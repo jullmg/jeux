@@ -1,0 +1,853 @@
+extends SceneTree
+# Regenerates art/decor/*.svg: Godot --headless --path . --script res://tools/generate_houses.gd
+
+const X0 := 30.0
+const FLOOR_H := 275.0
+const PORCH_FLOOR := 600.0
+const BASE := 614.0
+const GROUND := 700.0
+const RAIL_H := 48.0
+const VARIANTS := 9
+
+const DEFAULTS := {
+	"kind": "plex", "floors": 2, "width": 700.0,
+	"mortar": "#D9CFC2",
+	"trim": "#F4F1EA", "trim_dark": "#B9B2A5",
+	"lintel": "#BDB5A6", "lintel_dark": "#8F887B", "lintel_style": "plain", "keystone": false,
+	"door": "#B5652B", "door_dark": "#7A4019",
+	"metal": "#1F1F1F", "metal_light": false,
+	"slab": "#F1EEE8", "slab_dark": "#C9C3B8",
+	"tread": "#454545", "tread_dark": "#262626",
+	"step": "#A8A196", "step_dark": "#7E786E",
+	"cornice": "#6E7377", "cornice_dark": "#4A4E52",
+	"awning": "", "fence": "", "columns": false,
+	"lower_stone": false, "stones": ["#B9AE9E", "#C7BCAC", "#A99F90", "#BFB6A8"], "stone_mortar": "#8E867A",
+	"flower_boxes": false, "curtains": false, "downspout": -1.0, "basement": [480.0],
+	"top": 0.0, "parapet": "cornice", "pediment": false, "crest": false, "number": "",
+	"windows": [], "ground_window": [], "door_cx": 278.0, "balcony": [130.0, 420.0], "porch": [150.0, 400.0], "stair": [],
+	"shop_sign": "#2E5E3E", "bins": false,
+}
+
+const GLYPHS := {
+	"0": [[0, 0, 1, 0, 1, 1, 0, 1, 0, 0]],
+	"1": [[0.2, 0.2, 0.5, 0, 0.5, 1]],
+	"2": [[0, 0, 1, 0, 1, 0.5, 0, 0.5, 0, 1, 1, 1]],
+	"3": [[0, 0, 1, 0, 1, 1, 0, 1], [0, 0.5, 1, 0.5]],
+	"4": [[0, 0, 0, 0.5, 1, 0.5], [1, 0, 1, 1]],
+	"5": [[1, 0, 0, 0, 0, 0.5, 1, 0.5, 1, 1, 0, 1]],
+	"6": [[1, 0, 0, 0, 0, 1, 1, 1, 1, 0.5, 0, 0.5]],
+	"7": [[0, 0, 1, 0, 1, 1]],
+	"8": [[0, 0, 1, 0, 1, 1, 0, 1, 0, 0], [0, 0.5, 1, 0.5]],
+	"9": [[1, 0.5, 0, 0.5, 0, 0, 1, 0, 1, 1, 0, 1]],
+}
+
+const BRICK_PALETTES := [
+	["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"],
+	["#7E4436", "#8A4A3A", "#6E3A2E", "#94543F", "#743F33"],
+	["#D9B88F", "#CFAE84", "#E2C39C", "#C4A079", "#DDBE96"],
+	["#B5603F", "#A85536", "#C26B48", "#9C4D31", "#C77650"],
+	["#7A4A3A", "#6E4234", "#865243", "#5F392D", "#8E5A48"],
+	["#C8A27A", "#BC966E", "#D4AE86", "#B08A62", "#CCA680"],
+]
+const MORTARS := ["#CDBFB0", "#BFB2A3", "#EFE6D8", "#D6C9B9", "#C2B6A8", "#E6DCCB"]
+const DOORS := [
+	["#B5652B", "#7A4019"], ["#3E6B48", "#244330"], ["#2F5D8A", "#1C3C5E"],
+	["#2B2B2E", "#111111"], ["#8E2F3A", "#5E1C25"], ["#F4F1EA", "#B9B2A5"],
+]
+# Stair shapes leaving the floor-1 balcony towards the right, relative to their start x.
+const STAIR_SHAPES := [
+	[Vector2(0, 336), Vector2(148, 380), Vector2(238, 520), Vector2(168, 696)],
+	[Vector2(0, 336), Vector2(62, 456), Vector2(123, 576), Vector2(185, 696)],
+	[Vector2(0, 336), Vector2(75, 380), Vector2(130, 520), Vector2(115, 696)],
+]
+
+const HOUSES := [
+	{
+		"name": "duplex_voisin_gauche",
+		"bricks": ["#7E4436", "#8A4A3A", "#6E3A2E", "#94543F", "#743F33"], "mortar": "#BFB2A3",
+		"trim": "#5B4A3E", "trim_dark": "#3E3128", "lintel": "#D8CDB5", "lintel_dark": "#A89C84",
+		"door": "#2B2B2E", "door_dark": "#111111", "awning": "#B08A5A",
+		"windows": [[120.0, 110.0], [520.0, 110.0]], "door_cx": 362.0,
+		"balcony": [255.0, 470.0], "porch": [270.0, 455.0],
+		"stair": [Vector2(228, 336), Vector2(170, 456), Vector2(115, 576), Vector2(60, 696)],
+		"fence": "black", "downspout": 655.0, "basement": [520.0], "curtains": true,
+	},
+	{
+		"name": "duplex_charlotte",
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
+		"lintel": "#BEB8AC", "lintel_dark": "#8A8478", "lintel_style": "fleur",
+		"top": 40.0, "parapet": "flat", "crest": true, "number": "5672",
+		"door": "#C0702F", "door_dark": "#7E4520", "awning": "#7C8186", "columns": true,
+		"windows": [[70.0, 110.0], [470.0, 110.0]], "door_cx": 278.0,
+		"balcony": [135.0, 420.0], "porch": [135.0, 420.0],
+		"stair": [Vector2(452, 336), Vector2(600, 380), Vector2(690, 520), Vector2(620, 696)],
+		"fence": "black", "basement": [480.0],
+	},
+	{
+		"name": "duplex_voisin_droite",
+		"bricks": ["#A0452F", "#B04E36", "#8F3D2B", "#B9583D", "#963F2E"], "mortar": "#D6C9B9",
+		"lower_stone": true,
+		"trim": "#F7F5F0", "trim_dark": "#C9C4BA", "lintel": "#C9C0B0",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5",
+		"metal": "#F5F5F2", "metal_light": true, "tread": "#C8C8C4", "tread_dark": "#8C8C88",
+		"cornice": "#E9E6DF", "cornice_dark": "#B5B0A6",
+		"windows": [[90.0, 140.0], [535.0, 105.0]], "door_cx": 335.0,
+		"balcony": [250.0, 500.0], "porch": [250.0, 420.0],
+		"stair": [Vector2(525, 336), Vector2(600, 380), Vector2(655, 520), Vector2(640, 696)],
+		"fence": "white", "basement": [110.0], "curtains": true,
+	},
+	{
+		"name": "triplex_exemple_2", "floors": 3,
+		"bricks": ["#D9B88F", "#CFAE84", "#E2C39C", "#C4A079", "#DDBE96"], "mortar": "#EFE6D8",
+		"lintel": "#E4D6BE", "lintel_dark": "#B3A48A", "lintel_style": "arch", "keystone": true,
+		"cornice": "#E2D8C6", "cornice_dark": "#ADA28E", "pediment": true,
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "columns": true, "curtains": true,
+		"windows": [[70.0, 105.0], [525.0, 105.0]], "door_cx": 350.0,
+		"balcony": [200.0, 500.0], "porch": [230.0, 470.0],
+		"stair": [Vector2(232, 336), Vector2(90, 380), Vector2(5, 520), Vector2(75, 696)],
+		"fence": "black", "basement": [],
+	},
+	{
+		"name": "triplex_exemple_3", "floors": 3,
+		"bricks": ["#C8A27A", "#BC966E", "#D4AE86", "#B08A62", "#CCA680"], "mortar": "#E6DCCB",
+		"lintel": "#C8A27A", "lintel_dark": "#9C7A56", "parapet": "flat",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "flower_boxes": true, "curtains": true,
+		"tread": "#8A5A3A", "tread_dark": "#5E3B24",
+		"windows": [[95.0, 105.0], [505.0, 105.0]], "door_cx": 340.0,
+		"balcony": [150.0, 640.0], "porch": [260.0, 420.0],
+		"stair": [Vector2(205, 336), Vector2(150, 456), Vector2(100, 576), Vector2(50, 696)],
+		"basement": [],
+	},
+	{
+		"name": "moderne", "kind": "modern",
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
+		"lintel": "#C46A55", "lintel_dark": "#7E3A2E", "lintel_style": "arch",
+		"step": "#B08F6A", "step_dark": "#7E6446", "metal": "#6B5442",
+		"windows": [[150.0, 100.0], [470.0, 80.0]], "ground_window": [500.0, 100.0], "door_cx": 330.0,
+		"basement": [500.0], "bins": true, "curtains": true,
+	},
+	{
+		"name": "depanneur", "kind": "shop",
+		"bricks": ["#8A5A44", "#7E5240", "#966450", "#744A38", "#9C6A54"], "mortar": "#C9BCAE",
+		"cornice": "#3F4448", "cornice_dark": "#2A2E31",
+		"windows": [[70.0, 110.0], [295.0, 110.0], [520.0, 110.0]], "basement": [],
+		"metal": "#1F1F1F",
+	},
+	{
+		"name": "coin_holt", "kind": "side_wall", "width": 460.0,
+		"bricks": ["#B5603F", "#A85536", "#C26B48", "#9C4D31", "#C77650"], "mortar": "#D6C9B9",
+		"parapet": "flat", "windows": [[90.0, 90.0], [280.0, 90.0]], "basement": [], "downspout": 410.0,
+	},
+	{"name": "ruelle", "kind": "ruelle", "width": 300.0},
+]
+
+var k: Dictionary
+var out := PackedStringArray()
+var rng := RandomNumberGenerator.new()
+var X1 := 670.0
+var oy := 0.0
+var base_y := BASE
+var ground_y := GROUND
+
+
+func _init() -> void:
+	var configs: Array = HOUSES.duplicate()
+	for i in VARIANTS:
+		configs.append(_variant(i))
+	for cfg in configs:
+		k = DEFAULTS.duplicate(true)
+		k.merge(cfg, true)
+		X1 = k.width - 30.0
+		oy = (int(k.floors) - 2) * FLOOR_H
+		base_y = BASE + oy
+		ground_y = GROUND + oy
+		rng.seed = hash(k.name)
+		out = PackedStringArray()
+		_svg()
+		var file := FileAccess.open("res://art/decor/%s.svg" % k.name, FileAccess.WRITE)
+		file.store_string("\n".join(out))
+	quit()
+
+
+func _variant(i: int) -> Dictionary:
+	rng.seed = 1000 + i
+	var p := rng.randi_range(0, BRICK_PALETTES.size() - 1)
+	var d: Array = DOORS[rng.randi_range(0, DOORS.size() - 1)]
+	var cfg := {
+		"name": "plex_%02d" % (i + 1),
+		"floors": 3 if rng.randf() < 0.4 else 2,
+		"bricks": BRICK_PALETTES[p], "mortar": MORTARS[p],
+		"door": d[0], "door_dark": d[1],
+		"door_cx": 278.0, "windows": [[70.0, 110.0], [470.0, 110.0]],
+		"balcony": [130.0, 420.0], "porch": [150.0, 400.0],
+		"lintel_style": ["plain", "plain", "ears", "arch"][rng.randi_range(0, 3)],
+		"keystone": rng.randf() < 0.3,
+		"flower_boxes": rng.randf() < 0.35, "curtains": rng.randf() < 0.5,
+		"fence": ["black", "white", ""][rng.randi_range(0, 2)],
+		"lower_stone": rng.randf() < 0.15, "columns": rng.randf() < 0.4,
+		"awning": "#7C8186" if rng.randf() < 0.3 else "",
+		"pediment": rng.randf() < 0.3,
+	}
+	if rng.randf() < 0.3:
+		var crest := rng.randf() < 0.4
+		cfg.merge({"parapet": "flat", "crest": crest, "top": 40.0 if crest else 0.0})
+	if rng.randf() < 0.4:
+		cfg.merge({"metal": "#F5F5F2", "metal_light": true, "tread": "#C8C8C4", "tread_dark": "#8C8C88",
+			"cornice": "#E9E6DF", "cornice_dark": "#B5B0A6"})
+	var stair := []
+	for v in STAIR_SHAPES[rng.randi_range(0, STAIR_SHAPES.size() - 1)]:
+		stair.append(Vector2(450.0 + v.x, v.y))
+	cfg.stair = stair
+	if rng.randf() < 0.5:
+		_mirror(cfg)
+	return cfg
+
+
+func _mirror(cfg: Dictionary) -> void:
+	var w := 700.0
+	cfg.door_cx = w - cfg.door_cx
+	var wins := []
+	for win in cfg.windows:
+		wins.append([w - win[0] - win[1], win[1]])
+	cfg.windows = wins
+	cfg.balcony = [w - cfg.balcony[1], w - cfg.balcony[0]]
+	cfg.porch = [w - cfg.porch[1], w - cfg.porch[0]]
+	var stair := []
+	for v in cfg.stair:
+		stair.append(Vector2(w - v.x, v.y))
+	cfg.stair = stair
+	cfg.basement = [w - 96.0 - 480.0]
+
+
+func _fb(f: int) -> float:
+	return PORCH_FLOOR + oy - FLOOR_H * f
+
+
+func _win_y(f: int) -> float:
+	return _fb(f) - 190.0
+
+
+func _door_top(f: int) -> float:
+	return _fb(f) - 208.0
+
+
+func _top() -> float:
+	return k.top if k.top > 0.0 else _fb(int(k.floors) - 1) - 260.0
+
+
+func _svg() -> void:
+	var w: float = k.width
+	out.append('<svg xmlns="http://www.w3.org/2000/svg" width="%s" height="%s" viewBox="0 0 %s %s">' % [_n(w), _n(ground_y), _n(w), _n(ground_y)])
+	out.append('<defs>'
+		+ '<linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4E0EC"/><stop offset="1" stop-color="#557A90"/></linearGradient>'
+		+ '<linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.1"/><stop offset="1" stop-color="#000000" stop-opacity="0.16"/></linearGradient>'
+		+ '<radialGradient id="glow"><stop offset="0" stop-color="#FFE9A8" stop-opacity="0.75"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient>'
+		+ '</defs>')
+	match k.kind:
+		"ruelle":
+			_ruelle()
+		"modern":
+			_modern()
+		_:
+			_building()
+	out.append('</svg>')
+
+
+func _building() -> void:
+	var top := _top()
+	var floors: int = k.floors
+	if k.lower_stone:
+		_bricks(top, _fb(1) + 31.0)
+		_stones(_fb(1) + 39.0, base_y)
+		_rect(X0, _fb(1) + 25.0, X1 - X0, 14, k.lintel, _stroke(k.lintel_dark, 1.5))
+	else:
+		_bricks(top, base_y)
+	_wall_shading(top)
+	_foundation()
+	if k.downspout >= 0.0:
+		_downspout(k.downspout, top)
+	if k.parapet == "flat":
+		_flat_parapet(top)
+	else:
+		_cornice(top)
+	if k.crest:
+		_crest(k.door_cx, top + 6.0)
+	var first_floor := 1 if k.kind == "shop" else 0
+	for f in range(first_floor, floors):
+		for w in k.windows:
+			_window(w[0], _win_y(f), w[1], 160.0)
+	match k.kind:
+		"shop":
+			_storefront()
+		"plex":
+			_plex_front()
+
+
+func _wall_shading(top: float) -> void:
+	_rect(X0, top, X1 - X0, base_y - top, "url(#shade)")
+	_rect(X0, top, 3, base_y - top, "#000000", 'opacity="0.25"')
+	_rect(X1 - 3, top, 3, base_y - top, "#000000", 'opacity="0.25"')
+
+
+func _plex_front() -> void:
+	var floors: int = k.floors
+	var cx: float = k.door_cx
+	for f in floors:
+		_door(cx, _door_top(f), _fb(f))
+	if k.number != "":
+		_plaque(cx, _door_top(0) + 14.0, k.number)
+	var b: Array = k.balcony
+	if k.awning != "":
+		_awning(b[0], b[1], _door_top(floors - 1) - 26.0, _fb(floors - 1) - RAIL_H)
+	for f in range(floors - 1, 0, -1):
+		_rect(b[0], _fb(f) + 16, b[1] - b[0], 14, "#000000", 'opacity="0.15"')
+		if k.columns:
+			_column(b[0] + 4, 1.0, _fb(f) + 16, _fb(f - 1))
+			_column(b[1] - 11, -1.0, _fb(f) + 16, _fb(f - 1))
+		_balcony(b[0], b[1], _fb(f), [])
+	var p: Array = k.porch
+	_balcony(p[0], p[1], _fb(0), [[cx - 54, cx + 54]])
+	_front_steps(cx)
+	var s: Array = k.stair
+	var p3 := Vector2(s[3].x, s[3].y + oy)
+	_stairs(Vector2(s[0].x, _fb(1) + 6.0), s[1] + Vector2(0, oy), s[2] + Vector2(0, oy), p3)
+	var gaps := [[cx - 66, cx + 66], [p3.x - 42, p3.x + 42]]
+	gaps.sort_custom(func(a, c): return a[0] < c[0])
+	_garden(gaps)
+	_fence(gaps)
+
+
+func _bricks(y0: float, y1: float) -> void:
+	_rect(X0, y0, X1 - X0, y1 - y0, k.mortar)
+	var row := 0
+	var y := y0
+	while y < y1:
+		var h := minf(11.0, y1 - y)
+		var x := X0 - (18.0 if row % 2 == 1 else 0.0)
+		while x < X1:
+			var bx := maxf(x, X0)
+			var bw := minf(x + 34.0, X1) - bx
+			if bw > 1.0:
+				_rect(bx, y, bw, h, _pick(k.bricks))
+			x += 36.0
+		y += 13.0
+		row += 1
+
+
+func _stones(y0: float, y1: float) -> void:
+	_rect(X0, y0, X1 - X0, y1 - y0, k.stone_mortar)
+	var y := y0
+	while y < y1:
+		var h := minf(23.0, y1 - y)
+		var x := X0 - rng.randf_range(0.0, 50.0)
+		while x < X1:
+			var w := rng.randf_range(55.0, 95.0)
+			var bx := maxf(x, X0)
+			var bw := minf(x + w - 3.0, X1) - bx
+			if bw > 1.0:
+				_rect(bx, y, bw, h, _pick(k.stones))
+			x += w
+		y += 26.0
+
+
+func _foundation() -> void:
+	_rect(X0, base_y, X1 - X0, ground_y - base_y, "#A39D93")
+	_rect(X0, base_y, X1 - X0, 5, "#BDB7AD")
+	for y in [base_y + 26.0, base_y + 54.0]:
+		_rect(X0, y, X1 - X0, 1.5, "#000000", 'opacity="0.08"')
+	for x in k.basement:
+		_rect(x, base_y + 22, 96, 44, k.trim, _stroke(k.trim_dark, 2))
+		_rect(x + 6, base_y + 28, 84, 32, "url(#glass)")
+		_rect(x + 46, base_y + 28, 4, 32, k.trim)
+
+
+func _downspout(x: float, top: float) -> void:
+	var st := _stroke("#B9B7B0", 1.5)
+	_rect(x, top - 30, 9, ground_y - top + 24, "#ECEBE6", st)
+	_rect(x - 3, top - 18, 15, 8, "#ECEBE6", st)
+	_rect(x - 6, ground_y - 10, 20, 8, "#ECEBE6", st)
+
+
+func _cornice(top: float) -> void:
+	out.append('<g transform="translate(0 %s)">' % _n(top - 70.0))
+	if k.pediment:
+		var cx := (X0 + X1) / 2.0
+		_path("M%s 22 V14 Q%s 2 %s 14 V22 Z" % [_n(cx - 80), _n(cx), _n(cx + 80)], k.cornice, _stroke(k.cornice_dark, 2))
+		_circle(cx, 14, 5, k.cornice_dark, 'opacity="0.5"')
+	_rect(X0, 48, X1 - X0, 24, k.cornice)
+	_rect(X0, 72, X1 - X0, 10, "#000000", 'opacity="0.18"')
+	var x := X0 + 6.0
+	while x < X1 - 10.0:
+		_rect(x, 40, 8, 8, k.cornice_dark)
+		x += 14.0
+	_rect(X0, 22, X1 - X0, 12, k.cornice, _stroke(k.cornice_dark, 2))
+	_rect(X0, 34, X1 - X0, 6, k.cornice_dark)
+	var count := 8
+	var gap := (X1 - X0 - 34.0) / count
+	for i in count:
+		_rect(X0 + 30.0 + i * gap, 54, gap - 26.0, 12, "none", _stroke(k.cornice_dark, 1.5))
+	for i in count + 1:
+		_path("M%s 40 h14 v8 q0 22 -10 28 q-4 -10 -4 -36 z" % _n(X0 + 10.0 + i * gap), k.cornice, _stroke(k.cornice_dark, 1.5))
+	out.append('</g>')
+
+
+func _window(x: float, y: float, w: float, h: float) -> void:
+	match k.lintel_style:
+		"ears":
+			_rect(x - 8, y - 18, w + 16, 18, k.lintel, _stroke(k.lintel_dark, 1.5))
+			_rect(x - 8, y - 18, w + 16, 3, "#FFFFFF", 'opacity="0.3"')
+			for ex in [x - 22.0, x + w]:
+				_rect(ex, y - 23, 22, 27, k.lintel, _stroke(k.lintel_dark, 1.5))
+				_rect(ex + 3, y - 20, 16, 21, "none", _stroke(k.lintel_dark, 1))
+				_rosette(ex + 11, y - 9.5)
+		"fleur":
+			_fleur_lintel(x, y, w)
+		"arch":
+			var d := "M%s %s Q%s %s %s %s" % [_n(x - 6), _n(y + 2), _n(x + w / 2), _n(y - 34), _n(x + w + 6), _n(y + 2)]
+			_path(d, "none", _stroke(k.lintel_dark, 17))
+			_path(d, "none", _stroke(k.lintel, 13) + ' stroke-dasharray="7 2"')
+		"none":
+			pass
+		_:
+			_rect(x - 12, y - 20, w + 24, 20, k.lintel, _stroke(k.lintel_dark, 1.5))
+	if k.keystone:
+		var ky := y - 38.0 if k.lintel_style == "arch" else y - 24.0
+		_path("M%s %s h20 l-3 26 h-14 z" % [_n(x + w / 2 - 10), _n(ky)], k.lintel, _stroke(k.lintel_dark, 1.5))
+	_rect(x - 3, y - 3, w + 6, h + 6, k.trim_dark)
+	_rect(x, y, w, h, k.trim)
+	_rect(x + 8, y + 8, w - 16, h - 16, "url(#glass)")
+	if k.curtains:
+		var gh := h - 16
+		_path("M%s %s h22 q-8 %s 2 %s h-24 z" % [_n(x + 8), _n(y + 8), _n(gh * 0.5), _n(gh)], "#F3E9D8", 'opacity="0.92"')
+		_path("M%s %s h-22 q8 %s -2 %s h24 z" % [_n(x + w - 8), _n(y + 8), _n(gh * 0.5), _n(gh)], "#F3E9D8", 'opacity="0.92"')
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [
+		_n(x + w * 0.55), _n(y + 8), _n(x + w * 0.55 + 16), _n(y + 8),
+		_n(x + 24), _n(y + h * 0.55), _n(x + 8), _n(y + h * 0.55)], "#FFFFFF", 'opacity="0.22"')
+	var ty := y + h * 0.34
+	_rect(x + 4, ty - 3, w - 8, 6, k.trim)
+	_rect(x + w / 2 - 3, ty, 6, y + h - ty - 4, k.trim)
+	_rect(x - 10, y + h + 3, w + 20, 9, k.lintel, _stroke(k.lintel_dark, 1.5))
+	_rect(x - 6, y + h + 12, w + 12, 5, "#000000", 'opacity="0.15"')
+	if k.flower_boxes:
+		var fx := x + 12.0
+		while fx < x + w - 10:
+			_circle(fx, y + h - 14, 7, "#5FAE4F")
+			_circle(fx + 2, y + h - 18, 4, _pick(["#FF7BA3", "#FFD23F", "#FFFFFF", "#C084FC"]))
+			fx += 13.0
+		_rect(x + 4, y + h - 12, w - 8, 15, "#7A5236", _stroke("#5A3B26", 1.5))
+
+
+# Stone band with a carved fleur-de-lis block in the middle, between two recessed panels.
+func _fleur_lintel(x: float, y: float, w: float) -> void:
+	var lx := x - 12.0
+	var lw := w + 24.0
+	var h := 24.0
+	var ly := y - h
+	var bw := 26.0
+	var bx := x + w / 2 - bw / 2
+	_rect(lx, ly, lw, h, k.lintel, _stroke(k.lintel_dark, 1.5))
+	_rect(lx, ly, lw, 3, "#FFFFFF", 'opacity="0.3"')
+	for seg in [[lx + 4, bx - 4], [bx + bw + 4, lx + lw - 4]]:
+		_rect(seg[0], ly + 5, seg[1] - seg[0], h - 9, "none", _stroke(k.lintel_dark, 1) + ' opacity="0.7"')
+	_rect(bx + 2, ly, bw, h + 2, "#000000", 'opacity="0.15"')
+	_rect(bx, ly - 2, bw, h + 2, k.lintel, _stroke(k.lintel_dark, 1.5))
+	_fleur(bx + bw / 2, ly + h / 2 - 1, 0.95, k.lintel_dark)
+
+
+func _fleur(cx: float, cy: float, s: float, color: String) -> void:
+	out.append('<g transform="translate(%s %s) scale(%s)" fill="%s">' % [_n(cx), _n(cy), str(s), color])
+	out.append('<path d="M0 -10 C3 -6 4 -2 1.5 2 H-1.5 C-4 -2 -3 -6 0 -10 Z"/>')
+	out.append('<path d="M1.5 1.5 C2 -4 9 -7 9.5 -1.5 C9.8 2 6.5 2.5 5.5 0 C5.5 3 3.5 3.5 1.5 3 Z"/>')
+	out.append('<path d="M-1.5 1.5 C-2 -4 -9 -7 -9.5 -1.5 C-9.8 2 -6.5 2.5 -5.5 0 C-5.5 3 -3.5 3.5 -1.5 3 Z"/>')
+	out.append('<rect x="-5" y="2.5" width="10" height="2.2" rx="1"/>')
+	out.append('<path d="M-1.5 4.7 H1.5 L2.2 10 L0 8.5 L-2.2 10 Z"/>')
+	out.append('<path d="M-1.8 4.7 C-4 5 -6 6.5 -5.5 9 C-4 8 -2.5 6.8 -1.8 6 Z"/>')
+	out.append('<path d="M1.8 4.7 C4 5 6 6.5 5.5 9 C4 8 2.5 6.8 1.8 6 Z"/>')
+	out.append('</g>')
+
+
+func _flat_parapet(top: float) -> void:
+	_rect(X0 - 4, top - 12, X1 - X0 + 8, 12, "#8E9296", _stroke("#63676B", 1.5))
+	_rect(X0 - 4, top - 12, X1 - X0 + 8, 3, "#B7BBBF")
+	_rect(X0, top, X1 - X0, 6, "#000000", 'opacity="0.15"')
+
+
+# Carved stone panel with a face in relief, centred above the upper door.
+func _crest(cx: float, y: float) -> void:
+	var w := 62.0
+	var h := 50.0
+	var x := cx - w / 2
+	var dark: String = k.lintel_dark
+	_rect(x + 3, y + 3, w, h, "#000000", 'opacity="0.2"')
+	_rect(x, y, w, h, k.lintel, _stroke(dark, 1.5))
+	_path("M%s %s h%s l-5 5 h%s v%s l-5 5 z" % [_n(x), _n(y), _n(w), _n(-(w - 10)), _n(h - 10)], "#FFFFFF", 'opacity="0.35"')
+	_path("M%s %s h%s l5 -5 h%s v%s l5 -5 z" % [_n(x + w), _n(y + h), _n(-w), _n(w - 10), _n(-(h - 10))], "#000000", 'opacity="0.18"')
+	var c := Vector2(cx, y + h / 2)
+	for i in 16:
+		var a := TAU * i / 16.0
+		var d := Vector2(cos(a), sin(a))
+		var p0 := c + d * 13.5
+		var p1 := c + d * Vector2(26, 19)
+		_path("M%s %s L%s %s" % [_n(p0.x), _n(p0.y), _n(p1.x), _n(p1.y)], "none", _stroke(dark, 1.5) + ' opacity="0.7"')
+	_circle(c.x + 1.5, c.y + 1.5, 12, "#000000", 'opacity="0.22"')
+	_circle(c.x, c.y, 12, k.lintel, _stroke(dark, 1.5))
+	_circle(c.x - 2, c.y - 2, 8, "#FFFFFF", 'opacity="0.2"')
+	var face := _stroke(dark, 1.6) + ' stroke-linecap="round"'
+	_path("M%s %s q2.5 -2.5 5 0 M%s %s q2.5 -2.5 5 0" % [_n(c.x - 7), _n(c.y - 2), _n(c.x + 2), _n(c.y - 2)], "none", face)
+	_path("M%s %s v4 h-1.5" % [_n(c.x), _n(c.y - 1)], "none", face)
+	_path("M%s %s q4 3.5 8 0" % [_n(c.x - 4), _n(c.y + 5)], "none", face)
+
+
+func _rosette(cx: float, cy: float) -> void:
+	for d in [Vector2(0, -3.5), Vector2(3.5, 0), Vector2(0, 3.5), Vector2(-3.5, 0)]:
+		_circle(cx + d.x, cy + d.y, 3, k.lintel_dark, 'opacity="0.55"')
+	_circle(cx, cy, 2, k.lintel_dark)
+
+
+func _plaque(cx: float, cy: float, text: String) -> void:
+	var gw := 7.0
+	var gh := 11.0
+	var gap := 4.0
+	var w := text.length() * gw + (text.length() - 1) * gap + 14.0
+	_rect(cx - w / 2, cy - 11, w, 22, "#1E1E1E", 'rx="3" ' + _stroke("#555555", 1))
+	var gx := cx - w / 2 + 7.0
+	for ch in text:
+		if GLYPHS.has(ch):
+			for stroke in GLYPHS[ch]:
+				var parts := PackedStringArray()
+				for i in range(0, stroke.size(), 2):
+					parts.append("%s%s %s" % ["M" if i == 0 else "L", _n(gx + stroke[i] * gw), _n(cy - gh / 2 + stroke[i + 1] * gh)])
+				_path(" ".join(parts), "none", _stroke("#FFFFFF", 1.8) + ' stroke-linecap="round" stroke-linejoin="round"')
+		gx += gw + gap
+
+
+func _door(cx: float, top: float, bottom: float) -> void:
+	var w := 96.0
+	var x := cx - w / 2
+	_rect(x - 14, top - 20, w + 28, 20, k.lintel, _stroke(k.lintel_dark, 1.5))
+	_rect(x - 7, top, w + 14, bottom - top, k.trim_dark)
+	_rect(x - 4, top, w + 8, bottom - top, k.trim)
+	_rect(x + 4, top + 5, w - 8, 18, "url(#glass)")
+	var dy := top + 28
+	var dh := bottom - dy
+	var lw := (w - 8) / 2.0
+	for i in 2:
+		var lx := x + 4 + i * lw
+		_rect(lx, dy, lw, dh, k.door, _stroke(k.door_dark, 2))
+		_rect(lx + 7, dy + 9, lw - 14, dh * 0.58, "url(#glass)", _stroke(k.door_dark, 2))
+		_rect(lx + 7, dy + dh * 0.58 + 18, lw - 14, dh * 0.42 - 28, "none", _stroke(k.door_dark, 2))
+	_circle(cx - 6, dy + dh * 0.62, 3, "#E3C26A")
+	_circle(cx + 6, dy + dh * 0.62, 3, "#E3C26A")
+	for sx in [-1.0, 1.0]:
+		_lantern(cx + sx * (w / 2 + 24), top + 34)
+
+
+func _lantern(x: float, y: float) -> void:
+	_circle(x, y + 8, 22, "url(#glow)")
+	_rect(x - 1.5, y - 12, 3, 6, "#1E1E1E")
+	_path("M%s %s h16 l-3 -6 h-10 z" % [_n(x - 8), _n(y - 2)], "#1E1E1E")
+	_rect(x - 6, y - 2, 12, 18, "#FFE7A3", _stroke("#1E1E1E", 2))
+	_rect(x - 7, y + 16, 14, 3, "#1E1E1E")
+
+
+func _awning(x0: float, x1: float, y: float, post_bottom: float) -> void:
+	var dark := "#" + Color(k.awning).darkened(0.3).to_html(false)
+	_rect(x0 - 16, y + 22, x1 - x0 + 32, 12, "#000000", 'opacity="0.15"')
+	for px in [x0 + 2, x1 - 9]:
+		_rect(px, y + 20, 7, post_bottom - y - 20, k.metal, _metal_stroke())
+	_path("M%s %s H%s L%s %s H%s Z" % [_n(x0 - 10), _n(y), _n(x1 + 10), _n(x1 + 18), _n(y + 20), _n(x0 - 18)], k.awning, _stroke(dark, 2))
+	var x := x0 - 8.0
+	while x < x1 + 10:
+		_path("M%s %s V%s" % [_n(x), _n(y + 1), _n(y + 18)], "none", _stroke(dark, 1.5))
+		x += 9.0
+	_rect(x0 - 20, y + 18, x1 - x0 + 40, 5, dark)
+
+
+func _column(x: float, dir: float, y0: float, y1: float) -> void:
+	_rect(x, y0, 7, y1 - y0, k.metal, _metal_stroke())
+	_path("M%s %s q%s -4 %s -26" % [_n(x + 3.5 + dir * 3.5), _n(y0 + 26), _n(dir * 12), _n(dir * 22)], "none", _stroke(k.metal, 3))
+
+
+func _balcony(x0: float, x1: float, floor_y: float, gaps: Array) -> void:
+	var top := floor_y - RAIL_H
+	for seg in _segments(x0, x1, gaps):
+		var a: float = seg[0]
+		var b: float = seg[1]
+		var x := a + 8.0
+		while x < b - 6.0:
+			_rect(x, top + 4, 2.5, RAIL_H - 6, k.metal, _metal_stroke())
+			x += 10.0
+		var sx := a + 40.0
+		while sx < b - 30.0:
+			_scroll(sx, top + RAIL_H * 0.5)
+			sx += 64.0
+		_rect(a, top, b - a, 5, k.metal, _metal_stroke())
+		_rect(a, floor_y - 9, b - a, 3, k.metal, _metal_stroke())
+		for px in [a, b - 6]:
+			_rect(px, top - 4, 6, RAIL_H + 4, k.metal, _metal_stroke())
+			_circle(px + 3, top - 6, 4, k.metal, _metal_stroke())
+	_rect(x0 - 6, floor_y, x1 - x0 + 12, 16, k.slab, _stroke(k.slab_dark, 2))
+	_rect(x0 - 6, floor_y + 11, x1 - x0 + 12, 5, k.slab_dark)
+
+
+func _scroll(cx: float, cy: float) -> void:
+	var d := "M%s %s c-12 -4 -14 -20 -4 -22 c6 -1 8 6 3 8 M%s %s c12 -4 14 -20 4 -22 c-6 -1 -8 6 -3 8" % [_n(cx), _n(cy + 12), _n(cx), _n(cy + 12)]
+	if k.metal_light:
+		_path(d, "none", _stroke("#8E8E8A", 4.5))
+	_path(d, "none", _stroke(k.metal, 2.5))
+
+
+func _front_steps(cx: float) -> void:
+	var count := 5
+	var sh := (ground_y - base_y) / count
+	for i in count:
+		var w := 96.0 + i * 8.0
+		var y := base_y + i * sh
+		_rect(cx - w / 2, y, w, sh, k.step, _stroke(k.step_dark, 1.5))
+		_rect(cx - w / 2, y, w, 3, "#FFFFFF", 'opacity="0.25"')
+	for sx in [-1.0, 1.0]:
+		var top := Vector2(cx + sx * 54.0, _fb(0) - RAIL_H)
+		var bottom := Vector2(cx + sx * 70.0, ground_y - RAIL_H)
+		for i in 4:
+			var p := top.lerp(bottom, (i + 1) / 5.0)
+			_rect(p.x - 1.25, p.y, 2.5, RAIL_H, k.metal, _metal_stroke())
+		_line("M%s %s L%s %s" % [_n(top.x), _n(top.y), _n(bottom.x), _n(bottom.y)], 4.5)
+		_rect(bottom.x - 3, bottom.y - 2, 6, RAIL_H + 2, k.metal, _metal_stroke())
+
+
+func _stairs(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) -> void:
+	var steps := 18
+	var hw := 30.0
+	var pts: Array[Vector2] = []
+	for i in steps + 1:
+		pts.append(p0.bezier_interpolate(p1, p2, p3, float(i) / steps))
+	for side in [-1.0, 1.0]:
+		if side > 0.0:
+			for i in range(1, steps + 1):
+				var p := pts[i]
+				_rect(p.x - hw, p.y - 3, hw * 2, 7, k.tread, _stroke(k.tread_dark, 1))
+				_rect(p.x - hw, p.y - 3, hw * 2, 2, "#FFFFFF", 'opacity="0.25"')
+		for p in pts:
+			_rect(p.x + side * hw - 1.25, p.y - RAIL_H, 2.5, RAIL_H, k.metal, _metal_stroke())
+		if k.metal_light and side > 0.0:
+			for i in range(0, steps, 2):
+				var m := (pts[i] + pts[i + 1]) * 0.5
+				_circle(m.x + hw, m.y - RAIL_H * 0.5, 6, "none", _stroke(k.metal, 2.5))
+		_line(_polyline(pts, Vector2(side * hw, 5)), 6.0)
+		_line(_polyline(pts, Vector2(side * hw, -RAIL_H)), 4.5)
+
+
+func _garden(gaps: Array) -> void:
+	for seg in _segments(X0, X1, gaps):
+		var x: float = seg[0] + 14.0
+		while x < seg[1] - 14.0:
+			var r := rng.randf_range(12.0, 20.0)
+			_circle(x, ground_y - r * 0.7, r, _pick(["#4F9A44", "#5FAE4F", "#3F8636"]))
+			if rng.randf() < 0.5:
+				_circle(x + rng.randf_range(-8.0, 8.0), ground_y - r * 1.1, 3.5, _pick(["#FF7BA3", "#FFD23F", "#FFFFFF", "#C084FC"]))
+			x += rng.randf_range(18.0, 34.0)
+
+
+func _fence(gaps: Array) -> void:
+	if k.fence == "":
+		return
+	var light: bool = k.fence == "white"
+	var col := "#F5F5F2" if light else "#1F1F1F"
+	var st := _stroke("#9A9A96", 1) if light else ""
+	var pitch := 13.0 if light else 9.0
+	var pw := 5.0 if light else 2.5
+	var top := ground_y - 50.0
+	for seg in _segments(X0, X1, gaps):
+		var a: float = seg[0]
+		var b: float = seg[1]
+		var x := a + 8.0
+		while x < b - 6.0:
+			_rect(x, top + 2, pw, ground_y - top - 4, col, st)
+			if not light:
+				_path("M%s %s l3 -8 l3 8 z" % [_n(x - 1.75), _n(top + 4)], col)
+			x += pitch
+		_rect(a, top + 6, b - a, 4, col, st)
+		_rect(a, ground_y - 12, b - a, 4, col, st)
+		for px in [a, b - 8]:
+			_rect(px, top - 4, 8, ground_y - top + 4, col, st)
+			_rect(px - 2, top - 8, 12, 5, col, st)
+
+
+# Modern infill: brick ground floor with white checker band and quoins, white stucco upper floor.
+func _modern() -> void:
+	var top := _top()
+	var cx: float = k.door_cx
+	var mid := _fb(1) + 10.0
+	_rect(X0, top, X1 - X0, mid - top, "#ECEAE4")
+	_rect(X0, top, X1 - X0, mid - top, "url(#shade)")
+	_rect(X0 - 4, top - 10, X1 - X0 + 8, 10, "#D9D6CF", _stroke("#B5B1A8", 1.5))
+	for w in k.windows:
+		var wy := _win_y(1) + 10.0
+		_rect(w[0] - 4, wy - 4, w[1] + 8, 128, "#5E5A54")
+		_rect(w[0] + 3, wy + 3, w[1] - 6, 114, "url(#glass)")
+		if k.curtains:
+			_path("M%s %s h24 q-8 57 2 114 h-26 z" % [_n(w[0] + 3), _n(wy + 3)], "#F3E9D8", 'opacity="0.92"')
+		_rect(w[0] - 8, wy + 122, w[1] + 16, 8, "#CFCBC2")
+	_rect(X0 - 6, mid, X1 - X0 + 12, 12, "#B7B3AA", _stroke("#8F8B83", 1.5))
+	var gy := mid + 12.0
+	_bricks(gy, base_y)
+	_wall_shading(gy)
+	var by := gy + 22.0
+	var i := 0
+	var x := X0 + 8.0
+	while x < X1 - 44.0:
+		_rect(x, by + (i % 2) * 11.0, 12, 10, "#F2EFE8")
+		x += 13.0
+		i += 1
+	var qy := gy
+	var row := 0
+	while qy < base_y - 10.0:
+		var qw := 30.0 if row % 2 == 0 else 18.0
+		_rect(X1 - qw - 4, qy, qw, 11, "#F2EFE8")
+		qy += 13.0
+		row += 1
+	_foundation()
+	var gw: Array = k.ground_window
+	_window(gw[0], _win_y(0), gw[1], 160.0)
+	var dt := _door_top(0) + 10.0
+	var dh := _fb(0) - dt
+	_rect(cx - 38, dt, 76, dh, "#8C7A62", _stroke("#5E5242", 2))
+	_rect(cx - 30, dt + 6, 60, 20, "url(#glass)")
+	_rect(cx - 30, dt + 32, 60, dh - 40, "url(#glass)", _stroke("#5E5242", 1.5))
+	_circle(cx - 22, dt + dh * 0.6, 3, "#D9D6CF")
+	_rect(cx - 90, dt - 34, 180, 22, "#D8CBB0", _stroke("#A89A7E", 1.5))
+	_rect(cx - 86, dt - 12, 172, 6, "#000000", 'opacity="0.15"')
+	_circle(cx - 66, dt + 22, 8, "#F4F1EA", _stroke("#9A968E", 1.5))
+	_rect(cx - 76, dt + 70, 18, 24, "#2B2B2B")
+	_rect(cx - 110, _fb(0), 220, 14, k.step, _stroke(k.step_dark, 1.5))
+	_front_steps(cx)
+	_garden([[cx - 120, cx + 120]])
+	if k.bins:
+		_bin(X0 + 40, "#2E7D32")
+		_bin(X0 + 92, "#5F6368")
+
+
+func _bin(x: float, color: String) -> void:
+	var dark := "#" + Color(color).darkened(0.35).to_html(false)
+	_path("M%s %s h40 l-4 58 h-32 z" % [_n(x), _n(ground_y - 62)], color, _stroke(dark, 2))
+	_rect(x - 3, ground_y - 68, 46, 8, color, 'rx="3" ' + _stroke(dark, 2))
+	_circle(x + 8, ground_y - 3, 4, "#222222")
+
+
+# Corner store: sign board (text added in the game), striped awning, shelves behind the windows.
+func _storefront() -> void:
+	var cx: float = k.width / 2.0
+	var y0 := _door_top(0) - 30.0
+	var dark := "#" + Color(k.shop_sign).darkened(0.35).to_html(false)
+	_rect(X0 + 16, y0 - 6, X1 - X0 - 32, 46, k.shop_sign, _stroke(dark, 2.5))
+	var ay := y0 + 44.0
+	var x := X0 + 16.0
+	var i := 0
+	while x < X1 - 30.0:
+		_path("M%s %s h28 l4 30 h-28 z" % [_n(x), _n(ay)], "#FFFFFF" if i % 2 == 0 else k.shop_sign, _stroke(dark, 1))
+		x += 28.0
+		i += 1
+	var wy := ay + 46.0
+	var wb := _fb(0) - 4.0
+	for r in [[X0 + 24, cx - 54], [cx + 54, X1 - 24]]:
+		_rect(r[0] - 5, wy - 5, r[1] - r[0] + 10, wb - wy + 10, dark)
+		_rect(r[0], wy, r[1] - r[0], wb - wy, "url(#glass)")
+		for sy in [wy + 46.0, wy + 92.0, wy + 136.0]:
+			if sy > wb - 6.0:
+				continue
+			var px: float = r[0] + 10.0
+			while px < r[1] - 20.0:
+				var ph := rng.randf_range(12.0, 28.0)
+				_rect(px, sy - ph, rng.randf_range(8.0, 14.0), ph, _pick(["#E74C3C", "#F1C40F", "#3498DB", "#2ECC71", "#E67E22", "#FFFFFF", "#9B59B6"]))
+				px += rng.randf_range(13.0, 19.0)
+			_rect(r[0] + 4, sy, r[1] - r[0] - 8, 4, "#8A7A66")
+		_path("M%s %s l40 0 l-60 %s l-40 0 z" % [_n(r[1] - 70), _n(wy), _n(wb - wy)], "#FFFFFF", 'opacity="0.12"')
+	_rect(X0 + 40, wy + 12, 54, 20, "#FF3B30", 'rx="5" opacity="0.9"')
+	_rect(cx - 46, wy - 12, 92, _fb(0) - wy + 12, dark)
+	_rect(cx - 40, wy - 6, 80, _fb(0) - wy + 6, "url(#glass)")
+	_rect(cx - 40, wy + 70, 80, 5, dark)
+	_front_steps(cx)
+
+
+# Back lane seen from the street: lane trees, clothesline, wooden fences and greenery.
+func _ruelle() -> void:
+	var cx: float = k.width / 2.0
+	var far := 560.0
+	for i in 7:
+		_circle(rng.randf_range(X0, X1), rng.randf_range(300.0, 430.0), rng.randf_range(45.0, 70.0),
+			_pick(["#5FAE4F", "#4F9A44", "#6CBF5A"]), _stroke("#3F8636", 2))
+	_path("M%s 380 Q%s 405 %s 380" % [_n(X0), _n(cx), _n(X1)], "none", _stroke("#555555", 1.5))
+	var x := X0 + 26.0
+	while x < X1 - 30.0:
+		var t := (x - cx) / (cx - X0)
+		var y := 380.0 + 12.5 * (1.0 - t * t)
+		_rect(x, y, 18, rng.randf_range(20.0, 30.0), _pick(["#FF7BA3", "#FFD23F", "#4FA3E0", "#FFFFFF", "#9B59B6"]))
+		x += 30.0
+	_rect(X0, far - 70, X1 - X0, 70, "#A07850")
+	var px := X0 + 10.0
+	while px < X1:
+		_path("M%s %s V%s" % [_n(px), _n(far - 70), _n(far)], "none", _stroke("#7E5C3A", 2))
+		px += 12.0
+	_rect(X0 + 16, far - 96, 86, 96, "#7A9A8A", _stroke("#55705F", 2))
+	_path("M%s %s l43 -22 l43 22 z" % [_n(X0 + 16), _n(far - 96)], "#5E6B73", _stroke("#3F4A50", 2))
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(X0 + 6), _n(ground_y), _n(cx - 40), _n(far), _n(cx + 40), _n(far), _n(X1 - 6), _n(ground_y)], "#8E8C86")
+	_path("M%s %s L%s %s" % [_n(cx), _n(ground_y), _n(cx), _n(far)], "none", _stroke("#7A7872", 3))
+	for side in [-1.0, 1.0]:
+		for j in 7:
+			var t := j / 6.0
+			var edge := X1 - 6.0 if side > 0.0 else X0 + 6.0
+			var bx := lerpf(cx + side * 40.0, edge, t)
+			_circle(bx + side * 6.0, lerpf(far, ground_y, t) - 6.0, 8.0 + 14.0 * t, _pick(["#4F9A44", "#5FAE4F", "#3F8636"]))
+
+
+func _segments(x0: float, x1: float, gaps: Array) -> Array:
+	var segs := []
+	var a := x0
+	for g in gaps:
+		if g[0] > a and g[0] < x1:
+			segs.append([a, g[0]])
+		a = maxf(a, g[1])
+	if a < x1:
+		segs.append([a, x1])
+	return segs
+
+
+func _polyline(pts: Array[Vector2], offset: Vector2) -> String:
+	var parts := PackedStringArray()
+	for i in pts.size():
+		parts.append("%s%s %s" % ["M" if i == 0 else "L", _n(pts[i].x + offset.x), _n(pts[i].y + offset.y)])
+	return " ".join(parts)
+
+
+func _line(d: String, width: float) -> void:
+	if k.metal_light:
+		_path(d, "none", _stroke("#8E8E8A", width + 2) + ' stroke-linecap="round" stroke-linejoin="round"')
+	_path(d, "none", _stroke(k.metal, width) + ' stroke-linecap="round" stroke-linejoin="round"')
+
+
+func _metal_stroke() -> String:
+	return _stroke("#8E8E8A", 1) if k.metal_light else ""
+
+
+func _pick(colors: Array) -> String:
+	return colors[0] if rng.randf() < 0.55 else colors[rng.randi_range(1, colors.size() - 1)]
+
+
+func _n(v: float) -> String:
+	return str(snappedf(v, 0.1))
+
+
+func _stroke(color: String, width: float) -> String:
+	return 'stroke="%s" stroke-width="%s"' % [color, _n(width)]
+
+
+func _rect(x: float, y: float, w: float, h: float, fill: String, extra := "") -> void:
+	out.append('<rect x="%s" y="%s" width="%s" height="%s" fill="%s" %s/>' % [_n(x), _n(y), _n(w), _n(h), fill, extra])
+
+
+func _circle(x: float, y: float, r: float, fill: String, extra := "") -> void:
+	out.append('<circle cx="%s" cy="%s" r="%s" fill="%s" %s/>' % [_n(x), _n(y), _n(r), fill, extra])
+
+
+func _path(d: String, fill: String, extra := "") -> void:
+	out.append('<path d="%s" fill="%s" %s/>' % [d, fill, extra])
