@@ -25,8 +25,11 @@ const DEFAULTS := {
 	"flower_boxes": false, "curtains": false, "downspout": -1.0, "basement": [480.0],
 	"top": 0.0, "parapet": "cornice", "pediment": false, "crest": false, "number": "",
 	"windows": [], "ground_window": [], "door_cx": 278.0, "balcony": [130.0, 420.0], "porch": [150.0, 400.0], "stair": [],
-	"shop_sign": "#2E5E3E", "bins": false,
+	"shop_sign": "#2E5E3E", "bins": false, "halloween": true,
 }
+
+const AUTUMN_BUSHES := ["#B5442E", "#D9682B", "#E3A33A", "#7E8F3A", "#9C3B2A", "#5F7F3A"]
+const MUMS := ["#F2B632", "#E0782E", "#8E2A3A", "#F4E3B0"]
 
 const GLYPHS := {
 	"0": [[0, 0, 1, 0, 1, 1, 0, 1, 0, 0]],
@@ -187,6 +190,7 @@ func _variant(i: int) -> Dictionary:
 		"lower_stone": rng.randf() < 0.15, "columns": rng.randf() < 0.4,
 		"awning": "#7C8186" if rng.randf() < 0.3 else "",
 		"pediment": rng.randf() < 0.3,
+		"halloween": rng.randf() < 0.75,
 	}
 	if rng.randf() < 0.3:
 		var crest := rng.randf() < 0.4
@@ -242,6 +246,8 @@ func _svg() -> void:
 		+ '<linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4E0EC"/><stop offset="1" stop-color="#557A90"/></linearGradient>'
 		+ '<linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.1"/><stop offset="1" stop-color="#000000" stop-opacity="0.16"/></linearGradient>'
 		+ '<radialGradient id="glow"><stop offset="0" stop-color="#FFE9A8" stop-opacity="0.75"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient>'
+		+ '<linearGradient id="warm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7B5"/><stop offset="1" stop-color="#D98E4A"/></linearGradient>'
+		+ '<radialGradient id="pumpkin_glow"><stop offset="0" stop-color="#FFB347" stop-opacity="0.6"/><stop offset="1" stop-color="#FFB347" stop-opacity="0"/></radialGradient>'
 		+ '</defs>')
 	match k.kind:
 		"ruelle":
@@ -306,8 +312,19 @@ func _plex_front() -> void:
 			_column(b[1] - 11, -1.0, _fb(f) + 16, _fb(f - 1))
 		_balcony(b[0], b[1], _fb(f), [])
 	var p: Array = k.porch
+	if k.halloween:
+		_cobweb(p[0] + 4.0, _fb(1) + 16.0, 1.0)
+		_cobweb(p[1] - 4.0, _fb(1) + 16.0, -1.0)
+		for gx in [b[0] + 30.0, b[1] - 40.0]:
+			if rng.randf() < 0.6:
+				_ghost(gx, _fb(1) + 30.0)
+		_string_lights(b[0], b[1], _fb(1) - RAIL_H)
 	_balcony(p[0], p[1], _fb(0), [[cx - 54, cx + 54]])
 	_front_steps(cx)
+	if k.halloween:
+		_pumpkin(cx - 76, base_y + 2.0, 1.0, true)
+		_pumpkin(cx + 78, base_y + 2.0, 0.75, rng.randf() < 0.5)
+		_mums(cx + 96, ground_y)
 	var s: Array = k.stair
 	var p3 := Vector2(s[3].x, s[3].y + oy)
 	_stairs(Vector2(s[0].x, _fb(1) + 6.0), s[1] + Vector2(0, oy), s[2] + Vector2(0, oy), p3)
@@ -415,7 +432,11 @@ func _window(x: float, y: float, w: float, h: float) -> void:
 		_path("M%s %s h20 l-3 26 h-14 z" % [_n(x + w / 2 - 10), _n(ky)], k.lintel, _stroke(k.lintel_dark, 1.5))
 	_rect(x - 3, y - 3, w + 6, h + 6, k.trim_dark)
 	_rect(x, y, w, h, k.trim)
-	_rect(x + 8, y + 8, w - 16, h - 16, "url(#glass)")
+	var lit := rng.randf() < 0.22
+	_rect(x + 8, y + 8, w - 16, h - 16, "url(#warm)" if lit else "url(#glass)")
+	if k.halloween and rng.randf() < 0.18:
+		for b in 2:
+			_bat(x + w * (0.35 + b * 0.3), y + h * (0.3 + b * 0.2), 0.8)
 	if k.curtains:
 		var gh := h - 16
 		_path("M%s %s h22 q-8 %s 2 %s h-24 z" % [_n(x + 8), _n(y + 8), _n(gh * 0.5), _n(gh)], "#F3E9D8", 'opacity="0.92"')
@@ -635,6 +656,10 @@ func _stairs(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) -> void:
 				_circle(m.x + hw, m.y - RAIL_H * 0.5, 6, "none", _stroke(k.metal, 2.5))
 		_line(_polyline(pts, Vector2(side * hw, 5)), 6.0)
 		_line(_polyline(pts, Vector2(side * hw, -RAIL_H)), 4.5)
+	if k.halloween:
+		for i in [7, 12, 16]:
+			if rng.randf() < 0.7:
+				_pumpkin(pts[i].x + rng.randf_range(-10.0, 10.0), pts[i].y - 3.0, rng.randf_range(0.55, 0.75), rng.randf() < 0.4)
 
 
 func _garden(gaps: Array) -> void:
@@ -642,10 +667,17 @@ func _garden(gaps: Array) -> void:
 		var x: float = seg[0] + 14.0
 		while x < seg[1] - 14.0:
 			var r := rng.randf_range(12.0, 20.0)
-			_circle(x, ground_y - r * 0.7, r, _pick(["#4F9A44", "#5FAE4F", "#3F8636"]))
-			if rng.randf() < 0.5:
-				_circle(x + rng.randf_range(-8.0, 8.0), ground_y - r * 1.1, 3.5, _pick(["#FF7BA3", "#FFD23F", "#FFFFFF", "#C084FC"]))
+			var c := _pick(AUTUMN_BUSHES)
+			_circle(x + 3, ground_y - r * 0.7 + 3, r, "#000000", 'opacity="0.15"')
+			_circle(x, ground_y - r * 0.7, r, c)
+			_circle(x - r * 0.3, ground_y - r * 1.0, r * 0.5, "#" + Color(c).lightened(0.25).to_html(false), 'opacity="0.8"')
+			if rng.randf() < 0.3:
+				_circle(x + rng.randf_range(-8.0, 8.0), ground_y - r * 1.1, 3.5, _pick(["#FFD23F", "#FFFFFF", "#C084FC"]))
 			x += rng.randf_range(18.0, 34.0)
+		var lx: float = seg[0] + 4.0
+		while lx < seg[1] - 4.0:
+			_leaf(lx, ground_y - rng.randf_range(1.0, 5.0), rng.randf_range(0.0, TAU))
+			lx += rng.randf_range(6.0, 16.0)
 
 
 func _fence(gaps: Array) -> void:
@@ -722,6 +754,8 @@ func _modern() -> void:
 	_rect(cx - 110, _fb(0), 220, 14, k.step, _stroke(k.step_dark, 1.5))
 	_front_steps(cx)
 	_garden([[cx - 120, cx + 120]])
+	_pumpkin(cx - 70, _fb(0), 1.1, true)
+	_pumpkin(cx + 74, _fb(0), 0.8, false)
 	if k.bins:
 		_bin(X0 + 40, "#2E7D32")
 		_bin(X0 + 92, "#5F6368")
@@ -775,7 +809,7 @@ func _ruelle() -> void:
 	var far := 560.0
 	for i in 7:
 		_circle(rng.randf_range(X0, X1), rng.randf_range(300.0, 430.0), rng.randf_range(45.0, 70.0),
-			_pick(["#5FAE4F", "#4F9A44", "#6CBF5A"]), _stroke("#3F8636", 2))
+			_pick(["#E3A33A", "#D9682B", "#B5442E", "#C9B03A"]), _stroke("#8E3A24", 2))
 	_path("M%s 380 Q%s 405 %s 380" % [_n(X0), _n(cx), _n(X1)], "none", _stroke("#555555", 1.5))
 	var x := X0 + 26.0
 	while x < X1 - 30.0:
@@ -797,7 +831,90 @@ func _ruelle() -> void:
 			var t := j / 6.0
 			var edge := X1 - 6.0 if side > 0.0 else X0 + 6.0
 			var bx := lerpf(cx + side * 40.0, edge, t)
-			_circle(bx + side * 6.0, lerpf(far, ground_y, t) - 6.0, 8.0 + 14.0 * t, _pick(["#4F9A44", "#5FAE4F", "#3F8636"]))
+			_circle(bx + side * 6.0, lerpf(far, ground_y, t) - 6.0, 8.0 + 14.0 * t, _pick(AUTUMN_BUSHES))
+
+
+# --- Autumn & Halloween -----------------------------------------------------
+
+func _leaf(x: float, y: float, a: float) -> void:
+	var c := _pick(["#D9682B", "#B5442E", "#E3A33A", "#C9562E", "#8E3A24"])
+	out.append('<ellipse cx="%s" cy="%s" rx="4.5" ry="2.4" fill="%s" transform="rotate(%s %s %s)"/>' % [_n(x), _n(y), c, _n(rad_to_deg(a)), _n(x), _n(y)])
+
+
+func _pumpkin(cx: float, bottom: float, s: float, carved: bool) -> void:
+	var w := 34.0 * s
+	var h := 26.0 * s
+	var cy := bottom - h / 2
+	if carved:
+		_circle(cx, cy, w * 1.4, "url(#pumpkin_glow)")
+	out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="#000000" opacity="0.18"/>' % [_n(cx + 3), _n(bottom - 1), _n(w * 0.6), _n(h * 0.15)])
+	for i in [-1.0, 1.0, 0.0]:
+		var col := "#F28C28" if i == 0.0 else "#E07418"
+		out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="%s" stroke="#A84E10" stroke-width="1.5"/>' % [
+			_n(cx + i * w * 0.22), _n(cy), _n(w * (0.32 if i == 0.0 else 0.3)), _n(h / 2), col])
+	_path("M%s %s q2 -8 7 -10" % [_n(cx), _n(cy - h / 2 + 2)], "none", _stroke("#5A6B2A", 3.5 * s) + ' stroke-linecap="round"')
+	if carved:
+		var e := 5.0 * s
+		_path("M%s %s l%s %s l%s %s z M%s %s l%s %s l%s %s z" % [
+			_n(cx - 9 * s), _n(cy - 1 * s), _n(e * 0.5), _n(-e), _n(e * 0.5), _n(e),
+			_n(cx + 4 * s), _n(cy - 1 * s), _n(e * 0.5), _n(-e), _n(e * 0.5), _n(e)], "#FFD36B")
+		_path("M%s %s l3 3 l3 -3 l3 3 l3 -3 l3 3 l3 -3" % [_n(cx - 9 * s), _n(cy + 4 * s)], "none",
+			_stroke("#FFD36B", 2.5 * s) + ' stroke-linejoin="round"')
+
+
+func _mums(cx: float, bottom: float) -> void:
+	_path("M%s %s h26 l-4 20 h-18 z" % [_n(cx - 13), _n(bottom - 22)], "#8A5A3A", _stroke("#5E3B24", 1.5))
+	var c := _pick(MUMS)
+	for i in 9:
+		var a := TAU * i / 9.0
+		_circle(cx + cos(a) * 11.0, bottom - 32 + sin(a) * 8.0, 6.5, c, _stroke("#" + Color(c).darkened(0.25).to_html(false), 1))
+	_circle(cx, bottom - 34, 7, "#" + Color(c).lightened(0.2).to_html(false))
+
+
+func _ghost(cx: float, top: float) -> void:
+	_path("M%s %s V%s" % [_n(cx), _n(top - 14), _n(top)], "none", _stroke("#DDDDDD", 1))
+	_path("M%s %s q-17 0 -17 22 v26 l5.7 -6 l5.7 6 l5.7 -6 l5.7 6 l5.7 -6 l5.7 6 v-26 q0 -22 -17 -22 z" % [_n(cx), _n(top)],
+		"#FBFBF8", _stroke("#C9C9C2", 1.5) + ' stroke-linejoin="round"')
+	_circle(cx - 5, top + 15, 2.6, "#2B2B2B")
+	_circle(cx + 5, top + 15, 2.6, "#2B2B2B")
+	out.append('<ellipse cx="%s" cy="%s" rx="2.5" ry="3.5" fill="#2B2B2B"/>' % [_n(cx), _n(top + 24)])
+
+
+func _cobweb(x: float, y: float, dir: float) -> void:
+	var st := _stroke("#F4F4F0", 1) + ' opacity="0.75"'
+	for i in 5:
+		var a := PI * 0.5 * i / 4.0
+		_path("M%s %s L%s %s" % [_n(x), _n(y), _n(x + dir * cos(a) * 42.0), _n(y + sin(a) * 42.0)], "none", st)
+	for ring in [12.0, 24.0, 36.0]:
+		var parts := PackedStringArray()
+		for i in 5:
+			var a := PI * 0.5 * i / 4.0
+			parts.append("%s%s %s" % ["M" if i == 0 else "L", _n(x + dir * cos(a) * ring), _n(y + sin(a) * ring)])
+		_path(" ".join(parts), "none", st)
+	_circle(x + dir * 22.0, y + 26.0, 3.5, "#1E1E1E")
+
+
+func _string_lights(x0: float, x1: float, y: float) -> void:
+	var pts := PackedStringArray()
+	var x := x0 + 6.0
+	while x < x1 - 6.0:
+		pts.append("%s%s %s" % ["M" if pts.is_empty() else "L", _n(x), _n(y + 3 + 7.0 * sin(PI * fmod((x - x0) / 40.0, 1.0)))])
+		x += 5.0
+	_path(" ".join(pts), "none", _stroke("#2B2B2B", 1))
+	x = x0 + 14.0
+	var i := 0
+	while x < x1 - 10.0:
+		var sag := 7.0 * sin(PI * fmod((x - x0) / 40.0, 1.0))
+		var col := "#FF8A3D" if i % 2 == 0 else "#B266FF"
+		_circle(x, y + 8 + sag, 7, col, 'opacity="0.35"')
+		_circle(x, y + 7 + sag, 3.2, col)
+		x += 20.0
+		i += 1
+
+
+func _bat(cx: float, cy: float, s: float) -> void:
+	_path("M%s %s q-6 -6 -14 -2 q4 2 3 6 q4 -2 6 2 q2 -3 5 -2 q3 -1 5 2 q2 -4 6 -2 q-1 -4 3 -6 q-8 -4 -14 2 z" % [_n(cx), _n(cy)], "#1E1E1E",
+		'transform="translate(%s %s) scale(%s) translate(%s %s)"' % [_n(cx), _n(cy), str(s), _n(-cx), _n(-cy)])
 
 
 func _segments(x0: float, x1: float, gaps: Array) -> Array:
