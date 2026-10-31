@@ -165,6 +165,60 @@ func _switch_area(x: float, y: float) -> Rect2:
 	return Rect2(x - 10.0, y - 44.0, 42.0, 54.0)
 
 
+## A speech bubble over someone's head (`height` px above their feet) for a moment.
+func _say(who: Node2D, text: String, height := 280.0, seconds := 2.4) -> void:
+	var bubble := Label.new()
+	bubble.text = text
+	bubble.add_theme_font_size_override("font_size", 20)
+	bubble.add_theme_color_override("font_color", Color("#1D4F91"))
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color.WHITE
+	box.border_color = Color("#1D4F91")
+	box.set_border_width_all(2)
+	box.set_corner_radius_all(12)
+	box.set_content_margin_all(8)
+	bubble.add_theme_stylebox_override("normal", box)
+	bubble.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	add_child(bubble)
+	bubble.reset_size()
+	bubble.position = who.position + Vector2(-bubble.size.x / 2.0, -height - bubble.size.y)
+	bubble.modulate.a = 0.0
+	var tween := create_tween()
+	tween.tween_property(bubble, "modulate:a", 1.0, 0.2)
+	tween.tween_interval(seconds)
+	tween.tween_property(bubble, "modulate:a", 0.0, 0.3)
+	tween.tween_callback(bubble.queue_free)
+
+
+## Something Charlotte gets (a snack, a treat): its picture floats up above her with `text`, and a happy sound.
+func _treat(picture: Texture2D, text: String, delay := 0.0) -> void:
+	var treat := Node2D.new()
+	treat.position = _charlotte.position + Vector2(0, -270)
+	treat.modulate.a = 0.0
+	add_child(treat)
+	var icon := Sprite2D.new()
+	icon.texture = picture
+	treat.add_child(icon)
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 20)
+	label.add_theme_color_override("font_color", Color("#1D4F91"))
+	label.add_theme_color_override("font_outline_color", Color.WHITE)
+	label.add_theme_constant_override("outline_size", 6)
+	label.position = Vector2(-110, -66)
+	label.size = Vector2(220, 30)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	treat.add_child(label)
+	var tween := create_tween()
+	tween.tween_interval(delay)
+	tween.tween_callback(func(): Sfx.play("miam"))
+	tween.tween_property(treat, "modulate:a", 1.0, 0.25)
+	tween.parallel().tween_property(treat, "position:y", treat.position.y - 30.0, 1.6)
+	tween.tween_interval(0.6)
+	tween.tween_property(treat, "modulate:a", 0.0, 0.4)
+	tween.tween_callback(treat.queue_free)
+
+
 # ── Light ───────────────────────────────────────────────────────
 
 ## Daylight from a window: a soft beam slanting down to a warm patch on the floor, dust motes drifting in it.

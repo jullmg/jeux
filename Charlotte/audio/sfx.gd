@@ -138,6 +138,8 @@ func _synth(sound: String) -> PackedFloat32Array:
 			return _chime([880.0, 1318.5], 0.16, 0.28)
 		"miam":
 			return _chime([660.0, 880.0, 1046.5], 0.11, 0.26)
+		"bell":
+			return _chime([1568.0, 2093.0, 1568.0], 0.08, 0.22)
 		"goodnight":
 			return _chime([1046.5, 784.0, 659.3, 523.3], 0.22, 0.2)
 		"bird":

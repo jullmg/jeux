@@ -119,35 +119,12 @@ func _open_fridge() -> void:
 	var cold := _glow(Vector2(KITCHEN_START + 60.0, 420.0), 220.0, Color(0.75, 0.9, 1.0, 0.35))
 	move_child(cold, open.get_index() + 1)
 	var pick: Array = SNACKS[randi() % SNACKS.size()]
-	var treat := Node2D.new()
-	treat.position = _charlotte.position + Vector2(0, -270)
-	treat.modulate.a = 0.0
-	add_child(treat)
-	var icon := Sprite2D.new()
-	icon.texture = InteriorArt.snack(pick[0])
-	treat.add_child(icon)
-	var bubble := Label.new()
-	bubble.text = "%s Miam !" % pick[1]
-	bubble.add_theme_font_size_override("font_size", 20)
-	bubble.add_theme_color_override("font_color", Color("#1D4F91"))
-	bubble.add_theme_color_override("font_outline_color", Color.WHITE)
-	bubble.add_theme_constant_override("outline_size", 6)
-	bubble.position = Vector2(-90, -66)
-	bubble.size = Vector2(180, 30)
-	bubble.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	treat.add_child(bubble)
+	_treat(InteriorArt.snack(pick[0]), "%s Miam !" % pick[1], 0.6)
 	var tween := create_tween()
-	tween.tween_interval(0.6)
-	tween.tween_callback(func(): Sfx.play("miam"))
-	tween.tween_property(treat, "modulate:a", 1.0, 0.25)
-	tween.parallel().tween_property(treat, "position:y", treat.position.y - 30.0, 1.6)
-	tween.tween_interval(0.6)
+	tween.tween_interval(3.0)
 	tween.tween_callback(func():
 		open.queue_free()
-		cold.queue_free())
-	tween.tween_property(treat, "modulate:a", 0.0, 0.4)
-	tween.tween_callback(func():
-		treat.queue_free()
+		cold.queue_free()
 		_fridge_busy = false)
 
 

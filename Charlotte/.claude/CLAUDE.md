@@ -70,6 +70,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - `scenes/house.gd` (extends `Interior`): Charlotte's flat, from the photos in `reference/charlotte_house_inside`:
   vestibule (0–640) → oak glass doorway → salon (–2260) → hallway → kitchen (3400–3960); Charlotte's bedroom is a separate
   area (5000–6650) reached through the "chacha" door (fade, camera limits switch). Charlotte is at scale 0.5 inside.
+- `scenes/depanneur.gd` (extends `Interior`): inside dépanneur Xin-Xin, entered from its door on Rue Dandurand (bell).
+  Furniture from `world/shop_art.gd` (`ShopArt`: door, counter with till and scratch tickets, candy wall, chips, freezer,
+  drinks fridge, newspaper rack, Halloween display, lottery poster, treats; nothing branded); checkered floor
+  (`RoomShell.floor_style = "tiles"`), fluorescent tubes. Click the shopkeeper (a fixed-seed adult on a raised floor behind
+  the counter) to say hello, the candy / freezer / fridge to buy a treat. `Interior._say(who, text)` (speech bubble) and
+  `Interior._treat(picture, text)` (what Charlotte gets, floating up) are reusable.
 - Charlotte's hamster (`world/hamster.gd`, `Hamster`) lives in the terrarium on her bedroom dresser. The terrarium art is two
   layers, `InteriorArt.terrarium(false)` behind and `terrarium(true)` in front (glass glare, things on the dresser); the
   hamster node shares its position/scale and works in its canvas units. It wanders, grooms, runs its wheel, naps in the

@@ -19,6 +19,9 @@ var posts: Array = []
 var casings: Array = []
 ## x of windows and lamps whose light gleams on the glossy floor.
 var gleams: Array = []
+## "wood" (narrow honey strips) or "tiles" (a shop's checkered linoleum).
+var floor_style := "wood"
+const TILES := [Color("#ECE8DE"), Color("#9AA092")]
 var seed_value := 77
 
 
@@ -75,7 +78,10 @@ func _room(x0: float, x1: float, wall: Color, base: Color, rng: RandomNumberGene
 	draw_rect(Rect2(x0, WALL_BASE - 28, w, 28), base)
 	draw_rect(Rect2(x0, WALL_BASE - 28, w, 4), base.lightened(0.25))
 	draw_rect(Rect2(x0, WALL_BASE - 24, w, 2), base.darkened(0.15))
-	_floor(x0, x1, rng)
+	if floor_style == "tiles":
+		_tiles(x0, x1)
+	else:
+		_floor(x0, x1, rng)
 
 
 # Narrow honey-coloured strips running along the room, rows growing toward the camera, staggered butt
@@ -112,6 +118,31 @@ func _floor(x0: float, x1: float, rng: RandomNumberGenerator) -> void:
 			var k := 1.0 - i * 0.3
 			draw_polygon(PackedVector2Array([Vector2(g - half * k, WALL_BASE + 6), Vector2(g + half * k, WALL_BASE + 6), Vector2(g + half * k * 1.3, BOTTOM), Vector2(g - half * k * 1.3, BOTTOM)]),
 				PackedColorArray([Color(1, 0.97, 0.88, 0.1), Color(1, 0.97, 0.88, 0.1), Color(1, 0.97, 0.88, 0.0), Color(1, 0.97, 0.88, 0.0)]))
+
+
+# Checkered tiles in rows that widen toward the camera, fanning out from the room's middle, with a soft sheen.
+func _tiles(x0: float, x1: float) -> void:
+	var mid := (x0 + x1) / 2.0
+	var y := WALL_BASE
+	var row := 0
+	while y < BOTTOM:
+		var h := 10.0 + row * 4.0
+		var w := 46.0 + row * 7.0
+		var k := -ceili((mid - x0) / w) - 1
+		while mid + k * w < x1:
+			var a := maxf(mid + k * w, x0)
+			var b := minf(mid + (k + 1) * w, x1)
+			if b > a:
+				draw_rect(Rect2(a, y, b - a, h), TILES[(k + row) & 1])
+			k += 1
+		draw_line(Vector2(x0, y), Vector2(x1, y), Color(0, 0, 0, 0.08), 1.0)
+		y += h
+		row += 1
+	_vgrad(x0, x1, WALL_BASE, WALL_BASE + 14, Color(0.1, 0.1, 0.1, 0.25), Color(0.1, 0.1, 0.1, 0.0))
+	for g: float in gleams:
+		if g >= x0 and g <= x1:
+			draw_polygon(PackedVector2Array([Vector2(g - 50, WALL_BASE + 6), Vector2(g + 50, WALL_BASE + 6), Vector2(g + 70, BOTTOM), Vector2(g - 70, BOTTOM)]),
+				PackedColorArray([Color(1, 1, 1, 0.14), Color(1, 1, 1, 0.14), Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.0)]))
 
 
 func _vgrad(x0: float, x1: float, y0: float, y1: float, top: Color, bottom: Color) -> void:

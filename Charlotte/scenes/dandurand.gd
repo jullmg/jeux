@@ -53,6 +53,14 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 
 func _build_doors() -> void:
 	_add_corner(_cross_streets[0], "res://scenes/main.tscn", "6e_from_dandurand")
+	# The dépanneur's glass door, at the top of its steps.
+	var origin := _house_origin(layout.find("depanneur_front"))
+	var area := Rect2(origin + Vector2(338.0, 503.0) * HOUSE_SCALE, Vector2(104.0, 97.0) * HOUSE_SCALE)
+	add_child(DoorSpot.make(area, func():
+		_control.enabled = false
+		Transition.street_x = area.get_center().x
+		Sfx.play("bell")
+		Transition.change_scene(self, "res://scenes/depanneur.tscn"), area.get_center().x))
 
 
 # The ice chest and the flattened boxes by the dépanneur's steps.
