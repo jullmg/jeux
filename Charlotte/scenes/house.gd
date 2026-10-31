@@ -176,7 +176,12 @@ func _build_bedroom() -> void:
 	_put(InteriorArt.round_rug(), x + 380.0, 700.0, 1.0)
 	_put(InteriorArt.window(180.0, 300.0), x + 90.0, 420.0, 1.0, "wall")
 	_daylight(Vector2(x + 90.0, 120.0), 180.0, 0.14)
-	_put(InteriorArt.dresser_terrarium(), x + 30.0, 606.0, 0.85, "floor")
+	var tank := _put(InteriorArt.terrarium(false), x + 30.0, 606.0, 0.85, "floor")
+	var hamster := Hamster.new()
+	hamster.position = tank.position
+	hamster.scale = tank.scale
+	add_child(hamster)
+	_put(InteriorArt.terrarium(true), x + 30.0, 606.0, 0.85)
 	_put(InteriorArt.flower_painting(), x + 470.0, 330.0, 0.8, "wall")
 	_put(InteriorArt.bed(), x + 360.0, 608.0, 0.8, "floor")
 	_put(InteriorArt.kid_table(), x + 830.0, 612.0, 0.75, "floor")

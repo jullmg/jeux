@@ -35,6 +35,10 @@ Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks
   class; furniture comes from `world/interior_art.gd` (`InteriorArt`, one SVG function per piece). Charlotte is at scale 0.5 inside.
   Place pieces with `_put(tex, x, bottom, scale, shadow)`: `"wall"` for hung things, `"floor"` for standing furniture (adds a
   contact shadow). Windows get `_daylight()` beams; lamps get additive `_glow()`s. Add pieces in back-to-front order.
+- Charlotte's hamster (`world/hamster.gd`, `Hamster`) lives in the terrarium on her bedroom dresser. The terrarium art is two
+  layers, `InteriorArt.terrarium(false)` behind and `terrarium(true)` in front (glass glare, things on the dresser); the
+  hamster node shares its position/scale and works in its canvas units. It wanders, grooms, runs its wheel, naps in the
+  hideout, and stands up with hearts when clicked.
 - `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through), `PlayerControl` (keys and
   click/tap-to-walk, walks to interactables and calls them; used by the street and the house), `CharacterArt` (generates the
   body-part SVGs from a look), `CharacterLook` (Resource; `CharacterLook.charlotte()` and `CharacterLook.random(rng, age)`).
@@ -57,7 +61,7 @@ Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks
 ## Interactions and scene changes
 
 - Anything clickable joins the `interactable` group and implements `can_interact()`, `hit_test(point)`, `approach_x(from_x)`,
-  `reserve()`, `release()` and `interact(charlotte)` (see `StrayCat`). `main.gd` walks Charlotte to `approach_x`, then calls `interact`.
+  `reserve()`, `release()` and `interact(charlotte)` (see `StrayCat`), and optionally `focus_x()` (where Charlotte should look). `main.gd` walks Charlotte to `approach_x`, then calls `interact`.
 - Input is mouse-based with event positions converted to world space, so touch works through emulated mouse events.
 - Doors are `DoorSpot.make(rect, action)` interactables. `Transition` fades (`fade_in`, `through_black`, `change_scene`) and
   holds cross-scene state as static vars (`Transition.street_x`: where Charlotte reappears on the street).

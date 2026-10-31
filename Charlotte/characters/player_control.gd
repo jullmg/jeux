@@ -93,6 +93,8 @@ func _arrive() -> void:
 	var target := _goal_target
 	_goal_target = null
 	if target and is_instance_valid(target) and target.can_interact():
-		if absf(target.position.x - charlotte.position.x) > 1.0:
-			charlotte.facing = 1 if target.position.x > charlotte.position.x else -1
+		# Interactables can name the x to look at (e.g. the hamster moving inside its terrarium).
+		var look_x: float = target.focus_x() if target.has_method("focus_x") else target.position.x
+		if absf(look_x - charlotte.position.x) > 1.0:
+			charlotte.facing = 1 if look_x > charlotte.position.x else -1
 		target.interact(charlotte)

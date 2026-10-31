@@ -351,25 +351,41 @@ static func bed() -> ImageTexture:
 	return tex(560, 300, s)
 
 
-## Canvas 360x380: white dresser with a lit candle, photo frames and a little gumball machine,
-## under a glass terrarium full of greenery. Floor at y 380.
-static func dresser_terrarium() -> ImageTexture:
-	var s := '<rect x="10" y="20" width="300" height="150" fill="#DDEFE8" fill-opacity="0.45" stroke="#B9C9C4" stroke-width="3"/>'
-	s += '<path d="M10 20 L30 4 H330 L310 20 Z M310 20 L330 4 V154 L310 170 Z" fill="#E8F2EE" fill-opacity="0.4" stroke="#B9C9C4" stroke-width="2"/>'
-	s += '<path d="M14 166 Q60 130 120 150 Q180 120 240 148 Q280 130 306 150 V168 H14 Z" fill="#D9C9A4"/>'
-	for x in [40.0, 90.0, 170.0, 250.0]:
-		s += '<path d="M%s 150 q-10 -40 6 -60 q8 30 -6 60 M%s 150 q14 -34 30 -40 q-6 28 -30 40" fill="#5FAE4F" stroke="#3E7E32" stroke-width="2"/>' % [x, x]
-	s += '<path d="M200 156 q10 -10 20 0" stroke="#8A6A40" stroke-width="5" fill="none"/>'
-	s += '<path d="M20 24 L60 24 L26 120 L20 120 Z" fill="#FFFFFF" opacity="0.35"/>'
+## Canvas 360x380: white dresser with the hamster's glass terrarium on top, in two layers so the hamster
+## (a Hamster node, in these canvas units) lives between them. `front` = glass edges and glare plus the
+## things standing on the dresser (photo frames, lit candle, gumball machine); otherwise the back:
+## glass box, bedding, plants, a wooden hideout, the water bottle and the dresser itself. Bedding at y 152.
+static func terrarium(front: bool) -> ImageTexture:
+	var s := ""
+	if front:
+		s += '<rect x="10" y="20" width="300" height="150" fill="none" stroke="#B9C9C4" stroke-width="3"/>'
+		s += '<path d="M10 20 L30 4 H330 L310 20 M310 20 L330 4 V154 L310 170" fill="none" stroke="#B9C9C4" stroke-width="2"/>'
+		s += '<path d="M20 24 L60 24 L26 120 L20 120 Z M250 24 L262 24 L214 168 L202 168 Z" fill="#FFFFFF" opacity="0.28"/>'
+		s += '<rect x="30" y="134" width="48" height="42" fill="#2B2B2B"/><rect x="36" y="140" width="36" height="30" fill="#8E9AA6"/>'
+		s += '<rect x="86" y="146" width="36" height="30" fill="#F4F2EC" stroke="#2B2B2B" stroke-width="3"/><rect x="92" y="152" width="24" height="18" fill="#C9A88A"/>'
+		s += '<path d="M240 176 v-40 h44 v40 z" fill="#F2C14E" stroke="#B58A24" stroke-width="2"/><path d="M262 136 q-4 -10 0 -18 q4 8 0 18" fill="#FFB347"/>'
+		s += '<circle cx="306" cy="152" r="14" fill="#F7D6E0" stroke="#D97A9A" stroke-width="2"/><rect x="298" y="164" width="16" height="12" fill="#E04F7A"/>'
+		return tex(360, 380, s)
+	s += '<rect x="10" y="20" width="300" height="150" fill="#DDEFE8" fill-opacity="0.45"/>'
+	s += '<path d="M10 20 L30 4 H330 L310 20 Z M310 20 L330 4 V154 L310 170 Z" fill="#E8F2EE" fill-opacity="0.4"/>'
+	for x in [36.0, 84.0, 186.0, 290.0]:
+		s += '<path d="M%s 150 q-10 -44 6 -66 q8 32 -6 66 M%s 150 q14 -36 30 -44 q-6 30 -30 44" fill="#5FAE4F" stroke="#3E7E32" stroke-width="2"/>' % [x, x]
+	s += '<path d="M14 168 Q60 146 120 152 Q180 146 240 152 Q280 147 306 152 V170 H14 Z" fill="#E6D3A8"/>'
+	for i in 40:
+		var bx := 18.0 + (i * 37) % 286
+		var by := 156.0 + (i * 13) % 12
+		s += '<path d="M%s %s l6 -2" stroke="#C9B080" stroke-width="2"/>' % [bx, by]
+	# Wooden hideout with a round door, and the water bottle clipped to the glass.
+	s += '<path d="M196 152 V116 L222 98 L248 116 V152 Z" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2.5"/>'
+	s += '<path d="M190 118 L222 94 L254 118" stroke="#9A6E44" stroke-width="5" fill="none" stroke-linecap="round"/>'
+	s += '<path d="M212 152 V138 Q222 124 232 138 V152 Z" fill="#4A3020"/>'
+	s += '<rect x="278" y="40" width="18" height="56" rx="8" fill="#BFE3F2" fill-opacity="0.8" stroke="#7FA8BA" stroke-width="2"/>'
+	s += '<rect x="278" y="62" width="18" height="34" rx="8" fill="#7FC4E0" fill-opacity="0.7"/>'
+	s += '<path d="M287 96 L282 118" stroke="#9A9A9A" stroke-width="3"/><rect x="276" y="40" width="22" height="8" fill="#E04F5F"/>'
 	s += '<rect x="0" y="176" width="340" height="18" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="2.5"/>'
 	s += '<rect x="10" y="194" width="320" height="186" fill="#F7F6F2" stroke="#C9C2B4" stroke-width="2.5"/>'
 	for y in [204.0, 264.0, 324.0]:
 		s += '<rect x="22" y="%s" width="296" height="50" fill="none" stroke="#D9D2C4" stroke-width="2"/><rect x="156" y="%s" width="28" height="5" rx="2" fill="#C9C2B4"/>' % [y, y + 22]
-	# Things on top of the dresser, in front of the terrarium.
-	s += '<rect x="30" y="134" width="48" height="42" fill="#2B2B2B"/><rect x="36" y="140" width="36" height="30" fill="#8E9AA6"/>'
-	s += '<rect x="86" y="146" width="36" height="30" fill="#F4F2EC" stroke="#2B2B2B" stroke-width="3"/><rect x="92" y="152" width="24" height="18" fill="#C9A88A"/>'
-	s += '<path d="M240 176 v-40 h44 v40 z" fill="#F2C14E" stroke="#B58A24" stroke-width="2"/><path d="M262 136 q-4 -10 0 -18 q4 8 0 18" fill="#FFB347"/>'
-	s += '<circle cx="306" cy="152" r="14" fill="#F7D6E0" stroke="#D97A9A" stroke-width="2"/><rect x="298" y="164" width="16" height="12" fill="#E04F7A"/>'
 	return tex(360, 380, s)
 
 
