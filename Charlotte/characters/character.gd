@@ -1,13 +1,17 @@
 class_name Character
 extends Node2D
-## Paper-cutout puppet assembled from CharacterArt parts: walk cycle, blinking, hair follow-through.
+## Paper-cutout puppet assembled from CharacterArt parts: walk/run cycle, blinking, hair follow-through.
 
 const BACK_TINT := Color(0.82, 0.82, 0.86)
 const ARM_REST := deg_to_rad(6.0)
+## Running speed, as a multiple of walk_speed.
+const RUN_SPEED := 1.9
 
 var look: CharacterLook
 var walk_speed := 200.0
 var is_walking := false
+## While walking, blends into a run (faster, longer strides, leaning forward).
+var running := false
 var walk_phase := 0.0
 var facing := 1
 var animate := true
@@ -29,6 +33,7 @@ var _blink_in := 2.0
 var _pet_time := 0.0
 var _pet := 0.0
 var _pet_low := 1.0
+var _run := 0.0
 
 
 func _ready() -> void:
@@ -90,6 +95,11 @@ func hand_position() -> Vector2:
 	return _arm_front.to_global(Vector2(0, _rig.arm_len))
 
 
+## Current ground speed, easing between walking and running.
+func speed() -> float:
+	return walk_speed * lerpf(1.0, RUN_SPEED, _run)
+
+
 func _process(delta: float) -> void:
 	if not animate:
 		_apply_pose()
@@ -97,14 +107,16 @@ func _process(delta: float) -> void:
 	_time += delta
 	_pet_time = maxf(_pet_time - delta, 0.0)
 	_pet = move_toward(_pet, 1.0 if _pet_time > 0.0 else 0.0, delta * 4.0)
+	_run = move_toward(_run, 1.0 if running and is_walking else 0.0, delta * 3.0)
 	if is_walking:
 		# Longer legs take longer strides, so they swing more slowly for the same speed.
-		walk_phase = fmod(walk_phase + delta * 1.6 * (walk_speed / 200.0) * (110.0 / (_rig.leg_len as float)), 1.0)
+		# A run is a faster cadence plus longer strides (wider swing), which together make up RUN_SPEED.
+		walk_phase = fmod(walk_phase + delta * 1.6 * lerpf(1.0, 1.35, _run) * (walk_speed / 200.0) * (110.0 / (_rig.leg_len as float)), 1.0)
 	_blink_in -= delta
 	if _blink_in <= 0.0:
 		_lids.visible = not _lids.visible
 		_blink_in = 0.12 if _lids.visible else randf_range(1.8, 5.0)
-	var target := 0.09 if is_walking else 0.0
+	var target := lerpf(0.09, 0.2, _run) if is_walking else 0.0
 	_hair_vel += ((target - _hair_angle) * 60.0 - _hair_vel * 7.0) * delta
 	_hair_angle += _hair_vel * delta
 	_apply_pose()
@@ -114,17 +126,19 @@ func _apply_pose() -> void:
 	var swing := sin(walk_phase * TAU) if is_walking else 0.0
 	# Petting: lunge down to the animal's height (deep for cats), lean in and stroke with the front hand.
 	var lunge := deg_to_rad(lerpf(8.0, 55.0, _pet_low)) * _pet
-	_leg_front.rotation = deg_to_rad(26.0) * swing - lunge
-	_leg_back.rotation = -deg_to_rad(26.0) * swing + lunge
-	var arm_swing := deg_to_rad(22.0) * swing
+	var stride := deg_to_rad(lerpf(26.0, 38.0, _run))
+	_leg_front.rotation = stride * swing - lunge
+	_leg_back.rotation = -stride * swing + lunge
+	var arm_swing := deg_to_rad(lerpf(22.0, 48.0, _run)) * swing
 	var stroke := deg_to_rad(lerpf(-82.0, -62.0, _pet_low)) + sin(_time * 6.0) * deg_to_rad(12.0)
 	_arm_front.rotation = lerpf(ARM_REST - arm_swing, stroke, _pet)
 	_arm_back.rotation = -ARM_REST + arm_swing
-	_body.position.y = (1.0 - cos(_leg_front.rotation)) * (_rig.leg_len as float)
-	_body.rotation = ((_rig.lean as float) + deg_to_rad(10.0) * _pet) * facing
 	var bounce := sin(walk_phase * TAU * 2.0)
+	# Running: a little hop at each push-off instead of the walk's dip.
+	_body.position.y = (1.0 - cos(_leg_front.rotation)) * (_rig.leg_len as float) * (1.0 - _run) - absf(bounce) * 6.0 * _run
+	_body.rotation = ((_rig.lean as float) + deg_to_rad(10.0) * _pet + deg_to_rad(9.0) * _run) * facing
 	var tilt := bounce if is_walking else sin(_time * 2.2) * 0.6
-	_head.rotation = deg_to_rad(2.0) * tilt + deg_to_rad(10.0) * _pet
+	_head.rotation = deg_to_rad(2.0) * tilt + deg_to_rad(10.0) * _pet - deg_to_rad(4.0) * _run
 	_hair_back.rotation = _head.rotation + _hair_angle + (0.025 * bounce if is_walking else 0.0)
 	_torso.skew = 0.035 * swing
 	_body.scale.x = facing

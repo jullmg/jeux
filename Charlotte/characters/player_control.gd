@@ -1,7 +1,7 @@
 class_name PlayerControl
 extends Node
-## Moves Charlotte with ←/→ or click/tap-to-walk, and walks her to clicked interactables before calling
-## their interact(). Shared by the street and the house. Interactables join the "interactable" group and
+## Moves Charlotte with ←/→ or click/tap-to-walk (double-press or double-click/tap to run), and walks her
+## to clicked interactables before calling their interact(). Shared by the street and the house. Interactables join the "interactable" group and
 ## implement can_interact(), hit_test(point), approach_x(from_x), reserve(), release(), interact(charlotte).
 
 var charlotte: Character
@@ -10,8 +10,18 @@ var bounds := Vector2(60, 1000)
 var walk_top := 0.0
 var enabled := true
 
+## Two presses (or clicks) closer than this make Charlotte run.
+const DOUBLE_TIME := 0.32
+## Max distance between the two clicks/taps of a double click, in screen pixels.
+const DOUBLE_DIST := 48.0
+
 var _goal_x := NAN
 var _goal_target: Node2D
+# Last arrow press (direction, time) and last click (screen position, time), to spot doubles.
+var _last_key_dir := 0
+var _last_key_at := -10.0
+var _last_click := Vector2.ZERO
+var _last_click_at := -10.0
 
 
 func _init() -> void:
@@ -22,7 +32,9 @@ func _init() -> void:
 func _process(delta: float) -> void:
 	if not enabled:
 		charlotte.is_walking = false
+		charlotte.running = false
 		return
+	var speed := charlotte.speed()
 	var dir := Input.get_axis("ui_left", "ui_right")
 	if dir != 0.0:
 		_goal_x = NAN
@@ -31,19 +43,21 @@ func _process(delta: float) -> void:
 			charlotte.pet(0.0)
 	elif not is_nan(_goal_x):
 		var dx := _goal_x - charlotte.position.x
-		if absf(dx) <= charlotte.walk_speed * delta:
+		if absf(dx) <= speed * delta:
 			charlotte.position.x = _goal_x
 			_goal_x = NAN
 			_arrive()
 		else:
 			dir = signf(dx)
+	if dir == 0.0:
+		charlotte.running = false
 	if charlotte.is_petting() and dir == 0.0:
 		charlotte.is_walking = false
 	else:
 		charlotte.is_walking = dir != 0.0
 	if dir != 0.0:
 		charlotte.facing = 1 if dir > 0.0 else -1
-		charlotte.position.x = clampf(charlotte.position.x + dir * charlotte.walk_speed * delta, bounds.x, bounds.y)
+		charlotte.position.x = clampf(charlotte.position.x + dir * speed * delta, bounds.x, bounds.y)
 
 
 ## Clears any walk target (e.g. when teleporting through a door).
@@ -51,15 +65,27 @@ func stop() -> void:
 	_goal_x = NAN
 	_set_goal_target(null)
 	charlotte.is_walking = false
+	charlotte.running = false
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not enabled:
 		return
-	if event is InputEventMouseMotion:
+	var now := Time.get_ticks_msec() / 1000.0
+	var key_dir := 1 if event.is_action_pressed("ui_right") else -1 if event.is_action_pressed("ui_left") else 0
+	if key_dir != 0:
+		# Same arrow twice in a row: run for as long as it is held.
+		charlotte.running = key_dir == _last_key_dir and now - _last_key_at < DOUBLE_TIME
+		_last_key_dir = key_dir
+		_last_key_at = now
+	elif event is InputEventMouseMotion:
 		var hovering := _interactable_at(_to_world(event.position)) != null
 		Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND if hovering else Input.CURSOR_ARROW)
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		# Timed by hand rather than event.double_click, so emulated taps on a tablet count too.
+		charlotte.running = now - _last_click_at < DOUBLE_TIME and event.position.distance_to(_last_click) < DOUBLE_DIST
+		_last_click = event.position
+		_last_click_at = now
 		var at := _to_world(event.position)
 		var target := _interactable_at(at)
 		_set_goal_target(target)
