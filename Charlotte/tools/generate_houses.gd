@@ -143,6 +143,8 @@ const HOUSES := [
 		"parapet": "flat", "windows": [[90.0, 90.0], [280.0, 90.0]], "basement": [], "downspout": 410.0,
 	},
 	{"name": "ruelle", "kind": "ruelle", "width": 300.0},
+	# The green lane near the Dandurand corner (reference/Entrée_ruelle_coin_dandurand.jpg).
+	{"name": "ruelle_verte", "kind": "ruelle_verte", "width": 400.0},
 	# Across Rue Holt: the side wall of the next block's corner building.
 	{
 		"name": "coin_holt_est", "kind": "side_wall", "width": 620.0, "floors": 3,
@@ -270,6 +272,8 @@ func _svg() -> void:
 	match k.kind:
 		"ruelle":
 			_ruelle()
+		"ruelle_verte":
+			_ruelle_verte()
 		"modern":
 			_modern()
 		"school":
@@ -892,6 +896,99 @@ func _school() -> void:
 	_rect(cx - 18, top - 78, 36, 9, "#7FA89A", _stroke(copper_dark, 1.5))
 	_foundation()
 	_fence([])
+
+
+# The green lane seen from its entrance, in perspective toward (cx, 470): brick side walls (pipes and a
+# tag on the left, a colourful mural on the right), a leafy concrete path, a big white planter with black
+# dots, a wooden planter box, a red pole carrying the "Ruelle verte" sign (text added in the game) and
+# orange trees arching over it all.
+func _ruelle_verte() -> void:
+	var vp := Vector2(k.width / 2.0, 470.0)
+	var at := func(p: Vector2, d: float) -> Vector2: return vp + (p - vp) * (1.0 - d)
+	var poly := func(pts: Array, fill: String, extra := "") -> void:
+		var parts := PackedStringArray()
+		for i in pts.size():
+			parts.append("%s%s %s" % ["M" if i == 0 else "L", _n(pts[i].x), _n(pts[i].y)])
+		_path(" ".join(parts) + " Z", fill, extra)
+	var far := 0.68
+	var l0 := Vector2(X0, 60)
+	var r0 := Vector2(X1, 60)
+	var gl := Vector2(X0, ground_y)
+	var gr := Vector2(X1, ground_y)
+	# Bright far end: the lane goes on, greener and paler.
+	poly.call([at.call(l0, far), at.call(r0, far), at.call(gr, far), at.call(gl, far)], "#DCE6D8")
+	for i in 4:
+		_circle(lerpf(at.call(gl, far).x, at.call(gr, far).x, (i + 0.5) / 4.0), at.call(gl, far).y - 30, 22, _pick(["#7FA34A", "#9DB85A", "#E3A33A"]))
+	# Concrete path, darker at the entrance, with a joint across it.
+	poly.call([gl, gr, at.call(gr, far), at.call(gl, far)], "#A8A49C")
+	poly.call([gl, gr, at.call(gr, 0.25), at.call(gl, 0.25)], "#9A968E")
+	_path("M%s %s L%s %s" % [_n(at.call(gl, 0.25).x), _n(at.call(gl, 0.25).y), _n(at.call(gr, 0.25).x), _n(at.call(gr, 0.25).y)], "none", _stroke("#7E7A72", 2))
+	var mh: Vector2 = at.call(Vector2(vp.x, ground_y), 0.45)
+	out.append('<ellipse cx="%s" cy="%s" rx="16" ry="5" fill="#6E6A62" stroke="#55524C" stroke-width="1.5"/>' % [_n(mh.x), _n(mh.y)])
+	# Side walls.
+	for side in [[l0, gl, "#7E4E3E", "#6A4033"], [r0, gr, "#93604A", "#7A4E3C"]]:
+		poly.call([side[0], at.call(side[0], far), at.call(side[1], far), side[1]], side[2])
+		for t in [0.3, 0.55, 0.8]:
+			var y := lerpf(side[0].y, side[1].y, t)
+			var a := Vector2(side[0].x, y)
+			_path("M%s %s L%s %s" % [_n(a.x), _n(a.y), _n(at.call(a, far).x), _n(at.call(a, far).y)], "none", _stroke(side[3], 1.5))
+	# Left wall: white conduits, a meter box, a yellow box with a plant, a blue tag.
+	for y in [372.0, 388.0]:
+		var a := Vector2(X0, y)
+		var b: Vector2 = at.call(a, 0.55)
+		_path("M%s %s L%s %s" % [_n(a.x), _n(a.y), _n(b.x), _n(b.y)], "none", _stroke("#E9E6DE", 4))
+	_rect(X0 + 6, 380, 5, 150, "#E9E6DE")
+	_rect(X0 + 16, 470, 14, 22, "#D9D6CE", _stroke("#9A968E", 1))
+	var yb: Vector2 = at.call(Vector2(X0, 540), 0.42)
+	_rect(yb.x - 4, yb.y - 26, 18, 30, "#E8C33A", _stroke("#A88A1E", 1.5))
+	_circle(yb.x + 5, yb.y - 34, 9, "#5F8F3A")
+	var tag: Vector2 = at.call(Vector2(X0, 560), 0.2)
+	_path("M%s %s c6 -16 14 -16 12 0 c-2 14 10 14 12 -2 c2 -14 12 -12 10 4" % [_n(tag.x - 4), _n(tag.y)], "none", _stroke("#2F4FA8", 3.5) + ' stroke-linecap="round"')
+	_path("M%s %s c4 -10 10 -10 8 0" % [_n(tag.x + 2), _n(tag.y - 22)], "none", _stroke("#F4F1EA", 2) + ' stroke-linecap="round"')
+	# Right wall: the painted mural further in.
+	var m0 := 0.38
+	var m1 := 0.62
+	poly.call([at.call(Vector2(X1, 430), m0), at.call(Vector2(X1, 430), m1), at.call(gr, m1), at.call(gr, m0)], "#3D7FD0")
+	poly.call([at.call(Vector2(X1, 500), m0), at.call(Vector2(X1, 470), m1), at.call(gr, m1), at.call(gr, m0)], "#6FBF4A")
+	for i in 3:
+		var f: Vector2 = at.call(Vector2(X1, 520 + i * 40), lerpf(m0, m1, (i + 0.5) / 3.0))
+		out.append('<ellipse cx="%s" cy="%s" rx="5" ry="9" fill="#F2C230" stroke="#2B2B2B" stroke-width="1"/>' % [_n(f.x), _n(f.y)])
+	# Leaves carpeting the path, thickest along the right.
+	for i in 140:
+		var d := pow(rng.randf(), 1.6) * far
+		var u := rng.randf()
+		if rng.randf() < 0.5:
+			u = lerpf(0.65, 1.0, rng.randf())
+		var p: Vector2 = at.call(Vector2(lerpf(X0 + 6, X1 - 6, u), ground_y - 4), d)
+		_leaf(p.x, p.y, rng.randf_range(0.0, PI))
+	# Wooden planter box along the right wall, heaped with leaves.
+	poly.call([Vector2(X1, ground_y - 46), at.call(Vector2(X1, ground_y - 46), 0.4), at.call(Vector2(X1 - 34, ground_y - 46), 0.4), Vector2(X1 - 34, ground_y - 46)], "#B5442E")
+	poly.call([Vector2(X1 - 34, ground_y - 46), at.call(Vector2(X1 - 34, ground_y - 46), 0.4), at.call(Vector2(X1 - 34, ground_y), 0.4), Vector2(X1 - 34, ground_y)], "#8A6440", _stroke("#5E4228", 1.5))
+	for i in 5:
+		var pp: Vector2 = at.call(Vector2(X1 - 16, ground_y - 50), i * 0.08)
+		_circle(pp.x, pp.y - 6, 10 - i, _pick(["#5F8F3A", "#7FA34A", "#C9562E"]))
+	# Big round white concrete planter with black dots, a plant in it.
+	var pc := Vector2(X0 + 62, ground_y - 46)
+	out.append('<ellipse cx="%s" cy="%s" rx="50" ry="10" fill="#000000" opacity="0.18"/>' % [_n(pc.x + 6), _n(ground_y - 2)])
+	_path("M%s %s L%s %s Q%s %s %s %s L%s %s Z" % [_n(pc.x - 46), _n(pc.y), _n(pc.x - 40), _n(ground_y - 6), _n(pc.x), _n(ground_y + 4), _n(pc.x + 40), _n(ground_y - 6), _n(pc.x + 46), _n(pc.y)], "#EDEBE5", _stroke("#B9B5AC", 2))
+	out.append('<ellipse cx="%s" cy="%s" rx="46" ry="11" fill="#D9D6CE" stroke="#B9B5AC" stroke-width="2"/>' % [_n(pc.x), _n(pc.y)])
+	for dot in [[-28, 18, 6], [-6, 26, 8], [20, 16, 5], [34, 30, 4], [-34, 34, 4]]:
+		_circle(pc.x + dot[0], pc.y + dot[1], dot[2], "#1E1E1E")
+	for i in 7:
+		var a := lerpf(-2.6, -0.5, i / 6.0)
+		_path("M%s %s q%s %s %s %s" % [_n(pc.x), _n(pc.y - 4), _n(cos(a) * 20), _n(sin(a) * 40), _n(cos(a) * 34), _n(sin(a) * 30)], "none", _stroke(_pick(["#5F8F3A", "#7FA34A", "#4E7A30"]), 5) + ' stroke-linecap="round"')
+	# Red pole with the green lane sign.
+	var px: float = k.width / 2.0 + 14.0
+	_rect(px - 3, 440, 6, ground_y - 446, "#C8202A", _stroke("#8E1A20", 1))
+	out.append('<ellipse cx="%s" cy="%s" rx="7" ry="2.5" fill="#000000" opacity="0.25"/>' % [_n(px + 2), _n(ground_y - 4)])
+	_rect(px - 66, 384, 132, 64, "#2E8B47", 'rx="8" ' + _stroke("#F4F1EA", 4))
+	_path("M%s 440 q-10 -14 0 -24 q10 10 0 24 z" % _n(px - 50), "#9BD16A")
+	# Trees arching over the lane: dark branches, then the canopy.
+	_path("M%s 420 C%s 300 %s 200 %s 120 M%s 330 C%s 290 %s 240 %s 200" % [_n(X1 - 10), _n(X1 - 40), _n(X1 - 110), _n(X0 + 40), _n(X1 - 30), _n(X1 - 80), _n(X1 - 120), _n(X1 - 170)], "none", _stroke("#4A3428", 6) + ' stroke-linecap="round"')
+	for i in 16:
+		var cx2 := rng.randf_range(X0 - 10, X1 + 10)
+		var cy2 := rng.randf_range(40.0, 250.0) + (cx2 - X0) * 0.18
+		_circle(cx2, cy2, rng.randf_range(34.0, 58.0), _pick(["#E3A33A", "#D9682B", "#C9562E", "#B5442E", "#E8B54A"]), _stroke("#8E3A24", 1.5) + ' opacity="0.95"')
 
 
 # Back lane seen from the street: lane trees, clothesline, wooden fences and greenery.

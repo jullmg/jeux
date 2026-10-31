@@ -13,7 +13,7 @@ const MARGIN := 30.0
 # Across each cross street, the first building of the next block (the school across Dandurand).
 const LAYOUT: Array[String] = [
 	"ecole", "rue_dandurand",
-	"depanneur", "plex_01", "ruelle",
+	"depanneur", "plex_01", "ruelle_verte",
 	"triplex_exemple_2", "plex_02", "plex_03", "moderne", "plex_04",
 	"duplex_voisin_gauche", "duplex_charlotte", "duplex_voisin_droite",
 	"plex_05", "triplex_exemple_3", "plex_06", "plex_07", "plex_08", "plex_09",
@@ -22,7 +22,7 @@ const LAYOUT: Array[String] = [
 ]
 # Cross streets are gaps in the row (width in px at the facade line), drawn by CrossStreet.
 const CROSS_STREETS := {"rue_dandurand": 560.0, "rue_holt": 520.0}
-const TREES_AFTER: Array[int] = [3, 6, 8, 10, 13, 15, 17]
+const TREES_AFTER: Array[int] = [2, 6, 8, 10, 13, 15, 17]
 const LAMPS_AFTER: Array[int] = [4, 9, 14, 18]
 const HYDRANTS_AT: Array[float] = [7.5, 16.3]
 const RACKS_AT: Array[float] = [2.5, 12.55, 15.6]
@@ -246,6 +246,8 @@ func _build_houses() -> void:
 		add_child(house)
 		if LAYOUT[i] == "depanneur":
 			_label("DÉPANNEUR XIN-XIN", house.position + Vector2(350, 379) * HOUSE_SCALE, Vector2(360, 30), 18, Color.WHITE, Color("#16285C"))
+		elif LAYOUT[i] == "ruelle_verte":
+			_label("RUELLE\nVERTE", house.position + Vector2(214, 416) * HOUSE_SCALE, Vector2(72, 36), 12, Color.WHITE, Color("#1E5E30"))
 
 
 func _build_window_cats() -> void:
@@ -288,7 +290,7 @@ func _sway(strength: float, phase: float) -> ShaderMaterial:
 # The low sun on the left throws the canopies' shadows up and to the right, onto the facades.
 func _build_tree_shadows(trees: Array[Texture2D]) -> void:
 	for i in trees.size():
-		if LAYOUT[TREES_AFTER[i] + 1] == "ruelle":
+		if LAYOUT[TREES_AFTER[i] + 1] in ["ruelle", "ruelle_verte"]:
 			continue
 		var shadow := _sprite(trees[i], TREE_SCALE)
 		shadow.position = _tree_origin(i) + Vector2(80, 14)
