@@ -16,7 +16,7 @@ const DOUBLE_TIME := 0.32
 const DOUBLE_DIST := 48.0
 
 var _goal_x := NAN
-var _goal_target: Node2D
+var _goal_target: CanvasItem
 # Last arrow press (direction, time) and last click (screen position, time), to spot doubles.
 var _last_key_dir := 0
 var _last_key_at := -10.0
@@ -100,14 +100,14 @@ func _to_world(screen: Vector2) -> Vector2:
 	return get_viewport().get_canvas_transform().affine_inverse() * screen
 
 
-func _interactable_at(point: Vector2) -> Node2D:
+func _interactable_at(point: Vector2) -> CanvasItem:
 	for node in get_tree().get_nodes_in_group("interactable"):
 		if node.can_interact() and node.hit_test(point):
 			return node
 	return null
 
 
-func _set_goal_target(target: Node2D) -> void:
+func _set_goal_target(target: CanvasItem) -> void:
 	if _goal_target and is_instance_valid(_goal_target):
 		_goal_target.release()
 	_goal_target = target
@@ -120,7 +120,7 @@ func _arrive() -> void:
 	_goal_target = null
 	if target and is_instance_valid(target) and target.can_interact():
 		# Interactables can name the x to look at (e.g. the hamster moving inside its terrarium).
-		var look_x: float = target.focus_x() if target.has_method("focus_x") else target.position.x
+		var look_x: float = target.focus_x() if target.has_method("focus_x") else (target as Node2D).position.x
 		if absf(look_x - charlotte.position.x) > 1.0:
 			charlotte.facing = 1 if look_x > charlotte.position.x else -1
 		target.interact(charlotte)

@@ -193,6 +193,7 @@ func _build_hallway() -> void:
 	_put(InteriorArt.black_coats(), 2330.0, 470.0, 0.8, "wall")
 	_put(InteriorArt.photo_row(), 2520.0, 260.0, 0.8, "wall")
 	_put(InteriorArt.tv(), 2560.0, 400.0, 0.8, "wall")
+	_build_tv(Vector2(2560.0, 400.0 - 140.0 * 0.8), 0.8)
 	_plate(2480.0, 330.0, false)
 	_put(InteriorArt.radiator(160.0, 150.0), 2790.0, WALL_BASE, 1.0, "floor")
 	_put(InteriorArt.recycling_bin(), 2985.0, 608.0, 1.0, "floor")
@@ -334,6 +335,16 @@ func _pendant(x: float, y: float) -> void:
 	_pendant_pivot.add_child(globe)
 	var glow := _glow(Vector2(x, y), 260.0, Color(1.0, 0.88, 0.6, 0.35))
 	glow.reparent(_pendant_pivot)
+
+
+# The TV's picture over the InteriorArt.tv() frame at `top_left`: click to turn on and change channels.
+func _build_tv(top_left: Vector2, s: float) -> void:
+	var screen := TvScreen.new()
+	screen.position = top_left + Vector2(12, 12) * s
+	screen.scale = Vector2.ONE * s
+	screen.stand_x = top_left.x + 110.0 * s
+	screen.glow = _glow(top_left + Vector2(110, 120) * s, 320.0, Color(1, 1, 1, 0.3))
+	add_child(screen)
 
 
 func _glow(center: Vector2, radius: float, color: Color) -> Sprite2D:

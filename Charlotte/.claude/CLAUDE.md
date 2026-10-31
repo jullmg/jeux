@@ -8,7 +8,8 @@ Current state: a living, side-scrolling street. Charlotte walks with ←/→ or 
 (`Character.running`, `RUN_SPEED` × walk speed, eased; `Character.speed()` gives the current speed).
 Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks over and pets it. Click her front door
 (ground floor of `duplex_charlotte`, n° 5672) to go inside her flat. In her bedroom, click the dresser's drawers to open her
-wardrobe and change clothes. No goals yet.
+wardrobe and change clothes. Click the hallway TV to turn it on and change channels (`world/tv_screen.gd`, `TvScreen`: a
+`Control` drawing five little shows — news, animals, an original cartoon, hockey, weather — then off). No goals yet.
 
 ## Run / verify
 
@@ -79,7 +80,7 @@ wardrobe and change clothes. No goals yet.
 
 ## Interactions and scene changes
 
-- Anything clickable joins the `interactable` group and implements `can_interact()`, `hit_test(point)`, `approach_x(from_x)`,
+- Anything clickable (a `Node2D`, or a `Control` like `TvScreen`) joins the `interactable` group and implements `can_interact()`, `hit_test(point)`, `approach_x(from_x)`,
   `reserve()`, `release()` and `interact(charlotte)` (see `StrayCat`), and optionally `focus_x()` (where Charlotte should look). `main.gd` walks Charlotte to `approach_x`, then calls `interact`.
 - Input is mouse-based with event positions converted to world space, so touch works through emulated mouse events.
 - Doors are `DoorSpot.make(rect, action)` interactables. `Transition` fades (`fade_in`, `through_black`, `change_scene`) and
