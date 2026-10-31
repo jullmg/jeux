@@ -54,23 +54,77 @@ static func _far_city(layer: Parallax2D, span: float, rng: RandomNumberGenerator
 		var top := rng.randf_range(170, 240)
 		_poly(layer, [Vector2(x, top), Vector2(x + w, top), Vector2(x + w, 560), Vector2(x, 560)], col.lerp(HAZE, rng.randf_range(0.0, 0.3)))
 		x += w + rng.randf_range(-10, 30)
-	_stadium(layer, 1250.0, col.darkened(0.06))
+	_stadium(layer, 1180.0, col.darkened(0.06))
 	_steeple(layer, 520.0, col.darkened(0.04))
 	_steeple(layer, 1900.0, col.darkened(0.03))
 
 
-# Olympic Stadium seen from Rosemont: low shell and the leaning mast with its cables.
+# Olympic Stadium seen from Rosemont: the ribbed oval bowl under its roof, and the inclined tower curving
+# up over it, crowned by the observatory, with the roof cables fanning down. Lit from the low sun on the left.
 static func _stadium(layer: Node, x: float, col: Color) -> void:
-	_poly(layer, [Vector2(x - 40, 240), Vector2(x - 10, 214), Vector2(x + 80, 198), Vector2(x + 200, 196),
-		Vector2(x + 300, 206), Vector2(x + 340, 226), Vector2(x + 350, 560), Vector2(x - 40, 560)], col)
-	_poly(layer, [Vector2(x + 30, 224), Vector2(x + 82, 224), Vector2(x + 202, 64), Vector2(x + 178, 56)], col.darkened(0.08))
-	_poly(layer, [Vector2(x + 168, 50), Vector2(x + 214, 58), Vector2(x + 208, 78), Vector2(x + 162, 70)], col.darkened(0.15))
-	for i in 7:
+	var lit := col.lightened(0.12)
+	var shade := col.darkened(0.12)
+	# Bowl: a low oval whose top bulges up in the middle, with the concrete consoles as ribs.
+	var bowl := [Vector2(x + 20, 560)]
+	for i in 25:
+		var t := i / 24.0
+		bowl.append(Vector2(x + 20 + t * 420.0, 236.0 - sin(t * PI) * 34.0))
+	bowl.append(Vector2(x + 440, 560))
+	_poly(layer, bowl, col)
+	for i in 15:
+		var t := (i + 0.5) / 15.0
+		var top := Vector2(x + 20 + t * 420.0, 236.0 - sin(t * PI) * 34.0)
+		var lean := (t - 0.5) * 18.0
+		_poly(layer, [top + Vector2(-5, 2), top + Vector2(5, 2), top + Vector2(5 + lean, 60), top + Vector2(-5 + lean, 60)], lit if t < 0.5 else shade)
+	# Roof membrane: a flatter, slightly darker oval sitting inside the rim.
+	var roof := []
+	for i in 21:
+		var t := i / 20.0
+		roof.append(Vector2(x + 60 + t * 340.0, 214.0 - sin(t * PI) * 30.0))
+	for i in 21:
+		var t := 1.0 - i / 20.0
+		roof.append(Vector2(x + 60 + t * 340.0, 214.0 - sin(t * PI) * 22.0 + 6.0))
+	_poly(layer, roof, col.darkened(0.06))
+	# Tower: a wedge rising from the left end of the bowl, wide at the base, tapering as it curves over.
+	var back := []
+	var front := []
+	for i in 17:
+		var t := i / 16.0
+		back.append(_bezier(Vector2(x - 60, 260), Vector2(x - 14, 116), Vector2(x + 140, 58), t))
+		front.append(_bezier(Vector2(x + 80, 260), Vector2(x + 84, 160), Vector2(x + 180, 96), t))
+	# Sunlit back face (the left third) and the funicular track along it.
+	var spine := []
+	for i in 17:
+		spine.append(back[i].lerp(front[i], 0.35))
+	var body := back.duplicate()
+	var underside := front.duplicate()
+	underside.reverse()
+	_poly(layer, body + underside, col.darkened(0.03))
+	var face := back.duplicate()
+	var inner := spine.duplicate()
+	inner.reverse()
+	_poly(layer, face + inner, lit)
+	var track := Line2D.new()
+	track.points = PackedVector2Array(spine)
+	track.width = 1.5
+	track.default_color = shade
+	layer.add_child(track)
+	# Observatory at the top: a wider block with a band of windows.
+	_poly(layer, [Vector2(x + 140, 56), Vector2(x + 196, 70), Vector2(x + 190, 102), Vector2(x + 168, 104), Vector2(x + 136, 80)], col.darkened(0.1))
+	_poly(layer, [Vector2(x + 146, 64), Vector2(x + 192, 76), Vector2(x + 190, 84), Vector2(x + 144, 72)], col.lightened(0.3))
+	_poly(layer, [Vector2(x + 140, 56), Vector2(x + 196, 70), Vector2(x + 194, 74), Vector2(x + 139, 60)], lit)
+	# Roof cables fanning from the tower's underside down to the rim.
+	for i in 9:
+		var from: Vector2 = front[3 + i]
 		var line := Line2D.new()
-		line.points = PackedVector2Array([Vector2(x + 120 + i * 9, 140 - i * 10), Vector2(x + 140 + i * 26, 200)])
-		line.width = 1.2
-		line.default_color = col.darkened(0.1)
+		line.points = PackedVector2Array([from, Vector2(x + 110 + i * 34.0, 206.0 - sin((0.15 + i * 0.09) * PI) * 22.0)])
+		line.width = 1.0
+		line.default_color = Color(shade, 0.8)
 		layer.add_child(line)
+
+
+static func _bezier(a: Vector2, b: Vector2, c: Vector2, t: float) -> Vector2:
+	return a.lerp(b, t).lerp(b.lerp(c, t), t)
 
 
 static func _steeple(layer: Node, x: float, col: Color) -> void:
