@@ -5,7 +5,7 @@ func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color("#F4F1EA"))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(_arg("--seed=", "1"))
-	var looks: Array[CharacterLook] = [CharacterLook.charlotte()]
+	var looks: Array[CharacterLook] = [CharacterLook.usual()]
 	for age in ["child", "child", "teen", "adult", "adult", "senior", "child", "adult", "teen"]:
 		looks.append(CharacterLook.random(rng, age))
 	for i in looks.size():

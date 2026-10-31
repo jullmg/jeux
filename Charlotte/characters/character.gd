@@ -39,12 +39,26 @@ var _run := 0.0
 func _ready() -> void:
 	if look == null:
 		look = CharacterLook.charlotte()
+	_blink_in = randf_range(1.0, 4.0)
+	_build()
+
+
+## Dresses the puppet in a new look: rebuilds every body part.
+func set_look(new_look: CharacterLook) -> void:
+	look = new_look
+	if _body:
+		remove_child(_body)
+		_body.queue_free()
+	_build()
+	queue_redraw()
+
+
+func _build() -> void:
 	var art := CharacterArt.build(look)
 	_rig = art.rig
 	var tex: Dictionary = art.tex
 	var leg: float = _rig.leg_len
 	var neck := Vector2(0, _rig.neck_y)
-	_blink_in = randf_range(1.0, 4.0)
 	_body = Node2D.new()
 	add_child(_body)
 	# Children are drawn back to front.

@@ -42,8 +42,28 @@ const ADULT_HAIR: Array[String] = ["short", "bob", "bun", "curly", "long_straigh
 # Exact hex colours that win over the derived palette (used to keep Charlotte pixel-identical).
 @export var overrides := {}
 
+## What Charlotte chose in her wardrobe; kept between runs.
+const OUTFIT_PATH := "user://charlotte_outfit.tres"
+static var _outfit: CharacterLook
 
+
+## Charlotte as she is dressed right now (her usual yellow dress unless she changed in her room).
 static func charlotte() -> CharacterLook:
+	if _outfit == null and ResourceLoader.exists(OUTFIT_PATH):
+		_outfit = ResourceLoader.load(OUTFIT_PATH, "", ResourceLoader.CACHE_MODE_IGNORE) as CharacterLook
+	if _outfit:
+		return _outfit.duplicate(true)
+	return usual()
+
+
+## Keeps the outfit for every scene, and on disk.
+static func dress_charlotte(look: CharacterLook) -> void:
+	_outfit = look.duplicate(true)
+	ResourceSaver.save(_outfit, OUTFIT_PATH)
+
+
+## Her usual look: the yellow polka-dot dress.
+static func usual() -> CharacterLook:
 	var look := CharacterLook.new()
 	look.overrides = {
 		"skin_line": "#D9A88E", "skin_shade": "#F2C7AE", "neck": "#EDC3AC", "blush": "#F5A3A0", "nose": "#D9947A",

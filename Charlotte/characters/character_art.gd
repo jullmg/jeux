@@ -85,7 +85,7 @@ func _palette() -> Dictionary:
 	}
 	d.scarf_line = _hex(_tone(Color(d.scarf), 0.25, 0.0))
 	d.pack_line = _hex(_tone(Color(d.pack), 0.25, 0.0))
-	if look.legwear == "socks":
+	if look.legwear == "socks" and look.legwear_color.is_equal_approx(Color.WHITE):
 		d.leg_line = d.sock_line
 	d.merge(look.overrides, true)
 	d.brow = d.hair_line
@@ -250,6 +250,23 @@ func _hat() -> String:
 			return _f('<path d="M44 92 C46 40 78 22 112 22 C150 22 180 40 182 92" stroke="{hat}" stroke-width="7" fill="none"/>'
 				+ '<path d="M56 64 L58 6 L98 40 Z M128 38 L168 4 L172 62 Z" fill="{hat}" stroke="{hat_line}" stroke-width="2" stroke-linejoin="round"/>'
 				+ '<path d="M64 52 L65 22 L86 40 Z M138 38 L160 20 L162 50 Z" fill="#FF9DBB"/>')
+		"bow":
+			return _f('<path d="M150 30 L118 8 Q108 30 118 52 Z M150 30 L182 8 Q192 30 182 52 Z" fill="{hat}" stroke="{hat_line}" stroke-width="3" stroke-linejoin="round"/>'
+				+ '<path d="M124 18 Q120 30 124 42 M176 18 Q180 30 176 42" stroke="{hat_light}" stroke-width="3" fill="none" stroke-linecap="round"/>'
+				+ '<circle cx="150" cy="30" r="9" fill="{hat_light}" stroke="{hat_line}" stroke-width="3"/>')
+		"crown":
+			return ('<path d="M66 40 L72 -6 L92 18 L112 -16 L132 18 L152 -6 L158 40 Z" fill="#FFD23F" stroke="#C99410" stroke-width="3" stroke-linejoin="round"/>'
+				+ '<rect x="64" y="34" width="96" height="12" rx="4" fill="#F2B632" stroke="#C99410" stroke-width="2.5"/>'
+				+ _f('<circle cx="112" cy="40" r="5" fill="{hat}"/><circle cx="86" cy="40" r="4" fill="{hat_light}"/><circle cx="138" cy="40" r="4" fill="{hat_light}"/>')
+				+ '<circle cx="72" cy="-6" r="4" fill="#FFF3B0"/><circle cx="112" cy="-16" r="4" fill="#FFF3B0"/><circle cx="152" cy="-6" r="4" fill="#FFF3B0"/>')
+		"beret":
+			return _f('<path d="M26 62 Q30 2 116 2 Q198 6 202 52 Q160 72 26 62 Z" fill="{hat}" stroke="{hat_line}" stroke-width="3" stroke-linejoin="round"/>'
+				+ '<path d="M40 50 Q46 14 110 12" stroke="{hat_light}" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.7"/>'
+				+ '<path d="M112 2 Q114 -10 122 -12" stroke="{hat_line}" stroke-width="5" fill="none" stroke-linecap="round"/>')
+		"headband":
+			return _f('<path d="M38 70 C40 30 76 14 112 14 C150 14 184 30 186 70" stroke="{hat_line}" stroke-width="13" fill="none" stroke-linecap="round"/>'
+				+ '<path d="M38 70 C40 30 76 14 112 14 C150 14 184 30 186 70" stroke="{hat}" stroke-width="9" fill="none" stroke-linecap="round"/>'
+				+ '<path d="M60 36 Q80 22 104 19" stroke="{hat_light}" stroke-width="3" fill="none" stroke-linecap="round"/>')
 	return ""
 
 
@@ -264,6 +281,10 @@ func _torso_svg(sx: float, sy: float) -> String:
 			s += _dress()
 		"coat":
 			s += _coat()
+		"overalls":
+			s += _overalls()
+		"hoodie":
+			s += _top() + _hoodie()
 		_:
 			s += _top()
 	if look.backpack != "":
@@ -281,6 +302,11 @@ func _dress() -> String:
 	s += _f('<path d="M26 66 Q14 100 4 138 Q10 144 18 141 Q24 100 34 66 Z" fill="{cloth_shade}"/>')
 	s += _f('<g stroke="{cloth_fold}" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M50 72 Q46 106 40 138"/><path d="M80 72 Q84 106 90 138"/></g>')
 	s += _pattern([[36, 96], [62, 88], [94, 96], [50, 122], [78, 116], [106, 126], [22, 128]], [[70, 132], [96, 110], [40, 110]])
+	if look.pattern == "stripes":
+		s += '<clipPath id="skirt"><path d="M26 62 H104 Q118 100 128 140 L2 140 Q12 100 26 62 Z"/></clipPath><g clip-path="url(#skirt)">'
+		for y in [80, 100, 120]:
+			s += _f('<rect x="0" y="%d" width="130" height="9" fill="{accent}" opacity="0.9"/>' % y)
+		s += '</g>'
 	s += _f('<path d="M42 12 Q65 22 88 12 L100 18 Q108 22 108 32 L104 64 H26 L22 32 Q22 22 30 18 Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>')
 	s += _f('<path d="M24 34 Q24 24 32 20 Q28 40 30 62 H26 Z" fill="{cloth_shade}"/>')
 	s += _pattern([[80, 40], [48, 46]], [], 3.5)
@@ -306,6 +332,12 @@ func _pattern(big: Array, small: Array, r := 4.5) -> String:
 					var a := TAU * i / 5.0
 					s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#FFFFFF"/>' % [c[0] + cos(a) * r * 0.75, c[1] + sin(a) * r * 0.75, r * 0.55]
 				s += _f('<circle cx="%s" cy="%s" r="%.1f" fill="{accent}"/>' % [c[0], c[1], r * 0.45])
+		"hearts":
+			for c in big:
+				s += _f('<path d="M0 3 C-5 -1 -3 -6 0 -3 C3 -6 5 -1 0 3 Z" transform="translate(%s %s) scale(%.2f)" fill="{accent}"/>' % [c[0], c[1], r / 3.0])
+		"stars":
+			for c in big:
+				s += '<path d="M0 -5 l1.5 3.4 l3.6 0.3 l-2.8 2.4 l0.9 3.6 l-3.2 -2 l-3.2 2 l0.9 -3.6 l-2.8 -2.4 l3.6 -0.3 z" transform="translate(%s %s) scale(%.2f)" fill="#FFF3B0"/>' % [c[0], c[1], r / 4.0]
 	return s
 
 
@@ -323,11 +355,36 @@ func _top() -> String:
 			s += _f('<path d="M65 38 l5 11 l12 1 l-9 8 l3 12 l-11 -6 l-11 6 l3 -12 l-9 -8 l12 -1 z" fill="{accent}"/>')
 		"zigzag":
 			s += _f('<path d="M24 52 l10 -8 l10 8 l10 -8 l10 8 l10 -8 l10 8 l10 -8 l8 6" stroke="{accent}" stroke-width="5" fill="none" stroke-linejoin="round"/>')
-	if look.outfit == "sweater":
+		_:
+			s += _pattern([[38, 44], [66, 54], [94, 44], [44, 78], [74, 86], [98, 74]], [[56, 34], [84, 68]])
+	if look.outfit in ["sweater", "hoodie"]:
 		s += _f('<rect x="24" y="94" width="82" height="10" rx="3" fill="{cloth_line}" opacity="0.5"/>')
 		s += _f('<path d="M44 14 Q65 28 86 14" stroke="{cloth_line}" stroke-width="5" fill="none" stroke-linecap="round"/>')
 	else:
 		s += _f('<path d="M48 14 Q65 26 82 14" stroke="{cloth_line}" stroke-width="2.5" fill="none" stroke-linecap="round"/>')
+	return s
+
+
+# Salopette: the shirt (accent colour) under a bib with straps and buttons; the trousers are the legs.
+func _overalls() -> String:
+	var body := "M42 12 Q65 22 88 12 L100 18 Q108 22 108 32 L106 98 Q106 104 100 104 H30 Q24 104 24 98 L22 32 Q22 22 30 18 Z"
+	var s := _f('<path d="%s" fill="{accent}" stroke="{accent_line}" stroke-width="2.5" stroke-linejoin="round"/>' % body)
+	s += _f('<path d="M48 14 Q65 26 82 14" stroke="{accent_line}" stroke-width="2.5" fill="none" stroke-linecap="round"/>')
+	s += _f('<path d="M38 42 H92 V70 Q104 72 106 80 V100 Q106 106 100 106 H30 Q24 106 24 100 V80 Q26 72 38 70 Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>')
+	s += _f('<path d="M26 82 Q28 74 36 72 V104 H30 Q26 104 26 98 Z" fill="{cloth_shade}"/>')
+	s += _f('<path d="M42 44 L32 16 M88 44 L98 16" stroke="{cloth}" stroke-width="9" stroke-linecap="round"/>')
+	s += _f('<path d="M42 44 L32 16 M88 44 L98 16" stroke="{cloth_line}" stroke-width="2" stroke-dasharray="3 3" opacity="0.7"/>')
+	s += _f('<rect x="52" y="50" width="26" height="16" rx="3" fill="none" stroke="{cloth_line}" stroke-width="2"/>')
+	s += '<circle cx="42" cy="47" r="4" fill="#F2B632" stroke="#A47A12" stroke-width="1.5"/><circle cx="88" cy="47" r="4" fill="#F2B632" stroke="#A47A12" stroke-width="1.5"/>'
+	return s
+
+
+# Coton ouaté: a hood bunched behind the neck, drawstrings and a kangaroo pocket, over a sweater-like top.
+func _hoodie() -> String:
+	var s := _f('<path d="M34 20 Q30 4 46 2 Q65 14 84 2 Q100 4 96 20 Q80 30 65 30 Q50 30 34 20 Z" fill="{cloth_shade}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>')
+	s += _f('<path d="M58 22 L56 46 M72 22 L74 46" stroke="{accent_light}" stroke-width="2.5" stroke-linecap="round"/>')
+	s += _f('<circle cx="56" cy="47" r="2.5" fill="{accent}"/><circle cx="74" cy="47" r="2.5" fill="{accent}"/>')
+	s += _f('<path d="M40 96 L46 72 H84 L90 96" fill="{cloth_shade}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>')
 	return s
 
 
@@ -347,6 +404,11 @@ func _arm_svg(length: float) -> String:
 	var hy := 8.0 + length
 	var s := _f('<rect x="9" y="20" width="12" height="%s" rx="5" fill="{skin}" stroke="{skin_line}" stroke-width="2.5"/>' % (length - 16.0))
 	s += _f('<circle cx="15" cy="%s" r="10" fill="{skin}" stroke="{skin_line}" stroke-width="2.5"/>' % hy)
+	# Under overalls the sleeves belong to the shirt, in the accent colour.
+	var palette := p.duplicate()
+	if look.outfit == "overalls":
+		p.cloth = p.accent
+		p.cloth_line = p.accent_line
 	match look.sleeve:
 		"puff":
 			s += _f('<path d="M2 10 Q15 -3 28 10 Q30 24 24 30 H6 Q0 24 2 10 Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>')
@@ -358,6 +420,7 @@ func _arm_svg(length: float) -> String:
 		"long":
 			s += _f('<path d="M3 8 Q15 -2 27 8 L25 %s Q15 %s 5 %s Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [hy - 9, hy - 5, hy - 9])
 			s += _f('<rect x="5" y="%s" width="20" height="7" rx="2" fill="{cloth_line}" opacity="0.6"/>' % (hy - 17))
+	p = palette
 	return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="%d" viewBox="0 0 30 %d">%s</svg>' % [ceili(hy + 12), ceili(hy + 12), s]
 
 
@@ -367,7 +430,7 @@ func _leg_svg(length: float) -> String:
 	match look.legwear:
 		"socks":
 			s += _f('<rect x="11" y="0" width="18" height="%s" rx="7" fill="{skin}" stroke="{skin_line}" stroke-width="2.5"/>' % (length - 18.0))
-			s += _f('<rect x="9" y="%s" width="22" height="18" rx="4" fill="#FFFFFF" stroke="{leg_line}" stroke-width="2"/>' % (length - 34.0))
+			s += _f('<rect x="9" y="%s" width="22" height="18" rx="4" fill="{leg}" stroke="{leg_line}" stroke-width="2"/>' % (length - 34.0))
 		"tights":
 			s += _f('<rect x="11" y="0" width="18" height="%s" rx="7" fill="{leg}" stroke="{leg_line}" stroke-width="2.5"/>' % (length - 18.0))
 		_:
@@ -386,6 +449,11 @@ func _leg_svg(length: float) -> String:
 		"boot":
 			s += _f('<path d="M8 66 H32 V96 Q48 94 48 106 Q49 110 44 110 H6 Q4 100 8 92 Z" fill="{shoe}" stroke="{shoe_line}" stroke-width="2.5" stroke-linejoin="round"/>')
 			s += _f('<rect x="7" y="64" width="26" height="8" rx="3" fill="{shoe_line}"/>')
+		"rain_boot":
+			s += _f('<path d="M7 50 H33 V94 Q48 94 48 106 Q49 110 44 110 H6 Q4 100 7 90 Z" fill="{shoe}" stroke="{shoe_line}" stroke-width="2.5" stroke-linejoin="round"/>')
+			s += _f('<rect x="5" y="46" width="30" height="9" rx="4" fill="{shoe_line}"/>')
+			s += '<path d="M13 58 V88" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" opacity="0.5"/>'
+			s += _f('<circle cx="40" cy="101" r="3" fill="{shoe_light}"/>')
 	s += _f('<rect x="3" y="106" width="46" height="9" rx="4.5" fill="{sole}" stroke="{sock_line}" stroke-width="1.5"/>')
 	s += "</g>"
 	return '<svg xmlns="http://www.w3.org/2000/svg" width="52" height="%d" viewBox="0 0 52 %d">%s</svg>' % [ceili(length + 10.0), ceili(length + 10.0), s]

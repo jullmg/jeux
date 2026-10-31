@@ -7,7 +7,8 @@ a little girl, on her street in Montréal (Rosemont): her side of **6e Avenue** 
 Current state: a living, side-scrolling street. Charlotte walks with ←/→ or by clicking/tapping the street; double-pressing the arrow or double-clicking/tapping makes her run
 (`Character.running`, `RUN_SPEED` × walk speed, eased; `Character.speed()` gives the current speed).
 Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks over and pets it. Click her front door
-(ground floor of `duplex_charlotte`, n° 5672) to go inside her flat. No goals yet.
+(ground floor of `duplex_charlotte`, n° 5672) to go inside her flat. In her bedroom, click the dresser's drawers to open her
+wardrobe and change clothes. No goals yet.
 
 ## Run / verify
 
@@ -47,7 +48,12 @@ Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks
   layers, `InteriorArt.terrarium(false)` behind and `terrarium(true)` in front (glass glare, things on the dresser); the
   hamster node shares its position/scale and works in its canvas units. It wanders, grooms, runs its wheel, naps in the
   hideout, and stands up with hearts when clicked.
-- `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through), `PlayerControl` (keys and
+- `ui/wardrobe.gd` (`Wardrobe`, CanvasLayer 60): the dressing window (mirror preview + tabs of clothes, colours, patterns,
+  hats, accessories; "Au hasard", "Comme d'habitude"). On "C'est parfait !" the house calls `CharacterLook.dress_charlotte()`,
+  which keeps the look for every scene and saves it to `user://charlotte_outfit.tres`; `CharacterLook.charlotte()` returns it
+  (else `usual()`, the yellow dress). Delete that file after tests that press "C'est parfait !". Picking a clothing colour drops
+  Charlotte's exact-colour `overrides` for clothes (`cloth_*`, `accent_*`, `shoe_*`). Design sheets use `CharacterLook.usual()`.
+- `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through; `set_look()` rebuilds it), `PlayerControl` (keys and
   click/tap-to-walk, walks to interactables and calls them; used by the street and the house), `CharacterArt` (generates the
   body-part SVGs from a look), `CharacterLook` (Resource; `CharacterLook.charlotte()` and `CharacterLook.random(rng, age)`).
 - `world/`: one `class_name` per element (`SkyBackdrop`, `Skyline`, `Cloud`, `Birds`, `Street`, `Cat` (railing cat), `Squirrel`, `Passerby`, `PropArt`),

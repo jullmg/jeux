@@ -91,6 +91,28 @@ func _build_doors() -> void:
 		Transition.change_scene(self, "res://scenes/main.tscn")))
 	add_child(DoorSpot.make(Rect2(CHACHA_DOOR_X, 170, 150, 430), func(): _go_through(BEDROOM_DOOR_X - 40.0, BEDROOM, -1)))
 	add_child(DoorSpot.make(Rect2(BEDROOM_DOOR_X, 170, 150, 430), func(): _go_through(CHACHA_DOOR_X + 75.0, HALL, 1)))
+	# The dresser's drawers (under the terrarium): her wardrobe.
+	add_child(DoorSpot.make(Rect2(BEDROOM.x + 40.0, 444, 276, 162), _open_wardrobe, BEDROOM.x + 180.0))
+
+
+func _open_wardrobe() -> void:
+	_control.enabled = false
+	var wardrobe := Wardrobe.new(_charlotte.look)
+	wardrobe.closed.connect(func(look: CharacterLook):
+		if look:
+			CharacterLook.dress_charlotte(look)
+			_charlotte.set_look(CharacterLook.charlotte())
+			_twirl()
+		_control.enabled = true)
+	add_child(wardrobe)
+
+
+# A happy little spin in the new outfit.
+func _twirl() -> void:
+	var tween := create_tween()
+	for i in 4:
+		tween.tween_callback(func(): _charlotte.facing = -_charlotte.facing)
+		tween.tween_interval(0.12)
 
 
 func _go_through(x: float, area: Vector2, facing: int) -> void:

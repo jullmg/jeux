@@ -25,7 +25,7 @@ func _ready() -> void:
 	zoom.position = Vector2(1130, 420)
 	add_child(zoom)
 	var charlotte := Character.new()
-	charlotte.look = CharacterLook.charlotte()
+	charlotte.look = CharacterLook.usual()
 	charlotte.scale = Vector2.ONE * 0.38
 	charlotte.position = Vector2(0, 0)
 	charlotte.facing = -1
@@ -74,7 +74,7 @@ func _ready() -> void:
 		if i == 0 or i == 2:
 			# Charlotte petting the labrador and the corgi, at game depths (dogs walk 22 px further back).
 			var petter := Character.new()
-			petter.look = CharacterLook.charlotte()
+			petter.look = CharacterLook.usual()
 			petter.scale = Vector2.ONE * 0.38
 			petter.facing = -1
 			add_child(petter)
