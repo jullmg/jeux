@@ -35,8 +35,9 @@ var school := false
 ## Walls along each side, nearest first: {"to": depth, "top": y at the facade line, "kind", "color"}.
 var left_walls: Array = []
 var right_walls: Array = []
-## Plate on the corner sign.
+## Plates on the corner sign: the cross street, then the street we're on.
 var street_name := ""
+var along_name := "6e Avenue"
 ## Which corner (left or right edge of the gap) the signs stand on.
 var sign_side := 1.0
 
@@ -49,7 +50,7 @@ var _litter: Array[Color] = Season.litter()
 static func make(which: Part, from: CrossStreet) -> CrossStreet:
 	var cs := CrossStreet.new()
 	cs.part = which
-	for prop in ["x0", "x1", "sidewalk", "school", "left_walls", "right_walls", "street_name", "sign_side"]:
+	for prop in ["x0", "x1", "sidewalk", "school", "left_walls", "right_walls", "street_name", "along_name", "sign_side"]:
 		cs.set(prop, from.get(prop))
 	return cs
 
@@ -362,7 +363,7 @@ func _draw_signs() -> void:
 		draw_colored_polygon(inner, Color("#C8202A"))
 		draw_string(font, c + Vector2(-30, 5), "ARRÊT", HORIZONTAL_ALIGNMENT_CENTER, 60, 13, Color.WHITE)
 	# Montreal-style blue street plates.
-	var names := [street_name, "6e Avenue"]
+	var names := [street_name, along_name]
 	for i in names.size():
 		var r := Rect2(px - 80, 296 + i * 30, 160, 26)
 		draw_rect(r, Color.WHITE)

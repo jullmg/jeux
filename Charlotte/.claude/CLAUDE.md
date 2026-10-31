@@ -41,7 +41,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   (`layout`: ordered house SVG names; `cross_streets`; `trees_after`, `lamps_after`, `hydrants_at`, `racks_at`,
   `squirrels_at`; fractional values = position across a building), plus hooks (`_start_x`, `_walk_bounds`,
   `_build_cross_streets`, `_decorate_house`, `_build_landmarks`, `_build_doors`, `_build_extra_props`).
-- `scenes/main.gd` (6e Avenue) is one such street.
+- `scenes/main.gd` (6e Avenue) is one such street; `scenes/dandurand.gd` (Rue Dandurand: dépanneur Xin-Xin's real front,
+  `depanneur_front` in the generator, with 6e Avenue crossing at its right end) is another.
+- Turning corners: `StreetScene._add_corner(cross_street, scene, key)` makes the cross street clickable: Charlotte walks to
+  the curb, the other street loads with `Transition.arrive = key`, and that street's `_start_x()` checks `_arriving(key)`
+  to put her at the matching corner. 6e ⇄ Dandurand works both ways; crossing streets is still to come.
   `layout` runs: `ecole` (école Saint-Jean-de-Brébeuf, across Dandurand), `rue_dandurand`, Charlotte's block (`depanneur`: the
   side of dépanneur Xin-Xin, which fronts Dandurand; `garages`; `ruelle_verte`, the green lane with its sign; … `coin_holt`),
   `rue_holt`, `coin_holt_est`. The first three buildings of the block are drawn from the photos in `reference/` (the user wants

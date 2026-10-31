@@ -10,7 +10,7 @@ const PORCH_FLOOR := 600.0
 const BASE := 614.0
 const GROUND := 700.0
 const RAIL_H := 48.0
-const VARIANTS := 9
+const VARIANTS := 11
 
 const DEFAULTS := {
 	"kind": "plex", "floors": 2, "width": 700.0,
@@ -153,6 +153,18 @@ const HOUSES := [
 	{"name": "ruelle", "kind": "ruelle", "width": 300.0},
 	# The green lane near the Dandurand corner (reference/Entrée_ruelle_coin_dandurand.jpg).
 	{"name": "ruelle_verte", "kind": "ruelle_verte", "width": 400.0},
+	# Dépanneur Xin-Xin's real front, on Rue Dandurand (reference/dépanneur_on_dandurant.jpg).
+	{
+		"name": "depanneur_front", "kind": "depanneur_front", "width": 780.0, "halloween": true,
+		"bricks": ["#6E3A2E", "#7A4234", "#5E3029", "#844A3A", "#4E2A28", "#8C5440"], "mortar": "#B9AEA2",
+		"trim": "#F2F0EA", "trim_dark": "#A9A398", "basement": [], "metal": "#1F1F1F",
+	},
+	# Across 6e Avenue on Rue Dandurand: a corner building's side.
+	{
+		"name": "dandurand_nord", "kind": "side_wall", "width": 600.0, "floors": 3,
+		"bricks": ["#C2A07A", "#B8956E", "#CDAA84", "#AE8C66", "#D4B48E"], "mortar": "#E6DCCB",
+		"parapet": "flat", "windows": [[90.0, 90.0], [300.0, 90.0]], "basement": [], "downspout": 540.0,
+	},
 	# Across Rue Holt: the side wall of the next block's corner building.
 	{
 		"name": "coin_holt_est", "kind": "side_wall", "width": 620.0, "floors": 3,
@@ -293,6 +305,8 @@ func _svg() -> void:
 			_ruelle_verte()
 		"depanneur_side":
 			_depanneur_side()
+		"depanneur_front":
+			_depanneur_front()
 		"garages":
 			_garages()
 		"modern":
@@ -1071,6 +1085,114 @@ func _depanneur_side() -> void:
 		rx += 11.0
 	_path("M0 %s L190 %s" % [_n(top + 16), _n(top + 52)], "none", _stroke("#F2F0EA", 4))
 	_rect(0, top + 52, 190, 20, "url(#drop)")
+
+
+# Dépanneur Xin-Xin's front on Dandurand: under a long balcony (scrolled railing, white soffit, green corrugated
+# awning on top), a white sign band with the blue shop sign in the middle (text added in the game) between two
+# red banners; below, two shop windows full of posters on either side of a glass door behind a grille, two air
+# conditioners over the door, the civic number, concrete steps with a handrail, white quoins at the corners.
+func _depanneur_front() -> void:
+	var top := _top()
+	_bricks(top, base_y)
+	_wall_shading(top)
+	_flat_parapet(top)
+	for x in [X0, X1]:
+		var y := top + 4.0
+		var i := 0
+		while y < base_y - 6.0:
+			var w := 34.0 if i % 2 == 0 else 22.0
+			_rect(x if x == X0 else x - w, y, w, 22, "#E8E4DA", _stroke("#B5B0A6", 1))
+			y += 26.0
+			i += 1
+	_foundation()
+	# Upstairs windows, half hidden by the balcony.
+	for wx in [120.0, 540.0]:
+		_window(wx, _win_y(1), 110.0, 150.0)
+	# Green corrugated awning over the balcony.
+	var ay := top + 6.0
+	_path("M%s %s H%s L%s %s H%s Z" % [_n(X0 - 16), _n(ay), _n(X1 + 16), _n(X1 + 24), _n(ay + 30), _n(X0 - 24)], "#3E8C5A", _stroke("#2A6340", 2))
+	var rx := X0 - 14.0
+	while rx < X1 + 20.0:
+		_path("M%s %s V%s" % [_n(rx), _n(ay + 2), _n(ay + 28)], "none", _stroke("#2A6340", 2))
+		rx += 10.0
+	_rect(X0 - 24, ay + 28, X1 - X0 + 48, 5, "#F2F0EA")
+	_rect(X0 - 20, ay + 33, X1 - X0 + 40, 26, "url(#drop)")
+	_snow(X0 - 16, X1 - X0 + 32, ay)
+	# Balcony: posts, scrolled railing, white peeling soffit.
+	var slab := _fb(1) + 18.0
+	for px in [X0 + 6.0, X1 - 12.0]:
+		_rect(px, ay + 30, 6, slab - ay - 30, "#1F1F1F")
+	_scroll_railing(X0 + 4, X1 - 4, slab - 64, slab)
+	_rect(X0 - 10, slab, X1 - X0 + 20, 26, "#E8E4D8", _stroke("#B9B5AC", 1.5))
+	for i in 9:
+		_rect(rng.randf_range(X0, X1 - 60), slab + rng.randf_range(4, 18), rng.randf_range(20, 60), 4, "#B9B2A4", 'opacity="0.6"')
+	_rect(X0 - 10, slab + 26, X1 - X0 + 20, 20, "url(#drop)")
+	_snow(X0 + 4, X1 - X0 - 8, slab - 64)
+	# Sign band: red banners either side of the blue shop sign (its text is a label in the game).
+	var band := slab + 30.0
+	_rect(X0 + 6, band, X1 - X0 - 12, 62, "#F4F2EC", _stroke("#B9B5AC", 1.5))
+	for b in [[X0 + 14, 230.0], [X1 - 244, 230.0]]:
+		_rect(b[0], band + 6, b[1], 50, "#C8202A", _stroke("#8E1A20", 1.5))
+		_path("M%s %s q30 -14 60 0 t60 0 t60 0" % [_n(b[0] + 26), _n(band + 31)], "none", _stroke("#FFFFFF", 4) + ' stroke-linecap="round"')
+		_rect(b[0] + 12, band + 12, 22, 38, "#F4F2EC", 'rx="4"')
+	_rect(260, band + 4, 260, 54, "#25408F", _stroke("#16285C", 2))
+	_rect(X0 + 10, band + 62, X1 - X0 - 20, 4, "#FFF8D6", 'opacity="0.9"')
+	# Shop windows with their posters.
+	var wy := band + 82.0
+	var wb := _fb(0) - 6.0
+	for win in [[X0 + 36, 250.0], [X1 - 286, 250.0]]:
+		_rect(win[0] - 6, wy - 6, win[1] + 12, wb - wy + 12, "#F2F0EA", _stroke("#B9B5AC", 2))
+		_rect(win[0], wy, win[1], wb - wy, "#3E4A52")
+		var gx: float = win[0] + 10.0
+		while gx < win[0] + win[1] - 6:
+			_rect(gx, wy + 4, 2, wb - wy - 8, "#E9EEF2", 'opacity="0.5"')
+			gx += 22.0
+	var lx: float = X0 + 56.0
+	_rect(lx, wy + 30, 200, wb - wy - 46, "#2E7D4F", _stroke("#1E5A38", 2))
+	for bx in [lx + 40.0, lx + 70.0]:
+		_rect(bx, wy + 60, 18, 70, "#3E9A5E", 'rx="6"')
+		_rect(bx + 5, wy + 44, 8, 20, "#3E9A5E")
+	for i in 3:
+		_rect(lx + 110, wy + 60 + i * 16, 70, 6, "#F4F2EC")
+	var rxw: float = X1 - 266.0
+	_rect(rxw, wy + 20, 210, wb - wy - 40, "#F4F2EC", _stroke("#C9C2B4", 2))
+	_rect(rxw + 10, wy + 30, 190, 30, "#C8202A")
+	_rect(rxw + 20, wy + 80, 40, 80, "#E04F5F", 'rx="6"')
+	_rect(rxw + 80, wy + 90, 70, 40, "#FFFFFF", _stroke("#2B2B2B", 1.5))
+	_rect(rxw + 150, wy + 130, 50, 30, "#25408F")
+	# Air conditioners over the door, the door behind its grille, the civic number.
+	var dx := 390.0
+	for ax in [dx - 74.0, dx + 6.0]:
+		_rect(ax, wy - 6, 66, 40, "#F2F2EF", _stroke("#A9A398", 1.5))
+		for gy in range(0, 4):
+			_rect(ax + 6, wy + gy * 8, 54, 3, "#C9C5BC")
+	_rect(dx - 60, wy + 40, 120, _fb(0) - wy - 40, "#F2F0EA", _stroke("#B9B5AC", 2))
+	_rect(dx - 52, wy + 48, 104, _fb(0) - wy - 48, "#3E4A52")
+	var gy2 := wy + 56.0
+	while gy2 < _fb(0) - 6:
+		_rect(dx - 48, gy2, 96, 2.5, "#E9EEF2")
+		gy2 += 16.0
+	var gx2 := dx - 46.0
+	while gx2 < dx + 48:
+		_rect(gx2, wy + 50, 2.5, _fb(0) - wy - 54, "#E9EEF2")
+		gx2 += 16.0
+	_rect(dx - 20, wy + 90, 40, 26, "#F4F2EC")
+	_plaque(dx + 88, wy + 64, "2891")
+	# Concrete steps with a handrail.
+	for i in 3:
+		var w := 150.0 + i * 20.0
+		_rect(dx - w / 2, _fb(0) + i * 33.0, w, 33, "#A8A49C", _stroke("#7E7A72", 1.5))
+		_rect(dx - w / 2, _fb(0) + i * 33.0, w, 4, "#C9C5BC")
+		if season == "winter":
+			_rect(dx - w / 2 + 6, _fb(0) + i * 33.0 - 2, w - 12, 5, "#F7F9FB")
+	_path("M%s %s L%s %s" % [_n(dx + 50), _n(_fb(0) - 40), _n(dx + 96), _n(ground_y - 50)], "none", _stroke("#E8E4DA", 5) + ' stroke-linecap="round"')
+	_rect(dx + 92, ground_y - 54, 5, 54, "#E8E4DA")
+	# Glass blocks low on the left, and Halloween by the steps.
+	for i in 4:
+		_rect(X0 + 40 + i * 22, base_y + 18, 20, 20, "#D6EAF5", _stroke("#9AB8C8", 1))
+	if k.halloween:
+		_pumpkin(dx - 110, ground_y, 1.0, true)
+		_pumpkin(dx + 120, ground_y, 0.8, false)
 
 
 # The two-storey garage building: on the left a white door under an arched fanlight, a small barred window

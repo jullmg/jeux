@@ -31,6 +31,26 @@ static func sandwich_board() -> ImageTexture:
 	return tex(_svg(90, 120, s))
 
 
+## Canvas 130x120: the ice chest outside the dépanneur (white, a blue panel with snowy mountains; its
+## "GLACE" is a label in the game).
+static func ice_chest() -> ImageTexture:
+	var s := '<rect x="6" y="24" width="118" height="92" rx="6" fill="#F4F6F8" stroke="#9AA8B4" stroke-width="2.5"/>'
+	s += '<rect x="2" y="12" width="126" height="18" rx="4" fill="#E6ECF0" stroke="#9AA8B4" stroke-width="2"/>'
+	s += '<rect x="14" y="40" width="102" height="66" fill="#2E5FB0"/>'
+	s += '<path d="M14 106 L40 70 L58 88 L80 60 L116 106 Z" fill="#E8F2FA"/><path d="M34 78 L40 70 L46 78 Z M74 68 L80 60 L86 68 Z" fill="#FFFFFF"/>'
+	s += '<rect x="56" y="16" width="18" height="8" rx="3" fill="#7E8A94"/>'
+	return tex(_svg(130, 120, s))
+
+
+## Canvas 140x80: flattened cardboard boxes leaning by the door, waiting for recycling.
+static func cardboard() -> ImageTexture:
+	var s := '<path d="M10 78 L22 18 L70 22 L60 78 Z" fill="#C9A26E" stroke="#8A6A40" stroke-width="2"/>'
+	s += '<path d="M50 78 L64 8 L118 14 L104 78 Z" fill="#D4AE78" stroke="#8A6A40" stroke-width="2"/>'
+	s += '<rect x="84" y="46" width="52" height="32" fill="#BF9660" stroke="#8A6A40" stroke-width="2"/><path d="M84 52 H136" stroke="#8A6A40" stroke-width="1.5"/>'
+	s += '<path d="M76 30 l14 2 M70 44 l16 2" stroke="#2E5FB0" stroke-width="3"/>'
+	return tex(_svg(140, 80, s))
+
+
 static func _pick(rng: RandomNumberGenerator, items: Array) -> Variant:
 	return items[rng.randi_range(0, items.size() - 1)]
 

@@ -4,6 +4,8 @@ extends RefCounted
 
 ## Street x to put Charlotte at when the street scene loads (NAN = default spot).
 static var street_x := NAN
+## Which corner Charlotte comes round when a street loads (e.g. "dandurand_from_6e"; "" = none).
+static var arrive := ""
 ## Interior x to put Charlotte at when an interior reloads (NAN = its default spot).
 static var inside_x := NAN
 

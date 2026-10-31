@@ -48,6 +48,8 @@ var _window_cats: WindowCats
 var _cat_timer := 3.0
 var _control := PlayerControl.new()
 var _cross_streets: Array[CrossStreet] = []
+# Where Charlotte started (worked out once: _start_x() may consume Transition's hand-over).
+var _start := 0.0
 
 
 func _ready() -> void:
@@ -72,6 +74,7 @@ func _ready() -> void:
 	_build_tree_shadows(trees)
 	_build_passersby()
 	var start_x := _start_x()
+	_start = start_x
 	var x_arg := _arg("--x=")
 	if not x_arg.is_empty():
 		start_x = x_arg.to_float()
@@ -130,9 +133,9 @@ func _walk_bounds() -> Vector2:
 	var right := _street_width - 60.0
 	for cs in _cross_streets:
 		var road := cs.road_x(CHARLOTTE_Y)
-		if cs.x1 < _start_x():
+		if cs.x1 < _start:
 			left = maxf(left, road.y + 8.0)
-		elif cs.x0 > _start_x():
+		elif cs.x0 > _start:
 			right = minf(right, road.x - 8.0)
 	return Vector2(left, right)
 
@@ -155,6 +158,25 @@ func _build_landmarks() -> void:
 ## Clickable doors and corners.
 func _build_doors() -> void:
 	pass
+
+
+## Turning the corner: click a cross street and Charlotte walks to the curb on her side, then `scene` (another
+## street) loads with Transition.arrive = `arrive`, so that street knows which corner she comes round.
+func _add_corner(cs: CrossStreet, scene: String, arrive: String) -> void:
+	var curb := _control.bounds.y if cs.x0 > _start else _control.bounds.x
+	var area := Rect2(cs.x0 + 30.0, 380.0, cs.x1 - cs.x0 - 60.0, CURB_Y - 380.0)
+	add_child(DoorSpot.make(area, func():
+		_control.enabled = false
+		Transition.arrive = arrive
+		Transition.change_scene(self, scene), curb))
+
+
+## Takes the corner hand-over: true (and clears it) when Charlotte is arriving round `key`.
+func _arriving(key: String) -> bool:
+	if Transition.arrive != key:
+		return false
+	Transition.arrive = ""
+	return true
 
 
 ## Street-specific props, before the generic lamps, hydrants and racks.

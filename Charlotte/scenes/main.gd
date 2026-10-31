@@ -22,8 +22,10 @@ func _init() -> void:
 	squirrels_at = [4.2, 9.5, 14.6, 18.4]
 
 
-# In front of her duplex, or back where she left the street (from her flat).
+# In front of her duplex, back where she left the street (from her flat), or at the Dandurand corner.
 func _start_x() -> float:
+	if _arriving("6e_from_dandurand"):
+		return _starts[layout.find("depanneur")] + 60.0
 	if not is_nan(Transition.street_x):
 		var x := Transition.street_x
 		Transition.street_x = NAN
@@ -72,8 +74,10 @@ func _build_landmarks() -> void:
 	add_child(cat)
 
 
-# Charlotte's own front door (ground floor of her duplex): click it to go inside.
+# Charlotte's own front door (ground floor of her duplex): click it to go inside. Click Rue Dandurand to turn
+# the corner.
 func _build_doors() -> void:
+	_add_corner(_cross_streets[0], "res://scenes/dandurand.tscn", "dandurand_from_6e")
 	var origin := _house_origin(layout.find("duplex_charlotte"))
 	var area := Rect2(origin + Vector2(278.0 - 48.0, 392.0) * HOUSE_SCALE, Vector2(96.0, 208.0) * HOUSE_SCALE)
 	add_child(DoorSpot.make(area, func():
