@@ -34,9 +34,7 @@ var _wind := Wind.new()
 var _animals: Node2D
 var _window_cats: WindowCats
 var _cat_timer := 3.0
-# Click/tap to walk: where Charlotte is heading, and what she'll interact with when she gets there.
-var _goal_x := NAN
-var _goal_target: Node2D
+var _control := PlayerControl.new()
 
 
 func _ready() -> void:
@@ -56,10 +54,18 @@ func _ready() -> void:
 	_build_tree_shadows(trees)
 	_build_passersby()
 	var start_x := _starts[LAYOUT.find("duplex_charlotte")] + 150.0
+	if not is_nan(Transition.street_x):
+		start_x = Transition.street_x
+		Transition.street_x = NAN
 	var x_arg := _arg("--x=")
 	if not x_arg.is_empty():
 		start_x = x_arg.to_float()
 	_charlotte = _spawn_charlotte(start_x)
+	_control.charlotte = _charlotte
+	_control.bounds = Vector2(60.0, _street_width - 60.0)
+	_control.walk_top = HOUSE_BASE_Y - 200.0
+	add_child(_control)
+	_build_front_door()
 	_window_cats.charlotte = _charlotte
 	var kick := LeafKick.new()
 	kick.walker = _charlotte
@@ -85,78 +91,26 @@ func _ready() -> void:
 	_follow_charlotte()
 	_camera.reset_smoothing()
 	_build_grade()
+	Transition.fade_in(self)
 	var shot := _arg("--screenshot=")
 	if not shot.is_empty():
 		_save_screenshot(shot)
 
 
 func _process(delta: float) -> void:
-	var dir := Input.get_axis("ui_left", "ui_right")
-	if dir != 0.0:
-		_goal_x = NAN
-		_set_goal_target(null)
-		if _charlotte.is_petting():
-			_charlotte.pet(0.0)
-	elif not is_nan(_goal_x):
-		var dx := _goal_x - _charlotte.position.x
-		if absf(dx) <= _charlotte.walk_speed * delta:
-			_charlotte.position.x = _goal_x
-			_goal_x = NAN
-			_arrive()
-		else:
-			dir = signf(dx)
-	if _charlotte.is_petting() and dir == 0.0:
-		_charlotte.is_walking = false
-	else:
-		_charlotte.is_walking = dir != 0.0
-	if dir != 0.0:
-		_charlotte.facing = 1 if dir > 0.0 else -1
-		_charlotte.position.x = clampf(_charlotte.position.x + dir * _charlotte.walk_speed * delta, 60.0, _street_width - 60.0)
 	_follow_charlotte()
 	_spawn_stray_cats(delta)
 
 
-# Click (or tap) a cat to go pet it; click anywhere else on the street to walk there.
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion:
-		var hovering := _interactable_at(_to_world(event.position)) != null
-		Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND if hovering else Input.CURSOR_ARROW)
-	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var at := _to_world(event.position)
-		var target := _interactable_at(at)
-		_set_goal_target(target)
-		if target:
-			_goal_x = clampf(target.approach_x(_charlotte.position.x), 60.0, _street_width - 60.0)
-		elif at.y > HOUSE_BASE_Y - 200.0:
-			_goal_x = clampf(at.x, 60.0, _street_width - 60.0)
-
-
-# Touches arrive as emulated mouse events, so this covers tablets too.
-func _to_world(screen: Vector2) -> Vector2:
-	return get_canvas_transform().affine_inverse() * screen
-
-
-func _interactable_at(point: Vector2) -> Node2D:
-	for node in get_tree().get_nodes_in_group("interactable"):
-		if node.can_interact() and node.hit_test(point):
-			return node
-	return null
-
-
-func _set_goal_target(target: Node2D) -> void:
-	if _goal_target and is_instance_valid(_goal_target):
-		_goal_target.release()
-	_goal_target = target
-	if target:
-		target.reserve()
-
-
-func _arrive() -> void:
-	var target := _goal_target
-	_goal_target = null
-	if target and is_instance_valid(target) and target.can_interact():
-		_charlotte.facing = 1 if target.position.x > _charlotte.position.x else -1
-		target.interact(_charlotte)
+# Charlotte's own front door (ground floor of her duplex): click it to go inside.
+func _build_front_door() -> void:
+	var origin := _house_origin(LAYOUT.find("duplex_charlotte"))
+	var area := Rect2(origin + Vector2(278.0 - 48.0, 392.0) * HOUSE_SCALE, Vector2(96.0, 208.0) * HOUSE_SCALE)
+	var door := DoorSpot.make(area, func():
+		_control.enabled = false
+		Transition.street_x = area.get_center().x
+		Transition.change_scene(self, "res://scenes/house.tscn"))
+	add_child(door)
 
 
 # Now and then a stray cat wanders in from just off screen.

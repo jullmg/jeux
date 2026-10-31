@@ -5,15 +5,18 @@ a little girl, on her street in Montréal (Rosemont): her side of **6e Avenue** 
 **Rue Dandurand** (left) and **Rue Holt** (right), in autumn. In-game text is in **French** (Québec).
 
 Current state: a living, side-scrolling street. Charlotte walks with ←/→ or by clicking/tapping the street.
-Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks over and pets it. No goals yet.
+Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks over and pets it. Click her front door
+(ground floor of `duplex_charlotte`, n° 5672) to go inside her flat. No goals yet.
 
 ## Run / verify
 
 - Godot binary: `/Applications/Godot.app/Contents/MacOS/Godot` (not on PATH).
-- Main scene: `res://scenes/intro.tscn` (title screen) → "Démarrer" / Enter → `res://scenes/main.tscn`.
+- Main scene: `res://scenes/intro.tscn` (title screen) → "Démarrer" / Enter → `res://scenes/main.tscn` (street)
+  ⇄ `res://scenes/house.tscn` (inside, through her front door).
 - Screenshots (use them to check visual changes):
   - `Godot --path . res://scenes/intro.tscn -- --screenshot=/path/intro.png`
   - `Godot --path . res://scenes/main.tscn -- --screenshot=/path/main.png [--x=1234] [--wait=6]` (`--x` = Charlotte's start x, `--wait` = seconds before the shot)
+  - `Godot --path . res://scenes/house.tscn -- --screenshot=/path/house.png [--x=1234] [--wait=1]` (x ≥ 5000 = bedroom)
   - `Godot --path . res://tools/lineup.tscn -- --screenshot=/path/lineup.png [--seed=1]` (character design sheet)
   - `Godot --path . res://tools/animals.tscn -- --screenshot=/path/animals.png [--focus=x,y --zoom=3]` (cat coats/poses, squirrels,
     dog breeds, Charlotte petting a cat and dogs; use focus/zoom to inspect details)
@@ -26,7 +29,12 @@ Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks
   placement arrays (`TREES_AFTER`, `LAMPS_AFTER`, `HYDRANTS_AT`, `RACKS_AT`). Fractional values = position between house indices.
 - `scenes/intro.gd` builds a shorter copy of the same street (5 houses around Charlotte's duplex), plus the logo and start button.
   Its geometry helpers mirror `main.gd`, so a layout/geometry change in one may need the same change in the other.
-- `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through), `CharacterArt` (generates the
+- `scenes/house.gd`: the flat as a side-on cross-section, from the photos in `reference/charlotte_house_inside`:
+  vestibule (0–640) → oak glass doorway → salon (–2260) → hallway → kitchen (3400–3960); Charlotte's bedroom is a separate
+  area (5000–6650) reached through the "chacha" door (fade, camera limits switch). Walls/floor are drawn by its inner `_Rooms`
+  class; furniture comes from `world/interior_art.gd` (`InteriorArt`, one SVG function per piece). Charlotte is at scale 0.5 inside.
+- `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through), `PlayerControl` (keys and
+  click/tap-to-walk, walks to interactables and calls them; used by the street and the house), `CharacterArt` (generates the
   body-part SVGs from a look), `CharacterLook` (Resource; `CharacterLook.charlotte()` and `CharacterLook.random(rng, age)`).
 - `world/`: one `class_name` per element (`SkyBackdrop`, `Skyline`, `Cloud`, `Birds`, `Street`, `Cat` (railing cat), `Squirrel`, `Passerby`, `PropArt`),
   plus `StrayCat` (procedural sidewalk cats: 8 coats, walk/sit/loaf/pet), `Dog` (9 breeds on a leash, attached to a passerby's
@@ -44,11 +52,15 @@ Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks
 - `art/logo.png` is cut out of `art/logo.jpg` by `tools/cutout_logo.gd` (same headless invocation).
 - `reference/` holds real-world reference photos (Charlotte, her house, the neighbours, the Google Maps view). It is gitignored.
 
-## Interactions
+## Interactions and scene changes
 
 - Anything clickable joins the `interactable` group and implements `can_interact()`, `hit_test(point)`, `approach_x(from_x)`,
   `reserve()`, `release()` and `interact(charlotte)` (see `StrayCat`). `main.gd` walks Charlotte to `approach_x`, then calls `interact`.
 - Input is mouse-based with event positions converted to world space, so touch works through emulated mouse events.
+- Doors are `DoorSpot.make(rect, action)` interactables. `Transition` fades (`fade_in`, `through_black`, `change_scene`) and
+  holds cross-scene state as static vars (`Transition.street_x`: where Charlotte reappears on the street).
+- To test click flows, write a temporary `extends SceneTree` script and run it with `-s` (a scene-based test node gets freed
+  by `change_scene_to_file`); send clicks with `Input.parse_input_event`, then delete the script.
 - Petting: `Character.pet(seconds, low)` lunges (low 1 = deep, for cats/small dogs; 0 = standing, arm out, for big dogs) and
   strokes with the front hand. The animal is drawn just in front of Charlotte so her hand lands on its head: stray cats walk at
   y 646 (she is at 638); a dog being petted steps 32 px toward the camera and gets z_index 1, while its walker `hold()`s.
