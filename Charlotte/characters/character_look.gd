@@ -49,7 +49,7 @@ static func charlotte() -> CharacterLook:
 		"skin_line": "#D9A88E", "skin_shade": "#F2C7AE", "neck": "#EDC3AC", "blush": "#F5A3A0", "nose": "#D9947A",
 		"hair_line": "#8A4527", "hair_light": "#E3A06A", "hair_mid": "#C97A4A",
 		"iris_dark": "#5A3318",
-		"cloth_shade": "#F5BC1C", "cloth_line": "#C99410", "cloth_fold": "#EDB61A",
+		"cloth_shade": "#f51c52", "cloth_line": "#C99410", "cloth_fold": "#EDB61A",
 		"accent_line": "#D63E72", "accent_light": "#FF7BA3",
 		"shoe_line": "#D63E72", "shoe_light": "#FF9DBB",
 	}
