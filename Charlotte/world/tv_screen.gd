@@ -1,7 +1,7 @@
 class_name TvScreen
 extends Control
 ## The salon TV's picture. Click it: it turns on; click again: next channel; after the last one, off.
-## Channels are tiny animated shows drawn in code, a burst of static between them, and the screen's glow
+## Channels are tiny animated shows drawn in code (all original, including the family sitcom "Les Ratons"), a burst of static between them, and the screen's glow
 ## lights the room. Interactable like StrayCat (see PlayerControl).
 
 const SIZE := Vector2(196, 108)
@@ -12,6 +12,7 @@ const CHANNELS := [
 	{"name": "Dessins animés", "glow": Color(1.0, 0.6, 0.85)},
 	{"name": "Hockey", "glow": Color(0.85, 0.92, 1.0)},
 	{"name": "Météo", "glow": Color(0.5, 0.85, 0.7)},
+	{"name": "Les Ratons", "glow": Color(0.75, 0.95, 0.7)},
 ]
 const TICKER := "Il fera beau à Montréal aujourd'hui  •  Les écureuils de la 6e Avenue font leurs provisions pour l'hiver  •  Des bonbons d'Halloween au dépanneur Xin-Xin  •  La ruelle verte est pleine de feuilles  •  "
 
@@ -103,6 +104,7 @@ func _draw() -> void:
 		2: _cartoon()
 		3: _hockey()
 		4: _weather()
+		5: _ratons()
 	# Scanlines and a soft vignette, like an old-fashioned picture.
 	for y in range(0, int(SIZE.y), 3):
 		draw_rect(Rect2(0, y, SIZE.x, 1), Color(0, 0, 0, 0.06))
@@ -254,3 +256,72 @@ func _weather() -> void:
 		draw_circle(cloud + c, 7, Color(1, 1, 1, 0.9))
 	draw_rect(Rect2(0, 92, SIZE.x, 16), Color("#1D3F7A"))
 	_text("MÉTÉO  •  Ensoleillé, 12°", Vector2(6, 103), 10, Color.WHITE)
+
+
+# "Les Ratons", an original family sitcom: a raccoon family in their kitchen. Dad reads the paper, Mom
+# stirs the soup, the kid juggles apples, the baby bounces in the high chair; a title card opens it.
+func _ratons() -> void:
+	draw_rect(Rect2(Vector2.ZERO, SIZE), Color("#CFE3B8"))
+	for x in range(0, int(SIZE.x), 12):
+		draw_rect(Rect2(x, 78, 6, 30), Color("#F4EFE2"))
+		draw_rect(Rect2(x + 6, 78, 6, 30), Color("#E06A5A"))
+	draw_rect(Rect2(126, 12, 50, 36), Color("#8FC6E8"))
+	draw_rect(Rect2(126, 12, 50, 36), Color("#F4EFE2"), false, 3.0)
+	draw_rect(Rect2(150, 12, 2, 36), Color("#F4EFE2"))
+	# Stove with Mom stirring the pot.
+	draw_rect(Rect2(150, 54, 40, 30), Color("#F4F1EA"))
+	draw_rect(Rect2(156, 46, 22, 10), Color("#5A6B7A"))
+	var stir := sin(_t * 5.0) * 4.0
+	_raccoon(Vector2(140, 62), 0.9, Color("#E04F5F"), false)
+	draw_line(Vector2(150, 58), Vector2(166 + stir, 46), Color("#8D6E63"), 2.0)
+	if fmod(_t, 1.0) < 0.6:
+		draw_circle(Vector2(162, 40 - fmod(_t, 1.0) * 10.0), 3, Color(1, 1, 1, 0.6))
+	# Table, Dad behind his newspaper.
+	draw_rect(Rect2(40, 66, 70, 6), Color("#A0703E"))
+	draw_rect(Rect2(46, 72, 4, 14), Color("#7A5230"))
+	draw_rect(Rect2(100, 72, 4, 14), Color("#7A5230"))
+	_raccoon(Vector2(58, 58), 1.0, Color("#4A6FA5"), false)
+	var rustle := sin(_t * 9.0) * 0.6 if fmod(_t, 3.0) < 0.5 else 0.0
+	draw_rect(Rect2(62 + rustle, 40, 24, 28), Color("#F2F0EA"))
+	for i in 4:
+		draw_rect(Rect2(65 + rustle, 44 + i * 5, 18, 2), Color("#9A968E"))
+	# The kid juggling three apples.
+	var kid := Vector2(100, 60)
+	_raccoon(kid, 0.75, Color("#FFD23F"), true)
+	for i in 3:
+		var a := _t * 4.0 + i * TAU / 3.0
+		draw_circle(kid + Vector2(cos(a) * 9.0, -24.0 + sin(a) * 7.0 - absf(sin(a)) * 6.0), 3.0, Color("#D9302A"))
+	# The baby bouncing in the high chair.
+	draw_rect(Rect2(14, 62, 18, 4), Color("#F4F1EA"))
+	draw_line(Vector2(16, 66), Vector2(14, 86), Color("#F4F1EA"), 2.0)
+	draw_line(Vector2(30, 66), Vector2(32, 86), Color("#F4F1EA"), 2.0)
+	_raccoon(Vector2(23, 60 - absf(sin(_t * 6.0)) * 3.0), 0.55, Color("#FFB3C7"), false)
+	# Title card for the first moments, then a little laugh now and then.
+	if _osd > 0.8:
+		draw_rect(Rect2(36, 26, 124, 44), Color("#7A5230"))
+		draw_rect(Rect2(40, 30, 116, 36), Color("#F2C230"))
+		_text("Les Ratons", Vector2(40, 54), 18, Color("#5A3A22"), 116, HORIZONTAL_ALIGNMENT_CENTER)
+	elif fmod(_t, 6.0) > 5.0:
+		_text("ha ha ha !", Vector2(6, 16), 10, Color("#5A3A22"))
+
+
+# A cartoon raccoon sitting at `at` (head centre), wearing a shirt of `shirt` colour.
+func _raccoon(at: Vector2, k: float, shirt: Color, tail_up: bool) -> void:
+	var grey := Color("#8E9096")
+	var dark := Color("#3A3A40")
+	# Striped tail.
+	var tail := at + Vector2(-12, 18) * k
+	for i in 4:
+		var p := tail + Vector2(-4 * i, (-5 if tail_up else 2) * i) * k
+		draw_circle(p, 4.5 * k, dark if i % 2 == 0 else grey)
+	draw_rect(Rect2(at.x - 9 * k, at.y + 6 * k, 18 * k, 16 * k), shirt)
+	for e in [-1.0, 1.0]:
+		draw_colored_polygon(PackedVector2Array([at + Vector2(e * 5, -8) * k, at + Vector2(e * 11, -15) * k, at + Vector2(e * 11, -5) * k]), grey)
+	draw_circle(at, 10 * k, grey)
+	draw_rect(Rect2(at.x - 10 * k, at.y - 3 * k, 20 * k, 6 * k), dark)
+	draw_circle(at + Vector2(-4, 0) * k, 1.8 * k, Color.WHITE)
+	draw_circle(at + Vector2(4, 0) * k, 1.8 * k, Color.WHITE)
+	draw_circle(at + Vector2(-4, 0) * k, 0.9 * k, Color.BLACK)
+	draw_circle(at + Vector2(4, 0) * k, 0.9 * k, Color.BLACK)
+	draw_circle(at + Vector2(0, 5) * k, 4 * k, Color("#F1EEE8"))
+	draw_circle(at + Vector2(0, 3.5) * k, 1.4 * k, Color.BLACK)
