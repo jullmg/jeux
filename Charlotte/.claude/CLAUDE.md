@@ -47,7 +47,10 @@ Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks
   plus `StrayCat` (procedural sidewalk cats: 8 coats, walk/sit/loaf/pet), `Dog` (9 breeds on a leash, attached to a passerby's
   `Character.hand_position()`), `WindowCats` (cats that pop up behind window panes near the camera), `Wind` (periodic gusts:
   drives the `gust` uniform of every sway material + a leaf flurry), `LeafKick` (leaves kicked by Charlotte's feet),
-  `Foreground` (blurred near-camera layer, `Parallax2D` scroll 1.35), `CritterDraw` (shared static drawing helpers for the
+  `Foreground` (blurred near-camera layer, `Parallax2D` scroll 1.35), `Squirrel` (flees Charlotte, from further away when she
+  runs, often up the nearest street tree; climbs the trunk's side, hides in the canopy and pokes its head out at the
+  canopy outline, found from the tree texture's alpha. Squirrels are added before the trees so the tree hides them;
+  `squirrel.trees` shares the scene's `_tree_sprites` array, filled later), `CritterDraw` (shared static drawing helpers for the
   animals: shaded outlined bodies, tapered limbs/tails built from convex quads, glossy eyes, hearts).
   `PropArt` generates trees, lamp posts, hydrants, bikes, leaves as textures. `PropArt.car()`/`wheel()` still exist but
   cars were removed from both scenes on purpose (2026-10-31); see git history to bring them back.

@@ -31,6 +31,8 @@ var _charlotte: Character
 var _rng        := RandomNumberGenerator.new()
 var _time        := 0.0
 var _tree_texs: Array[Texture2D] = []
+# Filled by _build_trees, after the squirrels (which share this array) are built behind them.
+var _tree_sprites: Array[Sprite2D] = []
 var _wind := Wind.new()
 var _window_cats: WindowCats
 
@@ -222,6 +224,7 @@ func _build_trees() -> void:
 		tree.position = _tree_origin(i)
 		tree.material = _sway(7.0, i * 1.7)
 		add_child(tree)
+		_tree_sprites.append(tree)
 		add_child(_falling_leaves(leaf, tree.position + Vector2(190, 250) * TREE_SCALE))
 
 
@@ -314,6 +317,7 @@ func _build_squirrels() -> void:
 		squirrel.scale = Vector2.ONE * 0.85
 		squirrel.bounds = Vector2(maxf(x - 500.0, 60.0), minf(x + 500.0, STREET_W - 60.0))
 		squirrel.threat = _charlotte
+		squirrel.trees = _tree_sprites
 		add_child(squirrel)
 
 
