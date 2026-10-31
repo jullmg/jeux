@@ -46,6 +46,7 @@ func _ready() -> void:
 	_camera.position_smoothing_enabled = true
 	add_child(_camera)
 	_build_doors()
+	_build_foreground()
 	_build_grade()
 	var x_arg := _arg("--x=")
 	if not x_arg.is_empty():
@@ -95,8 +96,20 @@ func _go_through(x: float, area: Vector2, facing: int) -> void:
 # Furniture
 # ─────────────────────────────────────────────────────────────
 
-## Puts a texture with its bottom-left corner at (x, bottom).
-func _put(tex: Texture2D, x: float, bottom: float, s := 1.0) -> Sprite2D:
+## Puts a texture with its bottom-left corner at (x, bottom). `shadow`: "wall" casts a soft shadow onto
+## the wall behind (hung things), "floor" also grounds it with a contact shadow (standing furniture).
+func _put(tex: Texture2D, x: float, bottom: float, s := 1.0, shadow := "") -> Sprite2D:
+	if shadow != "":
+		var cast := Sprite2D.new()
+		cast.texture = tex
+		cast.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		cast.centered = false
+		cast.scale = Vector2.ONE * s
+		cast.position = Vector2(x + 10.0, bottom - tex.get_height() * s + 6.0)
+		cast.modulate = Color(0.25, 0.12, 0.05, 0.16)
+		add_child(cast)
+	if shadow == "floor":
+		_floor_shadow(x + tex.get_width() * s * 0.5, bottom, tex.get_width() * s * 0.55)
 	var sprite := Sprite2D.new()
 	sprite.texture = tex
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
@@ -108,49 +121,72 @@ func _put(tex: Texture2D, x: float, bottom: float, s := 1.0) -> Sprite2D:
 
 
 func _build_vestibule() -> void:
-	_put(InteriorArt.coat_shelf(), 14.0, 430.0, 0.9)
-	_put(InteriorArt.radiator(96.0, 150.0), 186.0, WALL_BASE)
+	_put(InteriorArt.coat_shelf(), 14.0, 430.0, 0.9, "wall")
+	_plate(250.0, 330.0, false)
+	_put(InteriorArt.radiator(96.0, 150.0), 186.0, WALL_BASE, 1.0, "floor")
 	_put(InteriorArt.front_door(), 290.0, WALL_BASE)
-	_put(InteriorArt.backpack(), 40.0, 616.0, 0.9)
+	_daylight(Vector2(330.0, 230.0), 240.0, 0.08)
+	_put(InteriorArt.doormat(), 345.0, 630.0)
+	_put(InteriorArt.backpack(), 40.0, 616.0, 0.9, "floor")
+	_put(InteriorArt.boots(), 540.0, 612.0, 0.8, "floor")
 	_put(InteriorArt.floor_clutter(), 150.0, 622.0)
 	_ceiling_light(320.0)
 	_put(InteriorArt.oak_doorway(), VESTIBULE_END, WALL_BASE)
-	_put(InteriorArt.oak_glass_door(), VESTIBULE_END + 230.0, WALL_BASE)
+	_put(InteriorArt.oak_glass_door(), VESTIBULE_END + 230.0, WALL_BASE, 1.0, "wall")
 
 
 func _build_salon() -> void:
 	_put(InteriorArt.rug(), 900.0, 694.0, 0.9)
+	_plate(1700.0, 560.0, true)
+	_put(InteriorArt.monstera(), 860.0, 606.0, 0.85, "floor")
 	for i in 3:
-		_put(InteriorArt.poster(i), 1030.0 + i * 130.0, 340.0, 0.85)
-	_put(InteriorArt.sofa(), 960.0, 606.0, 0.85)
-	_put(InteriorArt.dining_table(), 1580.0, 606.0, 0.85)
-	_pendant(1784.0, 310.0)
-	_put(InteriorArt.black_shelf(), 2030.0, WALL_BASE, 0.9)
+		_put(InteriorArt.poster(i), 1030.0 + i * 130.0, 340.0, 0.85, "wall")
+	_put(InteriorArt.floor_lamp(), 1470.0, 604.0, 0.9, "floor")
+	_glow(Vector2(1524.0, 360.0), 200.0, Color(1.0, 0.82, 0.5, 0.4))
+	_put(InteriorArt.sofa(), 960.0, 606.0, 0.85, "floor")
+	_put(InteriorArt.side_table(), 1390.0, 610.0, 0.8, "floor")
+	_put(InteriorArt.window(170.0, 300.0), 1580.0, 470.0, 1.0, "wall")
+	_daylight(Vector2(1580.0, 170.0), 170.0, 0.12)
+	_plate(1780.0, 330.0, false)
+	_put(InteriorArt.dining_table(), 1780.0, 606.0, 0.85, "floor")
+	_pendant(1984.0, 310.0)
+	_put(InteriorArt.black_shelf(), 2110.0, WALL_BASE, 0.7, "floor")
 
 
 func _build_hallway() -> void:
 	_ceiling_light(2600.0)
 	_ceiling_light(3200.0)
-	_put(InteriorArt.black_coats(), 2330.0, 470.0, 0.8)
-	_put(InteriorArt.tv(), 2540.0, 380.0, 0.9)
-	_put(InteriorArt.radiator(160.0, 150.0), 2790.0, WALL_BASE)
-	_put(InteriorArt.recycling_bin(), 2985.0, 608.0)
+	_put(InteriorArt.runner(980.0), 2320.0, 690.0)
+	_put(InteriorArt.black_coats(), 2330.0, 470.0, 0.8, "wall")
+	_put(InteriorArt.photo_row(), 2520.0, 260.0, 0.8, "wall")
+	_put(InteriorArt.tv(), 2560.0, 400.0, 0.8, "wall")
+	_plate(2480.0, 330.0, false)
+	_put(InteriorArt.radiator(160.0, 150.0), 2790.0, WALL_BASE, 1.0, "floor")
+	_put(InteriorArt.recycling_bin(), 2985.0, 608.0, 1.0, "floor")
 	_put(InteriorArt.panel_door(), CHACHA_DOOR_X, WALL_BASE)
 	_chacha_sign(Vector2(CHACHA_DOOR_X + 75.0, 330.0))
+	_put(InteriorArt.monstera(), 3300.0, 606.0, 0.55, "floor")
 	_put(InteriorArt.kitchen(), KITCHEN_START, WALL_BASE)
+	_daylight(Vector2(KITCHEN_START + 322.0, 260.0), 126.0, 0.1)
 	_ceiling_light(KITCHEN_START + 200.0)
 
 
 func _build_bedroom() -> void:
 	var x := BEDROOM.x
-	_put(InteriorArt.flower_painting(), x + 70.0, 250.0, 0.8)
-	_put(InteriorArt.dresser_terrarium(), x + 30.0, 606.0, 0.85)
-	_put(InteriorArt.bed(), x + 360.0, 608.0, 0.8)
-	_put(InteriorArt.kid_table(), x + 830.0, 612.0, 0.75)
-	_put(InteriorArt.book_ledges(), x + 960.0, 470.0, 0.8)
-	_put(InteriorArt.fluffy_chair(), x + 960.0, 606.0, 0.8)
-	_put(InteriorArt.strawberry_poster(), x + 1130.0, 300.0, 0.8)
-	_put(InteriorArt.desk(), x + 1110.0, 606.0, 0.85)
+	_put(InteriorArt.round_rug(), x + 380.0, 700.0, 1.0)
+	_put(InteriorArt.window(180.0, 300.0), x + 90.0, 420.0, 1.0, "wall")
+	_daylight(Vector2(x + 90.0, 120.0), 180.0, 0.14)
+	_put(InteriorArt.dresser_terrarium(), x + 30.0, 606.0, 0.85, "floor")
+	_put(InteriorArt.flower_painting(), x + 470.0, 330.0, 0.8, "wall")
+	_put(InteriorArt.bed(), x + 360.0, 608.0, 0.8, "floor")
+	_put(InteriorArt.kid_table(), x + 830.0, 612.0, 0.75, "floor")
+	_put(InteriorArt.book_ledges(), x + 960.0, 470.0, 0.8, "wall")
+	_put(InteriorArt.fluffy_chair(), x + 960.0, 606.0, 0.8, "floor")
+	_put(InteriorArt.strawberry_poster(), x + 1130.0, 300.0, 0.8, "wall")
+	_plate(x + 1300.0, 330.0, false)
+	_put(InteriorArt.desk(), x + 1110.0, 606.0, 0.85, "floor")
+	_put(InteriorArt.laundry_basket(), x + 1300.0, 618.0, 0.8, "floor")
+	_put(InteriorArt.plushies(), x + 770.0, 626.0, 0.8, "floor")
 	_put(InteriorArt.panel_door(), BEDROOM_DOOR_X, WALL_BASE)
 	_glow(Vector2(x + 30.0 + 262.0 * 0.85, 606.0 - 230.0 * 0.85), 70.0, Color(1.0, 0.75, 0.4, 0.45))
 
@@ -174,6 +210,36 @@ func _chacha_sign(center: Vector2) -> void:
 		letter.position = center + Vector2(-50.0 + i * 17.0, -18.0 + (i % 2) * 2.0)
 		letter.rotation = deg_to_rad(-4.0 + (i * 37) % 9)
 		add_child(letter)
+
+
+func _plate(x: float, y: float, outlet: bool) -> void:
+	_put(InteriorArt.wall_plate(outlet), x, y, 0.8)
+
+
+func _floor_shadow(cx: float, y: float, rx: float) -> void:
+	var shadow := Polygon2D.new()
+	shadow.polygon = CritterDraw.ellipse_points(Vector2.ZERO, Vector2(rx, 7.0), 0.0, 24)
+	shadow.color = Color(0.25, 0.12, 0.04, 0.22)
+	shadow.position = Vector2(cx + 6.0, y + 2.0)
+	add_child(shadow)
+
+
+# Daylight from a window: a soft beam slanting down to a warm patch on the floor.
+func _daylight(top_left: Vector2, width: float, strength: float) -> void:
+	var beam := Polygon2D.new()
+	var floor_y := 650.0
+	var drop := (floor_y - top_left.y) * 0.45
+	beam.polygon = PackedVector2Array([top_left, top_left + Vector2(width, 0), Vector2(top_left.x + width + drop, floor_y), Vector2(top_left.x + drop, floor_y)])
+	beam.vertex_colors = PackedColorArray([Color(1, 0.96, 0.85, strength), Color(1, 0.96, 0.85, strength), Color(1, 0.92, 0.75, strength * 0.3), Color(1, 0.92, 0.75, strength * 0.3)])
+	var mat := CanvasItemMaterial.new()
+	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	beam.material = mat
+	add_child(beam)
+	var patch := Polygon2D.new()
+	patch.polygon = PackedVector2Array([Vector2(top_left.x + drop - 10, 616), Vector2(top_left.x + width + drop + 10, 616), Vector2(top_left.x + width + drop + 50, 700), Vector2(top_left.x + drop + 20, 700)])
+	patch.color = Color(1.0, 0.9, 0.65, strength * 1.4)
+	patch.material = mat
+	add_child(patch)
 
 
 func _ceiling_light(x: float) -> void:
@@ -212,6 +278,24 @@ func _glow(center: Vector2, radius: float, color: Color) -> void:
 	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
 	sprite.material = mat
 	add_child(sprite)
+
+
+# Out-of-focus things right in front of the camera, scrolling faster than the room for depth.
+func _build_foreground() -> void:
+	var layer := Parallax2D.new()
+	layer.scroll_scale = Vector2(Foreground.SCROLL, 1.0)
+	add_child(layer)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 21
+	# [world x where it should pass the screen centre, kind]
+	for item in [[700.0, "plant"], [1900.0, "plant"], [2900.0, "plant"], [5400.0, "plushie"], [6250.0, "plant"]]:
+		var at: float = item[0]
+		var x := 640.0 + (at - 640.0) * Foreground.SCROLL
+		match item[1]:
+			"plant":
+				Foreground.add(layer, Foreground.shrub(rng), Vector2(x, 720.0 + 100.0), Vector2(260, 170)).modulate = Color(0.45, 0.42, 0.38)
+			"plushie":
+				Foreground.add(layer, '<circle cx="90" cy="110" r="70" fill="#F2A7C9"/><circle cx="40" cy="50" r="28" fill="#F2A7C9"/><circle cx="140" cy="50" r="28" fill="#F2A7C9"/>', Vector2(x, 720.0 + 95.0), Vector2(180, 180)).modulate = Color(0.55, 0.5, 0.5)
 
 
 func _build_grade() -> void:
@@ -287,12 +371,28 @@ class _Rooms:
 
 	func _room(x0: float, x1: float, wall: Color, base: Color, rng: RandomNumberGenerator) -> void:
 		var w := x1 - x0
-		draw_rect(Rect2(x0, 0, w, 34), Color("#F3F1EC"))
+		var ceiling := PackedColorArray([Color("#F6F4EF"), Color("#F6F4EF"), Color("#E6E1D8"), Color("#E6E1D8")])
+		draw_polygon(PackedVector2Array([Vector2(x0, 0), Vector2(x1, 0), Vector2(x1, 34), Vector2(x0, 34)]), ceiling)
 		var shade := PackedColorArray([wall.lightened(0.04), wall.lightened(0.04), wall.darkened(0.07), wall.darkened(0.07)])
 		draw_polygon(PackedVector2Array([Vector2(x0, 34), Vector2(x1, 34), Vector2(x1, 600), Vector2(x0, 600)]), shade)
-		draw_rect(Rect2(x0, 34, w, 14), Color("#F7F5F0"))
-		draw_rect(Rect2(x0, 48, w, 4), Color("#D9D2C4"))
-		draw_rect(Rect2(x0, 52, w, 18), Color(0, 0, 0, 0.04))
+		# Crown moulding: cove, fillet and bead, with a soft shadow on the wall below.
+		draw_rect(Rect2(x0, 34, w, 10), Color("#FBFAF6"))
+		draw_rect(Rect2(x0, 44, w, 6), Color("#E3DDD2"))
+		draw_rect(Rect2(x0, 50, w, 5), Color("#F7F5F0"))
+		draw_line(Vector2(x0, 55), Vector2(x1, 55), Color("#CFC8BA"), 1.5)
+		var cove := PackedColorArray([Color(0.2, 0.1, 0.04, 0.12), Color(0.2, 0.1, 0.04, 0.12), Color(0.2, 0.1, 0.04, 0.0), Color(0.2, 0.1, 0.04, 0.0)])
+		draw_polygon(PackedVector2Array([Vector2(x0, 56), Vector2(x1, 56), Vector2(x1, 90), Vector2(x0, 90)]), cove)
+		# Plaster: faint vertical variation so the wall isn't a flat sheet.
+		var px := x0
+		while px < x1:
+			var pw := rng.randf_range(60.0, 160.0)
+			draw_rect(Rect2(px, 56, minf(pw, x1 - px), 522), Color(1, 1, 1, rng.randf_range(0.0, 0.03)))
+			px += pw
+		for edge in [[x0, 1.0], [x1, -1.0]]:
+			var ex: float = edge[0]
+			var d: float = edge[1]
+			var corner := PackedColorArray([Color(0.2, 0.1, 0.04, 0.14), Color(0.2, 0.1, 0.04, 0.0), Color(0.2, 0.1, 0.04, 0.0), Color(0.2, 0.1, 0.04, 0.14)])
+			draw_polygon(PackedVector2Array([Vector2(ex, 34), Vector2(ex + d * 60.0, 34), Vector2(ex + d * 60.0, 600), Vector2(ex, 600)]), corner)
 		draw_rect(Rect2(x0, 578, w, 22), base)
 		draw_rect(Rect2(x0, 578, w, 3), base.lightened(0.25))
 		# Floor: rows of planks, taller towards the camera, with staggered seams and a soft sheen.

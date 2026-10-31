@@ -33,6 +33,8 @@ Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks
   vestibule (0–640) → oak glass doorway → salon (–2260) → hallway → kitchen (3400–3960); Charlotte's bedroom is a separate
   area (5000–6650) reached through the "chacha" door (fade, camera limits switch). Walls/floor are drawn by its inner `_Rooms`
   class; furniture comes from `world/interior_art.gd` (`InteriorArt`, one SVG function per piece). Charlotte is at scale 0.5 inside.
+  Place pieces with `_put(tex, x, bottom, scale, shadow)`: `"wall"` for hung things, `"floor"` for standing furniture (adds a
+  contact shadow). Windows get `_daylight()` beams; lamps get additive `_glow()`s. Add pieces in back-to-front order.
 - `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through), `PlayerControl` (keys and
   click/tap-to-walk, walks to interactables and calls them; used by the street and the house), `CharacterArt` (generates the
   body-part SVGs from a look), `CharacterLook` (Resource; `CharacterLook.charlotte()` and `CharacterLook.random(rng, age)`).

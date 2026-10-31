@@ -466,3 +466,159 @@ static func kid_table() -> ImageTexture:
 	s += '<path d="M10 30 H30 M10 46 H30" stroke="#F4F2EC" stroke-width="5"/>'
 	s += '<circle cx="96" cy="40" r="10" fill="#F2C14E" stroke="#B58A24" stroke-width="2"/>'
 	return tex(140, 120, s)
+
+
+# ── Windows, plants, lamps and small things ──────────────────
+
+## Canvas w x h: window with white trim, sheer curtains and the view out: sky, the neighbour's brick
+## wall across the lane and an autumn tree.
+static func window(w: float, h: float) -> ImageTexture:
+	var s := _defs()
+	s += '<rect x="0" y="0" width="%s" height="%s" fill="%s" stroke="%s" stroke-width="3"/>' % [w, h, TRIM, TRIM_DARK]
+	s += '<rect x="16" y="16" width="%s" height="%s" fill="url(#outside)"/>' % [w - 32, h - 46]
+	s += '<rect x="16" y="%s" width="%s" height="%s" fill="#B5603F" opacity="0.75"/>' % [h * 0.42, w - 32, h * 0.45]
+	for y in range(int(h * 0.42) + 8, int(h) - 30, 12):
+		s += '<path d="M16 %d H%s" stroke="#9A4E34" stroke-width="1.5" opacity="0.7"/>' % [y, w - 16]
+	# An autumn tree in the lane: trunk and a few leaf clumps.
+	s += '<path d="M%s %s V%s" stroke="#5E4636" stroke-width="7"/>' % [w * 0.36, h * 0.88, h * 0.3]
+	for c in [[0.22, 0.3, 0.13, "#D35400"], [0.42, 0.22, 0.15, "#E67E22"], [0.3, 0.15, 0.11, "#F1C40F"], [0.52, 0.34, 0.1, "#C0392B"], [0.18, 0.18, 0.09, "#E59866"]]:
+		s += '<circle cx="%s" cy="%s" r="%s" fill="%s"/>' % [w * c[0], h * c[1], w * c[2], c[3]]
+	s += '<rect x="%s" y="16" width="8" height="%s" fill="%s"/>' % [w / 2 - 4, h - 46, TRIM]
+	s += '<rect x="16" y="%s" width="%s" height="8" fill="%s"/>' % [h * 0.45, w - 32, TRIM]
+	s += '<path d="M20 20 L%s 20 L30 %s L20 %s Z" fill="#FFFFFF" opacity="0.35"/>' % [w * 0.4, h * 0.6, h * 0.6]
+	s += '<rect x="-6" y="%s" width="%s" height="16" fill="%s" stroke="%s" stroke-width="2"/>' % [h - 30, w + 12, TRIM, TRIM_DARK]
+	# Sheer curtains gathered at the sides.
+	for side in [0, 1]:
+		var x0 := 4.0 if side == 0 else w - 4.0
+		var dir := 1.0 if side == 0 else -1.0
+		s += '<path d="M%s 4 h%s q%s %s %s %s h%s z" fill="#FBF7EE" opacity="0.8" stroke="#E3DACB" stroke-width="1.5"/>' % [x0, dir * w * 0.22, -dir * w * 0.12, h * 0.5, dir * w * 0.02, h - 34, -dir * w * 0.12]
+		for k in 3:
+			s += '<path d="M%s 8 q%s %s 0 %s" stroke="#E3DACB" stroke-width="1.5" fill="none"/>' % [x0 + dir * (10 + k * 10), dir * 6, h * 0.4, h - 44]
+	s += '<rect x="-10" y="0" width="%s" height="6" rx="3" fill="#B08A5A"/>' % (w + 20)
+	return tex(w, h, s)
+
+
+## Canvas 200x330: big monstera in a terracotta pot. Floor at y 330.
+static func monstera() -> ImageTexture:
+	var s := ""
+	var leaves := [[100, 60, -0.3, 1.0], [56, 120, -0.9, 0.9], [150, 110, 0.7, 0.95], [80, 180, -0.6, 0.8], [130, 175, 0.5, 0.85], [100, 130, 0.1, 0.9]]
+	for l in leaves:
+		s += '<path d="M100 250 Q%s %s %s %s" stroke="#3E6E32" stroke-width="4" fill="none"/>' % [100 + (l[0] - 100) * 0.3, l[1] + 60, l[0], l[1] + 30]
+	for l in leaves:
+		var cx: float = l[0]
+		var cy: float = l[1]
+		var r: float = 46.0 * l[3]
+		s += '<g transform="translate(%s %s) rotate(%s)">' % [cx, cy, rad_to_deg(l[2])]
+		s += '<path d="M0 %s Q%s %s %s 0 Q%s %s 0 %s Q%s %s %s 0 Q%s %s 0 %s Z" fill="#3E8E4A" stroke="#245E2E" stroke-width="2.5"/>' % [
+			r, r * 1.1, r * 0.8, r, r * 1.0, -r * 1.1, -r, -r * 1.0, -r * 1.1, -r, -r * 1.1, r * 0.8, r]
+		for k in 3:
+			var y := -r * 0.5 + k * r * 0.45
+			s += '<path d="M%s %s h%s M%s %s h%s" stroke="#F4EFE2" stroke-width="5" stroke-linecap="round"/>' % [r * 0.45, y, r * 0.4, -r * 0.45, y, -r * 0.4]
+		s += '<path d="M0 %s V%s" stroke="#2E6E38" stroke-width="2"/></g>' % [r * 0.9, -r * 0.9]
+	s += '<path d="M54 250 H146 L134 330 H66 Z" fill="#C2693F" stroke="#7E3E22" stroke-width="3"/>'
+	s += '<rect x="48" y="244" width="104" height="16" rx="3" fill="#D27A4E" stroke="#7E3E22" stroke-width="2.5"/>'
+	return tex(200, 330, s)
+
+
+## Canvas 120x420: brass floor lamp with a linen shade. Floor at y 420.
+static func floor_lamp() -> ImageTexture:
+	var s := '<path d="M20 70 L100 70 L86 10 L34 10 Z" fill="#F4E6C8" stroke="#C9B48A" stroke-width="2.5"/>'
+	s += '<path d="M28 66 L92 66" stroke="#FFF4D6" stroke-width="4"/>'
+	s += '<rect x="57" y="70" width="6" height="330" fill="#C9A35A" stroke="#8A6A30" stroke-width="1.5"/>'
+	s += '<ellipse cx="60" cy="410" rx="34" ry="8" fill="#C9A35A" stroke="#8A6A30" stroke-width="2"/>'
+	return tex(120, 420, s)
+
+
+## Canvas 110x130: little round side table with a mug and a book. Floor at y 130.
+static func side_table() -> ImageTexture:
+	var s := '<ellipse cx="55" cy="40" rx="48" ry="9" fill="#6E4424" stroke="#3E2414" stroke-width="2.5"/>'
+	s += '<path d="M52 48 V122 M30 128 L52 110 L80 128" stroke="#4A2E1A" stroke-width="6" fill="none" stroke-linecap="round"/>'
+	s += '<rect x="22" y="24" width="40" height="10" fill="#1D4F91" stroke="#123060" stroke-width="1.5"/>'
+	s += '<path d="M70 34 V18 H86 V34 Z" fill="#F2EDE2" stroke="#9A9A9A" stroke-width="2"/><path d="M86 22 q8 2 0 10" stroke="#9A9A9A" stroke-width="2" fill="none"/>'
+	return tex(110, 130, s)
+
+
+## Canvas 220x30: coir doormat with a leaf pattern, seen in perspective.
+static func doormat() -> ImageTexture:
+	var s := '<path d="M20 2 H200 L218 28 H2 Z" fill="#B8915A" stroke="#7E5E30" stroke-width="2"/>'
+	for x in range(40, 190, 24):
+		s += '<path d="M%d 8 q8 6 0 14 q-8 -6 0 -14" fill="#7E5E30" opacity="0.7"/>' % x
+	return tex(220, 30, s)
+
+
+## Canvas 130x80: rain boots (yellow and green) standing by the door. Floor at y 80.
+static func boots() -> ImageTexture:
+	var s := ""
+	for b in [[8.0, "#F2C12E", "#A8800E"], [66.0, "#3E8E5A", "#245E36"]]:
+		var x: float = b[0]
+		s += '<path d="M%s 6 H%s V56 Q%s 60 %s 64 H%s Q%s 80 %s 78 H%s Z" fill="%s" stroke="%s" stroke-width="2.5"/>' % [x + 6, x + 32, x + 34, x + 50, x + 54, x + 58, x + 50, x + 4, b[1], b[2]]
+		s += '<rect x="%s" y="6" width="26" height="8" fill="%s" opacity="0.4"/>' % [x + 6, b[2]]
+	return tex(130, 80, s)
+
+
+## Canvas 440x170: a row of framed family photos for the hallway.
+static func photo_row() -> ImageTexture:
+	var s := ""
+	var frames := [[0, 30, 90, 110, "#2B2B2B"], [110, 0, 120, 90, "#B08A5A"], [110, 104, 56, 64, "#F4F2EC"], [180, 104, 50, 64, "#2B2B2B"], [250, 20, 80, 100, "#F4F2EC"], [350, 40, 90, 70, "#B08A5A"]]
+	var tints := ["#9DB9C9", "#E8C9A0", "#C9DDB5", "#F2B6CF", "#D9C6E6", "#F2D9A0"]
+	for i in frames.size():
+		var f: Array = frames[i]
+		s += '<rect x="%s" y="%s" width="%s" height="%s" fill="%s"/>' % [f[0], f[1], f[2], f[3], f[4]]
+		s += '<rect x="%s" y="%s" width="%s" height="%s" fill="%s"/>' % [f[0] + 7, f[1] + 7, f[2] - 14, f[3] - 14, tints[i]]
+		var cx: float = f[0] + f[2] / 2.0
+		var cy: float = f[1] + f[3] * 0.62
+		s += '<circle cx="%s" cy="%s" r="%s" fill="#6E4E3A" opacity="0.6"/>' % [cx - 8, cy - 8, minf(f[2], f[3]) * 0.12]
+		s += '<circle cx="%s" cy="%s" r="%s" fill="#B0623A" opacity="0.6"/>' % [cx + 10, cy - 4, minf(f[2], f[3]) * 0.1]
+		s += '<path d="M%s %s q18 -16 36 0 v%s h-36 z" fill="#5A6E8E" opacity="0.5"/>' % [cx - 18, cy + 8, f[3] * 0.18]
+	return tex(440, 170, s)
+
+
+## Canvas w x 70: long striped runner rug for the hallway floor.
+static func runner(w: float) -> ImageTexture:
+	var s := '<path d="M30 2 H%s L%s 68 H2 Z" fill="#2F5D8A" stroke="#1C3C5E" stroke-width="2"/>' % [w - 30, w - 2]
+	for i in 3:
+		s += '<path d="M%s %s H%s" stroke="%s" stroke-width="5"/>' % [30 - i * 8, 14 + i * 20, w - 30 + i * 8, ["#F2C14E", "#E8E2D4", "#D9682B"][i]]
+	return tex(w, 70, s)
+
+
+## Canvas 420x90: round pink rug for the bedroom, in perspective.
+static func round_rug() -> ImageTexture:
+	var s := '<ellipse cx="210" cy="45" rx="206" ry="42" fill="#F2B6CF" stroke="#C97B9A" stroke-width="2"/>'
+	s += '<ellipse cx="210" cy="45" rx="160" ry="30" fill="none" stroke="#FBE3EC" stroke-width="6"/>'
+	s += '<ellipse cx="210" cy="45" rx="100" ry="18" fill="none" stroke="#E79AB8" stroke-width="5"/>'
+	return tex(420, 90, s)
+
+
+## Canvas 120x110: wicker laundry basket overflowing with clothes. Floor at y 110.
+static func laundry_basket() -> ImageTexture:
+	var s := '<path d="M30 30 Q20 0 60 8 Q96 0 92 30 Z" fill="#7FB3D5" stroke="#4E7E9E" stroke-width="2"/>'
+	s += '<path d="M60 30 q20 -30 40 -6 q4 10 -8 6 z" fill="#F2A7B9" stroke="#C26A84" stroke-width="2"/>'
+	s += '<path d="M12 30 H108 L98 108 H22 Z" fill="#D9B88A" stroke="#8A6A40" stroke-width="3"/>'
+	for y in range(42, 104, 12):
+		s += '<path d="M16 %d H104" stroke="#B8915A" stroke-width="2"/>' % y
+	for x in range(28, 100, 14):
+		s += '<path d="M%d 32 V106" stroke="#C9A472" stroke-width="2"/>' % x
+	return tex(120, 110, s)
+
+
+## Canvas 150x90: plushies sitting on the floor (a bear and a cat). Floor at y 90.
+static func plushies() -> ImageTexture:
+	var s := '<ellipse cx="45" cy="66" rx="30" ry="24" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2.5"/>'
+	s += '<circle cx="45" cy="30" r="22" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2.5"/>'
+	s += '<circle cx="28" cy="12" r="8" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2"/><circle cx="62" cy="12" r="8" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2"/>'
+	s += '<ellipse cx="45" cy="38" rx="9" ry="7" fill="#E8D2B4"/><circle cx="38" cy="28" r="2.5" fill="#2B2B2B"/><circle cx="52" cy="28" r="2.5" fill="#2B2B2B"/><circle cx="45" cy="36" r="2.5" fill="#2B2B2B"/>'
+	s += '<ellipse cx="110" cy="70" rx="26" ry="20" fill="#F4F2EC" stroke="#9A948A" stroke-width="2.5"/>'
+	s += '<circle cx="110" cy="40" r="18" fill="#F4F2EC" stroke="#9A948A" stroke-width="2.5"/>'
+	s += '<path d="M96 30 l2 -16 l10 10 M124 30 l-2 -16 l-10 10" fill="#F4F2EC" stroke="#9A948A" stroke-width="2"/>'
+	s += '<circle cx="104" cy="40" r="2.2" fill="#2B2B2B"/><circle cx="116" cy="40" r="2.2" fill="#2B2B2B"/><path d="M108 46 h4 l-2 2 z" fill="#E89AA8"/>'
+	return tex(150, 90, s)
+
+
+## Canvas 26x40: light switch plate (outlet = false) or wall outlet.
+static func wall_plate(outlet: bool) -> ImageTexture:
+	var s := '<rect x="2" y="2" width="22" height="36" rx="3" fill="#F7F5F0" stroke="#C9C2B4" stroke-width="1.5"/>'
+	if outlet:
+		s += '<rect x="9" y="9" width="2" height="6" fill="#6E6E6E"/><rect x="15" y="9" width="2" height="6" fill="#6E6E6E"/><rect x="9" y="24" width="2" height="6" fill="#6E6E6E"/><rect x="15" y="24" width="2" height="6" fill="#6E6E6E"/>'
+	else:
+		s += '<rect x="10" y="12" width="6" height="16" rx="2" fill="#E8E4DA" stroke="#B9B4AA" stroke-width="1"/>'
+	return tex(26, 40, s)
