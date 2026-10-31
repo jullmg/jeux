@@ -131,7 +131,7 @@ const HOUSES := [
 		"basement": [500.0], "bins": true, "curtains": true,
 	},
 	{
-		"name": "depanneur", "kind": "shop",
+		"name": "depanneur", "kind": "shop", "shop_sign": "#25408F",
 		"bricks": ["#8A5A44", "#7E5240", "#966450", "#744A38", "#9C6A54"], "mortar": "#C9BCAE",
 		"cornice": "#3F4448", "cornice_dark": "#2A2E31",
 		"windows": [[70.0, 110.0], [295.0, 110.0], [520.0, 110.0]], "basement": [],
@@ -143,6 +143,19 @@ const HOUSES := [
 		"parapet": "flat", "windows": [[90.0, 90.0], [280.0, 90.0]], "basement": [], "downspout": 410.0,
 	},
 	{"name": "ruelle", "kind": "ruelle", "width": 300.0},
+	# Across Rue Holt: the side wall of the next block's corner building.
+	{
+		"name": "coin_holt_est", "kind": "side_wall", "width": 620.0, "floors": 3,
+		"bricks": ["#9C6B4E", "#8E6146", "#A87656", "#82573E", "#B07E5E"], "mortar": "#D2C6B6",
+		"parapet": "flat", "windows": [[110.0, 90.0], [330.0, 90.0]], "basement": [], "downspout": 40.0,
+	},
+	# Across Rue Dandurand: école Saint-Jean-de-Brébeuf, seen from 6e Avenue (its side).
+	{
+		"name": "ecole", "kind": "school", "width": 1400.0, "floors": 3, "top": 40.0,
+		"bricks": ["#A9472F", "#9C4029", "#B44F35", "#943B26", "#B85A3E"], "mortar": "#C9B7A4",
+		"trim": "#ECE8E0", "trim_dark": "#A9A398", "lintel": "#D8CFC0", "lintel_dark": "#A39A8A",
+		"basement": [120.0, 420.0, 720.0], "fence": "black", "halloween": false,
+	},
 ]
 
 var k: Dictionary
@@ -259,6 +272,8 @@ func _svg() -> void:
 			_ruelle()
 		"modern":
 			_modern()
+		"school":
+			_school()
 		_:
 			_building()
 	out.append('</svg>')
@@ -817,6 +832,66 @@ func _storefront() -> void:
 	_rect(cx - 40, wy - 6, 80, _fb(0) - wy + 6, "url(#glass)")
 	_rect(cx - 40, wy + 70, 80, 5, dark)
 	_front_steps(cx)
+
+
+# A big red-brick school (from reference/School_on_dandurand.jpg): a long wing of tall paired windows
+# and, near the corner, a tall pavilion with a diamond lattice in the brick. Stone sills and bands,
+# green copper cornices, a small cross on the parapet.
+func _school() -> void:
+	var top := _top()
+	var pav := X1 - 400.0
+	var copper := "#4E8C7A"
+	var copper_dark := "#2F5E50"
+	_bricks(top, base_y)
+	_wall_shading(top)
+	# Pavilion: a hair forward of the wing, with a raised brick diamond lattice.
+	out.append('<clipPath id="pav"><rect x="%s" y="%s" width="%s" height="%s"/></clipPath>' % [_n(pav), _n(top - 30), _n(X1 - pav), _n(base_y - top - 90)])
+	_rect(pav, top - 30, X1 - pav, 30, k.mortar)
+	out.append('<g clip-path="url(#pav)">')
+	var d := -600.0
+	while d < 900.0:
+		_path("M%s %s l700 700 M%s %s l-700 700" % [_n(pav + d), _n(top - 30), _n(pav + d + 700), _n(top - 30)], "none", _stroke("#C46A50", 5) + ' opacity="0.7"')
+		d += 92.0
+	out.append('</g>')
+	_rect(pav - 6, top - 30, 6, base_y - top + 30, "#000000", 'opacity="0.18"')
+	for x in [pav, X1 - 22.0]:
+		_rect(x, top - 30, 22, base_y - top + 30, "#B85A3E")
+	# Stone band under the lattice and the pavilion's side entrance.
+	_rect(pav - 6, base_y - 120, X1 - pav + 12, 16, k.lintel, _stroke(k.lintel_dark, 1.5))
+	var dx := pav + 150.0
+	_rect(dx - 20, base_y - 104, 120, 104, k.lintel, _stroke(k.lintel_dark, 1.5))
+	_rect(dx, base_y - 92, 80, 92, "#A8382A", _stroke("#6E2018", 2))
+	_rect(dx + 8, base_y - 84, 28, 40, "url(#glass)")
+	_rect(dx + 44, base_y - 84, 28, 40, "url(#glass)")
+	# Wing: three rows of tall paired windows between brick pilasters.
+	var bay := 132.0
+	var x := X0 + 40.0
+	while x + 110.0 < pav - 20.0:
+		_rect(x - 18, top, 10, base_y - top, "#000000", 'opacity="0.08"')
+		for f in 3:
+			var wy := _win_y(f) + 10.0
+			for j in 2:
+				_window(x + j * 56.0, wy, 50.0, 150.0)
+		x += bay
+	_rect(X0, base_y - 120, pav - X0, 14, k.lintel, _stroke(k.lintel_dark, 1.5))
+	# Copper cornices, the wing's slightly lower than the pavilion's.
+	for c in [[X0, pav, top + 10.0], [pav - 8, X1 + 4, top - 44.0]]:
+		_rect(c[0], c[2], c[1] - c[0], 26, copper, _stroke(copper_dark, 2))
+		_rect(c[0], c[2] + 26, c[1] - c[0], 8, copper_dark)
+		_rect(c[0], c[2] + 34, c[1] - c[0], 30, "url(#drop)")
+		var dt: float = c[0] + 6.0
+		while dt < c[1] - 10.0:
+			_rect(dt, c[2] + 6, 6, 14, copper_dark, 'opacity="0.5"')
+			dt += 18.0
+	# Raised parapet with a stone cartouche and a little cross, in the middle of the wing.
+	var cx := (X0 + pav) / 2.0
+	_rect(cx - 90, top - 36, 180, 46, "#B85A3E", _stroke("#7E3424", 1.5))
+	_rect(cx - 96, top - 44, 192, 10, copper, _stroke(copper_dark, 1.5))
+	_rect(cx - 34, top - 26, 68, 30, k.lintel, _stroke(k.lintel_dark, 1.5))
+	_rect(cx - 5, top - 92, 10, 50, "#7FA89A", _stroke(copper_dark, 1.5))
+	_rect(cx - 18, top - 78, 36, 9, "#7FA89A", _stroke(copper_dark, 1.5))
+	_foundation()
+	_fence([])
 
 
 # Back lane seen from the street: lane trees, clothesline, wooden fences and greenery.

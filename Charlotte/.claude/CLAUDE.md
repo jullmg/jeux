@@ -28,6 +28,13 @@ Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks
 
 - `scenes/main.gd` builds the whole street in code from `LAYOUT` (an ordered list of house SVG names) and
   placement arrays (`TREES_AFTER`, `LAMPS_AFTER`, `HYDRANTS_AT`, `RACKS_AT`). Fractional values = position between house indices.
+  `LAYOUT` runs: `ecole` (école Saint-Jean-de-Brébeuf, across Dandurand), `rue_dandurand`, Charlotte's block (dépanneur Xin-Xin …
+  `coin_holt`), `rue_holt`, `coin_holt_est`. Entries in `CROSS_STREETS` are gaps (width in px), not SVGs: `CrossStreet`
+  (`world/cross_street.gd`) draws them in one-point perspective as three nodes in the draw order: `VISTA` (before the houses:
+  receding street, walls along it from `left_walls`/`right_walls`, street trees), `GROUND` (after `Street`: asphalt through the
+  sidewalk, curb ramps, crosswalk, yellow in the school zone) and `SIGNS` (with the props: plates, stop/school sign, utility pole
+  and wires). Charlotte's bounds stop at the curbs (`CrossStreet.road_x`); crossing streets and turning corners are planned.
+  Passersby already walk across on the crosswalks. `reference/` has photos of the Dandurand corner and `google_map_immediate_area.png`.
 - `scenes/intro.gd` builds a shorter copy of the same street (5 houses around Charlotte's duplex), plus the logo and start button.
   Its geometry helpers mirror `main.gd`, so a layout/geometry change in one may need the same change in the other.
 - `scenes/house.gd`: the flat as a side-on cross-section, from the photos in `reference/charlotte_house_inside`:

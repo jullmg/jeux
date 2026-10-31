@@ -10,17 +10,22 @@ const CURB_Y := 664.0
 const TREE_SCALE := 0.55
 const MARGIN := 30.0
 # Charlotte's side of 6e Avenue seen from the sidewalk: Dandurand on the left, Holt on the right.
+# Across each cross street, the first building of the next block (the school across Dandurand).
 const LAYOUT: Array[String] = [
+	"ecole", "rue_dandurand",
 	"depanneur", "plex_01", "ruelle",
 	"triplex_exemple_2", "plex_02", "plex_03", "moderne", "plex_04",
 	"duplex_voisin_gauche", "duplex_charlotte", "duplex_voisin_droite",
 	"plex_05", "triplex_exemple_3", "plex_06", "plex_07", "plex_08", "plex_09",
 	"ruelle", "coin_holt",
+	"rue_holt", "coin_holt_est",
 ]
-const TREES_AFTER: Array[int] = [1, 4, 6, 8, 11, 13, 15]
-const LAMPS_AFTER: Array[int] = [2, 7, 12, 16]
-const HYDRANTS_AT: Array[float] = [5.5, 14.3]
-const RACKS_AT: Array[float] = [0.5, 10.55, 13.6]
+# Cross streets are gaps in the row (width in px at the facade line), drawn by CrossStreet.
+const CROSS_STREETS := {"rue_dandurand": 560.0, "rue_holt": 520.0}
+const TREES_AFTER: Array[int] = [3, 6, 8, 10, 13, 15, 17]
+const LAMPS_AFTER: Array[int] = [4, 9, 14, 18]
+const HYDRANTS_AT: Array[float] = [7.5, 16.3]
+const RACKS_AT: Array[float] = [2.5, 12.55, 15.6]
 const STRAY_CAT_Y := 646.0
 const MAX_STRAY_CATS := 1
 
@@ -37,6 +42,7 @@ var _animals: Node2D
 var _window_cats: WindowCats
 var _cat_timer := 3.0
 var _control := PlayerControl.new()
+var _cross_streets: Array[CrossStreet] = []
 
 
 func _ready() -> void:
@@ -46,12 +52,15 @@ func _ready() -> void:
 	_street_width = _starts[-1]
 	Skyline.build(self, _street_width, VIEW.x)
 	add_child(Birds.new())
+	_build_cross_streets()
 	_build_houses()
 	_build_window_cats()
 	_build_cat()
 	var street := Street.new()
 	street.width = _street_width
 	add_child(street)
+	for cs in _cross_streets:
+		add_child(CrossStreet.make(CrossStreet.Part.GROUND, cs))
 	var trees := _tree_textures()
 	_build_tree_shadows(trees)
 	_build_passersby()
@@ -64,7 +73,8 @@ func _ready() -> void:
 		start_x = x_arg.to_float()
 	_charlotte = _spawn_charlotte(start_x)
 	_control.charlotte = _charlotte
-	_control.bounds = Vector2(60.0, _street_width - 60.0)
+	# Charlotte stays on her block, up to the curbs (crossing comes later).
+	_control.bounds = Vector2(_cross_streets[0].road_x(CHARLOTTE_Y).y + 8.0, _cross_streets[1].road_x(CHARLOTTE_Y).x - 8.0)
 	_control.walk_top = HOUSE_BASE_Y - 200.0
 	add_child(_control)
 	_build_front_door()
@@ -79,8 +89,6 @@ func _ready() -> void:
 	_build_squirrels()
 	_build_trees(trees)
 	_build_props()
-	_build_street_sign(110.0, "Rue Dandurand")
-	_build_street_sign(_street_width - 110.0, "Rue Holt")
 	Foreground.build(self, _street_width, VIEW.x)
 	add_child(_wind)
 	_camera = Camera2D.new()
@@ -166,7 +174,7 @@ func _layout_starts() -> Array[float]:
 	var x := 0.0
 	for art in LAYOUT:
 		starts.append(x)
-		x += (_tex(art).get_width() - 2.0 * MARGIN) * HOUSE_SCALE
+		x += CROSS_STREETS[art] if CROSS_STREETS.has(art) else (_tex(art).get_width() - 2.0 * MARGIN) * HOUSE_SCALE
 	starts.append(x)
 	return starts
 
@@ -180,20 +188,71 @@ func _house_origin(i: int) -> Vector2:
 	return Vector2(_starts[i] - MARGIN * HOUSE_SCALE, HOUSE_BASE_Y - _tex(LAYOUT[i]).get_height() * HOUSE_SCALE)
 
 
+# Rue Dandurand (left, from the reference photos: the dépanneur's real front, the garage building, the
+# back lane, the school across) and Rue Holt (right). The vistas go behind the houses.
+func _build_cross_streets() -> void:
+	var dandurand := _cross_street("rue_dandurand", "Rue Dandurand", 1.0)
+	dandurand.school = true
+	dandurand.left_walls = [
+		{"to": 2.6, "top": _house_top("ecole"), "kind": "school", "color": Color("#A9472F")},
+		{"to": CrossStreet.FAR, "top": 330.0, "kind": "plex", "color": Color("#9C5A44")},
+	]
+	dandurand.right_walls = [
+		{"to": 0.35, "top": _house_top("depanneur"), "kind": "shop", "color": Color("#8A5A44")},
+		{"to": 0.75, "top": 300.0, "kind": "garage", "color": Color("#7A4636")},
+		{"to": 1.0, "kind": "gap"},
+		{"to": 2.2, "top": 300.0, "kind": "plex", "color": Color("#B5603F")},
+		{"to": CrossStreet.FAR, "top": 260.0, "kind": "plex", "color": Color("#C8A27A")},
+	]
+	var holt := _cross_street("rue_holt", "Rue Holt", -1.0)
+	holt.left_walls = [
+		{"to": 0.6, "top": _house_top("coin_holt"), "kind": "plex", "color": Color("#B5603F")},
+		{"to": 0.85, "kind": "gap"},
+		{"to": 2.4, "top": 290.0, "kind": "plex", "color": Color("#A8473A")},
+		{"to": CrossStreet.FAR, "top": 320.0, "kind": "plex", "color": Color("#C2A07A")},
+	]
+	holt.right_walls = [
+		{"to": 0.7, "top": _house_top("coin_holt_est"), "kind": "plex", "color": Color("#9C6B4E")},
+		{"to": 2.0, "top": 270.0, "kind": "plex", "color": Color("#8E3A2F")},
+		{"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": Color("#B4513F")},
+	]
+	for cs in _cross_streets:
+		add_child(cs)
+
+
+func _cross_street(art: String, street_name: String, sign_side: float) -> CrossStreet:
+	var i := LAYOUT.find(art)
+	var cs := CrossStreet.new()
+	cs.x0 = _starts[i]
+	cs.x1 = _starts[i + 1]
+	cs.street_name = street_name
+	cs.sign_side = sign_side
+	_cross_streets.append(cs)
+	return cs
+
+
+# World y of a building's roof line (its SVG's top margin is about 40 px).
+func _house_top(art: String) -> float:
+	return _house_origin(LAYOUT.find(art)).y + 40.0 * HOUSE_SCALE
+
+
 func _build_houses() -> void:
 	# Right to left, so outdoor stairs overlapping the next house stay visible.
 	for i in range(LAYOUT.size() - 1, -1, -1):
+		if CROSS_STREETS.has(LAYOUT[i]):
+			continue
 		var house := _sprite(_tex(LAYOUT[i]), HOUSE_SCALE)
 		house.position = _house_origin(i)
 		add_child(house)
 		if LAYOUT[i] == "depanneur":
-			_label("DÉPANNEUR", house.position + Vector2(350, 379) * HOUSE_SCALE, Vector2(360, 30), 20, Color("#FFD23F"), Color("#1E3A28"))
+			_label("DÉPANNEUR XIN-XIN", house.position + Vector2(350, 379) * HOUSE_SCALE, Vector2(360, 30), 18, Color.WHITE, Color("#16285C"))
 
 
 func _build_window_cats() -> void:
 	var houses := []
 	for i in LAYOUT.size():
-		houses.append({"art": LAYOUT[i], "origin": _house_origin(i), "scale": HOUSE_SCALE})
+		if not CROSS_STREETS.has(LAYOUT[i]):
+			houses.append({"art": LAYOUT[i], "origin": _house_origin(i), "scale": HOUSE_SCALE})
 	_window_cats = WindowCats.new()
 	_window_cats.setup(houses)
 	add_child(_window_cats)
@@ -293,7 +352,7 @@ func _build_passersby() -> void:
 
 
 func _build_squirrels() -> void:
-	for at in [2.2, 7.5, 12.6, 16.4]:
+	for at in [4.2, 9.5, 14.6, 18.4]:
 		var squirrel := Squirrel.new()
 		var x := _street_x(at)
 		squirrel.position = Vector2(x, 652)
@@ -305,6 +364,8 @@ func _build_squirrels() -> void:
 
 
 func _build_props() -> void:
+	for cs in _cross_streets:
+		add_child(CrossStreet.make(CrossStreet.Part.SIGNS, cs))
 	for after in LAMPS_AFTER:
 		var lamp := _sprite(PropArt.lamppost(), 0.62)
 		lamp.position = Vector2(_starts[after + 1] - 101.0 * 0.62, CURB_Y + 2.0 - 518.0 * 0.62)
@@ -325,30 +386,6 @@ func _build_props() -> void:
 				bike.position = Vector2(rack.position.x + hoop * 0.8 - 75.0 * 0.85, CURB_Y + 2.0 - 90.0 * 0.85)
 				bike.flip_h = _rng.randf() < 0.5
 				add_child(bike)
-
-
-# Montreal-style blue street name plates on a pole.
-func _build_street_sign(x: float, cross_street: String) -> void:
-	var base := Vector2(x, CURB_Y)
-	var pole := ColorRect.new()
-	pole.color = Color("#5A5F63")
-	pole.position = base + Vector2(-3, -420)
-	pole.size = Vector2(6, 420)
-	add_child(pole)
-	var names := [cross_street, "6e Avenue"]
-	for i in names.size():
-		var top_left := base + Vector2(-80, -410 + i * 38)
-		var border := ColorRect.new()
-		border.color = Color.WHITE
-		border.position = top_left
-		border.size = Vector2(160, 32)
-		add_child(border)
-		var plate := ColorRect.new()
-		plate.color = Color("#1D4F91")
-		plate.position = top_left + Vector2(3, 3)
-		plate.size = Vector2(154, 26)
-		add_child(plate)
-		_label(names[i], top_left + Vector2(80, 16), Vector2(154, 26), 17, Color.WHITE, Color("#1D4F91"))
 
 
 func _build_grade() -> void:
