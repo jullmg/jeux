@@ -25,6 +25,8 @@ var _target := 0.0
 var _speed := 0.0
 var _t := 0.0
 var _hop := 0.0
+# Seconds before it can bolt again after a dash (stops it flickering between fleeing and resting).
+var _calm := 0.0
 var _ground_y := 0.0
 var _tree: Sprite2D
 var _side := 1.0
@@ -49,7 +51,8 @@ func _process(delta: float) -> void:
 	var near := _threat_near()
 	match _state:
 		"idle":
-			if near:
+			_calm = maxf(_calm - delta, 0.0)
+			if near and _calm == 0.0:
 				_flee()
 			else:
 				_timer -= delta
@@ -138,8 +141,13 @@ func _flee() -> void:
 				best = tree
 	if best and randf() < 0.8:
 		_run_to_tree(best, 340.0)
-	else:
-		_go(position.x + away * randf_range(320, 480), 340.0, "flee")
+		return
+	var dash := randf_range(320, 480)
+	# Cornered at the end of its patch: dart back past her instead of running on the spot.
+	if absf(clampf(position.x + away * dash, bounds.x, bounds.y) - position.x) < 60.0:
+		away = -away
+	_go(position.x + away * dash, 340.0, "flee")
+	_calm = 1.2
 
 
 func _nearest_tree(x: float, within: float) -> Sprite2D:
