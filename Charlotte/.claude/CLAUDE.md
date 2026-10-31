@@ -41,12 +41,18 @@ wardrobe and change clothes. Click the hallway TV to turn it on and change chann
   Passersby already walk across on the crosswalks. `reference/` has photos of the Dandurand corner and `google_map_immediate_area.png`.
 - `scenes/intro.gd` builds a shorter copy of the same street (5 houses around Charlotte's duplex), plus the logo and start button.
   Its geometry helpers mirror `main.gd`, so a layout/geometry change in one may need the same change in the other.
-- `scenes/house.gd`: the flat as a side-on cross-section, from the photos in `reference/charlotte_house_inside`:
+- Interiors are built from reusable parts, meant for future house insides too:
+  - `world/interior.gd` (`Interior`, base class): Charlotte + `PlayerControl` + camera (`_spawn_charlotte`), areas
+    (`_enter_area`, `_go_through` with a fade), furniture `_put(tex, x, bottom, scale, shadow)` (`"wall"` for hung things,
+    `"floor"` for standing furniture, adds a contact shadow; add pieces back to front), `_plate`, light (`_daylight` beams with
+    dust motes, additive `_glow`, `_ceiling_light`, swaying `_pendant`, flickering `_candle`), `_fairy_lights`, and `_finish()`
+    (foreground, colour grade, fade-in, `--screenshot=`).
+  - `world/room_shell.gd` (`RoomShell`): walls/ceiling/crown moulding/baseboards and a glossy narrow-strip hardwood floor, all from
+    data (`rooms`, `chair_rails`, `posts`, `casings`, `gleams` = x of lights mirrored on the floor).
+  - `world/interior_art.gd` (`InteriorArt`): one SVG function per piece of furniture; `world/fairy_lights.gd` (`FairyLights`).
+- `scenes/house.gd` (extends `Interior`): Charlotte's flat, from the photos in `reference/charlotte_house_inside`:
   vestibule (0–640) → oak glass doorway → salon (–2260) → hallway → kitchen (3400–3960); Charlotte's bedroom is a separate
-  area (5000–6650) reached through the "chacha" door (fade, camera limits switch). Walls/floor are drawn by its inner `_Rooms`
-  class; furniture comes from `world/interior_art.gd` (`InteriorArt`, one SVG function per piece). Charlotte is at scale 0.5 inside.
-  Place pieces with `_put(tex, x, bottom, scale, shadow)`: `"wall"` for hung things, `"floor"` for standing furniture (adds a
-  contact shadow). Windows get `_daylight()` beams; lamps get additive `_glow()`s. Add pieces in back-to-front order.
+  area (5000–6650) reached through the "chacha" door (fade, camera limits switch). Charlotte is at scale 0.5 inside.
 - Charlotte's hamster (`world/hamster.gd`, `Hamster`) lives in the terrarium on her bedroom dresser. The terrarium art is two
   layers, `InteriorArt.terrarium(false)` behind and `terrarium(true)` in front (glass glare, things on the dresser); the
   hamster node shares its position/scale and works in its canvas units. It wanders, grooms, runs its wheel, naps in the

@@ -165,17 +165,55 @@ static func sofa() -> ImageTexture:
 	return tex(600, 230, s)
 
 
-## Canvas 760x90: patterned rug seen in perspective on the floor.
+## Canvas 760x90: the salon's faded Persian rug seen in perspective on the floor (rose field, navy medallion,
+## cream border with little motifs, worn patches, fringes at both ends).
 static func rug() -> ImageTexture:
-	var s := '<path d="M60 4 H700 L756 86 H4 Z" fill="#C98A9A" stroke="#9A5E6E" stroke-width="2"/>'
-	s += '<path d="M84 12 H676 L722 78 H38 Z" fill="#E6C4C8" stroke="#8E5A6A" stroke-width="2"/>'
-	s += '<path d="M120 24 H640 L670 66 H90 Z" fill="#D7A6B4"/>'
-	for i in 9:
-		var x := 150.0 + i * 58.0
-		s += '<path d="M%s 30 l14 15 l-14 15 l-14 -15 z" fill="#7C8FB8" opacity="0.8"/>' % x
-		s += '<circle cx="%s" cy="45" r="4" fill="#F4E3B0"/>' % x
-	for x in range(14, 750, 12):
-		s += '<path d="M%d 86 v4" stroke="#E6D9C8" stroke-width="2"/>' % x
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 31
+	# Each band is the trapezoid inset by `i`: the far edge narrower than the near one.
+	var band := func(i: float) -> String:
+		return "M%.1f %.1f H%.1f L%.1f %.1f H%.1f Z" % [60 + i * 1.4, 4 + i * 0.55, 700 - i * 1.4, 756 - i * 1.9, 86 - i * 0.55, 4 + i * 1.9]
+	var s := '<defs><clipPath id="field"><path d="%s"/></clipPath></defs>' % band.call(30.0)
+	s += '<path d="%s" fill="#8E3438" stroke="#6A2428" stroke-width="2"/>' % band.call(0.0)
+	s += '<path d="%s" fill="#E6D6BC"/>' % band.call(6.0)
+	# Little motifs running round the cream border.
+	for x in range(80, 700, 22):
+		var t := float(x - 80) / 620.0
+		s += '<path d="M%.1f 8 l5 3 l-5 3 l-5 -3 z" fill="%s"/>' % [x, "#2F3E66" if x % 44 == 14 else "#B04A50"]
+		s += '<path d="M%.1f 79 l6 3.5 l-6 3.5 l-6 -3.5 z" fill="%s"/>' % [lerpf(40.0, 720.0, t), "#2F3E66" if x % 44 == 14 else "#B04A50"]
+	s += '<path d="%s" fill="#2F3E66"/>' % band.call(22.0)
+	s += '<path d="%s" fill="#C46E78"/>' % band.call(26.0)
+	s += '<g clip-path="url(#field)">'
+	# Worn, sun-faded patches.
+	for i in 7:
+		s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#E2A4AA" opacity="0.35"/>' % [rng.randf_range(120, 640), rng.randf_range(25, 65), rng.randf_range(40, 90), rng.randf_range(6, 14)]
+	# Scattered flowers and vines over the field.
+	for i in 70:
+		var x := rng.randf_range(100, 660)
+		var y := rng.randf_range(22, 70)
+		match i % 3:
+			0:
+				s += '<path d="M%.1f %.1f h6 M%.1f %.1f v4" stroke="#2F3E66" stroke-width="1.6"/>' % [x - 3, y, x, y - 2]
+			1:
+				s += '<circle cx="%.1f" cy="%.1f" r="2" fill="#F1E2C6"/>' % [x, y]
+			2:
+				s += '<path d="M%.1f %.1f q4 -4 8 0" stroke="#7A2E36" stroke-width="1.5" fill="none"/>' % [x, y]
+	# Corner spandrels.
+	for c in [[110.0, 22.0, 1.0, 1.0], [650.0, 22.0, -1.0, 1.0], [80.0, 70.0, 1.0, -1.0], [680.0, 70.0, -1.0, -1.0]]:
+		s += '<path d="M%.1f %.1f q%.1f 0 %.1f %.1f q%.1f %.1f %.1f %.1f z" fill="#2F3E66" opacity="0.85"/>' % [c[0], c[1], c[2] * 50, c[2] * 60, c[3] * 14, -c[2] * 30, -c[3] * 2, -c[2] * 60, -c[3] * 14]
+	s += '</g>'
+	# Central medallion with its pendants.
+	s += '<path d="M380 18 L480 46 L380 74 L280 46 Z" fill="#2F3E66" stroke="#E6D6BC" stroke-width="2"/>'
+	s += '<path d="M380 26 L452 46 L380 66 L308 46 Z" fill="#E6D6BC"/>'
+	s += '<path d="M380 32 L428 46 L380 60 L332 46 Z" fill="#B04A50"/>'
+	s += '<circle cx="380" cy="46" r="6" fill="#2F3E66"/><circle cx="380" cy="46" r="2.5" fill="#F1E2C6"/>'
+	for side in [-1.0, 1.0]:
+		s += '<path d="M%.1f 46 l%.1f -7 l0 14 z" fill="#2F3E66"/>' % [380 + side * 100, side * 26]
+	# Fringes.
+	for x in range(64, 700, 9):
+		s += '<path d="M%d 4 v-4" stroke="#EDE3D2" stroke-width="2"/>' % x
+	for x in range(10, 752, 10):
+		s += '<path d="M%d 86 v4" stroke="#EDE3D2" stroke-width="2"/>' % x
 	return tex(760, 90, s)
 
 
