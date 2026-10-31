@@ -200,6 +200,28 @@ func _hair_back() -> String:
 				var c := Vector2(112, 118) + Vector2(cos(a) * 88.0, sin(a) * 92.0)
 				s += _f('<circle cx="%.1f" cy="%.1f" r="30" fill="{hair}" stroke="{hair_line}" stroke-width="3"/>' % [c.x, c.y])
 			return s + _hair_shape("M30 120 C30 50 70 22 112 22 C160 22 196 50 194 120 C190 170 40 170 30 120 Z", 0.0)
+		"pigtails":
+			return _hair_shape(_CAP_BACK) \
+				+ _hair_shape("M44 96 C10 104 2 160 14 206 C20 226 40 222 38 200 C34 160 40 126 60 106 Z") \
+				+ _hair_shape("M180 96 C214 104 222 160 210 206 C204 226 184 222 186 200 C190 160 184 126 164 106 Z") \
+				+ _f('<circle cx="48" cy="100" r="9" fill="{accent}" stroke="{accent_line}" stroke-width="2"/><circle cx="176" cy="100" r="9" fill="{accent}" stroke="{accent_line}" stroke-width="2"/>')
+		"braids":
+			var b := _hair_shape(_CAP_BACK)
+			for side: float in [-1.0, 1.0]:
+				var x0 := 112.0 + side * 70.0
+				for i in 7:
+					var y := 118.0 + i * 20.0
+					var r := 15.0 - i * 0.8
+					b += _f('<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="12" fill="{hair}" stroke="{hair_line}" stroke-width="2.5" transform="rotate(%d %.1f %.1f)"/>' % [x0 + side * i * 1.5, y, r, 20 if i % 2 == 0 else -20, x0 + side * i * 1.5, y])
+				var tip := Vector2(x0 + side * 11.0, 262.0)
+				b += _f('<path d="M%.1f %.1f l-8 20 h16 Z" fill="{hair}" stroke="{hair_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [tip.x, tip.y - 2])
+				b += _f('<rect x="%.1f" y="%.1f" width="16" height="7" rx="3" fill="{accent}" stroke="{accent_line}" stroke-width="2"/>' % [tip.x - 8, tip.y - 6])
+			return b
+		"space_buns":
+			return _hair_shape(_CAP_BACK) \
+				+ _hair_shape("M62 42 m-28 0 a28 26 0 1 0 56 0 a28 26 0 1 0 -56 0") \
+				+ _hair_shape("M162 42 m-28 0 a28 26 0 1 0 56 0 a28 26 0 1 0 -56 0") \
+				+ _f('<path d="M46 56 Q62 66 80 56 M146 56 Q162 66 180 56" stroke="{accent}" stroke-width="5" fill="none" stroke-linecap="round"/>')
 		"short", "buzz":
 			return _hair_shape(_CAP_BACK)
 		"bald":
@@ -210,12 +232,12 @@ func _hair_back() -> String:
 func _hair_front() -> String:
 	var shine := _f('<path d="M66 54 C92 36 136 36 164 52" stroke="{hair_light}" stroke-width="8" fill="none" stroke-linecap="round"/>')
 	match look.hair_style:
-		"long_wavy", "long_straight", "bob":
+		"long_wavy", "long_straight", "bob", "pigtails":
 			return _hair_shape(_CHARLOTTE_FRONT) \
 				+ _f('<path d="M76 72 C80 60 92 50 108 44" stroke="{hair_line}" stroke-width="2.5" fill="none" stroke-linecap="round"/>') \
 				+ shine + _f('<path d="M176 64 C180 70 182 76 183 82" stroke="{hair_light}" stroke-width="5" fill="none" stroke-linecap="round"/>') \
 				+ _f('<path d="M48 96 C46 110 46 124 48 136" stroke="{hair_mid}" stroke-width="4" fill="none" stroke-linecap="round"/>')
-		"ponytail", "bun":
+		"ponytail", "bun", "braids", "space_buns":
 			return _hair_shape(_SWEPT_FRONT) + _f('<path d="M70 60 C92 44 132 42 160 54" stroke="{hair_light}" stroke-width="7" fill="none" stroke-linecap="round"/>')
 		"curly":
 			var s := ""

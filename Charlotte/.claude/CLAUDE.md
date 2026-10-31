@@ -49,7 +49,7 @@ wardrobe and change clothes. No goals yet.
   hamster node shares its position/scale and works in its canvas units. It wanders, grooms, runs its wheel, naps in the
   hideout, and stands up with hearts when clicked.
 - `ui/wardrobe.gd` (`Wardrobe`, CanvasLayer 60): the dressing window (mirror preview + tabs of clothes, colours, patterns,
-  hats, accessories; "Au hasard", "Comme d'habitude"). On "C'est parfait !" the house calls `CharacterLook.dress_charlotte()`,
+  hairstyle and hair colour, hats, accessories; "Au hasard", "Comme d'habitude"). On "C'est parfait !" the house calls `CharacterLook.dress_charlotte()`,
   which keeps the look for every scene and saves it to `user://charlotte_outfit.tres`; `CharacterLook.charlotte()` returns it
   (else `usual()`, the yellow dress). Delete that file after tests that press "C'est parfait !". Picking a clothing colour drops
   Charlotte's exact-colour `overrides` for clothes (`cloth_*`, `accent_*`, `shoe_*`). Design sheets use `CharacterLook.usual()`.

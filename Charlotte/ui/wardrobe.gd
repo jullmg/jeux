@@ -24,6 +24,11 @@ const COLORS := ["#FFD23F", "#FF8A3D", "#E04F5F", "#FF5D8F", "#FFB3C7", "#C2185B
 	"#4A6FA5", "#1FB5C4", "#A5D6A7", "#3E8E5A", "#8D6E63", "#F4F1EA", "#FFFFFF", "#2E3440"]
 const LEG_COLORS := ["#FFFFFF", "#FFB3C7", "#FF5D8F", "#E04F5F", "#FFD23F", "#7E57C2", "#4A6FA5", "#2F3E5C",
 	"#3A3A3A", "#8D6E63", "#5E6B3A", "#2B2B2B"]
+const HAIR_STYLES := [["long_wavy", "Longs ondulés"], ["long_straight", "Longs raides"], ["bob", "Carré"], ["ponytail", "Queue de cheval"],
+	["pigtails", "Couettes"], ["braids", "Tresses"], ["bun", "Chignon"], ["space_buns", "Deux chignons"], ["curly", "Bouclés"], ["short", "Courts"]]
+# Natural shades first (hers is the first), then a few fun ones.
+const HAIR_COLORS := ["#B0623A", "#8A3B1E", "#5A3A22", "#3A2618", "#1E1612", "#C9A060", "#E3C78A",
+	"#FF7BA3", "#B388FF", "#4FA3E0", "#3FBFA0"]
 const GLASSES := ["#2B2B2B", "#8A4B2A", "#C0392B", "#4A6FA5", "#FF5D8F", "#7E57C2"]
 # Charlotte's exact-colour overrides that a new clothing colour must drop (skin, hair and eyes stay).
 const CLOTHING_OVERRIDES := ["cloth_", "accent_", "shoe_"]
@@ -64,7 +69,7 @@ func _ready() -> void:
 	_tabs.position = Vector2(400, 78)
 	_tabs.size = Vector2(750, 482)
 	panel.add_child(_tabs)
-	for tab_name in ["Vêtement", "Jambes et pieds", "Chapeaux", "Accessoires"]:
+	for tab_name in ["Vêtement", "Jambes et pieds", "Coiffure", "Chapeaux", "Accessoires"]:
 		var scroll := ScrollContainer.new()
 		scroll.name = tab_name
 		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -154,8 +159,9 @@ func _refresh() -> void:
 		pages.append(page)
 	_clothes_page(pages[0])
 	_legs_page(pages[1])
-	_hats_page(pages[2])
-	_extras_page(pages[3])
+	_hair_page(pages[2])
+	_hats_page(pages[3])
+	_extras_page(pages[4])
 
 
 func _clothes_page(page: VBoxContainer) -> void:
@@ -190,6 +196,13 @@ func _legs_page(page: VBoxContainer) -> void:
 	_swatches(page, "Couleur des chaussures", COLORS, _look.shoe_color, func(c): _look.shoe_color = c)
 
 
+# A new style keeps her exact hair colours; only a new colour drops them.
+func _hair_page(page: VBoxContainer) -> void:
+	_choices(page, "Coiffure", HAIR_STYLES, _look.hair_style, func(v): _look.hair_style = v, [])
+	_swatches(page, "Couleur des cheveux", HAIR_COLORS, _look.hair_color, func(c): _look.hair_color = c, ["hair_"])
+	_swatches(page, "Élastiques et rubans", COLORS, _look.accent_color, func(c): _look.accent_color = c)
+
+
 func _hats_page(page: VBoxContainer) -> void:
 	_choices(page, "Sur la tête", HATS, _look.hat, func(v): _look.hat = v)
 	if _look.hat != "":
@@ -214,7 +227,7 @@ func _row(page: VBoxContainer, title: String) -> HFlowContainer:
 	return flow
 
 
-func _choices(page: VBoxContainer, title: String, options: Array, current: String, on_pick: Callable) -> void:
+func _choices(page: VBoxContainer, title: String, options: Array, current: String, on_pick: Callable, drop := CLOTHING_OVERRIDES) -> void:
 	var flow := _row(page, title)
 	for o in options:
 		var b := Button.new()
@@ -222,15 +235,15 @@ func _choices(page: VBoxContainer, title: String, options: Array, current: Strin
 		b.custom_minimum_size = Vector2(0, 42)
 		if o[0] == current:
 			b.add_theme_stylebox_override("normal", _box(YELLOW, BLUE, 3, 14))
-		b.pressed.connect(_change.bind(on_pick, o[0]))
+		b.pressed.connect(_change.bind(on_pick, o[0], drop))
 		flow.add_child(b)
 
 
-func _swatches(page: VBoxContainer, title: String, colors: Array, current: Color, on_pick: Callable) -> void:
+func _swatches(page: VBoxContainer, title: String, colors: Array, current: Color, on_pick: Callable, drop := CLOTHING_OVERRIDES) -> void:
 	var flow := _row(page, title)
 	for hex in colors:
 		var c := Color(hex)
-		flow.add_child(_swatch(c, c.is_equal_approx(current), _change.bind(on_pick, c)))
+		flow.add_child(_swatch(c, c.is_equal_approx(current), _change.bind(on_pick, c, drop)))
 
 
 # A colour row with a "Rien" choice first; the value is a hex string, "" for none.
@@ -259,11 +272,12 @@ func _swatch(c: Color, selected: bool, on_press: Callable) -> Button:
 	return b
 
 
-func _change(on_pick: Callable, value: Variant) -> void:
+## Applies a choice. `drop`: prefixes of Charlotte's exact-colour overrides that no longer fit it.
+func _change(on_pick: Callable, value: Variant, drop := CLOTHING_OVERRIDES) -> void:
 	on_pick.call(value)
-	# Her usual exact colours only fit her usual dress: a new choice uses the derived palette.
+	# Her usual exact colours only fit her usual clothes and hair: a new colour uses the derived palette.
 	for key in _look.overrides.keys():
-		for prefix in CLOTHING_OVERRIDES:
+		for prefix in drop:
 			if String(key).begins_with(prefix):
 				_look.overrides.erase(key)
 	_refresh()
@@ -290,6 +304,7 @@ func _randomize() -> void:
 	_look.scarf = pick.call(COLORS) if rng.randf() < 0.3 else ""
 	_look.backpack = pick.call(COLORS) if rng.randf() < 0.3 else ""
 	_look.glasses = pick.call(GLASSES) if rng.randf() < 0.2 else ""
+	_look.hair_style = pick.call(HAIR_STYLES)[0]
 	_change(func(_v): pass, null)
 
 
