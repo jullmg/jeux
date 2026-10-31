@@ -13,7 +13,7 @@ const MARGIN := 30.0
 # Across each cross street, the first building of the next block (the school across Dandurand).
 const LAYOUT: Array[String] = [
 	"ecole", "rue_dandurand",
-	"depanneur", "plex_01", "ruelle_verte",
+	"depanneur", "garages", "ruelle_verte",
 	"triplex_exemple_2", "plex_02", "plex_03", "moderne", "plex_04",
 	"duplex_voisin_gauche", "duplex_charlotte", "duplex_voisin_droite",
 	"plex_05", "triplex_exemple_3", "plex_06", "plex_07", "plex_08", "plex_09",
@@ -22,7 +22,7 @@ const LAYOUT: Array[String] = [
 ]
 # Cross streets are gaps in the row (width in px at the facade line), drawn by CrossStreet.
 const CROSS_STREETS := {"rue_dandurand": 560.0, "rue_holt": 520.0}
-const TREES_AFTER: Array[int] = [2, 6, 8, 10, 13, 15, 17]
+const TREES_AFTER: Array[int] = [6, 8, 10, 13, 15, 17]
 const LAMPS_AFTER: Array[int] = [4, 9, 14, 18]
 const HYDRANTS_AT: Array[float] = [7.5, 16.3]
 const RACKS_AT: Array[float] = [2.5, 12.55, 15.6]
@@ -198,9 +198,7 @@ func _build_cross_streets() -> void:
 		{"to": CrossStreet.FAR, "top": 330.0, "kind": "plex", "color": Color("#9C5A44")},
 	]
 	dandurand.right_walls = [
-		{"to": 0.35, "top": _house_top("depanneur"), "kind": "shop", "color": Color("#8A5A44")},
-		{"to": 0.75, "top": 300.0, "kind": "garage", "color": Color("#7A4636")},
-		{"to": 1.0, "kind": "gap"},
+		{"to": 0.45, "top": _house_top("depanneur"), "kind": "shop", "color": Color("#6E3A2E")},
 		{"to": 2.2, "top": 300.0, "kind": "plex", "color": Color("#B5603F")},
 		{"to": CrossStreet.FAR, "top": 260.0, "kind": "plex", "color": Color("#C8A27A")},
 	]
@@ -244,9 +242,7 @@ func _build_houses() -> void:
 		var house := _sprite(_tex(LAYOUT[i]), HOUSE_SCALE)
 		house.position = _house_origin(i)
 		add_child(house)
-		if LAYOUT[i] == "depanneur":
-			_label("DÉPANNEUR XIN-XIN", house.position + Vector2(350, 379) * HOUSE_SCALE, Vector2(360, 30), 18, Color.WHITE, Color("#16285C"))
-		elif LAYOUT[i] == "ruelle_verte":
+		if LAYOUT[i] == "ruelle_verte":
 			_label("RUELLE\nVERTE", house.position + Vector2(214, 416) * HOUSE_SCALE, Vector2(72, 36), 12, Color.WHITE, Color("#1E5E30"))
 
 
