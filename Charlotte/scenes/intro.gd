@@ -1,8 +1,8 @@
 extends Node2D
 # ══════════════════════════════════════════════════════════════
 # Intro screen – full living street scene + the art/logo.png title.
-# Uses real game components: SkyBackdrop, Skyline, Cloud, Street,
-# Squirrel, Cat, Birds, Character (Charlotte), PropArt.
+# Uses real game components: SkyBackdrop, Skyline, Cloud, Street, Squirrel, Cat,
+# StrayCat, Dog, WindowCats, Birds, Character (Charlotte), PropArt, Foreground, Wind.
 # Press "Démarrer" or Enter/Space to start.
 # ══════════════════════════════════════════════════════════════
 
@@ -31,12 +31,15 @@ var _charlotte: Character
 var _rng        := RandomNumberGenerator.new()
 var _time        := 0.0
 var _tree_texs: Array[Texture2D] = []
+var _wind := Wind.new()
+var _window_cats: WindowCats
 
 # UI fade-in
 var _ui_alpha   := 0.0
 var _ui_layer: CanvasLayer
 var _logo: Sprite2D
 var _logo_base_scale := 1.0
+var _halo: TextureRect
 
 const LOGO_WIDTH := 640.0
 const LOGO_Y := 205.0
@@ -54,14 +57,18 @@ func _ready() -> void:
 	_build_skyline()
 	add_child(Birds.new())
 	_build_houses()
+	_build_window_cats()
 	_build_cat()
 	_build_street()
 	_build_tree_shadows()
 	_build_passersby()
 	_build_charlotte()
+	_build_stray_cat()
 	_build_squirrels()
 	_build_trees()
 	_build_props()
+	Foreground.build(self, VIEW.x, VIEW.x, 11)
+	add_child(_wind)
 
 	# ── UI overlay (logo + button) ────────────────────────────
 	_ui_layer = CanvasLayer.new()
@@ -130,6 +137,7 @@ func _sway(strength: float, phase: float) -> ShaderMaterial:
 	mat.shader = preload("res://shaders/sway.gdshader")
 	mat.set_shader_parameter("strength", strength)
 	mat.set_shader_parameter("phase", phase)
+	_wind.materials.append(mat)
 	return mat
 
 
@@ -159,6 +167,15 @@ func _build_houses() -> void:
 		var house := _sprite(_tex(LAYOUT[i]), HOUSE_SCALE)
 		house.position = _house_origin(i)
 		add_child(house)
+
+
+func _build_window_cats() -> void:
+	var houses := []
+	for i in LAYOUT.size():
+		houses.append({"art": LAYOUT[i], "origin": _house_origin(i), "scale": HOUSE_SCALE})
+	_window_cats = WindowCats.new()
+	_window_cats.setup(houses)
+	add_child(_window_cats)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -227,10 +244,7 @@ func _falling_leaves(leaf: Texture2D, at: Vector2) -> CPUParticles2D:
 	p.angle_max = 360.0
 	p.scale_amount_min = 0.5
 	p.scale_amount_max = 0.9
-	var colors := Gradient.new()
-	colors.offsets = PackedFloat32Array([0.0, 0.25, 0.5, 0.75, 1.0])
-	colors.colors = PackedColorArray([Color("#C0392B"), Color("#E67E22"), Color("#F1C40F"), Color("#D35400"), Color("#B5442E")])
-	p.color_initial_ramp = colors
+	p.color_initial_ramp = PropArt.leaf_colors()
 	var fade := Gradient.new()
 	fade.offsets = PackedFloat32Array([0.0, 0.85, 1.0])
 	fade.colors = PackedColorArray([Color.WHITE, Color.WHITE, Color(1, 1, 1, 0)])
@@ -239,21 +253,27 @@ func _falling_leaves(leaf: Texture2D, at: Vector2) -> CPUParticles2D:
 
 
 # ─────────────────────────────────────────────────────────────
-# Passersby (a couple of NPCs drifting along)
+# Passersby: kept to either side so they never walk behind the logo and button
 # ─────────────────────────────────────────────────────────────
+
+const WALK_ZONES: Array[Vector2] = [Vector2(70, 400), Vector2(880, 1240), Vector2(880, 1240)]
+
 
 func _build_passersby() -> void:
 	var ages := ["adult", "child", "senior"]
 	for i in ages.size():
+		var zone := WALK_ZONES[i]
 		var npc := Passerby.new()
 		npc.look = CharacterLook.random(_rng, ages[i])
 		npc.walk_speed = _rng.randf_range(100.0, 160.0)
-		npc.position = Vector2(_rng.randf_range(120.0, STREET_W - 120.0), CHARLOTTE_Y - 26.0)
+		npc.position = Vector2(_rng.randf_range(zone.x, zone.y), CHARLOTTE_Y - 26.0)
 		npc.scale = Vector2.ONE * CHAR_SCALE
 		npc.facing = 1 if _rng.randf() < 0.5 else -1
-		npc.bounds = Vector2(60.0, STREET_W - 60.0)
+		npc.bounds = zone
 		npc.modulate = Color(0.92, 0.92, 0.94)
 		add_child(npc)
+		if i == 0:
+			add_child(Dog.random(_rng, npc))
 
 
 # ─────────────────────────────────────────────────────────────
@@ -269,6 +289,17 @@ func _build_charlotte() -> void:
 	_charlotte.scale = Vector2.ONE * CHAR_SCALE
 	_charlotte.facing = -1  # faces left / camera
 	add_child(_charlotte)
+	_window_cats.charlotte = _charlotte
+
+
+# A stray cat already sitting near Charlotte, ready to come say hello.
+func _build_stray_cat() -> void:
+	var cat := StrayCat.random(_rng)
+	cat.position = Vector2(_charlotte.position.x - 150.0, 646.0)
+	cat.bounds = Vector2(720.0, 1240.0)
+	cat.charlotte = _charlotte
+	cat.facing = 1
+	add_child(cat)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -287,7 +318,7 @@ func _build_squirrels() -> void:
 
 
 # ─────────────────────────────────────────────────────────────
-# Props (lamp, hydrant, a parked car)
+# Props (lamp, hydrant)
 # ─────────────────────────────────────────────────────────────
 
 func _build_props() -> void:
@@ -301,20 +332,6 @@ func _build_props() -> void:
 	var char_idx := LAYOUT.find("duplex_charlotte")
 	hydrant.position = Vector2(_starts[char_idx] + 60.0, CURB_Y - 82.0 * 0.62)
 	add_child(hydrant)
-
-	# Parked car to the left
-	var car := _sprite(PropArt.car(_rng, "sedan"), 0.62)
-	car.position = Vector2(_starts[0] + 40.0, 648.0)
-	add_child(car)
-	var wheel_tex := PropArt.wheel()
-	for wx in [100.0, 340.0]:
-		var w := Sprite2D.new()
-		w.texture = wheel_tex
-		w.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-		w.scale = Vector2.ONE * 0.62
-		w.position = car.position + Vector2(wx, 128) * 0.62
-		w.rotation = _rng.randf_range(0, TAU)
-		add_child(w)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -341,6 +358,23 @@ func _build_grade() -> void:
 
 func _build_logo() -> void:
 	var cx := VIEW.x / 2.0
+	# Soft warm halo so the logo lifts off the busy brick behind it.
+	var grad := Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+	grad.colors = PackedColorArray([Color(1.0, 0.97, 0.9, 0.6), Color(1.0, 0.95, 0.85, 0.3), Color(1.0, 0.95, 0.85, 0.0)])
+	var halo_tex := GradientTexture2D.new()
+	halo_tex.gradient = grad
+	halo_tex.fill = GradientTexture2D.FILL_RADIAL
+	halo_tex.fill_from = Vector2(0.5, 0.5)
+	halo_tex.fill_to = Vector2(1.0, 0.5)
+	_halo = TextureRect.new()
+	_halo.texture = halo_tex
+	_halo.stretch_mode = TextureRect.STRETCH_SCALE
+	_halo.size = Vector2(1000, 560)
+	_halo.position = Vector2(cx, LOGO_Y + 30.0) - _halo.size / 2.0
+	_halo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_halo.modulate.a = 0.0
+	_ui_layer.add_child(_halo)
 	_logo = Sprite2D.new()
 	_logo.texture = preload("res://art/logo.png")
 	_logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
@@ -359,6 +393,7 @@ func _animate_logo() -> void:
 	_logo.position.y = LOGO_Y + sin(_time * 1.1) * 4.0
 	_logo.rotation = sin(_time * 0.8) * 0.012
 	_logo.modulate.a = _ui_alpha
+	_halo.modulate.a = _ui_alpha
 
 
 # ─────────────────────────────────────────────────────────────
@@ -367,7 +402,7 @@ func _animate_logo() -> void:
 
 func _build_start_button() -> void:
 	var cx := VIEW.x / 2.0
-	var btn_y := 430.0
+	var btn_y := 392.0
 
 	# "Démarrer" button
 	var btn := Button.new()
@@ -388,6 +423,9 @@ func _build_start_button() -> void:
 		st.corner_radius_bottom_right = 8
 		st.content_margin_left  = 14
 		st.content_margin_right = 14
+		st.shadow_color = Color(0.1, 0.05, 0.02, 0.35)
+		st.shadow_size = 8
+		st.shadow_offset = Vector2(0, 4)
 		return st
 
 	btn.add_theme_stylebox_override("normal",  _mk_style.call(Color("#1D4F91"), Color("#E8DDD0")))

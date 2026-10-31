@@ -26,6 +26,8 @@ var _arm_back: Sprite2D
 var _hair_angle := 0.0
 var _hair_vel := 0.0
 var _blink_in := 2.0
+var _pet_time := 0.0
+var _pet := 0.0
 
 
 func _ready() -> void:
@@ -38,7 +40,6 @@ func _ready() -> void:
 	var neck := Vector2(0, _rig.neck_y)
 	_blink_in = randf_range(1.0, 4.0)
 	_body = Node2D.new()
-	_body.rotation = _rig.lean
 	add_child(_body)
 	# Children are drawn back to front.
 	_hair_back = _part(_body, tex.hair_back, _rig.head_pivot, neck)
@@ -61,11 +62,29 @@ func _ready() -> void:
 	_apply_pose()
 
 
+# Contact shadow, plus a longer soft one thrown to the right by the low sun on the left.
 func _draw() -> void:
-	var w := 46.0 * float(_rig.get("sx", 1.0))
+	var w := 50.0 * float(_rig.get("sx", 1.0))
+	draw_set_transform(Vector2(w * 0.9, 3), 0.0, Vector2(1.9, 0.2))
+	draw_circle(Vector2.ZERO, w, Color(0.15, 0.08, 0.05, 0.12))
 	draw_set_transform(Vector2(6, 2), 0.0, Vector2(1.0, 0.22))
-	draw_circle(Vector2.ZERO, w, Color(0.15, 0.08, 0.05, 0.22))
-	draw_circle(Vector2.ZERO, w * 0.6, Color(0.15, 0.08, 0.05, 0.12))
+	draw_circle(Vector2.ZERO, w * 1.15, Color(0.15, 0.08, 0.05, 0.16))
+	draw_circle(Vector2.ZERO, w * 0.75, Color(0.15, 0.08, 0.05, 0.22))
+	draw_circle(Vector2.ZERO, w * 0.4, Color(0.15, 0.08, 0.05, 0.18))
+
+
+## Crouches and strokes whatever is in front of her for `duration` seconds.
+func pet(duration: float) -> void:
+	_pet_time = duration
+	is_walking = false
+
+
+func is_petting() -> bool:
+	return _pet_time > 0.0
+
+
+func hand_position() -> Vector2:
+	return _arm_front.to_global(Vector2(0, _rig.arm_len))
 
 
 func _process(delta: float) -> void:
@@ -73,6 +92,8 @@ func _process(delta: float) -> void:
 		_apply_pose()
 		return
 	_time += delta
+	_pet_time = maxf(_pet_time - delta, 0.0)
+	_pet = move_toward(_pet, 1.0 if _pet_time > 0.0 else 0.0, delta * 4.0)
 	if is_walking:
 		# Longer legs take longer strides, so they swing more slowly for the same speed.
 		walk_phase = fmod(walk_phase + delta * 1.6 * (walk_speed / 200.0) * (110.0 / (_rig.leg_len as float)), 1.0)
@@ -88,15 +109,19 @@ func _process(delta: float) -> void:
 
 func _apply_pose() -> void:
 	var swing := sin(walk_phase * TAU) if is_walking else 0.0
-	_leg_front.rotation = deg_to_rad(26.0) * swing
-	_leg_back.rotation = -_leg_front.rotation
+	# Petting: a deep lunge to get down to cat height, lean in and stroke with the front hand.
+	var lunge := deg_to_rad(55.0) * _pet
+	_leg_front.rotation = deg_to_rad(26.0) * swing - lunge
+	_leg_back.rotation = -deg_to_rad(26.0) * swing + lunge
 	var arm_swing := deg_to_rad(22.0) * swing
-	_arm_front.rotation = ARM_REST - arm_swing
+	var stroke := deg_to_rad(-62.0) + sin(_time * 6.0) * deg_to_rad(12.0)
+	_arm_front.rotation = lerpf(ARM_REST - arm_swing, stroke, _pet)
 	_arm_back.rotation = -ARM_REST + arm_swing
 	_body.position.y = (1.0 - cos(_leg_front.rotation)) * (_rig.leg_len as float)
+	_body.rotation = ((_rig.lean as float) + deg_to_rad(10.0) * _pet) * facing
 	var bounce := sin(walk_phase * TAU * 2.0)
 	var tilt := bounce if is_walking else sin(_time * 2.2) * 0.6
-	_head.rotation = deg_to_rad(2.0) * tilt
+	_head.rotation = deg_to_rad(2.0) * tilt + deg_to_rad(10.0) * _pet
 	_hair_back.rotation = _head.rotation + _hair_angle + (0.025 * bounce if is_walking else 0.0)
 	_torso.skew = 0.035 * swing
 	_body.scale.x = facing

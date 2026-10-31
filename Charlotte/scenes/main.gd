@@ -21,7 +21,8 @@ const TREES_AFTER: Array[int] = [1, 4, 6, 8, 11, 13, 15]
 const LAMPS_AFTER: Array[int] = [2, 7, 12, 16]
 const HYDRANTS_AT: Array[float] = [5.5, 14.3]
 const RACKS_AT: Array[float] = [0.5, 10.55, 13.6]
-const CARS_AT: Array[float] = [3.6, 6.4, 9.9, 15.2, 17.6]
+const STRAY_CAT_Y := 646.0
+const MAX_STRAY_CATS := 2
 
 var _street_width := 0.0
 var _starts: Array[float] = []
@@ -29,6 +30,13 @@ var _textures := {}
 var _charlotte: Character
 var _camera: Camera2D
 var _rng := RandomNumberGenerator.new()
+var _wind := Wind.new()
+var _animals: Node2D
+var _window_cats: WindowCats
+var _cat_timer := 3.0
+# Click/tap to walk: where Charlotte is heading, and what she'll interact with when she gets there.
+var _goal_x := NAN
+var _goal_target: Node2D
 
 
 func _ready() -> void:
@@ -39,6 +47,7 @@ func _ready() -> void:
 	Skyline.build(self, _street_width, VIEW.x)
 	add_child(Birds.new())
 	_build_houses()
+	_build_window_cats()
 	_build_cat()
 	var street := Street.new()
 	street.width = _street_width
@@ -51,11 +60,21 @@ func _ready() -> void:
 	if not x_arg.is_empty():
 		start_x = x_arg.to_float()
 	_charlotte = _spawn_charlotte(start_x)
+	_window_cats.charlotte = _charlotte
+	var kick := LeafKick.new()
+	kick.walker = _charlotte
+	add_child(kick)
+	# Stray cats walk the sidewalk just in front of Charlotte, so her petting hand lands on their heads.
+	_animals = Node2D.new()
+	add_child(_animals)
+	_spawn_cat(start_x + 260.0)
 	_build_squirrels()
 	_build_trees(trees)
 	_build_props()
 	_build_street_sign(110.0, "Rue Dandurand")
 	_build_street_sign(_street_width - 110.0, "Rue Holt")
+	Foreground.build(self, _street_width, VIEW.x)
+	add_child(_wind)
 	_camera = Camera2D.new()
 	_camera.limit_left = 0
 	_camera.limit_right = int(_street_width)
@@ -73,11 +92,97 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	var dir := Input.get_axis("ui_left", "ui_right")
-	_charlotte.is_walking = dir != 0.0
+	if dir != 0.0:
+		_goal_x = NAN
+		_set_goal_target(null)
+		if _charlotte.is_petting():
+			_charlotte.pet(0.0)
+	elif not is_nan(_goal_x):
+		var dx := _goal_x - _charlotte.position.x
+		if absf(dx) <= _charlotte.walk_speed * delta:
+			_charlotte.position.x = _goal_x
+			_goal_x = NAN
+			_arrive()
+		else:
+			dir = signf(dx)
+	if _charlotte.is_petting() and dir == 0.0:
+		_charlotte.is_walking = false
+	else:
+		_charlotte.is_walking = dir != 0.0
 	if dir != 0.0:
 		_charlotte.facing = 1 if dir > 0.0 else -1
 		_charlotte.position.x = clampf(_charlotte.position.x + dir * _charlotte.walk_speed * delta, 60.0, _street_width - 60.0)
 	_follow_charlotte()
+	_spawn_stray_cats(delta)
+
+
+# Click (or tap) a cat to go pet it; click anywhere else on the street to walk there.
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		var hovering := _interactable_at(_to_world(event.position)) != null
+		Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND if hovering else Input.CURSOR_ARROW)
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		var at := _to_world(event.position)
+		var target := _interactable_at(at)
+		_set_goal_target(target)
+		if target:
+			_goal_x = clampf(target.approach_x(_charlotte.position.x), 60.0, _street_width - 60.0)
+		elif at.y > HOUSE_BASE_Y - 200.0:
+			_goal_x = clampf(at.x, 60.0, _street_width - 60.0)
+
+
+# Touches arrive as emulated mouse events, so this covers tablets too.
+func _to_world(screen: Vector2) -> Vector2:
+	return get_canvas_transform().affine_inverse() * screen
+
+
+func _interactable_at(point: Vector2) -> Node2D:
+	for node in get_tree().get_nodes_in_group("interactable"):
+		if node.can_interact() and node.hit_test(point):
+			return node
+	return null
+
+
+func _set_goal_target(target: Node2D) -> void:
+	if _goal_target and is_instance_valid(_goal_target):
+		_goal_target.release()
+	_goal_target = target
+	if target:
+		target.reserve()
+
+
+func _arrive() -> void:
+	var target := _goal_target
+	_goal_target = null
+	if target and is_instance_valid(target) and target.can_interact():
+		_charlotte.facing = 1 if target.position.x > _charlotte.position.x else -1
+		target.interact(_charlotte)
+
+
+# Now and then a stray cat wanders in from just off screen.
+func _spawn_stray_cats(delta: float) -> void:
+	_cat_timer -= delta
+	if _cat_timer > 0.0:
+		return
+	_cat_timer = _rng.randf_range(15.0, 35.0)
+	if _animals.get_child_count() >= MAX_STRAY_CATS:
+		return
+	var cx := _camera.get_screen_center_position().x
+	var side := -1.0 if _rng.randf() < 0.5 else 1.0
+	var x := cx + side * (VIEW.x / 2.0 + 60.0)
+	if x < 40.0 or x > _street_width - 40.0:
+		side = -side
+		x = cx + side * (VIEW.x / 2.0 + 60.0)
+	_spawn_cat(x).walk_to(cx - side * _rng.randf_range(0.0, 400.0), 55.0)
+
+
+func _spawn_cat(x: float) -> StrayCat:
+	var cat := StrayCat.random(_rng)
+	cat.position = Vector2(x, STRAY_CAT_Y)
+	cat.bounds = Vector2(40.0, _street_width - 40.0)
+	cat.charlotte = _charlotte
+	_animals.add_child(cat)
+	return cat
 
 
 func _follow_charlotte() -> void:
@@ -129,6 +234,15 @@ func _build_houses() -> void:
 			_label("DÉPANNEUR", house.position + Vector2(350, 379) * HOUSE_SCALE, Vector2(360, 30), 20, Color("#FFD23F"), Color("#1E3A28"))
 
 
+func _build_window_cats() -> void:
+	var houses := []
+	for i in LAYOUT.size():
+		houses.append({"art": LAYOUT[i], "origin": _house_origin(i), "scale": HOUSE_SCALE})
+	_window_cats = WindowCats.new()
+	_window_cats.setup(houses)
+	add_child(_window_cats)
+
+
 func _build_cat() -> void:
 	var cat := Cat.new()
 	cat.position = _house_origin(LAYOUT.find("duplex_voisin_gauche")) + Vector2(300, 552) * HOUSE_SCALE
@@ -152,6 +266,7 @@ func _sway(strength: float, phase: float) -> ShaderMaterial:
 	mat.shader = preload("res://shaders/sway.gdshader")
 	mat.set_shader_parameter("strength", strength)
 	mat.set_shader_parameter("phase", phase)
+	_wind.materials.append(mat)
 	return mat
 
 
@@ -196,10 +311,7 @@ func _falling_leaves(leaf: Texture2D, at: Vector2) -> CPUParticles2D:
 	p.angle_max = 360.0
 	p.scale_amount_min = 0.5
 	p.scale_amount_max = 0.9
-	var colors := Gradient.new()
-	colors.offsets = PackedFloat32Array([0.0, 0.25, 0.5, 0.75, 1.0])
-	colors.colors = PackedColorArray([Color("#C0392B"), Color("#E67E22"), Color("#F1C40F"), Color("#D35400"), Color("#B5442E")])
-	p.color_initial_ramp = colors
+	p.color_initial_ramp = PropArt.leaf_colors()
 	var fade := Gradient.new()
 	fade.offsets = PackedFloat32Array([0.0, 0.85, 1.0])
 	fade.colors = PackedColorArray([Color.WHITE, Color.WHITE, Color(1, 1, 1, 0)])
@@ -219,6 +331,8 @@ func _build_passersby() -> void:
 		npc.bounds = Vector2(80.0, _street_width - 80.0)
 		npc.modulate = Color(0.94, 0.94, 0.96)
 		add_child(npc)
+		if ages[i] != "child" and _rng.randf() < 0.55:
+			add_child(Dog.random(_rng, npc))
 
 
 func _build_squirrels() -> void:
@@ -253,21 +367,6 @@ func _build_props() -> void:
 				bike.position = Vector2(rack.position.x + hoop * 0.8 - 75.0 * 0.85, CURB_Y + 2.0 - 90.0 * 0.85)
 				bike.flip_h = _rng.randf() < 0.5
 				add_child(bike)
-	var wheel := PropArt.wheel()
-	for at in CARS_AT:
-		var kind: String = ["sedan", "hatch", "suv"][_rng.randi_range(0, 2)]
-		var car := _sprite(PropArt.car(_rng, kind), 0.62)
-		car.position = Vector2(_street_x(at) - 220.0 * 0.62, 648.0)
-		car.flip_h = _rng.randf() < 0.3
-		add_child(car)
-		for wx in [100.0, 340.0]:
-			var w := Sprite2D.new()
-			w.texture = wheel
-			w.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-			w.scale = Vector2.ONE * 0.62
-			w.position = car.position + Vector2(wx, 128) * 0.62
-			w.rotation = _rng.randf_range(0, TAU)
-			add_child(w)
 
 
 # Montreal-style blue street name plates on a pole.
@@ -333,10 +432,13 @@ func _sprite(tex: Texture2D, sprite_scale: float) -> Sprite2D:
 	return sprite
 
 
-# Usage: Godot --path . -- --screenshot=/tmp/charlotte.png [--x=1234]
+# Usage: Godot --path . -- --screenshot=/tmp/charlotte.png [--x=1234] [--wait=seconds]
 func _save_screenshot(path: String) -> void:
 	for i in 8:
 		await get_tree().process_frame
+	var wait := _arg("--wait=")
+	if not wait.is_empty():
+		await get_tree().create_timer(wait.to_float()).timeout
 	get_viewport().get_texture().get_image().save_png(path)
 	get_tree().quit()
 

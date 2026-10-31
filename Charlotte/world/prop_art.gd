@@ -31,12 +31,12 @@ static func _pick(rng: RandomNumberGenerator, items: Array) -> Variant:
 	return items[rng.randi_range(0, items.size() - 1)]
 
 
-# Canvas 380x780, trunk base at (190, 780). Light comes from the upper right.
+# Canvas 380x780, trunk base at (190, 780). Light comes from the low sun on the upper left.
 static func tree(rng: RandomNumberGenerator) -> ImageTexture:
 	var pal: Array = _pick(rng, TREE_PALETTES)
 	var s := '<path d="M172 780 C174 700 168 600 176 520 C178 470 160 430 128 392 L142 382 C168 410 182 436 188 466 C196 428 220 398 254 378 L264 392 C234 414 210 450 204 520 C200 600 208 700 212 780 Z" fill="#6E5A4C" stroke="#4A3A30" stroke-width="3" stroke-linejoin="round"/>'
 	s += '<path d="M184 760 C182 700 186 640 182 580 M196 740 C198 680 194 620 198 560" stroke="#4A3A30" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
-	s += '<path d="M204 770 C202 700 206 620 200 540" stroke="#8C7664" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.7"/>'
+	s += '<path d="M180 770 C178 700 182 620 176 540" stroke="#8C7664" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.7"/>'
 	var blobs := []
 	for i in 19:
 		var a := rng.randf_range(0.0, TAU)
@@ -44,19 +44,41 @@ static func tree(rng: RandomNumberGenerator) -> ImageTexture:
 		blobs.append([190.0 + cos(a) * d * 128.0, 250.0 + sin(a) * d * 150.0, rng.randf_range(48.0, 74.0), _pick(rng, pal)])
 	blobs.sort_custom(func(a, b): return a[1] < b[1])
 	for b in blobs:
-		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="%s"/>' % [b[0] - 10, b[1] + 14, b[2], _hex(Color(b[3]).darkened(0.35))]
+		s += '<path d="%s" fill="%s"/>' % [_lobed(b[0] + 10, b[1] + 14, b[2], rng), _hex(Color(b[3]).darkened(0.4))]
 	for b in blobs:
-		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="%s"/>' % [b[0], b[1], b[2], b[3]]
+		s += '<path d="%s" fill="%s"/>' % [_lobed(b[0], b[1], b[2], rng), b[3]]
+	# Depth: darker clusters tucked into the lower half, sunlit tufts on the upper left of each clump.
 	for b in blobs:
-		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="%s" opacity="0.75"/>' % [b[0] + b[2] * 0.3, b[1] - b[2] * 0.35, b[2] * 0.5, _hex(Color(b[3]).lightened(0.28))]
-	for i in 150:
+		if b[1] > 270.0:
+			s += '<path d="%s" fill="%s" opacity="0.55"/>' % [_lobed(b[0] + b[2] * 0.15, b[1] + b[2] * 0.3, b[2] * 0.5, rng), _hex(Color(b[3]).darkened(0.25))]
+	for b in blobs:
+		if b[1] < 300.0:
+			s += '<path d="%s" fill="%s" opacity="0.7"/>' % [_lobed(b[0] - b[2] * 0.3, b[1] - b[2] * 0.35, b[2] * 0.45, rng), _hex(Color(b[3]).lightened(0.28))]
+	for i in 190:
 		var a := rng.randf_range(0.0, TAU)
-		var d := sqrt(rng.randf())
-		var x := 190.0 + cos(a) * d * 175.0
-		var y := 250.0 + sin(a) * d * 195.0
-		s += '<ellipse cx="%.1f" cy="%.1f" rx="5" ry="3" fill="%s" transform="rotate(%d %.1f %.1f)"/>' % [
-			x, y, _hex(Color(_pick(rng, pal)).lightened(rng.randf_range(-0.2, 0.25))), rng.randi_range(0, 180), x, y]
+		var d := pow(rng.randf(), 0.35)
+		var x := 190.0 + cos(a) * d * 178.0
+		var y := 250.0 + sin(a) * d * 198.0
+		s += '<ellipse cx="%.1f" cy="%.1f" rx="5.5" ry="3" fill="%s" transform="rotate(%d %.1f %.1f)"/>' % [
+			x, y, _hex(Color(_pick(rng, pal)).lightened(rng.randf_range(-0.25, 0.25))), rng.randi_range(0, 180), x, y]
 	return tex(_svg(380, 780, s))
+
+
+# Scalloped leaf-cluster outline around (cx, cy).
+static func _lobed(cx: float, cy: float, r: float, rng: RandomNumberGenerator) -> String:
+	var n := rng.randi_range(7, 10)
+	var off := rng.randf_range(0.0, TAU)
+	var pts := []
+	for i in n:
+		var a := off + TAU * i / n
+		pts.append(Vector2(cx, cy) + Vector2(cos(a), sin(a)) * r * rng.randf_range(0.8, 0.9))
+	var d := "M%.1f %.1f" % [pts[0].x, pts[0].y]
+	for i in n:
+		var am := off + TAU * (i + 0.5) / n
+		var q := Vector2(cx, cy) + Vector2(cos(am), sin(am)) * r * rng.randf_range(1.12, 1.25)
+		var p: Vector2 = pts[(i + 1) % n]
+		d += " Q%.1f %.1f %.1f %.1f" % [q.x, q.y, p.x, p.y]
+	return d + " Z"
 
 
 # Side view facing right, canvas 440x150; wheels are separate sprites at (100,128) and (340,128).
@@ -157,6 +179,13 @@ static func hydrant() -> ImageTexture:
 	s += '<rect x="12" y="74" width="36" height="8" rx="2" fill="#7B241C"/>'
 	s += '<path d="M22 34 V70" stroke="#FFFFFF" stroke-width="3" opacity="0.3" stroke-linecap="round"/>'
 	return tex(_svg(60, 84, s))
+
+
+static func leaf_colors() -> Gradient:
+	var colors := Gradient.new()
+	colors.offsets = PackedFloat32Array([0.0, 0.25, 0.5, 0.75, 1.0])
+	colors.colors = PackedColorArray([Color("#C0392B"), Color("#E67E22"), Color("#F1C40F"), Color("#D35400"), Color("#B5442E")])
+	return colors
 
 
 static func leaf() -> ImageTexture:

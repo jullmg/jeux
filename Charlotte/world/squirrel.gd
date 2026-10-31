@@ -64,12 +64,10 @@ func _draw() -> void:
 		tail = [Vector3(-10, -10, 5), Vector3(-18, -15, 7), Vector3(-27, -19, 8.5), Vector3(-36, -20, 9), Vector3(-44, -17, 8), Vector3(-50, -12, 6)]
 	else:
 		tail = [Vector3(-8, -6, 5), Vector3(-15, -14, 7), Vector3(-19, -25, 8.5), Vector3(-17, -37, 9.5), Vector3(-10, -45, 8.5), Vector3(-3, -45, 6)]
+	var spine: Array[Vector3] = []
 	for i in tail.size():
-		draw_circle(Vector2(tail[i].x + flick * i / 5.0, tail[i].y), tail[i].z + 1.5, dark)
-	for i in tail.size():
-		var c := Vector2(tail[i].x + flick * i / 5.0, tail[i].y)
-		draw_circle(c + Vector2(0.5, -1), tail[i].z, fur)
-		draw_circle(c + Vector2(1.5, -2), tail[i].z * 0.45, fur.lightened(0.15))
+		spine.append(Vector3(tail[i].x + flick * i / 5.0, tail[i].y, tail[i].z))
+	_bushy_tail(spine, dark)
 	if moving:
 		draw_set_transform(Vector2(0, lift), 0.0, Vector2(1.3, 0.75))
 		draw_circle(Vector2(0, -12), 10, dark)
@@ -93,3 +91,57 @@ func _draw() -> void:
 	draw_circle(head + Vector2(3, -1), 1.7, Color.BLACK)
 	draw_circle(head + Vector2(3.5, -1.6), 0.6, Color.WHITE)
 	draw_circle(head + Vector2(7, 1), 1.3, Color("#3A2A2A"))
+
+
+# One tapered plume along the control points (x, y, half-width): softly tufted outline, shaded
+# underside and a lighter core, instead of a chain of circles.
+func _bushy_tail(ctrl: Array[Vector3], dark: Color) -> void:
+	var n := 22
+	var spine := PackedVector2Array()
+	var widths := PackedFloat32Array()
+	for i in n:
+		var f := float(i) / (n - 1) * (ctrl.size() - 1)
+		var k := mini(int(f), ctrl.size() - 2)
+		var t := f - k
+		var p0 := ctrl[maxi(k - 1, 0)]
+		var p1 := ctrl[k]
+		var p2 := ctrl[k + 1]
+		var p3 := ctrl[mini(k + 2, ctrl.size() - 1)]
+		# Catmull-Rom through the control points.
+		var p := 0.5 * (2.0 * p1 + (p2 - p0) * t + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * t * t + (3.0 * p1 - p0 - 3.0 * p2 + p3) * t * t * t)
+		spine.append(Vector2(p.x, p.y))
+		# Thin at the root, fullest past the middle, rounded off at the tip.
+		var u := float(i) / (n - 1)
+		widths.append(p.z * (0.45 + 0.7 * sin(minf(u * 1.2, 1.0) * PI * 0.5)) * (1.0 if u < 0.8 else 1.0 - (u - 0.8) * 2.5))
+	draw_colored_polygon(_plume(spine, widths, 1.6, 1.0), dark)
+	draw_colored_polygon(_plume(spine, widths, 0.0, 1.0), fur)
+	draw_colored_polygon(_plume(spine, widths, 0.0, -0.1, true), fur.darkened(0.14))
+	var core := PackedVector2Array()
+	for i in range(1, n - 2):
+		core.append(spine[i] + _normal(spine, i) * widths[i] * 0.25)
+	draw_polyline(core, fur.lightened(0.2), 2.0, true)
+
+
+# Outline of the plume grown by `grow` px. With `half`, only the underside strip from the spine
+# (offset `side` widths) down to the lower edge.
+func _plume(spine: PackedVector2Array, widths: PackedFloat32Array, grow: float, side: float, half := false) -> PackedVector2Array:
+	var top := PackedVector2Array()
+	var bottom := PackedVector2Array()
+	for i in spine.size():
+		var nrm := _normal(spine, i)
+		var tuft := 1.0 + 0.07 * sin(i * 2.3) + 0.04 * sin(i * 5.1)
+		var w := widths[i] * tuft + grow
+		top.append(spine[i] + nrm * (w if not half else widths[i] * side))
+		bottom.append(spine[i] - nrm * w)
+	var last := spine.size() - 1
+	if not half:
+		top.append(spine[last] + (spine[last] - spine[last - 1]).normalized() * (widths[last] * 0.6 + grow))
+	bottom.reverse()
+	top.append_array(bottom)
+	return top
+
+
+func _normal(spine: PackedVector2Array, i: int) -> Vector2:
+	var a := spine[maxi(i - 1, 0)]
+	var b := spine[mini(i + 1, spine.size() - 1)]
+	return (b - a).normalized().orthogonal()

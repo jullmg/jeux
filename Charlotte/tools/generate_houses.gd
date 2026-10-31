@@ -1,5 +1,6 @@
 extends SceneTree
 # Regenerates art/decor/*.svg: Godot --headless --path . --script res://tools/generate_houses.gd
+# Also writes art/decor/windows.json: each house's window panes, used by the game to put cats in windows.
 
 const X0 := 30.0
 const FLOOR_H := 275.0
@@ -151,6 +152,7 @@ var X1 := 670.0
 var oy := 0.0
 var base_y := BASE
 var ground_y := GROUND
+var windows := {}
 
 
 func _init() -> void:
@@ -169,6 +171,7 @@ func _init() -> void:
 		_svg()
 		var file := FileAccess.open("res://art/decor/%s.svg" % k.name, FileAccess.WRITE)
 		file.store_string("\n".join(out))
+	FileAccess.open("res://art/decor/windows.json", FileAccess.WRITE).store_string(JSON.stringify(windows, "\t"))
 	quit()
 
 
@@ -247,6 +250,8 @@ func _svg() -> void:
 		+ '<linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.1"/><stop offset="1" stop-color="#000000" stop-opacity="0.16"/></linearGradient>'
 		+ '<radialGradient id="glow"><stop offset="0" stop-color="#FFE9A8" stop-opacity="0.75"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient>'
 		+ '<linearGradient id="warm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7B5"/><stop offset="1" stop-color="#D98E4A"/></linearGradient>'
+		+ '<linearGradient id="drop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1408" stop-opacity="0.3"/><stop offset="1" stop-color="#2A1408" stop-opacity="0"/></linearGradient>'
+		+ '<linearGradient id="sun" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE6B8" stop-opacity="0.14"/><stop offset="0.5" stop-color="#FFE6B8" stop-opacity="0"/><stop offset="1" stop-color="#1A0C14" stop-opacity="0.12"/></linearGradient>'
 		+ '<radialGradient id="pumpkin_glow"><stop offset="0" stop-color="#FFB347" stop-opacity="0.6"/><stop offset="1" stop-color="#FFB347" stop-opacity="0"/></radialGradient>'
 		+ '</defs>')
 	match k.kind:
@@ -289,8 +294,10 @@ func _building() -> void:
 			_plex_front()
 
 
+# Vertical falloff, plus the low sun warming the left of the facade and the right falling into shade.
 func _wall_shading(top: float) -> void:
 	_rect(X0, top, X1 - X0, base_y - top, "url(#shade)")
+	_rect(X0, top, X1 - X0, base_y - top, "url(#sun)")
 	_rect(X0, top, 3, base_y - top, "#000000", 'opacity="0.25"')
 	_rect(X1 - 3, top, 3, base_y - top, "#000000", 'opacity="0.25"')
 
@@ -393,6 +400,7 @@ func _cornice(top: float) -> void:
 		_circle(cx, 14, 5, k.cornice_dark, 'opacity="0.5"')
 	_rect(X0, 48, X1 - X0, 24, k.cornice)
 	_rect(X0, 72, X1 - X0, 10, "#000000", 'opacity="0.18"')
+	_rect(X0, 82, X1 - X0, 46, "url(#drop)")
 	var x := X0 + 6.0
 	while x < X1 - 10.0:
 		_rect(x, 40, 8, 8, k.cornice_dark)
@@ -434,6 +442,10 @@ func _window(x: float, y: float, w: float, h: float) -> void:
 	_rect(x, y, w, h, k.trim)
 	var lit := rng.randf() < 0.22
 	_rect(x + 8, y + 8, w - 16, h - 16, "url(#warm)" if lit else "url(#glass)")
+	if not windows.has(k.name):
+		windows[k.name] = []
+	windows[k.name].append({"pane": [x + 8, y + 8, w - 16, h - 16], "bar_y": y + h * 0.34, "trim": k.trim,
+		"lit": lit, "flower_box": k.flower_boxes})
 	if k.halloween and rng.randf() < 0.18:
 		for b in 2:
 			_bat(x + w * (0.35 + b * 0.3), y + h * (0.3 + b * 0.2), 0.8)
@@ -447,6 +459,9 @@ func _window(x: float, y: float, w: float, h: float) -> void:
 	var ty := y + h * 0.34
 	_rect(x + 4, ty - 3, w - 8, 6, k.trim)
 	_rect(x + w / 2 - 3, ty, 6, y + h - ty - 4, k.trim)
+	# Recess: the lintel and the left jamb shade the glass.
+	_rect(x + 8, y + 8, w - 16, 10, "url(#drop)")
+	_rect(x + 8, y + 8, 7, h - 16, "#000000", 'opacity="0.14"')
 	_rect(x - 10, y + h + 3, w + 20, 9, k.lintel, _stroke(k.lintel_dark, 1.5))
 	_rect(x - 6, y + h + 12, w + 12, 5, "#000000", 'opacity="0.15"')
 	if k.flower_boxes:
@@ -609,6 +624,7 @@ func _balcony(x0: float, x1: float, floor_y: float, gaps: Array) -> void:
 			_circle(px + 3, top - 6, 4, k.metal, _metal_stroke())
 	_rect(x0 - 6, floor_y, x1 - x0 + 12, 16, k.slab, _stroke(k.slab_dark, 2))
 	_rect(x0 - 6, floor_y + 11, x1 - x0 + 12, 5, k.slab_dark)
+	_rect(x0 - 2, floor_y + 16, x1 - x0 + 4, 36, "url(#drop)")
 
 
 func _scroll(cx: float, cy: float) -> void:
