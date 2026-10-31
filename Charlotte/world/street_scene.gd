@@ -109,6 +109,7 @@ func _ready() -> void:
 	_build_grade()
 	Season.add_weather(self)
 	Sfx.ambience(self)
+	Music.play(_music())
 	Transition.fade_in(self)
 	var shot := _arg("--screenshot=")
 	if not shot.is_empty():
@@ -177,6 +178,11 @@ func _arriving(key: String) -> bool:
 		return false
 	Transition.arrive = ""
 	return true
+
+
+## The soundtrack here, first that exists (see Music): this season's street theme, then the street theme.
+func _music() -> Array:
+	return ["street_" + Season.current, "street"]
 
 
 ## Street-specific props, before the generic lamps, hydrants and racks.

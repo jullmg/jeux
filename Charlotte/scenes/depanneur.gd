@@ -69,6 +69,10 @@ func _build_shop() -> void:
 	_put(ShopArt.freezer(), FREEZER_X, 640.0, 1.0, "floor")
 
 
+func _music() -> Array:
+	return ["depanneur", "street_" + Season.current, "street"]
+
+
 # A long fluorescent tube on the ceiling, and its cool glow.
 func _tube(x: float) -> void:
 	var tube := Polygon2D.new()

@@ -64,10 +64,16 @@ func _spawn_charlotte(x: float, facing := 1) -> void:
 func _finish(foreground: Array) -> void:
 	_build_foreground(foreground)
 	_build_grade()
+	Music.play(_music())
 	Transition.fade_in(self)
 	var shot := _arg("--screenshot=")
 	if not shot.is_empty():
 		_save_screenshot(shot)
+
+
+## The soundtrack inside, first that exists (see Music): the house theme, else the street's.
+func _music() -> Array:
+	return ["house", "street_" + Season.current, "street"]
 
 
 ## Camera limits and walking bounds for one area (x from, x to) of the interior.

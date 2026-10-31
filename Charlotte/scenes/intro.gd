@@ -84,6 +84,7 @@ func _ready() -> void:
 	_build_grade()
 	Season.add_weather(self)
 	Sfx.ambience(self)
+	Music.play(["title"])
 
 	# Usage: Godot --path . res://scenes/intro.tscn -- --screenshot=/tmp/intro.png
 	for arg in OS.get_cmdline_user_args():

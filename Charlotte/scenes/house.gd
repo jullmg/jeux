@@ -133,6 +133,7 @@ func _open_fridge() -> void:
 func _go_to_sleep() -> void:
 	_control.enabled = false
 	Sfx.play("goodnight")
+	Music.play(["night"])
 	var night := CanvasLayer.new()
 	night.layer = 55
 	add_child(night)
@@ -171,6 +172,7 @@ func _go_to_sleep() -> void:
 		_charlotte.position.x = BEDROOM.x + 840.0
 		_charlotte.facing = -1
 		_charlotte.visible = true
+		Music.play(_music())
 		Sfx.play("chime"))
 	tween.tween_property(words, "modulate:a", 1.0, 0.5)
 	tween.tween_interval(1.2)
