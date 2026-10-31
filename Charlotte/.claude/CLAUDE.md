@@ -48,7 +48,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   - `world/interior.gd` (`Interior`, base class): Charlotte + `PlayerControl` + camera (`_spawn_charlotte`), areas
     (`_enter_area`, `_go_through` with a fade), furniture `_put(tex, x, bottom, scale, shadow)` (`"wall"` for hung things,
     `"floor"` for standing furniture, adds a contact shadow; add pieces back to front), `_plate`, light (`_daylight` beams with
-    dust motes, additive `_glow`, `_ceiling_light`, swaying `_pendant`, flickering `_candle`), `_fairy_lights`, and `_finish()`
+    dust motes, additive `_glow`, `_ceiling_light`, swaying `_pendant`, flickering `_candle`), `_fairy_lights`,
+    `_switchable(area, stand_x, lights, room)` (wall switches/lamps that toggle lights and dim the room), and `_finish()`
     (foreground, colour grade, fade-in, `--screenshot=`).
   - `world/room_shell.gd` (`RoomShell`): walls/ceiling/crown moulding/baseboards and a glossy narrow-strip hardwood floor, all from
     data (`rooms`, `chair_rails`, `posts`, `casings`, `gleams` = x of lights mirrored on the floor).

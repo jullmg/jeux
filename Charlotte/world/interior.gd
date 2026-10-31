@@ -130,11 +130,36 @@ func _floor_shadow(cx: float, y: float, rx: float) -> void:
 	add_child(shadow)
 
 
-func _fairy_lights(from_x: float, count: int) -> void:
+func _fairy_lights(from_x: float, count: int) -> FairyLights:
 	var lights := FairyLights.new()
 	lights.from_x = from_x
 	lights.count = count
 	add_child(lights)
+	return lights
+
+
+## Something to click to turn lights on and off (a wall switch, a lamp): `lights` show only while it's on.
+## With a `room` (x from, x to), that room also dims while it's off. Call it after the room's furniture
+## (the dimming goes over it) and before _spawn_charlotte (she stays bright).
+func _switchable(area: Rect2, stand_x: float, lights: Array, room := Vector2.ZERO) -> void:
+	var dark: Polygon2D
+	if room != Vector2.ZERO:
+		dark = Polygon2D.new()
+		dark.polygon = PackedVector2Array([Vector2(room.x, 0), Vector2(room.y, 0), Vector2(room.y, VIEW.y), Vector2(room.x, VIEW.y)])
+		dark.color = Color(0.04, 0.03, 0.1, 0.3)
+		dark.visible = false
+		add_child(dark)
+	add_child(DoorSpot.make(area, func():
+		var on: bool = not lights[0].visible
+		for light in lights:
+			light.visible = on
+		if dark:
+			dark.visible = not on, stand_x))
+
+
+## A wall switch drawn by _plate(x, y, false): its clickable area.
+func _switch_area(x: float, y: float) -> Rect2:
+	return Rect2(x - 10.0, y - 44.0, 42.0, 54.0)
 
 
 # ── Light ───────────────────────────────────────────────────────
@@ -177,17 +202,17 @@ func _daylight(top_left: Vector2, width: float, strength: float) -> void:
 	add_child(motes)
 
 
-func _ceiling_light(x: float) -> void:
+func _ceiling_light(x: float) -> Sprite2D:
 	var fixture := Polygon2D.new()
 	fixture.polygon = PackedVector2Array([Vector2(-30, 0), Vector2(30, 0), Vector2(22, 12), Vector2(-22, 12)])
 	fixture.color = Color("#F7F5EF")
 	fixture.position = Vector2(x, CEILING)
 	add_child(fixture)
-	_glow(Vector2(x, CEILING + 20.0), 220.0, Color(1.0, 0.92, 0.75, 0.22))
+	return _glow(Vector2(x, CEILING + 20.0), 220.0, Color(1.0, 0.92, 0.75, 0.22))
 
 
 ## Globe pendant hanging from a ceiling medallion down to y; it sways very gently.
-func _pendant(x: float, y: float) -> void:
+func _pendant(x: float, y: float) -> Sprite2D:
 	_put(InteriorArt.medallion(), x - 40.0, CEILING + 60.0)
 	var pivot := Node2D.new()
 	pivot.position = Vector2(x, CEILING + 20.0)
@@ -205,6 +230,7 @@ func _pendant(x: float, y: float) -> void:
 	var glow := _glow(Vector2(x, y), 260.0, Color(1.0, 0.88, 0.6, 0.35))
 	glow.reparent(pivot)
 	_swaying.append(pivot)
+	return glow
 
 
 ## A candle flame's glow at `at`, flickering.

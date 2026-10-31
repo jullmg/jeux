@@ -15,6 +15,13 @@ const KITCHEN_START := 3400.0
 const CHACHA_DOOR_X := 3120.0
 const BEDROOM_DOOR_X := 6440.0
 
+# Lights that the switches and the floor lamp turn on and off.
+var _vestibule_light: Sprite2D
+var _salon_pendant: Sprite2D
+var _floor_lamp: Array = []
+var _hall_lights: Array = []
+var _bedroom_lights: FairyLights
+
 
 func _ready() -> void:
 	_build_shell()
@@ -22,6 +29,7 @@ func _ready() -> void:
 	_build_salon()
 	_build_hallway()
 	_build_bedroom()
+	_build_switches()
 	_spawn_charlotte(470.0)
 	_build_doors()
 	_enter_area(BEDROOM if _charlotte.position.x >= BEDROOM.x else HALL)
@@ -45,6 +53,15 @@ func _build_shell() -> void:
 	]
 	shell.gleams = [320.0, 410.0, 1524.0, 1665.0, 1984.0, 2600.0, 3200.0, KITCHEN_START + 322.0, BEDROOM.x + 180.0, BEDROOM.x + 700.0]
 	add_child(shell)
+
+
+# The wall switch in each room, and the salon's floor lamp (click the lamp itself).
+func _build_switches() -> void:
+	_switchable(_switch_area(250.0, 330.0), 250.0, [_vestibule_light], Vector2(0.0, VESTIBULE_END))
+	_switchable(_switch_area(1780.0, 330.0), 1790.0, [_salon_pendant], Vector2(VESTIBULE_END, SALON_END))
+	_switchable(Rect2(1470.0, 230.0, 110.0, 370.0), 1525.0, _floor_lamp)
+	_switchable(_switch_area(2480.0, 330.0), 2490.0, _hall_lights, Vector2(SALON_END, HALL.y))
+	_switchable(_switch_area(BEDROOM.x + 1300.0, 330.0), BEDROOM.x + 1310.0, [_bedroom_lights], BEDROOM)
 
 
 func _build_doors() -> void:
@@ -92,7 +109,7 @@ func _build_vestibule() -> void:
 	_put(InteriorArt.backpack(), 40.0, 616.0, 0.9, "floor")
 	_put(InteriorArt.boots(), 540.0, 612.0, 0.8, "floor")
 	_put(InteriorArt.floor_clutter(), 150.0, 622.0)
-	_ceiling_light(320.0)
+	_vestibule_light = _ceiling_light(320.0)
 	_put(InteriorArt.oak_doorway(), VESTIBULE_END, WALL_BASE)
 	_put(InteriorArt.oak_glass_door(), VESTIBULE_END + 230.0, WALL_BASE, 1.0, "wall")
 
@@ -104,20 +121,19 @@ func _build_salon() -> void:
 	for i in 3:
 		_put(InteriorArt.poster(i), 1030.0 + i * 130.0, 340.0, 0.85, "wall")
 	_put(InteriorArt.floor_lamp(), 1470.0, 604.0, 0.9, "floor")
-	_glow(Vector2(1524.0, 360.0), 200.0, Color(1.0, 0.82, 0.5, 0.4))
+	_floor_lamp = [_glow(Vector2(1524.0, 360.0), 200.0, Color(1.0, 0.82, 0.5, 0.4)), _glow(Vector2(1524.0, 300.0), 46.0, Color(1.0, 0.95, 0.75, 0.55))]
 	_put(InteriorArt.sofa(), 960.0, 606.0, 0.85, "floor")
 	_put(InteriorArt.side_table(), 1390.0, 610.0, 0.8, "floor")
 	_put(InteriorArt.window(170.0, 300.0), 1580.0, 470.0, 1.0, "wall")
 	_daylight(Vector2(1580.0, 170.0), 170.0, 0.12)
 	_plate(1780.0, 330.0, false)
 	_put(InteriorArt.dining_table(), 1780.0, 606.0, 0.85, "floor")
-	_pendant(1984.0, 310.0)
+	_salon_pendant = _pendant(1984.0, 310.0)
 	_put(InteriorArt.black_shelf(), 2110.0, WALL_BASE, 0.7, "floor")
 
 
 func _build_hallway() -> void:
-	_ceiling_light(2600.0)
-	_ceiling_light(3200.0)
+	_hall_lights = [_ceiling_light(2600.0), _ceiling_light(3200.0)]
 	_put(InteriorArt.runner(980.0), 2320.0, 690.0)
 	_put(InteriorArt.black_coats(), 2330.0, 470.0, 0.8, "wall")
 	_put(InteriorArt.photo_row(), 2520.0, 260.0, 0.8, "wall")
@@ -131,7 +147,7 @@ func _build_hallway() -> void:
 	_put(InteriorArt.monstera(), 3300.0, 606.0, 0.55, "floor")
 	_put(InteriorArt.kitchen(), KITCHEN_START, WALL_BASE)
 	_daylight(Vector2(KITCHEN_START + 322.0, 260.0), 126.0, 0.1)
-	_ceiling_light(KITCHEN_START + 200.0)
+	_hall_lights.append(_ceiling_light(KITCHEN_START + 200.0))
 
 
 func _build_bedroom() -> void:
@@ -158,7 +174,7 @@ func _build_bedroom() -> void:
 	_put(InteriorArt.panel_door(), BEDROOM_DOOR_X, WALL_BASE)
 	_candle(Vector2(x + 30.0 + 262.0 * 0.85, 606.0 - 240.0 * 0.85), 80.0)
 	_put(InteriorArt.bunting(440.0), x + 650.0, 230.0)
-	_fairy_lights(x + 40.0, 40)
+	_bedroom_lights = _fairy_lights(x + 40.0, 40)
 
 
 # Paper sign taped to the bedroom door, each letter in a different marker colour.
