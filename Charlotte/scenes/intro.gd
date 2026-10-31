@@ -82,6 +82,7 @@ func _ready() -> void:
 
 	# ── Post-process ──────────────────────────────────────────
 	_build_grade()
+	Season.add_weather(self)
 
 	# Usage: Godot --path . res://scenes/intro.tscn -- --screenshot=/tmp/intro.png
 	for arg in OS.get_cmdline_user_args():
@@ -108,7 +109,7 @@ func _process(delta: float) -> void:
 
 func _tex(art: String) -> Texture2D:
 	if not _textures.has(art):
-		_textures[art] = load("res://art/decor/%s.svg" % art)
+		_textures[art] = load(Season.decor(art))
 	return _textures[art]
 
 
@@ -218,7 +219,7 @@ func _build_tree_shadows() -> void:
 
 
 func _build_trees() -> void:
-	var leaf := PropArt.leaf()
+	var leaf := Season.falling_texture()
 	for i in TREES_AFTER.size():
 		var tree := _sprite(_tree_texs[i], TREE_SCALE)
 		tree.position = _tree_origin(i)
@@ -232,7 +233,8 @@ func _falling_leaves(leaf: Texture2D, at: Vector2) -> CPUParticles2D:
 	var p := CPUParticles2D.new()
 	p.position = at
 	p.texture = leaf
-	p.amount = 7
+	p.amount = maxi(1, int(7 * Season.falling_amount()))
+	p.emitting = Season.falling_amount() > 0.0
 	p.lifetime = 8.0
 	p.preprocess = 8.0
 	p.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
@@ -268,6 +270,7 @@ func _build_passersby() -> void:
 		var zone := WALK_ZONES[i]
 		var npc := Passerby.new()
 		npc.look = CharacterLook.random(_rng, ages[i])
+		Season.dress_for_weather(npc.look)
 		npc.walk_speed = _rng.randf_range(100.0, 160.0)
 		npc.position = Vector2(_rng.randf_range(zone.x, zone.y), CHARLOTTE_Y - 26.0)
 		npc.scale = Vector2.ONE * CHAR_SCALE
@@ -317,7 +320,9 @@ func _build_squirrels() -> void:
 		squirrel.scale = Vector2.ONE * 0.85
 		squirrel.bounds = Vector2(maxf(x - 500.0, 60.0), minf(x + 500.0, STREET_W - 60.0))
 		squirrel.threat = _charlotte
-		squirrel.trees = _tree_sprites
+		# Bare winter trees have no canopy to hide in.
+		if not Season.is_winter():
+			squirrel.trees = _tree_sprites
 		add_child(squirrel)
 
 
@@ -351,6 +356,7 @@ func _build_grade() -> void:
 	var mat := ShaderMaterial.new()
 	mat.shader = preload("res://shaders/grade.gdshader")
 	mat.set_shader_parameter("sun_uv", SkyBackdrop.SUN_POS / VIEW)
+	mat.set_shader_parameter("tint", Season.tint())
 	rect.material = mat
 	layer.add_child(rect)
 	add_child(layer)

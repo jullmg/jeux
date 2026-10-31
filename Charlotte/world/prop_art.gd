@@ -1,13 +1,7 @@
 class_name PropArt
 extends RefCounted
-## Street props drawn as SVG at runtime: autumn trees, cars, bikes, racks, lampposts, hydrants, leaves.
+## Street props drawn as SVG at runtime: seasonal trees, cars, bikes, racks, lampposts, hydrants, leaves.
 
-const TREE_PALETTES := [
-	["#C0392B", "#D9542E", "#A93226", "#E67E22", "#B03A2E"],
-	["#E67E22", "#D35400", "#F39C12", "#E59866", "#CA6F1E"],
-	["#F1C40F", "#E5B33A", "#D4AC0D", "#F7DC6F", "#E8A33D"],
-	["#E67E22", "#C0392B", "#F1C40F", "#9BAE4A", "#D35400"],
-]
 const CAR_COLORS := ["#C0392B", "#2E4A7A", "#E8E6E1", "#2B2B2B", "#7F8C8D", "#1F6E5C", "#D4A017", "#5B2C6F", "#A9CCE3"]
 const BIKE_COLORS := ["#E74C3C", "#3498DB", "#1ABC9C", "#F1C40F", "#2C3E50", "#E67E22", "#9B59B6", "#ECF0F1"]
 
@@ -42,8 +36,15 @@ static func _pick(rng: RandomNumberGenerator, items: Array) -> Variant:
 
 
 # Canvas 380x780, trunk base at (190, 780). Light comes from the low sun on the upper left.
+# In winter the tree is bare: its branches, dusted with snow. The random draws are the same in every season,
+# so the rest of the street (built from the same generator afterwards) doesn't change.
 static func tree(rng: RandomNumberGenerator) -> ImageTexture:
-	var pal: Array = _pick(rng, TREE_PALETTES)
+	var palettes := Season.tree_palettes()
+	var bare := palettes.is_empty()
+	if bare:
+		palettes = [["#5A4A3E", "#5A4A3E", "#5A4A3E", "#5A4A3E", "#5A4A3E"]]
+	# Same draw as picking one of autumn's four palettes.
+	var pal: Array = palettes[rng.randi_range(0, 3) % palettes.size()]
 	var s := '<path d="M172 780 C174 700 168 600 176 520 C178 470 160 430 128 392 L142 382 C168 410 182 436 188 466 C196 428 220 398 254 378 L264 392 C234 414 210 450 204 520 C200 600 208 700 212 780 Z" fill="#6E5A4C" stroke="#4A3A30" stroke-width="3" stroke-linejoin="round"/>'
 	s += '<path d="M184 760 C182 700 186 640 182 580 M196 740 C198 680 194 620 198 560" stroke="#4A3A30" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
 	s += '<path d="M180 770 C178 700 182 620 176 540" stroke="#8C7664" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.7"/>'
@@ -71,7 +72,29 @@ static func tree(rng: RandomNumberGenerator) -> ImageTexture:
 		var y := 250.0 + sin(a) * d * 198.0
 		s += '<ellipse cx="%.1f" cy="%.1f" rx="5.5" ry="3" fill="%s" transform="rotate(%d %.1f %.1f)"/>' % [
 			x, y, _hex(Color(_pick(rng, pal)).lightened(rng.randf_range(-0.25, 0.25))), rng.randi_range(0, 180), x, y]
+	if bare:
+		s = _bare_crown(s, blobs)
 	return tex(_svg(380, 780, s))
+
+
+# Winter: drop the leaves, keep the trunk, and grow branches out to where the clumps were, snow on top.
+static func _bare_crown(svg: String, blobs: Array) -> String:
+	# The trunk is the first three paths; everything after them is foliage.
+	var trunk := svg.substr(0, svg.find('opacity="0.7"/>') + 15)
+	var out := trunk
+	var forks := [Vector2(150, 400), Vector2(232, 386), Vector2(192, 470)]
+	for i in blobs.size():
+		var b: Array = blobs[i]
+		var tip := Vector2(b[0], b[1]) + (Vector2(b[0], b[1]) - Vector2(190, 300)).normalized() * 30.0
+		var from: Vector2 = forks[i % forks.size()]
+		var mid := from.lerp(tip, 0.5) + Vector2(0, -20)
+		out += '<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="#5A4A3E" stroke-width="%.1f" fill="none" stroke-linecap="round"/>' % [from.x, from.y, mid.x, mid.y, tip.x, tip.y, 7.0 - (i % 3) * 1.5]
+		for t in [0.55, 0.8]:
+			var p := from.lerp(tip, t)
+			var twig := p + Vector2(18 if i % 2 == 0 else -18, -22)
+			out += '<path d="M%.1f %.1f L%.1f %.1f" stroke="#5A4A3E" stroke-width="2.5" stroke-linecap="round"/>' % [p.x, p.y, twig.x, twig.y]
+		out += '<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="#F7FAFC" stroke-width="3" fill="none" stroke-linecap="round" transform="translate(0 -3)"/>' % [from.x, from.y, mid.x, mid.y, tip.x, tip.y]
+	return out
 
 
 # Scalloped leaf-cluster outline around (cx, cy).
@@ -191,11 +214,14 @@ static func hydrant() -> ImageTexture:
 	return tex(_svg(60, 84, s))
 
 
+## Colours of what drifts from the trees this season (leaves, petals, snow).
 static func leaf_colors() -> Gradient:
-	var colors := Gradient.new()
-	colors.offsets = PackedFloat32Array([0.0, 0.25, 0.5, 0.75, 1.0])
-	colors.colors = PackedColorArray([Color("#C0392B"), Color("#E67E22"), Color("#F1C40F"), Color("#D35400"), Color("#B5442E")])
-	return colors
+	return Season.falling_colors()
+
+
+## A soft snowflake for winter particles.
+static func flake() -> ImageTexture:
+	return tex(_svg(16, 16, '<circle cx="8" cy="8" r="6" fill="#FFFFFF" opacity="0.95"/><circle cx="8" cy="8" r="3" fill="#FFFFFF"/>'))
 
 
 static func leaf() -> ImageTexture:

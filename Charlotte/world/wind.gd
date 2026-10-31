@@ -1,6 +1,6 @@
 class_name Wind
 extends Node2D
-## Autumn gusts every so often: trees bend harder and a flurry of leaves blows across the screen.
+## Gusts every so often: trees bend harder and a flurry of leaves (petals, snow) blows across the screen.
 
 const GUST := 4.5
 
@@ -13,7 +13,7 @@ var _flurry: CPUParticles2D
 
 func _ready() -> void:
 	_flurry = CPUParticles2D.new()
-	_flurry.texture = PropArt.leaf()
+	_flurry.texture = Season.falling_texture()
 	_flurry.emitting = false
 	_flurry.amount = 46
 	_flurry.lifetime = 3.6

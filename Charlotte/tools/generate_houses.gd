@@ -1,5 +1,7 @@
 extends SceneTree
 # Regenerates art/decor/*.svg: Godot --headless --path . --script res://tools/generate_houses.gd
+# Autumn (Halloween) facades go in art/decor/, the other seasons in art/decor/<season>/ (see Season.decor).
+# Every season makes the same random draws in the same order, so only the seasonal decor differs.
 # Also writes art/decor/windows.json: each house's window panes, used by the game to put cats in windows.
 
 const X0 := 30.0
@@ -174,12 +176,23 @@ var oy := 0.0
 var base_y := BASE
 var ground_y := GROUND
 var windows := {}
+var season := "autumn"
 
 
 func _init() -> void:
 	var configs: Array = HOUSES.duplicate()
 	for i in VARIANTS:
 		configs.append(_variant(i))
+	for s in ["autumn", "spring", "summer", "winter"]:
+		season = s
+		if s != "autumn":
+			DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://art/decor/" + s))
+		_generate(configs)
+	FileAccess.open("res://art/decor/windows.json", FileAccess.WRITE).store_string(JSON.stringify(windows, "\t"))
+	quit()
+
+
+func _generate(configs: Array) -> void:
 	for cfg in configs:
 		k = DEFAULTS.duplicate(true)
 		k.merge(cfg, true)
@@ -190,10 +203,8 @@ func _init() -> void:
 		rng.seed = hash(k.name)
 		out = PackedStringArray()
 		_svg()
-		var file := FileAccess.open("res://art/decor/%s.svg" % k.name, FileAccess.WRITE)
-		file.store_string("\n".join(out))
-	FileAccess.open("res://art/decor/windows.json", FileAccess.WRITE).store_string(JSON.stringify(windows, "\t"))
-	quit()
+		var path := "res://art/decor/%s.svg" % k.name if season == "autumn" else "res://art/decor/%s/%s.svg" % [season, k.name]
+		FileAccess.open(path, FileAccess.WRITE).store_string("\n".join(out))
 
 
 func _variant(i: int) -> Dictionary:
@@ -442,6 +453,7 @@ func _cornice(top: float) -> void:
 		_rect(X0 + 30.0 + i * gap, 54, gap - 26.0, 12, "none", _stroke(k.cornice_dark, 1.5))
 	for i in count + 1:
 		_path("M%s 40 h14 v8 q0 22 -10 28 q-4 -10 -4 -36 z" % _n(X0 + 10.0 + i * gap), k.cornice, _stroke(k.cornice_dark, 1.5))
+	_snow(X0, X1 - X0, 22)
 	out.append('</g>')
 
 
@@ -471,11 +483,12 @@ func _window(x: float, y: float, w: float, h: float) -> void:
 	_rect(x, y, w, h, k.trim)
 	var lit := rng.randf() < 0.22
 	_rect(x + 8, y + 8, w - 16, h - 16, "url(#warm)" if lit else "url(#glass)")
-	if not windows.has(k.name):
-		windows[k.name] = []
-	windows[k.name].append({"pane": [x + 8, y + 8, w - 16, h - 16], "bar_y": y + h * 0.34, "trim": k.trim,
-		"lit": lit, "flower_box": k.flower_boxes})
-	if k.halloween and rng.randf() < 0.18:
+	if season == "autumn":
+		if not windows.has(k.name):
+			windows[k.name] = []
+		windows[k.name].append({"pane": [x + 8, y + 8, w - 16, h - 16], "bar_y": y + h * 0.34, "trim": k.trim,
+			"lit": lit, "flower_box": k.flower_boxes})
+	if k.halloween and rng.randf() < 0.18 and season == "autumn":
 		for b in 2:
 			_bat(x + w * (0.35 + b * 0.3), y + h * (0.3 + b * 0.2), 0.8)
 	if k.curtains:
@@ -496,10 +509,16 @@ func _window(x: float, y: float, w: float, h: float) -> void:
 	if k.flower_boxes:
 		var fx := x + 12.0
 		while fx < x + w - 10:
-			_circle(fx, y + h - 14, 7, "#5FAE4F")
-			_circle(fx + 2, y + h - 18, 4, _pick(["#FF7BA3", "#FFD23F", "#FFFFFF", "#C084FC"]))
+			var bloom := _pick(["#FF7BA3", "#FFD23F", "#FFFFFF", "#C084FC"])
+			if season == "winter":
+				_circle(fx, y + h - 12, 6, "#3E5A3A")
+				_circle(fx, y + h - 15, 4, "#F7F9FB")
+			else:
+				_circle(fx, y + h - 14, 7, "#5FAE4F")
+				_circle(fx + 2, y + h - 18, 4, "#E04F5F" if season == "summer" and int(fx) % 2 == 0 else bloom)
 			fx += 13.0
 		_rect(x + 4, y + h - 12, w - 8, 15, "#7A5236", _stroke("#5A3B26", 1.5))
+	_snow(x - 10, w + 20, y + h + 3)
 
 
 # Stone band with a carved fleur-de-lis block in the middle, between two recessed panels.
@@ -535,6 +554,7 @@ func _flat_parapet(top: float) -> void:
 	_rect(X0 - 4, top - 12, X1 - X0 + 8, 12, "#8E9296", _stroke("#63676B", 1.5))
 	_rect(X0 - 4, top - 12, X1 - X0 + 8, 3, "#B7BBBF")
 	_rect(X0, top, X1 - X0, 6, "#000000", 'opacity="0.15"')
+	_snow(X0 - 4, X1 - X0 + 8, top - 12)
 
 
 # Carved stone panel with a face in relief, centred above the upper door.
@@ -605,6 +625,8 @@ func _door(cx: float, top: float, bottom: float) -> void:
 	_circle(cx + 6, dy + dh * 0.62, 3, "#E3C26A")
 	for sx in [-1.0, 1.0]:
 		_lantern(cx + sx * (w / 2 + 24), top + 34)
+	if season == "winter":
+		_wreath(cx, top + 60)
 
 
 func _lantern(x: float, y: float) -> void:
@@ -626,6 +648,7 @@ func _awning(x0: float, x1: float, y: float, post_bottom: float) -> void:
 		_path("M%s %s V%s" % [_n(x), _n(y + 1), _n(y + 18)], "none", _stroke(dark, 1.5))
 		x += 9.0
 	_rect(x0 - 20, y + 18, x1 - x0 + 40, 5, dark)
+	_snow(x0 - 10, x1 - x0 + 20, y)
 
 
 func _column(x: float, dir: float, y0: float, y1: float) -> void:
@@ -654,6 +677,9 @@ func _balcony(x0: float, x1: float, floor_y: float, gaps: Array) -> void:
 	_rect(x0 - 6, floor_y, x1 - x0 + 12, 16, k.slab, _stroke(k.slab_dark, 2))
 	_rect(x0 - 6, floor_y + 11, x1 - x0 + 12, 5, k.slab_dark)
 	_rect(x0 - 2, floor_y + 16, x1 - x0 + 4, 36, "url(#drop)")
+	for seg in _segments(x0, x1, gaps):
+		_snow(seg[0], seg[1] - seg[0], top)
+		_snow(seg[0], seg[1] - seg[0], floor_y - 6)
 
 
 func _scroll(cx: float, cy: float) -> void:
@@ -671,6 +697,8 @@ func _front_steps(cx: float) -> void:
 		var y := base_y + i * sh
 		_rect(cx - w / 2, y, w, sh, k.step, _stroke(k.step_dark, 1.5))
 		_rect(cx - w / 2, y, w, 3, "#FFFFFF", 'opacity="0.25"')
+		if season == "winter":
+			_rect(cx - w / 2 + 6, y - 2, w - 12, 5, "#F7F9FB")
 	for sx in [-1.0, 1.0]:
 		var top := Vector2(cx + sx * 54.0, _fb(0) - RAIL_H)
 		var bottom := Vector2(cx + sx * 70.0, ground_y - RAIL_H)
@@ -712,17 +740,24 @@ func _garden(gaps: Array) -> void:
 		var x: float = seg[0] + 14.0
 		while x < seg[1] - 14.0:
 			var r := rng.randf_range(12.0, 20.0)
-			var c := _pick(AUTUMN_BUSHES)
+			var c := _bush(_pick(AUTUMN_BUSHES))
 			_circle(x + 3, ground_y - r * 0.7 + 3, r, "#000000", 'opacity="0.15"')
 			_circle(x, ground_y - r * 0.7, r, c)
 			_circle(x - r * 0.3, ground_y - r * 1.0, r * 0.5, "#" + Color(c).lightened(0.25).to_html(false), 'opacity="0.8"')
+			if season == "winter":
+				out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="#F7F9FB"/>' % [_n(x), _n(ground_y - r * 1.25), _n(r * 0.9), _n(r * 0.45)])
 			if rng.randf() < 0.3:
-				_circle(x + rng.randf_range(-8.0, 8.0), ground_y - r * 1.1, 3.5, _pick(["#FFD23F", "#FFFFFF", "#C084FC"]))
+				var fx := x + rng.randf_range(-8.0, 8.0)
+				var flower := _pick(["#FFD23F", "#FFFFFF", "#C084FC"])
+				if season != "winter":
+					_circle(fx, ground_y - r * 1.1, 3.5, flower)
 			x += rng.randf_range(18.0, 34.0)
 		var lx: float = seg[0] + 4.0
 		while lx < seg[1] - 4.0:
 			_leaf(lx, ground_y - rng.randf_range(1.0, 5.0), rng.randf_range(0.0, TAU))
 			lx += rng.randf_range(6.0, 16.0)
+		if season == "winter":
+			_rect(seg[0], ground_y - 8, seg[1] - seg[0], 8, "#F2F5F8")
 
 
 func _fence(gaps: Array) -> void:
@@ -745,6 +780,7 @@ func _fence(gaps: Array) -> void:
 			x += pitch
 		_rect(a, top + 6, b - a, 4, col, st)
 		_rect(a, ground_y - 12, b - a, 4, col, st)
+		_snow(a, b - a, top + 2)
 		for px in [a, b - 8]:
 			_rect(px, top - 4, 8, ground_y - top + 4, col, st)
 			_rect(px - 2, top - 8, 12, 5, col, st)
@@ -1220,7 +1256,7 @@ func _ruelle_verte() -> void:
 	for i in 16:
 		var cx2 := rng.randf_range(X0 - 10, X1 + 10)
 		var cy2 := rng.randf_range(40.0, 250.0) + (cx2 - X0) * 0.18
-		_circle(cx2, cy2, rng.randf_range(34.0, 58.0), _pick(["#E3A33A", "#D9682B", "#C9562E", "#B5442E", "#E8B54A"]), _stroke("#8E3A24", 1.5) + ' opacity="0.95"')
+		_circle(cx2, cy2, rng.randf_range(34.0, 58.0), _canopy(_pick(["#E3A33A", "#D9682B", "#C9562E", "#B5442E", "#E8B54A"])), _stroke(_canopy("#8E3A24"), 1.5) + ' opacity="0.95"')
 
 
 # Back lane seen from the street: lane trees, clothesline, wooden fences and greenery.
@@ -1229,7 +1265,7 @@ func _ruelle() -> void:
 	var far := 560.0
 	for i in 7:
 		_circle(rng.randf_range(X0, X1), rng.randf_range(300.0, 430.0), rng.randf_range(45.0, 70.0),
-			_pick(["#E3A33A", "#D9682B", "#B5442E", "#C9B03A"]), _stroke("#8E3A24", 2))
+			_canopy(_pick(["#E3A33A", "#D9682B", "#B5442E", "#C9B03A"])), _stroke(_canopy("#8E3A24"), 2))
 	_path("M%s 380 Q%s 405 %s 380" % [_n(X0), _n(cx), _n(X1)], "none", _stroke("#555555", 1.5))
 	var x := X0 + 26.0
 	while x < X1 - 30.0:
@@ -1251,17 +1287,31 @@ func _ruelle() -> void:
 			var t := j / 6.0
 			var edge := X1 - 6.0 if side > 0.0 else X0 + 6.0
 			var bx := lerpf(cx + side * 40.0, edge, t)
-			_circle(bx + side * 6.0, lerpf(far, ground_y, t) - 6.0, 8.0 + 14.0 * t, _pick(AUTUMN_BUSHES))
+			_circle(bx + side * 6.0, lerpf(far, ground_y, t) - 6.0, 8.0 + 14.0 * t, _bush(_pick(AUTUMN_BUSHES)))
 
 
 # --- Autumn & Halloween -----------------------------------------------------
 
+# A fallen leaf in autumn; a petal in spring, a green leaf in summer, a tuft of snow in winter.
 func _leaf(x: float, y: float, a: float) -> void:
 	var c := _pick(["#D9682B", "#B5442E", "#E3A33A", "#C9562E", "#8E3A24"])
+	match season:
+		"spring":
+			c = ["#F7C6D9", "#FBE0EA", "#FFFFFF", "#E890B4", "#F2A7C9"][int(x) % 5]
+		"summer":
+			if int(x * 7.0) % 4 != 0:
+				return
+			c = ["#4FA34A", "#6DB86A", "#3E8E3A"][int(x) % 3]
+		"winter":
+			out.append('<ellipse cx="%s" cy="%s" rx="7" ry="3" fill="#F7F9FB"/>' % [_n(x), _n(y)])
+			return
 	out.append('<ellipse cx="%s" cy="%s" rx="4.5" ry="2.4" fill="%s" transform="rotate(%s %s %s)"/>' % [_n(x), _n(y), c, _n(rad_to_deg(a)), _n(x), _n(y)])
 
 
 func _pumpkin(cx: float, bottom: float, s: float, carved: bool) -> void:
+	if season != "autumn":
+		_planter(cx, bottom, s)
+		return
 	var w := 34.0 * s
 	var h := 26.0 * s
 	var cy := bottom - h / 2
@@ -1285,6 +1335,9 @@ func _pumpkin(cx: float, bottom: float, s: float, carved: bool) -> void:
 func _mums(cx: float, bottom: float) -> void:
 	_path("M%s %s h26 l-4 20 h-18 z" % [_n(cx - 13), _n(bottom - 22)], "#8A5A3A", _stroke("#5E3B24", 1.5))
 	var c := _pick(MUMS)
+	if season != "autumn":
+		_planter_plant(cx, bottom - 22, 1.0)
+		return
 	for i in 9:
 		var a := TAU * i / 9.0
 		_circle(cx + cos(a) * 11.0, bottom - 32 + sin(a) * 8.0, 6.5, c, _stroke("#" + Color(c).darkened(0.25).to_html(false), 1))
@@ -1292,6 +1345,13 @@ func _mums(cx: float, bottom: float) -> void:
 
 
 func _ghost(cx: float, top: float) -> void:
+	if season == "winter":
+		# A glass bauble star hanging instead.
+		_path("M%s %s V%s" % [_n(cx), _n(top - 14), _n(top + 6)], "none", _stroke("#DDDDDD", 1))
+		_path("M%s %s l4 9 l10 1 l-8 6 l3 10 l-9 -5 l-9 5 l3 -10 l-8 -6 l10 -1 z" % [_n(cx), _n(top + 4)], "#FFD23F", _stroke("#C99410", 1.5))
+		return
+	if season != "autumn":
+		return
 	_path("M%s %s V%s" % [_n(cx), _n(top - 14), _n(top)], "none", _stroke("#DDDDDD", 1))
 	_path("M%s %s q-17 0 -17 22 v26 l5.7 -6 l5.7 6 l5.7 -6 l5.7 6 l5.7 -6 l5.7 6 v-26 q0 -22 -17 -22 z" % [_n(cx), _n(top)],
 		"#FBFBF8", _stroke("#C9C9C2", 1.5) + ' stroke-linejoin="round"')
@@ -1301,6 +1361,8 @@ func _ghost(cx: float, top: float) -> void:
 
 
 func _cobweb(x: float, y: float, dir: float) -> void:
+	if season != "autumn":
+		return
 	var st := _stroke("#F4F4F0", 1) + ' opacity="0.75"'
 	for i in 5:
 		var a := PI * 0.5 * i / 4.0
@@ -1326,10 +1388,90 @@ func _string_lights(x0: float, x1: float, y: float) -> void:
 	while x < x1 - 10.0:
 		var sag := 7.0 * sin(PI * fmod((x - x0) / 40.0, 1.0))
 		var col := "#FF8A3D" if i % 2 == 0 else "#B266FF"
+		if season == "winter":
+			col = ["#FF5D5D", "#FFD23F", "#5DD06A", "#5DA8FF"][i % 4]
+		elif season != "autumn":
+			col = "#FFF3C4"
 		_circle(x, y + 8 + sag, 7, col, 'opacity="0.35"')
 		_circle(x, y + 7 + sag, 3.2, col)
 		x += 20.0
 		i += 1
+
+
+# Seasonal planters where the Halloween pumpkins sit: tulips, geraniums, or a little snowy spruce.
+func _planter(cx: float, bottom: float, s: float) -> void:
+	var w := 30.0 * s
+	_path("M%s %s h%s l%s %s h%s z" % [_n(cx - w / 2), _n(bottom - 18 * s), _n(w), _n(-4 * s), _n(18 * s), _n(-w + 8 * s)], "#B5603F", _stroke("#7E3E28", 1.5))
+	_planter_plant(cx, bottom - 18 * s, s)
+
+
+func _planter_plant(cx: float, soil: float, s: float) -> void:
+	match season:
+		"spring":
+			for i in 5:
+				var x := cx + (i - 2) * 6.0 * s
+				_path("M%s %s V%s" % [_n(x), _n(soil), _n(soil - 20 * s)], "none", _stroke("#4E8A3A", 2.5 * s))
+				out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="%s"/>' % [_n(x), _n(soil - 22 * s), _n(4 * s), _n(6 * s), ["#E04F5F", "#FFD23F", "#F2A7C9", "#FF8A3D", "#C084FC"][i]])
+		"summer":
+			for i in 6:
+				_circle(cx + (i - 2.5) * 5.0 * s, soil - 8 * s - (i % 2) * 4 * s, 7 * s, "#4FA34A")
+			for i in 4:
+				_circle(cx + (i - 1.5) * 7.0 * s, soil - 18 * s, 4.5 * s, "#E0303A")
+		"winter":
+			_path("M%s %s l%s %s h%s z" % [_n(cx - 14 * s), _n(soil), _n(14 * s), _n(-38 * s), _n(14 * s)], "#2E5A3A", _stroke("#1E3E28", 1.5))
+			_path("M%s %s l%s %s l%s %s" % [_n(cx - 10 * s), _n(soil - 8 * s), _n(10 * s), _n(-6 * s), _n(10 * s), _n(6 * s)], "none", _stroke("#F7F9FB", 3 * s))
+			_circle(cx, soil - 38 * s, 3 * s, "#FFD23F")
+
+
+# Winter: a cushion of snow on a ledge from x to x + w at height y.
+func _snow(x: float, w: float, y: float) -> void:
+	if season != "winter" or w <= 4.0:
+		return
+	var parts := PackedStringArray(["M%s %s" % [_n(x), _n(y + 1)]])
+	var i := 0
+	var sx := x
+	while sx < x + w:
+		var step := minf(14.0, x + w - sx)
+		parts.append("Q%s %s %s %s" % [_n(sx + step / 2), _n(y - 5 - (i % 3)), _n(sx + step), _n(y + 0.5)])
+		sx += step
+		i += 1
+	parts.append("L%s %s L%s %s Z" % [_n(x + w), _n(y + 2), _n(x), _n(y + 2)])
+	_path(" ".join(parts), "#F7F9FB", _stroke("#D3DCE4", 1))
+
+
+# Winter: a wreath with a red bow on the door.
+func _wreath(cx: float, cy: float) -> void:
+	_circle(cx, cy, 15, "none", _stroke("#2E5A3A", 8))
+	for i in 8:
+		var a := TAU * i / 8.0
+		_circle(cx + cos(a) * 15.0, cy + sin(a) * 15.0, 2.2, "#C8202A" if i % 2 == 0 else "#FFD23F")
+	_path("M%s %s l-8 -6 v12 z M%s %s l8 -6 v12 z" % [_n(cx), _n(cy + 15), _n(cx), _n(cy + 15)], "#C8202A")
+
+
+# A lane tree's leaf clump colour this season (snow-laden branches in winter).
+func _canopy(autumn: String) -> String:
+	var i := absi(hash(autumn)) % 5
+	match season:
+		"spring":
+			return ["#9BCB6A", "#F7C6D9", "#B5D97A", "#F2A7C9", "#7FB85A"][i]
+		"summer":
+			return ["#3E8E3A", "#4FA34A", "#2F7A30", "#5DB55A", "#367F33"][i]
+		"winter":
+			return ["#E8EEF3", "#DCE4EA", "#F4F7FA", "#CBD5DD", "#E2E8EE"][i]
+	return autumn
+
+
+# A garden bush's colour this season (the autumn one maps to a spring, summer or snowy-evergreen one).
+func _bush(autumn: String) -> String:
+	var i := AUTUMN_BUSHES.find(autumn)
+	match season:
+		"spring":
+			return ["#7FB85A", "#9BCB6A", "#F2A7C9", "#5F9F4A", "#A6D07A", "#6FA048"][i]
+		"summer":
+			return ["#3E8E3A", "#4FA34A", "#2F7A30", "#5DB55A", "#367F33", "#447F33"][i]
+		"winter":
+			return ["#3E5A44", "#4A5A4A", "#3A5040", "#46584A", "#3E4E44", "#4E6050"][i]
+	return autumn
 
 
 func _bat(cx: float, cy: float, s: float) -> void:

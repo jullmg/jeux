@@ -23,7 +23,6 @@ const HAZE := Color("#B9C6D6")
 const ASPHALT := Color("#5A5956")
 const CONCRETE := Color("#CFCAC0")
 const CURB := Color("#E2DDD4")
-const LEAVES := [Color("#D9682B"), Color("#B5442E"), Color("#E3A33A"), Color("#C9562E"), Color("#8E3A24")]
 
 var part := Part.VISTA
 ## Gap between the corner buildings, in world x at the facade line.
@@ -42,6 +41,9 @@ var street_name := ""
 var sign_side := 1.0
 
 var _rng := RandomNumberGenerator.new()
+# This season's canopy colours and what lies in the gutters.
+var _foliage: Array[Color] = Season.foliage()
+var _litter: Array[Color] = Season.litter()
 
 
 static func make(which: Part, from: CrossStreet) -> CrossStreet:
@@ -93,7 +95,7 @@ func _draw_vista() -> void:
 	var vp := _vp()
 	_mount_royal()
 	# The street and its sidewalks, all the way to the horizon.
-	_quad(Vector2(x0, FACADE_Y), Vector2(x1, FACADE_Y), 0.0, FAR, CONCRETE)
+	_quad(Vector2(x0, FACADE_Y), Vector2(x1, FACADE_Y), 0.0, FAR, Color("#E9EEF2") if Season.is_winter() else CONCRETE)
 	_quad(Vector2(x0 + sidewalk, FACADE_Y), Vector2(x1 - sidewalk, FACADE_Y), 0.0, FAR, ASPHALT)
 	for side in [x0 + sidewalk, x1 - sidewalk]:
 		draw_line(_at(Vector2(side, FACADE_Y), 0.0), _at(Vector2(side, FACADE_Y), FAR), CURB, 2.0)
@@ -104,7 +106,9 @@ func _draw_vista() -> void:
 	for i in 60:
 		var d := pow(_rng.randf(), 2.0) * FAR
 		var gx: float = [x0 + sidewalk + 6.0, x1 - sidewalk - 6.0][i % 2] + _rng.randf_range(-12, 12)
-		draw_circle(_at(Vector2(gx, FACADE_Y), d), 4.0 / (1.0 + d), LEAVES[_rng.randi_range(0, LEAVES.size() - 1)])
+		var lc: Color = _litter[_rng.randi_range(0, 4) % _litter.size()]
+		if float(i % 10) / 10.0 < Season.litter_amount():
+			draw_circle(_at(Vector2(gx, FACADE_Y), d), 4.0 / (1.0 + d), lc)
 	_walls(left_walls, x0, -1.0)
 	_walls(right_walls, x1, 1.0)
 	_haze_band(3.0, 9.0, 0.0, 0.35)
@@ -116,10 +120,30 @@ func _draw_vista() -> void:
 			_tree(Vector2(tx, FACADE_Y), d + (0.3 if side > 0.0 else 0.0))
 
 
-# Mount Royal on the horizon at the end of the street: a long hazy hill in faded autumn colours, the cross
-# on its summit.
+# Mount Royal on the horizon at the end of the street: a long hazy hill in the season's colours, the cross
+# on its summit. First, open sky over the gap hides the distant city behind it (nothing stands behind the
+# mountain); the top fades out so the clouds above stay.
 func _mount_royal() -> void:
 	var vp := _vp()
+	var sky := Season.sky()
+	var grad := Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.35, 0.62, 0.82, 1.0])
+	grad.colors = sky
+	var sky_top := 90.0
+	var bands := 8
+	for i in bands:
+		var ya := lerpf(sky_top, HORIZON_Y + 4.0, float(i) / bands)
+		var yb := lerpf(sky_top, HORIZON_Y + 4.0, float(i + 1) / bands)
+		var ca := grad.sample(ya / 720.0)
+		var cb := grad.sample(yb / 720.0)
+		ca.a = clampf((ya - sky_top) / 50.0, 0.0, 1.0)
+		cb.a = clampf((yb - sky_top) / 50.0, 0.0, 1.0)
+		# Fade out toward the sides too, so the patch has no visible edge.
+		var xs := [x0, x0 + 140.0, x1 - 140.0, x1]
+		var fades := [0.0, 1.0, 1.0, 0.0]
+		for j in 3:
+			draw_polygon(PackedVector2Array([Vector2(xs[j], ya), Vector2(xs[j + 1], ya), Vector2(xs[j + 1], yb), Vector2(xs[j], yb)]),
+				PackedColorArray([Color(ca, ca.a * fades[j]), Color(ca, ca.a * fades[j + 1]), Color(cb, cb.a * fades[j + 1]), Color(cb, cb.a * fades[j])]))
 	var pts := PackedVector2Array()
 	for i in 25:
 		var t := i / 24.0
@@ -134,7 +158,7 @@ func _mount_royal() -> void:
 		var t := _rng.randf()
 		var ridge := HORIZON_Y - pow(sin(t * PI), 0.8) * 150.0
 		var c := Vector2(lerpf(vp.x - 420.0, vp.x + 440.0, t), lerpf(ridge + 10.0, HORIZON_Y, _rng.randf()))
-		draw_circle(c, _rng.randf_range(4.0, 8.0), Color(LEAVES[i % LEAVES.size()].lerp(Color("#8C8098"), 0.6), 0.7))
+		draw_circle(c, _rng.randf_range(3.0, 6.0), Color(_foliage[i % _foliage.size()].lerp(Color("#8C8098"), 0.6), 0.45))
 	draw_colored_polygon(pts, Color(HAZE, 0.18))
 	var top := Vector2(vp.x + 20.0, HORIZON_Y - 150.0)
 	draw_line(top, top + Vector2(0, -22), Color("#F2EEE6"), 2.5)
@@ -175,7 +199,7 @@ func _walls(walls: Array, front_x: float, side: float) -> void:
 				for t in 3:
 					var d := lerpf(d0, d1, (t + 0.5) / 3.0)
 					var c := _at(Vector2(front_x + side * 40.0, FACADE_Y - 190.0), d)
-					draw_circle(c, 70.0 / (1.0 + d), LEAVES[t % LEAVES.size()])
+					draw_circle(c, 70.0 / (1.0 + d), _foliage[t % _foliage.size()])
 			_:
 				var top: float = w.top
 				var col: Color = w.color
@@ -235,11 +259,19 @@ func _tree(base: Vector2, d: float) -> void:
 	var foot := _at(base, d)
 	var crown := _at(base + Vector2(0, -250), d)
 	draw_line(foot, crown, Color("#5E4A3C"), maxf(1.5, 14.0 * s))
+	if Season.is_winter():
+		# Bare branches with a line of snow along each.
+		for i in 6:
+			var a := -PI / 2.0 + (i - 2.5) * 0.45
+			var tip := crown + Vector2.from_angle(a) * 90.0 * s
+			draw_line(crown + Vector2(0, 30) * s, tip, Color("#5E4A3C"), maxf(1.0, 6.0 * s))
+			draw_line(crown + Vector2(0, 26) * s, tip + Vector2(0, -3) * s, Color("#F4F7FA"), maxf(1.0, 3.0 * s))
+		return
 	for i in 7:
 		var a := TAU * i / 7.0 + d
 		var off := Vector2(cos(a) * 70.0, sin(a) * 50.0) * s
-		draw_circle(crown + off, 62.0 * s, LEAVES[(i + int(d * 3.0)) % LEAVES.size()].darkened(0.08 * float(i % 2)))
-	draw_circle(crown + Vector2(-22, -26) * s, 40.0 * s, LEAVES[2].lightened(0.15))
+		draw_circle(crown + off, 62.0 * s, _foliage[(i + int(d * 3.0)) % _foliage.size()].darkened(0.08 * float(i % 2)))
+	draw_circle(crown + Vector2(-22, -26) * s, 40.0 * s, _foliage[2].lightened(0.15))
 
 
 # ── Ground ──────────────────────────────────────────────────────
@@ -276,7 +308,10 @@ func _draw_ground() -> void:
 		var y := _rng.randf_range(y0 + 4.0, y1 - 4.0)
 		var x := _rng.randf_range(_fan(l, y), _fan(r, y))
 		draw_set_transform(Vector2(x, y), _rng.randf_range(0.0, PI), Vector2(1.0, 0.5))
-		draw_circle(Vector2.ZERO, _rng.randf_range(3.0, 5.0), LEAVES[_rng.randi_range(0, LEAVES.size() - 1)])
+		var size := _rng.randf_range(3.0, 5.0)
+		var lc: Color = _litter[_rng.randi_range(0, 4) % _litter.size()]
+		if float(i % 10) / 10.0 < Season.litter_amount():
+			draw_circle(Vector2.ZERO, size, lc)
 	draw_set_transform(Vector2.ZERO)
 
 

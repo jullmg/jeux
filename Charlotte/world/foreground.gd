@@ -6,7 +6,6 @@ extends RefCounted
 const SCROLL := 1.35
 const BLUR := 0.2
 const SHADE := Color(0.62, 0.55, 0.55)
-const LEAVES := ["#C0392B", "#E67E22", "#F1C40F", "#D35400", "#B5442E", "#8E3A24"]
 
 
 static func build(parent: Node, street_width: float, view_width: float, seed_value := 7) -> Parallax2D:
@@ -43,20 +42,31 @@ static func add(layer: Node, svg_body: String, bottom: Vector2, size: Vector2) -
 	return sprite
 
 
+# A heap of fallen leaves in autumn; a snow mound in winter, a patch of flowers in spring, grass in summer.
 static func leaf_pile(rng: RandomNumberGenerator) -> String:
-	var s := '<ellipse cx="150" cy="104" rx="140" ry="40" fill="#5A2E1C"/>'
+	var ground: String = {"spring": "#4E7A30", "summer": "#3E6E2A", "autumn": "#5A2E1C", "winter": "#DCE4EA"}[Season.current]
+	var bits: Array[Color] = Season.litter() if Season.current != "summer" else Season.foliage()
+	if Season.current == "spring":
+		bits = [Color("#E04F5F"), Color("#FFD23F"), Color("#F2A7C9"), Color("#FFFFFF"), Color("#7FB85A")]
+	var s := '<ellipse cx="150" cy="104" rx="140" ry="40" fill="%s"/>' % ground
 	for i in 70:
 		var a := rng.randf_range(PI, TAU)
 		var d := sqrt(rng.randf())
 		var cx := 150.0 + cos(a) * d * 135.0
 		var cy := 104.0 + sin(a) * d * 70.0
 		s += '<ellipse cx="%.1f" cy="%.1f" rx="14" ry="7" fill="%s" transform="rotate(%d %.1f %.1f)"/>' % [
-			cx, cy, LEAVES[rng.randi_range(0, LEAVES.size() - 1)], rng.randi_range(0, 180), cx, cy]
+			cx, cy, "#" + bits[rng.randi_range(0, 5) % bits.size()].to_html(false), rng.randi_range(0, 180), cx, cy]
 	return s
 
 
 static func shrub(rng: RandomNumberGenerator) -> String:
-	var pal: Array = [["#7A2E22", "#A63D2A", "#C4562E"], ["#5E6B2A", "#7E8F3A", "#9BAE4A"], ["#8E2A3A", "#B5442E", "#D9682B"]][rng.randi_range(0, 2)]
+	var palettes := {
+		"spring": [["#4E7A30", "#6FA048", "#9BCB6A"], ["#5E8A3A", "#7FB85A", "#F2A7C9"], ["#4A7A36", "#6DB86A", "#C8E39A"]],
+		"summer": [["#2E6E2C", "#3E8E3A", "#5DB55A"], ["#2F6A30", "#447F33", "#64B04F"], ["#2C5E2A", "#3A8636", "#7CC261"]],
+		"autumn": [["#7A2E22", "#A63D2A", "#C4562E"], ["#5E6B2A", "#7E8F3A", "#9BAE4A"], ["#8E2A3A", "#B5442E", "#D9682B"]],
+		"winter": [["#4A5A4A", "#DDE4EA", "#F7F9FB"], ["#5A5048", "#E6ECF0", "#FFFFFF"], ["#3E4E44", "#D6DEE5", "#F4F7FA"]],
+	}
+	var pal: Array = palettes[Season.current][rng.randi_range(0, 2)]
 	var s := ""
 	for layer_i in 3:
 		for i in 9:

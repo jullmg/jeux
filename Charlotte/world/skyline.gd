@@ -84,7 +84,7 @@ static func _rooftops(layer: Parallax2D, span: float, rng: RandomNumberGenerator
 static func _backyard_trees(layer: Parallax2D, span: float, rng: RandomNumberGenerator) -> void:
 	var x := -100.0
 	while x < span:
-		var base := Color(AUTUMN[rng.randi_range(0, AUTUMN.size() - 1)]).lerp(HAZE, 0.45)
+		var base := Season.foliage()[rng.randi_range(0, AUTUMN.size() - 1)].lerp(HAZE, 0.45)
 		var cy := rng.randf_range(200, 250)
 		for i in 6:
 			var c := Vector2(x + rng.randf_range(-50, 50), cy + rng.randf_range(-40, 30))

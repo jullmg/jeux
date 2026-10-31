@@ -44,6 +44,9 @@ func _spawn_charlotte(x: float, facing := 1) -> void:
 	_charlotte.walk_speed = 260.0
 	_charlotte.position = Vector2(x, FEET_Y)
 	_charlotte.facing = facing
+	if not is_nan(Transition.inside_x):
+		_charlotte.position.x = Transition.inside_x
+		Transition.inside_x = NAN
 	var x_arg := _arg("--x=")
 	if not x_arg.is_empty():
 		_charlotte.position.x = x_arg.to_float()

@@ -1,6 +1,6 @@
 class_name SkyBackdrop
 extends CanvasLayer
-## Screen-space autumn afternoon sky: gradient and a low sun on the upper left.
+## Screen-space afternoon sky (colours from the Season): gradient and a low sun on the upper left.
 
 const SUN_POS := Vector2(150, 120)
 
@@ -10,7 +10,7 @@ func _ready() -> void:
 	var size := get_viewport().get_visible_rect().size
 	var grad := Gradient.new()
 	grad.offsets = PackedFloat32Array([0.0, 0.35, 0.62, 0.82, 1.0])
-	grad.colors = PackedColorArray([Color("#4F86C6"), Color("#86B5E0"), Color("#C9DDEB"), Color("#F6D9B4"), Color("#F4B98C")])
+	grad.colors = Season.sky()
 	var sky := GradientTexture2D.new()
 	sky.gradient = grad
 	sky.fill_to = Vector2(0, 1)
@@ -29,7 +29,10 @@ func _ready() -> void:
 
 func _disc(center: Vector2, diameter: float, colors: Array, offsets: Array = []) -> void:
 	var grad := Gradient.new()
-	grad.colors = PackedColorArray(colors)
+	var faded := PackedColorArray()
+	for c: Color in colors:
+		faded.append(Color(c, c.a * Season.sun()))
+	grad.colors = faded
 	if offsets.is_empty():
 		offsets = [0.0, 1.0]
 	grad.offsets = PackedFloat32Array(offsets)

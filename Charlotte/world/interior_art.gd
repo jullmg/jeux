@@ -580,10 +580,12 @@ static func window(w: float, h: float) -> ImageTexture:
 	s += '<rect x="16" y="%s" width="%s" height="%s" fill="#B5603F" opacity="0.75"/>' % [h * 0.42, w - 32, h * 0.45]
 	for y in range(int(h * 0.42) + 8, int(h) - 30, 12):
 		s += '<path d="M16 %d H%s" stroke="#9A4E34" stroke-width="1.5" opacity="0.7"/>' % [y, w - 16]
-	# An autumn tree in the lane: trunk and a few leaf clumps.
+	# A tree in the lane: trunk and a few clumps in the season's colours.
 	s += '<path d="M%s %s V%s" stroke="#5E4636" stroke-width="7"/>' % [w * 0.36, h * 0.88, h * 0.3]
-	for c in [[0.22, 0.3, 0.13, "#D35400"], [0.42, 0.22, 0.15, "#E67E22"], [0.3, 0.15, 0.11, "#F1C40F"], [0.52, 0.34, 0.1, "#C0392B"], [0.18, 0.18, 0.09, "#E59866"]]:
-		s += '<circle cx="%s" cy="%s" r="%s" fill="%s"/>' % [w * c[0], h * c[1], w * c[2], c[3]]
+	var leaves := Season.foliage()
+	for i in 5:
+		var c: Array = [[0.22, 0.3, 0.13], [0.42, 0.22, 0.15], [0.3, 0.15, 0.11], [0.52, 0.34, 0.1], [0.18, 0.18, 0.09]][i]
+		s += '<circle cx="%s" cy="%s" r="%s" fill="#%s"/>' % [w * c[0], h * c[1], w * c[2], leaves[i].to_html(false)]
 	s += '<rect x="%s" y="16" width="8" height="%s" fill="%s"/>' % [w / 2 - 4, h - 46, TRIM]
 	s += '<rect x="16" y="%s" width="%s" height="8" fill="%s"/>' % [h * 0.45, w - 32, TRIM]
 	s += '<path d="M20 20 L%s 20 L30 %s L20 %s Z" fill="#FFFFFF" opacity="0.35"/>' % [w * 0.4, h * 0.6, h * 0.6]

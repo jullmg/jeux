@@ -23,6 +23,7 @@ wardrobe and change clothes. Click the hallway TV to turn it on and change chann
   - `Godot --path . res://tools/lineup.tscn -- --screenshot=/path/lineup.png [--seed=1]` (character design sheet)
   - `Godot --path . res://tools/animals.tscn -- --screenshot=/path/animals.png [--focus=x,y --zoom=3]` (cat coats/poses, squirrels,
     dog breeds, Charlotte petting a cat and dogs; use focus/zoom to inspect details)
+  - Add `--season=winter` (spring, summer, autumn, winter; or printemps/été/automne/hiver) to any of these to see a season.
   - Add `--quit-after 2000` so a run can never hang; after editing SVGs or adding a new `class_name` script, run `Godot --headless --path . --import` first
     (otherwise the new class is "not declared").
 
@@ -96,6 +97,20 @@ wardrobe and change clothes. Click the hallway TV to turn it on and change chann
 - Petting: `Character.pet(seconds, low)` lunges (low 1 = deep, for cats/small dogs; 0 = standing, arm out, for big dogs) and
   strokes with the front hand. The animal is drawn just in front of Charlotte so her hand lands on its head: stray cats walk at
   y 646 (she is at 638); a dog being petted steps 32 px toward the camera and gets z_index 1, while its walker `hold()`s.
+
+## Seasons
+
+- `world/season.gd` (`Season`): `Season.current` (default `"autumn"`, the original Halloween look) and every seasonal
+  palette: tree canopies (`tree_palettes`, empty in winter = bare snowy trees), `foliage`, ground `litter` + `litter_amount`,
+  `falling_colors`/`falling_texture`/`falling_amount` (leaves, petals, snow), `sky`, `sun`, grade `tint`,
+  `dress_for_weather` (passersby), `add_weather` (winter snowfall) and `decor(art)` (facade SVG path).
+- Elements read the season when they're built; switching reloads the scene. Seasonal code must keep **the same random draws
+  in the same order** in every season (only colours/visibility change), so the street stays the same people and places.
+- Facades: the generator writes autumn to `art/decor/*.svg` and the other seasons to `art/decor/<season>/*.svg` (snow on
+  ledges, wreaths, Christmas lights in winter; tulips/geraniums instead of pumpkins; ghosts/cobwebs/bats autumn only).
+- `ui/debug_menu.gd` is the `DebugMenu` autoload: reads `--season=`, and in debug builds F1 opens a "Saisons" menu that
+  switches season while playing (reloads the scene; Charlotte keeps her x via `Transition.street_x` / `Transition.inside_x`).
+- Nothing stands behind Mount Royal: the cross-street vista paints open sky over the distant city before drawing it.
 
 ## Conventions
 

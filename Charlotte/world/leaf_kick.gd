@@ -1,12 +1,12 @@
 class_name LeafKick
 extends CPUParticles2D
-## Fallen leaves kicked up behind someone's feet while they walk.
+## Fallen leaves (petals in spring, powder snow in winter) kicked up behind someone's feet while they walk.
 
 var walker: Character
 
 
 func _ready() -> void:
-	texture = PropArt.leaf()
+	texture = Season.falling_texture()
 	amount = 10
 	lifetime = 0.8
 	local_coords = false
@@ -26,5 +26,5 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	position = walker.position + Vector2(0, -2)
-	emitting = walker.is_walking
+	emitting = walker.is_walking and (Season.litter_amount() > 0.1 or Season.is_winter())
 	direction = Vector2(-walker.facing, -1.6)

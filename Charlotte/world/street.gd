@@ -1,6 +1,7 @@
 class_name Street
 extends Node2D
-## Sidewalk, curb, gutter full of fallen leaves and asphalt (patches, cracks, manholes, puddles), drawn once.
+## Sidewalk, curb, gutter (full of fallen leaves in autumn, snowbanks in winter) and asphalt (patches, cracks,
+## manholes, puddles), drawn once.
 ## The thousands of leaves and grit specks go into vertex-coloured meshes: drawn one by one they cost
 ## thousands of draw calls every frame (the whole street is a single canvas item, never culled).
 
@@ -8,7 +9,7 @@ const TOP := 590.0
 const CURB := 662.0
 const ROAD := 670.0
 const BOTTOM := 720.0
-const LEAVES := [Color("#D9682B"), Color("#B5442E"), Color("#E3A33A"), Color("#C9562E"), Color("#8E3A24"), Color("#E8C04A")]
+const LEAVES_COUNT := 6
 
 var width := 2000.0
 
@@ -41,11 +42,13 @@ func _draw() -> void:
 	var grit := _Batch.new()
 	for n in int(width / 3.0):
 		grit.rect(Rect2(rng.randf_range(0, width), rng.randf_range(ROAD + 6, BOTTOM), 2, 2), Color("#6E6D6A") if rng.randf() < 0.5 else Color("#4F4E4C"))
-	_meshes.append(grit.draw(self))
+	_keep(grit.draw(self))
 	for gx in range(400, int(width), 900):
 		draw_rect(Rect2(gx, ROAD + 1, 46, 9), Color("#3A3938"))
 		for k in 6:
 			draw_line(Vector2(gx + 4 + k * 7, ROAD + 2), Vector2(gx + 4 + k * 7, ROAD + 9), Color("#6E6D6A"), 1.5)
+	if Season.is_winter():
+		_snow_on_sidewalk(rng)
 	var leaves := _Batch.new()
 	_leaves(leaves, rng, width / 9.0, TOP + 4, CURB - 2)
 	_leaves(leaves, rng, width / 4.0, ROAD - 2, ROAD + 12)
@@ -55,18 +58,71 @@ func _draw() -> void:
 		for k in 26:
 			var p := Vector2(x0 + rng.randf_range(-30, 30), ROAD + 4 + absf(rng.randfn(0.0, 3.0)))
 			var xf := Transform2D(rng.randf_range(0, PI), Vector2(1.0, 0.5), 0.0, p)
-			var c: Color = LEAVES[rng.randi_range(0, LEAVES.size() - 1)]
-			leaves.circle(xf, rng.randf_range(3.5, 6.0), c)
-	_meshes.append(leaves.draw(self))
+			var c := _litter_color(rng.randi_range(0, LEAVES_COUNT - 1))
+			var r := rng.randf_range(3.5, 6.0)
+			if _shown(n * 26 + k):
+				leaves.circle(xf, r, c)
+	_keep(leaves.draw(self))
+	if Season.is_winter():
+		_snowbank(rng)
+
+
+func _keep(mesh: ArrayMesh) -> void:
+	if mesh:
+		_meshes.append(mesh)
+
+
+# What lies on the ground this season. The random draws stay the same in every season (so the rest of the
+# street doesn't move); only the colour and how many are shown change.
+func _litter_color(i: int) -> Color:
+	var litter := Season.litter()
+	return litter[i % litter.size()]
+
+
+func _shown(i: int) -> bool:
+	return float((i * 7919) % 1000) / 1000.0 < Season.litter_amount()
+
+
+# Winter: packed snow over the sidewalk, heaped against the buildings.
+func _snow_on_sidewalk(rng: RandomNumberGenerator) -> void:
+	draw_rect(Rect2(0, TOP, width, CURB - TOP), Color(0.96, 0.97, 1.0, 0.55))
+	var pts := PackedVector2Array([Vector2(0, TOP)])
+	var x := 0.0
+	while x < width:
+		pts.append(Vector2(x, TOP + 6.0 + rng.randf_range(0.0, 10.0)))
+		x += rng.randf_range(30.0, 70.0)
+	pts.append(Vector2(width, TOP))
+	draw_colored_polygon(pts, Color("#F7F9FB"))
+	# Shovelled path down the middle: a little darker, with boot prints.
+	draw_rect(Rect2(0, TOP + 24, width, 22), Color(0.75, 0.78, 0.82, 0.35))
+
+
+# Winter: the plough's snowbank along the curb, and slush on the road.
+func _snowbank(rng: RandomNumberGenerator) -> void:
+	var pts := PackedVector2Array([Vector2(0, ROAD + 8)])
+	var x := 0.0
+	while x < width:
+		pts.append(Vector2(x, CURB - 10.0 - rng.randf_range(0.0, 12.0)))
+		x += rng.randf_range(24.0, 60.0)
+	pts.append(Vector2(width, ROAD + 8))
+	draw_colored_polygon(pts, Color("#EEF2F6"))
+	var shade := PackedVector2Array([Vector2(0, ROAD + 8), Vector2(width, ROAD + 8), Vector2(width, ROAD + 2), Vector2(0, ROAD + 2)])
+	draw_colored_polygon(shade, Color("#C9D3DC"))
+	for i in int(width / 160.0):
+		draw_set_transform(Vector2(rng.randf_range(0, width), rng.randf_range(ROAD + 14, BOTTOM - 6)), 0.0, Vector2(1.0, 0.25))
+		draw_circle(Vector2.ZERO, rng.randf_range(20.0, 60.0), Color(0.85, 0.88, 0.9, 0.35))
+	draw_set_transform(Vector2.ZERO)
 
 
 func _leaves(batch: _Batch, rng: RandomNumberGenerator, count: float, y0: float, y1: float) -> void:
 	for n in int(count):
 		var p := Vector2(rng.randf_range(0, width), rng.randf_range(y0, y1))
 		var xf := Transform2D(rng.randf_range(0, PI), Vector2(1.0, 0.5), 0.0, p)
-		var c: Color = LEAVES[rng.randi_range(0, LEAVES.size() - 1)]
-		batch.circle(xf, rng.randf_range(3.0, 5.5), c)
-		batch.line(xf, Vector2(-4, 0), Vector2(4, 0), 0.8, c.darkened(0.3))
+		var c := _litter_color(rng.randi_range(0, LEAVES_COUNT - 1))
+		var r := rng.randf_range(3.0, 5.5)
+		if _shown(n + int(y0)):
+			batch.circle(xf, r, c)
+			batch.line(xf, Vector2(-4, 0), Vector2(4, 0), 0.8, c.darkened(0.3))
 
 
 func _road_details(rng: RandomNumberGenerator) -> void:
@@ -141,6 +197,8 @@ class _Batch:
 		_tri(p[0], p[2], p[3], col)
 
 	func draw(ci: CanvasItem) -> ArrayMesh:
+		if _verts.is_empty():
+			return null
 		var arrays := []
 		arrays.resize(Mesh.ARRAY_MAX)
 		arrays[Mesh.ARRAY_VERTEX] = _verts
