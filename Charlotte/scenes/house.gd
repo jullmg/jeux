@@ -21,6 +21,8 @@ var _salon_pendant: Sprite2D
 var _floor_lamp: Array = []
 var _hall_lights: Array = []
 var _bedroom_lights: FairyLights
+# Charlotte's drawings stuck on the fridge door with magnets.
+var _fridge_art: Node2D
 
 
 func _ready() -> void:
@@ -71,6 +73,8 @@ func _build_doors() -> void:
 		Transition.change_scene(self, "res://scenes/main.tscn")))
 	add_child(DoorSpot.make(Rect2(CHACHA_DOOR_X, 170, 150, 430), func(): _go_through(BEDROOM_DOOR_X - 40.0, BEDROOM, -1)))
 	add_child(DoorSpot.make(Rect2(BEDROOM_DOOR_X, 170, 150, 430), func(): _go_through(CHACHA_DOOR_X + 75.0, HALL, 1)))
+	# Her desk: drawing paper and crayons.
+	add_child(DoorSpot.make(Rect2(BEDROOM.x + 1110.0, 420, 300, 186), _open_drawing_pad, BEDROOM.x + 1200.0))
 	# The dresser's drawers (under the terrarium): her wardrobe.
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 40.0, 444, 276, 162), _open_wardrobe, BEDROOM.x + 180.0))
 
@@ -85,6 +89,41 @@ func _open_wardrobe() -> void:
 			_twirl()
 		_control.enabled = true)
 	add_child(wardrobe)
+
+
+func _open_drawing_pad() -> void:
+	_control.enabled = false
+	var pad := DrawingPad.new()
+	pad.closed.connect(func(drawing: Image):
+		if drawing:
+			DrawingPad.keep(drawing)
+			_show_fridge_drawings()
+		_control.enabled = true)
+	add_child(pad)
+
+
+# Her kept drawings, newest last, on the fridge doors (kitchen fridge: x 3404–3508, doors split at y 370).
+func _show_fridge_drawings() -> void:
+	for child in _fridge_art.get_children():
+		child.queue_free()
+	var slots := [Vector2(KITCHEN_START + 14.0, 258.0), Vector2(KITCHEN_START + 56.0, 284.0),
+		Vector2(KITCHEN_START + 16.0, 396.0), Vector2(KITCHEN_START + 58.0, 430.0)]
+	var magnets := [Color("#E04F5F"), Color("#4FA3E0"), Color("#FFD23F"), Color("#7CCB5A")]
+	var drawings := DrawingPad.saved()
+	for i in drawings.size():
+		var art := Sprite2D.new()
+		art.texture = ImageTexture.create_from_image(drawings[i])
+		art.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		art.centered = false
+		art.scale = Vector2.ONE * 40.0 / DrawingPad.PAPER.x
+		art.position = slots[i]
+		art.rotation = deg_to_rad([-5.0, 4.0, 3.0, -4.0][i])
+		_fridge_art.add_child(art)
+		var magnet := Polygon2D.new()
+		magnet.polygon = CritterDraw.ellipse_points(Vector2.ZERO, Vector2(3.5, 3.5))
+		magnet.color = magnets[i]
+		magnet.position = slots[i] + Vector2(20, 1).rotated(art.rotation)
+		_fridge_art.add_child(magnet)
 
 
 # A happy little spin in the new outfit.
@@ -146,6 +185,9 @@ func _build_hallway() -> void:
 	_chacha_sign(Vector2(CHACHA_DOOR_X + 75.0, 330.0))
 	_put(InteriorArt.monstera(), 3300.0, 606.0, 0.55, "floor")
 	_put(InteriorArt.kitchen(), KITCHEN_START, WALL_BASE)
+	_fridge_art = Node2D.new()
+	add_child(_fridge_art)
+	_show_fridge_drawings()
 	_daylight(Vector2(KITCHEN_START + 322.0, 260.0), 126.0, 0.1)
 	_hall_lights.append(_ceiling_light(KITCHEN_START + 200.0))
 

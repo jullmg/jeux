@@ -8,7 +8,9 @@ Current state: a living, side-scrolling street. Charlotte walks with ←/→ or 
 (`Character.running`, `RUN_SPEED` × walk speed, eased; `Character.speed()` gives the current speed).
 Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks over and pets it. Click her front door
 (ground floor of `duplex_charlotte`, n° 5672) to go inside her flat. In her bedroom, click the dresser's drawers to open her
-wardrobe and change clothes. Click the hallway TV to turn it on and change channels, then off. `world/tv_shows.gd` (`TvShows`) is the
+wardrobe and change clothes. Click her desk to draw (`ui/drawing_pad.gd`, `DrawingPad`: crayons, sizes, eraser); "Sur le frigo !" saves the
+drawing to `user://drawings/` (newest 4 kept) and sticks it on the kitchen fridge. Delete that folder after tests.
+Click the hallway TV to turn it on and change channels, then off. `world/tv_shows.gd` (`TvShows`) is the
 catalogue of channels, all original (no copyrighted shows or characters): news, animals, cartoon, hockey, weather, the
 sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas, t, on_for)`. `world/tv_screen.gd`
 (`TvScreen`, a `Control`) is one TV for any house: set its `channels` (TvShows ids) to give it its own lineup. No goals yet.
