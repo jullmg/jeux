@@ -13,6 +13,8 @@ const FUR := Color("#E8A65A")
 const BELLY := Color("#FBF1E2")
 const PINK := Color("#F2A7B4")
 const SIZE := 1.25
+## The food bowl, on the bedding between the wheel and the hideout (the photo frames hide the left).
+const BOWL_X := 168.0
 
 var _x := 160.0
 var _state := "sit"
@@ -25,6 +27,10 @@ var _spin := 0.0
 var _blink := 2.0
 var _hearts: Array[Vector3] = []
 var _line := FUR.darkened(0.55)
+# Seeds falling into the bowl (x, y, speed), seeds in the bowl, and whether it's heading there to eat.
+var _falling: Array[Vector3] = []
+var _bowl := 0
+var _hungry := false
 
 
 func _ready() -> void:
@@ -37,12 +43,16 @@ func _process(delta: float) -> void:
 	if _blink < -0.15:
 		_blink = randf_range(1.5, 4.0)
 	_timer -= delta
+	_drop_seeds(delta)
 	match _state:
 		"walk":
-			var step := signf(_target - _x) * 70.0 * delta
+			var step := signf(_target - _x) * (110.0 if _hungry else 70.0) * delta
 			if absf(_target - _x) <= absf(step):
 				_x = _target
-				if is_equal_approx(_x, WHEEL.x) and randf() < 0.8:
+				if _hungry and is_equal_approx(_x, BOWL_X + 22.0):
+					_facing = -1
+					_settle("eat", 0.7)
+				elif is_equal_approx(_x, WHEEL.x) and randf() < 0.8:
 					_settle("wheel", randf_range(5.0, 10.0))
 				elif is_equal_approx(_x, HIDEOUT_X) and randf() < 0.6:
 					_settle("sleep", randf_range(6.0, 12.0))
@@ -51,13 +61,28 @@ func _process(delta: float) -> void:
 			else:
 				_x += step
 				_step = fmod(_step + delta * 9.0, 1.0)
+		"eat":
+			# One seed every 0.7 s, then a happy little dance of hearts.
+			if _timer <= 0.0:
+				if _bowl > 0:
+					_bowl -= 1
+					_timer = 0.7
+				elif _falling.is_empty():
+					_hungry = false
+					_settle("up", 2.0)
+					for i in 3:
+						_hearts.append(Vector3(randf_range(-8.0, 8.0), -i * 0.35, randf_range(0.6, 0.9)))
+				else:
+					_timer = 0.2
 		"wheel":
 			_spin += delta * 9.0
 			_step = fmod(_step + delta * 12.0, 1.0)
 			if _timer <= 0.0:
 				_walk_to(randf_range(ROAM.x, ROAM.y))
 		_:
-			if _timer <= 0.0:
+			if _timer <= 0.0 and _hungry:
+				_walk_to(BOWL_X + 22.0)
+			elif _timer <= 0.0:
 				var roll := randf()
 				if roll < 0.3:
 					_walk_to(WHEEL.x)
@@ -84,7 +109,19 @@ func _settle(state: String, time: float) -> void:
 	_timer = time
 
 
-# ── Interaction: click it and it stands up to say hi ─────────
+func _drop_seeds(delta: float) -> void:
+	for i in range(_falling.size() - 1, -1, -1):
+		var sd := _falling[i]
+		sd.z += 320.0 * delta
+		sd.y += sd.z * delta
+		if sd.y >= FLOOR - 6.0:
+			_falling.remove_at(i)
+			_bowl += 1
+		else:
+			_falling[i] = sd
+
+
+# ── Interaction: click it with an empty bowl and Charlotte feeds it; otherwise it stands up to say hi ──
 
 func can_interact() -> bool:
 	return true
@@ -113,6 +150,13 @@ func release() -> void:
 func interact(_who: Character) -> void:
 	if _state == "wheel" or _state == "walk":
 		_x = clampf(_x, ROAM.x, ROAM.y)
+	if _bowl == 0 and _falling.is_empty() and not _hungry:
+		# A pinch of sunflower seeds sprinkled into the bowl; it scurries over to eat.
+		for i in 7:
+			_falling.append(Vector3(BOWL_X + randf_range(-9.0, 9.0), 24.0 - i * 6.0, 0.0))
+		_hungry = true
+		_walk_to(BOWL_X + 22.0)
+		return
 	_settle("up", 2.4)
 	for i in 3:
 		_hearts.append(Vector3(randf_range(-8.0, 8.0), -i * 0.35, randf_range(0.6, 0.9)))
@@ -122,6 +166,7 @@ func interact(_who: Character) -> void:
 
 func _draw() -> void:
 	_draw_wheel(false)
+	_draw_bowl()
 	var running := _state == "wheel"
 	var at := Vector2(WHEEL.x, WHEEL.y + WHEEL_R - 3.0) if running else Vector2(_x, FLOOR)
 	if not running:
@@ -134,6 +179,8 @@ func _draw() -> void:
 			_draw_sleep()
 		"up":
 			_draw_upright(true)
+		"eat":
+			_draw_eating()
 		_:
 			_draw_upright(false)
 	draw_set_transform(Vector2.ZERO)
@@ -184,6 +231,26 @@ func _draw_upright(standing: bool) -> void:
 	var paw_y := -20.0 - tall * 1.4 + (scrub if _state == "groom" else 4.0)
 	for x in [3.0, 9.0]:
 		CritterDraw.ellipse(self, Vector2(x, paw_y), Vector2(2.6, 2.2), PINK, _line, 0.0, 1.2)
+
+
+# Sitting up at the bowl, a seed in its paws, cheeks stuffed and nose twitching.
+func _draw_eating() -> void:
+	_draw_upright(false)
+	var munch := absf(sin(_t * 16.0)) * 1.2
+	for x in [-3.0, 9.0]:
+		CritterDraw.ellipse(self, Vector2(x, -22 + munch * 0.3), Vector2(4.5 + munch, 3.8 + munch * 0.5), FUR, _line, 0.0, 1.2)
+	CritterDraw.ellipse(self, Vector2(8, -18), Vector2(2.4, 1.4), Color("#4A4038"), Color.TRANSPARENT, 0.4)
+	draw_line(Vector2(7.3, -18.5), Vector2(8.7, -17.5), Color("#E8E2D6"), 0.6)
+
+
+func _draw_bowl() -> void:
+	var b := Vector2(BOWL_X, FLOOR)
+	CritterDraw.ellipse(self, b + Vector2(0, -3), Vector2(14, 5), Color("#7FB5D9"), Color("#4E7FA0"), 0.0, 1.5)
+	CritterDraw.ellipse(self, b + Vector2(0, -6), Vector2(11, 2.6), Color("#5A8FB5"))
+	for i in mini(_bowl, 9):
+		CritterDraw.ellipse(self, b + Vector2(-8 + (i * 5) % 16, -7 - (i / 4) * 1.5), Vector2(2.2, 1.2), Color("#4A4038"), Color.TRANSPARENT, 0.5)
+	for sd in _falling:
+		CritterDraw.ellipse(self, Vector2(sd.x, sd.y), Vector2(2.2, 1.2), Color("#4A4038"), Color.TRANSPARENT, sd.y * 0.1)
 
 
 # Curled up asleep in a ball, with a little "z" floating up.

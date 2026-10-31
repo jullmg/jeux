@@ -59,7 +59,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Charlotte's hamster (`world/hamster.gd`, `Hamster`) lives in the terrarium on her bedroom dresser. The terrarium art is two
   layers, `InteriorArt.terrarium(false)` behind and `terrarium(true)` in front (glass glare, things on the dresser); the
   hamster node shares its position/scale and works in its canvas units. It wanders, grooms, runs its wheel, naps in the
-  hideout, and stands up with hearts when clicked.
+  hideout, and stands up with hearts when clicked; with an empty bowl, a click feeds it (seeds fall in, it runs over and
+  eats with stuffed cheeks).
 - `ui/wardrobe.gd` (`Wardrobe`, CanvasLayer 60): the dressing window (mirror preview + tabs of clothes, colours, patterns,
   hairstyle and hair colour, hats, accessories; "Au hasard", "Comme d'habitude"). On "C'est parfait !" the house calls `CharacterLook.dress_charlotte()`,
   which keeps the look for every scene and saves it to `user://charlotte_outfit.tres`; `CharacterLook.charlotte()` returns it
