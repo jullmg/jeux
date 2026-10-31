@@ -5,7 +5,7 @@ a little girl, on her street in Montréal (Rosemont): her side of **6e Avenue** 
 **Rue Dandurand** (left) and **Rue Holt** (right), in autumn. In-game text is in **French** (Québec).
 
 Current state: a living, side-scrolling street. Charlotte walks with ←/→ or by clicking/tapping the street.
-First interaction: click (or tap) a stray cat and Charlotte walks over and pets it. No goals yet.
+Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks over and pets it. No goals yet.
 
 ## Run / verify
 
@@ -15,8 +15,10 @@ First interaction: click (or tap) a stray cat and Charlotte walks over and pets 
   - `Godot --path . res://scenes/intro.tscn -- --screenshot=/path/intro.png`
   - `Godot --path . res://scenes/main.tscn -- --screenshot=/path/main.png [--x=1234] [--wait=6]` (`--x` = Charlotte's start x, `--wait` = seconds before the shot)
   - `Godot --path . res://tools/lineup.tscn -- --screenshot=/path/lineup.png [--seed=1]` (character design sheet)
-  - `Godot --path . res://tools/animals.tscn -- --screenshot=/path/animals.png` (cat coats/poses, squirrels, dog breeds, Charlotte petting)
-  - Add `--quit-after 2000` so a run can never hang; after editing SVGs run `Godot --headless --path . --import` first.
+  - `Godot --path . res://tools/animals.tscn -- --screenshot=/path/animals.png [--focus=x,y --zoom=3]` (cat coats/poses, squirrels,
+    dog breeds, Charlotte petting a cat and dogs; use focus/zoom to inspect details)
+  - Add `--quit-after 2000` so a run can never hang; after editing SVGs or adding a new `class_name` script, run `Godot --headless --path . --import` first
+    (otherwise the new class is "not declared").
 
 ## Layout
 
@@ -30,7 +32,8 @@ First interaction: click (or tap) a stray cat and Charlotte walks over and pets 
   plus `StrayCat` (procedural sidewalk cats: 8 coats, walk/sit/loaf/pet), `Dog` (9 breeds on a leash, attached to a passerby's
   `Character.hand_position()`), `WindowCats` (cats that pop up behind window panes near the camera), `Wind` (periodic gusts:
   drives the `gust` uniform of every sway material + a leaf flurry), `LeafKick` (leaves kicked by Charlotte's feet),
-  `Foreground` (blurred near-camera layer, `Parallax2D` scroll 1.35).
+  `Foreground` (blurred near-camera layer, `Parallax2D` scroll 1.35), `CritterDraw` (shared static drawing helpers for the
+  animals: shaded outlined bodies, tapered limbs/tails built from convex quads, glossy eyes, hearts).
   `PropArt` generates trees, lamp posts, hydrants, bikes, leaves as textures. `PropArt.car()`/`wheel()` still exist but
   cars were removed from both scenes on purpose (2026-10-31); see git history to bring them back.
 - `shaders/`: `grade.gdshader` (full-screen colour grade on CanvasLayer 50), `sway.gdshader` (tree sway).
@@ -46,8 +49,9 @@ First interaction: click (or tap) a stray cat and Charlotte walks over and pets 
 - Anything clickable joins the `interactable` group and implements `can_interact()`, `hit_test(point)`, `approach_x(from_x)`,
   `reserve()`, `release()` and `interact(charlotte)` (see `StrayCat`). `main.gd` walks Charlotte to `approach_x`, then calls `interact`.
 - Input is mouse-based with event positions converted to world space, so touch works through emulated mouse events.
-- Petting: `Character.pet(seconds)` puts her in a lunge with the front hand stroking; stray cats are drawn just in front of
-  Charlotte (y 646 vs 638) so the hand lands on their heads.
+- Petting: `Character.pet(seconds, low)` lunges (low 1 = deep, for cats/small dogs; 0 = standing, arm out, for big dogs) and
+  strokes with the front hand. The animal is drawn just in front of Charlotte so her hand lands on its head: stray cats walk at
+  y 646 (she is at 638); a dog being petted steps 32 px toward the camera and gets z_index 1, while its walker `hold()`s.
 
 ## Conventions
 

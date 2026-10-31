@@ -14,8 +14,6 @@ const COATS := [
 	{"base": "#9C7656", "dark": "#5E4230", "light": "#E3CDB4", "pattern": "tabby", "eyes": "#C9A43A"},
 ]
 const CALICO := ["#E8954A", "#2A282E", "#E8954A"]
-const PINK := Color("#E89AA8")
-const HEART := Color("#FF6F91")
 const PET_TIME := 2.8
 
 var coat: Dictionary = COATS[0]
@@ -188,9 +186,7 @@ func _update_hearts(delta: float) -> void:
 # ── Drawing (facing right, feet on y = 0) ────────────────────
 
 func _draw() -> void:
-	draw_set_transform(Vector2(4, 0), 0.0, Vector2(1.0, 0.22))
-	draw_circle(Vector2.ZERO, 30.0 if _state in ["walk", "leave", "loaf"] else 22.0, Color(0.15, 0.08, 0.05, 0.25))
-	draw_set_transform(Vector2.ZERO)
+	CritterDraw.ground_shadow(self, Vector2(4, 0), 30.0 if _state in ["walk", "leave", "gone", "loaf"] else 22.0)
 	match _state:
 		"walk", "leave", "gone":
 			_draw_walking()
@@ -198,57 +194,62 @@ func _draw() -> void:
 			_draw_loaf()
 		_:
 			_draw_sitting()
-	for h in _hearts:
-		var a := 1.0 - h.y / 1.6
-		_heart(Vector2(h.x, -58.0 - h.y * 34.0), 5.0 * h.z, Color(HEART, a))
+	CritterDraw.hearts(self, _hearts, Vector2(0, -62))
 
 
 func _draw_walking() -> void:
-	var body := Vector2(0, -27)
-	var r := Vector2(26, 12)
 	var cyc := _step * TAU
-	# Far legs first, darker.
-	_leg(Vector2(-14, -24), Vector2(-14 + sin(cyc + PI) * 6.0, -maxf(0.0, cos(cyc + PI)) * 3.0), true)
-	_leg(Vector2(15, -24), Vector2(15 + sin(cyc) * 6.0, -maxf(0.0, cos(cyc)) * 3.0), true)
+	var bob := absf(sin(cyc)) * 1.2
+	var body := Vector2(0, -24 - bob)
+	# Far legs first, in shade.
+	_leg(Vector2(-14, -22 - bob), cyc + PI, true, true)
+	_leg(Vector2(14, -22 - bob), cyc, true, false)
 	var sway := sin(_t * 3.0) * 4.0
-	_tail([Vector2(-23, -31), Vector2(-33, -40 + sway * 0.3), Vector2(-38, -52 + sway), Vector2(-34, -60 + sway)])
-	_body(body, r)
-	_leg(Vector2(-19, -22), Vector2(-19 + sin(cyc) * 6.0, -maxf(0.0, cos(cyc)) * 3.0), false)
-	_leg(Vector2(20, -22), Vector2(20 + sin(cyc + PI) * 6.0, -maxf(0.0, cos(cyc + PI)) * 3.0), false)
-	_head(Vector2(28, -40), 0.0)
+	_tail([Vector2(-21, -29 - bob), Vector2(-34, -34 + sway * 0.3), Vector2(-40, -50 + sway), Vector2(-33, -60 + sway)])
+	_body(body, Vector2(24, 11.5))
+	_leg(Vector2(-18, -20 - bob), cyc, false, true)
+	_leg(Vector2(18, -20 - bob), cyc + PI, false, false)
+	_head(Vector2(26, -38 - bob * 0.6), sin(cyc * 2.0) * 0.03)
 
 
 func _draw_sitting() -> void:
 	var pet := _state == "pet"
 	var flick := sin(_t * (9.0 if pet else 2.0)) * (5.0 if pet else 3.0)
 	if pet:
-		_tail([Vector2(-14, -12), Vector2(-20, -26), Vector2(-19 + flick * 0.4, -40), Vector2(-16 + flick, -52)])
+		_tail([Vector2(-13, -12), Vector2(-21, -26), Vector2(-19 + flick * 0.4, -42), Vector2(-15 + flick, -54)])
 	else:
-		_tail([Vector2(-14, -4), Vector2(-4, 0), Vector2(10, 0), Vector2(18, -4 + flick)])
-	_body(Vector2(-5, -15), Vector2(14, 13))
-	_body(Vector2(3, -28), Vector2(11, 16), 0.25)
+		_tail([Vector2(-13, -4), Vector2(-3, 1), Vector2(11, 0), Vector2(19, -5 + flick)])
+	_body(Vector2(-5, -14), Vector2(14, 13))
+	_body(Vector2(3, -27), Vector2(11, 16), 0.22)
 	for x in [3.0, 10.0]:
-		_leg(Vector2(x, -18), Vector2(x, 0), false)
+		_limb(PackedVector2Array([Vector2(x, -20), Vector2(x, -2)]), 5.5, false)
+		_paw(Vector2(x + 1, -1.5), false)
 	var tilt := sin(_t * 3.0) * 0.12 if pet else sin(_t * 0.7) * 0.05
-	_head(Vector2(7, -46), tilt)
+	_head(Vector2(7, -45), tilt)
 
 
 func _draw_loaf() -> void:
-	_tail([Vector2(-22, -5), Vector2(-10, -1), Vector2(6, -1), Vector2(16, -3 + sin(_t * 1.5) * 2.0)])
-	_body(Vector2(0, -12), Vector2(24, 12))
-	_ellipse(Vector2(18, -3), Vector2(5, 3), _paw_color())
-	_head(Vector2(20, -25), 0.0)
+	_tail([Vector2(-21, -5), Vector2(-9, 0), Vector2(7, 0), Vector2(17, -3 + sin(_t * 1.5) * 2.0)])
+	_body(Vector2(0, -12), Vector2(23, 12))
+	_paw(Vector2(18, -2.5), false)
+	_paw(Vector2(12, -1.5), false)
+	_head(Vector2(19, -25), 0.0)
 
 
 func _body(c: Vector2, r: Vector2, rot := 0.0) -> void:
-	_ellipse(c, r, Color(coat.base), rot)
+	var belly := Color(coat.light) if coat.pattern in ["tabby", "tuxedo"] else Color(coat.light, 0.5)
+	CritterDraw.body(self, c, r, Color(coat.base), belly, _line, rot, func(): _pattern(c, r, rot))
+
+
+func _pattern(c: Vector2, r: Vector2, rot: float) -> void:
 	var inside := func(u: float, v: float) -> Vector2:
 		return c + Vector2(u * r.x, v * r.y).rotated(rot)
 	match coat.pattern:
 		"tabby":
-			for u in [-0.6, -0.3, 0.0, 0.3]:
+			for u in [-0.62, -0.32, -0.02, 0.28]:
 				var top := -sqrt(1.0 - u * u)
-				draw_line(inside.call(u, top + 0.08), inside.call(u - 0.08, top + 0.85), Color(coat.dark), 3.0, true)
+				var pts := PackedVector2Array([inside.call(u, top + 0.06), inside.call(u - 0.07, top + 0.5), inside.call(u - 0.02, top + 0.85)])
+				draw_polyline(pts, Color(coat.dark), 2.6, true)
 		"calico":
 			for i in _patches.size():
 				var p := _patches[i]
@@ -256,16 +257,31 @@ func _body(c: Vector2, r: Vector2, rot := 0.0) -> void:
 				if room > 0.08:
 					draw_circle(inside.call(p.x, p.y), room * minf(r.x, r.y), Color(CALICO[i % CALICO.size()]))
 		"tuxedo":
-			_ellipse(inside.call(0.45, 0.35), Vector2(r.x * 0.42, r.y * 0.5), Color(coat.light), rot, false)
+			CritterDraw.ellipse(self, inside.call(0.45, 0.3), Vector2(r.x * 0.42, r.y * 0.52), Color(coat.light), Color.TRANSPARENT, rot)
 		"points":
-			_ellipse(c, r, Color(Color(coat.dark), 0.12), rot, false)
+			CritterDraw.band(self, c, r, -1.0, -0.4, Color(Color(coat.dark), 0.18), rot)
 
 
-func _leg(top: Vector2, foot: Vector2, far: bool) -> void:
-	var col := Color(coat.base).darkened(0.18 if far else 0.0)
-	draw_line(top, foot, _line, 7.5, true)
-	draw_line(top, foot, col, 5.0, true)
-	draw_circle(foot + Vector2(1, -1), 3.0, _paw_color().darkened(0.18 if far else 0.0))
+# A leg swinging with the walk cycle; back legs bend at the hock.
+func _leg(hip: Vector2, phase: float, far: bool, back: bool) -> void:
+	var swing := sin(phase) * 6.0
+	var lift := maxf(0.0, cos(phase)) * 3.0
+	var foot := Vector2(hip.x + swing, -lift - 1.5)
+	var pts := PackedVector2Array([hip])
+	if back:
+		pts.append(hip.lerp(foot, 0.55) + Vector2(-3.5, 0))
+	pts.append(foot)
+	_limb(pts, 6.0 if back else 5.5, far)
+	_paw(foot + Vector2(1, 0), far)
+
+
+func _limb(pts: PackedVector2Array, w: float, far: bool) -> void:
+	var col := Color(coat.base).darkened(0.2 if far else 0.0)
+	CritterDraw.taper(self, pts, w, w * 0.8, col, _line)
+
+
+func _paw(c: Vector2, far: bool) -> void:
+	CritterDraw.ellipse(self, c, Vector2(3.6, 2.5), _paw_color().darkened(0.2 if far else 0.0), _line, 0.0, 1.5)
 
 
 func _paw_color() -> Color:
@@ -277,76 +293,66 @@ func _paw_color() -> Color:
 	return Color(coat.base)
 
 
-func _tail(pts: Array[Vector2]) -> void:
-	var curve := PackedVector2Array()
-	for i in 13:
-		var t := i / 12.0
-		var a := pts[0].lerp(pts[1], t)
-		var b := pts[1].lerp(pts[2], t)
-		var c := pts[2].lerp(pts[3], t)
-		curve.append(a.lerp(b, t).lerp(b.lerp(c, t), t))
-	draw_polyline(curve, _line, 7.5, true)
+func _tail(ctrl: Array[Vector2]) -> void:
+	var pts := CritterDraw.curve(ctrl, 14)
 	var col := Color(coat.dark) if coat.pattern == "points" else Color(coat.base)
-	draw_polyline(curve, col, 5.0, true)
+	CritterDraw.taper(self, pts, 6.5, 4.5, col, _line)
 	if coat.pattern == "tabby":
-		for i in [4, 7, 10]:
-			draw_circle(curve[i], 2.6, Color(coat.dark))
+		for i in [5, 8, 11, 14]:
+			var d := (pts[i] - pts[i - 1]).normalized().orthogonal()
+			draw_line(pts[i] - d * 2.4, pts[i] + d * 2.4, Color(coat.dark), 2.2, true)
 
 
+# Big round head with cheek fluff, rounded ears and glossy eyes (three-quarter view, looking right).
 func _head(c: Vector2, tilt: float) -> void:
 	draw_set_transform(c, tilt)
 	var base := Color(coat.base)
 	var ear_col := Color(coat.dark) if coat.pattern == "points" else base
-	for ear in [[Vector2(-10, -4), Vector2(-7, -18), Vector2(0, -9)], [Vector2(2, -10), Vector2(9, -18), Vector2(11, -3)]]:
-		var tri := PackedVector2Array(ear)
+	for ear in [[Vector2(-12, -3), Vector2(-9, -19), Vector2(-1, -11)], [Vector2(3, -12), Vector2(11, -19), Vector2(13, -2)]]:
+		var tri := CritterDraw.curve([ear[0], ear[1] + Vector2(-1, -2), ear[1] + Vector2(2, -1), ear[2]], 8)
 		draw_colored_polygon(tri, ear_col)
-		tri.append(ear[0])
+		tri.append(tri[0])
 		draw_polyline(tri, _line, 2.0, true)
-		draw_colored_polygon(PackedVector2Array([ear[0].lerp(ear[2], 0.25), ear[1].lerp(ear[0].lerp(ear[2], 0.5), 0.3), ear[2].lerp(ear[0], 0.25)]), PINK)
-	_ellipse(Vector2.ZERO, Vector2(13, 11.5), base)
+		var inner := PackedVector2Array([ear[0].lerp(ear[2], 0.28), ear[1].lerp(ear[0].lerp(ear[2], 0.5), 0.3), ear[2].lerp(ear[0], 0.28)])
+		draw_colored_polygon(inner, Color("#F2A7B4"))
+		draw_line(inner[0].lerp(inner[2], 0.5), inner[1].lerp(inner[0].lerp(inner[2], 0.5), 0.4), Color(1, 1, 1, 0.6), 1.0, true)
+	# Head outline with fluffy cheeks.
+	var head := PackedVector2Array()
+	for i in 36:
+		var a := TAU * i / 36.0
+		var r := Vector2(15.0, 13.0)
+		var cheek := (a > 0.35 and a < 1.25) or (a > 1.9 and a < 2.8)
+		var k := 1.0 + (0.1 if cheek and i % 2 == 0 else 0.0)
+		head.append(Vector2(cos(a) * r.x, sin(a) * r.y + 1.0) * k)
+	draw_colored_polygon(head, base)
 	match coat.pattern:
 		"tabby":
-			for x in [-3.0, 0.5, 4.0]:
-				draw_line(Vector2(x, -11), Vector2(x, -7), Color(coat.dark), 1.8, true)
+			for x in [-3.5, 0.5, 4.5]:
+				draw_line(Vector2(x, -12), Vector2(x * 0.8, -7.5), Color(coat.dark), 1.8, true)
+			draw_line(Vector2(-14, 2), Vector2(-9, 3), Color(coat.dark), 1.5, true)
 		"tuxedo":
-			_ellipse(Vector2(7, 5), Vector2(6.5, 5), Color(coat.light), 0.0, false)
+			CritterDraw.ellipse(self, Vector2(7, 6), Vector2(7.5, 6.0), Color(coat.light))
+			draw_colored_polygon(PackedVector2Array([Vector2(4, 2), Vector2(7, -9), Vector2(10, 2)]), Color(coat.light))
 		"points":
-			_ellipse(Vector2(6, 3), Vector2(7.5, 6.5), Color(Color(coat.dark), 0.8), 0.0, false)
+			CritterDraw.ellipse(self, Vector2(6, 4), Vector2(8.5, 7.0), Color(Color(coat.dark), 0.75))
 		"calico":
-			draw_circle(Vector2(-6, -5), 5.0, Color(CALICO[0]))
-	var eyes := Color(coat.eyes)
-	for x in [-1.0, 7.5]:
-		var e := Vector2(x, -1)
-		if _state == "pet":
-			draw_arc(e + Vector2(0, 1.5), 2.6, PI * 1.15, PI * 1.85, 6, _line, 1.4, true)
-		elif _blink > 0.0:
-			draw_circle(e, 2.9, eyes)
-			draw_line(e + Vector2(0, -2.2), e + Vector2(0, 2.2), Color.BLACK, 1.3)
-			draw_circle(e + Vector2(0.9, -1.0), 0.8, Color.WHITE)
-		else:
-			draw_line(e + Vector2(-2.5, 0.5), e + Vector2(2.5, 0.5), _line, 1.3, true)
-	draw_circle(Vector2(-4, 4), 2.4, Color(PINK, 0.45))
-	draw_circle(Vector2(11, 4), 2.0, Color(PINK, 0.45))
-	draw_colored_polygon(PackedVector2Array([Vector2(10.5, 2.5), Vector2(13.5, 2.5), Vector2(12, 4.5)]), PINK.darkened(0.15))
-	draw_arc(Vector2(11, 5.5), 1.6, 0.2, PI - 0.2, 5, _line, 1.0, true)
-	draw_arc(Vector2(14, 5.5), 1.6, 0.2, PI - 0.2, 5, _line, 1.0, true)
-	for w in [-1.0, 1.0]:
-		draw_line(Vector2(13, 4.5), Vector2(22, 3.0 + w * 3.0), Color(1, 1, 1, 0.6), 0.7, true)
+			draw_circle(Vector2(-7, -5), 6.0, Color(CALICO[0]))
+			draw_circle(Vector2(9, -7), 4.0, Color(CALICO[1]))
+	CritterDraw.ellipse(self, Vector2(-5, -6), Vector2(6, 3.5), Color(1, 0.97, 0.9, 0.18))
+	head.append(head[0])
+	draw_polyline(head, _line, 2.0, true)
+	var mode := "happy" if _state == "pet" else ("open" if _blink > 0.0 else "closed")
+	CritterDraw.eye(self, Vector2(-2.5, 0), 3.2, Color(coat.eyes), _line, mode, true)
+	CritterDraw.eye(self, Vector2(7.5, 0), 3.6, Color(coat.eyes), _line, mode, true)
+	draw_circle(Vector2(-6, 6), 2.6, Color("#F2A7B4", 0.5))
+	draw_circle(Vector2(13, 6), 2.2, Color("#F2A7B4", 0.5))
+	# Muzzle puffs, nose, mouth and whiskers.
+	var muzzle := Color(coat.light) if coat.pattern != "points" else Color(coat.dark).lightened(0.15)
+	draw_circle(Vector2(10.5, 6.5), 3.0, muzzle)
+	draw_circle(Vector2(14.5, 6.5), 2.6, muzzle)
+	draw_colored_polygon(PackedVector2Array([Vector2(11, 3.5), Vector2(14.5, 3.5), Vector2(12.8, 5.6)]), Color("#E07F92"))
+	draw_arc(Vector2(11.6, 6.4), 1.4, 0.2, PI - 0.2, 5, _line, 1.0, true)
+	draw_arc(Vector2(14.0, 6.4), 1.4, 0.2, PI - 0.2, 5, _line, 1.0, true)
+	for w in [-1.0, 0.0, 1.0]:
+		draw_line(Vector2(15, 5.5 + w), Vector2(24, 4.0 + w * 3.0), Color(1, 1, 1, 0.65), 0.7, true)
 	draw_set_transform(Vector2.ZERO)
-
-
-func _ellipse(c: Vector2, r: Vector2, col: Color, rot := 0.0, outline := true) -> void:
-	var pts := PackedVector2Array()
-	for i in 28:
-		var a := TAU * i / 28.0
-		pts.append(c + Vector2(cos(a) * r.x, sin(a) * r.y).rotated(rot))
-	draw_colored_polygon(pts, col)
-	if outline:
-		pts.append(pts[0])
-		draw_polyline(pts, _line, 2.0, true)
-
-
-func _heart(c: Vector2, s: float, col: Color) -> void:
-	draw_circle(c + Vector2(-s * 0.5, 0), s * 0.6, col)
-	draw_circle(c + Vector2(s * 0.5, 0), s * 0.6, col)
-	draw_colored_polygon(PackedVector2Array([c + Vector2(-s * 1.08, s * 0.2), c + Vector2(s * 1.08, s * 0.2), c + Vector2(0, s * 1.4)]), col)

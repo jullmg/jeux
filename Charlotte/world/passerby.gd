@@ -6,6 +6,11 @@ var bounds := Vector2(0, 1000)
 var _pause := 0.0
 
 
+## Stops walking for `seconds` (e.g. while Charlotte pets their dog).
+func hold(seconds: float) -> void:
+	_pause = seconds
+
+
 func _process(delta: float) -> void:
 	if _pause > 0.0:
 		_pause -= delta

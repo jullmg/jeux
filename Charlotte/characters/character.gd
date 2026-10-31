@@ -28,6 +28,7 @@ var _hair_vel := 0.0
 var _blink_in := 2.0
 var _pet_time := 0.0
 var _pet := 0.0
+var _pet_low := 1.0
 
 
 func _ready() -> void:
@@ -73,9 +74,11 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, w * 0.4, Color(0.15, 0.08, 0.05, 0.18))
 
 
-## Crouches and strokes whatever is in front of her for `duration` seconds.
-func pet(duration: float) -> void:
+## Strokes whatever is in front of her for `duration` seconds. `low` 1 = deep lunge (cats, small dogs),
+## 0 = standing with the arm held out (big dogs).
+func pet(duration: float, low := 1.0) -> void:
 	_pet_time = duration
+	_pet_low = low
 	is_walking = false
 
 
@@ -109,12 +112,12 @@ func _process(delta: float) -> void:
 
 func _apply_pose() -> void:
 	var swing := sin(walk_phase * TAU) if is_walking else 0.0
-	# Petting: a deep lunge to get down to cat height, lean in and stroke with the front hand.
-	var lunge := deg_to_rad(55.0) * _pet
+	# Petting: lunge down to the animal's height (deep for cats), lean in and stroke with the front hand.
+	var lunge := deg_to_rad(lerpf(8.0, 55.0, _pet_low)) * _pet
 	_leg_front.rotation = deg_to_rad(26.0) * swing - lunge
 	_leg_back.rotation = -deg_to_rad(26.0) * swing + lunge
 	var arm_swing := deg_to_rad(22.0) * swing
-	var stroke := deg_to_rad(-62.0) + sin(_time * 6.0) * deg_to_rad(12.0)
+	var stroke := deg_to_rad(lerpf(-82.0, -62.0, _pet_low)) + sin(_time * 6.0) * deg_to_rad(12.0)
 	_arm_front.rotation = lerpf(ARM_REST - arm_swing, stroke, _pet)
 	_arm_back.rotation = -ARM_REST + arm_swing
 	_body.position.y = (1.0 - cos(_leg_front.rotation)) * (_rig.leg_len as float)

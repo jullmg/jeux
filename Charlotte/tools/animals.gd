@@ -1,5 +1,5 @@
 extends Node2D
-# Animal design sheet: Godot --path . res://tools/animals.tscn -- --screenshot=/tmp/animals.png [--seed=1]
+# Animal design sheet: Godot --path . res://tools/animals.tscn -- --screenshot=/tmp/animals.png [--seed=1] [--focus=x,y --zoom=3]
 # Row 1-2: every cat coat walking / sitting / loafing / being petted. Middle: squirrels. Bottom: every dog breed with a walker.
 
 func _ready() -> void:
@@ -67,14 +67,32 @@ func _ready() -> void:
 		dog._spots.clear()
 		if dog._b.get("spots", false):
 			for k in 9:
-				dog._spots.append(Vector3(rng.randf_range(-0.75, 0.75), rng.randf_range(-0.6, 0.5), rng.randf_range(1.6, 2.8)))
+				var sp := Vector2(rng.randf_range(-0.65, 0.65), rng.randf_range(-0.55, 0.45)).limit_length(0.68)
+				dog._spots.append(Vector3(sp.x, sp.y, rng.randf_range(1.5, 2.5)))
 		dog._lead = 55.0
 		add_child(dog)
+		if i == 0 or i == 2:
+			# Charlotte petting the labrador and the corgi, at game depths (dogs walk 22 px further back).
+			var petter := Character.new()
+			petter.look = CharacterLook.charlotte()
+			petter.scale = Vector2.ONE * 0.38
+			petter.facing = -1
+			add_child(petter)
+			dog.position = Vector2(walker.position.x + 55.0, 644)
+			dog.reserve()
+			petter.position = Vector2(dog.approach_x(dog.position.x + 100.0), 640 + 4 + 32 - 10)
+			dog.call_deferred("interact", petter)
 		var label := Label.new()
 		label.text = keys[i]
 		label.position = Vector2(30 + i * 135, 660)
 		label.add_theme_color_override("font_color", Color("#333333"))
 		add_child(label)
+	var focus := _arg("--focus=", "")
+	if focus != "":
+		var cam := Camera2D.new()
+		cam.position = Vector2(focus.get_slice(",", 0).to_float(), focus.get_slice(",", 1).to_float())
+		cam.zoom = Vector2.ONE * _arg("--zoom=", "3").to_float()
+		add_child(cam)
 	var shot := _arg("--screenshot=", "")
 	if shot != "":
 		for i in 30:
