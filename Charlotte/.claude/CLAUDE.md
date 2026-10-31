@@ -36,12 +36,16 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 
 ## Layout
 
-- `scenes/main.gd` builds the whole street in code from `LAYOUT` (an ordered list of house SVG names) and
-  placement arrays (`TREES_AFTER`, `LAMPS_AFTER`, `HYDRANTS_AT`, `RACKS_AT`). Fractional values = position between house indices.
-  `LAYOUT` runs: `ecole` (école Saint-Jean-de-Brébeuf, across Dandurand), `rue_dandurand`, Charlotte's block (`depanneur`: the
+- Streets extend `world/street_scene.gd` (`StreetScene`): it builds sky, skyline, houses, cross streets, sidewalk, trees,
+  lamps, hydrants, racks, passersby, cats, squirrels, Charlotte and the camera from data the street sets in `_init()`
+  (`layout`: ordered house SVG names; `cross_streets`; `trees_after`, `lamps_after`, `hydrants_at`, `racks_at`,
+  `squirrels_at`; fractional values = position across a building), plus hooks (`_start_x`, `_walk_bounds`,
+  `_build_cross_streets`, `_decorate_house`, `_build_landmarks`, `_build_doors`, `_build_extra_props`).
+- `scenes/main.gd` (6e Avenue) is one such street.
+  `layout` runs: `ecole` (école Saint-Jean-de-Brébeuf, across Dandurand), `rue_dandurand`, Charlotte's block (`depanneur`: the
   side of dépanneur Xin-Xin, which fronts Dandurand; `garages`; `ruelle_verte`, the green lane with its sign; … `coin_holt`),
   `rue_holt`, `coin_holt_est`. The first three buildings of the block are drawn from the photos in `reference/` (the user wants
-  every detail as close to the pictures as possible). The cross-street vistas run to the horizon with Mount Royal at the end. Entries in `CROSS_STREETS` are gaps (width in px), not SVGs: `CrossStreet`
+  every detail as close to the pictures as possible). The cross-street vistas run to the horizon with Mount Royal at the end. Entries in `cross_streets` are gaps (width in px), not SVGs: `CrossStreet`
   (`world/cross_street.gd`) draws them in one-point perspective as three nodes in the draw order: `VISTA` (before the houses:
   receding street, walls along it from `left_walls`/`right_walls`, street trees), `GROUND` (after `Street`: asphalt through the
   sidewalk, curb ramps, crosswalk, yellow in the school zone) and `SIGNS` (with the props: plates, stop/school sign, utility pole
