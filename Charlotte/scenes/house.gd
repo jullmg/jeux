@@ -78,6 +78,8 @@ func _build_doors() -> void:
 	add_child(DoorSpot.make(Rect2(BEDROOM_DOOR_X, 170, 150, 430), func(): _go_through(CHACHA_DOOR_X + 75.0, HALL, 1)))
 	# The fridge: a snack.
 	add_child(DoorSpot.make(Rect2(KITCHEN_START + 4.0, 240, 104, 356), _open_fridge, KITCHEN_START + 140.0))
+	# Her bed: sleep until the next morning.
+	add_child(DoorSpot.make(Rect2(BEDROOM.x + 360.0, 380, 448, 228), _go_to_sleep, BEDROOM.x + 600.0))
 	# The book ledges: her books.
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 960.0, 270, 136, 200), _open_books, BEDROOM.x + 1030.0))
 	# Her desk: drawing paper and crayons.
@@ -144,6 +146,69 @@ func _open_fridge() -> void:
 	tween.tween_callback(func():
 		treat.queue_free()
 		_fridge_busy = false)
+
+
+# Bedtime: the room goes night-blue and moonlit, she's tucked in ("Bonne nuit"), little z's float up from the
+# bed; then black, "Le lendemain matin…", a new day, and she's up beside the bed.
+func _go_to_sleep() -> void:
+	_control.enabled = false
+	var night := CanvasLayer.new()
+	night.layer = 55
+	add_child(night)
+	var dark := ColorRect.new()
+	dark.color = Color(0.04, 0.06, 0.18, 0.0)
+	dark.size = VIEW
+	dark.mouse_filter = Control.MOUSE_FILTER_STOP
+	night.add_child(dark)
+	var moon := _glow(Vector2(BEDROOM.x + 180.0, 280.0), 260.0, Color(0.6, 0.75, 1.0, 0.0))
+	var words := _night_label("Bonne nuit, Chacha…", 40)
+	words.position.y = -170.0
+	night.add_child(words)
+	# The z's rise from her pillow.
+	var pillow := get_viewport().get_canvas_transform() * Vector2(BEDROOM.x + 420.0, 450.0)
+	var zs := _night_label("z  z  z", 30)
+	zs.position = pillow - Vector2(60, 20)
+	zs.size = Vector2(120, 40)
+	night.add_child(zs)
+	var tween := create_tween()
+	tween.tween_property(dark, "color:a", 0.62, 1.0)
+	tween.parallel().tween_property(moon, "modulate:a", 1.0, 1.0)
+	moon.modulate.a = 0.0
+	moon.self_modulate = Color(1, 1, 1, 0.5)
+	tween.tween_callback(func(): _charlotte.visible = false)
+	tween.tween_property(words, "modulate:a", 1.0, 0.6)
+	tween.parallel().tween_property(zs, "modulate:a", 1.0, 0.6)
+	tween.parallel().tween_property(zs, "position:y", pillow.y - 110.0, 2.6)
+	tween.tween_property(dark, "color", Color(0.02, 0.02, 0.05, 1.0), 0.9)
+	tween.parallel().tween_property(words, "modulate:a", 0.0, 0.5)
+	tween.parallel().tween_property(zs, "modulate:a", 0.0, 0.5)
+	tween.tween_callback(func():
+		Season.day += 1
+		words.text = "Le lendemain matin…\nJour %d" % Season.day
+		words.position.y = 0.0
+		moon.queue_free()
+		_charlotte.position.x = BEDROOM.x + 840.0
+		_charlotte.facing = -1
+		_charlotte.visible = true)
+	tween.tween_property(words, "modulate:a", 1.0, 0.5)
+	tween.tween_interval(1.2)
+	tween.tween_property(words, "modulate:a", 0.0, 0.4)
+	tween.tween_property(dark, "color:a", 0.0, 0.8)
+	tween.tween_callback(func():
+		night.queue_free()
+		_control.enabled = true)
+
+
+func _night_label(text: String, font_size: int) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", font_size)
+	label.add_theme_color_override("font_color", Color("#FFF3C4"))
+	label.size = VIEW
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.modulate.a = 0.0
+	return label
 
 
 func _open_books() -> void:

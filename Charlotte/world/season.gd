@@ -8,6 +8,8 @@ const ALL: Array[String] = ["spring", "summer", "autumn", "winter"]
 const NAMES := {"spring": "Printemps", "summer": "Été", "autumn": "Automne", "winter": "Hiver"}
 
 static var current := "autumn"
+## Days gone by (Charlotte sleeping in her bed starts a new one); one day the seasons will follow them.
+static var day := 1
 
 
 static func is_winter() -> bool:
