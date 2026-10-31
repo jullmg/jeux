@@ -102,6 +102,7 @@ func _ready() -> void:
 	_camera.reset_smoothing()
 	_build_grade()
 	Season.add_weather(self)
+	Sfx.ambience(self)
 	Transition.fade_in(self)
 	var shot := _arg("--screenshot=")
 	if not shot.is_empty():
@@ -120,6 +121,7 @@ func _build_front_door() -> void:
 	var door := DoorSpot.make(area, func():
 		_control.enabled = false
 		Transition.street_x = area.get_center().x
+		Sfx.play("door", area.get_center())
 		Transition.change_scene(self, "res://scenes/house.tscn"))
 	add_child(door)
 
@@ -157,6 +159,7 @@ func _follow_charlotte() -> void:
 func _spawn_charlotte(x: float) -> Character:
 	var charlotte := Character.new()
 	charlotte.look = CharacterLook.charlotte()
+	charlotte.step_sound = Sfx.step_for(true)
 	charlotte.position = Vector2(x, CHARLOTTE_Y)
 	charlotte.scale = Vector2.ONE * CHAR_SCALE
 	add_child(charlotte)

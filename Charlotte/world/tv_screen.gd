@@ -69,6 +69,7 @@ func interact(_who: Character) -> void:
 	channel += 1
 	if channel >= channels.size():
 		channel = -1
+	Sfx.play("tv" if channel >= 0 else "click", get_global_rect().get_center())
 	_switching = SWITCH_TIME if channel >= 0 else 0.0
 	_osd = 2.0
 	_on_for = -SWITCH_TIME

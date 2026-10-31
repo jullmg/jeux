@@ -67,6 +67,7 @@ func _process(delta: float) -> void:
 				if _bowl > 0:
 					_bowl -= 1
 					_timer = 0.7
+					Sfx.play("nibble", global_position, -6.0)
 				elif _falling.is_empty():
 					_hungry = false
 					_settle("up", 2.0)
@@ -156,8 +157,10 @@ func interact(_who: Character) -> void:
 			_falling.append(Vector3(BOWL_X + randf_range(-9.0, 9.0), 24.0 - i * 6.0, 0.0))
 		_hungry = true
 		_walk_to(BOWL_X + 22.0)
+		Sfx.play("nibble", global_position)
 		return
 	_settle("up", 2.4)
+	Sfx.play("squeak", global_position)
 	for i in 3:
 		_hearts.append(Vector3(randf_range(-8.0, 8.0), -i * 0.35, randf_range(0.6, 0.9)))
 

@@ -219,6 +219,7 @@ func _action(bar: HBoxContainer, label: String, on_press: Callable) -> Button:
 
 
 func _close(result: Image) -> void:
+	Sfx.play("chime" if result else "pop")
 	closed.emit(result)
 	queue_free()
 

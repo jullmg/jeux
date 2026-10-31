@@ -12,6 +12,8 @@ var walk_speed := 200.0
 var is_walking := false
 ## While walking, blends into a run (faster, longer strides, leaning forward).
 var running := false
+## Footstep sound (a Sfx name) played at each step; empty = silent (passersby).
+var step_sound := ""
 var walk_phase := 0.0
 var facing := 1
 var animate := true
@@ -125,7 +127,11 @@ func _process(delta: float) -> void:
 	if is_walking:
 		# Longer legs take longer strides, so they swing more slowly for the same speed.
 		# A run is a faster cadence plus longer strides (wider swing), which together make up RUN_SPEED.
+		var before := walk_phase
 		walk_phase = fmod(walk_phase + delta * 1.6 * lerpf(1.0, 1.35, _run) * (walk_speed / 200.0) * (110.0 / (_rig.leg_len as float)), 1.0)
+		# A footstep each time a foot lands (twice a cycle).
+		if step_sound != "" and floori(before * 2.0) != floori(walk_phase * 2.0):
+			Sfx.play(step_sound, global_position, -8.0)
 	_blink_in -= delta
 	if _blink_in <= 0.0:
 		_lids.visible = not _lids.visible

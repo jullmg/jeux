@@ -275,6 +275,7 @@ func _swatch(c: Color, selected: bool, on_press: Callable) -> Button:
 ## Applies a choice. `drop`: prefixes of Charlotte's exact-colour overrides that no longer fit it.
 func _change(on_pick: Callable, value: Variant, drop := CLOTHING_OVERRIDES) -> void:
 	on_pick.call(value)
+	Sfx.play("swoosh", Vector2.INF, -6.0)
 	# Her usual exact colours only fit her usual clothes and hair: a new colour uses the derived palette.
 	for key in _look.overrides.keys():
 		for prefix in drop:
@@ -309,6 +310,7 @@ func _randomize() -> void:
 
 
 func _close(result: CharacterLook) -> void:
+	Sfx.play("chime" if result else "pop")
 	var tween := create_tween()
 	tween.tween_property(_root, "modulate:a", 0.0, 0.2)
 	tween.tween_callback(func():

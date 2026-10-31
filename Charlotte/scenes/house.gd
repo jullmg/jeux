@@ -73,6 +73,7 @@ func _build_doors() -> void:
 	# Front door (its glass door leaf inside the vestibule frame) → back to the street.
 	add_child(DoorSpot.make(Rect2(370, 204, 170, 396), func():
 		_control.enabled = false
+		Sfx.play("door")
 		Transition.change_scene(self, "res://scenes/main.tscn")))
 	add_child(DoorSpot.make(Rect2(CHACHA_DOOR_X, 170, 150, 430), func(): _go_through(BEDROOM_DOOR_X - 40.0, BEDROOM, -1)))
 	add_child(DoorSpot.make(Rect2(BEDROOM_DOOR_X, 170, 150, 430), func(): _go_through(CHACHA_DOOR_X + 75.0, HALL, 1)))
@@ -106,6 +107,7 @@ func _open_fridge() -> void:
 		return
 	_fridge_busy = true
 	_charlotte.facing = -1
+	Sfx.play("fridge", Vector2(KITCHEN_START + 60.0, 420.0))
 	var open := Sprite2D.new()
 	open.texture = InteriorArt.fridge_open()
 	open.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
@@ -136,6 +138,7 @@ func _open_fridge() -> void:
 	treat.add_child(bubble)
 	var tween := create_tween()
 	tween.tween_interval(0.6)
+	tween.tween_callback(func(): Sfx.play("miam"))
 	tween.tween_property(treat, "modulate:a", 1.0, 0.25)
 	tween.parallel().tween_property(treat, "position:y", treat.position.y - 30.0, 1.6)
 	tween.tween_interval(0.6)
@@ -152,6 +155,7 @@ func _open_fridge() -> void:
 # bed; then black, "Le lendemain matin…", a new day, and she's up beside the bed.
 func _go_to_sleep() -> void:
 	_control.enabled = false
+	Sfx.play("goodnight")
 	var night := CanvasLayer.new()
 	night.layer = 55
 	add_child(night)
@@ -189,7 +193,8 @@ func _go_to_sleep() -> void:
 		moon.queue_free()
 		_charlotte.position.x = BEDROOM.x + 840.0
 		_charlotte.facing = -1
-		_charlotte.visible = true)
+		_charlotte.visible = true
+		Sfx.play("chime"))
 	tween.tween_property(words, "modulate:a", 1.0, 0.5)
 	tween.tween_interval(1.2)
 	tween.tween_property(words, "modulate:a", 0.0, 0.4)

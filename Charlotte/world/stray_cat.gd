@@ -173,6 +173,8 @@ func interact(who: Character) -> void:
 	facing = 1 if who.position.x > position.x else -1
 	_settle("pet", PET_TIME)
 	_heart_in = 0.2
+	Sfx.play("meow", global_position)
+	Sfx.play("purr", global_position, -4.0)
 	who.pet(PET_TIME)
 
 

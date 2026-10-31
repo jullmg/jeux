@@ -129,12 +129,14 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _open_book(i: int) -> void:
+	Sfx.play("page")
 	_book = i
 	_page = 0
 	_show()
 
 
 func _turn(dir: int) -> void:
+	Sfx.play("page")
 	var pages: Array = BOOKS[_book].pages
 	_page += dir
 	if _page < 0:

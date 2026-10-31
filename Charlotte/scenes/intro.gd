@@ -83,6 +83,7 @@ func _ready() -> void:
 	# ── Post-process ──────────────────────────────────────────
 	_build_grade()
 	Season.add_weather(self)
+	Sfx.ambience(self)
 
 	# Usage: Godot --path . res://scenes/intro.tscn -- --screenshot=/tmp/intro.png
 	for arg in OS.get_cmdline_user_args():

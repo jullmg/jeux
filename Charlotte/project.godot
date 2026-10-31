@@ -20,3 +20,4 @@ renderer/rendering_method.mobile="gl_compatibility"
 [autoload]
 
 DebugMenu="*res://ui/debug_menu.gd"
+Sfx="*res://audio/sfx.gd"

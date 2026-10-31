@@ -39,6 +39,7 @@ func _process(delta: float) -> void:
 	_next -= delta
 	if _next <= 0.0:
 		_gust_t = 0.0
+		Sfx.play("wind", Vector2.INF, -8.0)
 		_next = randf_range(10.0, 20.0)
 	if _gust_t >= 0.0:
 		_gust_t += delta

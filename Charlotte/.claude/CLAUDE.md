@@ -107,6 +107,16 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   strokes with the front hand. The animal is drawn just in front of Charlotte so her hand lands on its head: stray cats walk at
   y 646 (she is at 638); a dog being petted steps 32 px toward the camera and gets z_index 1, while its walker `hold()`s.
 
+## Sound
+
+- `audio/sfx.gd` is the `Sfx` autoload: every sound effect is synthesised in code on first use (no audio files, no
+  licences): `Sfx.play(name, world_position = Vector2.INF, volume_db, pitch)`; names include steps (`Sfx.step_for(outside)`
+  picks wood / street / leaves / snow by season), door, click, tv, fridge, miam, meow, purr, bark, squeak, nibble, page,
+  swoosh, pop, chime, goodnight, bird, wind. `Sfx.ambience(scene)` adds birdsong outdoors (not in winter).
+- Buses "Effets" (effects) and "Musique" (for the user's music, made with Suno, to be added later): no music in code.
+- `Character.step_sound` (empty for passersby) plays footsteps; scripts run with `--check-only` report "Sfx not found"
+  because autoloads aren't loaded there; run the scene instead to check.
+
 ## Seasons
 
 - `world/season.gd` (`Season`): `Season.current` (default `"autumn"`, the original Halloween look) and every seasonal

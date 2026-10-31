@@ -42,6 +42,7 @@ func _spawn_charlotte(x: float, facing := 1) -> void:
 	_charlotte.look = CharacterLook.charlotte()
 	_charlotte.scale = Vector2.ONE * CHAR_SCALE
 	_charlotte.walk_speed = 260.0
+	_charlotte.step_sound = Sfx.step_for(false)
 	_charlotte.position = Vector2(x, FEET_Y)
 	_charlotte.facing = facing
 	if not is_nan(Transition.inside_x):
@@ -83,6 +84,7 @@ func _enter_area(area: Vector2) -> void:
 ## Through a door to another area: fade to black, move Charlotte to `x`, facing `facing`.
 func _go_through(x: float, area: Vector2, facing: int) -> void:
 	_control.enabled = false
+	Sfx.play("door")
 	Transition.through_black(self, func():
 		_control.stop()
 		_charlotte.position.x = x
@@ -150,6 +152,7 @@ func _switchable(area: Rect2, stand_x: float, lights: Array, room := Vector2.ZER
 		dark.visible = false
 		add_child(dark)
 	add_child(DoorSpot.make(area, func():
+		Sfx.play("click", area.get_center())
 		var on: bool = not lights[0].visible
 		for light in lights:
 			light.visible = on

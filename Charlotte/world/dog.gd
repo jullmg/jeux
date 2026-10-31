@@ -162,6 +162,7 @@ func interact(who: Character) -> void:
 	_held = false
 	_pet_time = PET_TIME
 	_heart_in = 0.2
+	Sfx.play("bark", global_position, -2.0)
 	facing = 1 if who.position.x > position.x else -1
 	who.pet(PET_TIME, _pet_low())
 	owner_walker.hold(PET_TIME + 1.2)
