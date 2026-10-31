@@ -90,8 +90,12 @@ static func random(rng: RandomNumberGenerator, age_group := "") -> CharacterLook
 	look.freckles = rng.randf() < 0.2
 	if rng.randf() < (0.45 if look.age == "senior" else 0.2):
 		look.glasses = _pick(rng, ["#2B2B2B", "#8A4B2A", "#C0392B", "#4A6FA5"])
+	# A beard or mustache only for a masculine look (no lashes, short hair); the draws are made either way so
+	# everyone else on the street stays the same.
 	if grown and look.age != "teen" and rng.randf() < 0.3:
-		look.facial_hair = _pick(rng, ["beard", "mustache"])
+		var whiskers := _pick(rng, ["beard", "mustache"])
+		if not look.lashes and look.hair_style in ["short", "buzz", "bald", "curly"]:
+			look.facial_hair = whiskers
 	look.outfit = _pick(rng, ["dress", "tshirt", "sweater"] if not grown else ["dress", "tshirt", "sweater", "coat", "coat"])
 	if look.outfit == "dress":
 		look.facial_hair = ""
