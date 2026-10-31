@@ -23,6 +23,10 @@ const BEDROOM_DOOR_X := 6440.0
 var _charlotte: Character
 var _camera: Camera2D
 var _control := PlayerControl.new()
+var _time := 0.0
+# Candle glows that flicker: [sprite, base alpha, base scale].
+var _flames: Array = []
+var _pendant_pivot: Node2D
 
 
 func _ready() -> void:
@@ -58,8 +62,15 @@ func _ready() -> void:
 		_save_screenshot(shot)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_time += delta
 	_camera.position = Vector2(_charlotte.position.x, VIEW.y / 2.0)
+	for f in _flames:
+		var flicker := 0.82 + 0.1 * sin(_time * 11.0) + 0.08 * sin(_time * 23.0 + 1.3)
+		f[0].modulate.a = f[1] * flicker
+		f[0].scale = Vector2.ONE * f[2] * (0.96 + 0.04 * flicker)
+	if _pendant_pivot:
+		_pendant_pivot.rotation = sin(_time * 0.9) * 0.012
 
 
 # Camera limits and walking bounds for the hall/salon/vestibule strip or the bedroom.
@@ -193,7 +204,13 @@ func _build_bedroom() -> void:
 	_put(InteriorArt.laundry_basket(), x + 1300.0, 618.0, 0.8, "floor")
 	_put(InteriorArt.plushies(), x + 770.0, 626.0, 0.8, "floor")
 	_put(InteriorArt.panel_door(), BEDROOM_DOOR_X, WALL_BASE)
-	_glow(Vector2(x + 30.0 + 262.0 * 0.85, 606.0 - 230.0 * 0.85), 70.0, Color(1.0, 0.75, 0.4, 0.45))
+	var flame := _glow(Vector2(x + 30.0 + 262.0 * 0.85, 606.0 - 240.0 * 0.85), 80.0, Color(1.0, 0.75, 0.4, 0.5))
+	_flames.append([flame, 1.0, flame.scale.x])
+	_put(InteriorArt.bunting(440.0), x + 650.0, 230.0)
+	var lights := _FairyLights.new()
+	lights.from_x = x + 40.0
+	lights.count = 40
+	add_child(lights)
 
 
 # Paper sign taped to the bedroom door, each letter in a different marker colour.
@@ -245,6 +262,27 @@ func _daylight(top_left: Vector2, width: float, strength: float) -> void:
 	patch.color = Color(1.0, 0.9, 0.65, strength * 1.4)
 	patch.material = mat
 	add_child(patch)
+	# Dust motes drifting in the beam.
+	var motes := CPUParticles2D.new()
+	motes.position = top_left + Vector2(width * 0.5 + drop * 0.5, (floor_y - top_left.y) * 0.5)
+	motes.amount = int(width / 8.0)
+	motes.lifetime = 9.0
+	motes.preprocess = 9.0
+	motes.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	motes.emission_rect_extents = Vector2(width * 0.45, (floor_y - top_left.y) * 0.45)
+	motes.direction = Vector2(0.3, -1)
+	motes.spread = 180.0
+	motes.gravity = Vector2(1.5, 2.0)
+	motes.initial_velocity_min = 1.0
+	motes.initial_velocity_max = 6.0
+	motes.scale_amount_min = 1.0
+	motes.scale_amount_max = 2.2
+	var fade := Gradient.new()
+	fade.offsets = PackedFloat32Array([0.0, 0.3, 0.7, 1.0])
+	fade.colors = PackedColorArray([Color(1, 0.97, 0.88, 0), Color(1, 0.97, 0.88, 0.7), Color(1, 0.97, 0.88, 0.7), Color(1, 0.97, 0.88, 0)])
+	motes.color_ramp = fade
+	motes.material = mat
+	add_child(motes)
 
 
 func _ceiling_light(x: float) -> void:
@@ -256,18 +294,27 @@ func _ceiling_light(x: float) -> void:
 	_glow(Vector2(x, CEILING + 20.0), 220.0, Color(1.0, 0.92, 0.75, 0.22))
 
 
+# Globe pendant hanging from a medallion; it sways very gently.
 func _pendant(x: float, y: float) -> void:
 	_put(InteriorArt.medallion(), x - 40.0, CEILING + 60.0)
+	_pendant_pivot = Node2D.new()
+	_pendant_pivot.position = Vector2(x, CEILING + 20.0)
+	add_child(_pendant_pivot)
 	var cord := Line2D.new()
-	cord.points = PackedVector2Array([Vector2(x, CEILING + 20.0), Vector2(x, y - 30.0)])
+	cord.points = PackedVector2Array([Vector2.ZERO, Vector2(0, y - 30.0 - CEILING - 20.0)])
 	cord.width = 2.0
 	cord.default_color = Color("#8A7A5A")
-	add_child(cord)
-	_put(InteriorArt.globe(), x - 35.0, y + 35.0)
-	_glow(Vector2(x, y), 260.0, Color(1.0, 0.88, 0.6, 0.35))
+	_pendant_pivot.add_child(cord)
+	var globe := Sprite2D.new()
+	globe.texture = InteriorArt.globe()
+	globe.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	globe.position = Vector2(0, y - CEILING - 20.0)
+	_pendant_pivot.add_child(globe)
+	var glow := _glow(Vector2(x, y), 260.0, Color(1.0, 0.88, 0.6, 0.35))
+	glow.reparent(_pendant_pivot)
 
 
-func _glow(center: Vector2, radius: float, color: Color) -> void:
+func _glow(center: Vector2, radius: float, color: Color) -> Sprite2D:
 	var grad := Gradient.new()
 	grad.colors = PackedColorArray([color, Color(color, 0.0)])
 	var t := GradientTexture2D.new()
@@ -283,6 +330,7 @@ func _glow(center: Vector2, radius: float, color: Color) -> void:
 	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
 	sprite.material = mat
 	add_child(sprite)
+	return sprite
 
 
 # Out-of-focus things right in front of the camera, scrolling faster than the room for depth.
@@ -368,11 +416,6 @@ class _Rooms:
 		for x in [3120.0, 6440.0]:
 			draw_rect(Rect2(x - 16, 154, 182, 446), Color("#7A4A26"))
 			draw_rect(Rect2(x - 10, 160, 170, 440), Color("#9A5E2C"))
-		# Fairy lights along the bedroom crown moulding.
-		for i in 40:
-			var p := Vector2(5040.0 + i * 40.0, 52.0 + sin(i * 0.9) * 6.0 + 8.0)
-			draw_circle(p, 9.0, Color(1.0, 0.85, 0.5, 0.18))
-			draw_circle(p, 3.2, Color("#FFE9A8"))
 
 	func _room(x0: float, x1: float, wall: Color, base: Color, rng: RandomNumberGenerator) -> void:
 		var w := x1 - x0
@@ -423,3 +466,30 @@ class _Rooms:
 		while sx < x1:
 			draw_colored_polygon(PackedVector2Array([Vector2(sx, 604), Vector2(sx + 80, 604), Vector2(sx + 30, 720), Vector2(sx - 60, 720)]), Color(1, 1, 1, 0.07))
 			sx += rng.randf_range(400.0, 700.0)
+
+
+# Warm fairy lights strung along the bedroom crown moulding, each twinkling at its own pace.
+class _FairyLights:
+	extends Node2D
+	var from_x := 0.0
+	var count := 40
+	var _t := 0.0
+
+	func _process(delta: float) -> void:
+		_t += delta
+		queue_redraw()
+
+	func _draw() -> void:
+		var wire := PackedVector2Array()
+		for i in count:
+			wire.append(_bulb(i) + Vector2(0, -4))
+		draw_polyline(wire, Color("#8A8478"), 1.2, true)
+		for i in count:
+			var p := _bulb(i)
+			var tw := 0.65 + 0.35 * sin(_t * (1.3 + (i * 7) % 5 * 0.3) + i * 1.7)
+			draw_circle(p, 11.0, Color(1.0, 0.82, 0.45, 0.14 * tw))
+			draw_circle(p, 6.0, Color(1.0, 0.86, 0.5, 0.22 * tw))
+			draw_circle(p, 3.2, Color(1.0, 0.93, 0.7).lerp(Color("#FFF8E6"), tw))
+
+	func _bulb(i: int) -> Vector2:
+		return Vector2(from_x + i * 40.0, 64.0 + sin(i * 0.9) * 6.0)

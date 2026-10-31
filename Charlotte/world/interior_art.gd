@@ -148,6 +148,13 @@ static func sofa() -> ImageTexture:
 	s += '<path d="M514 100 Q514 80 536 80 H570 Q590 80 590 100 V200 H514 Z" fill="url(#velvet)" stroke="#8A5E14" stroke-width="3"/>'
 	s += '<path d="M70 130 Q70 116 86 116 H514 Q530 116 530 130 V200 H70 Z" fill="#D9A23A" stroke="#8A5E14" stroke-width="3"/>'
 	s += '<path d="M300 118 V198" stroke="#8A5E14" stroke-width="2"/>'
+	# Velvet sheen on the cushion tops, shadow tucked under the back cushions, piping along the seat front.
+	for x in [70.0, 230.0, 390.0]:
+		s += '<path d="M%s 28 Q%s 22 %s 22 H%s" stroke="#F2C66A" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.7"/>' % [x + 12, x + 14, x + 30, x + 110]
+	s += '<rect x="72" y="118" width="456" height="10" fill="#6E4A10" opacity="0.25"/>'
+	s += '<path d="M90 134 H290 M312 134 H512" stroke="#F2C66A" stroke-width="5" stroke-linecap="round" opacity="0.6"/>'
+	s += '<path d="M72 196 H528" stroke="#B5801E" stroke-width="3"/>'
+	s += '<path d="M20 96 Q22 86 36 86 H64" stroke="#F2C66A" stroke-width="4" fill="none" opacity="0.6"/>'
 	s += '<path d="M40 200 H570 V212 H40 Z" fill="#9C6C18"/>'
 	for x in [60.0, 540.0]:
 		s += '<rect x="%s" y="210" width="12" height="20" fill="#4A3020"/>' % x
@@ -190,12 +197,14 @@ static func poster(style: int) -> ImageTexture:
 					var x := 26.0 + c * 30.0
 					var y := 30.0 + r * 32.0
 					s += '<path d="M%s %s l6 -10 l6 10 m-6 -10 v-8" stroke="#5A5248" stroke-width="2" fill="none"/>' % [x, y + 10]
+	s += '<path d="M8 8 L50 8 L8 70 Z" fill="#FFFFFF" opacity="0.14"/>'
 	return tex(120, 160, s)
 
 
 ## Canvas 480x220: walnut dining table with chairs, things on top. Floor at y 220.
 static func dining_table() -> ImageTexture:
 	var s := '<path d="M30 78 Q30 70 40 70 H440 Q450 70 450 78 V88 H30 Z" fill="#5A3A26" stroke="#2E1C10" stroke-width="3"/>'
+	s += '<path d="M40 74 H440" stroke="#8A6448" stroke-width="2.5" opacity="0.8"/><path d="M60 82 q60 -3 120 0 t140 0 t100 0" stroke="#3E2618" stroke-width="1.2" fill="none" opacity="0.6"/>'
 	for x in [50.0, 410.0]:
 		s += '<path d="M%s 88 h18 l-4 132 h-10 z" fill="#4A2E1C" stroke="#2E1C10" stroke-width="2"/>' % x
 	s += '<rect x="60" y="56" width="70" height="14" fill="#F2E3B0" stroke="#B5A270" stroke-width="2"/><rect x="66" y="46" width="60" height="10" fill="#E07A9A"/>'
@@ -298,31 +307,66 @@ static func panel_door() -> ImageTexture:
 	return tex(150, 430, s)
 
 
-## Canvas 560x480: the kitchen at the end of the hall: wood upper cabinet, white base cabinets,
-## black counter, back door with a window onto the yard and the wall AC unit above. Floor at y 480.
+## Canvas 560x480: the kitchen at the end of the hall: fridge covered in drawings, wood upper cabinet,
+## white base cabinets with a black counter (stove, kettle, fruit bowl, utensil rail), the back door with
+## a window onto the yard and the wall AC unit above, and a little island with a stool. Floor at y 480.
 static func kitchen() -> ImageTexture:
 	var s := _defs()
-	s += '<rect x="20" y="40" width="150" height="140" fill="#D6A464" stroke="#8A6234" stroke-width="3"/>'
-	for y in range(52, 176, 10):
-		s += '<path d="M28 %d H162" stroke="#B98A4E" stroke-width="2"/>' % y
-	s += '<rect x="20" y="220" width="200" height="40" fill="#EDEAE3"/>'
-	for x in range(20, 220, 20):
-		s += '<path d="M%d 220 V260" stroke="#D6D2C8" stroke-width="1.5"/>' % x
-	s += '<rect x="14" y="260" width="212" height="14" fill="#2E2E30"/>'
-	s += '<rect x="20" y="274" width="200" height="200" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="2.5"/>'
-	for x in [20.0, 120.0]:
-		s += '<rect x="%s" y="284" width="96" height="180" fill="none" stroke="#C9C2B4" stroke-width="2"/>' % (x + 4)
-		s += '<rect x="%s" y="300" width="22" height="4" fill="#9A9A9A"/>' % (x + 40)
-	s += '<path d="M40 260 v-30 h24 v30" fill="#C9C9C9" stroke="#8A8A8A" stroke-width="2"/><circle cx="160" cy="246" r="14" fill="#F2EDE2" stroke="#9A9A9A" stroke-width="2"/>'
-	s += '<rect x="290" y="30" width="190" height="56" rx="8" fill="#F7F7F5" stroke="#B9B4AA" stroke-width="2.5"/><path d="M304 70 H466" stroke="#B9B4AA" stroke-width="2"/>'
-	s += '<rect x="300" y="100" width="170" height="380" fill="#F7F6F2" stroke="#C9C2B4" stroke-width="3"/>'
-	s += '<rect x="310" y="104" width="150" height="40" fill="url(#outside)" stroke="#C9C2B4" stroke-width="2"/>'
-	s += '<rect x="322" y="160" width="126" height="170" fill="url(#outside)" stroke="#C9C2B4" stroke-width="3"/>'
-	s += '<path d="M322 250 H448" stroke="#F7F6F2" stroke-width="5"/><path d="M330 210 h110 M330 226 h110" stroke="#FFFFFF" stroke-width="2"/>'
-	s += '<path d="M360 330 v-60 l20 -30 l20 30 v60" fill="#B5603F" opacity="0.5"/>'
-	s += '<circle cx="440" cy="350" r="6" fill="#B9B4AA"/>'
-	s += '<rect x="322" y="370" width="126" height="90" fill="none" stroke="#C9C2B4" stroke-width="2.5"/>'
+	# Fridge.
+	s += '<rect x="4" y="120" width="104" height="356" rx="8" fill="#F2F2EF" stroke="#B9B4AA" stroke-width="3"/>'
+	s += '<path d="M4 250 H108" stroke="#B9B4AA" stroke-width="3"/><rect x="92" y="190" width="6" height="44" rx="3" fill="#B9B4AA"/><rect x="92" y="268" width="6" height="60" rx="3" fill="#B9B4AA"/>'
+	s += '<path d="M10 126 L40 126 L12 240 Z" fill="#FFFFFF" opacity="0.5"/>'
+	for d in [[20, 150, "#F2C12E"], [52, 170, "#7E57C2"], [24, 280, "#F2A7C9"], [58, 300, "#1FB5C4"]]:
+		s += '<rect x="%s" y="%s" width="30" height="36" fill="#FFFFFF" stroke="#D9D2C4" stroke-width="1" transform="rotate(-4 %s %s)"/>' % [d[0], d[1], d[0], d[1]]
+		s += '<path d="M%s %s q8 -10 16 0 q-8 10 -16 0" fill="%s"/><circle cx="%s" cy="%s" r="3" fill="#E04F5F"/>' % [d[0] + 7, d[1] + 20, d[2], d[0] + 15, d[1] + 2]
+	# Upper cabinet.
+	s += '<rect x="122" y="40" width="150" height="130" fill="#D6A464" stroke="#8A6234" stroke-width="3"/>'
+	for y in range(52, 166, 10):
+		s += '<path d="M130 %d H264" stroke="#B98A4E" stroke-width="2"/>' % y
+	# Backsplash, utensil rail, counter and base cabinets.
+	s += '<rect x="120" y="200" width="180" height="60" fill="#EDEAE3"/>'
+	for x in range(120, 300, 20):
+		s += '<path d="M%d 200 V260" stroke="#D6D2C8" stroke-width="1.5"/>' % x
+	s += '<path d="M120 230 H300" stroke="#D6D2C8" stroke-width="1.5"/>'
+	s += '<path d="M140 204 H280" stroke="#9A9A9A" stroke-width="3"/>'
+	for u in [[156, "M0 0 v26 M-5 26 h10 v8 h-10 z"], [190, "M0 0 v22 m0 0 q-6 4 0 12 q6 -4 0 -12"], [224, "M0 0 v30"], [256, "M0 0 v20 m-6 0 h12 l-6 12 z"]]:
+		s += '<g transform="translate(%s 206)"><path d="%s" stroke="#6E6E6E" stroke-width="2.5" fill="#B9B9B9"/></g>' % [u[0], u[1]]
+	s += '<rect x="114" y="260" width="192" height="14" fill="#2E2E30"/>'
+	s += '<rect x="120" y="274" width="180" height="202" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="2.5"/>'
+	for x in [124.0, 212.0]:
+		s += '<rect x="%s" y="284" width="84" height="182" fill="none" stroke="#C9C2B4" stroke-width="2"/><rect x="%s" y="300" width="22" height="4" fill="#9A9A9A"/>' % [x, x + 31]
+	s += '<rect x="130" y="250" width="70" height="10" fill="#3A3A3A"/><circle cx="148" cy="255" r="3" fill="#6E6E6E"/><circle cx="182" cy="255" r="3" fill="#6E6E6E"/>'
+	s += '<path d="M146 250 Q146 226 166 226 Q186 226 186 250 Z" fill="#E04F5F" stroke="#8E1A24" stroke-width="2"/><path d="M186 236 l10 -6" stroke="#8E1A24" stroke-width="3"/><path d="M156 226 q10 -10 20 0" stroke="#2B2B2B" stroke-width="2.5" fill="none"/>'
+	s += '<ellipse cx="260" cy="256" rx="26" ry="6" fill="#F4F2EC" stroke="#9A9A9A" stroke-width="1.5"/>'
+	for f in [[248, 248, "#E67E22"], [262, 246, "#F1C40F"], [274, 249, "#C0392B"], [256, 240, "#9BD15A"]]:
+		s += '<circle cx="%s" cy="%s" r="7" fill="%s"/>' % f
+	# Back door with the yard outside, AC unit above.
+	s += '<rect x="318" y="30" width="170" height="52" rx="8" fill="#F7F7F5" stroke="#B9B4AA" stroke-width="2.5"/><path d="M332 66 H474" stroke="#B9B4AA" stroke-width="2"/>'
+	s += '<rect x="322" y="100" width="164" height="380" fill="#F7F6F2" stroke="#C9C2B4" stroke-width="3"/>'
+	s += '<rect x="332" y="104" width="144" height="40" fill="url(#outside)" stroke="#C9C2B4" stroke-width="2"/>'
+	s += '<rect x="342" y="160" width="124" height="170" fill="url(#outside)" stroke="#C9C2B4" stroke-width="3"/>'
+	s += '<path d="M342 250 H466" stroke="#F7F6F2" stroke-width="5"/><path d="M350 210 h108 M350 226 h108" stroke="#FFFFFF" stroke-width="2"/>'
+	s += '<path d="M380 330 v-60 l20 -30 l20 30 v60" fill="#B5603F" opacity="0.5"/>'
+	s += '<circle cx="458" cy="350" r="6" fill="#B9B4AA"/>'
+	s += '<rect x="342" y="370" width="124" height="90" fill="none" stroke="#C9C2B4" stroke-width="2.5"/>'
+	# Little island and stool.
+	s += '<rect x="496" y="330" width="60" height="146" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="2.5"/><rect x="490" y="318" width="70" height="14" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2"/>'
+	s += '<path d="M500 390 h40 M506 390 l-8 86 M534 390 l8 86" stroke="#8A6A40" stroke-width="4" fill="none"/><ellipse cx="520" cy="388" rx="24" ry="6" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2"/>'
+	s += '<path d="M500 318 v-16 h18 v16" fill="#F2EDE2" stroke="#9A9A9A" stroke-width="2"/>'
 	return tex(560, 480, s)
+
+
+## Canvas w x 70: paper bunting with pastel flags hung across the wall.
+static func bunting(w: float) -> ImageTexture:
+	var cols := ["#F2A7C9", "#FFD23F", "#A5D6A7", "#9DB9E8", "#FFB38A", "#D9C6E6"]
+	var s := '<path d="M2 10 Q%s 40 %s 10" stroke="#B9B4AA" stroke-width="2" fill="none"/>' % [w / 2.0, w - 2.0]
+	var n := int(w / 46.0)
+	for i in n:
+		var t := (i + 0.5) / n
+		var x := t * w
+		var y := 10.0 + 4.0 * t * (1.0 - t) * 30.0
+		s += '<path d="M%s %s L%s %s L%s %s Z" fill="%s" stroke="#FFFFFF" stroke-width="1.5"/>' % [x - 16, y, x + 16, y, x, y + 34, cols[i % cols.size()]]
+	return tex(w, 70, s)
 
 
 # ── Charlotte's bedroom ──────────────────────────────────────
@@ -339,6 +383,9 @@ static func bed() -> ImageTexture:
 	s += '<path d="M60 170 Q90 140 200 150 Q380 136 540 150 L546 214 Q300 236 60 214 Z" fill="#F2A7B9" stroke="#C26A84" stroke-width="3"/>'
 	s += '<path d="M220 158 Q300 176 360 160 M400 152 Q450 174 520 158 M140 190 Q240 206 330 192" stroke="#E08AA2" stroke-width="2.5" fill="none"/>'
 	s += '<path d="M60 206 Q300 228 546 206 L548 240 Q300 262 58 240 Z" fill="#EE97AD" stroke="#C26A84" stroke-width="2.5"/>'
+	s += '<path d="M80 168 Q200 146 330 152 Q430 146 530 154" stroke="#FBD3DE" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.8"/>'
+	s += '<path d="M62 238 Q300 258 546 238" stroke="#B85A76" stroke-width="5" fill="none" opacity="0.35"/>'
+	s += '<path d="M70 128 Q120 112 190 116" stroke="#F0E6F6" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.8"/>'
 	s += '<path d="M440 150 V300 M540 140 V300" stroke="#F4F2EC" stroke-width="8"/><path d="M440 150 V300 M540 140 V300" stroke="#C9C2B4" stroke-width="1.5"/>'
 	for x in [460.0, 480.0, 500.0, 520.0]:
 		s += '<path d="M%s 150 V200" stroke="#F4F2EC" stroke-width="5"/>' % x
