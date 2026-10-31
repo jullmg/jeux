@@ -10,7 +10,8 @@ Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks
 (ground floor of `duplex_charlotte`, n° 5672) to go inside her flat. In her bedroom, click the dresser's drawers to open her
 wardrobe and change clothes. Click her desk to draw (`ui/drawing_pad.gd`, `DrawingPad`: crayons, sizes, eraser); "Sur le frigo !" saves the
 drawing to `user://drawings/` (newest 4 kept) and sticks it on the kitchen fridge. Delete that folder after tests.
-Click the fridge: it opens (`InteriorArt.fridge_open()`) and she takes a random snack (`InteriorArt.snack(kind)`), "Miam !".
+Click the bookshelf in her bedroom to read (`ui/book_reader.gd`, `BookReader`: four short original stories, a
+picture and text per page). Click the fridge: it opens (`InteriorArt.fridge_open()`) and she takes a random snack (`InteriorArt.snack(kind)`), "Miam !".
 Click the hallway TV to turn it on and change channels, then off. `world/tv_shows.gd` (`TvShows`) is the
 catalogue of channels, all original (no copyrighted shows or characters): news, animals, cartoon, hockey, weather, the
 sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas, t, on_for)`. `world/tv_screen.gd`

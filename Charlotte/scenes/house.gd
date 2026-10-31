@@ -78,6 +78,8 @@ func _build_doors() -> void:
 	add_child(DoorSpot.make(Rect2(BEDROOM_DOOR_X, 170, 150, 430), func(): _go_through(CHACHA_DOOR_X + 75.0, HALL, 1)))
 	# The fridge: a snack.
 	add_child(DoorSpot.make(Rect2(KITCHEN_START + 4.0, 240, 104, 356), _open_fridge, KITCHEN_START + 140.0))
+	# The book ledges: her books.
+	add_child(DoorSpot.make(Rect2(BEDROOM.x + 960.0, 270, 136, 200), _open_books, BEDROOM.x + 1030.0))
 	# Her desk: drawing paper and crayons.
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 1110.0, 420, 300, 186), _open_drawing_pad, BEDROOM.x + 1200.0))
 	# The dresser's drawers (under the terrarium): her wardrobe.
@@ -142,6 +144,13 @@ func _open_fridge() -> void:
 	tween.tween_callback(func():
 		treat.queue_free()
 		_fridge_busy = false)
+
+
+func _open_books() -> void:
+	_control.enabled = false
+	var books := BookReader.new()
+	books.closed.connect(func(): _control.enabled = true)
+	add_child(books)
 
 
 func _open_drawing_pad() -> void:
