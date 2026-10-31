@@ -4,7 +4,7 @@ extends Node2D
 ## Panes come from art/decor/windows.json (written by tools/generate_houses.gd).
 
 const RISE := 0.7
-const SLOTS := 2
+const SLOTS := 1
 
 var charlotte: Node2D
 var _panes: Array[Dictionary] = []
@@ -78,7 +78,7 @@ func _appear() -> void:
 	tween.tween_callback(func():
 		_busy.erase(pane.rect)
 		clip.queue_free()
-		_schedule(_rng.randf_range(8.0, 30.0)))
+		_schedule(_rng.randf_range(16.0, 60.0)))
 
 
 # Mullion and glare redrawn over the cat so it sits behind the glass.

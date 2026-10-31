@@ -22,7 +22,7 @@ const LAMPS_AFTER: Array[int] = [2, 7, 12, 16]
 const HYDRANTS_AT: Array[float] = [5.5, 14.3]
 const RACKS_AT: Array[float] = [0.5, 10.55, 13.6]
 const STRAY_CAT_Y := 646.0
-const MAX_STRAY_CATS := 2
+const MAX_STRAY_CATS := 1
 
 var _street_width := 0.0
 var _starts: Array[float] = []
@@ -118,7 +118,7 @@ func _spawn_stray_cats(delta: float) -> void:
 	_cat_timer -= delta
 	if _cat_timer > 0.0:
 		return
-	_cat_timer = _rng.randf_range(15.0, 35.0)
+	_cat_timer = _rng.randf_range(30.0, 70.0)
 	if _animals.get_child_count() >= MAX_STRAY_CATS:
 		return
 	var cx := _camera.get_screen_center_position().x
@@ -274,7 +274,7 @@ func _falling_leaves(leaf: Texture2D, at: Vector2) -> CPUParticles2D:
 
 
 func _build_passersby() -> void:
-	var ages := ["adult", "child", "senior", "adult", "teen", "child", "adult"]
+	var ages := ["adult", "child", "senior", "teen"]
 	for i in ages.size():
 		var npc := Passerby.new()
 		npc.look = CharacterLook.random(_rng, ages[i])
@@ -285,7 +285,7 @@ func _build_passersby() -> void:
 		npc.bounds = Vector2(80.0, _street_width - 80.0)
 		npc.modulate = Color(0.94, 0.94, 0.96)
 		add_child(npc)
-		if ages[i] != "child" and _rng.randf() < 0.55:
+		if ages[i] != "child" and _rng.randf() < 0.45:
 			add_child(Dog.random(_rng, npc))
 
 

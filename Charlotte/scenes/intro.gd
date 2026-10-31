@@ -256,11 +256,11 @@ func _falling_leaves(leaf: Texture2D, at: Vector2) -> CPUParticles2D:
 # Passersby: kept to either side so they never walk behind the logo and button
 # ─────────────────────────────────────────────────────────────
 
-const WALK_ZONES: Array[Vector2] = [Vector2(70, 400), Vector2(880, 1240), Vector2(880, 1240)]
+const WALK_ZONES: Array[Vector2] = [Vector2(70, 400), Vector2(880, 1240)]
 
 
 func _build_passersby() -> void:
-	var ages := ["adult", "child", "senior"]
+	var ages := ["adult", "child"]
 	for i in ages.size():
 		var zone := WALK_ZONES[i]
 		var npc := Passerby.new()
