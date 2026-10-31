@@ -3,7 +3,8 @@ extends Node2D
 ## A cross street at a corner of 6e Avenue, seen down its length in one-point perspective.
 ## Three parts, each a separate node so they land in the right place in the draw order:
 ##  - VISTA (added before the houses): the street receding behind the facade line, its sidewalks,
-##    the walls of the buildings along it, street trees, distant houses.
+##    the walls of the buildings along it, street trees, the street running to the horizon with
+##    Mount Royal far away in the haze.
 ##  - GROUND (added after Street): the asphalt cutting through the 6e sidewalk, curb ramps, crosswalk.
 ##  - SIGNS (added with the props): poles and signs at the corner.
 ## Every point is drawn as its projection at the facade line (y FACADE_Y) shrunk toward the vanishing
@@ -15,7 +16,10 @@ const FACADE_Y := 592.0
 const HORIZON_Y := 452.0
 const SIDEWALK_TOP := 590.0
 const ROAD_BOTTOM := 676.0
-const FAR := 7.0
+const FAR := 24.0
+## Beyond this depth, details (windows) are too small to draw.
+const DETAIL := 8.0
+const HAZE := Color("#B9C6D6")
 const ASPHALT := Color("#5A5956")
 const CONCRETE := Color("#CFCAC0")
 const CURB := Color("#E2DDD4")
@@ -87,20 +91,14 @@ func _draw() -> void:
 
 func _draw_vista() -> void:
 	var vp := _vp()
-	var far_y := HORIZON_Y + (FACADE_Y - HORIZON_Y) / (1.0 + FAR)
-	# Distant houses closing the view, then the street and its sidewalks.
-	var fl := _at(Vector2(x0, FACADE_Y), FAR)
-	var fr := _at(Vector2(x1, FACADE_Y), FAR)
-	draw_rect(Rect2(fl.x - 4, far_y - 40, fr.x - fl.x + 8, 40), Color("#A86A52"))
-	for i in 5:
-		draw_rect(Rect2(lerpf(fl.x, fr.x, (i + 0.25) / 5.0), far_y - 32, 4, 6), Color("#5E7486"))
-		draw_rect(Rect2(lerpf(fl.x, fr.x, (i + 0.25) / 5.0), far_y - 18, 4, 6), Color("#5E7486"))
+	_mount_royal()
+	# The street and its sidewalks, all the way to the horizon.
 	_quad(Vector2(x0, FACADE_Y), Vector2(x1, FACADE_Y), 0.0, FAR, CONCRETE)
 	_quad(Vector2(x0 + sidewalk, FACADE_Y), Vector2(x1 - sidewalk, FACADE_Y), 0.0, FAR, ASPHALT)
 	for side in [x0 + sidewalk, x1 - sidewalk]:
 		draw_line(_at(Vector2(side, FACADE_Y), 0.0), _at(Vector2(side, FACADE_Y), FAR), CURB, 2.0)
 	# Faded centre line, and leaves along the gutters.
-	for i in 12:
+	for i in 30:
 		var d := i * 0.55
 		draw_line(_at(Vector2(vp.x, FACADE_Y), d), _at(Vector2(vp.x, FACADE_Y), d + 0.25), Color(0.95, 0.85, 0.4, 0.35), 2.0 / (1.0 + d))
 	for i in 60:
@@ -109,11 +107,50 @@ func _draw_vista() -> void:
 		draw_circle(_at(Vector2(gx, FACADE_Y), d), 4.0 / (1.0 + d), LEAVES[_rng.randi_range(0, LEAVES.size() - 1)])
 	_walls(left_walls, x0, -1.0)
 	_walls(right_walls, x1, 1.0)
+	_haze_band(3.0, 9.0, 0.0, 0.35)
+	_haze_band(9.0, FAR, 0.35, 0.6)
 	# Street trees on both sidewalks, far to near.
-	for d in [5.0, 3.4, 2.2, 1.3]:
+	for d in [14.0, 9.5, 6.6, 4.6, 3.2, 2.2, 1.3]:
 		for side in [-1.0, 1.0]:
 			var tx := x0 + sidewalk * 0.35 if side < 0.0 else x1 - sidewalk * 0.35
 			_tree(Vector2(tx, FACADE_Y), d + (0.3 if side > 0.0 else 0.0))
+
+
+# Mount Royal on the horizon at the end of the street: a long hazy hill in faded autumn colours, the cross
+# on its summit.
+func _mount_royal() -> void:
+	var vp := _vp()
+	var pts := PackedVector2Array()
+	for i in 25:
+		var t := i / 24.0
+		var x := lerpf(vp.x - 440.0, vp.x + 460.0, t)
+		var bump := pow(sin(t * PI), 0.8) * 150.0 + sin(t * 9.0) * 6.0 + sin(t * 23.0) * 2.5
+		pts.append(Vector2(x, HORIZON_Y - bump))
+	pts.append(Vector2(vp.x + 460.0, HORIZON_Y + 4.0))
+	pts.append(Vector2(vp.x - 440.0, HORIZON_Y + 4.0))
+	draw_colored_polygon(pts, Color("#7D7A92"))
+	# Autumn woods on its flanks, faded by the distance.
+	for i in 140:
+		var t := _rng.randf()
+		var ridge := HORIZON_Y - pow(sin(t * PI), 0.8) * 150.0
+		var c := Vector2(lerpf(vp.x - 420.0, vp.x + 440.0, t), lerpf(ridge + 10.0, HORIZON_Y, _rng.randf()))
+		draw_circle(c, _rng.randf_range(4.0, 8.0), Color(LEAVES[i % LEAVES.size()].lerp(Color("#8C8098"), 0.6), 0.7))
+	draw_colored_polygon(pts, Color(HAZE, 0.18))
+	var top := Vector2(vp.x + 20.0, HORIZON_Y - 150.0)
+	draw_line(top, top + Vector2(0, -22), Color("#F2EEE6"), 2.5)
+	draw_line(top + Vector2(-6, -16), top + Vector2(6, -16), Color("#F2EEE6"), 2.5)
+
+
+# Translucent haze over the street between two depths, thicker with distance.
+func _haze_band(d0: float, d1: float, a0: float, a1: float) -> void:
+	var top := FACADE_Y - 460.0
+	var near := [_at(Vector2(x0, top), d0), _at(Vector2(x1, top), d0), _at(Vector2(x1, FACADE_Y), d0), _at(Vector2(x0, FACADE_Y), d0)]
+	var far := [_at(Vector2(x0, top), d1), _at(Vector2(x1, top), d1), _at(Vector2(x1, FACADE_Y), d1), _at(Vector2(x0, FACADE_Y), d1)]
+	# The walls and the road only (faces 1-3); face 0 is open sky, where Mount Royal shows.
+	for i in range(1, 4):
+		var j := (i + 1) % 4
+		draw_polygon(PackedVector2Array([near[i], near[j], far[j], far[i]]),
+			PackedColorArray([Color(HAZE, a0), Color(HAZE, a0), Color(HAZE, a1), Color(HAZE, a1)]))
 
 
 func _quad(a: Vector2, b: Vector2, d0: float, d1: float, col: Color) -> void:
@@ -185,6 +222,8 @@ func _windows(front_x: float, y: float, d0: float, d1: float, count: int, glass:
 		return
 	var step := (d1 - d0) / count
 	for i in count:
+		if d0 + step * i > DETAIL:
+			return
 		var a := d0 + step * (i + 0.25)
 		var b := d0 + step * (i + 0.75)
 		_wall_quad(front_x, y - 4.0, y + 94.0, a - step * 0.04, b + step * 0.04, trim)
