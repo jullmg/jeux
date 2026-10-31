@@ -75,6 +75,10 @@ Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks
 ## Conventions
 
 - Art is made procedurally in code: SVG strings or `_draw()`. There are no hand-drawn sprites except the logo.
+- Performance: a `_draw()` node spanning the whole street is never culled and redraws every command each frame, and every
+  `draw_set_transform` breaks batching. Thousands of small shapes (leaves, grit) therefore go into one vertex-coloured mesh
+  (`Street._Batch`); before that the street ran at about 35 fps on an M1. Check with
+  `RenderingServer.get_rendering_info(RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)` (the street is about 700).
 - The world uses a fixed RNG seed (`2026`) so the street looks the same on every run.
 - Shared y-coordinates (`HOUSE_BASE_Y 592`, `CHARLOTTE_Y 638`, `CURB_Y 664`) and scales (`HOUSE_SCALE 0.57`,
   `CHAR_SCALE 0.38`, `TREE_SCALE 0.55`) are duplicated as constants in `main.gd` and `intro.gd`. Keep them in sync.
