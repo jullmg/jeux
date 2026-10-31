@@ -14,6 +14,8 @@ const SALON_END := 2260.0
 const KITCHEN_START := 3400.0
 const CHACHA_DOOR_X := 3120.0
 const BEDROOM_DOOR_X := 6440.0
+const SNACKS := [["apple", "Une pomme !"], ["yogurt", "Un yogourt !"], ["cheese", "Du fromage !"],
+	["grapes", "Des raisins !"], ["carrot", "Une carotte !"], ["cookie", "Un biscuit !"]]
 
 # Lights that the switches and the floor lamp turn on and off.
 var _vestibule_light: Sprite2D
@@ -23,6 +25,7 @@ var _hall_lights: Array = []
 var _bedroom_lights: FairyLights
 # Charlotte's drawings stuck on the fridge door with magnets.
 var _fridge_art: Node2D
+var _fridge_busy := false
 
 
 func _ready() -> void:
@@ -73,6 +76,8 @@ func _build_doors() -> void:
 		Transition.change_scene(self, "res://scenes/main.tscn")))
 	add_child(DoorSpot.make(Rect2(CHACHA_DOOR_X, 170, 150, 430), func(): _go_through(BEDROOM_DOOR_X - 40.0, BEDROOM, -1)))
 	add_child(DoorSpot.make(Rect2(BEDROOM_DOOR_X, 170, 150, 430), func(): _go_through(CHACHA_DOOR_X + 75.0, HALL, 1)))
+	# The fridge: a snack.
+	add_child(DoorSpot.make(Rect2(KITCHEN_START + 4.0, 240, 104, 356), _open_fridge, KITCHEN_START + 140.0))
 	# Her desk: drawing paper and crayons.
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 1110.0, 420, 300, 186), _open_drawing_pad, BEDROOM.x + 1200.0))
 	# The dresser's drawers (under the terrarium): her wardrobe.
@@ -89,6 +94,54 @@ func _open_wardrobe() -> void:
 			_twirl()
 		_control.enabled = true)
 	add_child(wardrobe)
+
+
+# The fridge door swings open (cold light spilling out), she takes a snack, and it floats up with a "Miam !".
+func _open_fridge() -> void:
+	if _fridge_busy:
+		return
+	_fridge_busy = true
+	_charlotte.facing = -1
+	var open := Sprite2D.new()
+	open.texture = InteriorArt.fridge_open()
+	open.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	open.centered = false
+	open.position = Vector2(KITCHEN_START - 40.0, 240.0)
+	add_child(open)
+	# Over the fridge and its drawings, under Charlotte.
+	move_child(open, _fridge_art.get_index() + 1)
+	var cold := _glow(Vector2(KITCHEN_START + 60.0, 420.0), 220.0, Color(0.75, 0.9, 1.0, 0.35))
+	move_child(cold, open.get_index() + 1)
+	var pick: Array = SNACKS[randi() % SNACKS.size()]
+	var treat := Node2D.new()
+	treat.position = _charlotte.position + Vector2(0, -270)
+	treat.modulate.a = 0.0
+	add_child(treat)
+	var icon := Sprite2D.new()
+	icon.texture = InteriorArt.snack(pick[0])
+	treat.add_child(icon)
+	var bubble := Label.new()
+	bubble.text = "%s Miam !" % pick[1]
+	bubble.add_theme_font_size_override("font_size", 20)
+	bubble.add_theme_color_override("font_color", Color("#1D4F91"))
+	bubble.add_theme_color_override("font_outline_color", Color.WHITE)
+	bubble.add_theme_constant_override("outline_size", 6)
+	bubble.position = Vector2(-90, -66)
+	bubble.size = Vector2(180, 30)
+	bubble.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	treat.add_child(bubble)
+	var tween := create_tween()
+	tween.tween_interval(0.6)
+	tween.tween_property(treat, "modulate:a", 1.0, 0.25)
+	tween.parallel().tween_property(treat, "position:y", treat.position.y - 30.0, 1.6)
+	tween.tween_interval(0.6)
+	tween.tween_callback(func():
+		open.queue_free()
+		cold.queue_free())
+	tween.tween_property(treat, "modulate:a", 0.0, 0.4)
+	tween.tween_callback(func():
+		treat.queue_free()
+		_fridge_busy = false)
 
 
 func _open_drawing_pad() -> void:

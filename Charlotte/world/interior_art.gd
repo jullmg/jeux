@@ -725,3 +725,57 @@ static func wall_plate(outlet: bool) -> ImageTexture:
 	else:
 		s += '<rect x="10" y="12" width="6" height="16" rx="2" fill="#E8E4DA" stroke="#B9B4AA" stroke-width="1"/>'
 	return tex(26, 40, s)
+
+
+## Canvas 150x360: the kitchen fridge with its door swung open toward the viewer (door on the left, seen
+## edge-on with its shelves), the lit inside full of food. Drawn over InteriorArt.kitchen()'s fridge.
+static func fridge_open() -> ImageTexture:
+	var s := '<rect x="44" y="2" width="104" height="356" rx="8" fill="#F2F2EF" stroke="#B9B4AA" stroke-width="3"/>'
+	s += '<rect x="52" y="10" width="88" height="114" fill="#EAF4FA"/><rect x="52" y="136" width="88" height="214" fill="#EAF4FA"/>'
+	s += '<rect x="52" y="10" width="88" height="10" fill="#FFFFFF" opacity="0.9"/>'
+	for y in [60.0, 196.0, 256.0, 312.0]:
+		s += '<rect x="52" y="%s" width="88" height="4" fill="#C9D9E2"/>' % y
+	# Freezer: ice cube tray and a tub of ice cream.
+	s += '<rect x="58" y="38" width="36" height="20" fill="#D6EAF5" stroke="#9AB8C8" stroke-width="1.5"/><rect x="100" y="26" width="32" height="32" rx="4" fill="#F7D6E0" stroke="#D97A9A" stroke-width="1.5"/>'
+	s += '<rect x="56" y="70" width="80" height="50" fill="#DCEBF3"/>'
+	# Fridge: milk, eggs, jam, leftovers, vegetables in the drawer.
+	s += '<path d="M60 194 V162 L66 154 H80 L86 162 V194 Z" fill="#FFFFFF" stroke="#4FA3E0" stroke-width="2"/><rect x="60" y="172" width="26" height="10" fill="#4FA3E0"/>'
+	for i in 4:
+		s += '<ellipse cx="%s" cy="188" rx="5" ry="6" fill="#F6E8D2" stroke="#D9C2A0" stroke-width="1"/>' % (96 + i * 11)
+	s += '<rect x="60" y="232" width="20" height="22" rx="3" fill="#C8202A" stroke="#8E1A20" stroke-width="1.5"/><rect x="58" y="228" width="24" height="6" fill="#F2C230"/>'
+	s += '<rect x="90" y="238" width="44" height="16" rx="4" fill="#F4E9C8" stroke="#C9B48A" stroke-width="1.5"/><rect x="92" y="236" width="40" height="5" fill="#7FB5D9"/>'
+	s += '<rect x="56" y="318" width="80" height="34" rx="4" fill="#D6EAF5" fill-opacity="0.8" stroke="#9AB8C8" stroke-width="1.5"/>'
+	for c in [[70, 336, "#7CCB5A"], [88, 340, "#FF8A3D"], [104, 334, "#E04F5F"], [120, 338, "#7CCB5A"]]:
+		s += '<circle cx="%s" cy="%s" r="8" fill="%s"/>' % c
+	s += '<rect x="58" y="274" width="34" height="34" rx="4" fill="#FFFFFF" stroke="#C9C2B4" stroke-width="1.5"/><rect x="98" y="282" width="38" height="26" fill="#F2C230" stroke="#C99410" stroke-width="1.5"/>'
+	# The open door, edge-on: its inner face with bottle shelves.
+	s += '<path d="M44 4 L4 22 V340 L44 358 Z" fill="#E6E6E2" stroke="#B9B4AA" stroke-width="3" stroke-linejoin="round"/>'
+	for y in [90.0, 180.0, 270.0]:
+		s += '<path d="M8 %s L40 %s V%s L8 %s Z" fill="#D6EAF5" fill-opacity="0.8" stroke="#9AB8C8" stroke-width="1.5"/>' % [y, y - 8, y + 20, y + 28]
+	s += '<rect x="14" y="150" width="9" height="28" rx="3" fill="#7CCB5A"/><rect x="26" y="146" width="9" height="30" rx="3" fill="#FFD23F"/>'
+	s += '<rect x="16" y="240" width="10" height="28" rx="3" fill="#E04F5F"/>'
+	return tex(150, 360, s)
+
+
+## Canvas 64x64: a snack Charlotte takes from the fridge ("apple", "yogurt", "cheese", "grapes", "carrot", "cookie").
+static func snack(kind: String) -> ImageTexture:
+	var s := ""
+	match kind:
+		"apple":
+			s = '<circle cx="26" cy="38" r="18" fill="#E0303A"/><circle cx="40" cy="38" r="18" fill="#E0303A"/><path d="M33 22 q2 -10 6 -14" stroke="#6E4E32" stroke-width="3" fill="none"/><path d="M36 16 q10 -8 16 -2 q-8 6 -16 2" fill="#7CCB5A"/><circle cx="24" cy="32" r="5" fill="#FFFFFF" opacity="0.4"/>'
+		"yogurt":
+			s = '<path d="M14 22 H50 L44 58 H20 Z" fill="#FFFFFF" stroke="#C9C2B4" stroke-width="2"/><rect x="12" y="16" width="40" height="8" rx="3" fill="#FF7BA3"/><circle cx="32" cy="40" r="7" fill="#FF7BA3"/>'
+		"cheese":
+			s = '<path d="M8 46 L56 30 V52 L8 58 Z" fill="#F2C230" stroke="#C99410" stroke-width="2"/><path d="M8 46 L40 22 L56 30 Z" fill="#F7D96A" stroke="#C99410" stroke-width="2"/><circle cx="22" cy="50" r="3" fill="#C99410"/><circle cx="40" cy="44" r="4" fill="#C99410"/>'
+		"grapes":
+			for p in [[24, 24], [36, 24], [18, 34], [30, 34], [42, 34], [24, 44], [36, 44], [30, 54]]:
+				s += '<circle cx="%s" cy="%s" r="7" fill="#7E57C2" stroke="#5A3A9A" stroke-width="1"/>' % p
+			s += '<path d="M30 18 q2 -8 8 -10" stroke="#6E4E32" stroke-width="3" fill="none"/>'
+		"carrot":
+			s = '<path d="M14 18 L50 34 Q46 44 38 42 Z" fill="#FF8A3D" stroke="#C45A12" stroke-width="2"/><path d="M50 34 l8 -10 M50 34 l10 -2 M50 34 l6 8" stroke="#3E8E5A" stroke-width="4" stroke-linecap="round"/>'
+		_:
+			s = '<circle cx="32" cy="34" r="22" fill="#D9A04A" stroke="#A8742A" stroke-width="2"/>'
+			for p in [[24, 28], [38, 26], [30, 40], [42, 40], [22, 42]]:
+				s += '<circle cx="%s" cy="%s" r="3.5" fill="#5A3A22"/>' % p
+	return tex(64, 64, s)
+
