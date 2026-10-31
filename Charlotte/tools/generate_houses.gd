@@ -920,6 +920,17 @@ func _quoins(x: float, dir: float, y0: float, y1: float) -> void:
 		i += 1
 
 
+# A row of bricks set on end, just under the roof line, with a corbelled course above it.
+func _soldier_course(y: float) -> void:
+	_rect(X0, y, X1 - X0, 30, k.mortar)
+	var x := X0 + 1.0
+	while x < X1:
+		_rect(x, y + 1, minf(12.0, X1 - x), 28, _pick(k.bricks))
+		x += 14.0
+	_rect(X0 - 4, y - 8, X1 - X0 + 8, 9, _pick(k.bricks), _stroke("#3E2420", 1))
+	_rect(X0, y + 30, X1 - X0, 8, "#000000", 'opacity="0.15"')
+
+
 # Wrought-iron railing with S-scrolls between two posts.
 func _scroll_railing(x0: float, x1: float, top: float, bottom: float) -> void:
 	var st := _stroke("#1F1F1F", 3) + ' fill="none" stroke-linecap="round"'
@@ -1002,8 +1013,14 @@ func _depanneur_side() -> void:
 	_rect(wx + ww / 2 - 3, wy, 6, wh, "#F2F0EA")
 	_path("M%s %s l50 0 l-90 %s l-50 0 z" % [_n(wx + ww - 120), _n(wy), _n(wh)], "#FFFFFF", 'opacity="0.1"')
 	_rect(wx - 16, wy + wh + 4, ww + 32, 14, "#B8B4AC", _stroke("#8E8A83", 1.5))
-	# One window upstairs.
-	_window(330.0, _win_y(1), 110.0, 150.0)
+	# Upstairs the 6e side is plain brick: a soldier course under the roof, a downspout, the electric meter.
+	_soldier_course(top + 2.0)
+	_downspout(X1 - 12.0, top)
+	var mx := 150.0
+	_rect(mx, concrete - 150, 34, 46, "#B9BCB8", _stroke("#7E817E", 1.5))
+	_circle(mx + 17, concrete - 132, 9, "#E9ECE6", _stroke("#7E817E", 1))
+	_rect(mx + 14, concrete - 104, 5, 104, "#8E918E")
+	_rect(mx + 14, top + 40, 5, concrete - 150 - top - 40, "#8E918E")
 	# Corner balcony: white soffit, scrolled railing, posts, and the green corrugated awning.
 	var by := _fb(1) + 10.0
 	_rect(0, by, 170, 18, "#ECEAE4", _stroke("#B5B1A8", 1.5))
@@ -1047,13 +1064,18 @@ func _garages() -> void:
 	_rect(mx, door_top + 6, 68, 136, "#8E9296", _stroke("#5E6266", 2))
 	_path("M%s %s c8 -14 16 -2 10 8 c-6 10 10 14 16 0 M%s %s c6 6 14 -4 20 4" % [_n(mx + 10), _n(door_top + 70), _n(mx + 14), _n(door_top + 100)], "none", _stroke("#F4F4F4", 2.5) + ' stroke-linecap="round"')
 	_rect(mx + 6, door_top - 36, 56, 26, "#C7C3BA", _stroke("#8E8A83", 1.5))
-	# Upstairs on the left: three small windows.
-	for wx in [76.0, 170.0, 250.0]:
-		_rect(wx - 3, _win_y(1) + 37, 64, 104, "#B9B5AC")
-		_rect(wx, _win_y(1) + 40, 58, 98, "#F2F0EA")
-		_rect(wx + 6, _win_y(1) + 46, 46, 86, "url(#glass)")
-		_rect(wx + 6, _win_y(1) + 84, 46, 4, "#F2F0EA")
-		_rect(wx - 8, _win_y(1) + 140, 74, 8, "#A8A49C")
+	_soldier_course(top + 2.0)
+	# Upstairs on the left: three tall windows under segmental brick arches, stone sills.
+	for wx in [70.0, 166.0, 252.0]:
+		var wy := _win_y(1) + 6.0
+		_path("M%s %s Q%s %s %s %s" % [_n(wx - 8), _n(wy + 6), _n(wx + 31), _n(wy - 22), _n(wx + 70), _n(wy + 6)], "none", _stroke("#4A2A26", 14))
+		_path("M%s %s Q%s %s %s %s" % [_n(wx - 8), _n(wy + 6), _n(wx + 31), _n(wy - 22), _n(wx + 70), _n(wy + 6)], "none", _stroke("#86503E", 10) + ' stroke-dasharray="6 2"')
+		_rect(wx - 3, wy - 3, 68, 140, "#B9B5AC")
+		_rect(wx, wy, 62, 134, "#F2F0EA")
+		_rect(wx + 6, wy + 6, 50, 122, "url(#glass)")
+		_rect(wx + 6, wy + 50, 50, 4, "#F2F0EA")
+		_rect(wx + 6, wy + 6, 50, 10, "url(#drop)")
+		_rect(wx - 8, wy + 136, 78, 9, "#A8A49C", _stroke("#7E7A72", 1))
 	# Garage doors.
 	var doors := [[350.0, 150.0, 160.0, 4], [540.0, 170.0, 190.0, 5]]
 	for gi in doors.size():
@@ -1087,10 +1109,16 @@ func _garages() -> void:
 	# White gutter pipe, then the wooden balcony on iron brackets, the grilled window behind its railing.
 	_rect(330, ground_y - 230, X1 - 330, 9, "#ECEAE4", _stroke("#B9B5AC", 1))
 	var deck := _fb(1) + 18.0
-	_rect(470, deck - 196, 130, 190, "#F2F0EA", _stroke("#B9B5AC", 2))
-	_rect(478, deck - 188, 114, 180, "#3E4A52")
-	for i in 3:
-		_path("M%s %s q20 30 0 60 q-20 30 0 60" % [_n(500 + i * 34), _n(deck - 180)], "none", _stroke("#1F1F1F", 2.5))
+	# The balcony door: glazed, behind a black grille of scrolls.
+	_path("M462 %s Q535 %s 608 %s" % [_n(deck - 196), _n(deck - 222), _n(deck - 196)], "none", _stroke("#4A2A26", 14))
+	_rect(470, deck - 196, 130, 196, "#F2F0EA", _stroke("#B9B5AC", 2))
+	_rect(478, deck - 188, 54, 186, "url(#glass)")
+	_rect(538, deck - 188, 54, 186, "url(#glass)")
+	_rect(478, deck - 188, 114, 14, "url(#drop)")
+	for cx in [505.0, 565.0]:
+		for cy in [deck - 160.0, deck - 110.0]:
+			_path("M%s %s c-14 -10 -14 -26 0 -22 c14 -4 14 12 0 22 z" % [_n(cx), _n(cy)], "none", _stroke("#1F1F1F", 2.5))
+			_circle(cx, cy + 14, 5, "none", _stroke("#1F1F1F", 2.5))
 	_scroll_railing(360, X1 - 4, deck - 70, deck)
 	_rect(350, deck, X1 - 346, 30, "#8A6440", _stroke("#5E4228", 1.5))
 	var pl := 356.0

@@ -362,6 +362,10 @@ func _build_squirrels() -> void:
 
 
 func _build_props() -> void:
+	# The dépanneur's sandwich board, out on the corner.
+	var board := _sprite(PropArt.sandwich_board(), 0.62)
+	board.position = Vector2(_starts[LAYOUT.find("depanneur")] + 70.0, CURB_Y - 14.0 - 120.0 * 0.62)
+	add_child(board)
 	for cs in _cross_streets:
 		add_child(CrossStreet.make(CrossStreet.Part.SIGNS, cs))
 	for after in LAMPS_AFTER:

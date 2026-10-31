@@ -27,6 +27,16 @@ static func _hex(c: Color) -> String:
 	return "#" + c.to_html(false)
 
 
+## Canvas 90x120: the dépanneur's white sandwich board on the sidewalk (lottery, cold drinks, snacks).
+static func sandwich_board() -> ImageTexture:
+	var s := '<path d="M20 6 L70 6 L84 118 H74 L66 60 H24 L16 118 H6 Z" fill="#F4F2EC" stroke="#9A968E" stroke-width="2.5" stroke-linejoin="round"/>'
+	s += '<rect x="26" y="14" width="38" height="12" rx="2" fill="#C8202A"/>'
+	s += '<rect x="26" y="30" width="38" height="8" rx="2" fill="#25408F"/>'
+	s += '<circle cx="34" cy="48" r="6" fill="#F2C230"/><circle cx="48" cy="48" r="6" fill="#3E8E5A"/><circle cx="62" cy="48" r="5" fill="#F57C1F"/>'
+	s += '<path d="M28 60 L22 112 M62 60 L68 112" stroke="#C9C5BC" stroke-width="2"/>'
+	return tex(_svg(90, 120, s))
+
+
 static func _pick(rng: RandomNumberGenerator, items: Array) -> Variant:
 	return items[rng.randi_range(0, items.size() - 1)]
 
