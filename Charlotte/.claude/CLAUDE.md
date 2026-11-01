@@ -72,8 +72,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   vestibule (0–640) → oak glass doorway → salon (–2260) → hallway → kitchen (3400–3960); Charlotte's bedroom is a separate
   area (5000–6650) reached through the "chacha" door (fade, camera limits switch). Charlotte is at scale 0.5 inside.
 - `scenes/depanneur.gd` (extends `Interior`): inside dépanneur Xin-Xin, entered from its door on Rue Dandurand (bell). A
-  crammed corner store: cash machine, newspapers, counter (till, scratch tickets) with the shopkeeper (an Asian woman: black
-  bob, warm light skin, dark eyes; on a raised floor behind the counter) and a wall of shelves behind her, a real-time
+  crammed corner store: cash machine, newspapers, counter (till, scratch tickets) with the shopkeeper (an Asian man: short
+  black hair, warm light skin, dark eyes; on a raised floor behind the counter) and a wall of shelves behind her, a real-time
   clock, a specials board, the candy wall, low gondolas mid-floor, bread rack, coffee/hot chocolate corner, the sloche
   machine (animated swirls; Québec word "sloche", not "barbotine"), freezer, drinks fridges, dairy cooler with 4 L milk
   bags, stockroom door, security mirror. Furniture from `world/shop_art.gd` (`ShopArt`, nothing branded); checkered floor

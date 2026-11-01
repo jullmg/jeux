@@ -85,16 +85,16 @@ func _build_counter() -> void:
 	add_child(specials)
 	_wall_label("OUVERT", Vector2(COUNTER_X + 640.0, 120.0), 28, Color("#FF5D8F"), Color("#7A1030"))
 	_glow(Vector2(COUNTER_X + 640.0, 120.0), 110.0, Color(1.0, 0.3, 0.55, 0.35))
-	# The shopkeeper: dark straight hair, warm light skin, dark eyes, a navy sweater; on the raised floor behind the
-	# counter so she shows above it.
+	# The shopkeeper: a man with short black hair, warm light skin, dark eyes, a navy sweater; on the raised floor
+	# behind the counter so he shows above it.
 	_clerk = Character.new()
 	var look := CharacterLook.new()
 	look.age = "adult"
 	look.skin = Color("#F1D0B0")
-	look.hair_style = "bob"
+	look.hair_style = "short"
 	look.hair_color = Color("#1A1412")
 	look.eye_color = Color("#3A2618")
-	look.lashes = true
+	look.lashes = false
 	look.mouth = "smile"
 	look.outfit = "sweater"
 	look.outfit_color = Color("#25408F")
