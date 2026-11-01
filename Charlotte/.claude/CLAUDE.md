@@ -256,9 +256,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   - menage (Mom gives it, after the milk; the toys can't be picked up before): 11 things on the bedroom floor (`MESS`,
     `InteriorArt.mess`); clicking each, Charlotte crouches and it flies to its place (`PUT_AWAY`); `flags.tidied`.
   - plants (Dad gives it): five thirsty plants (`_plant(id, kind, …)`, `InteriorArt.house_plant(kind, thirsty)`:
-    monstera and a hanging pothos in the salon, a fern on its stand and a fiddle-leaf fig in the corridor, a peace lily
+    monstera and a pothos on a stool by the window in the salon, a fern on a low stool and a fiddle-leaf fig in the corridor, a peace lily
     in the bedroom; thirsty = drooping, yellowed, brown tips, dry soil, dead leaves; the sprite swaps to the healthy
-    picture when watered) and the watering can in the kitchen (`InteriorArt.watering_can`, carried with
+    picture when watered; she stands beside the pot (`POUR_REACH`), steps up toward the wall (`POUR_STEP`, the plants stand
+    against it), lifts the can with her hands on its handle (`Character.carry_lift`, `carry_grip`), tips it, and drops arc
+    from the spout (`CAN_SPOUT`) onto the soil (`InteriorArt.plant_soil`)) and the watering can in the kitchen (`InteriorArt.watering_can`, carried with
     `Character.carry`, `flags.has_can`); `flags.watered`; the can goes back when all have drunk.
 - The dépanneur has prices (`_buy(picture, text, price)`, paid from `GameState.money`); the clerk says "Il te manque des
   sous !" when she can't afford something.

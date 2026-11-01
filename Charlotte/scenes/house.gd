@@ -23,6 +23,13 @@ const PUT_AWAY := {"sock": Vector2(1340, 560), "tshirt": Vector2(1340, 560), "py
 	"sneaker": Vector2(1400, 610), "book": Vector2(1010, 300), "crayons": Vector2(1180, 470), "puzzle": Vector2(1180, 470),
 	"ball": Vector2(800, 600), "teddy": Vector2(800, 600), "blocks": Vector2(800, 600), "car": Vector2(800, 600)}
 const CAN_X := KITCHEN_START + 470.0
+# The tip of the watering can's spout, in the held can's own space (its texture is centred, offset by (30, -4)).
+const CAN_SPOUT := Vector2(86, -24)
+const CAN_HANDLE := Vector2(18, -33)
+# She steps up to the plant (toward the wall it stands against) to pour.
+const POUR_STEP := 54.0
+# How far in front of Charlotte the spout is while she pours (world px): she stands that far from the soil.
+const POUR_REACH := 92.0
 const SNACKS := [["apple", "Une pomme !"], ["yogurt", "Un yogourt !"], ["cheese", "Du fromage !"],
 	["grapes", "Des raisins !"], ["carrot", "Une carotte !"], ["cookie", "Un biscuit !"]]
 
@@ -42,6 +49,9 @@ var _dad_line := 0
 # The house plants to water (id → sprite) and the watering can in the kitchen.
 var _plants := {}
 var _can: Sprite2D
+# The can in her hands while she carries it, and whether she is pouring.
+var _held_can: Sprite2D
+var _pouring := false
 
 
 func _ready() -> void:
@@ -141,7 +151,11 @@ func _build_chores() -> void:
 		if _thirsty(id):
 			plant.texture = plant.get_meta("thirsty")
 		var area := Rect2(plant.position, plant.texture.get_size() * plant.scale)
-		add_child(DoorSpot.make(area, _water.bind(id), area.get_center().x - 50.0))
+		var spot := DoorSpot.make(area, _water.bind(id))
+		# She stands beside the pot, on the side she comes from, the spout over the soil.
+		var soil_x := _soil(id).x
+		spot.approach = func(from_x: float) -> float: return soil_x - POUR_REACH if from_x < soil_x else soil_x + POUR_REACH
+		add_child(spot)
 	_can = _put(InteriorArt.watering_can(), CAN_X, 606.0, 0.55, "floor")
 	add_child(DoorSpot.make(Rect2(_can.position - Vector2(10, 20), Vector2(86, 70)), _take_can, CAN_X + 30.0))
 	add_child(QuestMark.make(_can.position + Vector2(33, -40), func() -> bool:
@@ -158,6 +172,7 @@ func _plant(id: String, kind: String, x: float, bottom: float, scale: float) -> 
 	var sprite := _put(healthy, x, bottom, scale)
 	sprite.set_meta("healthy", healthy)
 	sprite.set_meta("thirsty", InteriorArt.house_plant(kind, true))
+	sprite.set_meta("soil", InteriorArt.plant_soil(kind))
 	_plants[id] = sprite
 
 
@@ -208,11 +223,13 @@ func _take_can() -> void:
 func _hold_can() -> void:
 	_can.visible = false
 	var held := Sprite2D.new()
+	_held_can = held
 	held.texture = _can.texture
 	# Held up in front of her, a little bigger than it looks on the floor at the back of the kitchen.
 	held.scale = Vector2.ONE * 1.5
 	held.offset = Vector2(30, -4)
 	_charlotte.carry(held)
+	_charlotte.carry_grip = CAN_HANDLE
 
 
 func _water(id: String) -> void:
@@ -220,43 +237,80 @@ func _water(id: String) -> void:
 	if not _thirsty(id):
 		_say(_charlotte, "Elle a assez bu !" if Quests.done("plants") or Quests.active("plants") else "Elle est belle, cette plante.", 300.0)
 		return
-	if not GameState.flags.get("has_can", false):
+	if not GameState.flags.get("has_can", false) or _held_can == null:
 		_say(_charlotte, "Elle a soif… Il me faut\nl'arrosoir de la cuisine !", 300.0, 3.0)
 		return
-	# Water pours from the can onto the pot; the plant perks up and greens again.
-	var size := plant.texture.get_size() * plant.scale
-	var pot := plant.position + Vector2(size.x * 0.5, size.y * 0.75)
-	for i in 14:
-		var drop := Sprite2D.new()
-		drop.texture = PropArt.flake()
-		drop.modulate = Color(0.55, 0.78, 1.0, 0.9)
-		drop.scale = Vector2.ONE * 0.35
-		# From the can's spout.
-		drop.position = _charlotte.position + Vector2(85.0 * _charlotte.facing, -85.0)
-		add_child(drop)
-		var tween := create_tween()
-		tween.tween_interval(i * 0.06)
-		tween.tween_property(drop, "position", pot + Vector2(randf_range(-20, 20), randf_range(-10, 10)), 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-		tween.tween_callback(drop.queue_free)
-	Sfx.play("swoosh", pot)
-	var perk := create_tween()
-	perk.tween_interval(0.8)
-	perk.tween_callback(func(): plant.texture = plant.get_meta("healthy"))
-	perk.tween_property(plant, "modulate", Color(0.8, 1.15, 0.85), 0.25)
-	perk.tween_property(plant, "modulate", Color.WHITE, 0.6)
+	if _pouring:
+		return
+	# She faces the pot, lifts the can and tips it: water runs from the spout onto the soil, then she lowers it and the
+	# plant perks up and greens again.
+	_pouring = true
+	var soil := _soil(id)
+	_charlotte.facing = 1 if soil.x > _charlotte.position.x else -1
+	_control.enabled = false
+	var can := _held_can
+	var floor_y := _charlotte.position.y
+	var tween := create_tween()
+	tween.tween_callback(func(): _charlotte.is_walking = true)
+	tween.tween_property(_charlotte, "position:y", floor_y - POUR_STEP, 0.35).set_trans(Tween.TRANS_SINE)
+	tween.tween_callback(func(): _charlotte.is_walking = false)
+	tween.tween_property(_charlotte, "carry_lift", 1.0, 0.4).set_trans(Tween.TRANS_SINE)
+	tween.parallel().tween_property(can, "rotation", 0.5, 0.4).set_trans(Tween.TRANS_SINE)
+	tween.tween_callback(func():
+		Sfx.play("swoosh", soil)
+		for k in 24:
+			get_tree().create_timer(k * 0.045).timeout.connect(_drop.bind(can, soil)))
+	tween.tween_interval(1.45)
+	tween.tween_callback(func(): plant.texture = plant.get_meta("healthy"))
+	tween.tween_property(_charlotte, "carry_lift", 0.0, 0.4).set_trans(Tween.TRANS_SINE)
+	tween.parallel().tween_property(can, "rotation", 0.0, 0.4).set_trans(Tween.TRANS_SINE)
+	tween.parallel().tween_property(plant, "modulate", Color(0.8, 1.15, 0.85), 0.2)
+	tween.tween_property(plant, "modulate", Color.WHITE, 0.6)
+	tween.parallel().tween_callback(func(): _charlotte.is_walking = true)
+	tween.parallel().tween_property(_charlotte, "position:y", floor_y, 0.35).set_trans(Tween.TRANS_SINE)
+	tween.tween_callback(func(): _charlotte.is_walking = false)
 	var watered: Array = GameState.flags.get("watered", [])
 	watered.append(id)
 	GameState.flags["watered"] = watered
-	if watered.size() >= _plants.size():
+	var last := watered.size() >= _plants.size()
+	if last:
 		GameState.flags.erase("watered")
 		GameState.flags.erase("has_can")
-		perk.tween_callback(func():
+	tween.tween_callback(func():
+		_pouring = false
+		_control.enabled = true
+		if last:
 			_charlotte.carry(null)
+			_held_can = null
 			_can.visible = true
 			_say(_charlotte, "Toutes les plantes ont bu !", 300.0)
-			Quests.complete("plants"))
-	else:
-		_say(_charlotte, "Bois, petite plante !", 300.0)
+			Quests.complete("plants")
+		else:
+			_say(_charlotte, "Bois, petite plante !", 300.0))
+
+
+# One drop of water: out of the spout (wherever the tipped can is now), a little forward, falling onto the soil.
+func _drop(can: Node2D, soil: Vector2) -> void:
+	if not is_instance_valid(can):
+		return
+	var drop := Sprite2D.new()
+	drop.texture = PropArt.flake()
+	drop.modulate = Color(0.55, 0.78, 1.0, 0.9)
+	drop.scale = Vector2(0.22, 0.32)
+	var from := can.to_global(CAN_SPOUT)
+	var to := soil + Vector2(randf_range(-9, 9), randf_range(2, 6))
+	drop.position = from
+	add_child(drop)
+	var fall := create_tween()
+	fall.tween_method(func(t: float):
+		drop.position = Vector2(lerpf(from.x, to.x, 1.0 - (1.0 - t) * (1.0 - t)), lerpf(from.y, to.y, t * t)), 0.0, 1.0, 0.32)
+	fall.tween_callback(drop.queue_free)
+
+
+# Where the water lands on plant `id`, in the world.
+func _soil(id: String) -> Vector2:
+	var plant: Sprite2D = _plants[id]
+	return plant.position + (plant.get_meta("soil") as Vector2) * plant.scale
 
 
 func _family_member(look: CharacterLook, x: float, facing: int) -> Character:
@@ -483,7 +537,7 @@ func _build_vestibule() -> void:
 func _build_salon() -> void:
 	_put(InteriorArt.rug(), 900.0, 694.0, 0.9)
 	_plate(1700.0, 560.0, true)
-	_plant("salon", "monstera", 843.0, 606.0, 0.85)
+	_plant("salon", "monstera", 843.0, 606.0, 0.8)
 	for i in 3:
 		_put(InteriorArt.poster(i), 1030.0 + i * 130.0, 340.0, 0.85, "wall")
 	_put(InteriorArt.floor_lamp(), 1470.0, 604.0, 0.9, "floor")
@@ -492,7 +546,7 @@ func _build_salon() -> void:
 	_put(InteriorArt.side_table(), 1390.0, 610.0, 0.8, "floor")
 	_put(InteriorArt.window(170.0, 300.0), 1580.0, 470.0, 1.0, "wall")
 	_daylight(Vector2(1580.0, 170.0), 170.0, 0.12)
-	_plant("fenetre", "pothos", 1585.0, 360.0, 0.55)
+	_plant("fenetre", "pothos", 1590.0, 606.0, 0.5)
 	_plate(1780.0, 330.0, false)
 	_put(InteriorArt.dining_table(), 1780.0, 606.0, 0.85, "floor")
 	_salon_pendant = _pendant(1984.0, 310.0)

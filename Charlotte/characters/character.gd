@@ -40,6 +40,11 @@ var _pet_low := 1.0
 var _run := 0.0
 var _held: Node2D
 var _hold := 0.0
+## 0..1: lifts what she carries up in front of her, her hands on its `carry_grip` (to pour the watering can).
+var carry_lift := 0.0
+## Where her hands hold what she carries, in its own space (a handle); used while lifting.
+var carry_grip := Vector2.ZERO
+var _held_base := Vector2.ZERO
 ## Sitting on a bicycle: leaning forward, hands on the bars, legs turning with `pedal` (the crank's angle).
 var riding := false
 var pedal := 0.0
@@ -146,6 +151,7 @@ func carry(thing: Node2D) -> void:
 	_held = thing
 	if thing:
 		thing.position = Vector2((_rig.arm_len as float) * 0.62, (_rig.shoulder_y as float) + (_rig.arm_len as float) * 0.62)
+		_held_base = thing.position
 		_body.add_child(thing)
 		_body.move_child(thing, _arm_front.get_index())
 
@@ -283,6 +289,13 @@ func _apply_pose() -> void:
 	var stroke := deg_to_rad(lerpf(-82.0, -62.0, _pet_low)) + sin(_time * 6.0) * deg_to_rad(12.0)
 	_arm_front.rotation = lerpf(lerpf(ARM_REST - arm_swing, stroke, _pet), deg_to_rad(-58.0), _hold)
 	_arm_back.rotation = lerpf(-ARM_REST + arm_swing, deg_to_rad(-72.0), _hold)
+	if carry_lift > 0.0 and is_holding():
+		var arm: float = _rig.arm_len
+		_held.position = _held_base + Vector2(arm * 0.05, -arm * 0.7) * carry_lift
+		var grip := _held.transform * carry_grip
+		for a: Sprite2D in [_arm_back, _arm_front]:
+			var v := grip - a.position
+			a.rotation = lerp_angle(a.rotation, atan2(-v.x, v.y), carry_lift)
 	var bounce := sin(walk_phase * TAU * 2.0)
 	# Running: a little hop at each push-off instead of the walk's dip.
 	_body.position.y = (1.0 - cos(_leg_front.rotation)) * (_rig.leg_len as float) * (1.0 - _run) - absf(bounce) * 6.0 * _run
