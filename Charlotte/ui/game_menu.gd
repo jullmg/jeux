@@ -81,12 +81,14 @@ func _build_page() -> void:
 			toggle())
 	_page.add_child(dim)
 	_card = PanelContainer.new()
+	_card.draw.connect(_decorate)
 	var style := StyleBoxFlat.new()
 	style.bg_color = CREAM
 	style.border_color = BLUE
 	style.set_border_width_all(4)
 	style.set_corner_radius_all(18)
 	style.set_content_margin_all(28)
+	style.content_margin_top = 40
 	style.shadow_color = Color(0, 0, 0, 0.3)
 	style.shadow_size = 10
 	_card.add_theme_stylebox_override("panel", style)
@@ -122,6 +124,27 @@ func _build_page() -> void:
 	_options.add_child(full)
 	_options.add_child(_big_button("Retour", func(): _show(_main)))
 	_show(_main)
+
+
+# Over the card's edges: a cat, a dog and a hamster peeking over the top, flowers in the corners, paw prints.
+func _decorate() -> void:
+	var w := _card.size.x
+	var h := _card.size.y
+	CuteArt.cat_head(_card, Vector2(54, 0), 26, Color("#E8954A"))
+	CuteArt.dog_head(_card, Vector2(w - 56, 2), 26, Color("#C9A27A"), Color("#7A5232"))
+	CuteArt.hamster_head(_card, Vector2(w / 2.0 + 110.0, h), 20)
+	for f in [[Vector2(8, h - 8), Color("#F2A7C9")], [Vector2(26, h + 4), Color("#FFFFFF")], [Vector2(w - 10, h - 6), Color("#9B59B6")],
+			[Vector2(w - 30, h + 6), Color("#F7C6D9")], [Vector2(-6, 60), Color("#FFD23F")], [Vector2(w + 6, 70), Color("#F2A7C9")]]:
+		CuteArt.flower(_card, f[0], 12, f[1])
+	for p in [Vector2(30, h - 40), Vector2(48, h - 58), Vector2(30, h - 76)]:
+		_paw(p)
+
+
+func _paw(c: Vector2) -> void:
+	var col := Color(BLUE, 0.25)
+	_card.draw_circle(c, 5.0, col)
+	for k in 4:
+		_card.draw_circle(c + Vector2.from_angle(-PI / 2.0 + (k - 1.5) * 0.55) * 8.0, 2.4, col)
 
 
 func _show(which: VBoxContainer) -> void:
