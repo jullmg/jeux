@@ -71,7 +71,7 @@ static func dress_charlotte(look: CharacterLook) -> void:
 
 
 ## Charlotte's mother (from reference/mere_charlotte.jpg): long wavy light-brown hair with blond lights, fair skin,
-## brown eyes, a black knit sweater, jeans.
+## brown eyes; in the game a pretty floral dress rather than the photo's black sweater.
 static func mom() -> CharacterLook:
 	var look := CharacterLook.new()
 	look.age = "adult"
@@ -81,15 +81,16 @@ static func mom() -> CharacterLook:
 	look.eye_color = Color("#6B4E2E")
 	look.lashes = true
 	look.mouth = "smile"
-	look.outfit = "sweater"
-	look.outfit_color = Color("#262428")
-	look.accent_color = Color("#3A383E")
-	look.pattern = "none"
+	# A pretty teal dress with little flowers, warm tights and brown boots.
+	look.outfit = "dress"
+	look.outfit_color = Color("#5DB6BE")
+	look.accent_color = Color("#F2B632")
+	look.pattern = "flowers"
 	look.sleeve = "long"
-	look.legwear = "pants"
-	look.legwear_color = Color("#3F5578")
+	look.legwear = "tights"
+	look.legwear_color = Color("#8A5A4A")
 	look.shoes = "boot"
-	look.shoe_color = Color("#5A3A28")
+	look.shoe_color = Color("#7A4A2C")
 	return look
 
 
