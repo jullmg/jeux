@@ -1478,23 +1478,27 @@ func _depanneur_front() -> void:
 	# Air conditioners over the door, the door behind its grille, the civic number.
 	var dx := 390.0
 	for ax in [dx - 74.0, dx + 6.0]:
-		_rect(ax, wy - 6, 66, 40, "#F2F2EF", _stroke("#A9A398", 1.5))
+		_rect(ax, wy - 14, 66, 40, "#F2F2EF", _stroke("#A9A398", 1.5))
 		for gy in range(0, 4):
-			_rect(ax + 6, wy + gy * 8, 54, 3, "#C9C5BC")
-	_rect(dx - 60, wy + 40, 120, _fb(0) - wy - 40, "#F2F0EA", _stroke("#B9B5AC", 2))
-	_rect(dx - 52, wy + 48, 104, _fb(0) - wy - 48, "#3E4A52")
-	var gy2 := wy + 56.0
-	while gy2 < _fb(0) - 6:
+			_rect(ax + 6, wy - 8 + gy * 8, 54, 3, "#C9C5BC")
+	# A full-height shop door, down to the top step.
+	var dt := wy + 28.0
+	var db := _fb(0) + 33.0
+	_rect(dx - 60, dt, 120, db - dt, "#F2F0EA", _stroke("#B9B5AC", 2))
+	_rect(dx - 52, dt + 8, 104, db - dt - 8, "#3E4A52")
+	var gy2 := dt + 16.0
+	while gy2 < db - 6:
 		_rect(dx - 48, gy2, 96, 2.5, "#E9EEF2")
 		gy2 += 16.0
 	var gx2 := dx - 46.0
 	while gx2 < dx + 48:
-		_rect(gx2, wy + 50, 2.5, _fb(0) - wy - 54, "#E9EEF2")
+		_rect(gx2, dt + 10, 2.5, db - dt - 14, "#E9EEF2")
 		gx2 += 16.0
-	_rect(dx - 20, wy + 90, 40, 26, "#F4F2EC")
+	_rect(dx - 20, dt + 62, 40, 26, "#F4F2EC")
+	_rect(dx + 34, dt + (db - dt) * 0.55, 6, 22, "#B9BEC4", 'rx="2"')
 	_plaque(dx + 88, wy + 64, "2891")
 	# Concrete steps with a handrail.
-	for i in 3:
+	for i in range(1, 3):
 		var w := 150.0 + i * 20.0
 		_rect(dx - w / 2, _fb(0) + i * 33.0, w, 33, "#A8A49C", _stroke("#7E7A72", 1.5))
 		_rect(dx - w / 2, _fb(0) + i * 33.0, w, 4, "#C9C5BC")
