@@ -61,6 +61,18 @@ func _ready() -> void:
 	if not x_arg.is_empty():
 		start_x = x_arg.to_float()
 	_start = start_x
+	# The lanes are where the neighbourhood children play: one skipping rope, one with her ball.
+	_build_kid(start_x)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + 61
+	var ball := BallKid.new()
+	ball.look = CharacterLook.random(rng, "child")
+	Season.dress_for_weather(ball.look)
+	ball.ball_color = Color(PropArt._pick(rng, ["#E74C3C", "#3498DB", "#F1C40F", "#2ECC71"]))
+	var bx := _street_width * (0.3 if start_x > _street_width * 0.5 else 0.7)
+	ball.position = Vector2(bx, NEIGHBOUR_Y + 10.0)
+	ball.scale = Vector2.ONE * CHAR_SCALE
+	add_child(ball)
 	_charlotte = _spawn_charlotte(start_x)
 	_control.charlotte = _charlotte
 	_lane_birds.charlotte = _charlotte

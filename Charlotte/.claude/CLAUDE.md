@@ -167,8 +167,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Cyclists ride by in the traffic lane now and then (`world/cyclist.gd`, `Cyclist.random`; `StreetScene._spawn_cyclists`,
   `_traffic`, own RNG, rarer in winter, sometimes ringing).
 - Background life: `WireBirds` (`world/wire_birds.gd`: pigeons and sparrows on the poles' cable, fly off when
-  Charlotte comes close or runs, others land later; streets and lanes), a `JumpRopeKid` per street
-  (`world/jump_rope_kid.gd`, `StreetScene._build_kid`, own RNG, clickable), winter chimney smoke (`_build_life`).
+  Charlotte comes close or runs, others land later; streets and lanes), children playing in the lanes (not on the
+  streets): a `JumpRopeKid` (`world/jump_rope_kid.gd`, `StreetScene._build_kid`) and a `BallKid` (`world/ball_kid.gd`) in
+  each lane, own RNG, clickable; few passersby on the streets (`passerby_ages`: 2 on the avenues, 1 on Dandurand/Holt), winter chimney smoke (`_build_life`).
 - Every corner has planted curb extensions (`world/curb_garden.gd`, `CurbGarden`, `StreetScene._build_curb_gardens`, from
   `reference/terre_plein_01/02.png`): the curb bulges into the parking lane on both sides of each cross street, perennials
   by season, striped flexible bollards; drawn in front of people.

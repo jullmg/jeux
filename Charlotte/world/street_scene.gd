@@ -34,7 +34,7 @@ var lamps_after: Array[int] = []
 var hydrants_at: Array[float] = []
 var racks_at: Array[float] = []
 var squirrels_at: Array[float] = []
-var passerby_ages: Array[String] = ["adult", "child", "senior", "teen"]
+var passerby_ages: Array[String] = ["adult", "senior"]
 ## Seed for this street's random details, so it looks the same on every run.
 var seed_value := 2026
 ## Short name used in corner and lane hand-overs ("6e", "5e", "holt", "dandurand"): Transition.arrive keys
@@ -104,7 +104,7 @@ func _ready() -> void:
 	var x_arg := _arg("--x=")
 	if not x_arg.is_empty():
 		start_x = x_arg.to_float()
-	_build_kid(start_x)
+
 	_charlotte = _spawn_charlotte(start_x)
 	_control.charlotte = _charlotte
 	_segments = _walk_segments()
@@ -662,8 +662,8 @@ func _build_utility_poles() -> void:
 	add_child(birds)
 
 
-# A neighbourhood child skipping rope on the sidewalk, a little back from Charlotte's walking line (added with the
-# passersby, before her), from its own random numbers.
+# A neighbourhood child skipping rope (the lanes are where the children play), a little back from Charlotte's
+# walking line (added before her), from its own random numbers.
 func _build_kid(start_x: float) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value + 31

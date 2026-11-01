@@ -14,7 +14,7 @@ func _init() -> void:
 	hydrants_at = [2.15]
 	racks_at = [4.6]
 	squirrels_at = [3.5]
-	passerby_ages = ["adult", "senior"]
+	passerby_ages = ["senior"]
 	seed_value = 3317
 
 
