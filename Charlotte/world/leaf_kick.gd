@@ -7,15 +7,18 @@ var walker: Character
 
 func _ready() -> void:
 	texture = Season.falling_texture()
-	amount = 10
-	lifetime = 0.8
+	# A few leaves now and then, not a cloud: a light scuff.
+	amount = 3
+	lifetime = 0.7
+	explosiveness = 0.0
+	randomness = 0.8
 	local_coords = false
 	emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
 	emission_rect_extents = Vector2(10, 2)
 	spread = 25.0
 	gravity = Vector2(0, 320)
-	initial_velocity_min = 60.0
-	initial_velocity_max = 130.0
+	initial_velocity_min = 40.0
+	initial_velocity_max = 90.0
 	angular_velocity_min = -400.0
 	angular_velocity_max = 400.0
 	angle_max = 360.0
