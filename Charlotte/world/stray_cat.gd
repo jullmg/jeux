@@ -28,6 +28,7 @@ var collar := Color.TRANSPARENT
 var stay := false
 ## Called after Charlotte pets it.
 var on_pet: Callable
+var _in_arms := false
 
 var _state := "sit"
 var _timer := 2.0
@@ -84,6 +85,14 @@ func _process(delta: float) -> void:
 		_behave(delta)
 	_apply_facing()
 	queue_redraw()
+
+
+## Curled up in someone's arms (see Character.carry): loafing, purring with hearts, not going anywhere.
+func held() -> void:
+	_in_arms = true
+	wander = false
+	stay = true
+	_state = "loaf"
 
 
 ## Sets off for home: it leaves after a little sit.
@@ -160,7 +169,7 @@ func _apply_facing() -> void:
 # ── Interaction (see Main._unhandled_input) ──────────────────
 
 func can_interact() -> bool:
-	return _state != "leave" and _state != "gone"
+	return not _in_arms and _state != "leave" and _state != "gone"
 
 
 func hit_test(p: Vector2) -> bool:

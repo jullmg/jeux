@@ -36,6 +36,8 @@ var _pet_time := 0.0
 var _pet := 0.0
 var _pet_low := 1.0
 var _run := 0.0
+var _held: Node2D
+var _hold := 0.0
 
 
 func _ready() -> void:
@@ -112,6 +114,22 @@ func hand_position() -> Vector2:
 
 
 ## Current ground speed, easing between walking and running.
+## Carries `thing` in her arms (a cat): both arms come round it and it rides on her body, between her arms.
+## carry(null) puts it down (frees it).
+func carry(thing: Node2D) -> void:
+	if _held and is_instance_valid(_held):
+		_held.queue_free()
+	_held = thing
+	if thing:
+		thing.position = Vector2((_rig.arm_len as float) * 0.62, (_rig.shoulder_y as float) + (_rig.arm_len as float) * 0.62)
+		_body.add_child(thing)
+		_body.move_child(thing, _arm_front.get_index())
+
+
+func is_holding() -> bool:
+	return _held != null and is_instance_valid(_held)
+
+
 func speed() -> float:
 	return walk_speed * lerpf(1.0, RUN_SPEED, _run)
 
@@ -124,6 +142,7 @@ func _process(delta: float) -> void:
 	_pet_time = maxf(_pet_time - delta, 0.0)
 	_pet = move_toward(_pet, 1.0 if _pet_time > 0.0 else 0.0, delta * 4.0)
 	_run = move_toward(_run, 1.0 if running and is_walking else 0.0, delta * 3.0)
+	_hold = move_toward(_hold, 1.0 if is_holding() else 0.0, delta * 4.0)
 	if is_walking:
 		# Longer legs take longer strides, so they swing more slowly for the same speed.
 		# A run is a faster cadence plus longer strides (wider swing), which together make up RUN_SPEED.
@@ -151,8 +170,8 @@ func _apply_pose() -> void:
 	_leg_back.rotation = -stride * swing + lunge
 	var arm_swing := deg_to_rad(lerpf(22.0, 48.0, _run)) * swing
 	var stroke := deg_to_rad(lerpf(-82.0, -62.0, _pet_low)) + sin(_time * 6.0) * deg_to_rad(12.0)
-	_arm_front.rotation = lerpf(ARM_REST - arm_swing, stroke, _pet)
-	_arm_back.rotation = -ARM_REST + arm_swing
+	_arm_front.rotation = lerpf(lerpf(ARM_REST - arm_swing, stroke, _pet), deg_to_rad(-58.0), _hold)
+	_arm_back.rotation = lerpf(-ARM_REST + arm_swing, deg_to_rad(-72.0), _hold)
 	var bounce := sin(walk_phase * TAU * 2.0)
 	# Running: a little hop at each push-off instead of the walk's dip.
 	_body.position.y = (1.0 - cos(_leg_front.rotation)) * (_rig.leg_len as float) * (1.0 - _run) - absf(bounce) * 6.0 * _run

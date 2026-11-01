@@ -68,6 +68,7 @@ func _ready() -> void:
 	cat.bounds = Vector2(60.0, _street_width - 60.0)
 	cat.charlotte = _charlotte
 	_animals.add_child(cat)
+	_build_lost_cats()
 	var lines := _Clotheslines.new()
 	lines.pulleys = _pulleys
 	lines.seed_value = seed_value
@@ -109,6 +110,12 @@ func _start_x() -> float:
 
 func _music() -> Array:
 	return ["ruelle", "street_" + Season.current, "street"]
+
+
+# Lost cats hide in the lane by lot (index + fraction).
+func _found_x(at: float) -> float:
+	var lot := _lots[int(at)]
+	return lerpf(lot.x, lot.y, at - int(at))
 
 
 # ── Layout ──────────────────────────────────────────────────────

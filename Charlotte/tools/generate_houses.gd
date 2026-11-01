@@ -2,7 +2,8 @@ extends SceneTree
 # Regenerates art/decor/*.svg: Godot --headless --path . --script res://tools/generate_houses.gd
 # Autumn (Halloween) facades go in art/decor/, the other seasons in art/decor/<season>/ (see Season.decor).
 # Every season makes the same random draws in the same order, so only the seasonal decor differs.
-# Also writes art/decor/windows.json: each house's window panes, used by the game to put cats in windows.
+# Also writes art/decor/windows.json: each house's window panes, used by the game to put cats in windows, and
+# art/decor/doors.json: each plex's front door centre x (SVG units), where its owner comes out.
 
 const X0 := 30.0
 const FLOOR_H := 275.0
@@ -224,6 +225,7 @@ var oy := 0.0
 var base_y := BASE
 var ground_y := GROUND
 var windows := {}
+var doors := {}
 var season := "autumn"
 
 
@@ -237,6 +239,7 @@ func _init() -> void:
 			DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://art/decor/" + s))
 		_generate(configs)
 	FileAccess.open("res://art/decor/windows.json", FileAccess.WRITE).store_string(JSON.stringify(windows, "\t"))
+	FileAccess.open("res://art/decor/doors.json", FileAccess.WRITE).store_string(JSON.stringify(doors, "\t"))
 	quit()
 
 
@@ -249,6 +252,8 @@ func _generate(configs: Array) -> void:
 		base_y = BASE + oy
 		ground_y = GROUND + oy
 		rng.seed = hash(k.name)
+		if k.kind == "plex":
+			doors[k.name] = k.door_cx
 		out = PackedStringArray()
 		_svg()
 		var path := "res://art/decor/%s.svg" % k.name if season == "autumn" else "res://art/decor/%s/%s.svg" % [season, k.name]

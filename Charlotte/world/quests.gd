@@ -5,7 +5,7 @@ extends RefCounted
 ## not there = still to discover, "active" = in her notebook, "done" = a star. The Notebook autoload shows
 ## them, and announces each new and finished one.
 
-const ORDER := ["milk", "hamster", "cat"]
+const ORDER := ["milk", "hamster", "cat", "cat2", "cat3"]
 const ALL := {
 	"milk": {
 		"title": "Maman a besoin de lait : va au dépanneur",
@@ -21,9 +21,21 @@ const ALL := {
 	},
 	"cat": {
 		"title": "Retrouve le chat perdu du voisin",
-		"hint": "Pistache, un chat gris tigré au collier bleu. On l'a vu sur la rue Dandurand.",
-		"find": "Une affiche est collée sur un lampadaire de la 6e Avenue…",
+		"hint": "Pistache, un chat gris tigré au collier bleu, a été vu sur la rue Dandurand. Ramène-le au 5684, 6e Avenue (Mme Gagnon).",
+		"find": "Une affiche est collée sur un poteau de la 6e Avenue…",
 		"age": 7, "reward": 1.0,
+	},
+	"cat2": {
+		"title": "Retrouve Caramel, le chat de M. Tremblay",
+		"hint": "Un chat roux au collier rouge. Il se cache peut-être dans la ruelle. Ramène-le au 5679, 5e Avenue.",
+		"find": "Une autre affiche, sur la 5e Avenue…",
+		"age": 7, "after": "cat", "reward": 1.0,
+	},
+	"cat3": {
+		"title": "Retrouve Bijou, la chatte de Mme Nguyen",
+		"hint": "Une chatte calico au collier rose, vue près de la ruelle verte. Ramène-la au 2655, rue Holt.",
+		"find": "Encore une affiche, sur la rue Holt…",
+		"age": 7, "after": "cat2", "reward": 1.5,
 	},
 }
 

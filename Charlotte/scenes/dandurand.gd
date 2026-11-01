@@ -16,31 +16,6 @@ func _init() -> void:
 	seed_value = 2891
 
 
-func _ready() -> void:
-	super()
-	if Quests.active("cat"):
-		_lost_cat()
-
-
-# Pistache, the neighbour's lost cat (grey tabby, blue collar), waits near the houses while the "cat" quest is on.
-# Pet it and it's found: it heads home.
-func _lost_cat() -> void:
-	var cat := StrayCat.new()
-	cat.coat = StrayCat.COATS[2]
-	cat.size = 0.66
-	cat.collar = Color("#2F7BD8")
-	cat.stay = true
-	cat.position = Vector2(_street_x(3.6), STRAY_CAT_Y)
-	cat.bounds = Vector2(_street_x(2.3), _street_x(4.8))
-	cat.charlotte = _charlotte
-	cat.on_pet = func():
-		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Pistache ! Je te ramène chez toi !", 2.6)
-		Quests.complete("cat")
-		cat.on_pet = Callable()
-		get_tree().create_timer(StrayCat.PET_TIME + 1.0).timeout.connect(cat.go_home)
-	_animals.add_child(cat)
-
-
 # Round the corner from 6e Avenue, out of the dépanneur, or in front of it.
 func _start_x() -> float:
 	if _arriving("dandurand_from_6e"):

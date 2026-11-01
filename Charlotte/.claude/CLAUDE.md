@@ -175,9 +175,14 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - The quests so far:
   - milk: Mom gives it, buy the 4 L bag at the dépanneur (free, `flags.has_milk`), bring it to Mom;
   - hamster: Dad gives it; feeding sets `flags.hamster_fed` (cleared at bedtime); going to bed unfed is refused, fed completes it;
-  - cat: the PERDU poster on the lamp post by `duplex_voisin_gauche` (`main.gd` `LostPoster`) starts it; Pistache (grey
-    tabby, `StrayCat.collar` blue, `stay`, `on_pet`) waits on Rue Dandurand while it's active; petting it completes it and
-    it `go_home()`s.
+  - lost cats, `world/lost_cats.gd` (`LostCats.ALL`, ids = quest ids cat, cat2, cat3, chained by `after`): Pistache
+    (found on Dandurand, home 5684 6e Av.), Caramel (in the lane, home 5679 5e Av.), Bijou (in the lane, home 2655 rue
+    Holt). `StreetScene._build_lost_cats()` (streets and the lane): the "PERDU" `LostCats.Poster` on the street's pole
+    starts it; the collared cat waits at `found_at` (`_found_x`; lane = lot index); petting it, Charlotte picks it up
+    (`GameState.flags.carrying`, `Character.carry(node)` / `is_holding()`, `LostCats.held(id)`, kept across scenes and
+    indoors); at the owner's front door (`_door_x(art)` from `art/decor/doors.json`, written by the generator; "!" and
+    house number) the owner comes out (`_bring_home`), the cat is put down, quest done. Owners are always at a front
+    door on a street, never in the lane.
 - The dépanneur has prices (`_buy(picture, text, price)`, paid from `GameState.money`); the clerk says "Il te manque des
   sous !" when she can't afford something.
 

@@ -112,6 +112,7 @@ func _ready() -> void:
 	_build_squirrels()
 	_build_trees(trees)
 	_build_props()
+	_build_lost_cats()
 	Foreground.build(self, _street_width, VIEW.x)
 	add_child(_wind)
 	_camera = Camera2D.new()
@@ -298,6 +299,131 @@ func _build_sidewalk_props() -> void:
 ## like the curbside lamps).
 func _build_extra_props() -> void:
 	pass
+
+
+# ── Lost cats (LostCats) ────────────────────────────────────────
+
+## This street's part in the lost-cat quests: the cat in Charlotte's arms, the "PERDU" poster, the lost cat
+## waiting here, and the owner's front door.
+func _build_lost_cats() -> void:
+	var held := LostCats.carrying()
+	if held != "":
+		_charlotte.carry(LostCats.held(held))
+	for id in LostCats.ALL:
+		var info: Dictionary = LostCats.ALL[id]
+		if info.poster == street_key and (Quests.available(id) or Quests.active(id)):
+			_add_poster(id)
+		if info.found == street_key and Quests.active(id) and held != id:
+			_add_lost_cat(id)
+		if info.home == street_key and Quests.active(id):
+			_add_owner_door(id)
+
+
+## Where a found_at position is on this street (the lane counts in lots).
+func _found_x(at: float) -> float:
+	return _street_x(at)
+
+
+## Where this street's "PERDU" poster hangs (its centre).
+func _poster_spot() -> Vector2:
+	return Vector2(_starts[lamps_after[mini(1, lamps_after.size() - 1)] + 1], 518.0)
+
+
+## x of a plex's front door (art/decor/doors.json, from the generator).
+func _door_x(art: String) -> float:
+	if _door_data.is_empty():
+		_door_data = JSON.parse_string(FileAccess.get_file_as_string("res://art/decor/doors.json"))
+	return _house_origin(layout.find(art)).x + float(_door_data.get(art, 350.0)) * HOUSE_SCALE
+
+
+static var _door_data := {}
+
+
+func _add_poster(id: String) -> void:
+	var info: Dictionary = LostCats.ALL[id]
+	var at := _poster_spot()
+	var poster := LostCats.Poster.new()
+	poster.id = id
+	poster.position = at
+	add_child(poster)
+	add_child(QuestMark.make(at + Vector2(0, -66), func() -> bool: return Quests.available(id), 0.7))
+	add_child(DoorSpot.make(Rect2(at - Vector2(26, 36), Vector2(52, 72)), func():
+		var said := "%s… où es-tu ?" % info.name
+		if Quests.start(id):
+			said = "%s est perdu%s !\nJe vais %s retrouver !" % [info.name, info.get("e", ""), "la" if info.has("e") else "le"]
+		Bubble.say(self, _charlotte.position + Vector2(0, -190), said, 2.6), at.x - 34.0))
+
+
+# The lost cat, wearing its collar, waiting near where it was last seen. Pet it and Charlotte picks it up.
+func _add_lost_cat(id: String) -> void:
+	var cat := LostCats.make(id)
+	var x := _found_x(float(LostCats.ALL[id].found_at))
+	var room := _segment_at(x) if not _segments.is_empty() else Vector2(60.0, _street_width - 60.0)
+	cat.position = Vector2(x, STRAY_CAT_Y)
+	cat.bounds = Vector2(maxf(x - 350.0, room.x), minf(x + 350.0, room.y))
+	cat.charlotte = _charlotte
+	cat.on_pet = func():
+		cat.on_pet = Callable()
+		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je te tiens, %s !\nOn rentre chez toi." % LostCats.ALL[id].name, 2.6)
+		get_tree().create_timer(StrayCat.PET_TIME).timeout.connect(func():
+			cat.queue_free()
+			GameState.flags["carrying"] = id
+			_charlotte.carry(LostCats.held(id)))
+	_animals.add_child(cat)
+
+
+# The owner's door: with the cat in her arms, Charlotte rings and the owner comes out.
+func _add_owner_door(id: String) -> void:
+	var info: Dictionary = LostCats.ALL[id]
+	var x := _door_x(info.house)
+	_label(str(info.address).get_slice(",", 0), Vector2(x, 396.0), Vector2(48, 16), 11, Color.WHITE, Color("#2B2B2B"))
+	add_child(QuestMark.make(Vector2(x, 360.0), func() -> bool: return LostCats.carrying() == id))
+	var spot := DoorSpot.make(Rect2(x - 60.0, 400.0, 120.0, 200.0), _bring_home.bind(id, x), x)
+	spot.condition = func() -> bool: return LostCats.carrying() == id
+	add_child(spot)
+
+
+func _bring_home(id: String, x: float) -> void:
+	var info: Dictionary = LostCats.ALL[id]
+	_control.enabled = false
+	Sfx.play("door", Vector2(x, 500.0))
+	var owner := Character.new()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(id)
+	owner.look = CharacterLook.random(rng, "adult")
+	# "Mme" or "M.": a look that matches.
+	var madame := str(info.owner).begins_with("Mme")
+	owner.look.lashes = madame
+	owner.look.facial_hair = ""
+	if madame and owner.look.hair_style in ["short", "buzz", "bald"]:
+		owner.look.hair_style = "long"
+	elif not madame and not owner.look.hair_style in ["short", "buzz", "bald"]:
+		owner.look.hair_style = "short"
+	Season.dress_for_weather(owner.look)
+	owner.scale = Vector2.ONE * CHAR_SCALE
+	owner.position = Vector2(x + 46.0, CHARLOTTE_Y - 4.0)
+	owner.facing = -1
+	owner.modulate.a = 0.0
+	add_child(owner)
+	var tween := create_tween()
+	tween.tween_property(owner, "modulate:a", 1.0, 0.4)
+	tween.tween_callback(func():
+		Bubble.say(self, owner.position + Vector2(0, -200), "%s ! Tu l'as retrouvé%s !\nMerci, Charlotte !" % [info.name, info.get("e", "")], 3.0)
+		Sfx.play("meow", owner.position))
+	tween.tween_interval(1.2)
+	tween.tween_callback(func():
+		_charlotte.carry(null)
+		GameState.flags.erase("carrying")
+		var cat := LostCats.make(id)
+		cat.position = Vector2(x + 18.0, STRAY_CAT_Y)
+		cat.wander = false
+		cat.facing = 1
+		_animals.add_child(cat)
+		Quests.complete(id)
+		_control.enabled = true)
+	tween.tween_interval(3.0)
+	tween.tween_property(owner, "modulate:a", 0.0, 0.6)
+	tween.tween_callback(owner.queue_free)
 
 
 # ── Layout ──────────────────────────────────────────────────────
