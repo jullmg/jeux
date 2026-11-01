@@ -192,7 +192,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   - hamster: Dad gives it; feeding sets `flags.hamster_fed` (cleared at bedtime); going to bed unfed is refused, fed completes it;
   - lost cats, `world/lost_cats.gd` (`LostCats.ALL`, ids = quest ids cat, cat2, cat3, chained by `after`): Pistache
     (found on Dandurand, home 5684 6e Av.), Caramel (in the lane, home 5679 5e Av.), Bijou (in the lane, home 2655 rue
-    Holt). `StreetScene._build_lost_cats()` (streets and the lane): the "PERDU" `LostCats.Poster` on the street's pole
+    Holt). `StreetScene._build_lost_cats()` (streets and the lane): the "PERDU" `LostCats.Poster` on the street's pole (taken down once the cat is found, `poster_up`)
     starts it; the collared cat waits at `found_at` (`_found_x`; lane = lot index); petting it, Charlotte picks it up
     (`GameState.flags.carrying`, `Character.carry(node)` / `is_holding()`, `LostCats.held(id)`, kept across scenes and
     indoors); at the owner's front door (`_door_x(art)` from `art/decor/doors.json`, written by the generator; "!" and

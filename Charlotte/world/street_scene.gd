@@ -317,7 +317,7 @@ func _build_lost_cats() -> void:
 		_charlotte.carry(LostCats.held(held))
 	for id in LostCats.ALL:
 		var info: Dictionary = LostCats.ALL[id]
-		if info.poster == street_key and (Quests.available(id) or Quests.active(id)):
+		if info.poster == street_key and LostCats.poster_up(id):
 			_add_poster(id)
 		if info.found == street_key and Quests.active(id) and held != id:
 			_add_lost_cat(id)
@@ -358,11 +358,13 @@ func _add_poster(id: String) -> void:
 	poster.position = at
 	add_child(poster)
 	add_child(QuestMark.make(at + Vector2(0, -66), func() -> bool: return Quests.available(id), 0.7))
-	add_child(DoorSpot.make(Rect2(at - Vector2(26, 36), Vector2(52, 72)), func():
+	var spot := DoorSpot.make(Rect2(at - Vector2(26, 36), Vector2(52, 72)), func():
 		var said := "%s… où es-tu ?" % info.name
 		if Quests.start(id):
 			said = "%s est perdu%s !\nJe vais %s retrouver !" % [info.name, info.get("e", ""), "la" if info.has("e") else "le"]
-		Bubble.say(self, _charlotte.position + Vector2(0, -190), said, 2.6), at.x - 34.0))
+		Bubble.say(self, _charlotte.position + Vector2(0, -190), said, 2.6), at.x - 34.0)
+	spot.condition = func() -> bool: return LostCats.poster_up(id)
+	add_child(spot)
 
 
 # The lost cat, wearing its collar, waiting near where it was last seen. Pet it and Charlotte picks it up.

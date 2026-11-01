@@ -26,6 +26,11 @@ const ALL := {
 }
 
 
+## Whether the cat's "PERDU" poster is still up: until Charlotte has found it (in her arms, then home).
+static func poster_up(id: String) -> bool:
+	return Quests.available(id) or Quests.active(id) and carrying() != id
+
+
 ## The lost cat Charlotte is carrying ("" if none).
 static func carrying() -> String:
 	return str(GameState.flags.get("carrying", ""))
@@ -54,6 +59,10 @@ static func held(id: String) -> StrayCat:
 class Poster:
 	extends Node2D
 	var id := "cat"
+
+	# Taken down the moment the cat is found.
+	func _process(_delta: float) -> void:
+		visible = LostCats.poster_up(id)
 
 	func _draw() -> void:
 		var info: Dictionary = ALL[id]
