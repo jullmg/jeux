@@ -81,10 +81,12 @@ func _ready() -> void:
 	_starts = _layout_starts()
 	_street_width = _starts[-1]
 	Skyline.build(self, _street_width, VIEW.x)
+	DepthBlur.far(self)
 	add_child(Birds.new())
 	_build_cross_streets()
 	for cs in _cross_streets:
 		add_child(cs)
+		DepthBlur.vista(self, cs)
 	_build_houses()
 	_build_window_cats()
 	_build_landmarks()

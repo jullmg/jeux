@@ -176,6 +176,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   Squirrels work from each sprite's position, scale and texture alpha, so any size is climbable.
 - Street trees stand in a `TreePit` (`world/tree_pit.gd`, added in `StreetScene._build_trees`): grass, a neighbour's
   garden of perennials (seasonal tulips/mums), or mulch; granite edging, sometimes iron hoops; snow in winter.
+- Depth of field: `world/depth_blur.gd` (`DepthBlur`, `shaders/depth_blur.gdshader`): `DepthBlur.far(self)` right after
+  the skyline (before the houses) softens the distant roofs and steeples; `DepthBlur.vista(self, cs)` after each cross
+  street's VISTA blurs round its vanishing point (a BackBufferCopy refreshes the screen copy first). Streets and lanes.
 - `shaders/`: `grade.gdshader` (full-screen colour grade on CanvasLayer 50), `sway.gdshader` (tree sway).
 - `art/decor/windows.json`: window panes per house, written by the generator, read by `WindowCats`. It is not a resource:
   an export preset needs `*.json` in its include filter.

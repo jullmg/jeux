@@ -45,6 +45,7 @@ func _ready() -> void:
 	_plan()
 	add_child(SkyBackdrop.new())
 	Skyline.build(self, _street_width, VIEW.x)
+	DepthBlur.far(self)
 	add_child(Birds.new())
 	_build_backs()
 	_build_yard_trees()
