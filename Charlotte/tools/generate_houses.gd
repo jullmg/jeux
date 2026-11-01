@@ -1591,8 +1591,8 @@ func _fine_tree(base: Vector2, fork_y: float, heading: float, size: float, autum
 	# Leaves: darker ones underneath first, then the lit ones, in clusters round each twig.
 	for layer in 2:
 		for t in twigs:
-			for j in 24:
-				var p := t + Vector2(rng.randf_range(-24, 24), rng.randf_range(-20, 16)) * size
+			for j in 22:
+				var p := t + Vector2(rng.randf_range(-16, 16), rng.randf_range(-14, 10)) * size
 				var a := rng.randf_range(0.0, 180.0)
 				var c := _canopy(autumn[rng.randi_range(0, autumn.size() - 1)])
 				if layer == 0:
@@ -1606,11 +1606,17 @@ func _fine_tree(base: Vector2, fork_y: float, heading: float, size: float, autum
 func _limb(from: Vector2, angle: float, length: float, width: float, depth: int, twigs: Array[Vector2], limbs: Array) -> void:
 	var to := from + Vector2.from_angle(angle) * length
 	var bend := (to - from).orthogonal().normalized() * length * rng.randf_range(-0.18, 0.18)
-	limbs.append([from, from.lerp(to, 0.5) + bend, to, width])
+	limbs.append([from, from.lerp(to, 0.5) + bend, to, maxf(width, 1.6)])
 	if depth == 0:
 		twigs.append(to)
+		# Short twigs fanning out at the tip, for the leaves to hang on.
+		for i in 3:
+			var tip := to + Vector2.from_angle(angle + (i - 1) * 0.7) * length * 0.35
+			limbs.append([to, to.lerp(tip, 0.5), tip, 1.4])
+			twigs.append(tip)
 		return
-	twigs.append(from.lerp(to, 0.7))
+	twigs.append(from.lerp(to, 0.45))
+	twigs.append(from.lerp(to, 0.75))
 	for i in rng.randi_range(2, 3):
 		_limb(to, angle + rng.randf_range(-0.65, 0.65), length * rng.randf_range(0.58, 0.76), width * 0.62, depth - 1, twigs, limbs)
 

@@ -90,8 +90,13 @@ static func tree(rng: RandomNumberGenerator) -> ImageTexture:
 		var d := pow(rng.randf(), 0.35)
 		var x := 190.0 + cos(a) * d * 178.0
 		var y := 250.0 + sin(a) * d * 198.0
-		s += '<ellipse cx="%.1f" cy="%.1f" rx="5.5" ry="3" fill="%s" transform="rotate(%d %.1f %.1f)"/>' % [
+		var leaf := '<ellipse cx="%.1f" cy="%.1f" rx="5.5" ry="3" fill="%s" transform="rotate(%d %.1f %.1f)"/>' % [
 			x, y, _hex(Color(_pick(rng, pal)).lightened(rng.randf_range(-0.25, 0.25))), rng.randi_range(0, 180), x, y]
+		# Only on the foliage: a leaf out past every clump would hang in the air with no branch behind it.
+		for b in blobs:
+			if Vector2(x, y).distance_to(Vector2(b[0], b[1])) < b[2] * 1.02:
+				s += leaf
+				break
 	if bare:
 		s = _bare_crown(s, blobs)
 	return tex(_svg(380, 780, s))
