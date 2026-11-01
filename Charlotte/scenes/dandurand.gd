@@ -1,16 +1,17 @@
 extends StreetScene
 # Rue Dandurand, seen from across the street, looking at dépanneur Xin-Xin's real front (from the photos in
-# reference/). 6e Avenue crosses at the right end: click it to turn the corner back onto Charlotte's street.
+# reference/). 5e Avenue crosses at the left end, 6e Avenue at the right: click either to turn the corner.
 
 
 func _init() -> void:
+	street_key = "dandurand"
 	# Back lanes only open onto the north-south streets (like 6e Avenue), never onto Dandurand.
-	layout = ["plex_11", "plex_12", "plex_10", "depanneur_front", "rue_6e", "dandurand_nord"]
-	cross_streets = {"rue_6e": 560.0}
-	trees_after = [0, 1]
-	lamps_after = [0]
-	hydrants_at = [3.97]
-	squirrels_at = [1.4]
+	layout = ["dandurand_sud", "rue_5e", "plex_11", "plex_12", "plex_10", "depanneur_front", "rue_6e", "dandurand_nord"]
+	cross_streets = {"rue_5e": 540.0, "rue_6e": 560.0}
+	trees_after = [2, 3]
+	lamps_after = [2]
+	hydrants_at = [5.97]
+	squirrels_at = [3.4]
 	passerby_ages = ["adult", "child"]
 	seed_value = 2891
 
@@ -29,8 +30,8 @@ func _lost_cat() -> void:
 	cat.size = 0.66
 	cat.collar = Color("#2F7BD8")
 	cat.stay = true
-	cat.position = Vector2(_street_x(1.6), STRAY_CAT_Y)
-	cat.bounds = Vector2(_street_x(0.3), _street_x(2.8))
+	cat.position = Vector2(_street_x(3.6), STRAY_CAT_Y)
+	cat.bounds = Vector2(_street_x(2.3), _street_x(4.8))
 	cat.charlotte = _charlotte
 	cat.on_pet = func():
 		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Pistache ! Je te ramène chez toi !", 2.6)
@@ -44,16 +45,32 @@ func _lost_cat() -> void:
 func _start_x() -> float:
 	if _arriving("dandurand_from_6e"):
 		return _starts[layout.find("rue_6e")] - 40.0
+	if _arriving("dandurand_from_5e"):
+		return _starts[layout.find("rue_5e") + 1] + 40.0
 	if not is_nan(Transition.street_x):
 		var x := Transition.street_x
 		Transition.street_x = NAN
 		return x
-	return _street_x(3.5)
+	return _street_x(5.5)
 
 
-# 6e Avenue seen down its length: on the left the dépanneur's side, the garages, the green lane and the rest of
-# Charlotte's block; on the right the houses across 6e.
+# 5e Avenue (left) and 6e Avenue (right) seen down their length, both running north from here: just sky that way.
+# On 5e, Charlotte's block is on the right; on 6e, on the left (the dépanneur's side, the garages, the green lane).
 func _build_cross_streets() -> void:
+	var fifth := _cross_street("rue_5e", "5e Avenue", 1.0)
+	fifth.along_name = "Rue Dandurand"
+	fifth.facing = "north"
+	fifth.left_walls = [
+		{"to": 0.7, "top": _house_top("dandurand_sud"), "kind": "plex", "color": Color("#7A4A3A")},
+		{"to": 2.6, "top": 290.0, "kind": "plex", "color": Color("#B5603F")},
+		{"to": CrossStreet.FAR, "top": 310.0, "kind": "plex", "color": Color("#A8473A")},
+	]
+	fifth.right_walls = [
+		{"to": 0.5, "top": 300.0, "kind": "plex", "color": Color("#9C6B4E")},
+		{"to": 1.4, "top": 290.0, "kind": "plex", "color": Color("#C8A27A")},
+		{"to": 1.6, "kind": "gap"},
+		{"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": Color("#8E3A2F")},
+	]
 	var sixth := _cross_street("rue_6e", "6e Avenue", 1.0)
 	sixth.along_name = "Rue Dandurand"
 	# 6e Avenue runs north from here: no mountain that way, just sky.
@@ -80,7 +97,8 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 
 
 func _build_doors() -> void:
-	_add_corner(_cross_streets[0], "res://scenes/main.tscn", "6e_from_dandurand")
+	_add_corner(_cross_streets[0], "res://scenes/cinquieme.tscn", "5e_from_dandurand")
+	_add_corner(_cross_streets[1], "res://scenes/main.tscn", "6e_from_dandurand")
 	# The dépanneur's glass door, at the top of its steps.
 	var origin := _house_origin(layout.find("depanneur_front"))
 	var area := Rect2(origin + Vector2(338.0, 503.0) * HOUSE_SCALE, Vector2(104.0, 97.0) * HOUSE_SCALE)

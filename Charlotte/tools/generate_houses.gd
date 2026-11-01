@@ -10,7 +10,7 @@ const PORCH_FLOOR := 600.0
 const BASE := 614.0
 const GROUND := 700.0
 const RAIL_H := 48.0
-const VARIANTS := 12
+const VARIANTS := 26
 
 const DEFAULTS := {
 	"kind": "plex", "floors": 2, "width": 700.0,
@@ -170,6 +170,42 @@ const HOUSES := [
 		"name": "coin_holt_est", "kind": "side_wall", "width": 620.0, "floors": 3,
 		"bricks": ["#9C6B4E", "#8E6146", "#A87656", "#82573E", "#B07E5E"], "mortar": "#D2C6B6",
 		"parapet": "flat", "windows": [[110.0, 90.0], [330.0, 90.0]], "basement": [], "downspout": 40.0,
+	},
+	# Round the block (6e, Dandurand, 5e, Holt): corner buildings' side walls, on the block and across the streets.
+	# Across 6e Avenue on Rue Holt.
+	{
+		"name": "holt_nord", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
+		"parapet": "flat", "windows": [[90.0, 90.0], [300.0, 90.0]], "basement": [], "downspout": 500.0,
+	},
+	# Across 5e Avenue on Rue Holt.
+	{
+		"name": "holt_sud", "kind": "side_wall", "width": 600.0,
+		"bricks": ["#C8A27A", "#BC966E", "#D4AE86", "#B08A62", "#CCA680"], "mortar": "#E6DCCB",
+		"parapet": "flat", "windows": [[120.0, 90.0], [330.0, 90.0]], "basement": [], "downspout": 40.0,
+	},
+	# Across Rue Holt on 5e Avenue.
+	{
+		"name": "cinq_holt_ouest", "kind": "side_wall", "width": 580.0, "floors": 3,
+		"bricks": ["#7E4436", "#8A4A3A", "#6E3A2E", "#94543F", "#743F33"], "mortar": "#BFB2A3",
+		"parapet": "flat", "windows": [[90.0, 90.0], [300.0, 90.0]], "basement": [], "downspout": 520.0,
+	},
+	# Charlotte's block from 5e Avenue: the side of the corner building at Holt, and at Dandurand.
+	{
+		"name": "coin_5e_holt", "kind": "side_wall", "width": 480.0,
+		"bricks": ["#B5603F", "#A85536", "#C26B48", "#9C4D31", "#C77650"], "mortar": "#D6C9B9",
+		"parapet": "flat", "windows": [[90.0, 90.0], [280.0, 90.0]], "basement": [], "downspout": 40.0,
+	},
+	{
+		"name": "coin_5e_dandurand", "kind": "side_wall", "width": 500.0,
+		"bricks": ["#9C6B4E", "#8E6146", "#A87656", "#82573E", "#B07E5E"], "mortar": "#D2C6B6",
+		"parapet": "flat", "windows": [[100.0, 90.0], [290.0, 90.0]], "basement": [], "downspout": 440.0,
+	},
+	# Across 5e Avenue on Rue Dandurand.
+	{
+		"name": "dandurand_sud", "kind": "side_wall", "width": 580.0, "floors": 3,
+		"bricks": ["#7A4A3A", "#6E4234", "#865243", "#5F392D", "#8E5A48"], "mortar": "#C2B6A8",
+		"parapet": "flat", "windows": [[110.0, 90.0], [320.0, 90.0]], "basement": [], "downspout": 40.0,
 	},
 	# Across Rue Dandurand: école Saint-Jean-de-Brébeuf, seen from 6e Avenue (its side).
 	{

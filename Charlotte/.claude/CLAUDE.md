@@ -31,6 +31,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   - `Godot --path . res://tools/animals.tscn -- --screenshot=/path/animals.png [--focus=x,y --zoom=3]` (cat coats/poses, squirrels,
     dog breeds, Charlotte petting a cat and dogs; use focus/zoom to inspect details)
   - Add `--season=winter` (spring, summer, autumn, winter; or printemps/été/automne/hiver) to any of these to see a season.
+  - Logic tests (clicks, quests, scene changes): headless `extends SceneTree` scripts run with `-s`, with their own quit
+    timer; send clicks straight to `scene._control._unhandled_input(event)` (headless window size skews `Input.parse_input_event`).
+    Windows only for screenshots, and they must quit by themselves.
   - Add `--quit-after 2000` so a run can never hang; after editing SVGs or adding a new `class_name` script, run `Godot --headless --path . --import` first
     (otherwise the new class is "not declared").
 
@@ -42,12 +45,28 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `squirrels_at`; fractional values = position across a building), plus hooks (`_start_x`, `_walk_bounds`,
   `_build_cross_streets`, `_decorate_house`, `_build_landmarks`, `_build_doors`, `_build_sidewalk_props` (against the
   buildings, behind people), `_build_extra_props` (curbside, in front of people)).
-- `scenes/main.gd` (6e Avenue) is one such street; `scenes/dandurand.gd` (Rue Dandurand: dépanneur Xin-Xin's real front,
-  `depanneur_front` in the generator, with 6e Avenue crossing at its right end) is another.
+- Charlotte's block, every side a `StreetScene` seen from across the road, walking right goes round it clockwise:
+  `scenes/main.gd` (6e Avenue, `street_key` "6e": Dandurand left, Holt right), `scenes/holt.gd` (Rue Holt: 6e left, 5e right,
+  plex_13–16), `scenes/cinquieme.gd` (5e Avenue: Holt left, Dandurand right, the school across it; plex_17–26 and both lane
+  entrances), `scenes/dandurand.gd` (Rue Dandurand: 5e left, dépanneur Xin-Xin's real front `depanneur_front`, 6e right).
+  Cross-street `facing` by Montreal's compass: from 6e they run west (Mount Royal), from Dandurand north, from 5e east,
+  from Holt south. New corner/side walls in the generator: `holt_nord`, `holt_sud`, `cinq_holt_ouest`, `coin_5e_holt`,
+  `coin_5e_dandurand`, `dandurand_sud` (`VARIANTS` is 26).
+- Before 8 (`StreetScene.CROSS_AGE`, `GameState.age`) Charlotte can't cross a street ("Je n'ai pas le droit de traverser
+  toute seule !"), so her world is the block: its four corners and the lane.
+- The back lane, `scenes/ruelle.gd` (extends `StreetScene` but builds its own `_ready`; art in `world/lane_art.gd`,
+  `LaneArt`, from `reference/ruelle/`): an H-shaped lane (map): cross lanes from 6e to 5e near Holt (`ruelle`) and near
+  Dandurand (`ruelle_verte`), joined by the middle lane we walk, looking at the 6e plexes' backs (Holt left). Lots of
+  `LOT_W` 365: backs (siding/brick, wooden galleries, zigzag stairs, clothesline pulleys) and fronts along the lane (board,
+  cedar, picket, chain-link fences, corrugated-metal garages "tôle", roll-up garages, sheds, planters and bench), Virginia
+  creeper by season, blue/brown bins, poles and wires, clotheslines across the lane with laundry (`_Clotheslines`), the
+  black cat, yard trees. Charlotte's yard is lot `OWN_LOT` (swing, Dad's bike, chalk hopscotch). At each end: click the
+  cross lane's vista for 6e, "↓ 5e Avenue" at the bottom for 5e. Streets add entrances with `_add_lane(art)`; arrivals:
+  `Transition.arrive` = "ruelle_from_<street>_<art>" and back "<street>_from_<art>" (`StreetScene._from_lane()`).
 - Turning corners: `StreetScene._add_corner(cross_street, scene, key)` makes the cross street clickable: Charlotte walks to
   the curb, the other street loads with `Transition.arrive = key`, and that street's `_start_x()` checks `_arriving(key)`
-  to put her at the matching corner. 6e ⇄ Dandurand works both ways. A corner only works from the sidewalk Charlotte
-  started on, and its click area is the vista above the crosswalk.
+  to put her at the matching corner (keys "<street_key>_from_<other>"). All four corners of the block work both ways. A
+  corner only works from the sidewalk Charlotte started on, and its click area is the vista above the crosswalk.
 - Crossing streets: the sidewalk is split into stretches at each cross street's curbs (`StreetScene._segments`); Charlotte
   walks one stretch at a time. Every crosswalk is clickable (`_add_crossing`, automatic): she goes to the curb on her side,
   says "Je regarde des deux côtés !" and looks both ways, then walks across on her own (`PlayerControl.hands_off`) to the
@@ -65,8 +84,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   (`world/cross_street.gd`) draws them in one-point perspective as three nodes in the draw order: `VISTA` (before the houses:
   receding street, walls along it from `left_walls`/`right_walls`, street trees), `GROUND` (after `Street`: asphalt through the
   sidewalk, curb ramps, crosswalk, yellow in the school zone) and `SIGNS` (with the props: plates, stop/school sign, utility pole
-  and wires). Charlotte's bounds stop at the curbs (`CrossStreet.road_x`); crossing streets and turning corners are planned.
-  Passersby already walk across on the crosswalks. `reference/` has photos of the Dandurand corner and `google_map_immediate_area.png`.
+  and wires). Charlotte's bounds stop at the curbs (`CrossStreet.road_x`). Passersby already walk across on the crosswalks. `reference/` has photos of the Dandurand corner and `google_map_immediate_area.png`.
 - `scenes/intro.gd` builds a shorter copy of the same street (5 houses around Charlotte's duplex), plus the logo and start button.
   Its geometry helpers mirror `main.gd`, so a layout/geometry change in one may need the same change in the other.
 - Interiors are built from reusable parts, meant for future house insides too:

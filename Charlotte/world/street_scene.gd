@@ -17,6 +17,9 @@ const TREE_SCALE := 0.55
 const MARGIN := 30.0
 const STRAY_CAT_Y := 646.0
 const MAX_STRAY_CATS := 1
+## Charlotte may cross a street on her own from this age; before that she stays on her block (corners and lanes).
+const CROSS_AGE := 8
+const LANE_SCENE := "res://scenes/ruelle.tscn"
 
 # ── The street's data (set by the subclass in _init) ────────────
 ## Buildings left to right (facade SVG names), with cross streets as gaps named in `cross_streets`.
@@ -33,6 +36,9 @@ var squirrels_at: Array[float] = []
 var passerby_ages: Array[String] = ["adult", "child", "senior", "teen"]
 ## Seed for this street's random details, so it looks the same on every run.
 var seed_value := 2026
+## Short name used in corner and lane hand-overs ("6e", "5e", "holt", "dandurand"): Transition.arrive keys
+## are "<street>_from_<where>".
+var street_key := ""
 
 var _street_width := 0.0
 var _starts: Array[float] = []
@@ -216,6 +222,9 @@ func _add_crossing(cs: CrossStreet) -> void:
 
 
 func _cross(cs: CrossStreet) -> void:
+	if GameState.age < CROSS_AGE:
+		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je n'ai pas le droit de traverser\ntoute seule !", 2.6)
+		return
 	var curbs := cs.road_x(CHARLOTTE_Y)
 	var mid := (cs.x0 + cs.x1) / 2.0
 	var going_right := _charlotte.position.x < mid
@@ -244,6 +253,26 @@ func _cross(cs: CrossStreet) -> void:
 		_control.hands_off = false
 		_control.enabled = true)
 
+
+
+## A back lane's entrance (the "ruelle" or "ruelle_verte" building in `layout`): click it and Charlotte walks into
+## the lane (scenes/ruelle.tscn), which knows which entrance from Transition.arrive.
+func _add_lane(art: String) -> void:
+	var i := layout.find(art)
+	var w := _tex(art).get_width()
+	var area := Rect2(_house_origin(i) + Vector2(70.0, 330.0) * HOUSE_SCALE, Vector2(w - 140.0, 370.0) * HOUSE_SCALE)
+	add_child(DoorSpot.make(area, func():
+		_control.enabled = false
+		Transition.arrive = "ruelle_from_%s_%s" % [street_key, art]
+		Transition.change_scene(self, LANE_SCENE), area.get_center().x))
+
+
+## Where Charlotte comes out of the lane onto this street (NAN if she isn't coming from it).
+func _from_lane() -> float:
+	for art in ["ruelle", "ruelle_verte"]:
+		if layout.has(art) and _arriving("%s_from_%s" % [street_key, art]):
+			return _street_x(layout.find(art) + 0.5)
+	return NAN
 
 
 ## Takes the corner hand-over: true (and clears it) when Charlotte is arriving round `key`.

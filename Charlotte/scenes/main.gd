@@ -5,6 +5,7 @@ extends StreetScene
 
 
 func _init() -> void:
+	street_key = "6e"
 	layout = [
 		"ecole", "rue_dandurand",
 		"depanneur", "garages", "ruelle_verte",
@@ -22,10 +23,15 @@ func _init() -> void:
 	squirrels_at = [4.2, 9.5, 14.6, 18.4]
 
 
-# In front of her duplex, back where she left the street (from her flat), or at the Dandurand corner.
+# In front of her duplex, back where she left the street (from her flat), at a corner or out of the lane.
 func _start_x() -> float:
 	if _arriving("6e_from_dandurand"):
 		return _starts[layout.find("depanneur")] + 60.0
+	if _arriving("6e_from_holt"):
+		return _starts[layout.find("rue_holt")] - 40.0
+	var lane := _from_lane()
+	if not is_nan(lane):
+		return lane
 	if not is_nan(Transition.street_x):
 		var x := Transition.street_x
 		Transition.street_x = NAN
@@ -74,10 +80,13 @@ func _build_landmarks() -> void:
 	add_child(cat)
 
 
-# Charlotte's own front door (ground floor of her duplex): click it to go inside. Click Rue Dandurand to turn
-# the corner.
+# Charlotte's own front door (ground floor of her duplex): click it to go inside. Click Rue Dandurand or Rue Holt
+# to turn the corner, the lane entrances to go into the lane.
 func _build_doors() -> void:
 	_add_corner(_cross_streets[0], "res://scenes/dandurand.tscn", "dandurand_from_6e")
+	_add_corner(_cross_streets[1], "res://scenes/holt.tscn", "holt_from_6e")
+	_add_lane("ruelle_verte")
+	_add_lane("ruelle")
 	var origin := _house_origin(layout.find("duplex_charlotte"))
 	var area := Rect2(origin + Vector2(278.0 - 48.0, 392.0) * HOUSE_SCALE, Vector2(96.0, 208.0) * HOUSE_SCALE)
 	add_child(DoorSpot.make(area, func():
