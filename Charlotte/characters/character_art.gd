@@ -22,6 +22,9 @@ static func build(character_look: CharacterLook) -> Dictionary:
 	return art._build()
 
 
+var _clip_id := 0
+
+
 func _build() -> Dictionary:
 	var r: Dictionary = RIGS[look.age]
 	var leg: float = r.leg
@@ -183,7 +186,29 @@ const _CAP_BACK := 'M36 126 C28 68 70 30 112 30 C160 30 196 66 190 126 C172 146 
 
 
 func _hair_shape(d: String, width := 3.0) -> String:
-	return _f('<path d="%s" fill="{hair}" stroke="{hair_line}" stroke-width="%s" stroke-linejoin="round"/>' % [d, width])
+	return _f('<path d="%s" fill="{hair}" stroke="{hair_line}" stroke-width="%s" stroke-linejoin="round"/>' % [d, width]) + _strands(d)
+
+
+# Fine strands of hair flowing down from the crown, darker ones and a few catching the light, clipped to the
+# hair shape `d` so they never stray onto the face, whatever the hairstyle.
+func _strands(d: String) -> String:
+	if look.hair_style in ["curly", "buzz", "bald"]:
+		return ""
+	_clip_id += 1
+	var id := "hair%d" % _clip_id
+	var s := '<clipPath id="%s"><path d="%s"/></clipPath><g clip-path="url(#%s)" fill="none" stroke-linecap="round">' % [id, d, id]
+	var wavy := look.hair_style == "long_wavy"
+	for i in 13:
+		var k := (i - 6.0) / 6.0
+		var top := Vector2(112.0 + k * 20.0, 20.0)
+		var mid := Vector2(112.0 + k * 92.0, 110.0)
+		var end := Vector2(112.0 + k * 104.0 + (8.0 if wavy and i % 2 == 0 else 0.0), 280.0)
+		var wave := (14.0 if i % 2 == 0 else -14.0) if wavy else 0.0
+		var path := "M%.1f %.1f Q%.1f %.1f %.1f %.1f T%.1f %.1f" % [top.x, top.y, mid.x - wave, mid.y - 40.0, mid.x, mid.y, end.x, end.y]
+		s += _f('<path d="%s" stroke="{hair_line}" stroke-width="1.8" opacity="0.4"/>' % path)
+		if i % 3 == 1:
+			s += _f('<path d="%s" stroke="{hair_light}" stroke-width="1.4" opacity="0.55" transform="translate(4 2)"/>' % path)
+	return s + '</g>'
 
 
 func _hair_back() -> String:
@@ -332,6 +357,8 @@ func _dress() -> String:
 	var s := _f('<path d="M26 62 H104 Q118 100 128 140 Q120 148 108 142 Q98 150 86 143 Q76 150 65 143 Q54 150 44 143 Q32 150 22 142 Q10 148 2 140 Q12 100 26 62 Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>')
 	s += _f('<path d="M26 66 Q14 100 4 138 Q10 144 18 141 Q24 100 34 66 Z" fill="{cloth_shade}"/>')
 	s += _f('<g stroke="{cloth_fold}" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M50 72 Q46 106 40 138"/><path d="M80 72 Q84 106 90 138"/></g>')
+	# Gathers under the waistband, soft folds falling to the hem.
+	s += _f('<g stroke="{cloth_line}" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.4">%s</g>' % _gathers())
 	s += _pattern([[36, 96], [62, 88], [94, 96], [50, 122], [78, 116], [106, 126], [22, 128]], [[70, 132], [96, 110], [40, 110]])
 	if look.pattern == "stripes":
 		s += '<clipPath id="skirt"><path d="M26 62 H104 Q118 100 128 140 L2 140 Q12 100 26 62 Z"/></clipPath><g clip-path="url(#skirt)">'
@@ -347,6 +374,22 @@ func _dress() -> String:
 	s += _f('<path d="M38 63 L52 54 Q56 63 52 72 Z" fill="{accent_light}" stroke="{accent_line}" stroke-width="2" stroke-linejoin="round"/>')
 	s += _f('<circle cx="38" cy="63" r="5" fill="{accent}" stroke="{accent_line}" stroke-width="2"/>')
 	return s
+
+
+func _gathers() -> String:
+	var g := ""
+	for x in [36.0, 48.0, 60.0, 72.0, 84.0, 96.0]:
+		g += '<path d="M%.1f 70 q-1 6 0 12"/>' % x
+	for x in [16.0, 30.0, 64.0, 98.0, 112.0]:
+		g += '<path d="M%.1f 140 q2 -14 -1 -26"/>' % x
+	return g
+
+
+# Creases on a top: under the arms, at the waist, a pull at the hem.
+func _top_folds() -> String:
+	return _f('<g stroke="{cloth_line}" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.4">'
+		+ '<path d="M28 36 Q36 44 33 58"/><path d="M102 36 Q94 44 97 58"/>'
+		+ '<path d="M44 84 Q52 90 48 100"/><path d="M86 86 Q80 92 84 100"/><path d="M60 96 q4 4 2 8"/></g>')
 
 
 func _pattern(big: Array, small: Array, r := 4.5) -> String:
@@ -393,6 +436,7 @@ func _top() -> String:
 				+ '<path d="M48 70 L60 70 L76 52 L60 52 Z M60 70 L56 46 M76 52 L82 70 M52 46 H60 M76 52 L74 44 H81"/></g>')
 		_:
 			s += _pattern([[38, 44], [66, 54], [94, 44], [44, 78], [74, 86], [98, 74]], [[56, 34], [84, 68]])
+	s += _top_folds()
 	if look.outfit in ["sweater", "hoodie"]:
 		s += _f('<rect x="24" y="94" width="82" height="10" rx="3" fill="{cloth_line}" opacity="0.5"/>')
 		s += _f('<path d="M44 14 Q65 28 86 14" stroke="{cloth_line}" stroke-width="5" fill="none" stroke-linecap="round"/>')
@@ -456,6 +500,7 @@ func _arm_svg(length: float) -> String:
 		"long":
 			s += _f('<path d="M3 8 Q15 -2 27 8 L25 %s Q15 %s 5 %s Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [hy - 9, hy - 5, hy - 9])
 			s += _f('<rect x="5" y="%s" width="20" height="7" rx="2" fill="{cloth_line}" opacity="0.6"/>' % (hy - 17))
+			s += _f('<path d="M8 %s q7 4 14 0 M10 %s q6 3 11 0" stroke="{cloth_line}" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.45"/>' % [hy * 0.55, hy * 0.55 + 6.0])
 	p = palette
 	return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="%d" viewBox="0 0 30 %d">%s</svg>' % [ceili(hy + 12), ceili(hy + 12), s]
 
@@ -472,6 +517,7 @@ func _leg_svg(length: float) -> String:
 		_:
 			s += _f('<rect x="8" y="0" width="24" height="%s" rx="4" fill="{leg}" stroke="{leg_line}" stroke-width="2.5"/>' % (length - 14.0))
 			s += _f('<rect x="8" y="%s" width="24" height="6" fill="{leg_line}" opacity="0.5"/>' % (length - 20.0))
+			s += _f('<path d="M12 %s q8 5 16 0 M14 %s q6 3 12 0" stroke="{leg_line}" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.45"/>' % [length * 0.48, length * 0.48 + 7.0])
 	s += '<g transform="translate(0 %s)">' % off
 	match look.shoes:
 		"mary_jane":
