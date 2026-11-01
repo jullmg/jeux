@@ -47,6 +47,10 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Turning corners: `StreetScene._add_corner(cross_street, scene, key)` makes the cross street clickable: Charlotte walks to
   the curb, the other street loads with `Transition.arrive = key`, and that street's `_start_x()` checks `_arriving(key)`
   to put her at the matching corner. 6e ⇄ Dandurand works both ways; crossing streets is still to come.
+- Real-world rules (from the Google Maps view): back lanes (ruelles) only open onto the north-south avenues like 6e
+  Avenue, never onto Dandurand or Holt (no "gap" walls or `ruelle` buildings there). Every intersection has a street-name
+  post at both corners (`CrossStreet` SIGNS): the plate of the street we're on faces us, the cross street's plate is
+  slanted along that street toward its vanishing point. Overhead wires run pole to pole across the whole view.
   `layout` runs: `ecole` (école Saint-Jean-de-Brébeuf, across Dandurand), `rue_dandurand`, Charlotte's block (`depanneur`: the
   side of dépanneur Xin-Xin, which fronts Dandurand; `garages`; `ruelle_verte`, the green lane with its sign; … `coin_holt`),
   `rue_holt`, `coin_holt_est`. The first three buildings of the block are drawn from the photos in `reference/` (the user wants

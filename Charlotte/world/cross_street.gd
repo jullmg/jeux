@@ -340,24 +340,58 @@ func _draw_ground() -> void:
 
 func _draw_signs() -> void:
 	var font := ThemeDB.fallback_font
-	# At the corner of the sidewalk, by the curb, clear of the shop signs on the facades.
-	var corner := x0 + sidewalk - 22.0 if sign_side < 0.0 else x1 - sidewalk + 22.0
-	var px := _fan(corner, 650.0)
-	var foot := Vector2(px, 652.0)
-	# Wooden utility pole carrying the wires that cross the street.
+	_wires()
+	# A name post at both corners of the intersection; the stop or school-zone sign only on `sign_side`'s.
+	for side in [-1.0, 1.0]:
+		# At the corner of the sidewalk, by the curb, clear of the shop signs on the facades.
+		var corner := x0 + sidewalk - 22.0 if side < 0.0 else x1 - sidewalk + 22.0
+		var px := _fan(corner, 650.0)
+		draw_rect(Rect2(px - 3, 300, 6, 352), Color("#5A5F63"))
+		if side == sign_side:
+			_traffic_sign(px, font)
+		_name_plates(Vector2(px, 300.0), font)
+
+
+# Montreal-style blue street plates: the street we're on faces us, flat; the cross street's plate is turned to run
+# along that street, so it slants toward the vanishing point like the street itself.
+func _name_plates(top: Vector2, font: Font) -> void:
+	var flat := Rect2(top.x - 80, top.y + 30, 160, 26)
+	_plate(flat, along_name, font)
+	var e := (_vp() - top).normalized()
+	if e.x < 0.0:
+		e = -e
+	var f := 0.72
+	var origin := top + Vector2(0, -4) - e * 80.0 * f
+	draw_set_transform_matrix(Transform2D(e * f, Vector2(0, 1), origin))
+	_plate(Rect2(0, 0, 160, 26), street_name, font)
+	draw_set_transform(Vector2.ZERO)
+
+
+func _plate(r: Rect2, text: String, font: Font) -> void:
+	draw_rect(r, Color.WHITE)
+	draw_rect(r.grow(-2.5), Color("#1D4F91"))
+	draw_string(font, Vector2(r.position.x, r.position.y + 19), text, HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 15, Color.WHITE)
+
+
+# Wooden utility poles every few hundred px, the wires sagging from one to the next, far past both ends of the view.
+func _wires() -> void:
 	var pole_x := _fan(x0 + 50.0 if sign_side > 0.0 else x1 - 50.0, 600.0)
 	draw_rect(Rect2(pole_x - 5, 120, 10, 482), Color("#6B5644"))
 	draw_rect(Rect2(pole_x - 5, 120, 3, 482), Color("#8A735E"))
 	draw_rect(Rect2(pole_x - 26, 136, 52, 6), Color("#5A4636"))
+	var span := 700.0
 	for i in 3:
 		var wy := 140.0 + i * 4.0
-		var pts := PackedVector2Array()
-		for t in 9:
-			var x := lerpf(pole_x - 700.0, pole_x + 700.0, t / 8.0)
-			pts.append(Vector2(x, wy + 26.0 * (1.0 - pow(absf(t / 4.0 - 1.0), 2.0)) - 20.0))
-		draw_polyline(pts, Color(0.12, 0.1, 0.1, 0.7), 1.2, true)
-	# Sign post: the cross street's plate, plus a school zone sign or a stop sign.
-	draw_rect(Rect2(px - 3, 360, 6, foot.y - 360), Color("#5A5F63"))
+		for k in range(-5, 5):
+			var a := pole_x + k * span
+			var pts := PackedVector2Array()
+			for t in 9:
+				var u := t / 8.0
+				pts.append(Vector2(a + u * span, wy + 4.0 * sin(u * PI) * 6.0))
+			draw_polyline(pts, Color(0.12, 0.1, 0.1, 0.7), 1.2, true)
+
+
+func _traffic_sign(px: float, font: Font) -> void:
 	if school:
 		var c := Vector2(px, 420)
 		draw_colored_polygon(PackedVector2Array([c + Vector2(0, -34), c + Vector2(30, -8), c + Vector2(30, 30), c + Vector2(-30, 30), c + Vector2(-30, -8)]), Color("#C8E03A"))
@@ -382,10 +416,3 @@ func _draw_signs() -> void:
 			inner.append(c + (p - c) * 0.88)
 		draw_colored_polygon(inner, Color("#C8202A"))
 		draw_string(font, c + Vector2(-30, 5), "ARRÊT", HORIZONTAL_ALIGNMENT_CENTER, 60, 13, Color.WHITE)
-	# Montreal-style blue street plates.
-	var names := [street_name, along_name]
-	for i in names.size():
-		var r := Rect2(px - 80, 296 + i * 30, 160, 26)
-		draw_rect(r, Color.WHITE)
-		draw_rect(r.grow(-2.5), Color("#1D4F91"))
-		draw_string(font, Vector2(r.position.x, r.position.y + 19), names[i], HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 15, Color.WHITE)

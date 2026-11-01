@@ -4,9 +4,10 @@ extends StreetScene
 
 
 func _init() -> void:
-	layout = ["plex_11", "ruelle", "plex_10", "depanneur_front", "rue_6e", "dandurand_nord"]
+	# Back lanes only open onto the north-south streets (like 6e Avenue), never onto Dandurand.
+	layout = ["plex_11", "plex_12", "plex_10", "depanneur_front", "rue_6e", "dandurand_nord"]
 	cross_streets = {"rue_6e": 560.0}
-	trees_after = [1]
+	trees_after = [0, 1]
 	lamps_after = [0]
 	hydrants_at = [3.97]
 	squirrels_at = [1.4]

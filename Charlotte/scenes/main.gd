@@ -50,7 +50,6 @@ func _build_cross_streets() -> void:
 	var holt := _cross_street("rue_holt", "Rue Holt", -1.0)
 	holt.left_walls = [
 		{"to": 0.6, "top": _house_top("coin_holt"), "kind": "plex", "color": Color("#B5603F")},
-		{"to": 0.85, "kind": "gap"},
 		{"to": 2.4, "top": 290.0, "kind": "plex", "color": Color("#A8473A")},
 		{"to": CrossStreet.FAR, "top": 320.0, "kind": "plex", "color": Color("#C2A07A")},
 	]
