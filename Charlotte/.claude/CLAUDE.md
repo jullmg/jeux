@@ -312,7 +312,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   ledges, wreaths, Christmas lights in winter; tulips/geraniums instead of pumpkins; ghosts/cobwebs/bats autumn only).
 - `ui/debug_menu.gd` is the `DebugMenu` autoload: reads `--season=`, and in debug builds F1 opens a "Saisons" menu that
   switches season while playing (reloads the scene; Charlotte keeps her x via `Transition.street_x` / `Transition.inside_x`),
-  and lists every quest with "Effacer" (not started, its flags in `QUEST_FLAGS` cleared) / "Activer" / "Tout effacer" to test them again.
+  and lists every quest with "Effacer" (not started, its flags in `QUEST_FLAGS` cleared) / "Activer" / "Finir" (done, reward paid) / "Tout effacer" to test them again.
 - Nothing stands behind Mount Royal: the cross-street vista paints open sky over the distant city first. Mount Royal shows
   only when the street runs west (`CrossStreet.facing = "west"`, Montreal compass); other ways end in sky and clouds.
 

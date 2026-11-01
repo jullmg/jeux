@@ -64,8 +64,8 @@ func _open() -> void:
 	_quest_list(columns)
 
 
-# One row per quest: its state, "Effacer" (back to not started, its flags cleared) and "Activer" (in the notebook now,
-# whatever it waits for).
+# One row per quest: its state, "Effacer" (back to not started, its flags cleared), "Activer" (in the notebook now,
+# whatever it waits for) and "Finir" (done, with its star and reward).
 func _quest_list(parent: Control) -> void:
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", 6)
@@ -85,7 +85,7 @@ func _quest_list(parent: Control) -> void:
 		label.custom_minimum_size = Vector2(120, 0)
 		label.add_theme_font_size_override("font_size", 17)
 		row.add_child(label)
-		for action in [["Effacer", ""], ["Activer", "active"]]:
+		for action in [["Effacer", ""], ["Activer", "active"], ["Finir", "done"]]:
 			var b := Button.new()
 			b.text = action[0]
 			b.add_theme_font_size_override("font_size", 15)
@@ -106,7 +106,9 @@ func _quest_list(parent: Control) -> void:
 func _set_quest(id: String, state: String) -> void:
 	_clear_quest(id)
 	if state != "":
-		GameState.quests[id] = state
+		GameState.quests[id] = "active"
+	if state == "done":
+		Quests.complete(id)
 	_close()
 	_reload()
 
