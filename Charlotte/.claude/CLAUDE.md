@@ -93,7 +93,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   the shopkeeper to say hello; candy, sloche, coffee corner, freezer, fridges or dairy to buy something.
   `Interior._say(who, text)` (speech bubble) and `Interior._treat(picture, text)` (what Charlotte gets) are reusable.
 - Charlotte's parents, from `reference/mere_charlotte.jpg` / `pere_charlotte.jpg`: `CharacterLook.mom()` (long wavy light-brown
-  hair, brown eyes, black knit sweater, jeans) in the kitchen, `CharacterLook.dad()` (short dark-brown hair, black cap,
+  hair, brown eyes, black knit sweater, jeans) in the kitchen, `CharacterLook.dad()` (short brown hair, no cap,
   `facial_hair = "stubble"`, blue eyes, navy sweater) in the salon. Click them and they say a line (`MOM_LINES` / `DAD_LINES`
   in house.gd).
 - Charlotte's hamster (`world/hamster.gd`, `Hamster`) lives in the terrarium on her bedroom dresser. The terrarium art is two

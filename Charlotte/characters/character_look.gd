@@ -85,14 +85,14 @@ static func mom() -> CharacterLook:
 	return look
 
 
-## Charlotte's father (from reference/pere_charlotte.jpg): short dark-brown hair under a black cap, a few days'
-## beard, blue eyes, fair skin, a navy sweater.
+## Charlotte's father (from reference/pere_charlotte.jpg): short brown hair (no cap), a few days' beard, blue eyes,
+## fair skin, a navy sweater.
 static func dad() -> CharacterLook:
 	var look := CharacterLook.new()
 	look.age = "adult"
 	look.skin = Color("#F0CDB2")
 	look.hair_style = "short"
-	look.hair_color = Color("#4A3426")
+	look.hair_color = Color("#5A3E2A")
 	look.eye_color = Color("#5B8FC4")
 	look.lashes = false
 	look.mouth = "smile"
@@ -106,8 +106,6 @@ static func dad() -> CharacterLook:
 	look.legwear_color = Color("#2E2E30")
 	look.shoes = "sneaker"
 	look.shoe_color = Color("#2B2B2B")
-	look.hat = "cap"
-	look.hat_color = Color("#1E2230")
 	return look
 
 
