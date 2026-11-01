@@ -59,6 +59,10 @@ var _cross_streets: Array[CrossStreet] = []
 var _segments: Array[Vector2] = []
 # Each street tree's scale (TREE_SIZES).
 var _tree_scales: Array[float] = []
+# Corners Charlotte can take by walking into the curb (direction → action), from her home stretch of sidewalk.
+var _corner_turns := {}
+var _corner_home := Vector2.ZERO
+var _push := 0.0
 # The utility poles' x, left to right.
 var _pole_xs: Array[float] = []
 # The crossing guard at the school's crosswalk, if any (key: the CrossStreet).
@@ -142,6 +146,22 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_follow_charlotte()
 	_spawn_stray_cats(delta)
+	_push_round_corner(delta)
+
+
+# Walking into the curb at a corner with the arrow keys, and keeping on pushing for a moment, takes the corner
+# (the same as clicking the cross street).
+func _push_round_corner(delta: float) -> void:
+	var dir := signf(Input.get_axis("ui_left", "ui_right"))
+	var edge := _control.bounds.y if dir > 0.0 else _control.bounds.x
+	if dir == 0.0 or not _control.enabled or _control.hands_off or absf(_charlotte.position.x - edge) > 2.0 \
+			or not _corner_turns.has(dir) or _segment_at(_charlotte.position.x) != _corner_home:
+		_push = 0.0
+		return
+	_push += delta
+	if _push > 0.45:
+		_push = 0.0
+		_corner_turns[dir].call()
 
 
 # ── Hooks for the street ────────────────────────────────────────
@@ -200,10 +220,13 @@ func _add_corner(cs: CrossStreet, scene: String, arrive: String) -> void:
 	var home := _control.bounds
 	var curb := home.y if cs.x0 > _start else home.x
 	var area := Rect2(cs.x0 + 30.0, 380.0, cs.x1 - cs.x0 - 60.0, 218.0)
-	var spot := DoorSpot.make(area, func():
+	var turn := func():
 		_control.enabled = false
 		Transition.arrive = arrive
-		Transition.change_scene(self, scene), curb)
+		Transition.change_scene(self, scene)
+	_corner_turns[1.0 if cs.x0 > _start else -1.0] = turn
+	_corner_home = home
+	var spot := DoorSpot.make(area, turn, curb)
 	spot.condition = func(): return _segment_at(_charlotte.position.x) == home
 	add_child(spot)
 

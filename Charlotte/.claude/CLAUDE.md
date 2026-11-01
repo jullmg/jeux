@@ -83,7 +83,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Turning corners: `StreetScene._add_corner(cross_street, scene, key)` makes the cross street clickable: Charlotte walks to
   the curb, the other street loads with `Transition.arrive = key`, and that street's `_start_x()` checks `_arriving(key)`
   to put her at the matching corner (keys "<street_key>_from_<other>"). All four corners of the block work both ways. A
-  corner only works from the sidewalk Charlotte started on, and its click area is the vista above the crosswalk.
+  corner only works from the sidewalk Charlotte started on, and its click area is the vista above the crosswalk; walking
+  into the curb with the arrow keys and pushing on for a moment takes it too (`_push_round_corner`).
 - Crossing streets: the sidewalk is split into stretches at each cross street's curbs (`StreetScene._segments`); Charlotte
   walks one stretch at a time. Every crosswalk is clickable (`_add_crossing`, automatic): she goes to the curb on her side,
   says "Je regarde des deux côtés !" and looks both ways, then walks across on her own (`PlayerControl.hands_off`) to the
