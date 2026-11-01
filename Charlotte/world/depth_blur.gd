@@ -19,14 +19,14 @@ static func far(parent: Node, lod := 1.2) -> DepthBlur:
 
 
 static func vista(parent: Node, cs: CrossStreet) -> DepthBlur:
+	# The whole screen, not just the gap: the blur's mipmaps reach outside the gap, and a partial copy left them grey.
 	var copy := BackBufferCopy.new()
-	copy.copy_mode = BackBufferCopy.COPY_MODE_RECT
-	copy.rect = Rect2(cs.x0 - 20.0, 0.0, cs.x1 - cs.x0 + 40.0, CrossStreet.FACADE_Y + 10.0)
+	copy.copy_mode = BackBufferCopy.COPY_MODE_VIEWPORT
 	parent.add_child(copy)
 	var blur := DepthBlur.new()
 	blur.vista_of = cs
 	blur._rect = Rect2(cs.x0, 0.0, cs.x1 - cs.x0, CrossStreet.FACADE_Y)
-	blur._setup(1.8)
+	blur._setup(1.2)
 	parent.add_child(blur)
 	return blur
 

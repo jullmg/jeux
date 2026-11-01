@@ -5,7 +5,7 @@ shader_type canvas_item;
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
 uniform float lod = 1.4;
 uniform vec2 vp = vec2(-1.0, -1.0);
-uniform float radius = 0.16;
+uniform float radius = 0.13;
 uniform float aspect = 1.7778;
 
 void fragment() {
