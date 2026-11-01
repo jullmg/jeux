@@ -68,10 +68,13 @@ const STAIR_SHAPES := [
 	[Vector2(0, 336), Vector2(75, 380), Vector2(130, 520), Vector2(115, 696)],
 ]
 
-# Front doors seen along the avenues of Rosemont (reference/portes.jpg): wooden doors with raised panels, an oval
-# of leaded glass, stained glass with sidelights, stacked diamonds, a 1950s flat door with three little windows,
-# glazed double doors.
-const DOOR_STYLES := ["double", "panel", "oval", "leaded", "diamond", "slots", "panel", "leaded"]
+# Front doors seen along the avenues of Rosemont (reference/portes.jpg): raised panels, an oval of leaded glass,
+# stained glass, stacked diamonds, a 1950s flat door with three little windows, a narrow glass slit, vertical planks
+# with a peephole window, slanted glass slats, a half-moon fanlight, small-paned glass, an art-deco sunburst, a round
+# porthole, a wrought-iron grille over the glass, horizontal panels, tall arched panels, glazed and stained-glass
+# double doors; some with stained-glass sidelights.
+const DOOR_STYLES := ["double", "panel", "oval", "leaded", "diamond", "slots", "slit", "planks", "slats", "fan_top", "grid",
+	"sunburst", "porthole", "grille", "horizontal", "arched_panels", "double_leaded"]
 
 const HOUSES := [
 	{
@@ -313,6 +316,7 @@ func _variant(i: int) -> Dictionary:
 	cfg.door_surround = ["lintel", "cornice", "pediment", "arch", "cornice"][rng.randi_range(0, 4)]
 	cfg.ornate = rng.randf() < 0.5
 	cfg.stair_kind = "landing" if rng.randf() < 0.3 else "curve"
+	cfg.sidelights = rng.randf() < 0.3
 	return cfg
 
 
@@ -718,17 +722,27 @@ func _door(cx: float, top: float, bottom: float) -> void:
 	var dy := top + 28
 	var dh := bottom - dy
 	match style:
-		"double":
+		"double", "double_leaded":
 			var lw := (w - 8) / 2.0
 			for i in 2:
 				var lx := x + 4 + i * lw
 				_rect(lx, dy, lw, dh, k.door, _stroke(k.door_dark, 2))
 				_rect(lx + 7, dy + 9, lw - 14, dh * 0.58, "url(#glass)", _stroke(k.door_dark, 2))
+				if style == "double_leaded":
+					_leading(Rect2(lx + 7, dy + 9, lw - 14, dh * 0.58))
 				_rect(lx + 7, dy + dh * 0.58 + 18, lw - 14, dh * 0.42 - 28, "none", _stroke(k.door_dark, 2))
 			_circle(cx - 6, dy + dh * 0.62, 3, "#E3C26A")
 			_circle(cx + 6, dy + dh * 0.62, 3, "#E3C26A")
 		_:
-			_door_leaf(style, Rect2(x + 4, dy, w - 8, dh))
+			if k.get("sidelights", false):
+				# Narrow stained-glass lights each side of a narrower door, a small panel under each.
+				for sx in [x + 4.0, x + w - 18.0]:
+					_rect(sx, dy, 14, dh * 0.72, "url(#glass)", _stroke(k.door_dark, 1.5))
+					_leading(Rect2(sx, dy, 14, dh * 0.72))
+					_rect(sx, dy + dh * 0.72, 14, dh * 0.28, k.door, _stroke(k.door_dark, 1.5))
+				_door_leaf(style, Rect2(x + 20, dy, w - 40, dh))
+			else:
+				_door_leaf(style, Rect2(x + 4, dy, w - 8, dh))
 	for sx in [-1.0, 1.0]:
 		_lantern(cx + sx * (w / 2 + 24), top + 34)
 	if season == "winter":
@@ -794,6 +808,64 @@ func _door_leaf(style: String, r: Rect2) -> void:
 		"slots":
 			for row in 3:
 				_rect(x + w / 2 - 9, y + h * (0.16 + row * 0.2), 18, 18, "url(#glass)", _stroke(dark, 2))
+		"slit":
+			_rect(x + w * 0.62, y + h * 0.1, 10, h * 0.55, "url(#glass)", _stroke(dark, 2))
+		"planks":
+			var px := x + 9.0
+			while px < x + w - 4.0:
+				_path("M%s %s V%s" % [_n(px), _n(y + 2), _n(y + h - 2)], "none", _stroke(dark, 1.2))
+				px += 9.0
+			_rect(x + w / 2 - 8, y + h * 0.14, 16, 16, "url(#glass)", _stroke(dark, 2))
+			for hy in [y + h * 0.2, y + h * 0.8]:
+				_rect(x + 2, hy, w * 0.45, 5, "#2B2B2B")
+		"slats":
+			for row in 5:
+				var sy := y + h * (0.12 + row * 0.12)
+				_path("M%s %s l%s -8 v8 l-%s 8 z" % [_n(x + w * 0.22), _n(sy + 8), _n(w * 0.56), _n(w * 0.56)], "url(#glass)", _stroke(dark, 1.5))
+		"fan_top":
+			var c := Vector2(x + w / 2, y + h * 0.3)
+			_path("M%s %s A%s %s 0 0 1 %s %s Z" % [_n(x + 8), _n(c.y), _n(w / 2 - 8), _n(h * 0.2), _n(x + w - 8), _n(c.y)], "url(#glass)", _stroke(dark, 2))
+			for a in [0.2, 0.4, 0.6, 0.8]:
+				var p := c + Vector2(-cos(a * PI) * (w / 2 - 8), -sin(a * PI) * h * 0.2)
+				_path("M%s %s L%s %s" % [_n(c.x), _n(c.y), _n(p.x), _n(p.y)], "none", _stroke(dark, 1.2))
+			_raised(x + 10, y + h * 0.38, (w - 26) / 2.0, h * 0.56)
+			_raised(x + 16 + (w - 26) / 2.0, y + h * 0.38, (w - 26) / 2.0, h * 0.56)
+		"grid":
+			var g := Rect2(x + 9, y + 9, w - 18, h * 0.48)
+			_rect(g.position.x, g.position.y, g.size.x, g.size.y, "url(#glass)", _stroke(dark, 2))
+			for col in [1, 2]:
+				_path("M%s %s V%s" % [_n(g.position.x + g.size.x * col / 3.0), _n(g.position.y), _n(g.end.y)], "none", _stroke(dark, 1.5))
+			for row in [1, 2, 3]:
+				_path("M%s %s H%s" % [_n(g.position.x), _n(g.position.y + g.size.y * row / 4.0), _n(g.end.x)], "none", _stroke(dark, 1.5))
+			_raised(x + 10, y + h * 0.62, w - 20, h * 0.32)
+		"sunburst":
+			var base := Vector2(x + w / 2, y + h * 0.46)
+			for k2 in 5:
+				var a0 := PI + k2 * PI / 5.0
+				var p0 := base + Vector2.from_angle(a0) * w * 0.4
+				var p1 := base + Vector2.from_angle(a0 + PI / 5.0 - 0.08) * w * 0.4
+				_path("M%s %s L%s %s L%s %s Z" % [_n(base.x), _n(base.y), _n(p0.x), _n(p0.y), _n(p1.x), _n(p1.y)], "url(#glass)", _stroke(dark, 1.2))
+			_raised(x + 10, y + h * 0.56, w - 20, h * 0.38)
+		"porthole":
+			_circle(x + w / 2, y + h * 0.28, w * 0.2, "url(#glass)", _stroke(dark, 4))
+			_circle(x + w / 2, y + h * 0.28, w * 0.24, "none", _stroke("#C9A24A", 2))
+		"grille":
+			var g := Rect2(x + 9, y + 9, w - 18, h * 0.7)
+			_rect(g.position.x, g.position.y, g.size.x, g.size.y, "url(#glass)", _stroke(dark, 2))
+			for row in 3:
+				var cy := g.position.y + g.size.y * (0.2 + row * 0.3)
+				_path("M%s %s c-10 -4 -12 -16 -2 -18 c6 -1 7 6 2 7 M%s %s c10 -4 12 -16 2 -18 c-6 -1 -7 6 -2 7" % [_n(g.get_center().x), _n(cy), _n(g.get_center().x), _n(cy)], "none", _stroke("#1F1F1F", 2))
+			_path("M%s %s V%s" % [_n(g.get_center().x), _n(g.position.y), _n(g.end.y)], "none", _stroke("#1F1F1F", 2))
+			_raised(x + 10, y + h * 0.82, w - 20, h * 0.13)
+		"horizontal":
+			for row in 4:
+				_raised(x + 9, y + 10 + row * (h - 20) / 4.0, w - 18, (h - 20) / 4.0 - 8)
+		"arched_panels":
+			for col in 2:
+				var px := x + 9 + col * (w - 18) / 2.0
+				var pw := (w - 18) / 2.0 - 5
+				_path("M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(px), _n(y + h * 0.62), _n(y + 22), _n(pw / 2), _n(14), _n(px + pw), _n(y + 22), _n(y + h * 0.62)], "none", _stroke(dark, 2))
+				_raised(px, y + h * 0.7, pw, h * 0.24)
 	_rect(x + w / 2 - 12, y + h * 0.56, 24, 5, "#C9A24A", _stroke("#8E6E2A", 1))
 	_circle(x + w - 12, y + h * 0.52, 3.5, "#E3C26A")
 
