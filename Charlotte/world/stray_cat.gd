@@ -212,7 +212,8 @@ func _update_hearts(delta: float) -> void:
 # ── Drawing (facing right, feet on y = 0) ────────────────────
 
 func _draw() -> void:
-	CritterDraw.ground_shadow(self, Vector2(4, 0), 30.0 if _state in ["walk", "leave", "gone", "loaf"] else 22.0)
+	if not _in_arms:
+		CritterDraw.ground_shadow(self, Vector2(4, 0), 30.0 if _state in ["walk", "leave", "gone", "loaf"] else 22.0)
 	match _state:
 		"walk", "leave", "gone":
 			_draw_walking()
@@ -375,14 +376,16 @@ func _head(c: Vector2, tilt: float) -> void:
 	CritterDraw.eye(self, Vector2(-2.5, 0), 3.2, Color(coat.eyes), _line, mode, true)
 	CritterDraw.eye(self, Vector2(7.5, 0), 3.6, Color(coat.eyes), _line, mode, true)
 	draw_circle(Vector2(-6, 6), 2.6, Color("#F2A7B4", 0.5))
-	draw_circle(Vector2(13, 6), 2.2, Color("#F2A7B4", 0.5))
-	# Muzzle puffs, nose, mouth and whiskers.
+	draw_circle(Vector2(12.5, 7), 2.2, Color("#F2A7B4", 0.5))
+	# Muzzle puffs, nose, mouth and whiskers: under the eyes, a little toward the way the head is turned.
 	var muzzle := Color(coat.light) if coat.pattern != "points" else Color(coat.dark).lightened(0.15)
-	draw_circle(Vector2(10.5, 6.5), 3.0, muzzle)
-	draw_circle(Vector2(14.5, 6.5), 2.6, muzzle)
-	draw_colored_polygon(PackedVector2Array([Vector2(11, 3.5), Vector2(14.5, 3.5), Vector2(12.8, 5.6)]), Color("#E07F92"))
-	draw_arc(Vector2(11.6, 6.4), 1.4, 0.2, PI - 0.2, 5, _line, 1.0, true)
-	draw_arc(Vector2(14.0, 6.4), 1.4, 0.2, PI - 0.2, 5, _line, 1.0, true)
+	draw_circle(Vector2(3.6, 7.0), 2.9, muzzle)
+	draw_circle(Vector2(7.6, 7.0), 2.9, muzzle)
+	draw_colored_polygon(PackedVector2Array([Vector2(3.9, 3.9), Vector2(7.3, 3.9), Vector2(5.6, 5.9)]), Color("#E07F92"))
+	draw_line(Vector2(5.6, 5.9), Vector2(5.6, 7.0), _line, 1.0, true)
+	draw_arc(Vector2(4.5, 7.0), 1.1, 0.2, PI - 0.2, 5, _line, 1.0, true)
+	draw_arc(Vector2(6.7, 7.0), 1.1, 0.2, PI - 0.2, 5, _line, 1.0, true)
 	for w in [-1.0, 0.0, 1.0]:
-		draw_line(Vector2(15, 5.5 + w), Vector2(24, 4.0 + w * 3.0), Color(1, 1, 1, 0.65), 0.7, true)
+		draw_line(Vector2(9.5, 6.5 + w), Vector2(19, 5.0 + w * 3.0), Color(1, 1, 1, 0.65), 0.7, true)
+		draw_line(Vector2(1.5, 6.5 + w), Vector2(-6, 5.5 + w * 2.5), Color(1, 1, 1, 0.45), 0.7, true)
 	draw_set_transform(Vector2.ZERO)

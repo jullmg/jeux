@@ -50,7 +50,7 @@ static func make(id: String) -> StrayCat:
 ## The cat curled up in Charlotte's arms, in her body's units (the same size next to her indoors and out).
 static func held(id: String) -> StrayCat:
 	var cat := make(id)
-	cat.size = 1.25 / StreetScene.CHAR_SCALE
+	cat.size = 0.74 / StreetScene.CHAR_SCALE
 	cat.held()
 	return cat
 
