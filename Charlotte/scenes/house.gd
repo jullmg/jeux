@@ -157,8 +157,11 @@ func _thirsty(id: String) -> bool:
 func _tidy(kind: String, item: Sprite2D) -> void:
 	if not is_instance_valid(item) or item.has_meta("taken"):
 		return
+	# Only once Mom has asked her to.
+	if not Quests.active("menage"):
+		_say(_charlotte, "Je rangerai ça plus tard…", 300.0)
+		return
 	item.set_meta("taken", true)
-	Quests.start("menage")
 	_charlotte.pet(0.7, 1.0)
 	Sfx.play("pop", item.position)
 	var to: Vector2 = BEDROOM.x * Vector2.RIGHT + PUT_AWAY[kind]
