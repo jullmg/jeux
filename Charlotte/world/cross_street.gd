@@ -644,63 +644,198 @@ func _draw_ground() -> void:
 
 # ── Signs ───────────────────────────────────────────────────────
 
+const POST_TOP := 232.0
+const POST_FOOT := 652.0
+const SIGN_INK := Color("#1A1A1A")
+const SCHOOL_GREEN := Color("#C9E23A")
+static var _bold: FontVariation
+
+
 func _draw_signs() -> void:
-	var font := ThemeDB.fallback_font
-	# A name post at both corners of the intersection; the stop or school-zone sign only on `sign_side`'s.
+	if _bold == null:
+		_bold = FontVariation.new()
+		_bold.base_font = ThemeDB.fallback_font
+		_bold.variation_embolden = 0.7
+	# A name post at both corners of the intersection; the stop or school-zone sign on `sign_side`'s, the pedestrian
+	# crossing sign on the other.
 	for side in [-1.0, 1.0]:
 		# At the corner of the sidewalk, by the curb, clear of the shop signs on the facades.
 		var corner := x0 + sidewalk - 22.0 if side < 0.0 else x1 - sidewalk + 22.0
 		var px := _fan(corner, 650.0)
-		draw_rect(Rect2(px - 3, 236, 6, 416), Color("#5A5F63"))
+		_post(px)
 		if side == sign_side:
-			_traffic_sign(px, font)
-		_name_plates(Vector2(px, 236.0), font)
+			_traffic_sign(px)
+		else:
+			_crossing_sign(Vector2(px, 440))
+		_name_plates(Vector2(px, POST_TOP), side)
+
+
+# A round galvanised post: lit on the left, a cap, a collar where it goes into the sidewalk, a few stickers.
+func _post(px: float) -> void:
+	var r := Rect2(px - 3.5, POST_TOP, 7, POST_FOOT - POST_TOP)
+	draw_rect(r, Color("#7D8389"))
+	draw_rect(Rect2(r.position.x + 0.8, r.position.y, 1.8, r.size.y), Color("#BFC5CB"))
+	draw_rect(Rect2(r.end.x - 1.8, r.position.y, 1.8, r.size.y), Color("#555A5F"))
+	draw_rect(Rect2(px - 4.5, POST_TOP - 3, 9, 4), Color("#5E6368"))
+	draw_rect(Rect2(px - 5.5, POST_FOOT - 10, 11, 10), Color("#666B70"))
+	draw_rect(Rect2(px - 5.5, POST_FOOT - 10, 3, 10), Color("#9AA0A6"))
+	draw_rect(Rect2(px - 3.5, POST_FOOT - 26, 7, 16), Color("#8A6A4A", 0.35))
+	draw_rect(Rect2(px - 3.5, 552, 7, 9), Color("#F2EFE6"))
+	draw_rect(Rect2(px - 3.5, 554, 7, 2), Color("#D23B3B"))
 
 
 # Montreal-style blue street plates: the street we're on faces us, flat; the cross street's plate is turned to run
 # along that street, so it slants toward the vanishing point like the street itself.
-func _name_plates(top: Vector2, font: Font) -> void:
+func _name_plates(top: Vector2, side: float) -> void:
 	# The slanted plate on top, centred on the post; it tilts by at most ~30 px each way, so the flat one goes
 	# well below it.
 	var e := (_vp() - top).normalized()
 	if e.x < 0.0:
 		e = -e
 	var f := 0.72
-	_plate(Rect2(top.x - 80, top.y + 64, 160, 26), along_name, font)
+	_clamp(Vector2(top.x, top.y + 62))
+	_clamp(Vector2(top.x, top.y + 94))
+	_plate(Rect2(top.x - 80, top.y + 64, 160, 28), along_name, true)
 	var origin := top + Vector2(0, 2) - e * 80.0 * f
 	draw_set_transform_matrix(Transform2D(e * f, Vector2(0, 1), origin))
-	_plate(Rect2(0, 0, 160, 26), street_name, font)
+	_plate(Rect2(0, 0, 160, 28), street_name, side > 0.0)
 	draw_set_transform(Vector2.ZERO)
+	_clamp(top + Vector2(0, 1))
 
 
-func _plate(r: Rect2, text: String, font: Font) -> void:
-	draw_rect(r, Color.WHITE)
-	draw_rect(r.grow(-2.5), Color("#1D4F91"))
-	draw_string(font, Vector2(r.position.x, r.position.y + 19), text, HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 15, Color.WHITE)
+func _clamp(at: Vector2) -> void:
+	draw_rect(Rect2(at + Vector2(-5, -2.5), Vector2(10, 5)), Color("#5E6368"))
+	draw_rect(Rect2(at + Vector2(-5, -2.5), Vector2(10, 1.5)), Color("#A5ABB1"))
+	draw_circle(at, 1.2, Color("#3A3D42"))
 
 
-func _traffic_sign(px: float, font: Font) -> void:
+# One plate: a rounded white-rimmed blue panel with an edge showing its thickness, a faint sheen, the generic ("Rue",
+# "Avenue") smaller than the name, the ordinal's "e" raised. `lit`: the side facing the sun gets the sheen.
+func _plate(r: Rect2, text: String, lit: bool) -> void:
+	var box := StyleBoxFlat.new()
+	box.set_corner_radius_all(5)
+	box.anti_aliasing = true
+	box.bg_color = Color("#0E2A52")
+	draw_style_box(box, Rect2(r.position + Vector2(1.2, 2.0), r.size))
+	box.bg_color = Color("#F4F6F8")
+	draw_style_box(box, r)
+	box.set_corner_radius_all(3)
+	box.bg_color = Color("#1D4F91")
+	draw_style_box(box, r.grow(-2.6))
+	box.bg_color = Color(1, 1, 1, 0.1 if lit else 0.05)
+	draw_style_box(box, Rect2(r.position + Vector2(2.6, 2.6), Vector2(r.size.x - 5.2, r.size.y * 0.42)))
+	# The words, measured first to centre them.
+	var parts: Array = []
+	var words := text.split(" ")
+	for word in words:
+		if word in ["Rue", "Avenue", "Boulevard", "Ruelle"]:
+			parts.append([word, 11 if word == words[0] and words.size() > 1 else 15, 0.0])
+		elif word.length() >= 2 and word.ends_with("e") and word.left(-1).is_valid_int():
+			parts.append([word.left(-1), 17, 0.0])
+			parts.append(["e", 10, -6.0])
+		else:
+			parts.append([word, 17, 0.0])
+	var width := 0.0
+	for i in parts.size():
+		width += _bold.get_string_size(parts[i][0], HORIZONTAL_ALIGNMENT_LEFT, -1, parts[i][1]).x
+		if i < parts.size() - 1 and parts[i + 1][0] != "e":
+			width += 4.0
+	var x := r.position.x + (r.size.x - width) / 2.0
+	var base := r.position.y + r.size.y / 2.0 + 6.0
+	for i in parts.size():
+		var word: String = parts[i][0]
+		var size: int = parts[i][1]
+		var raise: float = parts[i][2]
+		draw_string(_bold, Vector2(x, base + raise), word, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color.WHITE)
+		x += _bold.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+		if i < parts.size() - 1 and parts[i + 1][0] != "e":
+			x += 4.0
+
+
+func _traffic_sign(px: float) -> void:
 	if school:
-		var c := Vector2(px, 420)
-		draw_colored_polygon(PackedVector2Array([c + Vector2(0, -34), c + Vector2(30, -8), c + Vector2(30, 30), c + Vector2(-30, 30), c + Vector2(-30, -8)]), Color("#C8E03A"))
-		draw_polyline(PackedVector2Array([c + Vector2(0, -34), c + Vector2(30, -8), c + Vector2(30, 30), c + Vector2(-30, 30), c + Vector2(-30, -8), c + Vector2(0, -34)]), Color("#1E1E1E"), 2.0, true)
-		for k in [-1.0, 1.0]:
-			var kid := c + Vector2(k * 10.0, 4.0)
-			draw_circle(kid + Vector2(0, -14), 4.0, Color("#1E1E1E"))
-			draw_line(kid + Vector2(0, -10), kid + Vector2(0, 6), Color("#1E1E1E"), 4.0)
-			draw_line(kid + Vector2(0, 6), kid + Vector2(-4 * k, 18), Color("#1E1E1E"), 3.0)
-			draw_line(kid + Vector2(0, 6), kid + Vector2(5 * k, 18), Color("#1E1E1E"), 3.0)
-		draw_rect(Rect2(px - 20, 456, 40, 44), Color.WHITE)
-		draw_rect(Rect2(px - 20, 456, 40, 44), Color("#1E1E1E"), false, 2.0)
-		draw_string(font, Vector2(px - 20, 490), "30", HORIZONTAL_ALIGNMENT_CENTER, 40, 24, Color("#1E1E1E"))
+		_school_sign(Vector2(px, 420))
 	else:
-		var c := Vector2(px, 430)
-		var oct := PackedVector2Array()
-		for i in 8:
-			oct.append(c + Vector2.from_angle(TAU * (i + 0.5) / 8.0) * 30.0)
-		draw_colored_polygon(oct, Color.WHITE)
-		var inner := PackedVector2Array()
-		for p in oct:
-			inner.append(c + (p - c) * 0.88)
-		draw_colored_polygon(inner, Color("#C8202A"))
-		draw_string(font, c + Vector2(-30, 5), "ARRÊT", HORIZONTAL_ALIGNMENT_CENTER, 60, 13, Color.WHITE)
+		_stop_sign(Vector2(px, 432))
+
+
+func _octagon(c: Vector2, r: float) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	for i in 8:
+		pts.append(c + Vector2.from_angle(TAU * (i + 0.5) / 8.0) * r)
+	return pts
+
+
+# Québec's ARRÊT: a red octagon with a white rim, its edge showing, a sheen on the sunny side, two bolts.
+func _stop_sign(c: Vector2) -> void:
+	draw_colored_polygon(_octagon(c + Vector2(1.4, 2.0), 33.0), Color("#5A0E12"))
+	draw_colored_polygon(_octagon(c, 33.0), Color("#F7F7F5"))
+	draw_colored_polygon(_octagon(c, 29.5), Color("#C8202A"))
+	var sheen := _octagon(c, 29.5)
+	var half := PackedVector2Array([sheen[3], sheen[4], sheen[5], c])
+	draw_colored_polygon(half, Color(1, 1, 1, 0.1))
+	var oct := _octagon(c, 31.3)
+	oct.append(oct[0])
+	draw_polyline(oct, Color(0, 0, 0, 0.12), 0.8, true)
+	var w := _bold.get_string_size("ARRÊT", HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
+	draw_string(_bold, c + Vector2(-w / 2.0, 6), "ARRÊT", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color.WHITE)
+	for dy in [-24.0, 24.0]:
+		draw_circle(c + Vector2(0, dy), 1.6, Color("#B9BEC4"))
+
+
+# The school zone: the fluorescent yellow-green pentagon with two children walking, and the 30 km/h limit under it.
+func _school_sign(c: Vector2) -> void:
+	var penta := PackedVector2Array([c + Vector2(0, -36), c + Vector2(32, -9), c + Vector2(32, 32), c + Vector2(-32, 32), c + Vector2(-32, -9)])
+	var back := PackedVector2Array()
+	for p in penta:
+		back.append(p + Vector2(1.4, 2.0))
+	draw_colored_polygon(back, Color("#3A4A0A"))
+	draw_colored_polygon(penta, SCHOOL_GREEN)
+	var rim := PackedVector2Array()
+	for p in penta:
+		rim.append(c + (p - c) * 0.9 + Vector2(0, 1))
+	rim.append(rim[0])
+	draw_polyline(rim, SIGN_INK, 2.0, true)
+	_walker(c + Vector2(-9, 18), 0.82, 1.0)
+	_walker(c + Vector2(10, 20), 0.66, 1.0)
+	draw_line(c + Vector2(-24, 24), c + Vector2(24, 24), SIGN_INK, 1.6)
+	# The speed limit: a white panel, the number in a red ring.
+	var r := Rect2(c.x - 22, 458, 44, 52)
+	draw_rect(Rect2(r.position + Vector2(1.4, 2), r.size), Color("#2A2A2A"))
+	draw_rect(r, Color("#F7F7F5"))
+	draw_rect(r.grow(-2.5), SIGN_INK, false, 1.2)
+	var o := Vector2(c.x, 478)
+	draw_arc(o, 15.0, 0, TAU, 28, Color("#C8202A"), 4.0, true)
+	var w := _bold.get_string_size("30", HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
+	draw_string(_bold, o + Vector2(-w / 2.0, 5.5), "30", HORIZONTAL_ALIGNMENT_LEFT, -1, 15, SIGN_INK)
+	w = ThemeDB.fallback_font.get_string_size("km/h", HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
+	draw_string(ThemeDB.fallback_font, Vector2(c.x - w / 2.0, 505), "km/h", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, SIGN_INK)
+
+
+# The pedestrian crossing: a fluorescent yellow-green square, a black rim, someone walking across the stripes.
+func _crossing_sign(c: Vector2) -> void:
+	var r := Rect2(c - Vector2(27, 27), Vector2(54, 54))
+	draw_rect(Rect2(r.position + Vector2(1.4, 2), r.size), Color("#3A4A0A"))
+	draw_rect(r, SCHOOL_GREEN)
+	draw_rect(Rect2(r.position, Vector2(r.size.x, r.size.y * 0.4)), Color(1, 1, 1, 0.1))
+	draw_rect(r.grow(-3.0), SIGN_INK, false, 1.8)
+	for k in 4:
+		draw_rect(Rect2(c + Vector2(-19 + k * 10.5, 15), Vector2(6, 4)), SIGN_INK)
+	_walker(c + Vector2(0, 12), 1.0, 1.0)
+	for dy in [-22.0, 22.0]:
+		draw_circle(c + Vector2(0, dy), 1.3, Color("#8E9A40"))
+
+
+# A pictogram walker (feet at `foot`), striding toward `dir`.
+func _walker(foot: Vector2, k: float, dir: float) -> void:
+	var hip := foot + Vector2(0, -14) * k
+	var neck := hip + Vector2(2.5 * dir, -13) * k
+	draw_circle(neck + Vector2(1.0 * dir, -4.2) * k, 4.0 * k, SIGN_INK)
+	draw_line(hip, neck, SIGN_INK, 4.6 * k, true)
+	draw_line(hip, hip + Vector2(6.5 * dir, 7.5) * k, SIGN_INK, 3.6 * k, true)
+	draw_line(hip + Vector2(6.5 * dir, 7.5) * k, foot + Vector2(8 * dir, 0), SIGN_INK, 3.2 * k, true)
+	draw_line(hip, hip + Vector2(-4 * dir, 8) * k, SIGN_INK, 3.6 * k, true)
+	draw_line(hip + Vector2(-4 * dir, 8) * k, foot + Vector2(-8 * dir, -1) * k, SIGN_INK, 3.2 * k, true)
+	var shoulder := neck + Vector2(-0.6 * dir, 2.5) * k
+	draw_line(shoulder, shoulder + Vector2(5.5 * dir, 8) * k, SIGN_INK, 2.8 * k, true)
+	draw_line(shoulder, shoulder + Vector2(-5 * dir, 7.5) * k, SIGN_INK, 2.8 * k, true)
