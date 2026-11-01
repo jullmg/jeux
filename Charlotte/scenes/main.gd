@@ -4,6 +4,9 @@ extends StreetScene
 # The generic street (sky, houses, trees, people, animals, camera) lives in StreetScene.
 
 
+var _window_neighbour: WindowNeighbour
+
+
 func _init() -> void:
 	street_key = "6e"
 	layout = [
@@ -68,6 +71,13 @@ func _build_cross_streets() -> void:
 
 
 func _decorate_house(i: int, house: Sprite2D) -> void:
+	if layout[i] == "coin_holt":
+		# The old man in his armchair, behind the annex window right of its door (glass at 242,711 62x84 in the SVG).
+		var neighbour := WindowNeighbour.new()
+		neighbour.position = house.position + Vector2(242, 711) * HOUSE_SCALE
+		neighbour.size = Vector2(62, 84) * HOUSE_SCALE
+		add_child(neighbour)
+		_window_neighbour = neighbour
 	if layout[i] == "ruelle":
 		# The neighbours' sign at the lane entrance by the Holt corner.
 		# On its own post at the right of the entrance (drawn by the generator, as on the photo).
@@ -92,6 +102,7 @@ func _build_landmarks() -> void:
 # Charlotte's own front door (ground floor of her duplex): click it to go inside. Click Rue Dandurand or Rue Holt
 # to turn the corner, the lane entrances to go into the lane.
 func _build_doors() -> void:
+	_window_neighbour.charlotte = _charlotte
 	_add_corner(_cross_streets[0], "res://scenes/dandurand.tscn", "dandurand_from_6e")
 	_add_corner(_cross_streets[1], "res://scenes/holt.tscn", "holt_from_6e")
 	_add_lane("ruelle_verte")
