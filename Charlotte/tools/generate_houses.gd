@@ -1549,43 +1549,169 @@ func _ruelle_verte() -> void:
 	out.append('<ellipse cx="%s" cy="%s" rx="7" ry="2.5" fill="#000000" opacity="0.25"/>' % [_n(px + 2), _n(ground_y - 4)])
 	_rect(px - 66, 384, 132, 64, "#2E8B47", 'rx="8" ' + _stroke("#F4F1EA", 4))
 	_path("M%s 440 q-10 -14 0 -24 q10 10 0 24 z" % _n(px - 50), "#9BD16A")
-	# Trees arching over the lane: dark branches, then the canopy.
-	_path("M%s 420 C%s 300 %s 200 %s 120 M%s 330 C%s 290 %s 240 %s 200" % [_n(X1 - 10), _n(X1 - 40), _n(X1 - 110), _n(X0 + 40), _n(X1 - 30), _n(X1 - 80), _n(X1 - 120), _n(X1 - 170)], "none", _stroke("#4A3428", 6) + ' stroke-linecap="round"')
-	for i in 16:
-		var cx2 := rng.randf_range(X0 - 10, X1 + 10)
-		var cy2 := rng.randf_range(40.0, 250.0) + (cx2 - X0) * 0.18
-		_circle(cx2, cy2, rng.randf_range(34.0, 58.0), _canopy(_pick(["#E3A33A", "#D9682B", "#C9562E", "#B5442E", "#E8B54A"])), _stroke(_canopy("#8E3A24"), 1.5) + ' opacity="0.95"')
+	# Brick courses along both side walls, and the stone quoins at the left building's corner (photo).
+	for side in [[l0, gl, "#6A4033"], [r0, gr, "#7A4E3C"]]:
+		var y: float = side[0].y + 12.0
+		while y < side[1].y - 8.0:
+			var a := Vector2(side[0].x, y)
+			_path("M%s %s L%s %s" % [_n(a.x), _n(a.y), _n(at.call(a, 0.5).x), _n(at.call(a, 0.5).y)], "none", _stroke(side[2], 0.8) + ' opacity="0.55"')
+			y += 9.0
+	var qy := 120.0
+	while qy < ground_y - 60.0:
+		_rect(X0, qy, 26 if int(qy / 34.0) % 2 == 0 else 16, 16, "#C9C3B6", _stroke("#9A948A", 1))
+		qy += 34.0
+	# A round electricity meter on the left wall, a child's red tricycle by the stairs on the right.
+	var meter: Vector2 = at.call(Vector2(X0, 500), 0.12)
+	_circle(meter.x + 4, meter.y, 9, "#D9D6CE", _stroke("#8E8A82", 1.5))
+	_circle(meter.x + 4, meter.y, 5, "#B9C6CC")
+	var trike: Vector2 = at.call(Vector2(X1 - 60, ground_y - 4), 0.3)
+	_circle(trike.x - 12, trike.y - 8, 8, "none", _stroke("#2B2B2B", 2.5))
+	_circle(trike.x + 12, trike.y - 8, 8, "none", _stroke("#2B2B2B", 2.5))
+	_path("M%s %s l12 -16 l12 16 M%s %s v-10 h8" % [_n(trike.x - 12), _n(trike.y - 8), _n(trike.x), _n(trike.y - 24)], "none", _stroke("#D9342B", 4) + ' stroke-linecap="round"')
+	# The lane tree from the photo: rising on the right and arching right over the entrance.
+	_fine_tree(Vector2(X1 - 54, ground_y - 46), 330.0, -PI * 0.78, 1.15, ["#E3A33A", "#D9682B", "#C9562E", "#B5442E", "#E8B54A"])
 
 
-# Back lane seen from the street: lane trees, clothesline, wooden fences and greenery.
+# A tree drawn branch by branch: a trunk to `fork_y`, limbs splitting three times around `heading` (radians, -PI/2 =
+# straight up), hundreds of small leaves in clusters at the twigs (this season's colours), bare and snowy in winter.
+# The same random draws in every season.
+func _fine_tree(base: Vector2, fork_y: float, heading: float, size: float, autumn: Array) -> void:
+	var bark := "#4A3428"
+	var fork := Vector2(base.x + cos(heading) * (base.y - fork_y) * 0.25, fork_y)
+	_path("M%s %s Q%s %s %s %s" % [_n(base.x), _n(base.y), _n(base.x), _n(lerpf(base.y, fork_y, 0.6)), _n(fork.x), _n(fork.y)], "none", _stroke(bark, 13.0 * size) + ' stroke-linecap="round"')
+	_path("M%s %s Q%s %s %s %s" % [_n(base.x - 3), _n(base.y), _n(base.x - 3), _n(lerpf(base.y, fork_y, 0.6)), _n(fork.x - 3), _n(fork.y)], "none", _stroke("#6E5444", 3.0 * size) + ' stroke-linecap="round" opacity="0.7"')
+	var twigs: Array[Vector2] = []
+	var limbs: Array = []
+	for i in 3:
+		_limb(fork, heading + (i - 1) * 0.55 + rng.randf_range(-0.15, 0.15), 120.0 * size, 9.0 * size, 3, twigs, limbs)
+	for l in limbs:
+		_path("M%s %s Q%s %s %s %s" % [_n(l[0].x), _n(l[0].y), _n(l[1].x), _n(l[1].y), _n(l[2].x), _n(l[2].y)], "none", _stroke(bark, l[3]) + ' stroke-linecap="round"')
+		if season == "winter" and l[3] > 2.5:
+			_path("M%s %s Q%s %s %s %s" % [_n(l[0].x), _n(l[0].y - l[3] * 0.5), _n(l[1].x), _n(l[1].y - l[3] * 0.5), _n(l[2].x), _n(l[2].y - l[3] * 0.5)], "none", _stroke("#F7F9FB", 2.0) + ' stroke-linecap="round"')
+	# Leaves: darker ones underneath first, then the lit ones, in clusters round each twig.
+	for layer in 2:
+		for t in twigs:
+			for j in 24:
+				var p := t + Vector2(rng.randf_range(-24, 24), rng.randf_range(-20, 16)) * size
+				var a := rng.randf_range(0.0, 180.0)
+				var c := _canopy(autumn[rng.randi_range(0, autumn.size() - 1)])
+				if layer == 0:
+					c = "#" + Color(c).darkened(0.3).to_html(false)
+				elif rng.randf() < 0.3:
+					c = "#" + Color(c).lightened(0.2).to_html(false)
+				if season != "winter":
+					out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="%s" transform="rotate(%s %s %s)"/>' % [_n(p.x), _n(p.y), _n(5.5 * size), _n(2.6 * size), c, _n(a), _n(p.x), _n(p.y)])
+
+
+func _limb(from: Vector2, angle: float, length: float, width: float, depth: int, twigs: Array[Vector2], limbs: Array) -> void:
+	var to := from + Vector2.from_angle(angle) * length
+	var bend := (to - from).orthogonal().normalized() * length * rng.randf_range(-0.18, 0.18)
+	limbs.append([from, from.lerp(to, 0.5) + bend, to, width])
+	if depth == 0:
+		twigs.append(to)
+		return
+	twigs.append(from.lerp(to, 0.7))
+	for i in rng.randi_range(2, 3):
+		_limb(to, angle + rng.randf_range(-0.65, 0.65), length * rng.randf_range(0.58, 0.76), width * 0.62, depth - 1, twigs, limbs)
+
+
+# Back lane seen from the street, in perspective: the lane running in between board fences, an old corrugated-metal
+# garage, Virginia creeper, a tree leaning over, a clothesline across with laundry, the weeds down the middle, a
+# blue bin, bunting, and the far end bright and green.
 func _ruelle() -> void:
 	var cx: float = k.width / 2.0
-	var far := 560.0
-	for i in 7:
-		_circle(rng.randf_range(X0, X1), rng.randf_range(300.0, 430.0), rng.randf_range(45.0, 70.0),
-			_canopy(_pick(["#E3A33A", "#D9682B", "#B5442E", "#C9B03A"])), _stroke(_canopy("#8E3A24"), 2))
-	_path("M%s 380 Q%s 405 %s 380" % [_n(X0), _n(cx), _n(X1)], "none", _stroke("#555555", 1.5))
-	var x := X0 + 26.0
-	while x < X1 - 30.0:
+	var vp := Vector2(cx, 470.0)
+	var far := 0.78
+	var at := func(p: Vector2, d: float) -> Vector2: return vp + (p - vp) * (1.0 - d)
+	var poly := func(pts: Array, fill: String, extra := "") -> void:
+		var parts := PackedStringArray()
+		for i in pts.size():
+			parts.append("%s%s %s" % ["M" if i == 0 else "L", _n(pts[i].x), _n(pts[i].y)])
+		_path(" ".join(parts) + " Z", fill, extra)
+	var gl := Vector2(X0, ground_y)
+	var gr := Vector2(X1, ground_y)
+	# Far end: the yards' greenery and the pale houses across the next street.
+	var e0: Vector2 = at.call(Vector2(X0, 330), far)
+	var e1: Vector2 = at.call(gr, far)
+	_rect(e0.x - 10, e0.y, e1.x - e0.x + 20, e1.y - e0.y, "#D8CBB8")
+	for i in 3:
+		_rect(e0.x - 4 + i * 16, e0.y + 8, 6, 8, "#E8EEF2")
+	for i in 40:
+		var p := Vector2(rng.randf_range(e0.x - 30, e1.x + 30), rng.randf_range(e0.y - 30, e1.y - 6))
+		out.append('<ellipse cx="%s" cy="%s" rx="4" ry="2" fill="%s"/>' % [_n(p.x), _n(p.y), _canopy(_pick(["#E3A33A", "#9DB85A", "#7FA34A", "#D9682B"]))])
+	# The lane: concrete, a joint, the crack with its weeds.
+	poly.call([gl, gr, at.call(gr, far), at.call(gl, far)], "#A9A59D")
+	poly.call([gl, gr, at.call(gr, 0.3), at.call(gl, 0.3)], "#9E9A92")
+	var mid0 := Vector2(cx, ground_y)
+	var mid1: Vector2 = at.call(mid0, far)
+	_path("M%s %s L%s %s" % [_n(mid0.x), _n(mid0.y), _n(mid1.x), _n(mid1.y)], "none", _stroke("#6E6A62", 2))
+	for i in 26:
+		var t := pow(rng.randf(), 1.5)
+		var p := mid0.lerp(mid1, t)
+		var h := 9.0 * (1.0 - t)
+		_path("M%s %s l%s %s l%s %s z" % [_n(p.x - h * 0.5), _n(p.y), _n(h * 0.5), _n(-h * 1.6), _n(h * 0.5), _n(h * 1.6)], _bush("#7E8F3A"))
+	# Board fences on both sides, the boards converging.
+	for side in [-1.0, 1.0]:
+		var x := X0 if side < 0.0 else X1
+		var t0 := Vector2(x, ground_y - 175.0)
+		var b0 := Vector2(x, ground_y)
+		var c := _pick(["#9A958C", "#A8A296", "#8C877E"])
+		poly.call([t0, at.call(t0, far), at.call(b0, far), b0], c)
+		for j in 18:
+			var f := pow(j / 18.0, 0.7) * far
+			var top: Vector2 = at.call(t0, f) + Vector2(0, rng.randf_range(-2.0, 2.0) * (1.0 - f))
+			_path("M%s %s L%s %s" % [_n(top.x), _n(top.y), _n(at.call(b0, f).x), _n(at.call(b0, f).y)], "none", _stroke("#" + Color(c).darkened(0.35).to_html(false), 1.2 * (1.0 - f) + 0.4))
+		poly.call([b0 + Vector2(0, -30), at.call(b0 + Vector2(0, -30), far), at.call(b0, far), b0], "#3A3020", 'opacity="0.18"')
+	# The old tôle garage part way down the left, rust streaks, creeper on its corner.
+	var g := [at.call(Vector2(X0, ground_y - 250.0), 0.32), at.call(Vector2(X0, ground_y - 250.0), 0.55), at.call(Vector2(X0, ground_y), 0.55), at.call(Vector2(X0, ground_y), 0.32)]
+	poly.call(g, "#B8BCC0")
+	for j in 12:
+		var f := lerpf(0.32, 0.55, j / 12.0)
+		_path("M%s %s L%s %s" % [_n(at.call(Vector2(X0, ground_y - 250.0), f).x), _n(at.call(Vector2(X0, ground_y - 250.0), f).y), _n(at.call(gl, f).x), _n(at.call(gl, f).y)], "none", _stroke("#8E9399", 1.0))
+	poly.call([g[0], g[1], g[1] + Vector2(0, 8), g[0] + Vector2(0, 10)], "#6E7377")
+	_path("M%s %s l2 60" % [_n(g[0].x + 6), _n(g[0].y + 20)], "none", _stroke("#8E5A3A", 3) + ' opacity="0.5"')
+	if season == "winter":
+		poly.call([g[0] + Vector2(0, -6), g[1] + Vector2(0, -4), g[1], g[0]], "#F4F6F8")
+	# Creeper over both fences, thicker near us.
+	var vines := ["#B5302A", "#D9482B", "#8E2A2A", "#E0782E"]
+	match season:
+		"spring":
+			vines = ["#7FB85A", "#9BCB6A", "#5E9A40"]
+		"summer":
+			vines = ["#3E7A30", "#4F8E3A", "#2F6A2A"]
+	for i in 160:
+		var side := -1.0 if rng.randf() < 0.5 else 1.0
+		var f := pow(rng.randf(), 1.8) * 0.6
+		var y := ground_y - 175.0 + rng.randf_range(-8.0, 40.0 + 60.0 * rng.randf())
+		var p: Vector2 = at.call(Vector2(X0 if side < 0.0 else X1, y), f)
+		var r := 5.0 * (1.0 - f)
+		if season != "winter":
+			out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="%s"/>' % [_n(p.x), _n(p.y), _n(r), _n(r * 0.7), vines[rng.randi_range(0, vines.size() - 1)]])
+	# A clothesline across the lane, with a few things pinned on it.
+	var ca := Vector2(X0 + 4, 300.0)
+	var cb := Vector2(X1 - 4, 290.0)
+	_path("M%s %s Q%s %s %s %s" % [_n(ca.x), _n(ca.y), _n(cx), _n(328.0), _n(cb.x), _n(cb.y)], "none", _stroke("#E6E6E0", 1.6))
+	for i in 5:
+		var t := (i + 0.7) / 6.0
+		var p := ca.lerp(cb, t) + Vector2(0, sin(t * PI) * 19.0)
+		var col := _pick(["#E74C3C", "#FFFFFF", "#3498DB", "#F1C40F", "#F7C6D9"])
+		if season != "winter":
+			if i % 2 == 0:
+				_path("M%s %s h16 l4 6 l-4 2 v14 h-16 v-14 l-4 -2 z" % [_n(p.x - 8), _n(p.y)], col)
+			else:
+				_rect(p.x - 5, p.y, 10, 16, col)
+	# The tree leaning over the right-hand fence.
+	_fine_tree(Vector2(X1 - 20, ground_y - 160), 360.0, -PI * 0.62, 0.85, ["#E3A33A", "#D9682B", "#B5442E", "#C9B03A"])
+	# The blue recycling bin at the entrance, and the bunting.
+	_rect(X0 + 22, ground_y - 62, 42, 60, "#2F6DB5", _stroke("#1F4A80", 2))
+	_rect(X0 + 19, ground_y - 68, 48, 9, "#26599A", 'rx="3"')
+	_path("M%s 380 Q%s 405 %s 380" % [_n(X0), _n(cx), _n(X1)], "none", _stroke("#555555", 1.2))
+	var x := X0 + 14.0
+	while x < X1 - 14.0:
 		var t := (x - cx) / (cx - X0)
 		var y := 380.0 + 12.5 * (1.0 - t * t)
-		_rect(x, y, 18, rng.randf_range(20.0, 30.0), _pick(["#FF7BA3", "#FFD23F", "#4FA3E0", "#FFFFFF", "#9B59B6"]))
-		x += 30.0
-	_rect(X0, far - 70, X1 - X0, 70, "#A07850")
-	var px := X0 + 10.0
-	while px < X1:
-		_path("M%s %s V%s" % [_n(px), _n(far - 70), _n(far)], "none", _stroke("#7E5C3A", 2))
-		px += 12.0
-	_rect(X0 + 16, far - 96, 86, 96, "#7A9A8A", _stroke("#55705F", 2))
-	_path("M%s %s l43 -22 l43 22 z" % [_n(X0 + 16), _n(far - 96)], "#5E6B73", _stroke("#3F4A50", 2))
-	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(X0 + 6), _n(ground_y), _n(cx - 40), _n(far), _n(cx + 40), _n(far), _n(X1 - 6), _n(ground_y)], "#8E8C86")
-	_path("M%s %s L%s %s" % [_n(cx), _n(ground_y), _n(cx), _n(far)], "none", _stroke("#7A7872", 3))
-	for side in [-1.0, 1.0]:
-		for j in 7:
-			var t := j / 6.0
-			var edge := X1 - 6.0 if side > 0.0 else X0 + 6.0
-			var bx := lerpf(cx + side * 40.0, edge, t)
-			_circle(bx + side * 6.0, lerpf(far, ground_y, t) - 6.0, 8.0 + 14.0 * t, _bush(_pick(AUTUMN_BUSHES)))
+		_path("M%s %s l12 0 l-6 16 z" % [_n(x), _n(y)], _pick(["#FF7BA3", "#FFD23F", "#4FA3E0", "#FFFFFF", "#9B59B6"]))
+		x += 18.0
 
 
 # --- Autumn & Halloween -----------------------------------------------------

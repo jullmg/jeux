@@ -153,6 +153,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   arch with fanlight), `ornate` stair railings (spades, scrolled newel), `stair_kind` "landing" (L with a landing on
   posts) or "curve"; drawn last in `_variant` so other draws don't move. Spiral staircases only in the lane
   (`LaneArt._spiral`), never on the street side.
+- Lane entrances seen from the street (generator `_ruelle_verte`, `_ruelle`) use `_fine_tree` (trunk, limbs split three
+  times, hundreds of small leaves in this season's colours, bare and snowy in winter) instead of round blobs; the Holt-side
+  entrance is drawn in perspective (fences, tôle garage, creeper, clothesline, weeds, bin, bunting).
 - `art/decor/*.svg`: house façades, **generated**. Edit `tools/generate_houses.gd` and regenerate instead of hand-editing:
   `Godot --headless --path . --script res://tools/generate_houses.gd`
 - `art/logo.png` is cut out of `art/logo.jpg` by `tools/cutout_logo.gd` (same headless invocation).
