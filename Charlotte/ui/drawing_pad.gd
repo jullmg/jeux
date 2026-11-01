@@ -7,7 +7,6 @@ signal closed(drawing: Image)
 
 const PAPER := Vector2i(480, 320)
 const KEEP := 4
-const FOLDER := "user://drawings"
 const BLUE := Color("#1D4F91")
 const YELLOW := Color("#FFD23F")
 const CRAYONS := ["#2B2B2B", "#E04F5F", "#FF8A3D", "#FFD23F", "#7CCB5A", "#3E8E5A", "#4FA3E0", "#1D4F91",
@@ -145,16 +144,21 @@ func _dab(c: Vector2, r: float, col: Color) -> void:
 
 # ── Saved drawings (for the fridge) ─────────────────────────────
 
+## The current game's drawings folder.
+static func folder() -> String:
+	return GameState.slot_dir() + "/drawings"
+
+
 ## The kept drawings, oldest first.
 static func saved() -> Array[Image]:
 	var out: Array[Image] = []
-	var dir := DirAccess.open(FOLDER)
+	var dir := DirAccess.open(folder())
 	if dir == null:
 		return out
 	var names := Array(dir.get_files()).filter(func(n: String): return n.ends_with(".png"))
 	names.sort()
 	for n in names:
-		var img := Image.load_from_file(FOLDER + "/" + n)
+		var img := Image.load_from_file(folder() + "/" + n)
 		if img:
 			out.append(img)
 	return out
@@ -162,7 +166,7 @@ static func saved() -> Array[Image]:
 
 ## Takes every drawing off the fridge (a new game).
 static func forget_all() -> void:
-	var dir := DirAccess.open(FOLDER)
+	var dir := DirAccess.open(folder())
 	if dir == null:
 		return
 	for n in dir.get_files():
@@ -171,9 +175,9 @@ static func forget_all() -> void:
 
 ## Keeps a new drawing, dropping the oldest beyond KEEP.
 static func keep(img: Image) -> void:
-	DirAccess.make_dir_recursive_absolute(FOLDER)
-	img.save_png("%s/%d.png" % [FOLDER, int(Time.get_unix_time_from_system() * 1000.0)])
-	var dir := DirAccess.open(FOLDER)
+	DirAccess.make_dir_recursive_absolute(folder())
+	img.save_png("%s/%d.png" % [folder(), int(Time.get_unix_time_from_system() * 1000.0)])
+	var dir := DirAccess.open(folder())
 	var names := Array(dir.get_files()).filter(func(n: String): return n.ends_with(".png"))
 	names.sort()
 	while names.size() > KEEP:

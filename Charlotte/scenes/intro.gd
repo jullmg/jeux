@@ -3,7 +3,8 @@ extends Node2D
 # Intro screen – full living street scene + the art/logo.png title.
 # Uses real game components: SkyBackdrop, Skyline, Cloud, Street, Squirrel, Cat,
 # StrayCat, Dog, WindowCats, Birds, Character (Charlotte), PropArt, Foreground, Wind.
-# "Continuer" picks up the saved game (if any), "Nouvelle partie" starts over; Enter/Space = the first one.
+# "Continuer" picks up the last game played, "Mes parties" lists the saved games (play, erase, or start a new one
+# in a free slot); with none saved, "Nouvelle partie". Enter/Space = the first button.
 # ══════════════════════════════════════════════════════════════
 
 const VIEW        := Vector2(1280, 720)
@@ -420,9 +421,10 @@ func _animate_logo() -> void:
 func _build_start_button() -> void:
 	var cx := VIEW.x / 2.0
 	var btn_y := 392.0
-	if GameState.has_save():
+	GameState.migrate()
+	if GameState.any_save():
 		_title_button("▶  Continuer", Vector2(cx, btn_y), 28, _on_continue_pressed)
-		_title_button("Nouvelle partie", Vector2(cx, btn_y + 74.0), 22, _on_new_game_pressed)
+		_title_button("Mes parties", Vector2(cx, btn_y + 74.0), 22, _open_games)
 	else:
 		_title_button("▶  Nouvelle partie", Vector2(cx, btn_y), 28, _on_new_game_pressed)
 
@@ -463,21 +465,166 @@ func _title_button(label: String, top_center: Vector2, font_size: int, on_press:
 
 
 func _on_continue_pressed() -> void:
-	var scene := GameState.load_game()
-	get_tree().change_scene_to_file(scene if ResourceLoader.exists(scene) else MAIN_SCENE)
+	_play(GameState.last_slot())
 
 
 func _on_new_game_pressed() -> void:
-	GameState.new_game()
+	_start(1)
+
+
+func _play(n: int) -> void:
+	var scene := GameState.load_game(n)
+	get_tree().change_scene_to_file(scene if ResourceLoader.exists(scene) else MAIN_SCENE)
+
+
+func _start(n: int) -> void:
+	GameState.new_game(n)
 	get_tree().change_scene_to_file(MAIN_SCENE)
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _games:
+		if event.is_action_pressed("ui_cancel"):
+			_close_games()
+			get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("ui_accept"):
-		if GameState.has_save():
+		if GameState.any_save():
 			_on_continue_pressed()
 		else:
 			_on_new_game_pressed()
+
+
+# ─────────────────────────────────────────────────────────────
+# Mes parties: the saved games side by side
+# ─────────────────────────────────────────────────────────────
+
+var _games: Control
+
+
+# A card per game: a saved one shows its season, Charlotte's age, her stars and pocket money, with "Jouer" and
+# "Effacer" (asks first); an empty one starts a new game.
+func _open_games() -> void:
+	_close_games()
+	_games = Control.new()
+	_games.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui_layer.add_child(_games)
+	var dim := ColorRect.new()
+	dim.color = Color(0.05, 0.03, 0.02, 0.55)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_games.add_child(dim)
+	var panel := PanelContainer.new()
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color("#FBF6EC")
+	box.border_color = Color("#1D4F91")
+	box.set_border_width_all(4)
+	box.set_corner_radius_all(18)
+	box.set_content_margin_all(24)
+	box.shadow_color = Color(0, 0, 0, 0.3)
+	box.shadow_size = 14
+	panel.add_theme_stylebox_override("panel", box)
+	_games.add_child(panel)
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 14)
+	panel.add_child(list)
+	var title := Label.new()
+	title.text = "Mes parties"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 34)
+	title.add_theme_color_override("font_color", Color("#1D4F91"))
+	list.add_child(title)
+	for n in range(1, GameState.SLOTS + 1):
+		list.add_child(_game_card(n))
+	var back := _card_button("Retour", Color("#8A7A68"), _close_games)
+	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	list.add_child(back)
+	panel.reset_size()
+	panel.position = (VIEW - panel.size) / 2.0
+
+
+func _game_card(n: int) -> Control:
+	var card := PanelContainer.new()
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color("#E8DDD0") if GameState.has_save(n) else Color("#F2ECE2")
+	box.border_color = Color("#C9B9A4")
+	box.set_border_width_all(2)
+	box.set_corner_radius_all(12)
+	box.set_content_margin_all(14)
+	card.add_theme_stylebox_override("panel", box)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	card.add_child(row)
+	var info := VBoxContainer.new()
+	info.custom_minimum_size = Vector2(330, 0)
+	row.add_child(info)
+	var heading := Label.new()
+	heading.text = "Partie %d" % n
+	heading.add_theme_font_size_override("font_size", 24)
+	heading.add_theme_color_override("font_color", Color("#1D4F91"))
+	info.add_child(heading)
+	var line := Label.new()
+	var game := GameState.summary(n)
+	if game.is_empty():
+		line.text = "Libre"
+	else:
+		line.text = "%s · %d ans · %d ★ · %s" % [Season.NAMES.get(game.season, game.season), game.age, game.stars, Quests.money_text(game.money)]
+	line.add_theme_font_size_override("font_size", 18)
+	line.add_theme_color_override("font_color", Color("#5A4A3A"))
+	info.add_child(line)
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 8)
+	buttons.alignment = BoxContainer.ALIGNMENT_END
+	buttons.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(buttons)
+	if game.is_empty():
+		buttons.add_child(_card_button("Nouvelle partie", Color("#1D4F91"), _start.bind(n)))
+	else:
+		buttons.add_child(_card_button("▶ Jouer", Color("#1D4F91"), _play.bind(n)))
+		buttons.add_child(_card_button("Effacer", Color("#B8433A"), _ask_erase.bind(n, buttons)))
+	return card
+
+
+# "Effacer" asks first, in place of the card's buttons.
+func _ask_erase(n: int, buttons: HBoxContainer) -> void:
+	for child in buttons.get_children():
+		child.queue_free()
+	var ask := Label.new()
+	ask.text = "Effacer cette partie ?"
+	ask.add_theme_font_size_override("font_size", 18)
+	ask.add_theme_color_override("font_color", Color("#B8433A"))
+	buttons.add_child(ask)
+	buttons.add_child(_card_button("Oui", Color("#B8433A"), func():
+		GameState.erase(n)
+		if GameState.any_save():
+			_open_games()
+		else:
+			get_tree().reload_current_scene()))
+	buttons.add_child(_card_button("Non", Color("#1D4F91"), _open_games))
+
+
+func _card_button(label: String, color: Color, on_press: Callable) -> Button:
+	var b := Button.new()
+	b.text = label
+	b.add_theme_font_size_override("font_size", 19)
+	for state in ["normal", "hover", "pressed"]:
+		var st := StyleBoxFlat.new()
+		st.bg_color = color if state == "normal" else (Color("#FFD23F") if state == "hover" else Color("#E6B800"))
+		st.set_corner_radius_all(8)
+		st.content_margin_left = 14
+		st.content_margin_right = 14
+		st.content_margin_top = 6
+		st.content_margin_bottom = 6
+		b.add_theme_stylebox_override(state, st)
+	b.add_theme_color_override("font_color", Color.WHITE)
+	b.add_theme_color_override("font_hover_color", Color("#1D4F91"))
+	b.pressed.connect(on_press)
+	return b
+
+
+func _close_games() -> void:
+	if _games:
+		_games.queue_free()
+		_games = null
 
 
 

@@ -9,7 +9,7 @@ Current state: a living, side-scrolling street. Charlotte walks with ←/→ or 
 Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks over and pets it. Click her front door
 (ground floor of `duplex_charlotte`, n° 5672) to go inside her flat. In her bedroom, click the dresser's drawers to open her
 wardrobe and change clothes. Click her desk to draw (`ui/drawing_pad.gd`, `DrawingPad`: crayons, sizes, eraser); "Sur le frigo !" saves the
-drawing to `user://drawings/` (newest 4 kept) and sticks it on the kitchen fridge. Delete that folder after tests.
+drawing to the game's `user://slots/<n>/drawings/` (newest 4 kept) and sticks it on the kitchen fridge. Delete that folder after tests.
 Click the bookshelf in her bedroom to read (`ui/book_reader.gd`, `BookReader`: four short original stories, a
 picture and text per page). Click her bed to sleep: night falls, "Bonne nuit, Chachoue…", then "Le lendemain matin…" (no day count shown or kept for now; `Season.day` stays 1).
 Click the fridge: it opens (`InteriorArt.fridge_open()`) and she takes a random snack (`InteriorArt.snack(kind)`), "Miam !".
@@ -156,7 +156,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   eats with stuffed cheeks).
 - `ui/wardrobe.gd` (`Wardrobe`, CanvasLayer 60): the dressing window (mirror preview + tabs of clothes, colours, patterns,
   hairstyle and hair colour, hats, accessories; "Au hasard", "Comme d'habitude"). On "C'est parfait !" the house calls `CharacterLook.dress_charlotte()`,
-  which keeps the look for every scene and saves it to `user://charlotte_outfit.tres`; `CharacterLook.charlotte()` returns it
+  which keeps the look for every scene and saves it in the game's slot folder; `CharacterLook.charlotte()` returns it
   (else `usual()`, the yellow dress). Delete that file after tests that press "C'est parfait !". Picking a clothing colour drops
   Charlotte's exact-colour `overrides` for clothes (`cloth_*`, `accent_*`, `shoe_*`). Design sheets use `CharacterLook.usual()`.
 - Outdoors in winter Charlotte wears a copy of her look dressed by `Season.dress_for_weather` (coat, boots, tuque, scarf):
@@ -266,11 +266,14 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 ## Saving
 
 - `world/game_state.gd` (`GameState`): the game in progress (pocket `money`, `quests`, story `flags`, plus `Season.day` /
-  `Season.current`) and `user://save.json` (scene path + Charlotte's x). `world/saver.gd` (`Saver`), added by `StreetScene`
-  and `Interior`, autosaves 1 s after a scene opens, every 10 s, on leaving it and on window close.
-- Title screen: "Continuer" (`GameState.load_game()` → restores state, sets `Transition.street_x` / `inside_x`, loads the
-  scene) when a save exists, and "Nouvelle partie" (`GameState.new_game()`: day 1, autumn, starting money, clears the save,
-  her outfit and the fridge drawings).
+  `Season.current`). Several games side by side: `GameState.SLOTS` (3) slots, `GameState.slot` the current one; each
+  keeps `save.json` (scene path + Charlotte's x), her outfit (`CharacterLook.outfit_path()`) and her fridge drawings
+  (`DrawingPad.folder()`) in `user://slots/<n>/` (`slot_dir()`); the last one played is in `user://settings.cfg`
+  [game] last_slot. `migrate()` moves an old single `user://save.json` into slot 1. `world/saver.gd` (`Saver`), added by
+  `StreetScene` and `Interior`, autosaves 1 s after a scene opens, every 10 s, on leaving it and on window close.
+- Title screen: "Continuer" (`GameState.load_game(last_slot())`) and "Mes parties" (a card per slot: season, age, stars,
+  money, "Jouer" / "Effacer" with a confirmation, or "Nouvelle partie" in a free slot, `GameState.new_game(n)`); with no
+  save at all, just "Nouvelle partie" (slot 1).
 - `GameState.enabled()` is false for test runs (`--screenshot=`, `--x=`, `-s` scripts), so they never write or wipe the save.
   A plain scene run (no such args) does save: back up `user://` first if you must test that way.
 

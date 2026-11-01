@@ -45,14 +45,18 @@ const ADULT_HAIR: Array[String] = ["short", "bob", "bun", "curly", "long_straigh
 @export var overrides := {}
 
 ## What Charlotte chose in her wardrobe; kept between runs.
-const OUTFIT_PATH := "user://charlotte_outfit.tres"
 static var _outfit: CharacterLook
+
+
+## Her outfit's file, in the current game's folder.
+static func outfit_path() -> String:
+	return GameState.slot_dir() + "/charlotte_outfit.tres"
 
 
 ## Charlotte as she is dressed right now (her usual yellow dress unless she changed in her room).
 static func charlotte() -> CharacterLook:
-	if _outfit == null and ResourceLoader.exists(OUTFIT_PATH):
-		_outfit = ResourceLoader.load(OUTFIT_PATH, "", ResourceLoader.CACHE_MODE_IGNORE) as CharacterLook
+	if _outfit == null and ResourceLoader.exists(outfit_path()):
+		_outfit = ResourceLoader.load(outfit_path(), "", ResourceLoader.CACHE_MODE_IGNORE) as CharacterLook
 	if _outfit:
 		return _outfit.duplicate(true)
 	return usual()
@@ -61,13 +65,19 @@ static func charlotte() -> CharacterLook:
 ## Back to her usual dress (a new game).
 static func forget_outfit() -> void:
 	_outfit = null
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(OUTFIT_PATH))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(outfit_path()))
+
+
+## Forgets the outfit in memory (another game was loaded): read again from that game's folder.
+static func reload_outfit() -> void:
+	_outfit = null
 
 
 ## Keeps the outfit for every scene, and on disk.
 static func dress_charlotte(look: CharacterLook) -> void:
 	_outfit = look.duplicate(true)
-	ResourceSaver.save(_outfit, OUTFIT_PATH)
+	DirAccess.make_dir_recursive_absolute(GameState.slot_dir())
+	ResourceSaver.save(_outfit, outfit_path())
 
 
 ## Charlotte's mother (from reference/mere_charlotte.jpg): long wavy light-brown hair with blond lights, fair skin,
