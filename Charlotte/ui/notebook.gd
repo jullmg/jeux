@@ -279,59 +279,31 @@ class _Paper:
 		draw_rect(Rect2(size.x - 16, -4, 9, size.y + 8), Color("#2B2B33"))
 		draw_rect(Rect2(size.x - 16, -4, 3, size.y + 8), Color("#4A4A55"))
 
+	# Charlotte's crayon drawings round the page (CuteArt, crayon style): a smiling sun, a rainbow and a cloud,
+	# hearts and stars in the margin, her hamster, her cat, a dog, a flower, her house, herself, her signature.
 	func _doodles() -> void:
 		var pink: Color = CRAYONS[0]
-		var blue: Color = CRAYONS[1]
 		var yellow: Color = CRAYONS[2]
-		var green: Color = CRAYONS[3]
-		var orange: Color = CRAYONS[4]
 		var purple: Color = CRAYONS[5]
-		# A smiling sun, top right.
-		var sun := Vector2(size.x - 60, 232)
-		_scribble_circle(sun, 22, yellow)
-		for k in 10:
-			var d := Vector2.from_angle(TAU * k / 10.0 + 0.2)
-			_wobble([sun + d * 28.0, sun + d * 40.0], orange)
-		_wobble([sun + Vector2(-9, -4), sun + Vector2(-7, -4)], Color("#3A3A48"), 3.0)
-		_wobble([sun + Vector2(7, -4), sun + Vector2(9, -4)], Color("#3A3A48"), 3.0)
-		_arc(sun + Vector2(0, 2), 9, 0.4, PI - 0.4, Color("#3A3A48"))
-		# A little rainbow between the title and the header.
+		CuteArt.sun(self, Vector2(size.x - 62, 236), 17, true, _rng)
 		for k in 4:
-			_arc(Vector2(392, 78), 30 - k * 6, PI, TAU, [pink, orange, yellow, green][k])
-		_cloud(Vector2(366, 80), Color("#BFD3EA"))
-		# Stars and hearts in the margin.
-		for at in [Vector2(36, 150), Vector2(38, 330), Vector2(34, 500)]:
-			_heart(at, pink)
-		for at in [Vector2(40, 240), Vector2(36, 420), Vector2(size.x - 44, 330)]:
-			_star(at, 9, yellow)
-		# Her hamster, in the margin: round, ears, whiskers.
-		var h := Vector2(38, 600 - 24)
-		_scribble_circle(h, 15, orange)
-		_scribble_circle(h + Vector2(-9, -13), 5, orange)
-		_scribble_circle(h + Vector2(9, -13), 5, orange)
-		draw_circle(h + Vector2(-5, -2), 1.8, Color("#3A3A48"))
-		draw_circle(h + Vector2(5, -2), 1.8, Color("#3A3A48"))
-		draw_circle(h + Vector2(0, 3), 1.6, pink)
-		for sx in [-1.0, 1.0]:
-			_wobble([h + Vector2(sx * 6, 4), h + Vector2(sx * 20, 1)], Color("#3A3A48"), 1.0)
-		# A cat saying miaou, bottom right.
-		var cat := Vector2(size.x - 120, size.y - 70)
-		_scribble_circle(cat, 18, blue)
-		_wobble([cat + Vector2(-16, -8), cat + Vector2(-12, -26), cat + Vector2(-4, -16)], blue)
-		_wobble([cat + Vector2(16, -8), cat + Vector2(12, -26), cat + Vector2(4, -16)], blue)
-		draw_circle(cat + Vector2(-6, -2), 2.0, Color("#3A3A48"))
-		draw_circle(cat + Vector2(6, -2), 2.0, Color("#3A3A48"))
-		_arc(cat + Vector2(-3, 5), 3, 0.2, PI - 0.2, Color("#3A3A48"))
-		_arc(cat + Vector2(3, 5), 3, 0.2, PI - 0.2, Color("#3A3A48"))
-		draw_string(ThemeDB.fallback_font, cat + Vector2(22, -18), "miaou !", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, purple)
-		# A flower by the cat, and her signature.
-		var f := Vector2(size.x - 190, size.y - 50)
-		_wobble([f, f + Vector2(2, 30)], green, 2.5)
-		_wobble([f + Vector2(1, 18), f + Vector2(12, 12)], green, 2.5)
-		for k in 6:
-			_scribble_circle(f + Vector2.from_angle(TAU * k / 6.0) * 8.0, 5, pink)
-		draw_circle(f, 4, yellow)
-		draw_string(ThemeDB.fallback_font, Vector2(size.x - 260, size.y - 14), "Chacha ♥", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, pink)
+			_arc(Vector2(392, 82), 30 - k * 6, PI, TAU, [pink, CRAYONS[4], yellow, CRAYONS[3]][k])
+		for k in [[-14, 4, 10], [0, -2, 12], [14, 4, 10]]:
+			CuteArt._shape(self, CuteArt._oval(Vector2(362 + k[0], 84 + k[1]), Vector2(k[2], k[2] * 0.8)), Color("#BFD3EA"), true, _rng)
+		for at in [Vector2(37, 150), Vector2(37, 330), Vector2(37, 500)]:
+			CuteArt.heart(self, at, 11, pink, true, _rng)
+		for at in [Vector2(37, 240), Vector2(37, 420), Vector2(size.x - 44, 340)]:
+			CuteArt.star(self, at, 11, yellow, true, _rng)
+		CuteArt.hamster_head(self, Vector2(37, size.y - 28), 17, true, _rng)
+		var cat := Vector2(size.x - 98, size.y - 66)
+		CuteArt.cat_head(self, cat, 20, Color("#8E8E96"), true, _rng)
+		draw_string(ThemeDB.fallback_font, cat + Vector2(-58, -30), "miaou !", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, purple)
+		CuteArt.dog_head(self, Vector2(size.x - 50, 405), 17, Color("#C9A27A"), Color("#7A5232"), true, _rng)
+		CuteArt.flower(self, Vector2(size.x - 170, size.y - 40), 12, pink, true, _rng)
+		CuteArt._stroke(self, [Vector2(size.x - 170, size.y - 30), Vector2(size.x - 168, size.y - 8)], CRAYONS[3], 2.5, true, _rng)
+		CuteArt.house(self, Vector2(size.x - 52, 470), 22, true, _rng)
+		CuteArt.me(self, Vector2(size.x - 54, 130), 20, true, _rng)
+		draw_string(ThemeDB.fallback_font, Vector2(size.x - 290, size.y - 14), "Chacha ♥", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, pink)
 
 	# Crayon strokes: a line through `pts`, each segment jittered a little, drawn twice like a child's hand.
 	func _wobble(pts: Array, color: Color, width := 2.2) -> void:
