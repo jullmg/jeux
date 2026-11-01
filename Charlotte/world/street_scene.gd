@@ -542,6 +542,21 @@ func _build_utility_poles() -> void:
 	add_child(poles)
 
 
+# The planted curb extensions at every corner (CurbGarden): our curb bulges into the parking lane on both sides
+# of each cross street, in front of the people.
+func _build_curb_gardens() -> void:
+	var i := 0
+	for cs in _cross_streets:
+		for side in [-1.0, 1.0]:
+			var garden := CurbGarden.new()
+			garden.corner = -side
+			garden.width = 250.0
+			garden.position = Vector2(cs.x0 - 10.0 - garden.width if side < 0.0 else cs.x1 + 10.0 + garden.width, CURB_Y + 1.0)
+			garden.seed_value = seed_value * 13 + i
+			add_child(garden)
+			i += 1
+
+
 # ── Trees ───────────────────────────────────────────────────────
 
 func _tree_textures() -> Array[Texture2D]:
@@ -704,6 +719,7 @@ func _follow_charlotte() -> void:
 func _build_props() -> void:
 	_build_extra_props()
 	_build_utility_poles()
+	_build_curb_gardens()
 	for cs in _cross_streets:
 		add_child(CrossStreet.make(CrossStreet.Part.SIGNS, cs))
 	for after in lamps_after:
