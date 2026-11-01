@@ -4,7 +4,7 @@ A small Godot 4.7 2D game (GL Compatibility, 1280×720, `canvas_items` stretch) 
 a little girl (nicknamed **Chachoue**: her parents and friends call her that; neighbours and shopkeepers say "Charlotte"), on her street in Montréal (Rosemont): her side of **6e Avenue** between
 **Rue Dandurand** (left) and **Rue Holt** (right), in autumn. In-game text is in **French** (Québec).
 
-Current state: a living, side-scrolling street. Charlotte walks with ←/→ or by clicking/tapping the street; double-pressing the arrow or double-clicking/tapping makes her run
+Current state: a living, side-scrolling street. Charlotte walks with ←/→ or by clicking/tapping the street; double-pressing the arrow or double-clicking/tapping makes her run; ↑ in front of a door (any `DoorSpot` whose area spans her x) goes through it (`PlayerControl._door_ahead`)
 (`Character.running`, `RUN_SPEED` × walk speed, eased; `Character.speed()` gives the current speed).
 Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks over and pets it. Click her front door
 (ground floor of `duplex_charlotte`, n° 5672) to go inside her flat. In her bedroom, click the dresser's drawers to open her

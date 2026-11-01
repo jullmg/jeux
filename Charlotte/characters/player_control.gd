@@ -1,7 +1,7 @@
 class_name PlayerControl
 extends Node
 ## Moves Charlotte with ←/→ or click/tap-to-walk (double-press or double-click/tap to run), and walks her
-## to clicked interactables before calling their interact(). Shared by the street and the house. Interactables join the "interactable" group and
+## to clicked interactables before calling their interact(); ↑ in front of a door (any DoorSpot) goes through it. Shared by the street and the house. Interactables join the "interactable" group and
 ## implement can_interact(), hit_test(point), approach_x(from_x), reserve(), release(), interact(charlotte).
 
 var charlotte: Character
@@ -77,7 +77,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	var now := Time.get_ticks_msec() / 1000.0
 	var key_dir := 1 if event.is_action_pressed("ui_right") else -1 if event.is_action_pressed("ui_left") else 0
-	if key_dir != 0:
+	if event.is_action_pressed("ui_up"):
+		# ↑ in front of a door (or any spot): go through it, as if it had been clicked.
+		var door := _door_ahead()
+		if door:
+			_set_goal_target(door)
+			_goal_x = clampf(door.approach_x(charlotte.position.x), bounds.x, bounds.y)
+	elif key_dir != 0:
 		# Same arrow twice in a row: run for as long as it is held.
 		charlotte.running = key_dir == _last_key_dir and now - _last_key_at < DOUBLE_TIME
 		_last_key_dir = key_dir
@@ -109,6 +115,22 @@ func _interactable_at(point: Vector2) -> CanvasItem:
 		if node.can_interact() and node.hit_test(point):
 			return node
 	return null
+
+
+# The door (DoorSpot) Charlotte stands in front of: its area spans her x; the nearest if several.
+func _door_ahead() -> DoorSpot:
+	var best: DoorSpot = null
+	var best_d := INF
+	var x := charlotte.position.x
+	for node in get_tree().get_nodes_in_group("interactable"):
+		var door := node as DoorSpot
+		if door == null or not door.can_interact() or x < door.rect.position.x - 20.0 or x > door.rect.end.x + 20.0:
+			continue
+		var d := absf(door.rect.get_center().x - x)
+		if d < best_d:
+			best = door
+			best_d = d
+	return best
 
 
 func _set_goal_target(target: CanvasItem) -> void:
