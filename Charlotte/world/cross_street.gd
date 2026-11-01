@@ -48,6 +48,7 @@ var guard := false
 var sign_side := 1.0
 
 var _rng := RandomNumberGenerator.new()
+var _tree_tex: Array[Texture2D] = []
 # This season's canopy colours and what lies in the gutters.
 var _foliage: Array[Color] = Season.foliage()
 var _litter: Array[Color] = Season.litter()
@@ -84,6 +85,11 @@ func road_x(y: float) -> Vector2:
 
 func _ready() -> void:
 	_rng.seed = hash(street_name)
+	if part == Part.VISTA:
+		# Two street trees drawn like the street's own (PropArt.tree, this season), from their own random numbers.
+		var trees := RandomNumberGenerator.new()
+		trees.seed = hash(street_name + along_name)
+		_tree_tex = [PropArt.tree(trees), PropArt.tree(trees)]
 
 
 func _draw() -> void:
@@ -116,15 +122,65 @@ func _draw_vista() -> void:
 		var lc: Color = _litter[_rng.randi_range(0, 4) % _litter.size()]
 		if float(i % 10) / 10.0 < Season.litter_amount():
 			draw_circle(_at(Vector2(gx, FACADE_Y), d), 4.0 / (1.0 + d), lc)
+	_street_details()
 	_walls(left_walls, x0, -1.0)
 	_walls(right_walls, x1, 1.0)
 	_haze_band(3.0, 9.0, 0.0, 0.35)
 	_haze_band(9.0, FAR, 0.35, 0.6)
-	# Street trees on both sidewalks, far to near.
+	# Street trees on both sidewalks, far to near, then the utility poles along the curb with their wires.
+	var k := 0
 	for d in [14.0, 9.5, 6.6, 4.6, 3.2, 2.2, 1.3]:
 		for side in [-1.0, 1.0]:
 			var tx := x0 + sidewalk * 0.35 if side < 0.0 else x1 - sidewalk * 0.35
-			_tree(Vector2(tx, FACADE_Y), d + (0.3 if side > 0.0 else 0.0))
+			_tree(Vector2(tx, FACADE_Y), d + (0.3 if side > 0.0 else 0.0), k)
+			k += 1
+	_poles()
+
+
+# The sidewalks' slab joints, the gutters along the curbs, a manhole cover in the road.
+func _street_details() -> void:
+	var d := 0.35
+	while d < DETAIL:
+		for side in [[x0, x0 + sidewalk], [x1 - sidewalk, x1]]:
+			draw_line(_at(Vector2(side[0], FACADE_Y), d), _at(Vector2(side[1], FACADE_Y), d), Color(0, 0, 0, 0.12), maxf(1.0, 2.0 / (1.0 + d)))
+		d += 0.7
+	for side in [x0 + sidewalk + 7.0, x1 - sidewalk - 7.0]:
+		draw_line(_at(Vector2(side, FACADE_Y), 0.0), _at(Vector2(side, FACADE_Y), FAR), Color(0, 0, 0, 0.12), 7.0)
+	var mh := _at(Vector2((x0 + x1) / 2.0 + 30.0, FACADE_Y), 2.5)
+	var r := 22.0 / 3.5
+	draw_set_transform(mh, 0.0, Vector2(1.0, 0.3))
+	draw_circle(Vector2.ZERO, r, Color("#4A4946"))
+	draw_arc(Vector2.ZERO, r, 0, TAU, 16, Color("#6E6D68"), 1.0)
+	draw_set_transform(Vector2.ZERO)
+
+
+# Wooden poles along the left curb, receding, the wires sagging from one to the next down to the horizon.
+func _poles() -> void:
+	var curb := x0 + sidewalk - 8.0
+	var depths: Array[float] = [1.6, 4.0, 7.2, 11.5, 17.0]
+	var tops: Array[Vector2] = []
+	var scales: Array[float] = []
+	for d in depths:
+		var foot := _at(Vector2(curb, FACADE_Y), d)
+		var top := _at(Vector2(curb, FACADE_Y - 470.0), d)
+		var s := 1.0 / (1.0 + d)
+		var wood := Color("#6E5B4A").lerp(HAZE, clampf(d / FAR, 0.0, 0.6))
+		draw_line(foot, top, wood, maxf(1.0, 12.0 * s))
+		draw_line(top + Vector2(-46.0, 24.0) * s, top + Vector2(46.0, 24.0) * s, wood.darkened(0.2), maxf(1.0, 6.0 * s))
+		tops.append(top + Vector2(0, 24.0) * s)
+		scales.append(s)
+	tops.append(_vp() + Vector2(0, -6))
+	scales.append(0.0)
+	for w in 3:
+		var off := Vector2((w - 1) * 30.0, 0)
+		for i in tops.size() - 1:
+			var a := tops[i] + off * scales[i]
+			var b := tops[i + 1] + off * scales[i + 1]
+			var pts := PackedVector2Array()
+			for t in 9:
+				var u := t / 8.0
+				pts.append(a.lerp(b, u) + Vector2(0, sin(u * PI) * a.distance_to(b) * 0.06))
+			draw_polyline(pts, Color(0.12, 0.1, 0.1, 0.6), 1.0, true)
 
 
 # The end of the street: open sky over the gap hides the distant city behind it (the top fades out so the clouds
@@ -221,19 +277,35 @@ func _walls(walls: Array, front_x: float, side: float) -> void:
 		var d1: float = w.to
 		match w.kind:
 			"gap":
-				# A back lane: autumn trees and a glimpse of fences.
-				_wall_quad(front_x, FACADE_Y - 70.0, FACADE_Y, d0, d1, Color("#A07850"))
-				for t in 3:
-					var d := lerpf(d0, d1, (t + 0.5) / 3.0)
-					var c := _at(Vector2(front_x + side * 40.0, FACADE_Y - 190.0), d)
-					draw_circle(c, 70.0 / (1.0 + d), _foliage[t % _foliage.size()])
+				# A back lane: a tree over a board fence, the lane's opening between.
+				if not _tree_tex.is_empty() and d0 < DETAIL:
+					var md := (d0 + d1) / 2.0
+					var sz := Vector2(380, 780) * 0.42 / (1.0 + md)
+					var foot := _at(Vector2(front_x + side * 30.0, FACADE_Y - 60.0), md)
+					draw_texture_rect(_tree_tex[1], Rect2(foot - Vector2(sz.x * 0.5, sz.y), sz), false, Color.WHITE.lerp(HAZE, clampf(md / FAR, 0.0, 0.6)))
+				var fence := Color("#9A958C")
+				_wall_quad(front_x, FACADE_Y - 120.0, FACADE_Y, d0, d0 + (d1 - d0) * 0.3, fence)
+				_wall_quad(front_x, FACADE_Y - 120.0, FACADE_Y, d1 - (d1 - d0) * 0.3, d1, fence)
+				var fd := d0
+				while fd < d1 and fd < DETAIL:
+					if fd < d0 + (d1 - d0) * 0.3 or fd > d1 - (d1 - d0) * 0.3:
+						draw_line(_at(Vector2(front_x, FACADE_Y - 120.0), fd), _at(Vector2(front_x, FACADE_Y), fd), fence.darkened(0.3), 1.0)
+					fd += 0.04
 			_:
 				var top: float = w.top
 				var col: Color = w.color
 				_wall_quad(front_x, top, FACADE_Y, d0, d1, col)
+				# Brick courses, near enough to see.
+				var y := top + 22.0
+				while y < FACADE_Y - 4.0:
+					draw_line(_at(Vector2(front_x, y), d0), _at(Vector2(front_x, y), minf(d1, DETAIL)), Color(col.darkened(0.3), 0.35), 1.0)
+					y += 13.0
 				# Seen at a glancing angle: a darker shade, the further from the sun the darker.
 				_wall_quad(front_x, top, FACADE_Y, d0, d1, Color(0.1, 0.04, 0.06, 0.18 if side < 0.0 else 0.3))
 				_wall_quad(front_x, top, top + 14.0, d0, d1, col.darkened(0.35))
+				_wall_quad(front_x, top - 6.0, top + 2.0, d0, d1, col.lightened(0.2))
+				# Where one building ends and the next begins.
+				draw_line(_at(Vector2(front_x, top), d0), _at(Vector2(front_x, FACADE_Y), d0), col.darkened(0.5), maxf(1.0, 2.5 / (1.0 + d0)))
 				_wall_details(w, front_x, top, d0, d1)
 		d0 = d1
 
@@ -289,6 +361,28 @@ func _wall_details(w: Dictionary, front_x: float, top: float, d0: float, d1: flo
 			_wall_quad(front_x, top - 6.0, top + 18.0, d0, d1, Color("#4E8C7A"))
 			_wall_quad(front_x, FACADE_Y - 60.0, FACADE_Y, d0, d1, Color("#C9C2B4"))
 		_:
+			# Each building (about 0.55 deep): a door at the top of its steps, iron balconies on the upper floors, and
+			# the outdoor stair from the first balcony down to the sidewalk.
+			var count := maxi(1, int(round(span / 0.55)))
+			for b in count:
+				var b0 := d0 + span * b / count
+				var bs := span / count
+				if b0 > DETAIL:
+					break
+				for f in range(1, floors):
+					var yb := FACADE_Y - 150.0 * f + 8.0
+					_wall_quad(front_x, yb, yb + 7.0, b0 + bs * 0.05, b0 + bs * 0.62, Color("#D8D4CC"))
+					_wall_quad(front_x, yb - 32.0, yb - 28.0, b0 + bs * 0.05, b0 + bs * 0.62, Color("#1F1F1F"))
+					for k2 in 7:
+						var bd := b0 + bs * lerpf(0.07, 0.6, k2 / 6.0)
+						draw_line(_at(Vector2(front_x, yb - 30.0), bd), _at(Vector2(front_x, yb), bd), Color("#1F1F1F"), 1.0)
+				_wall_quad(front_x, FACADE_Y - 116.0, FACADE_Y - 22.0, b0 + bs * 0.4, b0 + bs * 0.5, Color("#5E3A26"))
+				_wall_quad(front_x, FACADE_Y - 22.0, FACADE_Y, b0 + bs * 0.36, b0 + bs * 0.54, Color("#A8A196"))
+				if floors > 1:
+					var s0 := _at(Vector2(front_x, FACADE_Y - 142.0), b0 + bs * 0.62)
+					var s1 := _at(Vector2(front_x, FACADE_Y), b0 + bs * 0.95)
+					draw_line(s0, s1, Color("#1F1F1F"), maxf(1.0, 3.0 / (1.0 + b0)))
+					draw_line(s0 + Vector2(0, -30.0) / (1.0 + b0), s1 + Vector2(0, -30.0) / (1.0 + b0), Color("#1F1F1F"), 1.0)
 			for f in floors:
 				_windows(front_x, top + 40.0 + f * 150.0, d0, d1, maxi(2, int(span * 5.0)), glass, trim)
 
@@ -303,28 +397,28 @@ func _windows(front_x: float, y: float, d0: float, d1: float, count: int, glass:
 			return
 		var a := d0 + step * (i + 0.25)
 		var b := d0 + step * (i + 0.75)
+		_wall_quad(front_x, y - 16.0, y - 6.0, a - step * 0.08, b + step * 0.08, trim.darkened(0.08))
 		_wall_quad(front_x, y - 4.0, y + 94.0, a - step * 0.04, b + step * 0.04, trim)
 		_wall_quad(front_x, y, y + 90.0, a, b, glass)
+		_wall_quad(front_x, y + 94.0, y + 100.0, a - step * 0.07, b + step * 0.07, trim.darkened(0.12))
+		if a < 4.0:
+			var m := (a + b) / 2.0
+			draw_line(_at(Vector2(front_x, y), m), _at(Vector2(front_x, y + 90.0), m), trim, maxf(1.0, 3.0 / (1.0 + m)))
+			draw_line(_at(Vector2(front_x, y + 32.0), a), _at(Vector2(front_x, y + 32.0), b), trim, maxf(1.0, 3.0 / (1.0 + m)))
 
 
-func _tree(base: Vector2, d: float) -> void:
+# A street tree at depth d, drawn like the street's own (one of _tree_tex, this season's), in its pit, hazier with
+# distance.
+func _tree(base: Vector2, d: float, k := 0) -> void:
 	var s := 1.0 / (1.0 + d)
 	var foot := _at(base, d)
-	var crown := _at(base + Vector2(0, -250), d)
-	draw_line(foot, crown, Color("#5E4A3C"), maxf(1.5, 14.0 * s))
-	if Season.is_winter():
-		# Bare branches with a line of snow along each.
-		for i in 6:
-			var a := -PI / 2.0 + (i - 2.5) * 0.45
-			var tip := crown + Vector2.from_angle(a) * 90.0 * s
-			draw_line(crown + Vector2(0, 30) * s, tip, Color("#5E4A3C"), maxf(1.0, 6.0 * s))
-			draw_line(crown + Vector2(0, 26) * s, tip + Vector2(0, -3) * s, Color("#F4F7FA"), maxf(1.0, 3.0 * s))
-		return
-	for i in 7:
-		var a := TAU * i / 7.0 + d
-		var off := Vector2(cos(a) * 70.0, sin(a) * 50.0) * s
-		draw_circle(crown + off, 62.0 * s, _foliage[(i + int(d * 3.0)) % _foliage.size()].darkened(0.08 * float(i % 2)))
-	draw_circle(crown + Vector2(-22, -26) * s, 40.0 * s, _foliage[2].lightened(0.15))
+	draw_set_transform(foot, 0.0, Vector2(1.0, 0.3))
+	draw_circle(Vector2.ZERO, 46.0 * s, Color("#5A4232").lerp(HAZE, clampf(d / FAR, 0.0, 0.6)))
+	draw_set_transform(Vector2.ZERO)
+	var sizes: Array[float] = [1.0, 0.85, 1.15]
+	var size := Vector2(380, 780) * 0.5 * s * sizes[k % 3]
+	draw_texture_rect(_tree_tex[k % _tree_tex.size()], Rect2(foot - Vector2(size.x * 0.5, size.y), size), false,
+		Color.WHITE.lerp(HAZE, clampf(d / FAR * 1.4, 0.0, 0.65)))
 
 
 # ── Ground ──────────────────────────────────────────────────────
