@@ -38,6 +38,9 @@ var _pet_low := 1.0
 var _run := 0.0
 var _held: Node2D
 var _hold := 0.0
+## Sitting on a bicycle: leaning forward, hands on the bars, legs turning with `pedal` (the crank's angle).
+var riding := false
+var pedal := 0.0
 ## Little idle gestures when she stands still a while (Charlotte, her parents): a wave, a hop, a stretch, a look round.
 var fidgets := false
 var _shade: ShaderMaterial
@@ -213,6 +216,15 @@ func _apply_pose() -> void:
 	_body.scale.x = facing
 	if _shade:
 		_shade.set_shader_parameter("facing", float(facing))
+	if riding:
+		_leg_front.rotation = deg_to_rad(-62.0) + sin(pedal) * deg_to_rad(26.0)
+		_leg_back.rotation = deg_to_rad(-62.0) + sin(pedal + PI) * deg_to_rad(26.0)
+		_arm_front.rotation = deg_to_rad(-64.0)
+		_arm_back.rotation = deg_to_rad(-58.0)
+		_body.rotation = deg_to_rad(16.0) * facing
+		_body.position.y = 0.0
+		_head.rotation = deg_to_rad(-10.0)
+		return
 	# Breathing while she stands, and the idle gesture on top.
 	var still := 0.0 if is_walking else 1.0
 	_torso.scale.y = 1.0 + 0.014 * sin(_time * 2.1) * still
