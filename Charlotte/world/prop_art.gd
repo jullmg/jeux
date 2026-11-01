@@ -21,6 +21,21 @@ static func _hex(c: Color) -> String:
 	return "#" + c.to_html(false)
 
 
+## Canvas 120x110: the neighbours' sign at a lane entrance: a yellow board with two running children, screwed to
+## the wall; the street puts the words on it ("RALENTISSEZ !" above, "ENFANTS EN LIBERTÉ !" below) as labels.
+static func slow_sign() -> ImageTexture:
+	var s := '<rect x="4" y="4" width="112" height="102" rx="8" fill="#FFD23F" stroke="#1E1E1E" stroke-width="4"/>'
+	for k in [[38.0, 1.0], [80.0, -1.0]]:
+		var x: float = k[0]
+		var d: float = k[1]
+		s += '<circle cx="%.1f" cy="40" r="6" fill="#1E1E1E"/>' % x
+		s += '<path d="M%.1f 46 l%.1f 16 M%.1f 52 l%.1f -4 M%.1f 52 l%.1f 6 M%.1f 62 l%.1f 12 M%.1f 62 l%.1f 10" stroke="#1E1E1E" stroke-width="4" stroke-linecap="round" fill="none"/>' % [
+			x, d * 3, x + d * 1, d * 10, x + d * 1, -d * 9, x + d * 3, d * 8, x + d * 3, -d * 8]
+	for c in [[10, 10], [110, 10], [10, 100], [110, 100]]:
+		s += '<circle cx="%d" cy="%d" r="2" fill="#7E7A72"/>' % c
+	return tex(_svg(120, 110, s))
+
+
 ## Canvas 90x120: the dépanneur's white sandwich board on the sidewalk (lottery, cold drinks, snacks).
 static func sandwich_board() -> ImageTexture:
 	var s := '<path d="M20 6 L70 6 L84 118 H74 L66 60 H24 L16 118 H6 Z" fill="#F4F2EC" stroke="#9A968E" stroke-width="2.5" stroke-linejoin="round"/>'

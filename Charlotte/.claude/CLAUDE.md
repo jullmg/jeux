@@ -88,7 +88,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   uses them too. Lost-cat posters are stapled to the pole nearest the street's second lamp (`_poster_spot`).
   `layout` runs: `ecole` (école Saint-Jean-de-Brébeuf, across Dandurand), `rue_dandurand`, Charlotte's block (`depanneur`: the
   side of dépanneur Xin-Xin, which fronts Dandurand; `garages`; `ruelle_verte`, the green lane with its sign; … `coin_holt`),
-  `rue_holt`, `coin_holt_est`. The first three buildings of the block are drawn from the photos in `reference/` (the user wants
+  `rue_holt`, `coin_holt_est`. The Holt-side lane entrance on 6e has the neighbours' yellow "RALENTISSEZ ! ENFANTS EN
+  LIBERTÉ !" sign (`PropArt.slow_sign`, words as labels). The first three buildings of the block are drawn from the photos in `reference/` (the user wants
   every detail as close to the pictures as possible). The cross-street vistas run to the horizon with Mount Royal at the end. Entries in `cross_streets` are gaps (width in px), not SVGs: `CrossStreet`
   (`world/cross_street.gd`) draws them in one-point perspective as three nodes in the draw order: `VISTA` (before the houses:
   receding street, walls along it from `left_walls`/`right_walls`, street trees), `GROUND` (after `Street`: asphalt through the
