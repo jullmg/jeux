@@ -171,7 +171,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `PropArt` generates trees, lamp posts, hydrants, bikes, leaves as textures. `PropArt.car()`/`wheel()` still exist but
   cars were removed from both scenes on purpose (2026-10-31); see git history to bring them back.
 - Cyclists ride by in the traffic lane now and then (`world/cyclist.gd`, `Cyclist.random`: the bike is drawn, the rider is
-  a `Character` with `riding = true`, legs following `pedal`; `StreetScene._spawn_cyclists`,
+  a `Character` with `riding = true`: each leg split at the knee (`_pedal_legs`, two-bone IK, foot on the turning pedal); `StreetScene._spawn_cyclists`,
   `_traffic`, own RNG, rarer in winter, sometimes ringing).
 - Background life: `WireBirds` (`world/wire_birds.gd`: pigeons and sparrows on the poles' cable, fly off when
   Charlotte comes close or runs, others land later; streets and lanes), children playing in the lanes (not on the

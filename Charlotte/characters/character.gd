@@ -41,6 +41,9 @@ var _hold := 0.0
 ## Sitting on a bicycle: leaning forward, hands on the bars, legs turning with `pedal` (the crank's angle).
 var riding := false
 var pedal := 0.0
+# Riding, each leg is split in two at the knee (the same texture: thigh, then shin and shoe) so it can bend:
+# back thigh, back shin, front thigh, front shin.
+var _ride_legs: Array[Sprite2D] = []
 ## Little idle gestures when she stands still a while (Charlotte, her parents): a wave, a hop, a stretch, a look round.
 var fidgets := false
 var _shade: ShaderMaterial
@@ -143,6 +146,61 @@ func is_holding() -> bool:
 	return _held != null and is_instance_valid(_held)
 
 
+# On a bike: each foot on its pedal going round in front of and below the hip, the knee bending forward (two-bone IK).
+func _pedal_legs() -> void:
+	var leg_len: float = _rig.leg_len
+	var thigh_len := leg_len * 0.5 - 6.0
+	var shin_len := leg_len * 0.5
+	if _ride_legs.is_empty():
+		var tex := _leg_front.texture
+		var pivot: Vector2 = _rig.leg_pivot
+		for leg: Sprite2D in [_leg_back, _leg_front]:
+			var at := leg.get_index()
+			var thigh := Sprite2D.new()
+			thigh.texture = tex
+			thigh.texture_filter = leg.texture_filter
+			thigh.region_enabled = true
+			thigh.region_rect = Rect2(0, 0, tex.get_width(), leg_len * 0.5 + 6.0)
+			thigh.centered = false
+			thigh.offset = -pivot
+			thigh.modulate = leg.modulate
+			thigh.material = _shade
+			var shin := Sprite2D.new()
+			shin.texture = tex
+			shin.texture_filter = leg.texture_filter
+			shin.region_enabled = true
+			shin.region_rect = Rect2(0, leg_len * 0.5, tex.get_width(), tex.get_height() - leg_len * 0.5)
+			shin.centered = false
+			shin.offset = -Vector2(pivot.x, 0)
+			shin.modulate = leg.modulate
+			shin.material = _shade
+			_body.add_child(thigh)
+			_body.move_child(thigh, at)
+			_body.add_child(shin)
+			_body.move_child(shin, at + 1)
+			leg.visible = false
+			_ride_legs.append_array([thigh, shin])
+	for k in 2:
+		var hip: Vector2 = (_leg_back if k == 0 else _leg_front).position
+		var centre := hip + Vector2(leg_len * 0.42, leg_len * 0.62)
+		var foot := centre + Vector2.from_angle(pedal + (PI if k == 0 else 0.0)) * leg_len * 0.2
+		var to_foot := foot - hip
+		var d := clampf(to_foot.length(), absf(thigh_len - shin_len) + 1.0, thigh_len + shin_len - 1.0)
+		var dir := to_foot.normalized()
+		var along := (thigh_len * thigh_len - shin_len * shin_len + d * d) / (2.0 * d)
+		var up := sqrt(maxf(thigh_len * thigh_len - along * along, 0.0))
+		# Of the two ways the knee could bend, the one forward (toward +x, where she faces in body space).
+		var knee_a := hip + dir * along + dir.orthogonal() * up
+		var knee_b := hip + dir * along - dir.orthogonal() * up
+		var knee := knee_a if knee_a.x > knee_b.x else knee_b
+		var thigh := _ride_legs[k * 2]
+		var shin := _ride_legs[k * 2 + 1]
+		thigh.position = hip
+		thigh.rotation = atan2(-(knee - hip).x, (knee - hip).y)
+		shin.position = knee
+		shin.rotation = atan2(-(hip + dir * d - knee).x, (hip + dir * d - knee).y)
+
+
 # Standing still a while, now and then: one little gesture, then back to rest.
 func _fidget(delta: float) -> void:
 	if _gesture != "":
@@ -217,8 +275,7 @@ func _apply_pose() -> void:
 	if _shade:
 		_shade.set_shader_parameter("facing", float(facing))
 	if riding:
-		_leg_front.rotation = deg_to_rad(-62.0) + sin(pedal) * deg_to_rad(26.0)
-		_leg_back.rotation = deg_to_rad(-62.0) + sin(pedal + PI) * deg_to_rad(26.0)
+		_pedal_legs()
 		_arm_front.rotation = deg_to_rad(-64.0)
 		_arm_back.rotation = deg_to_rad(-58.0)
 		_body.rotation = deg_to_rad(16.0) * facing
