@@ -25,3 +25,7 @@ Music="*res://audio/music.gd"
 MuteButton="*res://ui/mute_button.gd"
 Notebook="*res://ui/notebook.gd"
 GameMenu="*res://ui/game_menu.gd"
+
+[gui]
+
+theme/custom_font="res://ui/fonts/fredoka.tres"

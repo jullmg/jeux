@@ -290,6 +290,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Shared y-coordinates (`HOUSE_BASE_Y 592`, `CHARLOTTE_Y 638`, `CURB_Y 664`) and scales (`HOUSE_SCALE 0.57`,
   `CHAR_SCALE 0.38`, `TREE_SCALE 0.55`) are duplicated as constants in `main.gd` and `intro.gd`. Keep them in sync.
 - UI above the grade goes on a CanvasLayer > 50 so it keeps its true colours.
+- Font: Fredoka (rounded, SIL OFL, `ui/fonts/Fredoka.ttf` + `OFL.txt`), weight 520 via `ui/fonts/fredoka.tres`, set as
+  the project's `gui/theme/custom_font` (so Controls and `ThemeDB.fallback_font` draw_string() use it).
 - Palette: warm autumn street; UI blue `#1D4F91`, yellow `#FFD23F`, cream `#E8DDD0`.
 - GDScript style: static typing, `:=`, tabs, short section-banner comments.
 - Light comes from the low sun on the upper left: highlights on the left, shadows thrown to the right.
