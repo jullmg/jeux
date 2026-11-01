@@ -819,3 +819,46 @@ static func snack(kind: String) -> ImageTexture:
 				s += '<circle cx="%s" cy="%s" r="3.5" fill="#5A3A22"/>' % p
 	return tex(64, 64, s)
 
+
+
+# ── Chores ──────────────────────────────────────────────────
+
+## Canvas 120x90: a green watering can, its spout to the right, "floor" at the bottom.
+static func watering_can() -> ImageTexture:
+	var s := '<path d="M22 30 H74 L70 86 H26 Z" fill="#4FA34A" stroke="#2F6A2A" stroke-width="3" stroke-linejoin="round"/>'
+	s += '<path d="M72 50 L112 22 L116 28 L76 62 Z" fill="#4FA34A" stroke="#2F6A2A" stroke-width="3" stroke-linejoin="round"/>'
+	s += '<ellipse cx="114" cy="25" rx="6" ry="8" fill="#3E8E3A" stroke="#2F6A2A" stroke-width="2" transform="rotate(-35 114 25)"/>'
+	s += '<path d="M30 30 Q48 2 66 30" stroke="#2F6A2A" stroke-width="6" fill="none" stroke-linecap="round"/>'
+	s += '<rect x="28" y="40" width="10" height="38" fill="#FFFFFF" opacity="0.25"/>'
+	return tex(120, 90, s)
+
+
+## The things lying on Charlotte's bedroom floor until she tidies up. Canvas 80x50, "floor" at the bottom.
+static func mess(kind: String) -> ImageTexture:
+	var s := '<ellipse cx="40" cy="47" rx="30" ry="3" fill="#000000" opacity="0.15"/>'
+	match kind:
+		"sock":
+			s += '<path d="M22 14 H40 V32 Q40 40 50 40 H60 Q66 40 66 46 H34 Q22 46 22 34 Z" fill="#F2A7B9" stroke="#C26A84" stroke-width="2"/>'
+			for y in [20, 28]:
+				s += '<rect x="22" y="%d" width="18" height="4" fill="#FFFFFF" opacity="0.8"/>' % y
+		"book":
+			s += '<path d="M14 44 L40 36 L66 44 L40 48 Z" fill="#F4F1EA" stroke="#9A948A" stroke-width="1.5"/>'
+			s += '<path d="M12 46 L40 38 L40 42 L14 49 Z" fill="#3D7FD0"/><path d="M68 46 L40 38 L40 42 L66 49 Z" fill="#2F65A8"/>'
+		"ball":
+			s += '<circle cx="40" cy="30" r="16" fill="#E74C3C" stroke="#9E2420" stroke-width="2"/>'
+			s += '<path d="M24 30 Q40 22 56 30" stroke="#FFFFFF" stroke-width="4" fill="none"/><circle cx="34" cy="24" r="4" fill="#FFFFFF" opacity="0.5"/>'
+		"tshirt":
+			s += '<path d="M18 30 L30 22 H50 L62 30 L56 36 L52 33 V46 H28 V33 L24 36 Z" fill="#F2C230" stroke="#B5891E" stroke-width="2" stroke-linejoin="round"/>'
+			s += '<circle cx="40" cy="36" r="4" fill="#E85FA0"/>'
+		"crayons":
+			s += '<rect x="20" y="34" width="26" height="12" fill="#3D8BD9" stroke="#2B5E9A" stroke-width="1.5"/>'
+			var colors := ["#E74C3C", "#F1C40F", "#2ECC71", "#9B59B6"]
+			for i in 4:
+				s += '<path d="M%d %d l18 -4 l3 3 l-18 4 z" fill="%s"/>' % [44 + i * 2, 40 + i * 2 - 8, colors[i]]
+		_:
+			# A teddy bear, fallen on its back.
+			s += '<ellipse cx="44" cy="36" rx="18" ry="11" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2"/>'
+			s += '<circle cx="22" cy="32" r="11" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2"/>'
+			s += '<circle cx="16" cy="22" r="4" fill="#C49A6C" stroke="#7E5E3A" stroke-width="1.5"/><circle cx="26" cy="21" r="4" fill="#C49A6C" stroke="#7E5E3A" stroke-width="1.5"/>'
+			s += '<circle cx="19" cy="31" r="1.5" fill="#2B2B2B"/><circle cx="25" cy="31" r="1.5" fill="#2B2B2B"/>'
+	return tex(80, 50, s)

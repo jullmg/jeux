@@ -16,6 +16,11 @@ const CHACHA_DOOR_X := 3120.0
 const BEDROOM_DOOR_X := 6440.0
 const MOM_LINES := ["Bonjour ma chouette !", "As-tu faim ? Il y a des fruits.", "N'oublie pas de nourrir le hamster !", "Je t'aime, Chacha !"]
 const DAD_LINES := ["Salut Chacha !", "On va au parc tantôt ?", "As-tu fait un beau dessin ?", "Tu veux jouer avec moi ?"]
+# What's lying on the bedroom floor (kind, x in the bedroom), and where each goes when she tidies it away.
+const MESS := [["teddy", 230.0], ["sock", 540.0], ["book", 700.0], ["ball", 880.0], ["tshirt", 1060.0], ["crayons", 1240.0]]
+const PUT_AWAY := {"sock": Vector2(1340, 560), "tshirt": Vector2(1340, 560), "book": Vector2(1010, 300),
+	"crayons": Vector2(1180, 470), "ball": Vector2(800, 600), "teddy": Vector2(800, 600)}
+const CAN_X := KITCHEN_START + 470.0
 const SNACKS := [["apple", "Une pomme !"], ["yogurt", "Un yogourt !"], ["cheese", "Du fromage !"],
 	["grapes", "Des raisins !"], ["carrot", "Une carotte !"], ["cookie", "Un biscuit !"]]
 
@@ -32,6 +37,9 @@ var _mom: Character
 var _dad: Character
 var _mom_line := 0
 var _dad_line := 0
+# The house plants to water (id → sprite) and the watering can in the kitchen.
+var _plants := {}
+var _can: Sprite2D
 
 
 func _ready() -> void:
@@ -43,6 +51,7 @@ func _ready() -> void:
 	_build_family()
 	_build_switches()
 	_spawn_charlotte(470.0)
+	_build_chores()
 	_build_doors()
 	_enter_area(BEDROOM if _charlotte.position.x >= BEDROOM.x else HALL)
 	_finish([[700.0, "plant"], [1900.0, "plant"], [2900.0, "plant"], [5400.0, "plushie"], [6250.0, "plant"]])
@@ -80,8 +89,8 @@ func _build_family() -> void:
 	add_child(DoorSpot.make(Rect2(_dad.position.x - 55.0, 330, 110, 340), _talk_to_dad, _dad.position.x - 90.0))
 	# A "!" over whoever has a quest for Charlotte, or is waiting for what she brings.
 	add_child(QuestMark.make(_mom.position + Vector2(0, -350), func() -> bool:
-		return Quests.available("milk") or Quests.active("milk") and GameState.flags.get("has_milk", false)))
-	add_child(QuestMark.make(_dad.position + Vector2(0, -360), func() -> bool: return Quests.available("hamster")))
+		return Quests.available("milk") or Quests.available("menage") or Quests.active("milk") and GameState.flags.get("has_milk", false)))
+	add_child(QuestMark.make(_dad.position + Vector2(0, -360), func() -> bool: return Quests.available("hamster") or Quests.available("plants")))
 
 
 # Mom asks for milk, sends her to the dépanneur, and thanks her when she brings it home.
@@ -94,6 +103,10 @@ func _talk_to_mom() -> void:
 		_say(_mom, "Chacha, peux-tu aller me chercher\ndu lait au dépanneur ?", 380.0, 3.5)
 	elif Quests.active("milk"):
 		_say(_mom, "Le dépanneur est au coin\nde la rue Dandurand !", 380.0)
+	elif Quests.start("menage"):
+		_say(_mom, "Ta chambre est en désordre,\nva la ranger, ma chouette !", 380.0, 3.5)
+	elif Quests.active("menage"):
+		_say(_mom, "As-tu fini de ranger\nta chambre ?", 380.0)
 	else:
 		_say(_mom, MOM_LINES[_mom_line % MOM_LINES.size()], 350.0)
 		_mom_line += 1
@@ -102,9 +115,130 @@ func _talk_to_mom() -> void:
 func _talk_to_dad() -> void:
 	if Quests.start("hamster"):
 		_say(_dad, "Avant le dodo, n'oublie pas\nde nourrir ton hamster !", 390.0, 3.5)
+	elif Quests.start("plants"):
+		_say(_dad, "Les plantes ont soif ! L'arrosoir\nest dans la cuisine.", 390.0, 3.5)
+	elif Quests.active("plants"):
+		_say(_dad, "Une au salon, une dans le corridor,\nune dans ta chambre !", 390.0, 3.5)
 	else:
 		_say(_dad, DAD_LINES[_dad_line % DAD_LINES.size()], 360.0)
 		_dad_line += 1
+
+
+# ── Chores: tidying her room, watering the plants ───────────
+
+func _build_chores() -> void:
+	var tidied: Array = GameState.flags.get("tidied", [])
+	if not Quests.done("menage"):
+		for m in MESS:
+			if tidied.has(m[0]):
+				continue
+			var item := _put(InteriorArt.mess(m[0]), BEDROOM.x + m[1], 690.0, 1.15)
+			add_child(DoorSpot.make(Rect2(item.position - Vector2(6, 10), Vector2(104, 66)), _tidy.bind(m[0], item), BEDROOM.x + m[1] + 32.0))
+	for id in _plants:
+		var plant: Sprite2D = _plants[id]
+		if _thirsty(id):
+			plant.modulate = Color(0.86, 0.74, 0.38)
+			plant.skew = 0.2
+		var area := Rect2(plant.position, plant.texture.get_size() * plant.scale)
+		add_child(DoorSpot.make(area, _water.bind(id), area.get_center().x - 50.0))
+	_can = _put(InteriorArt.watering_can(), CAN_X, 606.0, 0.55, "floor")
+	add_child(DoorSpot.make(Rect2(_can.position - Vector2(10, 20), Vector2(86, 70)), _take_can, CAN_X + 30.0))
+	add_child(QuestMark.make(_can.position + Vector2(33, -40), func() -> bool:
+		return Quests.active("plants") and not GameState.flags.get("has_can", false), 0.8))
+	if GameState.flags.get("has_can", false):
+		_hold_can.call_deferred()
+
+
+func _thirsty(id: String) -> bool:
+	return not Quests.done("plants") and not (GameState.flags.get("watered", []) as Array).has(id)
+
+
+# She crouches, picks it up, and it flies to its place (the laundry basket, the toys, the bookshelf, the desk).
+func _tidy(kind: String, item: Sprite2D) -> void:
+	if not is_instance_valid(item) or item.has_meta("taken"):
+		return
+	item.set_meta("taken", true)
+	Quests.start("menage")
+	_charlotte.pet(0.7, 1.0)
+	Sfx.play("pop", item.position)
+	var to: Vector2 = BEDROOM.x * Vector2.RIGHT + PUT_AWAY[kind]
+	var tween := create_tween()
+	tween.tween_interval(0.35)
+	tween.tween_property(item, "position", to, 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(item, "scale", item.scale * 0.5, 0.5)
+	tween.parallel().tween_property(item, "modulate:a", 0.0, 0.5)
+	tween.tween_callback(item.queue_free)
+	var tidied: Array = GameState.flags.get("tidied", [])
+	tidied.append(kind)
+	GameState.flags["tidied"] = tidied
+	if tidied.size() >= MESS.size():
+		GameState.flags.erase("tidied")
+		_say(_charlotte, "Ma chambre est toute propre !", 300.0)
+		Quests.complete("menage")
+
+
+func _take_can() -> void:
+	if Quests.done("plants") or GameState.flags.get("has_can", false):
+		_say(_charlotte, "C'est l'arrosoir.", 300.0)
+		return
+	if LostCats.carrying() != "":
+		_say(_charlotte, "J'ai les mains pleines !", 300.0)
+		return
+	Quests.start("plants")
+	GameState.flags["has_can"] = true
+	Sfx.play("pop", _can.position)
+	_hold_can()
+
+
+func _hold_can() -> void:
+	_can.visible = false
+	var held := Sprite2D.new()
+	held.texture = _can.texture
+	held.scale = Vector2.ONE * 0.5
+	held.offset = Vector2(20, -10)
+	_charlotte.carry(held)
+
+
+func _water(id: String) -> void:
+	var plant: Sprite2D = _plants[id]
+	if not _thirsty(id):
+		_say(_charlotte, "Elle a assez bu !" if Quests.done("plants") or Quests.active("plants") else "Elle est belle, cette plante.", 300.0)
+		return
+	if not GameState.flags.get("has_can", false):
+		_say(_charlotte, "Elle a soif… Il me faut\nl'arrosoir de la cuisine !", 300.0, 3.0)
+		return
+	# Water pours from the can onto the pot; the plant perks up and greens again.
+	var size := plant.texture.get_size() * plant.scale
+	var pot := plant.position + Vector2(size.x * 0.5, size.y * 0.75)
+	for i in 14:
+		var drop := Sprite2D.new()
+		drop.texture = PropArt.flake()
+		drop.modulate = Color(0.55, 0.78, 1.0, 0.9)
+		drop.scale = Vector2.ONE * 0.35
+		drop.position = _charlotte.position + Vector2(40.0 * _charlotte.facing, -150.0)
+		add_child(drop)
+		var tween := create_tween()
+		tween.tween_interval(i * 0.06)
+		tween.tween_property(drop, "position", pot + Vector2(randf_range(-20, 20), randf_range(-10, 10)), 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tween.tween_callback(drop.queue_free)
+	Sfx.play("swoosh", pot)
+	var perk := create_tween()
+	perk.tween_interval(0.8)
+	perk.tween_property(plant, "modulate", Color.WHITE, 0.8)
+	perk.parallel().tween_property(plant, "skew", 0.0, 0.8).set_trans(Tween.TRANS_BACK)
+	var watered: Array = GameState.flags.get("watered", [])
+	watered.append(id)
+	GameState.flags["watered"] = watered
+	if watered.size() >= _plants.size():
+		GameState.flags.erase("watered")
+		GameState.flags.erase("has_can")
+		perk.tween_callback(func():
+			_charlotte.carry(null)
+			_can.visible = true
+			_say(_charlotte, "Toutes les plantes ont bu !", 300.0)
+			Quests.complete("plants"))
+	else:
+		_say(_charlotte, "Bois, petite plante !", 300.0)
 
 
 func _family_member(look: CharacterLook, x: float, facing: int) -> Character:
@@ -330,7 +464,7 @@ func _build_vestibule() -> void:
 func _build_salon() -> void:
 	_put(InteriorArt.rug(), 900.0, 694.0, 0.9)
 	_plate(1700.0, 560.0, true)
-	_put(InteriorArt.monstera(), 860.0, 606.0, 0.85, "floor")
+	_plants["salon"] = _put(InteriorArt.monstera(), 860.0, 606.0, 0.85, "floor")
 	for i in 3:
 		_put(InteriorArt.poster(i), 1030.0 + i * 130.0, 340.0, 0.85, "wall")
 	_put(InteriorArt.floor_lamp(), 1470.0, 604.0, 0.9, "floor")
@@ -357,7 +491,7 @@ func _build_hallway() -> void:
 	_put(InteriorArt.recycling_bin(), 2985.0, 608.0, 1.0, "floor")
 	_put(InteriorArt.panel_door(), CHACHA_DOOR_X, WALL_BASE)
 	_chacha_sign(Vector2(CHACHA_DOOR_X + 75.0, 330.0))
-	_put(InteriorArt.monstera(), 3300.0, 606.0, 0.55, "floor")
+	_plants["corridor"] = _put(InteriorArt.monstera(), 3300.0, 606.0, 0.55, "floor")
 	_put(InteriorArt.kitchen(), KITCHEN_START, WALL_BASE)
 	_fridge_art = Node2D.new()
 	add_child(_fridge_art)
@@ -380,6 +514,7 @@ func _build_bedroom() -> void:
 		return Quests.active("hamster") and not GameState.flags.get("hamster_fed", false), 0.8))
 	_put(InteriorArt.terrarium(true), x + 30.0, 606.0, 0.85)
 	_put(InteriorArt.flower_painting(), x + 470.0, 330.0, 0.8, "wall")
+	_plants["chambre"] = _put(InteriorArt.monstera(), x + 282.0, 606.0, 0.42, "floor")
 	_put(InteriorArt.bed(), x + 360.0, 608.0, 0.8, "floor")
 	_put(InteriorArt.kid_table(), x + 830.0, 612.0, 0.75, "floor")
 	_put(InteriorArt.book_ledges(), x + 960.0, 470.0, 0.8, "wall")
