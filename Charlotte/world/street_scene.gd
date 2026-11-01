@@ -48,6 +48,10 @@ var _window_cats: WindowCats
 var _cat_timer := 3.0
 var _control := PlayerControl.new()
 var _cross_streets: Array[CrossStreet] = []
+# The sidewalk's stretches between cross streets (x from, x to); Charlotte walks one at a time and crosses between them.
+var _segments: Array[Vector2] = []
+# The crossing guard at the school's crosswalk, if any (key: the CrossStreet).
+var _guards := {}
 # Where Charlotte started (worked out once: _start_x() may consume Transition's hand-over).
 var _start := 0.0
 
@@ -81,10 +85,13 @@ func _ready() -> void:
 		start_x = x_arg.to_float()
 	_charlotte = _spawn_charlotte(start_x)
 	_control.charlotte = _charlotte
-	_control.bounds = _walk_bounds()
+	_segments = _walk_segments()
+	_control.bounds = _segment_at(start_x)
 	_control.walk_top = HOUSE_BASE_Y - 200.0
 	add_child(_control)
 	_build_doors()
+	for cs in _cross_streets:
+		_add_crossing(cs)
 	_window_cats.charlotte = _charlotte
 	var kick := LeafKick.new()
 	kick.walker = _charlotte
@@ -129,17 +136,26 @@ func _start_x() -> float:
 	return _street_width / 2.0
 
 
-## How far she can walk: by default up to the curbs of the cross streets at either end.
-func _walk_bounds() -> Vector2:
+## The sidewalk split into stretches at each cross street's curbs.
+func _walk_segments() -> Array[Vector2]:
+	var segments: Array[Vector2] = []
 	var left := 60.0
-	var right := _street_width - 60.0
-	for cs in _cross_streets:
-		var road := cs.road_x(CHARLOTTE_Y)
-		if cs.x1 < _start:
-			left = maxf(left, road.y + 8.0)
-		elif cs.x0 > _start:
-			right = minf(right, road.x - 8.0)
-	return Vector2(left, right)
+	var sorted := _cross_streets.duplicate()
+	sorted.sort_custom(func(a, b): return a.x0 < b.x0)
+	for cs in sorted:
+		var road: Vector2 = cs.road_x(CHARLOTTE_Y)
+		segments.append(Vector2(left, road.x - 8.0))
+		left = road.y + 8.0
+	segments.append(Vector2(left, _street_width - 60.0))
+	return segments
+
+
+## The stretch of sidewalk that x is on.
+func _segment_at(x: float) -> Vector2:
+	for seg in _segments:
+		if x <= seg.y + 1.0:
+			return seg
+	return _segments[-1]
 
 
 ## Configure each cross street (its walls, signs) with _cross_street(); they're added for you.
@@ -164,13 +180,67 @@ func _build_doors() -> void:
 
 ## Turning the corner: click a cross street and Charlotte walks to the curb on her side, then `scene` (another
 ## street) loads with Transition.arrive = `arrive`, so that street knows which corner she comes round.
+## Only from the sidewalk Charlotte started on (the block the corner belongs to); the crosswalk below is for crossing.
 func _add_corner(cs: CrossStreet, scene: String, arrive: String) -> void:
-	var curb := _control.bounds.y if cs.x0 > _start else _control.bounds.x
-	var area := Rect2(cs.x0 + 30.0, 380.0, cs.x1 - cs.x0 - 60.0, CURB_Y - 380.0)
-	add_child(DoorSpot.make(area, func():
+	var home := _control.bounds
+	var curb := home.y if cs.x0 > _start else home.x
+	var area := Rect2(cs.x0 + 30.0, 380.0, cs.x1 - cs.x0 - 60.0, 218.0)
+	var spot := DoorSpot.make(area, func():
 		_control.enabled = false
 		Transition.arrive = arrive
-		Transition.change_scene(self, scene), curb))
+		Transition.change_scene(self, scene), curb)
+	spot.condition = func(): return _segment_at(_charlotte.position.x) == home
+	add_child(spot)
+
+
+## The crosswalk: click it and Charlotte goes to the curb on her side, looks both ways, and crosses to the other
+## side (and back the same way). At the school's crosswalk the crossing guard steps out with her stop paddle.
+func _add_crossing(cs: CrossStreet) -> void:
+	var road := cs.road_x(630.0)
+	var area := Rect2(road.x, 600.0, road.y - road.x, CURB_Y - 600.0)
+	var spot := DoorSpot.make(area, _cross.bind(cs))
+	spot.approach = func(from_x: float) -> float:
+		var curbs := cs.road_x(CHARLOTTE_Y)
+		return curbs.x - 8.0 if from_x < (cs.x0 + cs.x1) / 2.0 else curbs.y + 8.0
+	add_child(spot)
+	if cs.guard:
+		var guard := CrossingGuard.new()
+		guard.scale = Vector2.ONE * CHAR_SCALE
+		guard.position = Vector2(cs.road_x(CHARLOTTE_Y + 12.0).x - 34.0, CHARLOTTE_Y + 12.0)
+		guard.walk_speed = 150.0
+		add_child(guard)
+		_guards[cs] = guard
+
+
+func _cross(cs: CrossStreet) -> void:
+	var curbs := cs.road_x(CHARLOTTE_Y)
+	var mid := (cs.x0 + cs.x1) / 2.0
+	var going_right := _charlotte.position.x < mid
+	var dir := 1 if going_right else -1
+	var to := curbs.y + 8.0 if going_right else curbs.x - 8.0
+	var walk_time := absf(to - _charlotte.position.x) / _charlotte.walk_speed
+	_control.enabled = false
+	_control.hands_off = true
+	_charlotte.is_walking = false
+	Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je regarde des deux côtés !", 1.4)
+	var tween := create_tween()
+	# Look both ways first: toward the road, back, and toward it again.
+	for look in [dir, -dir, dir]:
+		tween.tween_callback(func(): _charlotte.facing = look)
+		tween.tween_interval(0.45)
+	if _guards.has(cs):
+		_guards[cs].escort(mid, walk_time + 0.6)
+		tween.tween_interval(0.9)
+	tween.tween_callback(func():
+		_charlotte.facing = dir
+		_charlotte.is_walking = true)
+	tween.tween_property(_charlotte, "position:x", to, walk_time)
+	tween.tween_callback(func():
+		_charlotte.is_walking = false
+		_control.bounds = _segment_at(to)
+		_control.hands_off = false
+		_control.enabled = true)
+
 
 
 ## Takes the corner hand-over: true (and clears it) when Charlotte is arriving round `key`.

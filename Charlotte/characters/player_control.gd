@@ -9,6 +9,8 @@ var bounds := Vector2(60, 1000)
 ## Clicks above this y (in world space) don't walk Charlotte, unless they hit an interactable.
 var walk_top := 0.0
 var enabled := true
+## While true (a scripted moment like crossing the street), leaves Charlotte's walking to the script.
+var hands_off := false
 
 ## Two presses (or clicks) closer than this make Charlotte run.
 const DOUBLE_TIME := 0.32
@@ -30,6 +32,8 @@ func _init() -> void:
 
 
 func _process(delta: float) -> void:
+	if hands_off:
+		return
 	if not enabled:
 		charlotte.is_walking = false
 		charlotte.running = false

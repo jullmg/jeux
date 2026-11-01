@@ -38,6 +38,7 @@ func _start_x() -> float:
 func _build_cross_streets() -> void:
 	var dandurand := _cross_street("rue_dandurand", "Rue Dandurand", 1.0)
 	dandurand.school = true
+	dandurand.guard = true
 	dandurand.left_walls = [
 		{"to": 2.6, "top": _house_top("ecole"), "kind": "school", "color": Color("#A9472F")},
 		{"to": CrossStreet.FAR, "top": 330.0, "kind": "plex", "color": Color("#9C5A44")},

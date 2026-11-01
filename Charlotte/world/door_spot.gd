@@ -6,6 +6,10 @@ extends Node2D
 var rect: Rect2
 var stand_x := NAN
 var action: Callable
+## Optional: where to stand, worked out from where Charlotte is (from_x → x), instead of `stand_x`.
+var approach := Callable()
+## Optional: whether it can be clicked right now.
+var condition := Callable()
 
 
 static func make(area: Rect2, on_enter: Callable, stand := NAN) -> DoorSpot:
@@ -22,15 +26,15 @@ func _ready() -> void:
 
 
 func can_interact() -> bool:
-	return true
+	return condition.call() if condition.is_valid() else true
 
 
 func hit_test(p: Vector2) -> bool:
 	return rect.has_point(p)
 
 
-func approach_x(_from_x: float) -> float:
-	return stand_x
+func approach_x(from_x: float) -> float:
+	return approach.call(from_x) if approach.is_valid() else stand_x
 
 
 func reserve() -> void:

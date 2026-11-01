@@ -41,6 +41,8 @@ var along_name := "6e Avenue"
 ## Which way the street runs away from us (Montreal's compass, the street grid's "north"): "west" ends on Mount
 ## Royal; any other way ends in open sky and a few clouds.
 var facing := "west"
+## A crossing guard works this crosswalk (the school's).
+var guard := false
 ## Which corner (left or right edge of the gap) the signs stand on.
 var sign_side := 1.0
 
