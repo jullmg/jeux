@@ -23,7 +23,7 @@ const ALL := {
 		"title": "Range ta chambre",
 		"hint": "Ramasse les jouets et les vêtements qui traînent par terre dans ta chambre.",
 		"find": "Maman trouve que ta chambre est un peu en désordre…",
-		"age": 7, "after": "milk", "reward": 1.0,
+		"age": 7, "reward": 1.0,
 	},
 	"plants": {
 		"title": "Arrose les plantes",
