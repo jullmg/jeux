@@ -68,6 +68,11 @@ const STAIR_SHAPES := [
 	[Vector2(0, 336), Vector2(75, 380), Vector2(130, 520), Vector2(115, 696)],
 ]
 
+# Front doors seen along the avenues of Rosemont (reference/portes.jpg): wooden doors with raised panels, an oval
+# of leaded glass, stained glass with sidelights, stacked diamonds, a 1950s flat door with three little windows,
+# glazed double doors.
+const DOOR_STYLES := ["double", "panel", "oval", "leaded", "diamond", "slots", "panel", "leaded"]
+
 const HOUSES := [
 	{
 		"name": "duplex_voisin_gauche",
@@ -292,6 +297,11 @@ func _variant(i: int) -> Dictionary:
 	cfg.stair = stair
 	if rng.randf() < 0.5:
 		_mirror(cfg)
+	# Drawn last, so the rest of each house stays as it was (reference/portes.jpg, reference/escaliers.jpg).
+	cfg.door_style = DOOR_STYLES[rng.randi_range(0, DOOR_STYLES.size() - 1)]
+	cfg.door_surround = ["lintel", "cornice", "pediment", "arch", "cornice"][rng.randi_range(0, 4)]
+	cfg.ornate = rng.randf() < 0.5
+	cfg.stair_kind = "landing" if rng.randf() < 0.3 else "curve"
 	return cfg
 
 
@@ -429,7 +439,19 @@ func _plex_front() -> void:
 		_mums(cx + 96, ground_y)
 	var s: Array = k.stair
 	var p3 := Vector2(s[3].x, s[3].y + oy)
-	_stairs(Vector2(s[0].x, _fb(1) + 6.0), s[1] + Vector2(0, oy), s[2] + Vector2(0, oy), p3)
+	var p0 := Vector2(s[0].x, _fb(1) + 6.0)
+	if k.get("stair_kind", "curve") == "landing":
+		# An L: a straight flight down to a landing on iron posts, then back the other way to the sidewalk.
+		var d := signf(p3.x - p0.x)
+		var land := Vector2(p0.x + d * 118.0, lerpf(p0.y, ground_y, 0.52))
+		p3 = Vector2(land.x - d * 96.0, ground_y)
+		var f1 := land - Vector2(d * 30.0, 0)
+		_stairs(p0, p0.lerp(f1, 1.0 / 3.0), p0.lerp(f1, 2.0 / 3.0), f1)
+		_landing(land)
+		var f2 := land - Vector2(d * 30.0, -4.0)
+		_stairs(f2, f2.lerp(p3, 1.0 / 3.0), f2.lerp(p3, 2.0 / 3.0), p3)
+	else:
+		_stairs(p0, s[1] + Vector2(0, oy), s[2] + Vector2(0, oy), p3)
 	var gaps := [[cx - 66, cx + 66], [p3.x - 42, p3.x + 42]]
 	gaps.sort_custom(func(a, c): return a[0] < c[0])
 	_garden(gaps)
@@ -664,24 +686,118 @@ func _plaque(cx: float, cy: float, text: String) -> void:
 func _door(cx: float, top: float, bottom: float) -> void:
 	var w := 96.0
 	var x := cx - w / 2
-	_rect(x - 14, top - 20, w + 28, 20, k.lintel, _stroke(k.lintel_dark, 1.5))
+	var style: String = k.get("door_style", "double")
+	_door_surround(cx, top, w)
 	_rect(x - 7, top, w + 14, bottom - top, k.trim_dark)
 	_rect(x - 4, top, w + 8, bottom - top, k.trim)
-	_rect(x + 4, top + 5, w - 8, 18, "url(#glass)")
+	# The transom over the door: a fan of glass under an arched surround, else a plain glazed light.
+	if k.get("door_surround", "lintel") == "arch":
+		_path("M%s %s A%s 22 0 0 1 %s %s Z" % [_n(x + 4), _n(top + 23), _n((w - 8) / 2.0), _n(x + w - 4), _n(top + 23)], "url(#glass)", _stroke(k.door_dark, 1.5))
+		for a in [0.25, 0.5, 0.75]:
+			var p := Vector2(cx, top + 23) + Vector2(-cos(a * PI), -sin(a * PI) * 0.5) * (w - 8) / 2.0
+			_path("M%s %s L%s %s" % [_n(cx), _n(top + 23), _n(p.x), _n(p.y)], "none", _stroke(k.door_dark, 1.2))
+	else:
+		_rect(x + 4, top + 5, w - 8, 18, "url(#glass)")
+		if style == "leaded":
+			_leading(Rect2(x + 4, top + 5, w - 8, 18))
 	var dy := top + 28
 	var dh := bottom - dy
-	var lw := (w - 8) / 2.0
-	for i in 2:
-		var lx := x + 4 + i * lw
-		_rect(lx, dy, lw, dh, k.door, _stroke(k.door_dark, 2))
-		_rect(lx + 7, dy + 9, lw - 14, dh * 0.58, "url(#glass)", _stroke(k.door_dark, 2))
-		_rect(lx + 7, dy + dh * 0.58 + 18, lw - 14, dh * 0.42 - 28, "none", _stroke(k.door_dark, 2))
-	_circle(cx - 6, dy + dh * 0.62, 3, "#E3C26A")
-	_circle(cx + 6, dy + dh * 0.62, 3, "#E3C26A")
+	match style:
+		"double":
+			var lw := (w - 8) / 2.0
+			for i in 2:
+				var lx := x + 4 + i * lw
+				_rect(lx, dy, lw, dh, k.door, _stroke(k.door_dark, 2))
+				_rect(lx + 7, dy + 9, lw - 14, dh * 0.58, "url(#glass)", _stroke(k.door_dark, 2))
+				_rect(lx + 7, dy + dh * 0.58 + 18, lw - 14, dh * 0.42 - 28, "none", _stroke(k.door_dark, 2))
+			_circle(cx - 6, dy + dh * 0.62, 3, "#E3C26A")
+			_circle(cx + 6, dy + dh * 0.62, 3, "#E3C26A")
+		_:
+			_door_leaf(style, Rect2(x + 4, dy, w - 8, dh))
 	for sx in [-1.0, 1.0]:
 		_lantern(cx + sx * (w / 2 + 24), top + 34)
 	if season == "winter":
 		_wreath(cx, top + 60)
+
+
+# What tops the doorway: a plain lintel, a cornice on two scrolled brackets, a little pediment, or an arch.
+func _door_surround(cx: float, top: float, w: float) -> void:
+	var x := cx - w / 2
+	match k.get("door_surround", "lintel"):
+		"cornice":
+			_rect(x - 16, top - 24, w + 32, 18, k.lintel, _stroke(k.lintel_dark, 1.5))
+			_rect(x - 26, top - 34, w + 52, 10, k.lintel, _stroke(k.lintel_dark, 1.5))
+			_rect(x - 26, top - 26, w + 52, 2, k.lintel_dark)
+			for bx in [x - 14.0, x + w + 4.0]:
+				_path("M%s %s h10 v8 q0 14 -5 22 q-5 -8 -5 -22 z" % [_n(bx), _n(top - 24)], k.lintel, _stroke(k.lintel_dark, 1.5))
+				_circle(bx + 5, top - 14, 2.5, k.lintel_dark)
+		"pediment":
+			_rect(x - 14, top - 20, w + 28, 20, k.lintel, _stroke(k.lintel_dark, 1.5))
+			_path("M%s %s L%s %s L%s %s Z" % [_n(x - 20), _n(top - 20), _n(cx), _n(top - 50), _n(x + w + 20), _n(top - 20)], k.lintel, _stroke(k.lintel_dark, 1.5))
+			_path("M%s %s L%s %s L%s %s" % [_n(x - 8), _n(top - 24), _n(cx), _n(top - 42), _n(x + w + 8), _n(top - 24)], "none", _stroke(k.lintel_dark, 1.2))
+		"arch":
+			_path("M%s %s A%s 34 0 0 1 %s %s Z" % [_n(x - 14), _n(top + 2), _n(w / 2 + 14), _n(x + w + 14), _n(top + 2)], k.lintel, _stroke(k.lintel_dark, 1.5))
+			_rect(cx - 6, top - 34, 12, 16, k.lintel_dark)
+		_:
+			_rect(x - 14, top - 20, w + 28, 20, k.lintel, _stroke(k.lintel_dark, 1.5))
+
+
+# A single door leaf in one of the Rosemont styles, with its knob and brass mail slot.
+func _door_leaf(style: String, r: Rect2) -> void:
+	var dark: String = k.door_dark
+	_rect(r.position.x, r.position.y, r.size.x, r.size.y, k.door, _stroke(dark, 2))
+	_rect(r.position.x, r.position.y, 4, r.size.y, "#FFFFFF", 'opacity="0.12"')
+	var x := r.position.x
+	var y := r.position.y
+	var w := r.size.x
+	var h := r.size.y
+	match style:
+		"panel":
+			for row in 3:
+				for col in 2:
+					var px := x + 10 + col * (w - 20) / 2.0
+					var py := y + 10 + row * (h - 20) / 3.0
+					_raised(px + 3, py + 3, (w - 20) / 2.0 - 6, (h - 20) / 3.0 - 8)
+		"oval":
+			_path("M%s %s a%s %s 0 1 0 0.01 0 z" % [_n(x + w / 2), _n(y + 12), _n(w * 0.3), _n(h * 0.3)], "url(#glass)", _stroke(dark, 2.5))
+			for k2 in [-1.0, 1.0]:
+				_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(x + w / 2), _n(y + 22), _n(x + w / 2 + k2 * w * 0.2), _n(y + 12 + h * 0.3), _n(x + w / 2), _n(y + 2 + h * 0.6), _n(x + w / 2 + k2 * w * 0.06), _n(y + 12 + h * 0.3)], "none", _stroke("#3A3A3A", 1.0))
+			_raised(x + 12, y + h * 0.7, w - 24, h * 0.24)
+		"leaded":
+			var g := Rect2(x + 9, y + 9, w - 18, h * 0.5)
+			_rect(g.position.x, g.position.y, g.size.x, g.size.y, "url(#glass)", _stroke(dark, 2))
+			_leading(g)
+			_raised(x + 10, y + h * 0.62, (w - 26) / 2.0, h * 0.32)
+			_raised(x + 16 + (w - 26) / 2.0, y + h * 0.62, (w - 26) / 2.0, h * 0.32)
+		"diamond":
+			for row in 3:
+				var cy := y + h * (0.2 + row * 0.3)
+				var dw := w * 0.36
+				var dh2 := h * 0.12
+				_path("M%s %s l%s %s l%s %s l%s %s z" % [_n(x + w / 2), _n(cy - dh2), _n(dw), _n(dh2), _n(-dw), _n(dh2), _n(-dw), _n(-dh2)], "none", _stroke(dark, 2))
+				_path("M%s %s l%s %s l%s %s l%s %s z" % [_n(x + w / 2), _n(cy - dh2 * 0.55), _n(dw * 0.55), _n(dh2 * 0.55), _n(-dw * 0.55), _n(dh2 * 0.55), _n(-dw * 0.55), _n(-dh2 * 0.55)], "#FFFFFF", 'opacity="0.12"')
+		"slots":
+			for row in 3:
+				_rect(x + w / 2 - 9, y + h * (0.16 + row * 0.2), 18, 18, "url(#glass)", _stroke(dark, 2))
+	_rect(x + w / 2 - 12, y + h * 0.56, 24, 5, "#C9A24A", _stroke("#8E6E2A", 1))
+	_circle(x + w - 12, y + h * 0.52, 3.5, "#E3C26A")
+
+
+func _raised(x: float, y: float, w: float, h: float) -> void:
+	_rect(x, y, w, h, "none", _stroke(k.door_dark, 2))
+	_rect(x + 4, y + 4, w - 8, h - 8, "#FFFFFF", 'opacity="0.08"')
+	_path("M%s %s h%s M%s %s v%s" % [_n(x + 1), _n(y + h - 1), _n(w - 2), _n(x + w - 1), _n(y + 1), _n(h - 2)], "none", _stroke("#000000", 1.5) + ' opacity="0.2"')
+
+
+# Stained glass: lead lines in arcs and a few coloured pieces (amber, ruby, green).
+func _leading(g: Rect2) -> void:
+	var c := g.get_center()
+	for piece in [["#E8B04A", -0.3, -0.25], ["#B03A4A", 0.3, -0.25], ["#4E8A5A", 0.0, 0.2], ["#E8B04A", 0.0, -0.05]]:
+		_circle(c.x + piece[1] * g.size.x, c.y + piece[2] * g.size.y, minf(g.size.x, g.size.y) * 0.16, piece[0], 'opacity="0.55"')
+	var lead := _stroke("#3A3A3A", 1.2)
+	_path("M%s %s Q%s %s %s %s" % [_n(g.position.x), _n(g.end.y), _n(c.x), _n(g.position.y - g.size.y * 0.3), _n(g.end.x), _n(g.end.y)], "none", lead)
+	_path("M%s %s V%s M%s %s H%s" % [_n(c.x), _n(g.position.y), _n(g.end.y), _n(g.position.x), _n(c.y), _n(g.end.x)], "none", lead)
+	_circle(c.x, c.y, minf(g.size.x, g.size.y) * 0.18, "none", lead)
 
 
 func _lantern(x: float, y: float) -> void:
@@ -764,8 +880,19 @@ func _front_steps(cx: float) -> void:
 		_rect(bottom.x - 3, bottom.y - 2, 6, RAIL_H + 2, k.metal, _metal_stroke())
 
 
+func _landing(c: Vector2) -> void:
+	for px in [c.x - 32.0, c.x + 26.0]:
+		_rect(px, c.y, 6, ground_y - c.y, k.metal, _metal_stroke())
+	_rect(c.x - 36, c.y - 3, 72, 9, k.tread, _stroke(k.tread_dark, 1))
+	var x := c.x - 32.0
+	while x < c.x + 34.0:
+		_rect(x, c.y - RAIL_H, 2.5, RAIL_H, k.metal, _metal_stroke())
+		x += 9.0
+	_rect(c.x - 36, c.y - RAIL_H - 2, 72, 5, k.metal, _metal_stroke())
+
+
 func _stairs(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) -> void:
-	var steps := 18
+	var steps := int(clampf(p0.distance_to(p3) / 20.0, 6.0, 18.0))
 	var hw := 30.0
 	var pts: Array[Vector2] = []
 	for i in steps + 1:
@@ -784,8 +911,16 @@ func _stairs(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) -> void:
 				_circle(m.x + hw, m.y - RAIL_H * 0.5, 6, "none", _stroke(k.metal, 2.5))
 		_line(_polyline(pts, Vector2(side * hw, 5)), 6.0)
 		_line(_polyline(pts, Vector2(side * hw, -RAIL_H)), 4.5)
+		if k.get("ornate", false):
+			# Wrought-iron spades between the balusters, and a scrolled newel at the foot.
+			for i in range(1, steps, 2):
+				var m := (pts[i] + pts[i + 1]) * 0.5 + Vector2(side * hw, -RAIL_H * 0.55)
+				_path("M%s %s c-5 -4 -5 -10 0 -12 c5 2 5 8 0 12 z" % [_n(m.x), _n(m.y + 6)], k.metal, _metal_stroke())
+			var foot := pts[-1] + Vector2(side * hw, -RAIL_H)
+			_path("M%s %s c%s 0 %s 14 %s 16 c-6 0 -8 -6 -4 -8" % [_n(foot.x), _n(foot.y), _n(side * 10), _n(side * 12), _n(side * 4)], "none", _stroke(k.metal, 3.5))
 	if k.halloween:
-		for i in [7, 12, 16]:
+		for f in [0.4, 0.66, 0.9]:
+			var i := int(f * steps)
 			if rng.randf() < 0.7:
 				_pumpkin(pts[i].x + rng.randf_range(-10.0, 10.0), pts[i].y - 3.0, rng.randf_range(0.55, 0.75), rng.randf() < 0.4)
 

@@ -721,7 +721,13 @@
 <circle cx="210.0" cy="280.0" r="4.0" fill="#F7F9FB" />
 <rect x="124.0" y="283.0" width="102.0" height="15.0" fill="#7A5236" stroke="#5A3B26" stroke-width="1.5"/>
 <path d="M110.0 299.0 Q117.0 293.0 124.0 298.5 Q131.0 292.0 138.0 298.5 Q145.0 291.0 152.0 298.5 Q159.0 293.0 166.0 298.5 Q173.0 292.0 180.0 298.5 Q187.0 291.0 194.0 298.5 Q201.0 293.0 208.0 298.5 Q215.0 292.0 222.0 298.5 Q229.0 291.0 236.0 298.5 Q238.0 293.0 240.0 298.5 L240.0 300.0 L110.0 300.0 Z" fill="#F7F9FB" stroke="#D3DCE4" stroke-width="1.0"/>
-<rect x="360.0" y="372.0" width="124.0" height="20.0" fill="#BDB5A6" stroke="#8F887B" stroke-width="1.5"/>
+<rect x="358.0" y="368.0" width="128.0" height="18.0" fill="#BDB5A6" stroke="#8F887B" stroke-width="1.5"/>
+<rect x="348.0" y="358.0" width="148.0" height="10.0" fill="#BDB5A6" stroke="#8F887B" stroke-width="1.5"/>
+<rect x="348.0" y="366.0" width="148.0" height="2.0" fill="#8F887B" />
+<path d="M360.0 368.0 h10 v8 q0 14 -5 22 q-5 -8 -5 -22 z" fill="#BDB5A6" stroke="#8F887B" stroke-width="1.5"/>
+<circle cx="365.0" cy="378.0" r="2.5" fill="#8F887B" />
+<path d="M474.0 368.0 h10 v8 q0 14 -5 22 q-5 -8 -5 -22 z" fill="#BDB5A6" stroke="#8F887B" stroke-width="1.5"/>
+<circle cx="479.0" cy="378.0" r="2.5" fill="#8F887B" />
 <rect x="367.0" y="392.0" width="110.0" height="208.0" fill="#B9B2A5" />
 <rect x="370.0" y="392.0" width="104.0" height="208.0" fill="#F4F1EA" />
 <rect x="378.0" y="397.0" width="88.0" height="18.0" fill="url(#glass)" />
@@ -753,7 +759,13 @@
 <circle cx="422.0" cy="437.0" r="2.2" fill="#C8202A" />
 <circle cx="432.6" cy="441.4" r="2.2" fill="#FFD23F" />
 <path d="M422.0 467.0 l-8 -6 v12 z M422.0 467.0 l8 -6 v12 z" fill="#C8202A" />
-<rect x="360.0" y="97.0" width="124.0" height="20.0" fill="#BDB5A6" stroke="#8F887B" stroke-width="1.5"/>
+<rect x="358.0" y="93.0" width="128.0" height="18.0" fill="#BDB5A6" stroke="#8F887B" stroke-width="1.5"/>
+<rect x="348.0" y="83.0" width="148.0" height="10.0" fill="#BDB5A6" stroke="#8F887B" stroke-width="1.5"/>
+<rect x="348.0" y="91.0" width="148.0" height="2.0" fill="#8F887B" />
+<path d="M360.0 93.0 h10 v8 q0 14 -5 22 q-5 -8 -5 -22 z" fill="#BDB5A6" stroke="#8F887B" stroke-width="1.5"/>
+<circle cx="365.0" cy="103.0" r="2.5" fill="#8F887B" />
+<path d="M474.0 93.0 h10 v8 q0 14 -5 22 q-5 -8 -5 -22 z" fill="#BDB5A6" stroke="#8F887B" stroke-width="1.5"/>
+<circle cx="479.0" cy="103.0" r="2.5" fill="#8F887B" />
 <rect x="367.0" y="117.0" width="110.0" height="208.0" fill="#B9B2A5" />
 <rect x="370.0" y="117.0" width="104.0" height="208.0" fill="#F4F1EA" />
 <rect x="378.0" y="122.0" width="88.0" height="18.0" fill="url(#glass)" />

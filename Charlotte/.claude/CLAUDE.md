@@ -144,6 +144,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - `shaders/`: `grade.gdshader` (full-screen colour grade on CanvasLayer 50), `sway.gdshader` (tree sway).
 - `art/decor/windows.json`: window panes per house, written by the generator, read by `WindowCats`. It is not a resource:
   an export preset needs `*.json` in its include filter.
+- Street doors and stairs follow `reference/portes.jpg` and `reference/escaliers.jpg`: generator `DOOR_STYLES` (double,
+  panel, oval, leaded stained glass, diamond, 1950s slots) and `door_surround` (lintel, cornice on brackets, pediment,
+  arch with fanlight), `ornate` stair railings (spades, scrolled newel), `stair_kind` "landing" (L with a landing on
+  posts) or "curve"; drawn last in `_variant` so other draws don't move. Spiral staircases only in the lane
+  (`LaneArt._spiral`), never on the street side.
 - `art/decor/*.svg`: house façades, **generated**. Edit `tools/generate_houses.gd` and regenerate instead of hand-editing:
   `Godot --headless --path . --script res://tools/generate_houses.gd`
 - `art/logo.png` is cut out of `art/logo.jpg` by `tools/cutout_logo.gd` (same headless invocation).

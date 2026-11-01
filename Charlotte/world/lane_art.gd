@@ -121,7 +121,11 @@ static func back(rng: RandomNumberGenerator, w: float, own := false) -> Array:
 			s += '<circle cx="%.1f" cy="%.1f" r="5" fill="#D9D9D9" stroke="#55585C" stroke-width="2"/>' % [pulley.x, pulley.y]
 	for px in [g0 + 2.0, g1 - 8.0]:
 		s += _rect(px, ground - (floors - 1) * fh - fh + 10, 7, (floors - 1) * fh + fh - 10 + 30, _dark(wood, 0.1))
-	# Zigzag stairs from the top gallery down to the yard.
+	# A metal spiral staircase from the top gallery down to the yard (only in the lanes, never on the street side),
+	# or zigzag wooden stairs.
+	if rng.randf() < 0.35:
+		s += _spiral(g1 + 24.0 if left else g0 - 24.0, ground - (floors - 1) * fh + 2.0, ground + 30.0, floors - 1)
+		return [_tex(w, s), pulley]
 	for f in range(floors - 1, 0, -1):
 		var hi := ground - f * fh + 2.0
 		var lo := ground - (f - 1) * fh + 2.0
@@ -135,6 +139,27 @@ static func back(rng: RandomNumberGenerator, w: float, own := false) -> Array:
 			s += _rect(p.x - 7, p.y - 2, 14, 3, _light(wood, 0.1))
 		s += _line(Vector2(sx, hi - 34), Vector2(ex, lo - 34), wood, 3.0)
 	return [_tex(w, s), pulley]
+
+
+# A helix of steel treads round a central pole, one turn per floor, with its handrail.
+static func _spiral(x: float, top: float, bottom: float, turns: int) -> String:
+	var metal := "#2E3236"
+	var s := _rect(x - 2.5, top - 40, 5, bottom - top + 40, metal)
+	var r := 26.0
+	var n := 16 * maxi(turns, 1)
+	var rail := PackedStringArray()
+	for i in n + 1:
+		var a := TAU * i / 16.0
+		var y := lerpf(top, bottom, float(i) / n)
+		var tip := x + cos(a) * r
+		var front := sin(a) > 0.0
+		if i < n:
+			s += _poly([Vector2(x, y - 2), Vector2(tip, y - 3), Vector2(tip, y + 1), Vector2(x, y + 2)], "#55595E" if front else "#3A3E42")
+		rail.append("%s%.1f %.1f" % ["M" if i == 0 else "L", x + cos(a) * (r + 2.0), y - 34.0])
+		if i % 2 == 0:
+			s += _line(Vector2(tip, y - 2), Vector2(x + cos(a) * (r + 2.0), y - 34.0), metal, 1.2)
+	s += '<path d="%s" stroke="%s" stroke-width="2.5" fill="none"/>' % [" ".join(rail), metal]
+	return s
 
 
 # ── Along the lane ──────────────────────────────────────────
