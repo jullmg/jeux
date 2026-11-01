@@ -128,6 +128,7 @@ func _draw_vista() -> void:
 	_walls(left_walls, x0, -1.0)
 	_walls(right_walls, x1, 1.0)
 	_far_crosswalks()
+	_curb_gardens()
 	_haze_band(3.0, 9.0, 0.0, 0.35)
 	_haze_band(9.0, FAR, 0.35, 0.6)
 	_lamps()
@@ -155,6 +156,60 @@ func _far_crosswalks() -> void:
 				var b := lerpf(l, r, (i + 0.75) / n)
 				draw_colored_polygon(PackedVector2Array([_at(Vector2(a, FACADE_Y), edge), _at(Vector2(b, FACADE_Y), edge),
 					_at(Vector2(b, FACADE_Y), edge + 0.07), _at(Vector2(a, FACADE_Y), edge + 0.07)]), Color(1, 1, 1, 0.75))
+
+
+# The planted curb extensions of the cross street too (like CurbGarden on ours): on both curbs just past the corner,
+# and either side of the next crossing down; a rounded bed bulging into the road, perennials, striped bollards.
+func _curb_gardens() -> void:
+	var spans: Array[Vector2] = [Vector2(0.1, 0.8)]
+	for c in _crossings:
+		spans.append(Vector2(c.x - 0.6, c.x - 0.04))
+		spans.append(Vector2(c.y + 0.04, c.y + 0.6))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(street_name + "beds")
+	var winter := Season.is_winter()
+	for span in spans:
+		if span.x > DETAIL:
+			continue
+		for dir in [1.0, -1.0]:
+			var curb := x0 + sidewalk if dir > 0.0 else x1 - sidewalk
+			var outer := PackedVector2Array()
+			var inner := PackedVector2Array()
+			for k in 13:
+				var t := k / 12.0
+				var d := lerpf(span.x, span.y, t)
+				var off := 74.0 * pow(sin(t * PI), 0.35)
+				outer.append(_at(Vector2(curb + dir * off, FACADE_Y), d))
+				inner.append(_at(Vector2(curb, FACADE_Y), d))
+			var bed := outer.duplicate()
+			for k in range(inner.size() - 1, -1, -1):
+				bed.append(inner[k])
+			draw_colored_polygon(bed, Color("#EEF2F5") if winter else Color("#5A4232"))
+			draw_polyline(outer, Color("#D6D1C6"), maxf(1.0, 4.0 / (1.0 + span.x)), true)
+			# Plants: tufts of grass and clumps of flowers or autumn colour, sized by the distance.
+			for i in 26:
+				var t := rng.randf_range(0.06, 0.94)
+				var d := lerpf(span.x, span.y, t)
+				var off := rng.randf_range(6.0, 66.0 * pow(sin(t * PI), 0.35))
+				var p := _at(Vector2(curb + dir * off, FACADE_Y), d)
+				var s := 1.0 / (1.0 + d)
+				var c: Color = _foliage[rng.randi_range(0, _foliage.size() - 1)]
+				if winter:
+					draw_line(p, p + Vector2(rng.randf_range(-3, 3), -16.0) * s, Color("#8E7A62"), maxf(1.0, 1.5 * s))
+				else:
+					var h := rng.randf_range(14.0, 30.0)
+					for b in 3:
+						draw_line(p, p + Vector2(rng.randf_range(-6.0, 6.0), -h) * s, c.darkened(0.3), maxf(1.0, 2.0 * s))
+					draw_circle(p + Vector2(0, -h * 0.6) * s, rng.randf_range(9.0, 15.0) * s, c.darkened(rng.randf_range(0.0, 0.25)))
+					if rng.randf() < 0.4:
+						draw_circle(p + Vector2(rng.randf_range(-4, 4), -h) * s, 4.0 * s, Color("#F2C230") if rng.randf() < 0.5 else Color("#C97AB8"))
+			# The bollards at its two tips.
+			for t in [0.0, 1.0]:
+				var d := lerpf(span.x, span.y, t)
+				var foot := _at(Vector2(curb + dir * 10.0, FACADE_Y), d)
+				var s := 1.0 / (1.0 + d)
+				draw_line(foot, foot + Vector2(0, -34.0) * s, Color("#1E1E1E"), maxf(1.0, 6.0 * s))
+				draw_line(foot + Vector2(0, -12.0) * s, foot + Vector2(0, -18.0) * s, Color("#F4F4F4"), maxf(1.0, 6.0 * s))
 
 
 # Street lamps along the right curb, receding (the poles are on the left).
@@ -350,11 +405,10 @@ func _walls(walls: Array, front_x: float, side: float) -> void:
 				var top: float = w.top
 				var col: Color = w.color
 				_wall_quad(front_x, top, FACADE_Y, d0, d1, col)
-				# Brick courses, near enough to see.
-				var y := top + 22.0
-				while y < FACADE_Y - 4.0:
-					draw_line(_at(Vector2(front_x, y), d0), _at(Vector2(front_x, y), minf(d1, DETAIL)), Color(col.darkened(0.3), 0.35), 1.0)
-					y += 13.0
+				if w.has("tex"):
+					_textured_wall(front_x, w, d0, d1)
+				else:
+					_bricks(front_x, top, d0, d1, col)
 				# Seen at a glancing angle: a darker shade, the further from the sun the darker.
 				_wall_quad(front_x, top, FACADE_Y, d0, d1, Color(0.1, 0.04, 0.06, 0.18 if side < 0.0 else 0.3))
 				_wall_quad(front_x, top, top + 14.0, d0, d1, col.darkened(0.35))
@@ -362,15 +416,61 @@ func _walls(walls: Array, front_x: float, side: float) -> void:
 				# Where one building ends and the next begins.
 				draw_line(_at(Vector2(front_x, top), d0), _at(Vector2(front_x, FACADE_Y), d0), col.darkened(0.5), maxf(1.0, 2.5 / (1.0 + d0)))
 				# A chimney or a vent box on the near roofs, set back from the edge.
-				if d0 < 4.0 and w.kind == "plex":
+				if d0 < 4.0 and w.kind == "plex" and not w.has("tex"):
 					var cd := d0 + (d1 - d0) * 0.3
 					var cx := front_x + side * 70.0
 					var chim := PackedVector2Array([_at(Vector2(cx, top - 34.0), cd), _at(Vector2(cx + side * 26.0, top - 34.0), cd),
 						_at(Vector2(cx + side * 26.0, top), cd), _at(Vector2(cx, top), cd)])
 					draw_colored_polygon(chim, col.darkened(0.2))
 					draw_colored_polygon(PackedVector2Array([chim[0] + Vector2(0, -3), chim[1] + Vector2(0, -3), chim[1], chim[0]]), Color("#5A5E62"))
-				_wall_details(w, front_x, top, d0, d1)
+				if not w.has("tex"):
+					_wall_details(w, front_x, top, d0, d1)
 		d0 = d1
+
+
+# A building's real facade (its street's SVG, `w.tex`) laid along the wall in perspective: cut into thin strips down
+# the depth so the mapping follows it; the facade's bottom on the facade line, as on its own street; hazier further.
+func _textured_wall(front_x: float, w: Dictionary, d0: float, d1: float) -> void:
+	var tex: Texture2D = w.tex
+	var tw := float(tex.get_width())
+	var th := float(tex.get_height())
+	var top := FACADE_Y - th * StreetScene.HOUSE_SCALE
+	var u0 := 30.0 / tw
+	var u1 := (tw - 30.0) / tw
+	if w.get("flip", false):
+		var t := u0
+		u0 = u1
+		u1 = t
+	var strips := clampi(int((d1 - d0) * 40.0) + 4, 4, 24)
+	var tint := Color.WHITE.lerp(HAZE, clampf(d0 / FAR * 1.4, 0.0, 0.65))
+	var colors := PackedColorArray([tint, tint, tint, tint])
+	for i in strips:
+		var ta := float(i) / strips
+		var tb := float(i + 1) / strips
+		var da := lerpf(d0, d1, ta)
+		var db := lerpf(d0, d1, tb)
+		var ua := lerpf(u0, u1, ta)
+		var ub := lerpf(u0, u1, tb)
+		draw_polygon(PackedVector2Array([_at(Vector2(front_x, top), da), _at(Vector2(front_x, top), db),
+			_at(Vector2(front_x, FACADE_Y), db), _at(Vector2(front_x, FACADE_Y), da)]),
+			colors, PackedVector2Array([Vector2(ua, 0), Vector2(ub, 0), Vector2(ub, 1), Vector2(ua, 1)]), tex)
+
+
+# Exposed brickwork on a drawn wall: the courses, and near enough to see, the staggered joints between the bricks.
+func _bricks(front_x: float, top: float, d0: float, d1: float, col: Color) -> void:
+	var joint := Color(col.darkened(0.3), 0.35)
+	var lines := PackedVector2Array()
+	var y := top + 22.0
+	var row := 0
+	while y < FACADE_Y - 4.0:
+		lines.append_array([_at(Vector2(front_x, y), d0), _at(Vector2(front_x, y), minf(d1, DETAIL))])
+		var dd := d0 + (0.028 if row % 2 == 1 else 0.0)
+		while dd < minf(d1, 2.5):
+			lines.append_array([_at(Vector2(front_x, y), dd), _at(Vector2(front_x, minf(y + 13.0, FACADE_Y)), dd)])
+			dd += 0.056
+		y += 13.0
+		row += 1
+	draw_multiline(lines, joint, 1.0)
 
 
 # A building's end wall, square to the street at depth d (parallel to the screen), from its roof (top) down to `bottom`,

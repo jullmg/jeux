@@ -543,13 +543,20 @@ func _walls_along(script_path: String, from_gap: String, direction: int, ours :=
 		var tex := _tex(art)
 		d += (tex.get_width() - 2.0 * MARGIN) * HOUSE_SCALE / 650.0
 		var wall := {"to": d, "top": HOUSE_BASE_Y - (tex.get_height() - 40.0) * HOUSE_SCALE, "kind": _wall_kind(art), "color": _wall_color(tex)}
+		if wall.kind != "gap":
+			# Its real facade, laid along the wall in perspective; going back along that street's layout, its right
+			# edge is the near end.
+			wall.tex = tex
+			wall.flip = direction < 0
 		walls.append(wall)
 		if wall.kind != "gap":
 			last = wall.color
 		i += direction
 	if ours != "" and not walls.is_empty() and walls[0].kind != "gap":
+		# The corner building's side: drawn at our corner facade's height and brick so the corner joins up.
 		walls[0].top = _house_top(ours)
 		walls[0].color = _wall_color(_tex(ours))
+		walls[0].erase("tex")
 	# The next cross street (an open "cross" gap, with its crosswalk), then the next block's plexes into the distance.
 	walls.append({"to": d + 0.5, "kind": "cross"})
 	walls.append({"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": last.lerp(Color("#B5603F"), 0.5)})

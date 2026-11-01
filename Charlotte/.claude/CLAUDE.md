@@ -66,6 +66,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   A building taller than the one before it shows its end wall above that one's roof (`_end_wall`, drawn first, far to
   near, so nearer facades hide the rest); chimneys on near roofs; street lamps down the right curb (`_lamps`); the next
   street down the vista is a "cross" gap (from `_walls_along`) with crosswalks painted across our road.
+- Vista walls built from a real street carry that building's own facade texture (`w.tex`, `w.flip` from `_walls_along`)
+  laid in perspective in thin strips (`CrossStreet._textured_wall`): its doors, stairs, balconies, bricks, season decor.
+  Drawn walls (the corner building's side, the other blocks across) get exposed brick courses and staggered joints
+  (`_bricks`). Planted curb extensions on both curbs past the corner and either side of the next crossing
+  (`_curb_gardens`).
 - Cross-street vistas show the real street that runs there: `StreetScene._walls_along(script, from_gap, direction)`
   reads that street's `layout` (its scene script's `_init`) from our corner to its next cross street, giving each wall
   its building's width, height, kind (`_wall_kind`: ohbon, corner_holt, shop = Xin-Xin, garage, school, gap = lane,
