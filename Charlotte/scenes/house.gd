@@ -76,18 +76,19 @@ func _build_shell() -> void:
 func _build_family() -> void:
 	_mom = _family_member(CharacterLook.mom(), KITCHEN_START + 300.0, -1)
 	_dad = _family_member(CharacterLook.dad(), 1720.0, -1)
-	add_child(DoorSpot.make(Rect2(_mom.position.x - 50.0, 380, 100, 290), func():
-		_say(_mom, MOM_LINES[_mom_line % MOM_LINES.size()], 300.0)
+	add_child(DoorSpot.make(Rect2(_mom.position.x - 55.0, 330, 110, 340), func():
+		_say(_mom, MOM_LINES[_mom_line % MOM_LINES.size()], 350.0)
 		_mom_line += 1, _mom.position.x - 90.0))
-	add_child(DoorSpot.make(Rect2(_dad.position.x - 50.0, 380, 100, 290), func():
-		_say(_dad, DAD_LINES[_dad_line % DAD_LINES.size()], 310.0)
+	add_child(DoorSpot.make(Rect2(_dad.position.x - 55.0, 330, 110, 340), func():
+		_say(_dad, DAD_LINES[_dad_line % DAD_LINES.size()], 360.0)
 		_dad_line += 1, _dad.position.x - 90.0))
 
 
 func _family_member(look: CharacterLook, x: float, facing: int) -> Character:
 	var who := Character.new()
 	who.look = look
-	who.scale = Vector2.ONE * CHAR_SCALE
+	# The grown-ups stand a head taller than their daughter.
+	who.scale = Vector2.ONE * CHAR_SCALE * 1.18
 	who.position = Vector2(x, FEET_Y - 10.0)
 	who.facing = facing
 	add_child(who)

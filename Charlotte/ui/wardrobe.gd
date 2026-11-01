@@ -14,7 +14,7 @@ const OUTFITS := [["dress", "Robe"], ["tshirt", "T-shirt"], ["sweater", "Chandai
 	["overalls", "Salopette"], ["coat", "Manteau"]]
 const DRESS_PATTERNS := [["none", "Uni"], ["dots", "Pois"], ["flowers", "Fleurs"], ["hearts", "Cœurs"], ["stars", "Étoiles"], ["stripes", "Rayures"]]
 const TOP_PATTERNS := [["none", "Uni"], ["stripes", "Rayures"], ["heart", "Gros cœur"], ["star", "Grande étoile"], ["zigzag", "Zigzag"],
-	["dots", "Pois"], ["flowers", "Fleurs"], ["hearts", "Cœurs"], ["stars", "Étoiles"]]
+	["dots", "Pois"], ["flowers", "Fleurs"], ["hearts", "Cœurs"], ["stars", "Étoiles"], ["bike", "Vélo"]]
 const SLEEVES := [["puff", "Bouffantes"], ["short", "Courtes"], ["long", "Longues"]]
 const LEGWEAR := [["socks", "Chaussettes"], ["tights", "Collants"], ["pants", "Pantalon"]]
 const SHOES := [["mary_jane", "Souliers"], ["sneaker", "Espadrilles"], ["boot", "Bottes"], ["rain_boot", "Bottes de pluie"]]

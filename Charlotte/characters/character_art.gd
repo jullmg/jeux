@@ -386,6 +386,11 @@ func _top() -> String:
 			s += _f('<path d="M65 38 l5 11 l12 1 l-9 8 l3 12 l-11 -6 l-11 6 l3 -12 l-9 -8 l12 -1 z" fill="{accent}"/>')
 		"zigzag":
 			s += _f('<path d="M24 52 l10 -8 l10 8 l10 -8 l10 8 l10 -8 l10 8 l10 -8 l8 6" stroke="{accent}" stroke-width="5" fill="none" stroke-linejoin="round"/>')
+		"bike":
+			# A bicycle printed on the chest: two wheels, the frame, a saddle and handlebars.
+			s += _f('<g stroke="{accent}" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">'
+				+ '<circle cx="48" cy="70" r="11"/><circle cx="82" cy="70" r="11"/>'
+				+ '<path d="M48 70 L60 70 L76 52 L60 52 Z M60 70 L56 46 M76 52 L82 70 M52 46 H60 M76 52 L74 44 H81"/></g>')
 		_:
 			s += _pattern([[38, 44], [66, 54], [94, 44], [44, 78], [74, 86], [98, 74]], [[56, 34], [84, 68]])
 	if look.outfit in ["sweater", "hoodie"]:
