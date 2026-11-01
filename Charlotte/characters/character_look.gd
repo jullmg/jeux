@@ -62,6 +62,55 @@ static func dress_charlotte(look: CharacterLook) -> void:
 	ResourceSaver.save(_outfit, OUTFIT_PATH)
 
 
+## Charlotte's mother (from reference/mere_charlotte.jpg): long wavy light-brown hair with blond lights, fair skin,
+## brown eyes, a black knit sweater, jeans.
+static func mom() -> CharacterLook:
+	var look := CharacterLook.new()
+	look.age = "adult"
+	look.skin = Color("#F3D3BC")
+	look.hair_style = "long_wavy"
+	look.hair_color = Color("#9C7550")
+	look.eye_color = Color("#6B4E2E")
+	look.lashes = true
+	look.mouth = "smile"
+	look.outfit = "sweater"
+	look.outfit_color = Color("#262428")
+	look.accent_color = Color("#3A383E")
+	look.pattern = "none"
+	look.sleeve = "long"
+	look.legwear = "pants"
+	look.legwear_color = Color("#3F5578")
+	look.shoes = "boot"
+	look.shoe_color = Color("#5A3A28")
+	return look
+
+
+## Charlotte's father (from reference/pere_charlotte.jpg): short dark-brown hair under a black cap, a few days'
+## beard, blue eyes, fair skin, a navy sweater.
+static func dad() -> CharacterLook:
+	var look := CharacterLook.new()
+	look.age = "adult"
+	look.skin = Color("#F0CDB2")
+	look.hair_style = "short"
+	look.hair_color = Color("#4A3426")
+	look.eye_color = Color("#5B8FC4")
+	look.lashes = false
+	look.mouth = "smile"
+	look.facial_hair = "stubble"
+	look.outfit = "sweater"
+	look.outfit_color = Color("#232B3E")
+	look.accent_color = Color("#2E3A52")
+	look.pattern = "none"
+	look.sleeve = "long"
+	look.legwear = "pants"
+	look.legwear_color = Color("#2E2E30")
+	look.shoes = "sneaker"
+	look.shoe_color = Color("#2B2B2B")
+	look.hat = "cap"
+	look.hat_color = Color("#1E2230")
+	return look
+
+
 ## Her usual look: the yellow polka-dot dress.
 static func usual() -> CharacterLook:
 	var look := CharacterLook.new()

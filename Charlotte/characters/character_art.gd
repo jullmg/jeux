@@ -153,12 +153,21 @@ func _head_svg(lids_only: bool) -> String:
 	s += _f('<path d="M124 150 Q129 153 125 156" stroke="{nose}" stroke-width="2.5" fill="none" stroke-linecap="round"/>')
 	if look.facial_hair == "beard":
 		s += _f('<path d="M52 146 C58 196 86 216 114 216 C144 216 172 196 180 146 C170 168 150 184 114 184 C80 184 60 168 52 146 Z" fill="{hair}" stroke="{hair_line}" stroke-width="2.5"/>')
+	elif look.facial_hair == "stubble":
+		# A few days' growth: a soft shadow along the jaw and over the lip, flecked with short hairs.
+		s += _f('<path d="M54 146 C60 192 86 210 114 210 C144 210 170 192 178 146 C168 166 150 180 114 180 C80 180 62 166 54 146 Z" fill="{hair}" opacity="0.38"/>')
+		s += _f('<path d="M102 162 Q114 154 123 159 Q132 154 144 162 Q132 166 123 163 Q114 166 102 162 Z" fill="{hair}" opacity="0.45"/>')
+		for i in 26:
+			var a := float(i) / 25.0
+			var x := lerpf(64.0, 168.0, a)
+			var y := 158.0 + sin(a * PI) * 40.0 + (i % 3) * 4.0
+			s += _f('<circle cx="%.1f" cy="%.1f" r="1.3" fill="{hair_line}" opacity="0.55"/>' % [x, y])
 	if look.mouth == "open_smile":
 		s += _f('<path d="M110 166 Q123 180 136 166 Z" fill="{mouth}" stroke="{mouth_line}" stroke-width="2" stroke-linejoin="round"/>')
 		s += _f('<path d="M116 172 Q123 178 130 172 Q123 170 116 172 Z" fill="{tongue}"/>')
 	else:
 		s += _f('<path d="M110 167 Q123 177 136 167" stroke="{mouth_line}" stroke-width="3" fill="none" stroke-linecap="round"/>')
-	if look.facial_hair != "":
+	if look.facial_hair in ["beard", "mustache"]:
 		s += _f('<path d="M104 161 Q114 152 123 158 Q132 152 142 161 Q132 166 123 162 Q114 166 104 161 Z" fill="{hair}" stroke="{hair_line}" stroke-width="2"/>')
 	if look.glasses != "":
 		s += _f('<g fill="#FFFFFF" fill-opacity="0.15" stroke="{glasses}" stroke-width="3.5"><circle cx="94" cy="130" r="25"/><circle cx="150" cy="130" r="23"/></g>')

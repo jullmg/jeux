@@ -14,6 +14,8 @@ const SALON_END := 2260.0
 const KITCHEN_START := 3400.0
 const CHACHA_DOOR_X := 3120.0
 const BEDROOM_DOOR_X := 6440.0
+const MOM_LINES := ["Bonjour ma chouette !", "As-tu faim ? Il y a des fruits.", "N'oublie pas de nourrir le hamster !", "Je t'aime, Chacha !"]
+const DAD_LINES := ["Salut Chacha !", "On va au parc tantôt ?", "As-tu fait un beau dessin ?", "Tu veux jouer avec moi ?"]
 const SNACKS := [["apple", "Une pomme !"], ["yogurt", "Un yogourt !"], ["cheese", "Du fromage !"],
 	["grapes", "Des raisins !"], ["carrot", "Une carotte !"], ["cookie", "Un biscuit !"]]
 
@@ -26,6 +28,10 @@ var _bedroom_lights: FairyLights
 # Charlotte's drawings stuck on the fridge door with magnets.
 var _fridge_art: Node2D
 var _fridge_busy := false
+var _mom: Character
+var _dad: Character
+var _mom_line := 0
+var _dad_line := 0
 
 
 func _ready() -> void:
@@ -34,6 +40,7 @@ func _ready() -> void:
 	_build_salon()
 	_build_hallway()
 	_build_bedroom()
+	_build_family()
 	_build_switches()
 	_spawn_charlotte(470.0)
 	_build_doors()
@@ -63,6 +70,28 @@ func _build_shell() -> void:
 	]
 	shell.gleams = [320.0, 410.0, 1524.0, 1665.0, 1984.0, 2600.0, 3200.0, KITCHEN_START + 322.0, BEDROOM.x + 180.0, BEDROOM.x + 700.0]
 	add_child(shell)
+
+
+# Mom in the kitchen by the stove, Dad in the salon by the dining table. Click them for a word.
+func _build_family() -> void:
+	_mom = _family_member(CharacterLook.mom(), KITCHEN_START + 300.0, -1)
+	_dad = _family_member(CharacterLook.dad(), 1720.0, -1)
+	add_child(DoorSpot.make(Rect2(_mom.position.x - 50.0, 380, 100, 290), func():
+		_say(_mom, MOM_LINES[_mom_line % MOM_LINES.size()], 300.0)
+		_mom_line += 1, _mom.position.x - 90.0))
+	add_child(DoorSpot.make(Rect2(_dad.position.x - 50.0, 380, 100, 290), func():
+		_say(_dad, DAD_LINES[_dad_line % DAD_LINES.size()], 310.0)
+		_dad_line += 1, _dad.position.x - 90.0))
+
+
+func _family_member(look: CharacterLook, x: float, facing: int) -> Character:
+	var who := Character.new()
+	who.look = look
+	who.scale = Vector2.ONE * CHAR_SCALE
+	who.position = Vector2(x, FEET_Y - 10.0)
+	who.facing = facing
+	add_child(who)
+	return who
 
 
 # The wall switch in each room, and the salon's floor lamp (click the lamp itself).
