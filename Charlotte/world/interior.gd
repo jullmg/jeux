@@ -60,7 +60,7 @@ func _spawn_charlotte(x: float, facing := 1) -> void:
 	add_child(_camera)
 
 
-## Out-of-focus foreground (`items`: [world x, "plant" | "plushie"]), colour grade, fade-in, `--screenshot=`.
+## Out-of-focus foreground (`items`: [world x, "plant" | "plushie" | "shelf"]), colour grade, fade-in, `--screenshot=`.
 func _finish(foreground: Array) -> void:
 	_build_foreground(foreground)
 	_build_grade()
@@ -337,6 +337,11 @@ func _build_foreground(items: Array) -> void:
 		match item[1]:
 			"plant":
 				Foreground.add(layer, Foreground.shrub(rng), Vector2(x, 720.0 + 100.0), Vector2(260, 170)).modulate = Color(0.45, 0.42, 0.38)
+			"shelf":
+				var body := '<rect x="10" y="40" width="380" height="200" fill="#C9C5BC"/>'
+				for i in 12:
+					body += '<rect x="%d" y="%d" width="26" height="46" fill="%s"/>' % [22 + i * 30, 60 + (i % 2) * 70, ["#E04F5F", "#FFD23F", "#4FA3E0", "#7CCB5A", "#FF8A3D", "#C084FC"][(i * 7) % 6]]
+				Foreground.add(layer, body, Vector2(x, 720.0 + 120.0), Vector2(400, 240)).modulate = Color(0.5, 0.48, 0.46)
 			"plushie":
 				Foreground.add(layer, '<circle cx="90" cy="110" r="70" fill="#F2A7C9"/><circle cx="40" cy="50" r="28" fill="#F2A7C9"/><circle cx="140" cy="50" r="28" fill="#F2A7C9"/>', Vector2(x, 720.0 + 95.0), Vector2(180, 180)).modulate = Color(0.55, 0.5, 0.5)
 

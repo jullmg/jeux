@@ -21,6 +21,8 @@ var casings: Array = []
 var gleams: Array = []
 ## "wood" (narrow honey strips) or "tiles" (a shop's checkered linoleum).
 var floor_style := "wood"
+## "moulding" (a home's crown moulding) or "drop" (a shop's suspended ceiling: tiles in a metal grid).
+var ceiling_style := "moulding"
 const TILES := [Color("#ECE8DE"), Color("#9AA092")]
 var seed_value := 77
 
@@ -54,11 +56,22 @@ func _room(x0: float, x1: float, wall: Color, base: Color, rng: RandomNumberGene
 	var w := x1 - x0
 	_vgrad(x0, x1, 0.0, CEILING, Color("#F7F5F0"), Color("#E4DFD5"))
 	_vgrad(x0, x1, CEILING, WALL_BASE, wall.lightened(0.05), wall.darkened(0.08))
-	# Crown moulding: cove, fillet and bead, with a soft shadow on the wall below.
-	draw_rect(Rect2(x0, CEILING, w, 10), Color("#FBFAF6"))
-	draw_rect(Rect2(x0, CEILING + 10, w, 6), Color("#E3DDD2"))
-	draw_rect(Rect2(x0, CEILING + 16, w, 5), Color("#F7F5F0"))
-	draw_line(Vector2(x0, CEILING + 21), Vector2(x1, CEILING + 21), Color("#CFC8BA"), 1.5)
+	if ceiling_style == "drop":
+		# Suspended ceiling: square tiles in a thin metal grid, an angle trim where it meets the wall.
+		draw_rect(Rect2(x0, 0, w, CEILING), Color("#F2F2EE"))
+		var gx := x0
+		while gx < x1:
+			draw_line(Vector2(gx, 0), Vector2(gx, CEILING), Color("#C9CBC6"), 2.0)
+			gx += 120.0
+		draw_line(Vector2(x0, CEILING * 0.5), Vector2(x1, CEILING * 0.5), Color("#C9CBC6"), 2.0)
+		draw_rect(Rect2(x0, CEILING, w, 6), Color("#D6D8D4"))
+		draw_rect(Rect2(x0, CEILING + 6, w, 2), Color("#A9ABA6"))
+	else:
+		# Crown moulding: cove, fillet and bead, with a soft shadow on the wall below.
+		draw_rect(Rect2(x0, CEILING, w, 10), Color("#FBFAF6"))
+		draw_rect(Rect2(x0, CEILING + 10, w, 6), Color("#E3DDD2"))
+		draw_rect(Rect2(x0, CEILING + 16, w, 5), Color("#F7F5F0"))
+		draw_line(Vector2(x0, CEILING + 21), Vector2(x1, CEILING + 21), Color("#CFC8BA"), 1.5)
 	_vgrad(x0, x1, CEILING + 22, CEILING + 70, Color(0.2, 0.1, 0.04, 0.12), Color(0.2, 0.1, 0.04, 0.0))
 	# Plaster: faint vertical variation so the wall isn't a flat sheet.
 	var px := x0
