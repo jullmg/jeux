@@ -52,17 +52,9 @@ func _build_cross_streets() -> void:
 		{"to": 2.6, "top": _house_top("ecole"), "kind": "school", "color": Color("#A9472F")},
 		{"to": CrossStreet.FAR, "top": 330.0, "kind": "plex", "color": Color("#9C5A44")},
 	]
-	dandurand.right_walls = [
-		{"to": 0.45, "top": _house_top("depanneur"), "kind": "shop", "color": Color("#6E3A2E")},
-		{"to": 2.2, "top": 300.0, "kind": "plex", "color": Color("#B5603F")},
-		{"to": CrossStreet.FAR, "top": 260.0, "kind": "plex", "color": Color("#C8A27A")},
-	]
+	dandurand.right_walls = _walls_along("res://scenes/dandurand.gd", "rue_6e", -1)
 	var holt := _cross_street("rue_holt", "Rue Holt", -1.0)
-	holt.left_walls = [
-		{"to": 0.6, "top": _house_top("coin_holt"), "kind": "plex", "color": Color("#B5603F")},
-		{"to": 2.4, "top": 290.0, "kind": "plex", "color": Color("#A8473A")},
-		{"to": CrossStreet.FAR, "top": 320.0, "kind": "plex", "color": Color("#C2A07A")},
-	]
+	holt.left_walls = _walls_along("res://scenes/holt.gd", "rue_6e", 1)
 	holt.right_walls = [
 		{"to": 0.7, "top": _house_top("coin_holt_est"), "kind": "plex", "color": Color("#9C6B4E")},
 		{"to": 2.0, "top": 270.0, "kind": "plex", "color": Color("#8E3A2F")},

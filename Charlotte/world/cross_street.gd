@@ -249,6 +249,32 @@ func _wall_details(w: Dictionary, front_x: float, top: float, d0: float, d1: flo
 			_wall_quad(front_x, FACADE_Y - 112.0, FACADE_Y - 6.0, d0 + span * 0.55, d0 + span * 0.7, Color("#3A3A3A"))
 			_wall_quad(front_x, top + 14.0, top + 40.0, d0, d1, Color("#3E8C5A"))
 			_windows(front_x, top + 70.0, d0, d1, 3, glass, trim)
+		"ohbon":
+			# Dépanneur Oh Bon!: its sign band, the windows, the red and white checkerboard, the red footing; galleries above.
+			_wall_quad(front_x, FACADE_Y - 160.0, FACADE_Y - 136.0, d0 + span * 0.04, d0 + span * 0.7, Color("#C8202A"))
+			_wall_quad(front_x, FACADE_Y - 156.0, FACADE_Y - 140.0, d0 + span * 0.06, d0 + span * 0.68, Color("#F4F1EA"))
+			_wall_quad(front_x, FACADE_Y - 128.0, FACADE_Y - 40.0, d0 + span * 0.06, d0 + span * 0.45, glass)
+			for k in 4:
+				for row in 3:
+					var a := d0 + span * (0.48 + k * 0.05)
+					_wall_quad(front_x, FACADE_Y - 128.0 + row * 29.0, FACADE_Y - 99.0 + row * 29.0, a, a + span * 0.05,
+						Color("#D9342B") if (k + row) % 2 == 0 else Color("#F4F1EA"))
+			_wall_quad(front_x, FACADE_Y - 40.0, FACADE_Y, d0 + span * 0.04, d0 + span * 0.7, Color("#D9342B"))
+			for gy in [FACADE_Y - 200.0, FACADE_Y - 350.0]:
+				_wall_quad(front_x, gy, gy + 6.0, d0, d0 + span * 0.7, Color("#1F1F1F"))
+				_wall_quad(front_x, gy + 26.0, gy + 32.0, d0, d0 + span * 0.7, Color("#D8D4CC"))
+			_windows(front_x, top + 40.0, d0, d1, 3, glass, trim)
+		"corner_holt":
+			# The corner building's 6e side: the red corner window and awning at the corner, white lintels, the annex.
+			_wall_quad(front_x, FACADE_Y - 120.0, FACADE_Y - 30.0, d0 + span * 0.02, d0 + span * 0.18, glass)
+			_wall_quad(front_x, FACADE_Y - 138.0, FACADE_Y - 120.0, d0, d0 + span * 0.2, Color("#D9342B"))
+			_wall_quad(front_x, FACADE_Y - 30.0, FACADE_Y, d0 + span * 0.02, d0 + span * 0.18, Color("#D9342B"))
+			_wall_quad(front_x, FACADE_Y - 120.0, FACADE_Y, d1 - span * 0.3, d1, Color("#CBC5B6"))
+			_wall_quad(front_x, FACADE_Y - 140.0, FACADE_Y - 120.0, d1 - span * 0.31, d1, Color("#7E848A"))
+			for f in floors - 1:
+				var y := top + 40.0 + f * 150.0
+				_windows(front_x, y, d0 + span * 0.1, d1 - span * 0.1, 4, glass, trim)
+				_windows(front_x, y - 16.0, d0 + span * 0.1, d1 - span * 0.1, 4, trim, trim)
 		"garage":
 			_wall_quad(front_x, FACADE_Y - 96.0, FACADE_Y, d0 + span * 0.2, d0 + span * 0.45, trim)
 			_wall_quad(front_x, FACADE_Y - 96.0, FACADE_Y, d0 + span * 0.55, d0 + span * 0.85, trim)

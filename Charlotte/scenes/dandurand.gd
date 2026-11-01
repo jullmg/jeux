@@ -40,23 +40,12 @@ func _build_cross_streets() -> void:
 		{"to": 2.6, "top": 290.0, "kind": "plex", "color": Color("#B5603F")},
 		{"to": CrossStreet.FAR, "top": 310.0, "kind": "plex", "color": Color("#A8473A")},
 	]
-	fifth.right_walls = [
-		{"to": 0.5, "top": 300.0, "kind": "plex", "color": Color("#9C6B4E")},
-		{"to": 1.4, "top": 290.0, "kind": "plex", "color": Color("#C8A27A")},
-		{"to": 1.6, "kind": "gap"},
-		{"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": Color("#8E3A2F")},
-	]
+	fifth.right_walls = _walls_along("res://scenes/cinquieme.gd", "rue_dandurand", -1)
 	var sixth := _cross_street("rue_6e", "6e Avenue", 1.0)
 	sixth.along_name = "Rue Dandurand"
 	# 6e Avenue runs north from here: no mountain that way, just sky.
 	sixth.facing = "north"
-	sixth.left_walls = [
-		{"to": 0.4, "top": _house_top("depanneur_front"), "kind": "plex", "color": Color("#6E3A2E")},
-		{"to": 0.9, "top": 300.0, "kind": "garage", "color": Color("#6B3A2E")},
-		{"to": 1.15, "kind": "gap"},
-		{"to": 3.0, "top": 250.0, "kind": "plex", "color": Color("#C8A27A")},
-		{"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": Color("#A8473A")},
-	]
+	sixth.left_walls = _walls_along("res://scenes/main.gd", "rue_dandurand", 1)
 	sixth.right_walls = [
 		{"to": 0.7, "top": _house_top("dandurand_nord"), "kind": "plex", "color": Color("#C2A07A")},
 		{"to": 2.4, "top": 280.0, "kind": "plex", "color": Color("#9C5A44")},

@@ -57,6 +57,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   corrugated annex with its shingle awning, the red corner window), `ohbon` (dépanneur Oh Bon! on Holt: red storefront,
   checkerboard, galleries, white-railed stairs; "DÉPANNEUR" / "OH BON !" as labels in `holt.gd`, no logo) and the Holt-side
   `ruelle` entrance (iron stair, conduits, tags, garage door, one-way sign, the post for the "RALENTISSEZ" sign).
+- Cross-street vistas show the real street that runs there: `StreetScene._walls_along(script, from_gap, direction)`
+  reads that street's `layout` (its scene script's `_init`) from our corner to its next cross street, giving each wall
+  its building's width, height, kind (`_wall_kind`: ohbon, corner_holt, shop = Xin-Xin, garage, school, gap = lane,
+  plex) and brick colour sampled off its facade (`_wall_color`); generic plexes beyond. Only the side across the street
+  (another block) is still hand-written.
 - Before 8 (`StreetScene.CROSS_AGE`, `GameState.age`) Charlotte can't cross a street ("Je n'ai pas le droit de traverser
   toute seule !"), so her world is the block: its four corners and the lane.
 - The back lanes, `scenes/ruelle.gd` (extends `StreetScene` but builds its own `_ready`; art in `world/lane_art.gd`,

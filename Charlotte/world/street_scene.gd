@@ -472,6 +472,53 @@ func _house_top(art: String) -> float:
 	return _house_origin(layout.find(art)).y + 40.0 * HOUSE_SCALE
 
 
+## The walls along a cross street, built from the street that really runs there (its scene script's layout): from
+## our corner, its gap `from_gap`, going `direction` (+1 / -1 along its layout) to its next cross street; each building
+## with its width, height, colour (sampled off its facade) and kind; then the next block, generic, into the distance.
+func _walls_along(script_path: String, from_gap: String, direction: int) -> Array:
+	var other: Node = load(script_path).new()
+	var lay: Array = other.layout
+	var gaps: Dictionary = other.cross_streets
+	other.free()
+	var walls := []
+	var d := 0.0
+	var i := lay.find(from_gap) + direction
+	var last := Color("#9C5A44")
+	while i >= 0 and i < lay.size() and not gaps.has(lay[i]):
+		var art: String = lay[i]
+		var tex := _tex(art)
+		d += (tex.get_width() - 2.0 * MARGIN) * HOUSE_SCALE / 650.0
+		var wall := {"to": d, "top": HOUSE_BASE_Y - (tex.get_height() - 40.0) * HOUSE_SCALE, "kind": _wall_kind(art), "color": _wall_color(tex)}
+		walls.append(wall)
+		if wall.kind != "gap":
+			last = wall.color
+		i += direction
+	# The next cross street, then the next block's plexes on into the distance.
+	walls.append({"to": d + 0.5, "kind": "gap"})
+	walls.append({"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": last.lerp(Color("#B5603F"), 0.5)})
+	return walls
+
+
+func _wall_kind(art: String) -> String:
+	if art.begins_with("ruelle"):
+		return "gap"
+	return {"ohbon": "ohbon", "coin_holt": "corner_holt", "depanneur_front": "shop", "garages": "garage", "ecole": "school"}.get(art, "plex")
+
+
+# A facade's brick colour: the average of a few points down its left side, clear of windows and stairs.
+func _wall_color(tex: Texture2D) -> Color:
+	var img := tex.get_image()
+	var sum := Color(0, 0, 0, 0)
+	var n := 0
+	for k in 8:
+		var p := Vector2i(int(MARGIN) + 10, int(img.get_height() * lerpf(0.3, 0.6, k / 7.0)))
+		var c := img.get_pixelv(p)
+		if c.a > 0.5:
+			sum += c
+			n += 1
+	return Color(sum.r / n, sum.g / n, sum.b / n) if n > 0 else Color("#9C5A44")
+
+
 func _cross_street(art: String, street_name: String, sign_side: float) -> CrossStreet:
 	var i := layout.find(art)
 	var cs := CrossStreet.new()
