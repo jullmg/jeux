@@ -40,6 +40,7 @@ func _process(delta: float) -> void:
 func _spawn_charlotte(x: float, facing := 1) -> void:
 	_charlotte = Character.new()
 	_charlotte.look = CharacterLook.charlotte()
+	_charlotte.fidgets = true
 	_charlotte.scale = Vector2.ONE * CHAR_SCALE
 	_charlotte.walk_speed = 260.0
 	_charlotte.step_sound = Sfx.step_for(false)

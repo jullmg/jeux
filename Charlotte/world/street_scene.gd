@@ -783,6 +783,7 @@ func _spawn_cat(x: float) -> StrayCat:
 func _spawn_charlotte(x: float) -> Character:
 	var charlotte := Character.new()
 	charlotte.look = CharacterLook.charlotte()
+	charlotte.fidgets = true
 	charlotte.step_sound = Sfx.step_for(true)
 	charlotte.position = Vector2(x, CHARLOTTE_Y)
 	charlotte.scale = Vector2.ONE * CHAR_SCALE

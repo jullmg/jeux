@@ -244,6 +244,7 @@ func _water(id: String) -> void:
 func _family_member(look: CharacterLook, x: float, facing: int) -> Character:
 	var who := Character.new()
 	who.look = look
+	who.fidgets = true
 	# The grown-ups stand a head taller than their daughter.
 	who.scale = Vector2.ONE * CHAR_SCALE * 1.18
 	who.position = Vector2(x, FEET_Y - 10.0)

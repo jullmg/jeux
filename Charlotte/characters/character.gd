@@ -38,6 +38,14 @@ var _pet_low := 1.0
 var _run := 0.0
 var _held: Node2D
 var _hold := 0.0
+## Little idle gestures when she stands still a while (Charlotte, her parents): a wave, a hop, a stretch, a look round.
+var fidgets := false
+var _shade: ShaderMaterial
+var _idle := 0.0
+var _gesture := ""
+var _gesture_t := 0.0
+var _gesture_len := 1.0
+var _next_gesture := 6.0
 
 
 func _ready() -> void:
@@ -60,6 +68,8 @@ func set_look(new_look: CharacterLook) -> void:
 func _build() -> void:
 	var art := CharacterArt.build(look)
 	_rig = art.rig
+	_shade = ShaderMaterial.new()
+	_shade.shader = preload("res://shaders/character_shade.gdshader")
 	var tex: Dictionary = art.tex
 	var leg: float = _rig.leg_len
 	var neck := Vector2(0, _rig.neck_y)
@@ -130,6 +140,25 @@ func is_holding() -> bool:
 	return _held != null and is_instance_valid(_held)
 
 
+# Standing still a while, now and then: one little gesture, then back to rest.
+func _fidget(delta: float) -> void:
+	if _gesture != "":
+		_gesture_t -= delta
+		if _gesture_t <= 0.0 or is_walking or is_petting():
+			_gesture = ""
+		return
+	if not fidgets or is_walking or is_petting() or is_holding():
+		_idle = 0.0
+		_next_gesture = randf_range(5.0, 9.0)
+		return
+	_idle += delta
+	if _idle >= _next_gesture:
+		_gesture = ["wave", "hop", "stretch", "look", "look"][randi() % 5]
+		_gesture_len = {"wave": 1.6, "hop": 0.9, "stretch": 1.4, "look": 2.2}[_gesture]
+		_gesture_t = _gesture_len
+		_next_gesture = _idle + randf_range(7.0, 14.0)
+
+
 func speed() -> float:
 	return walk_speed * lerpf(1.0, RUN_SPEED, _run)
 
@@ -143,6 +172,7 @@ func _process(delta: float) -> void:
 	_pet = move_toward(_pet, 1.0 if _pet_time > 0.0 else 0.0, delta * 4.0)
 	_run = move_toward(_run, 1.0 if running and is_walking else 0.0, delta * 3.0)
 	_hold = move_toward(_hold, 1.0 if is_holding() else 0.0, delta * 4.0)
+	_fidget(delta)
 	if is_walking:
 		# Longer legs take longer strides, so they swing more slowly for the same speed.
 		# A run is a faster cadence plus longer strides (wider swing), which together make up RUN_SPEED.
@@ -181,6 +211,26 @@ func _apply_pose() -> void:
 	_hair_back.rotation = _head.rotation + _hair_angle + (0.025 * bounce if is_walking else 0.0)
 	_torso.skew = 0.035 * swing
 	_body.scale.x = facing
+	if _shade:
+		_shade.set_shader_parameter("facing", float(facing))
+	# Breathing while she stands, and the idle gesture on top.
+	var still := 0.0 if is_walking else 1.0
+	_torso.scale.y = 1.0 + 0.014 * sin(_time * 2.1) * still
+	_head.position.y = float(_rig.neck_y) - 1.2 * sin(_time * 2.1) * still
+	if _gesture != "":
+		var t := 1.0 - _gesture_t / _gesture_len
+		var w := sin(PI * clampf(t, 0.0, 1.0))
+		match _gesture:
+			"wave":
+				_arm_front.rotation = lerpf(_arm_front.rotation, deg_to_rad(-150.0) + sin(_time * 14.0) * deg_to_rad(18.0), w)
+			"hop":
+				_body.position.y -= absf(sin(t * TAU)) * 16.0 * w
+			"stretch":
+				_arm_front.rotation = lerpf(_arm_front.rotation, deg_to_rad(-165.0), w)
+				_arm_back.rotation = lerpf(_arm_back.rotation, deg_to_rad(-160.0), w)
+				_torso.scale.y += 0.03 * w
+			"look":
+				_head.rotation += sin(t * TAU) * 0.18 * w
 
 
 func _part(parent: Node2D, tex: Texture2D, pivot: Vector2, pos: Vector2, tint := Color.WHITE) -> Sprite2D:
@@ -191,5 +241,6 @@ func _part(parent: Node2D, tex: Texture2D, pivot: Vector2, pos: Vector2, tint :=
 	sprite.offset = -pivot
 	sprite.position = pos
 	sprite.modulate = tint
+	sprite.material = _shade
 	parent.add_child(sprite)
 	return sprite

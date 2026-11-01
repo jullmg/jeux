@@ -146,7 +146,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   which keeps the look for every scene and saves it to `user://charlotte_outfit.tres`; `CharacterLook.charlotte()` returns it
   (else `usual()`, the yellow dress). Delete that file after tests that press "C'est parfait !". Picking a clothing colour drops
   Charlotte's exact-colour `overrides` for clothes (`cloth_*`, `accent_*`, `shoe_*`). Design sheets use `CharacterLook.usual()`.
-- `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through; `set_look()` rebuilds it), `PlayerControl` (keys and
+- `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through, breathing, soft shading by
+  `shaders/character_shade.gdshader` (lit from the left, follows `facing`), idle gestures when `fidgets` (wave, hop,
+  stretch, look round: Charlotte and her parents); `set_look()` rebuilds it), `PlayerControl` (keys and
   click/tap-to-walk, walks to interactables and calls them; used by the street and the house), `CharacterArt` (generates the
   body-part SVGs from a look), `CharacterLook` (Resource; `CharacterLook.charlotte()` and `CharacterLook.random(rng, age)`).
 - `world/`: one `class_name` per element (`SkyBackdrop`, `Skyline`, `Cloud`, `Birds`, `Street`, `Cat` (railing cat), `Squirrel`, `Passerby`, `PropArt`),
