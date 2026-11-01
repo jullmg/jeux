@@ -80,7 +80,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   black hair, warm light skin, dark eyes; on a raised floor behind the counter) and a wall of shelves behind her, a real-time
   clock, a specials board, the candy wall, low gondolas mid-floor, bread rack, coffee/hot chocolate corner, the sloche
   machine (animated swirls; Québec word "sloche", not "barbotine"), freezer, drinks fridges, dairy cooler with 4 L milk
-  bags, stockroom door, security mirror. Furniture from `world/shop_art.gd` (`ShopArt`, nothing branded); checkered floor
+  bags, stockroom door, security mirror. Furniture from `world/shop_art.gd` (`ShopArt`): original artwork, never real logos;
+  real names only as plain text labels ("LOTO-QUÉBEC", "SLUSH PUPPIE"). Checkered floor
   and suspended ceiling (`RoomShell.floor_style = "tiles"`, `ceiling_style = "drop"`); blurred "shelf" foreground. Click
   the shopkeeper to say hello; candy, sloche, coffee corner, freezer, fridges or dairy to buy something.
   `Interior._say(who, text)` (speech bubble) and `Interior._treat(picture, text)` (what Charlotte gets) are reusable.

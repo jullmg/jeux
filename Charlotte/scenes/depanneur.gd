@@ -63,7 +63,8 @@ func _build_walls() -> void:
 	_glow(Vector2(ATM_X - 150.0 + 71.0, 604.0 - 340.0 * 0.95 + 110.0), 70.0, Color(0.5, 0.85, 1.0, 0.35))
 	_put(ShopArt.newspaper_rack(), ATM_X + 20.0, 606.0, 0.9, "floor")
 	_put(ShopArt.lotto_poster(), ATM_X + 40.0, 330.0, 0.7, "wall")
-	_wall_label("LOTO", Vector2(ATM_X + 96.0, 214.0), 20, Color("#FFD23F"), Color("#16285C"))
+	# The names in plain lettering on the game's own artwork (no real logos).
+	_wall_label("LOTO-QUÉBEC", Vector2(ATM_X + 96.0, 228.0), 13, Color("#FFD23F"), Color("#16285C"))
 	_put(ShopArt.security_mirror(), STOCK_X + 30.0, 150.0, 0.8)
 	_put(ShopArt.back_door(), STOCK_X, WALL_BASE)
 	_wall_label("PRIVÉ", Vector2(STOCK_X + 85.0, WALL_BASE - 440.0 + 57.0), 20, Color("#C8202A"), Color.WHITE)
@@ -130,7 +131,8 @@ func _build_aisles() -> void:
 # The sloche machine (its swirls turn), the freezer, the drinks fridges and the dairy cooler, glowing cold.
 func _build_coolers() -> void:
 	var slush := _put(ShopArt.slush_machine(), SLUSH_X, 470.0, 0.85, "floor")
-	_wall_label("SLOCHE", Vector2(SLUSH_X + 94.0, slush.position.y + 27.0), 14, Color("#3D7FD0"), Color.WHITE)
+	_wall_label("SLUSH PUPPIE", Vector2(SLUSH_X + 94.0, slush.position.y + 27.0), 13, Color("#3D7FD0"), Color.WHITE)
+	_wall_label("SLOCHE", Vector2(SLUSH_X + 94.0, slush.position.y + 4.0), 12, Color.WHITE, Color("#3D7FD0"))
 	for i in 2:
 		var swirl := _Swirl.new()
 		swirl.position = slush.position + Vector2(22.0 + i * 92.0 + 42.0, 100.0) * 0.85
