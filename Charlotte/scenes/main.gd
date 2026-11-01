@@ -70,12 +70,13 @@ func _build_cross_streets() -> void:
 func _decorate_house(i: int, house: Sprite2D) -> void:
 	if layout[i] == "ruelle":
 		# The neighbours' sign at the lane entrance by the Holt corner.
-		var sign := _sprite(PropArt.slow_sign(), 0.7)
-		sign.position = house.position + Vector2(40, 300) * HOUSE_SCALE
+		# On its own post at the right of the entrance (drawn by the generator, as on the photo).
+		var sign := _sprite(PropArt.slow_sign(), 0.6)
+		sign.position = house.position + Vector2(_tex("ruelle").get_width() - 66.0, 300.0) * HOUSE_SCALE - Vector2(60.0 * 0.6, 0)
 		add_child(sign)
-		var mid := sign.position.x + 60.0 * 0.7
-		_label("RALENTISSEZ !", Vector2(mid, sign.position.y + 14.0), Vector2(84, 14), 10, Color("#C8202A"), Color("#FFD23F"))
-		_label("ENFANTS\nEN LIBERTÉ !", Vector2(mid, sign.position.y + 59.0), Vector2(84, 24), 9, Color("#1E1E1E"), Color("#FFD23F"))
+		var mid := sign.position.x + 60.0 * 0.6
+		_label("RALENTISSEZ !", Vector2(mid, sign.position.y + 12.0), Vector2(72, 12), 9, Color("#C8202A"), Color("#FFD23F"))
+		_label("ENFANTS\nEN LIBERTÉ !", Vector2(mid, sign.position.y + 51.0), Vector2(72, 22), 8, Color("#1E1E1E"), Color("#FFD23F"))
 	if layout[i] == "ruelle_verte":
 		_label("RUELLE\nVERTE", house.position + Vector2(214, 416) * HOUSE_SCALE, Vector2(72, 36), 12, Color.WHITE, Color("#1E5E30"))
 

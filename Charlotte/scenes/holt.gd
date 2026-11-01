@@ -6,7 +6,8 @@ extends StreetScene
 
 func _init() -> void:
 	street_key = "holt"
-	layout = ["holt_nord", "rue_6e", "plex_13", "plex_14", "plex_15", "plex_16", "rue_5e", "holt_sud"]
+	# Dépanneur Oh Bon! on the 6e corner (reference/holt_coin_6eme.png), then the plexes.
+	layout = ["holt_nord", "rue_6e", "ohbon", "plex_14", "plex_15", "plex_16", "rue_5e", "holt_sud"]
 	cross_streets = {"rue_6e": 560.0, "rue_5e": 540.0}
 	trees_after = [2, 4]
 	lamps_after = [3]
@@ -59,6 +60,14 @@ func _build_cross_streets() -> void:
 		{"to": 2.2, "top": 280.0, "kind": "plex", "color": Color("#9C5A44")},
 		{"to": CrossStreet.FAR, "top": 310.0, "kind": "plex", "color": Color("#B5603F")},
 	]
+
+
+# Dépanneur Oh Bon!'s sign and window lettering (plain text, not its logo).
+func _decorate_house(i: int, house: Sprite2D) -> void:
+	if layout[i] == "ohbon":
+		var sy := _house_origin(i).y + (875.0 - 270.0 + 20.0) * HOUSE_SCALE
+		_label("DÉPANNEUR", Vector2(house.position.x + 280.0 * HOUSE_SCALE, sy), Vector2(150, 18), 13, Color("#C8202A"), Color("#F4F1EA"))
+		_label("OH BON !", Vector2(house.position.x + 137.0 * HOUSE_SCALE, sy + 60.0), Vector2(100, 26), 20, Color("#E8352B"), Color("#FFFFFF"))
 
 
 func _build_doors() -> void:

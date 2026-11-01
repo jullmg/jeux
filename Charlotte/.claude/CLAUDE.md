@@ -52,6 +52,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   Cross-street `facing` by Montreal's compass: from 6e they run west (Mount Royal), from Dandurand north, from 5e east,
   from Holt south. New corner/side walls in the generator: `holt_nord`, `holt_sud`, `cinq_holt_ouest`, `coin_5e_holt`,
   `coin_5e_dandurand`, `dandurand_sud` (`VARIANTS` is 26).
+- The 6e/Holt corner follows `reference/6eme_coin_holt.png`, `holt_coin_6eme.png` and `entree_ruelle_6eme_coin_holt.png`:
+  generator kinds `corner_holt` (`coin_holt`: long brown three-storey, stepped white lintels, diamonds, the beige
+  corrugated annex with its shingle awning, the red corner window), `ohbon` (dépanneur Oh Bon! on Holt: red storefront,
+  checkerboard, galleries, white-railed stairs; "DÉPANNEUR" / "OH BON !" as labels in `holt.gd`, no logo) and the Holt-side
+  `ruelle` entrance (iron stair, conduits, tags, garage door, one-way sign, the post for the "RALENTISSEZ" sign).
 - Before 8 (`StreetScene.CROSS_AGE`, `GameState.age`) Charlotte can't cross a street ("Je n'ai pas le droit de traverser
   toute seule !"), so her world is the block: its four corners and the lane.
 - The back lanes, `scenes/ruelle.gd` (extends `StreetScene` but builds its own `_ready`; art in `world/lane_art.gd`,
@@ -87,7 +92,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   (foot y 662, in front of people, like the lamps; the lane's stand at its fences), every 650-780 px clear of cross streets, trees, lamps, hydrants, racks (own RNG); the lane
   uses them too. Lost-cat posters are stapled to the pole nearest the street's second lamp (`_poster_spot`).
   `layout` runs: `ecole` (école Saint-Jean-de-Brébeuf, across Dandurand), `rue_dandurand`, Charlotte's block (`depanneur`: the
-  side of dépanneur Xin-Xin, which fronts Dandurand; `garages`; `ruelle_verte`, the green lane with its sign; … `coin_holt`),
+  side of dépanneur Xin-Xin, which fronts Dandurand; `garages`; `ruelle_verte`, the green lane with its sign; … `ruelle`, `coin_holt`),
   `rue_holt`, `coin_holt_est`. The Holt-side lane entrance on 6e has the neighbours' yellow "RALENTISSEZ ! ENFANTS EN
   LIBERTÉ !" sign (`PropArt.slow_sign`, words as labels). The first three buildings of the block are drawn from the photos in `reference/` (the user wants
   every detail as close to the pictures as possible). The cross-street vistas run to the horizon with Mount Royal at the end. Entries in `cross_streets` are gaps (width in px), not SVGs: `CrossStreet`

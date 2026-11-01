@@ -151,10 +151,21 @@ const HOUSES := [
 		"bricks": ["#6B3A2E", "#7A4636", "#5A3028", "#86503E", "#4A2A26", "#93604A"], "mortar": "#B5AA9E",
 		"trim": "#F2F0EA", "trim_dark": "#A9A398", "basement": [], "metal": "#1F1F1F",
 	},
+	# The corner of 6e and Holt seen from 6e (reference/6eme_coin_holt.png, entree_ruelle_6eme_coin_holt.png): a long
+	# brown-brick three-storey with stepped white stone lintels, a beige corrugated-metal annex with a grey shingle
+	# awning on the left, and the red corner window of dépanneur Oh Bon! on the right.
 	{
-		"name": "coin_holt", "kind": "side_wall", "width": 460.0,
-		"bricks": ["#B5603F", "#A85536", "#C26B48", "#9C4D31", "#C77650"], "mortar": "#D6C9B9",
-		"parapet": "flat", "windows": [[90.0, 90.0], [280.0, 90.0]], "basement": [], "downspout": 410.0,
+		"name": "coin_holt", "kind": "corner_holt", "width": 1000.0, "floors": 3, "halloween": false,
+		"bricks": ["#7E4234", "#8A4A3A", "#74392D", "#93503E", "#6E3A2E", "#85463A"], "mortar": "#A8988A",
+		"lintel": "#EDE8DC", "lintel_dark": "#B5AE9F", "lintel_style": "none", "basement": [],
+	},
+	# Dépanneur Oh Bon! on Rue Holt at the 6e corner (reference/holt_coin_6eme.png): red storefront, a red and white
+	# checkerboard, its sign; iron galleries above, white-railed stairs up to the first one.
+	{
+		"name": "ohbon", "kind": "ohbon", "width": 760.0, "floors": 3, "halloween": false,
+		"bricks": ["#8A4A3A", "#7E4234", "#94523F", "#74392D", "#9A5A44"], "mortar": "#B0A090",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "lintel_style": "plain", "basement": [],
+		"door": "#7A2E2E", "door_dark": "#4E1C1C",
 	},
 	{"name": "ruelle", "kind": "ruelle", "width": 300.0},
 	# The green lane near the Dandurand corner (reference/Entrée_ruelle_coin_dandurand.jpg).
@@ -358,6 +369,10 @@ func _svg() -> void:
 			_depanneur_side()
 		"depanneur_front":
 			_depanneur_front()
+		"corner_holt":
+			_corner_holt()
+		"ohbon":
+			_ohbon()
 		"garages":
 			_garages()
 		"modern":
@@ -1621,13 +1636,15 @@ func _limb(from: Vector2, angle: float, length: float, width: float, depth: int,
 		_limb(to, angle + rng.randf_range(-0.65, 0.65), length * rng.randf_range(0.58, 0.76), width * 0.62, depth - 1, twigs, limbs)
 
 
-# Back lane seen from the street, in perspective: the lane running in between board fences, an old corrugated-metal
-# garage, Virginia creeper, a tree leaning over, a clothesline across with laundry, the weeds down the middle, a
-# blue bin, bunting, and the far end bright and green.
+# The lane entrance by the Holt corner (reference/entree_ruelle_6eme_coin_holt.png): on the right the corner
+# building's tall brick side, black conduits running down it, tags, its concrete footing; on the left the next
+# building's side with an iron stair and wooden treads curling up to a gallery; at the far end a white garage door
+# in a red frame under a black railing; a one-way sign on its post, the post of the "enfants en liberté" sign
+# (StreetScene hangs the sign), a yellow pole; a tree reaching over.
 func _ruelle() -> void:
 	var cx: float = k.width / 2.0
-	var vp := Vector2(cx, 470.0)
-	var far := 0.78
+	var vp := Vector2(cx + 10.0, 470.0)
+	var far := 0.72
 	var at := func(p: Vector2, d: float) -> Vector2: return vp + (p - vp) * (1.0 - d)
 	var poly := func(pts: Array, fill: String, extra := "") -> void:
 		var parts := PackedStringArray()
@@ -1636,88 +1653,217 @@ func _ruelle() -> void:
 		_path(" ".join(parts) + " Z", fill, extra)
 	var gl := Vector2(X0, ground_y)
 	var gr := Vector2(X1, ground_y)
-	# Far end: the yards' greenery and the pale houses across the next street.
-	var e0: Vector2 = at.call(Vector2(X0, 330), far)
-	var e1: Vector2 = at.call(gr, far)
-	_rect(e0.x - 10, e0.y, e1.x - e0.x + 20, e1.y - e0.y, "#D8CBB8")
-	for i in 3:
-		_rect(e0.x - 4 + i * 16, e0.y + 8, 6, 8, "#E8EEF2")
-	for i in 40:
-		var p := Vector2(rng.randf_range(e0.x - 30, e1.x + 30), rng.randf_range(e0.y - 30, e1.y - 6))
-		out.append('<ellipse cx="%s" cy="%s" rx="4" ry="2" fill="%s"/>' % [_n(p.x), _n(p.y), _canopy(_pick(["#E3A33A", "#9DB85A", "#7FA34A", "#D9682B"]))])
-	# The lane: concrete, a joint, the crack with its weeds.
-	poly.call([gl, gr, at.call(gr, far), at.call(gl, far)], "#A9A59D")
-	poly.call([gl, gr, at.call(gr, 0.3), at.call(gl, 0.3)], "#9E9A92")
-	var mid0 := Vector2(cx, ground_y)
-	var mid1: Vector2 = at.call(mid0, far)
-	_path("M%s %s L%s %s" % [_n(mid0.x), _n(mid0.y), _n(mid1.x), _n(mid1.y)], "none", _stroke("#6E6A62", 2))
-	for i in 26:
-		var t := pow(rng.randf(), 1.5)
-		var p := mid0.lerp(mid1, t)
-		var h := 9.0 * (1.0 - t)
-		_path("M%s %s l%s %s l%s %s z" % [_n(p.x - h * 0.5), _n(p.y), _n(h * 0.5), _n(-h * 1.6), _n(h * 0.5), _n(h * 1.6)], _bush("#7E8F3A"))
-	# Board fences on both sides, the boards converging.
-	for side in [-1.0, 1.0]:
-		var x := X0 if side < 0.0 else X1
-		var t0 := Vector2(x, ground_y - 175.0)
-		var b0 := Vector2(x, ground_y)
-		var c := _pick(["#9A958C", "#A8A296", "#8C877E"])
-		poly.call([t0, at.call(t0, far), at.call(b0, far), b0], c)
-		for j in 18:
-			var f := pow(j / 18.0, 0.7) * far
-			var top: Vector2 = at.call(t0, f) + Vector2(0, rng.randf_range(-2.0, 2.0) * (1.0 - f))
-			_path("M%s %s L%s %s" % [_n(top.x), _n(top.y), _n(at.call(b0, f).x), _n(at.call(b0, f).y)], "none", _stroke("#" + Color(c).darkened(0.35).to_html(false), 1.2 * (1.0 - f) + 0.4))
-		poly.call([b0 + Vector2(0, -30), at.call(b0 + Vector2(0, -30), far), at.call(b0, far), b0], "#3A3020", 'opacity="0.18"')
-	# The old tôle garage part way down the left, rust streaks, creeper on its corner.
-	var g := [at.call(Vector2(X0, ground_y - 250.0), 0.32), at.call(Vector2(X0, ground_y - 250.0), 0.55), at.call(Vector2(X0, ground_y), 0.55), at.call(Vector2(X0, ground_y), 0.32)]
-	poly.call(g, "#B8BCC0")
-	for j in 12:
-		var f := lerpf(0.32, 0.55, j / 12.0)
-		_path("M%s %s L%s %s" % [_n(at.call(Vector2(X0, ground_y - 250.0), f).x), _n(at.call(Vector2(X0, ground_y - 250.0), f).y), _n(at.call(gl, f).x), _n(at.call(gl, f).y)], "none", _stroke("#8E9399", 1.0))
-	poly.call([g[0], g[1], g[1] + Vector2(0, 8), g[0] + Vector2(0, 10)], "#6E7377")
-	_path("M%s %s l2 60" % [_n(g[0].x + 6), _n(g[0].y + 20)], "none", _stroke("#8E5A3A", 3) + ' opacity="0.5"')
-	if season == "winter":
-		poly.call([g[0] + Vector2(0, -6), g[1] + Vector2(0, -4), g[1], g[0]], "#F4F6F8")
-	# Creeper over both fences, thicker near us.
-	var vines := ["#B5302A", "#D9482B", "#8E2A2A", "#E0782E"]
-	match season:
-		"spring":
-			vines = ["#7FB85A", "#9BCB6A", "#5E9A40"]
-		"summer":
-			vines = ["#3E7A30", "#4F8E3A", "#2F6A2A"]
-	for i in 160:
-		var side := -1.0 if rng.randf() < 0.5 else 1.0
-		var f := pow(rng.randf(), 1.8) * 0.6
-		var y := ground_y - 175.0 + rng.randf_range(-8.0, 40.0 + 60.0 * rng.randf())
-		var p: Vector2 = at.call(Vector2(X0 if side < 0.0 else X1, y), f)
-		var r := 5.0 * (1.0 - f)
-		if season != "winter":
-			out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="%s"/>' % [_n(p.x), _n(p.y), _n(r), _n(r * 0.7), vines[rng.randi_range(0, vines.size() - 1)]])
-	# A clothesline across the lane, with a few things pinned on it.
-	var ca := Vector2(X0 + 4, 300.0)
-	var cb := Vector2(X1 - 4, 290.0)
-	_path("M%s %s Q%s %s %s %s" % [_n(ca.x), _n(ca.y), _n(cx), _n(328.0), _n(cb.x), _n(cb.y)], "none", _stroke("#E6E6E0", 1.6))
-	for i in 5:
-		var t := (i + 0.7) / 6.0
-		var p := ca.lerp(cb, t) + Vector2(0, sin(t * PI) * 19.0)
-		var col := _pick(["#E74C3C", "#FFFFFF", "#3498DB", "#F1C40F", "#F7C6D9"])
-		if season != "winter":
-			if i % 2 == 0:
-				_path("M%s %s h16 l4 6 l-4 2 v14 h-16 v-14 l-4 -2 z" % [_n(p.x - 8), _n(p.y)], col)
-			else:
-				_rect(p.x - 5, p.y, 10, 16, col)
-	# The tree leaning over the right-hand fence.
-	_fine_tree(Vector2(X1 - 20, ground_y - 160), 360.0, -PI * 0.62, 0.85, ["#E3A33A", "#D9682B", "#B5442E", "#C9B03A"])
-	# The blue recycling bin at the entrance, and the bunting.
-	_rect(X0 + 22, ground_y - 62, 42, 60, "#2F6DB5", _stroke("#1F4A80", 2))
-	_rect(X0 + 19, ground_y - 68, 48, 9, "#26599A", 'rx="3"')
-	_path("M%s 380 Q%s 405 %s 380" % [_n(X0), _n(cx), _n(X1)], "none", _stroke("#555555", 1.2))
-	var x := X0 + 14.0
-	while x < X1 - 14.0:
-		var t := (x - cx) / (cx - X0)
-		var y := 380.0 + 12.5 * (1.0 - t * t)
-		_path("M%s %s l12 0 l-6 16 z" % [_n(x), _n(y)], _pick(["#FF7BA3", "#FFD23F", "#4FA3E0", "#FFFFFF", "#9B59B6"]))
-		x += 18.0
+	# The far end: a brick wall, the white garage door in its red frame, a black railing above.
+	var f0: Vector2 = at.call(Vector2(X0, 200), far)
+	var f1: Vector2 = at.call(gr, far)
+	_rect(f0.x - 6, f0.y, f1.x - f0.x + 12, f1.y - f0.y, "#9C5A44")
+	var gd0: Vector2 = at.call(Vector2(X0 + 40, ground_y - 230), far)
+	var gd1: Vector2 = at.call(Vector2(X1 - 60, ground_y), far)
+	_rect(gd0.x - 3, gd0.y - 3, gd1.x - gd0.x + 6, gd1.y - gd0.y + 3, "#B5302A")
+	_rect(gd0.x, gd0.y, gd1.x - gd0.x, gd1.y - gd0.y, "#F2F0EA")
+	for k2 in 5:
+		var y := lerpf(gd0.y, gd1.y, (k2 + 1) / 6.0)
+		_path("M%s %s H%s" % [_n(gd0.x), _n(y), _n(gd1.x)], "none", _stroke("#C9C3B8", 1))
+	_rect(gd0.x - 8, gd0.y - 26, gd1.x - gd0.x + 16, 3, "#1F1F1F")
+	var bx := gd0.x - 6.0
+	while bx < gd1.x + 8.0:
+		_rect(bx, gd0.y - 24, 1.5, 18, "#1F1F1F")
+		bx += 5.0
+	# The lane: concrete, its joints, a seam of weeds.
+	poly.call([gl, gr, at.call(gr, far), at.call(gl, far)], "#B3AFA6")
+	for d in [0.25, 0.5]:
+		_path("M%s %s L%s %s" % [_n(at.call(gl, d).x), _n(at.call(gl, d).y), _n(at.call(gr, d).x), _n(at.call(gr, d).y)], "none", _stroke("#8E8A82", 1.5))
+	_path("M%s %s L%s %s" % [_n(cx), _n(ground_y), _n(at.call(Vector2(cx, ground_y), far).x), _n(at.call(Vector2(cx, ground_y), far).y)], "none", _stroke(_bush("#7E8F3A"), 2.5))
+	# Left: the neighbour's brick side, and its stair: wooden treads between two curling black stringers.
+	var lw := ["#8E4E3C", "#A85A44"]
+	poly.call([Vector2(X0, 140), at.call(Vector2(X0, 140), far), at.call(gl, far), gl], lw[0])
+	var y := 150.0
+	while y < ground_y - 6.0:
+		_path("M%s %s L%s %s" % [_n(X0), _n(y), _n(at.call(Vector2(X0, y), far).x), _n(at.call(Vector2(X0, y), far).y)], "none", _stroke(lw[1], 0.8) + ' opacity="0.6"')
+		y += 10.0
+	var s0 := Vector2(X0 + 64, ground_y - 4)
+	var s3: Vector2 = at.call(Vector2(X0, 380), 0.35)
+	var s1 := Vector2(X0 + 120, ground_y - 150)
+	var s2 := Vector2(X0 + 70, 400)
+	var inner: Array[Vector2] = []
+	var outer: Array[Vector2] = []
+	for i in 15:
+		var t := i / 14.0
+		var p := s0.bezier_interpolate(s1, s2, s3, t)
+		inner.append(p)
+		outer.append(p + Vector2(-34.0 * (1.0 - t * 0.6), 6.0 * (1.0 - t)))
+	for i in range(1, 15):
+		_path("M%s %s L%s %s" % [_n(inner[i].x), _n(inner[i].y), _n(outer[i].x), _n(outer[i].y)], "none", _stroke("#8E6A44", 5.0 * (1.0 - i / 20.0)))
+	for rail in [inner, outer]:
+		_path(_polyline(rail, Vector2.ZERO), "none", _stroke("#1F1F1F", 3.0))
+		_path(_polyline(rail, Vector2(0, -RAIL_H)), "none", _stroke("#1F1F1F", 2.5))
+		for i in range(0, 15, 2):
+			_path("M%s %s v%s" % [_n(rail[i].x), _n(rail[i].y), _n(-RAIL_H)], "none", _stroke("#1F1F1F", 1.5))
+	# Right: the corner building's tall side, its footing, its conduits and tags.
+	var rw := ["#7E4234", "#9A5A48"]
+	poly.call([Vector2(X1, 0), at.call(Vector2(X1, 0), far), at.call(gr, far), gr], rw[0])
+	y = 8.0
+	while y < ground_y - 40.0:
+		_path("M%s %s L%s %s" % [_n(X1), _n(y), _n(at.call(Vector2(X1, y), far).x), _n(at.call(Vector2(X1, y), far).y)], "none", _stroke(rw[1], 0.8) + ' opacity="0.6"')
+		y += 10.0
+	poly.call([Vector2(X1, ground_y - 46), at.call(Vector2(X1, ground_y - 46), far), at.call(gr, far), gr], "#B9B3A8")
+	for d in [0.1, 0.16]:
+		var top: Vector2 = at.call(Vector2(X1, 60), d)
+		var bot: Vector2 = at.call(Vector2(X1, ground_y - 50), d)
+		_path("M%s %s L%s %s Q%s %s %s %s" % [_n(top.x), _n(top.y), _n(bot.x), _n(bot.y), _n(bot.x), _n(bot.y + 14), _n(bot.x + 16), _n(bot.y + 16)], "none", _stroke("#1A1A1A", 4))
+	var tag: Vector2 = at.call(Vector2(X1, ground_y - 110), 0.3)
+	_path("M%s %s c4 -14 10 -14 9 0 c-1 12 8 12 9 -2 c1 -10 9 -10 8 2 m4 -8 l8 0" % [_n(tag.x - 14), _n(tag.y)], "none", _stroke("#2B3A6E", 2.5) + ' stroke-linecap="round"')
+	var tag2: Vector2 = at.call(Vector2(X1, ground_y - 22), 0.12)
+	_path("M%s %s l4 -12 l4 12 m4 -12 v12 h6 m4 -12 v12 h6" % [_n(tag2.x - 14), _n(tag2.y)], "none", _stroke("#C8202A", 2) + ' stroke-linecap="round"')
+	# A yellow pole leaning on the wall, the one-way sign, and the post for the neighbours' sign.
+	_path("M%s %s L%s %s" % [_n(X1 - 70), _n(ground_y - 2), _n(X1 - 50), _n(ground_y - 170)], "none", _stroke("#E8C33A", 5) + ' stroke-linecap="round"')
+	_rect(X0 + 26, 430, 6, ground_y - 430, "#8E9399")
+	_rect(X0 + 2, 418, 70, 26, "#1E1E1E", 'rx="2"')
+	_path("M%s 431 h46 m-12 -8 l12 8 l-12 8" % _n(X0 + 12), "none", _stroke("#FFFFFF", 4) + ' stroke-linecap="round" stroke-linejoin="round"')
+	_rect(X1 - 39, 360, 6, ground_y - 360, "#8E9399")
+	# The tree reaching over from the left.
+	_fine_tree(Vector2(X0 - 30, 420), 300.0, -PI * 0.38, 0.75, ["#E3A33A", "#D9682B", "#C9B03A", "#B5442E"])
+
+
+# Stone lintels in steps (a tall middle block and two lower shoulders), white like on the photos of the corner.
+func _stepped_lintel(x: float, y: float, w: float) -> void:
+	_rect(x - 14, y - 12, w + 28, 12, k.lintel, _stroke(k.lintel_dark, 1))
+	_rect(x + w * 0.25, y - 26, w * 0.5, 14, k.lintel, _stroke(k.lintel_dark, 1))
+	for sx in [x - 14.0, x + w + 2.0]:
+		_rect(sx, y, 12, 14, k.lintel, _stroke(k.lintel_dark, 1))
+
+
+func _diamond(cx: float, cy: float, r: float) -> void:
+	_path("M%s %s l%s %s l%s %s l%s %s z" % [_n(cx), _n(cy - r), _n(r), _n(r), _n(-r), _n(r), _n(-r), _n(-r)], "#4E5C70", _stroke("#36404E", 1))
+
+
+func _corner_holt() -> void:
+	var top := _top()
+	_bricks(top, base_y)
+	# The coping and the cream corner caps of the roofline, a corbelled band below.
+	_rect(X0 - 4, top - 10, X1 - X0 + 8, 12, "#5E3328")
+	for cxx in [X0 + 14.0, X1 - 14.0]:
+		_rect(cxx - 16, top - 24, 32, 16, "#E3C48A", _stroke("#B5975E", 1.5))
+		_rect(cxx - 10, top - 32, 20, 8, "#E3C48A", _stroke("#B5975E", 1.5))
+	var bx := X0 + 6.0
+	while bx < X1 - 10.0:
+		_rect(bx, top + 10, 10, 8, "#5E3328", 'opacity="0.55"')
+		bx += 20.0
+	_wall_shading(top)
+	_foundation()
+	var bays := [170.0, 380.0, 590.0, 800.0]
+	for f in [1, 2]:
+		for wx in bays:
+			_window(wx, _win_y(f), 74, 150)
+			_stepped_lintel(wx, _win_y(f), 74)
+		for i in 3:
+			_diamond((bays[i] + bays[i + 1] + 74.0) / 2.0, _win_y(f) + 70.0, 9.0)
+	for wx in [bays[1], bays[2]]:
+		_window(wx, _win_y(0) + 30.0, 74, 120)
+		_stepped_lintel(wx, _win_y(0) + 30.0, 74)
+	# Conduits down the wall, plaques, a tag near the ground.
+	for px in [510.0, 522.0]:
+		_rect(px, top + 50, 5, base_y - top - 60, "#1A1A1A")
+	_path("M510 %s q0 14 -16 16" % _n(base_y - 10), "none", _stroke("#1A1A1A", 5))
+	_rect(470, base_y - 150, 26, 18, "#F4F1EA", _stroke("#B9B2A5", 1))
+	_rect(560, base_y - 120, 18, 22, "#D9D6CE", _stroke("#9A968E", 1))
+	_path("M640 %s c4 -12 10 -12 9 0 c-1 10 8 10 9 -2 c1 -9 8 -9 7 2" % _n(base_y - 40), "none", _stroke("#6E6A9A", 2.5) + ' stroke-linecap="round"')
+	# The beige corrugated annex on the left with its grey shingle awning, white door and two windows.
+	var ax0 := X0
+	var ax1 := X0 + 300.0
+	var atop := _fb(0) - 210.0
+	_rect(ax0, atop, ax1 - ax0, base_y - atop, "#CBC5B6")
+	var cx := ax0
+	var light := true
+	while cx < ax1:
+		_rect(cx, atop, 5, base_y - atop, "#DAD5C8" if light else "#B5AFA0")
+		cx += 5.0
+		light = not light
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(ax0 - 12), _n(atop), _n(ax1 + 12), _n(atop), _n(ax1), _n(atop - 46), _n(ax0), _n(atop - 46)], "#7E848A", _stroke("#5E6268", 1.5))
+	for r in 4:
+		var yy := atop - 46.0 + r * 11.5
+		_path("M%s %s H%s" % [_n(ax0 - 2), _n(yy), _n(ax1 + 2)], "none", _stroke("#6A7076", 1))
+		var sx := ax0 + (r % 2) * 8.0
+		while sx < ax1:
+			_path("M%s %s v11" % [_n(sx), _n(yy)], "none", _stroke("#6A7076", 0.8))
+			sx += 16.0
+	_rect(ax0 - 12, atop - 2, ax1 - ax0 + 24, 6, "#F2F0EA")
+	for wx in [[ax0 + 24, 86.0], [ax0 + 206, 74.0]]:
+		_rect(wx[0], atop + 40, wx[1], 96, "#F2F0EA")
+		_rect(wx[0] + 6, atop + 46, wx[1] - 12, 84, "url(#glass)")
+		_rect(wx[0] + wx[1] / 2.0 - 2, atop + 46, 4, 84, "#F2F0EA")
+	_rect(ax0 + 128, atop + 26, 58, base_y - atop - 26, "#F4F2EC", _stroke("#C9C3B8", 2))
+	_rect(ax0 + 140, atop + 40, 34, 50, "url(#glass)")
+	_circle(ax0 + 176, atop + 120, 3, "#B9B2A5")
+	_rect(ax0 + 112, atop + 70, 10, 14, "#1E1E1E")
+	_lantern(ax0 + 116, atop + 24)
+	# The dépanneur's red corner window: posters behind the glass, a red awning, a red footing.
+	var sx0 := X1 - 200.0
+	var sx1 := X1 - 6.0
+	var wy := _fb(0) - 190.0
+	_rect(sx0, wy, sx1 - sx0, base_y - 50 - wy, "#2E3A44", _stroke("#1A1A1A", 3))
+	_rect(sx0 + 8, wy + 8, sx1 - sx0 - 16, base_y - 66 - wy, "url(#glass)", 'opacity="0.55"')
+	for pst in [[sx0 + 20, wy + 30, "#F2C230"], [sx0 + 70, wy + 20, "#E74C3C"], [sx0 + 120, wy + 40, "#F4F1EA"], [sx0 + 40, wy + 90, "#3498DB"]]:
+		_rect(pst[0], pst[1], 40, 50, pst[2], 'opacity="0.85"')
+	_rect(sx0, base_y - 50, sx1 - sx0, 50, "#D9342B")
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(sx0 - 10), _n(wy), _n(sx1 + 6), _n(wy), _n(sx1), _n(wy - 34), _n(sx0), _n(wy - 34)], "#D9342B", _stroke("#9E2420", 1.5))
+	_rect(sx0 - 10, wy - 4, sx1 - sx0 + 16, 5, "#F4F1EA")
+
+
+func _ohbon() -> void:
+	var top := _top()
+	_bricks(top, base_y)
+	_wall_shading(top)
+	_foundation()
+	_flat_parapet(top)
+	var store1 := 530.0
+	# Upstairs: galleries with their doors across the left, windows on the right; a white soffit over the top one.
+	for f in [1, 2]:
+		_door(200.0, _door_top(f), _fb(f))
+		_door(330.0, _door_top(f), _fb(f))
+		_window(440.0, _win_y(f), 70, 150)
+		_window(620.0, _win_y(f), 74, 150)
+		_balcony(X0, store1, _fb(f), [])
+	_rect(X0 - 8, _door_top(2) - 52, store1 - X0 + 16, 16, "#EDEBE5", _stroke("#B9B5AC", 1.5))
+	_rect(X0 - 4, _door_top(2) - 36, store1 - X0 + 8, 30, "url(#drop)")
+	# The storefront: sign band, windows full of posters, the glass door, the checkerboard, the red footing.
+	var sy := _fb(0) - 270.0
+	_rect(X0 - 6, sy - 18, store1 - X0 + 12, 16, "#E9E6DF", _stroke("#B9B5AC", 1.5))
+	_rect(X0, sy, store1 - X0, 40, "#F4F1EA", _stroke("#C8202A", 3))
+	var gy := sy + 50.0
+	var gh := base_y - 70.0 - gy
+	_rect(X0, gy - 6, store1 - X0, base_y - gy + 6, "#3A2E2E")
+	_rect(X0 + 12, gy, 190, gh, "#2E3A44")
+	_rect(X0 + 12, gy, 190, gh, "url(#glass)", 'opacity="0.5"')
+	for pst in [[X0 + 24, gy + 14, "#F2C230"], [X0 + 130, gy + 20, "#F4F1EA"], [X0 + 30, gy + gh - 70, "#E74C3C"], [X0 + 140, gy + gh - 60, "#3498DB"]]:
+		_rect(pst[0], pst[1], 46, 56, pst[2], 'opacity="0.8"')
+	_rect(X0 + 212, gy - 4, 66, base_y - gy + 4, "#1F1F1F")
+	_rect(X0 + 218, gy + 2, 54, base_y - gy - 8, "url(#glass)")
+	_rect(X0 + 262, gy + 90, 4, 40, "#C9A24A")
+	_rect(X0 + 288, gy, 92, gh, "#2E3A44")
+	_rect(X0 + 288, gy, 92, gh, "url(#glass)", 'opacity="0.5"')
+	var cy := gy
+	var row := 0
+	while cy < gy + gh - 2.0:
+		var cxx := X0 + 390.0
+		var col := row % 2
+		while cxx < store1 - 4.0:
+			_rect(cxx, cy, minf(22.0, store1 - 4.0 - cxx), minf(22.0, gy + gh - cy), "#D9342B" if col % 2 == 0 else "#F4F1EA")
+			cxx += 22.0
+			col += 1
+		cy += 22.0
+		row += 1
+	_rect(X0, base_y - 70, X0 + 202 - X0, 70, "#D9342B")
+	_rect(X0 + 288, base_y - 70, store1 - X0 - 288, 70, "#D9342B")
+	# White-railed straight stairs from the sidewalk up to the first gallery.
+	var keep_metal: String = k.metal
+	k.metal = "#F2F2EE"
+	k.tread = "#3A3A3A"
+	k.tread_dark = "#1F1F1F"
+	var p0 := Vector2(store1 - 10.0, _fb(1) + 6.0)
+	var p3 := Vector2(store1 + 170.0, ground_y)
+	_stairs(p0, p0.lerp(p3, 1.0 / 3.0), p0.lerp(p3, 2.0 / 3.0), p3)
+	k.metal = keep_metal
 
 
 # --- Autumn & Halloween -----------------------------------------------------
