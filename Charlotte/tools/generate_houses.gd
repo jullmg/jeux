@@ -1913,35 +1913,59 @@ func _ohbon() -> void:
 		_balcony(X0, store1, _fb(f), [])
 	_rect(X0 - 8, _door_top(2) - 52, store1 - X0 + 16, 16, "#EDEBE5", _stroke("#B9B5AC", 1.5))
 	_rect(X0 - 4, _door_top(2) - 36, store1 - X0 + 8, 30, "url(#drop)")
-	# The storefront: sign band, windows full of posters, the glass door, the checkerboard, the red footing.
-	var sy := _fb(0) - 270.0
-	_rect(X0 - 6, sy - 18, store1 - X0 + 12, 16, "#E9E6DF", _stroke("#B9B5AC", 1.5))
-	_rect(X0, sy, store1 - X0, 40, "#F4F1EA", _stroke("#C8202A", 3))
-	var gy := sy + 50.0
-	var gh := base_y - 70.0 - gy
-	_rect(X0, gy - 6, store1 - X0, base_y - gy + 6, "#3A2E2E")
-	_rect(X0 + 12, gy, 190, gh, "#2E3A44")
-	_rect(X0 + 12, gy, 190, gh, "url(#glass)", 'opacity="0.5"')
-	for pst in [[X0 + 24, gy + 14, "#F2C230"], [X0 + 130, gy + 20, "#F4F1EA"], [X0 + 30, gy + gh - 70, "#E74C3C"], [X0 + 140, gy + gh - 60, "#3498DB"]]:
-		_rect(pst[0], pst[1], 46, 56, pst[2], 'opacity="0.8"')
-	_rect(X0 + 212, gy - 4, 66, base_y - gy + 4, "#1F1F1F")
-	_rect(X0 + 218, gy + 2, 54, base_y - gy - 8, "url(#glass)")
-	_rect(X0 + 262, gy + 90, 4, 40, "#C9A24A")
-	_rect(X0 + 288, gy, 92, gh, "#2E3A44")
-	_rect(X0 + 288, gy, 92, gh, "url(#glass)", 'opacity="0.5"')
-	var cy := gy
+	# The storefront (reference/holt_coin_6eme.png), left to right: a narrow window (a beer neon goes in it), the
+	# black-framed glass door, the big window (the "OH BON!" neon goes in it, holt.gd), the red and white checkerboard,
+	# a white board. Over it a sloping brown canopy edged with a red fascia, and the white light-box sign over the door
+	# and the big window; a red footing under it all, little black handrails at the step.
+	var st := _fb(1) + 8.0
+	_rect(X0, st, store1 - X0, base_y - st, "#3A2E2E")
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(X0 - 6), _n(st + 30), _n(store1 + 6), _n(st + 30), _n(store1), _n(st), _n(X0), _n(st)], "#6E5444", _stroke("#4A3428", 1))
+	var slat := X0 + 6.0
+	while slat < store1:
+		_path("M%s %s L%s %s" % [_n(slat), _n(st + 1), _n(slat - 3), _n(st + 29)], "none", _stroke("#5A4436", 1))
+		slat += 9.0
+	_rect(X0 - 6, st + 30, store1 - X0 + 12, 16, "#D9342B", _stroke("#9E2420", 1))
+	var wy := st + 92.0
+	var wb := base_y - 62.0
+	# Narrow left window: posters, lottery stickers.
+	_rect(X0 + 6, wy, 92, wb - wy, "#2E3A44", _stroke("#1A1A1A", 3))
+	_rect(X0 + 6, wy, 92, wb - wy, "url(#glass)", 'opacity="0.45"')
+	_rect(X0 + 16, wb - 60, 30, 40, "#F2C230", 'opacity="0.8"')
+	_rect(X0 + 54, wb - 46, 34, 26, "#4E8A5A", 'opacity="0.8"')
+	# The door: black frame, glass, its number on the glass, a push bar.
+	_rect(X0 + 104, wy - 6, 74, base_y - wy + 6, "#1F1F1F")
+	_rect(X0 + 111, wy + 2, 60, base_y - wy - 12, "url(#glass)")
+	_rect(X0 + 111, wy + 2, 60, base_y - wy - 12, "#2E3A44", 'opacity="0.35"')
+	out.append('<text x="%s" y="%s" font-size="11" font-family="sans-serif" fill="#F4F1EA">2092</text>' % [_n(X0 + 118), _n(wy + 18)])
+	_rect(X0 + 114, wy + 120, 54, 5, "#B9B9B9")
+	# The big window: dark glass, posters along the bottom.
+	_rect(X0 + 184, wy, 150, wb - wy, "#2E3A44", _stroke("#1A1A1A", 3))
+	_rect(X0 + 184, wy, 150, wb - wy, "url(#glass)", 'opacity="0.4"')
+	for pst in [[X0 + 192, "#4E8A5A"], [X0 + 226, "#F2C230"], [X0 + 262, "#3D7FD0"], [X0 + 296, "#F4F1EA"]]:
+		_rect(pst[0], wb - 34, 30, 28, pst[1], 'opacity="0.85"')
+	# The light-box sign over the door and the big window (its words are labels in holt.gd).
+	_rect(X0 + 86, st + 52, 250, 32, "#F4F1EA", _stroke("#9A968E", 2))
+	_rect(X0 + 96, st + 60, 18, 14, "#D9342B")
+	_rect(X0 + 216, st + 58, 110, 20, "#D9342B")
+	# The checkerboard, squares of 26.
+	var cx0 := X0 + 340.0
+	var cy := st + 60.0
 	var row := 0
-	while cy < gy + gh - 2.0:
-		var cxx := X0 + 390.0
+	while cy < wb - 2.0:
+		var cxx := cx0
 		var col := row % 2
-		while cxx < store1 - 4.0:
-			_rect(cxx, cy, minf(22.0, store1 - 4.0 - cxx), minf(22.0, gy + gh - cy), "#D9342B" if col % 2 == 0 else "#F4F1EA")
-			cxx += 22.0
+		while cxx < cx0 + 156.0 - 1.0:
+			_rect(cxx, cy, 26, minf(26.0, wb - cy), "#D9342B" if col % 2 == 0 else "#F4F1EA")
+			cxx += 26.0
 			col += 1
-		cy += 22.0
+		cy += 26.0
 		row += 1
-	_rect(X0, base_y - 70, X0 + 202 - X0, 70, "#D9342B")
-	_rect(X0 + 288, base_y - 70, store1 - X0 - 288, 70, "#D9342B")
+	_rect(cx0 + 160, wb - 70, 30, 70, "#F4F1EA", _stroke("#C9C3B8", 1))
+	# The red footing and the step's little handrails.
+	_rect(X0, wb, store1 - X0, base_y - wb, "#D9342B")
+	_rect(X0 + 104, wb, 74, base_y - wb, "#1F1F1F")
+	for hx in [X0 + 60.0, X0 + 200.0]:
+		_path("M%s %s l0 -40 l40 0 l0 40" % [_n(hx), _n(base_y)], "none", _stroke("#1F1F1F", 3))
 	# White-railed straight stairs from the sidewalk up to the first gallery.
 	var keep_metal: String = k.metal
 	k.metal = "#F2F2EE"

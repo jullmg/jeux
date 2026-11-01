@@ -52,12 +52,28 @@ func _build_cross_streets() -> void:
 	]
 
 
-# Dépanneur Oh Bon!'s sign and window lettering (plain text, not its logo).
+# Dépanneur Oh Bon! (reference/holt_coin_6eme.png): the words on its light-box sign, "OH BON!" in red neon in the big
+# window right of the door, a beer neon in the narrow window (plain text, no logos). SVG coordinates: the shop's
+# first gallery floor at y 600, the light box at x 116-366, y 660-692.
 func _decorate_house(i: int, house: Sprite2D) -> void:
-	if layout[i] == "ohbon":
-		var sy := _house_origin(i).y + (875.0 - 270.0 + 20.0) * HOUSE_SCALE
-		_label("DÉPANNEUR", Vector2(house.position.x + 280.0 * HOUSE_SCALE, sy), Vector2(150, 18), 13, Color("#C8202A"), Color("#F4F1EA"))
-		_label("OH BON !", Vector2(house.position.x + 137.0 * HOUSE_SCALE, sy + 60.0), Vector2(100, 26), 20, Color("#E8352B"), Color("#FFFFFF"))
+	if layout[i] != "ohbon":
+		return
+	var at := func(p: Vector2) -> Vector2: return house.position + p * HOUSE_SCALE
+	_label("OH BON!", at.call(Vector2(164, 675)), Vector2(60, 14), 10, Color("#D9342B"), Color("#F4F1EA"))
+	_label("DÉPANNEUR", at.call(Vector2(301, 676)), Vector2(62, 12), 8, Color.WHITE, Color("#D9342B"))
+	var neon := NeonSign.new()
+	neon.lines = ["OH", "BON!"]
+	neon.font_size = 16
+	neon.position = at.call(Vector2(289, 760))
+	add_child(neon)
+	var beer := NeonSign.new()
+	beer.lines = ["BIÈRE"]
+	beer.vertical = true
+	beer.tilt = 0.0
+	beer.font_size = 8
+	beer.color = Color("#FF5A3A")
+	beer.position = at.call(Vector2(62, 755))
+	add_child(beer)
 
 
 func _build_doors() -> void:

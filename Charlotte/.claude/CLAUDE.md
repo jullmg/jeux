@@ -55,7 +55,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - The 6e/Holt corner follows `reference/6eme_coin_holt.png`, `holt_coin_6eme.png` and `entree_ruelle_6eme_coin_holt.png`:
   generator kinds `corner_holt` (`coin_holt`: long brown three-storey, stepped white lintels, diamonds, the beige
   corrugated annex with its shingle awning, the red corner window), `ohbon` (dépanneur Oh Bon! on Holt: red storefront,
-  checkerboard, galleries, white-railed stairs; "DÉPANNEUR" / "OH BON !" as labels in `holt.gd`, no logo) and the Holt-side
+  checkerboard under the white stairs, canopy with red fascia, light-box sign; "OH BON!" / "DÉPANNEUR" as labels and
+  the red "OH / BON!" neon in the big window, a generic "BIÈRE" neon, in `holt.gd`, no logos; `world/neon_sign.gd`,
+  `NeonSign`: glowing, flickering window neon) and the Holt-side
   `ruelle` entrance (iron stair, conduits, tags, garage door, one-way sign, the post for the "RALENTISSEZ" sign).
 - Cross-street vistas show the real street that runs there: `StreetScene._walls_along(script, from_gap, direction)`
   reads that street's `layout` (its scene script's `_init`) from our corner to its next cross street, giving each wall
