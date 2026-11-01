@@ -3,6 +3,8 @@ extends Resource
 
 const AGES: Array[String] = ["child", "teen", "adult", "senior"]
 const SKINS: Array[String] = ["#F9DCC8", "#F3CDB0", "#E8B892", "#D29A6E", "#B57A4E", "#8E5A36", "#6A4026"]
+## How often each skin tone comes up among the neighbours (Rosemont's mix): mostly light, some medium, a few dark.
+const SKIN_WEIGHTS: Array[float] = [26.0, 24.0, 20.0, 10.0, 8.0, 7.0, 5.0]
 const HAIRS: Array[String] = ["#B0623A", "#3A2618", "#5A3A22", "#1E1612", "#C9A060", "#E3C78A", "#8A3B1E", "#2B2B2B"]
 const GREYS: Array[String] = ["#D9D6D0", "#BDB8B0", "#F2F0EC", "#A8A39A"]
 const EYES: Array[String] = ["#8A5530", "#4A6FA5", "#5E8A4A", "#3A2618", "#6B4E2E"]
@@ -133,7 +135,7 @@ static func random(rng: RandomNumberGenerator, age_group := "") -> CharacterLook
 	look.age = age_group if age_group != "" else _pick(rng, AGES)
 	var grown := look.age != "child"
 	look.build = rng.randf_range(0.92, 1.14)
-	look.skin = Color(_pick(rng, SKINS))
+	look.skin = Color(SKINS[_weighted(rng, SKIN_WEIGHTS)])
 	look.eye_color = Color(_pick(rng, EYES))
 	look.hair_style = _pick(rng, ADULT_HAIR if grown else CHILD_HAIR)
 	look.hair_color = Color(_pick(rng, GREYS if look.age == "senior" else HAIRS))
@@ -191,6 +193,19 @@ static func random(rng: RandomNumberGenerator, age_group := "") -> CharacterLook
 	if look.age in ["child", "teen"] and rng.randf() < 0.45:
 		look.backpack = _pick(rng, CLOTHES)
 	return look
+
+
+# An index drawn with these weights, from a single random number (the same draws as a plain pick).
+static func _weighted(rng: RandomNumberGenerator, weights: Array[float]) -> int:
+	var total := 0.0
+	for w in weights:
+		total += w
+	var r := rng.randf() * total
+	for i in weights.size():
+		r -= weights[i]
+		if r <= 0.0:
+			return i
+	return weights.size() - 1
 
 
 static func _pick(rng: RandomNumberGenerator, items: Array) -> String:
