@@ -85,6 +85,7 @@ func _ready() -> void:
 	Season.add_weather(self)
 	Sfx.ambience(self)
 	Music.play(["title"])
+	Transition.fade_in(self)
 
 	# Usage: Godot --path . res://scenes/intro.tscn -- --screenshot=/tmp/intro.png
 	for arg in OS.get_cmdline_user_args():

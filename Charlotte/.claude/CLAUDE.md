@@ -198,7 +198,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Anything clickable (a `Node2D`, or a `Control` like `TvScreen`) joins the `interactable` group and implements `can_interact()`, `hit_test(point)`, `approach_x(from_x)`,
   `reserve()`, `release()` and `interact(charlotte)` (see `StrayCat`), and optionally `focus_x()` (where Charlotte should look). `main.gd` walks Charlotte to `approach_x`, then calls `interact`.
 - Input is mouse-based with event positions converted to world space, so touch works through emulated mouse events.
-- Doors are `DoorSpot.make(rect, action)` interactables. `Transition` fades (`fade_in`, `through_black`, `change_scene`) and
+- Doors are `DoorSpot.make(rect, action)` interactables. `Transition` fades (`fade_in`, `through_black`, `change_scene`; the
+  scene-change black lives on the tree root, group "scene_change_black", until the new scene's `fade_in`, so every scene
+  calls `Transition.fade_in(self)`; the clear colour is the same dark brown) and
   holds cross-scene state as static vars (`Transition.street_x`: where Charlotte reappears on the street).
 - To test click flows, write a temporary `extends SceneTree` script and run it with `-s` (a scene-based test node gets freed
   by `change_scene_to_file`); send clicks with `Input.parse_input_event`, then delete the script.
