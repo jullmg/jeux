@@ -156,8 +156,8 @@ func interact(_who: Character) -> void:
 		for i in 7:
 			_falling.append(Vector3(BOWL_X + randf_range(-9.0, 9.0), 24.0 - i * 6.0, 0.0))
 		_hungry = true
-		# Fed today: what the "hamster" quest checks at bedtime.
-		GameState.flags["hamster_fed"] = Season.day
+		# Fed since she last slept: what the "hamster" quest checks at bedtime.
+		GameState.flags["hamster_fed"] = true
 		_walk_to(BOWL_X + 22.0)
 		Sfx.play("nibble", global_position)
 		return

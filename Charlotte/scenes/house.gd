@@ -187,10 +187,10 @@ func _open_fridge() -> void:
 
 
 # Bedtime: the room goes night-blue and moonlit, she's tucked in ("Bonne nuit"), little z's float up from the
-# bed; then black, "Le lendemain matin…", a new day, and she's up beside the bed.
+# bed; then black, "Le lendemain matin…", and she's up beside the bed (the hamster is hungry again).
 func _go_to_sleep() -> void:
 	if Quests.active("hamster"):
-		if int(GameState.flags.get("hamster_fed", -1)) != Season.day:
+		if not GameState.flags.get("hamster_fed", false):
 			_say(_charlotte, "Oh ! Mon hamster n'a pas mangé !", 300.0)
 			return
 		Quests.complete("hamster")
@@ -228,8 +228,8 @@ func _go_to_sleep() -> void:
 	tween.parallel().tween_property(words, "modulate:a", 0.0, 0.5)
 	tween.parallel().tween_property(zs, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(func():
-		Season.day += 1
-		words.text = "Le lendemain matin…\nJour %d" % Season.day
+		GameState.flags.erase("hamster_fed")
+		words.text = "Le lendemain matin…"
 		words.position.y = 0.0
 		moon.queue_free()
 		_charlotte.position.x = BEDROOM.x + 840.0
@@ -377,7 +377,7 @@ func _build_bedroom() -> void:
 	hamster.scale = tank.scale
 	add_child(hamster)
 	add_child(QuestMark.make(tank.position + Vector2(140, -40) * tank.scale, func() -> bool:
-		return Quests.active("hamster") and int(GameState.flags.get("hamster_fed", -1)) != Season.day, 0.8))
+		return Quests.active("hamster") and not GameState.flags.get("hamster_fed", false), 0.8))
 	_put(InteriorArt.terrarium(true), x + 30.0, 606.0, 0.85)
 	_put(InteriorArt.flower_painting(), x + 470.0, 330.0, 0.8, "wall")
 	_put(InteriorArt.bed(), x + 360.0, 608.0, 0.8, "floor")

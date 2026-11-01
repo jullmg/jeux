@@ -11,7 +11,7 @@ Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks
 wardrobe and change clothes. Click her desk to draw (`ui/drawing_pad.gd`, `DrawingPad`: crayons, sizes, eraser); "Sur le frigo !" saves the
 drawing to `user://drawings/` (newest 4 kept) and sticks it on the kitchen fridge. Delete that folder after tests.
 Click the bookshelf in her bedroom to read (`ui/book_reader.gd`, `BookReader`: four short original stories, a
-picture and text per page). Click her bed to sleep: night falls, "Bonne nuit, Chacha…", then "Le lendemain matin…" and `Season.day` goes up.
+picture and text per page). Click her bed to sleep: night falls, "Bonne nuit, Chacha…", then "Le lendemain matin…" (no day count shown or kept for now; `Season.day` stays 1).
 Click the fridge: it opens (`InteriorArt.fridge_open()`) and she takes a random snack (`InteriorArt.snack(kind)`), "Miam !".
 Click the hallway TV to turn it on and change channels, then off. `world/tv_shows.gd` (`TvShows`) is the
 catalogue of channels, all original (no copyrighted shows or characters): news, animals, cartoon, hockey, weather, the
@@ -156,7 +156,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   to go next, while `condition` is true.
 - The quests so far:
   - milk: Mom gives it, buy the 4 L bag at the dépanneur (free, `flags.has_milk`), bring it to Mom;
-  - hamster: Dad gives it; feeding sets `flags.hamster_fed = Season.day`; going to bed unfed is refused, fed completes it;
+  - hamster: Dad gives it; feeding sets `flags.hamster_fed` (cleared at bedtime); going to bed unfed is refused, fed completes it;
   - cat: the PERDU poster on the lamp post by `duplex_voisin_gauche` (`main.gd` `LostPoster`) starts it; Pistache (grey
     tabby, `StrayCat.collar` blue, `stay`, `on_pet`) waits on Rue Dandurand while it's active; petting it completes it and
     it `go_home()`s.
