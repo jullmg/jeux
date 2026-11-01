@@ -345,7 +345,7 @@ static func panel_door() -> ImageTexture:
 	return tex(150, 430, s)
 
 
-## Canvas 560x480: the kitchen at the end of the hall: fridge covered in drawings, wood upper cabinet,
+## Canvas 560x480: the kitchen at the end of the hall: fridge (its door bare: Charlotte's own drawings go on it), wood upper cabinet,
 ## white base cabinets with a black counter (stove, kettle, fruit bowl, utensil rail), the back door with
 ## a window onto the yard and the wall AC unit above, and a little island with a stool. Floor at y 480.
 static func kitchen() -> ImageTexture:
@@ -354,9 +354,7 @@ static func kitchen() -> ImageTexture:
 	s += '<rect x="4" y="120" width="104" height="356" rx="8" fill="#F2F2EF" stroke="#B9B4AA" stroke-width="3"/>'
 	s += '<path d="M4 250 H108" stroke="#B9B4AA" stroke-width="3"/><rect x="92" y="190" width="6" height="44" rx="3" fill="#B9B4AA"/><rect x="92" y="268" width="6" height="60" rx="3" fill="#B9B4AA"/>'
 	s += '<path d="M10 126 L40 126 L12 240 Z" fill="#FFFFFF" opacity="0.5"/>'
-	for d in [[20, 150, "#F2C12E"], [52, 170, "#7E57C2"], [24, 280, "#F2A7C9"], [58, 300, "#1FB5C4"]]:
-		s += '<rect x="%s" y="%s" width="30" height="36" fill="#FFFFFF" stroke="#D9D2C4" stroke-width="1" transform="rotate(-4 %s %s)"/>' % [d[0], d[1], d[0], d[1]]
-		s += '<path d="M%s %s q8 -10 16 0 q-8 10 -16 0" fill="%s"/><circle cx="%s" cy="%s" r="3" fill="#E04F5F"/>' % [d[0] + 7, d[1] + 20, d[2], d[0] + 15, d[1] + 2]
+	# The fridge door stays bare: only Charlotte's own drawings go on it (see DrawingPad, house.gd).
 	# Upper cabinet.
 	s += '<rect x="122" y="40" width="150" height="130" fill="#D6A464" stroke="#8A6234" stroke-width="3"/>'
 	for y in range(52, 166, 10):
