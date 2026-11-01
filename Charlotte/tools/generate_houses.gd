@@ -1788,15 +1788,30 @@ func _corner_holt() -> void:
 			_path("M%s %s v11" % [_n(sx), _n(yy)], "none", _stroke("#6A7076", 0.8))
 			sx += 16.0
 	_rect(ax0 - 12, atop - 2, ax1 - ax0 + 24, 6, "#F2F0EA")
-	for wx in [[ax0 + 24, 86.0], [ax0 + 206, 74.0]]:
-		_rect(wx[0], atop + 40, wx[1], 96, "#F2F0EA")
-		_rect(wx[0] + 6, atop + 46, wx[1] - 12, 84, "url(#glass)")
-		_rect(wx[0] + wx[1] / 2.0 - 2, atop + 46, 4, 84, "#F2F0EA")
-	_rect(ax0 + 128, atop + 26, 58, base_y - atop - 26, "#F4F2EC", _stroke("#C9C3B8", 2))
-	_rect(ax0 + 140, atop + 40, 34, 50, "url(#glass)")
-	_circle(ax0 + 176, atop + 120, 3, "#B9B2A5")
-	_rect(ax0 + 112, atop + 70, 10, 14, "#1E1E1E")
-	_lantern(ax0 + 116, atop + 24)
+	# Its windows (reference photo): a big fixed pane over a row of small ones, two on the left, three on the right;
+	# the white door with its narrow glass slot, the black mailbox and house number, a small black wall lamp.
+	for wn in [[ax0 + 22, 92.0, 2], [ax0 + 198, 96.0, 3]]:
+		var wx2: float = wn[0]
+		var ww: float = wn[1]
+		var wy2 := atop + 36.0
+		var wh := 104.0
+		_rect(wx2, wy2, ww, wh, "#F2F0EA", _stroke("#C9C3B8", 1.5))
+		_rect(wx2 + 6, wy2 + 6, ww - 12, wh * 0.66, "url(#glass)")
+		var low := wy2 + 6.0 + wh * 0.66 + 5.0
+		var lh := wy2 + wh - 6.0 - low
+		var panes: int = wn[2]
+		var pw := (ww - 12.0 - (panes - 1) * 4.0) / panes
+		for k2 in panes:
+			_rect(wx2 + 6 + k2 * (pw + 4.0), low, pw, lh, "url(#glass)")
+		_rect(wx2 - 4, wy2 + wh, ww + 8, 6, "#F2F0EA", _stroke("#C9C3B8", 1))
+	_rect(ax0 + 128, atop + 22, 58, base_y - atop - 22, "#F4F2EC", _stroke("#C9C3B8", 2))
+	_rect(ax0 + 132, atop + 26, 50, base_y - atop - 26, "#FAF8F3", _stroke("#D9D4CA", 1))
+	_rect(ax0 + 166, atop + 36, 10, 46, "url(#glass)", _stroke("#C9C3B8", 1))
+	_circle(ax0 + 138, atop + 112, 3, "#B9B2A5")
+	_rect(ax0 + 104, atop + 70, 18, 10, "#1E1E1E")
+	_rect(ax0 + 102, atop + 84, 22, 16, "#1E1E1E", 'rx="2"')
+	_rect(ax0 + 112, atop + 30, 7, 10, "#1E1E1E")
+	_circle(ax0 + 115, atop + 28, 4, "#1E1E1E")
 	# The dépanneur's red corner window: posters behind the glass, a red awning, a red footing.
 	var sx0 := X1 - 200.0
 	var sx1 := X1 - 6.0

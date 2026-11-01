@@ -64,10 +64,11 @@ func _build_cross_streets() -> void:
 
 func _decorate_house(i: int, house: Sprite2D) -> void:
 	if layout[i] == "coin_holt":
-		# The old man in his armchair, behind the annex window right of its door (glass at 242,711 62x84 in the SVG).
+		# The old man in his armchair, behind the big upper pane of the annex window right of its door (SVG 234,707
+		# 84x69: annex top 665, window at x 228 y 701).
 		var neighbour := WindowNeighbour.new()
-		neighbour.position = house.position + Vector2(242, 711) * HOUSE_SCALE
-		neighbour.size = Vector2(62, 84) * HOUSE_SCALE
+		neighbour.position = house.position + Vector2(234, 707) * HOUSE_SCALE
+		neighbour.size = Vector2(84, 69) * HOUSE_SCALE
 		add_child(neighbour)
 		_window_neighbour = neighbour
 	if layout[i] == "ruelle":
