@@ -66,7 +66,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   Lots of `LOT_W` 365: backs (siding/brick, wooden galleries, zigzag or spiral stairs, clothesline pulleys) and fronts
   along the lane (board, cedar, picket, chain-link fences, tôle garages, roll-up garages, sheds, planters and bench),
   Virginia creeper by season, bins, poles and wires, clotheslines across the lane (`_Clotheslines`), the black cat, yard
-  trees. Charlotte's yard is the middle lane's lot `OWN_LOT` (swing, Dad's bike, chalk hopscotch).
+  trees, a croque-livre in each lane (`LaneArt.croque_livre`, `_open_croque_livre`: ready for a quest). Charlotte's
+  yard is the middle lane's lot `OWN_LOT` (swing, Dad's bike, chalk hopscotch).
 - Turning corners: `StreetScene._add_corner(cross_street, scene, key)` makes the cross street clickable: Charlotte walks to
   the curb, the other street loads with `Transition.arrive = key`, and that street's `_start_x()` checks `_arriving(key)`
   to put her at the matching corner (keys "<street_key>_from_<other>"). All four corners of the block work both ways. A

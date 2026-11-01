@@ -49,6 +49,7 @@ func _ready() -> void:
 	_build_yard_trees()
 	_build_fronts()
 	_build_poles()
+	_build_croque_livre()
 	var ground := _Ground.new()
 	ground.width = _street_width
 	ground.hopscotch = (_lots[_own].x + _lots[_own].y) / 2.0 if _own >= 0 else -1.0
@@ -224,6 +225,22 @@ func _build_fronts() -> void:
 		var bike := _sprite(PropArt.bike(_rng), 0.8)
 		bike.position = Vector2(own.x + 40.0, FENCE_Y + 4.0 - 90.0 * 0.8)
 		add_child(bike)
+
+
+# Every lane has its croque-livre against a fence: take a book, leave a book. (Ready for a quest later.)
+func _build_croque_livre() -> void:
+	var lot := _lots[4 if lane == "middle" else 1]
+	var box := _sprite(LaneArt.croque_livre(_rng), 0.75)
+	box.position = Vector2(lot.x + 70.0, FENCE_Y + 10.0 - 200.0 * 0.75)
+	add_child(box)
+	var x := box.position.x + 50.0 * 0.75
+	add_child(DoorSpot.make(Rect2(box.position, Vector2(100, 200) * 0.75), _open_croque_livre, x + 40.0))
+
+
+func _open_croque_livre() -> void:
+	var lines := ["Un croque-livre ! On prend un livre,\non en laisse un.", "Il y a plein d'histoires\nlà-dedans !"]
+	Bubble.say(self, _charlotte.position + Vector2(0, -190), lines[randi() % lines.size()], 2.8)
+	Sfx.play("page")
 
 
 # Wooden poles along the far edge of the lane, wires from one to the next (no service drops: the galleries' own).

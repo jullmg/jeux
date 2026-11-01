@@ -430,6 +430,36 @@ static func _vine(rng: RandomNumberGenerator, x: float, w: float, top: float, co
 	return s
 
 
+## A croque-livre (a little free library): a painted wooden box with a pitched roof on a post, books behind its
+## glass door, a hand-lettered sign. Canvas 100x200, the post's foot at (50, 200).
+static func croque_livre(rng: RandomNumberGenerator) -> ImageTexture:
+	var paint: String = PropArt._pick(rng, ["#F2C230", "#4FA3A0", "#D9482B", "#5E8FD0", "#7FB85A"])
+	var s := _rect(45, 110, 10, 90, "#6E5A48") + _rect(45, 110, 3, 90, "#8C7664")
+	s += _rect(30, 192, 40, 8, "#5A4A3A", 'rx="2"')
+	s += _rect(10, 40, 80, 74, paint, 'stroke="%s" stroke-width="3"' % _dark(paint, 0.4))
+	s += _poly([Vector2(2, 44), Vector2(50, 8), Vector2(98, 44)], "#5E6B73", 'stroke="#3F4A50" stroke-width="2"')
+	if Season.is_winter():
+		s += _poly([Vector2(4, 40), Vector2(50, 6), Vector2(96, 40), Vector2(50, 14)], "#F4F6F8")
+	# The glass door and the books inside, two shelves of spines.
+	s += _rect(18, 48, 64, 58, "#3A3A40")
+	for shelf in 2:
+		var x := 21.0
+		var y := 50.0 + shelf * 28.0
+		while x < 78.0:
+			var bw := rng.randf_range(4.0, 8.0)
+			var bh := rng.randf_range(16.0, 24.0)
+			s += _rect(x, y + 26.0 - bh, bw, bh, PropArt._pick(rng, ["#E74C3C", "#3498DB", "#F1C40F", "#2ECC71", "#9B59B6", "#ECF0F1", "#E67E22"]))
+			x += bw + 1.0
+		s += _rect(18, y + 26, 64, 2, "#2A2A2E")
+	s += _rect(18, 48, 64, 58, "#BFD8E6", 'opacity="0.25" stroke="%s" stroke-width="3"' % _light(paint, 0.2))
+	s += _poly([Vector2(22, 52), Vector2(40, 52), Vector2(22, 80)], "#FFFFFF", 'opacity="0.3"')
+	s += '<circle cx="76" cy="78" r="2.5" fill="#E3C26A"/>'
+	# The hand-lettered sign on the post.
+	s += _rect(20, 122, 60, 18, "#F4F1EA", 'stroke="#55524C" stroke-width="1.5" transform="rotate(-4 50 131)"')
+	s += '<text x="50" y="135" font-size="9" font-family="sans-serif" text-anchor="middle" fill="%s" transform="rotate(-4 50 131)">croque-livre</text>' % _dark(paint, 0.3)
+	return PropArt.tex(PropArt._svg(100, 200, s))
+
+
 # ── Where the lane meets its cross lanes ────────────────────
 
 ## The end of a cross lane, where it meets an avenue: the lane narrowing a little to the sidewalk, the asphalt, and
