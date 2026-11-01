@@ -78,8 +78,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   post at both corners (`CrossStreet` SIGNS): the plate of the street we're on faces us, the cross street's plate is
   slanted along that street toward its vanishing point. Overhead wires run pole to pole across the whole view:
   `world/utility_poles.gd` (`UtilityPoles`, one `_draw` node) draws the wooden poles (crossarms, insulators, transformers,
-  staples and torn posters) and all wires; `StreetScene._build_utility_poles()` puts them at the back of the sidewalk
-  (foot y 612, behind people), every 650-780 px clear of cross streets, trees, lamps, hydrants, racks (own RNG); the lane
+  staples and torn posters) and all wires; `StreetScene._build_utility_poles()` (in `_build_props`) puts them at the curb
+  (foot y 662, in front of people, like the lamps; the lane's stand at its fences), every 650-780 px clear of cross streets, trees, lamps, hydrants, racks (own RNG); the lane
   uses them too. Lost-cat posters are stapled to the pole nearest the street's second lamp (`_poster_spot`).
   `layout` runs: `ecole` (école Saint-Jean-de-Brébeuf, across Dandurand), `rue_dandurand`, Charlotte's block (`depanneur`: the
   side of dépanneur Xin-Xin, which fronts Dandurand; `garages`; `ruelle_verte`, the green lane with its sign; … `coin_holt`),

@@ -83,7 +83,6 @@ func _ready() -> void:
 	for cs in _cross_streets:
 		add_child(CrossStreet.make(CrossStreet.Part.GROUND, cs))
 	_build_sidewalk_props()
-	_build_utility_poles()
 	var trees := _tree_textures()
 	_build_tree_shadows(trees)
 	_build_passersby()
@@ -501,7 +500,7 @@ func _build_window_cats() -> void:
 
 # ── Utility poles ───────────────────────────────────────────────
 
-## Wooden poles at the back of the sidewalk (behind the people), every 650-780 px, clear of the cross streets, the
+## Wooden poles at the curb (in front of the people, like the lamps), every 650-780 px, clear of the cross streets, the
 ## trees, lamps, hydrants and bike racks; the wires run from one to the next. Their own random numbers, so the
 ## street's other draws don't change.
 func _build_utility_poles() -> void:
@@ -531,7 +530,7 @@ func _build_utility_poles() -> void:
 		x += rng.randf_range(650.0, 780.0)
 	var poles := UtilityPoles.new()
 	poles.xs = _pole_xs
-	poles.foot = 612.0
+	poles.foot = CURB_Y - 2.0
 	poles.width = _street_width
 	poles.seed_value = seed_value
 	add_child(poles)
@@ -686,6 +685,7 @@ func _follow_charlotte() -> void:
 
 func _build_props() -> void:
 	_build_extra_props()
+	_build_utility_poles()
 	for cs in _cross_streets:
 		add_child(CrossStreet.make(CrossStreet.Part.SIGNS, cs))
 	for after in lamps_after:
