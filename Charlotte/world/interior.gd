@@ -58,6 +58,9 @@ func _spawn_charlotte(x: float, facing := 1) -> void:
 	_camera = Camera2D.new()
 	_camera.position_smoothing_enabled = true
 	add_child(_camera)
+	var saver := Saver.new()
+	saver.who = _charlotte
+	add_child(saver)
 
 
 ## Out-of-focus foreground (`items`: [world x, "plant" | "plushie" | "shelf"]), colour grade, fade-in, `--screenshot=`.

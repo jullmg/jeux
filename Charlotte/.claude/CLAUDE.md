@@ -141,6 +141,17 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   strokes with the front hand. The animal is drawn just in front of Charlotte so her hand lands on its head: stray cats walk at
   y 646 (she is at 638); a dog being petted steps 32 px toward the camera and gets z_index 1, while its walker `hold()`s.
 
+## Saving
+
+- `world/game_state.gd` (`GameState`): the game in progress (pocket `money`, `quests`, story `flags`, plus `Season.day` /
+  `Season.current`) and `user://save.json` (scene path + Charlotte's x). `world/saver.gd` (`Saver`), added by `StreetScene`
+  and `Interior`, autosaves 1 s after a scene opens, every 10 s, on leaving it and on window close.
+- Title screen: "Continuer" (`GameState.load_game()` → restores state, sets `Transition.street_x` / `inside_x`, loads the
+  scene) when a save exists, and "Nouvelle partie" (`GameState.new_game()`: day 1, autumn, starting money, clears the save,
+  her outfit and the fridge drawings).
+- `GameState.enabled()` is false for test runs (`--screenshot=`, `--x=`, `-s` scripts), so they never write or wipe the save.
+  A plain scene run (no such args) does save: back up `user://` first if you must test that way.
+
 ## Sound
 
 - `audio/sfx.gd` is the `Sfx` autoload: every sound effect is synthesised in code on first use (no audio files, no

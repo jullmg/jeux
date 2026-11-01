@@ -160,6 +160,15 @@ static func saved() -> Array[Image]:
 	return out
 
 
+## Takes every drawing off the fridge (a new game).
+static func forget_all() -> void:
+	var dir := DirAccess.open(FOLDER)
+	if dir == null:
+		return
+	for n in dir.get_files():
+		dir.remove(n)
+
+
 ## Keeps a new drawing, dropping the oldest beyond KEEP.
 static func keep(img: Image) -> void:
 	DirAccess.make_dir_recursive_absolute(FOLDER)

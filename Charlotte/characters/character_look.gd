@@ -56,6 +56,12 @@ static func charlotte() -> CharacterLook:
 	return usual()
 
 
+## Back to her usual dress (a new game).
+static func forget_outfit() -> void:
+	_outfit = null
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(OUTFIT_PATH))
+
+
 ## Keeps the outfit for every scene, and on disk.
 static func dress_charlotte(look: CharacterLook) -> void:
 	_outfit = look.duplicate(true)

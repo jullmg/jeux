@@ -92,6 +92,9 @@ func _ready() -> void:
 	_build_doors()
 	for cs in _cross_streets:
 		_add_crossing(cs)
+	var saver := Saver.new()
+	saver.who = _charlotte
+	add_child(saver)
 	_window_cats.charlotte = _charlotte
 	var kick := LeafKick.new()
 	kick.walker = _charlotte

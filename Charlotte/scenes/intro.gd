@@ -3,7 +3,7 @@ extends Node2D
 # Intro screen – full living street scene + the art/logo.png title.
 # Uses real game components: SkyBackdrop, Skyline, Cloud, Street, Squirrel, Cat,
 # StrayCat, Dog, WindowCats, Birds, Character (Charlotte), PropArt, Foreground, Wind.
-# Press "Démarrer" or Enter/Space to start.
+# "Continuer" picks up the saved game (if any), "Nouvelle partie" starts over; Enter/Space = the first one.
 # ══════════════════════════════════════════════════════════════
 
 const VIEW        := Vector2(1280, 720)
@@ -415,14 +415,20 @@ func _animate_logo() -> void:
 func _build_start_button() -> void:
 	var cx := VIEW.x / 2.0
 	var btn_y := 392.0
+	if GameState.has_save():
+		_title_button("▶  Continuer", Vector2(cx, btn_y), 28, _on_continue_pressed)
+		_title_button("Nouvelle partie", Vector2(cx, btn_y + 74.0), 22, _on_new_game_pressed)
+	else:
+		_title_button("▶  Nouvelle partie", Vector2(cx, btn_y), 28, _on_new_game_pressed)
 
-	# "Démarrer" button
+
+func _title_button(label: String, top_center: Vector2, font_size: int, on_press: Callable) -> void:
 	var btn := Button.new()
-	btn.text = "▶  Démarrer"
-	var bw := 240.0
-	var bh := 58.0
+	btn.text = label
+	var bw := 300.0 if font_size >= 28 else 240.0
+	var bh := 58.0 if font_size >= 28 else 48.0
 	btn.size = Vector2(bw, bh)
-	btn.position = Vector2(cx - bw / 2.0, btn_y)
+	btn.position = Vector2(top_center.x - bw / 2.0, top_center.y)
 
 	var _mk_style := func(bg: Color, border: Color) -> StyleBoxFlat:
 		var st := StyleBoxFlat.new()
@@ -446,18 +452,27 @@ func _build_start_button() -> void:
 	btn.add_theme_color_override("font_color",         Color.WHITE)
 	btn.add_theme_color_override("font_hover_color",   Color("#1D4F91"))
 	btn.add_theme_color_override("font_pressed_color", Color("#1D4F91"))
-	btn.add_theme_font_size_override("font_size", 28)
-	btn.pressed.connect(_on_start_pressed)
+	btn.add_theme_font_size_override("font_size", font_size)
+	btn.pressed.connect(on_press)
 	_ui_layer.add_child(btn)
 
 
-func _on_start_pressed() -> void:
+func _on_continue_pressed() -> void:
+	var scene := GameState.load_game()
+	get_tree().change_scene_to_file(scene if ResourceLoader.exists(scene) else MAIN_SCENE)
+
+
+func _on_new_game_pressed() -> void:
+	GameState.new_game()
 	get_tree().change_scene_to_file(MAIN_SCENE)
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
-		_on_start_pressed()
+		if GameState.has_save():
+			_on_continue_pressed()
+		else:
+			_on_new_game_pressed()
 
 
 
