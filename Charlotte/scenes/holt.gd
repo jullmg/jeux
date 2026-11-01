@@ -40,11 +40,11 @@ func _build_cross_streets() -> void:
 		{"to": 2.4, "top": 300.0, "kind": "plex", "color": Color("#C2A07A")},
 		{"to": CrossStreet.FAR, "top": 290.0, "kind": "plex", "color": Color("#9C5A44")},
 	]
-	sixth.right_walls = _walls_along("res://scenes/main.gd", "rue_holt", -1)
+	sixth.right_walls = _walls_along("res://scenes/main.gd", "rue_holt", -1, "ohbon")
 	var fifth := _cross_street("rue_5e", "5e Avenue", -1.0)
 	fifth.along_name = "Rue Holt"
 	fifth.facing = "south"
-	fifth.left_walls = _walls_along("res://scenes/cinquieme.gd", "rue_holt", 1)
+	fifth.left_walls = _walls_along("res://scenes/cinquieme.gd", "rue_holt", 1, "plex_16")
 	fifth.right_walls = [
 		{"to": 0.7, "top": _house_top("holt_sud"), "kind": "plex", "color": Color("#C8A27A")},
 		{"to": 2.2, "top": 280.0, "kind": "plex", "color": Color("#9C5A44")},

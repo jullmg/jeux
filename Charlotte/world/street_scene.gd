@@ -499,7 +499,9 @@ func _house_top(art: String) -> float:
 ## The walls along a cross street, built from the street that really runs there (its scene script's layout): from
 ## our corner, its gap `from_gap`, going `direction` (+1 / -1 along its layout) to its next cross street; each building
 ## with its width, height, colour (sampled off its facade) and kind; then the next block, generic, into the distance.
-func _walls_along(script_path: String, from_gap: String, direction: int) -> Array:
+## The first one is the corner building's side, the same building as `ours` (our facade at that corner): it takes our
+## facade's height and brick, so the corner joins up.
+func _walls_along(script_path: String, from_gap: String, direction: int, ours := "") -> Array:
 	var other: Node = load(script_path).new()
 	var lay: Array = other.layout
 	var gaps: Dictionary = other.cross_streets
@@ -517,6 +519,9 @@ func _walls_along(script_path: String, from_gap: String, direction: int) -> Arra
 		if wall.kind != "gap":
 			last = wall.color
 		i += direction
+	if ours != "" and not walls.is_empty() and walls[0].kind != "gap":
+		walls[0].top = _house_top(ours)
+		walls[0].color = _wall_color(_tex(ours))
 	# The next cross street, then the next block's plexes on into the distance.
 	walls.append({"to": d + 0.5, "kind": "gap"})
 	walls.append({"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": last.lerp(Color("#B5603F"), 0.5)})
@@ -529,17 +534,18 @@ func _wall_kind(art: String) -> String:
 	return {"ohbon": "ohbon", "coin_holt": "corner_holt", "depanneur_front": "shop", "garages": "garage", "ecole": "school"}.get(art, "plex")
 
 
-# A facade's brick colour: the average of a few points down its left side, clear of windows and stairs.
+# A facade's brick colour: the average of points across it, keeping only brick-coloured ones (not the white
+# trim, the glass, a downspout or the dark ironwork).
 func _wall_color(tex: Texture2D) -> Color:
 	var img := tex.get_image()
 	var sum := Color(0, 0, 0, 0)
 	var n := 0
-	for k in 8:
-		var p := Vector2i(int(MARGIN) + 10, int(img.get_height() * lerpf(0.3, 0.6, k / 7.0)))
-		var c := img.get_pixelv(p)
-		if c.a > 0.5:
-			sum += c
-			n += 1
+	for fx in [0.06, 0.29, 0.5, 0.6, 0.72, 0.94]:
+		for k in 6:
+			var c := img.get_pixelv(Vector2i(int(img.get_width() * fx), int(img.get_height() * lerpf(0.25, 0.6, k / 5.0))))
+			if c.a > 0.5 and c.s > 0.18 and c.v > 0.25 and c.v < 0.92:
+				sum += c
+				n += 1
 	return Color(sum.r / n, sum.g / n, sum.b / n) if n > 0 else Color("#9C5A44")
 
 

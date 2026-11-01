@@ -62,7 +62,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Cross-street vistas show the real street that runs there: `StreetScene._walls_along(script, from_gap, direction)`
   reads that street's `layout` (its scene script's `_init`) from our corner to its next cross street, giving each wall
   its building's width, height, kind (`_wall_kind`: ohbon, corner_holt, shop = Xin-Xin, garage, school, gap = lane,
-  plex) and brick colour sampled off its facade (`_wall_color`); generic plexes beyond. Only the side across the street
+  plex) and brick colour sampled off its facade (`_wall_color`, brick-coloured points only); generic plexes beyond.
+  The first wall is the corner building's side, so it takes our own corner facade's height and brick (`ours`). Only the side across the street
   (another block) is still hand-written.
 - Before 8 (`StreetScene.CROSS_AGE`, `GameState.age`) Charlotte can't cross a street ("Je n'ai pas le droit de traverser
   toute seule !"), so her world is the block: its four corners and the lane.

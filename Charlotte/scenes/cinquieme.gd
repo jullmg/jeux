@@ -47,12 +47,12 @@ func _build_cross_streets() -> void:
 		{"to": 2.3, "top": 290.0, "kind": "plex", "color": Color("#B5603F")},
 		{"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": Color("#C2A07A")},
 	]
-	holt.right_walls = _walls_along("res://scenes/holt.gd", "rue_5e", -1)
+	holt.right_walls = _walls_along("res://scenes/holt.gd", "rue_5e", -1, "coin_5e_holt")
 	var dandurand := _cross_street("rue_dandurand", "Rue Dandurand", -1.0)
 	dandurand.along_name = "5e Avenue"
 	dandurand.facing = "east"
 	dandurand.school = true
-	dandurand.left_walls = _walls_along("res://scenes/dandurand.gd", "rue_5e", 1)
+	dandurand.left_walls = _walls_along("res://scenes/dandurand.gd", "rue_5e", 1, "coin_5e_dandurand")
 	dandurand.right_walls = [
 		{"to": 2.6, "top": _house_top("ecole"), "kind": "school", "color": Color("#A9472F")},
 		{"to": CrossStreet.FAR, "top": 330.0, "kind": "plex", "color": Color("#9C5A44")},
