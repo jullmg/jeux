@@ -184,9 +184,12 @@ func _mount_royal() -> void:
 		var c := Vector2(lerpf(vp.x - 420.0, vp.x + 440.0, t), lerpf(ridge + 10.0, HORIZON_Y, _rng.randf()))
 		draw_circle(c, _rng.randf_range(3.0, 6.0), Color(_foliage[i % _foliage.size()].lerp(Color("#8C8098"), 0.6), 0.45))
 	draw_colored_polygon(pts, Color(HAZE, 0.18))
-	var top := Vector2(vp.x + 20.0, HORIZON_Y - 150.0)
-	draw_line(top, top + Vector2(0, -22), Color("#F2EEE6"), 2.5)
-	draw_line(top + Vector2(-6, -16), top + Vector2(6, -16), Color("#F2EEE6"), 2.5)
+	# The cross, planted on the ridge itself (the same curve as the outline, where it stands).
+	var ct := 460.0 / 900.0
+	var ridge := pow(sin(ct * PI), 0.8) * 150.0 + sin(ct * 9.0) * 6.0 + sin(ct * 23.0) * 2.5
+	var top := Vector2(vp.x + 20.0, HORIZON_Y - ridge + 3.0)
+	draw_line(top, top + Vector2(0, -24), Color("#F2EEE6"), 2.5)
+	draw_line(top + Vector2(-6, -17), top + Vector2(6, -17), Color("#F2EEE6"), 2.5)
 
 
 # Translucent haze over the street between two depths, thicker with distance.
