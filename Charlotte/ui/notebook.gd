@@ -303,7 +303,7 @@ class _Paper:
 		CuteArt._stroke(self, [Vector2(size.x - 170, size.y - 30), Vector2(size.x - 168, size.y - 8)], CRAYONS[3], 2.5, true, _rng)
 		CuteArt.house(self, Vector2(size.x - 52, 470), 22, true, _rng)
 		CuteArt.me(self, Vector2(size.x - 54, 130), 20, true, _rng)
-		draw_string(ThemeDB.fallback_font, Vector2(size.x - 290, size.y - 14), "Chacha ♥", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, pink)
+		draw_string(ThemeDB.fallback_font, Vector2(size.x - 290, size.y - 14), "Chachoue ♥", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, pink)
 
 	# Crayon strokes: a line through `pts`, each segment jittered a little, drawn twice like a child's hand.
 	func _wobble(pts: Array, color: Color, width := 2.2) -> void:

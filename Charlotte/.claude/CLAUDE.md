@@ -1,7 +1,7 @@
 # Charlotte – project context
 
 A small Godot 4.7 2D game (GL Compatibility, 1280×720, `canvas_items` stretch) about Charlotte,
-a little girl, on her street in Montréal (Rosemont): her side of **6e Avenue** between
+a little girl (nicknamed **Chachoue**: her parents and friends call her that; neighbours and shopkeepers say "Charlotte"), on her street in Montréal (Rosemont): her side of **6e Avenue** between
 **Rue Dandurand** (left) and **Rue Holt** (right), in autumn. In-game text is in **French** (Québec).
 
 Current state: a living, side-scrolling street. Charlotte walks with ←/→ or by clicking/tapping the street; double-pressing the arrow or double-clicking/tapping makes her run
@@ -11,7 +11,7 @@ Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks
 wardrobe and change clothes. Click her desk to draw (`ui/drawing_pad.gd`, `DrawingPad`: crayons, sizes, eraser); "Sur le frigo !" saves the
 drawing to `user://drawings/` (newest 4 kept) and sticks it on the kitchen fridge. Delete that folder after tests.
 Click the bookshelf in her bedroom to read (`ui/book_reader.gd`, `BookReader`: four short original stories, a
-picture and text per page). Click her bed to sleep: night falls, "Bonne nuit, Chacha…", then "Le lendemain matin…" (no day count shown or kept for now; `Season.day` stays 1).
+picture and text per page). Click her bed to sleep: night falls, "Bonne nuit, Chachoue…", then "Le lendemain matin…" (no day count shown or kept for now; `Season.day` stays 1).
 Click the fridge: it opens (`InteriorArt.fridge_open()`) and she takes a random snack (`InteriorArt.snack(kind)`), "Miam !".
 Click the hallway TV to turn it on and change channels, then off. `world/tv_shows.gd` (`TvShows`) is the
 catalogue of channels, all original (no copyrighted shows or characters): news, animals, cartoon, hockey, weather, the

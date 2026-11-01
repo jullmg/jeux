@@ -3,7 +3,7 @@ extends Node2D
 ## A neighbourhood child playing with a ball in the lane: bouncing it in front of her, slapping it back down with her
 ## hand at the top of each bounce. Click her and she says something.
 
-const LINES := ["Tu veux jouer au ballon ?", "Attrape !", "J'ai compté jusqu'à cinquante !", "On joue à la tague tantôt ?"]
+const LINES := ["Tu veux jouer au ballon, Chachoue ?", "Attrape !", "J'ai compté jusqu'à cinquante !", "On joue à la tague tantôt ?"]
 
 var look: CharacterLook
 var ball_color := Color("#E74C3C")

@@ -3,7 +3,7 @@ extends Node2D
 ## A neighbourhood child skipping rope on the sidewalk: the rope swings round from hand to hand (behind her, over her
 ## head, then in front and under her feet as she hops). Click her and she says something.
 
-const LINES := ["Salut ! Je saute à la corde !", "Tu sais compter jusqu'à cent ?", "Un, deux, trois, quatre…", "Viens jouer tantôt !"]
+const LINES := ["Salut Chachoue ! Je saute à la corde !", "Tu sais compter jusqu'à cent ?", "Un, deux, trois, quatre…", "Viens jouer tantôt !"]
 
 var look: CharacterLook
 var _kid: Character

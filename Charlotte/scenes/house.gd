@@ -14,8 +14,8 @@ const SALON_END := 2260.0
 const KITCHEN_START := 3400.0
 const CHACHA_DOOR_X := 3120.0
 const BEDROOM_DOOR_X := 6440.0
-const MOM_LINES := ["Bonjour ma chouette !", "As-tu faim ? Il y a des fruits.", "N'oublie pas de nourrir le hamster !", "Je t'aime, Chacha !"]
-const DAD_LINES := ["Salut Chacha !", "On va au parc tantôt ?", "As-tu fait un beau dessin ?", "Tu veux jouer avec moi ?"]
+const MOM_LINES := ["Bonjour ma chouette !", "As-tu faim ? Il y a des fruits.", "N'oublie pas de nourrir le hamster !", "Je t'aime, Chachoue !"]
+const DAD_LINES := ["Salut Chachoue !", "On va au parc tantôt ?", "As-tu fait un beau dessin ?", "Tu veux jouer avec moi ?"]
 # What's lying on the bedroom floor (kind, x in the bedroom), and where each goes when she tidies it away.
 const MESS := [["teddy", 230.0], ["sock", 540.0], ["book", 700.0], ["ball", 880.0], ["tshirt", 1060.0], ["crayons", 1240.0]]
 const PUT_AWAY := {"sock": Vector2(1340, 560), "tshirt": Vector2(1340, 560), "book": Vector2(1010, 300),
@@ -97,10 +97,10 @@ func _build_family() -> void:
 func _talk_to_mom() -> void:
 	if Quests.active("milk") and GameState.flags.get("has_milk", false):
 		GameState.flags.erase("has_milk")
-		_say(_mom, "Du lait ! Merci, ma grande !", 350.0)
+		_say(_mom, "Du lait ! Merci, Chachoue !", 350.0)
 		Quests.complete("milk")
 	elif Quests.start("milk"):
-		_say(_mom, "Chacha, peux-tu aller me chercher\ndu lait au dépanneur ?", 380.0, 3.5)
+		_say(_mom, "Chachoue, peux-tu aller me chercher\ndu lait au dépanneur ?", 380.0, 3.5)
 	elif Quests.active("milk"):
 		_say(_mom, "Le dépanneur est au coin\nde la rue Dandurand !", 380.0)
 	elif Quests.start("menage"):
@@ -341,7 +341,7 @@ func _go_to_sleep() -> void:
 	dark.mouse_filter = Control.MOUSE_FILTER_STOP
 	night.add_child(dark)
 	var moon := _glow(Vector2(BEDROOM.x + 180.0, 280.0), 260.0, Color(0.6, 0.75, 1.0, 0.0))
-	var words := _night_label("Bonne nuit, Chacha…", 40)
+	var words := _night_label("Bonne nuit, Chachoue…", 40)
 	words.position.y = -170.0
 	night.add_child(words)
 	# The z's rise from her pillow.
