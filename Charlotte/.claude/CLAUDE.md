@@ -141,6 +141,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   animals: shaded outlined bodies, tapered limbs/tails built from convex quads, glossy eyes, hearts).
   `PropArt` generates trees, lamp posts, hydrants, bikes, leaves as textures. `PropArt.car()`/`wheel()` still exist but
   cars were removed from both scenes on purpose (2026-10-31); see git history to bring them back.
+- Street trees stand in a `TreePit` (`world/tree_pit.gd`, added in `StreetScene._build_trees`): grass, a neighbour's
+  garden of perennials (seasonal tulips/mums), or mulch; granite edging, sometimes iron hoops; snow in winter.
 - `shaders/`: `grade.gdshader` (full-screen colour grade on CanvasLayer 50), `sway.gdshader` (tree sway).
 - `art/decor/windows.json`: window panes per house, written by the generator, read by `WindowCats`. It is not a resource:
   an export preset needs `*.json` in its include filter.

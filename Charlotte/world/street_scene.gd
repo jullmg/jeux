@@ -573,6 +573,11 @@ func _build_tree_shadows(trees: Array[Texture2D]) -> void:
 func _build_trees(trees: Array[Texture2D]) -> void:
 	var leaf := Season.falling_texture()
 	for i in trees.size():
+		# The square of grass or of the neighbours' flowers round the trunk, cut into the sidewalk by the curb.
+		var pit := TreePit.new()
+		pit.position = Vector2(_starts[trees_after[i] + 1], CURB_Y)
+		pit.seed_value = seed_value * 31 + i
+		add_child(pit)
 		var tree := _sprite(trees[i], TREE_SCALE)
 		tree.position = _tree_origin(i)
 		tree.material = _sway(7.0, i * 1.7)
