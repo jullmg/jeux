@@ -54,15 +54,19 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `coin_5e_dandurand`, `dandurand_sud` (`VARIANTS` is 26).
 - Before 8 (`StreetScene.CROSS_AGE`, `GameState.age`) Charlotte can't cross a street ("Je n'ai pas le droit de traverser
   toute seule !"), so her world is the block: its four corners and the lane.
-- The back lane, `scenes/ruelle.gd` (extends `StreetScene` but builds its own `_ready`; art in `world/lane_art.gd`,
-  `LaneArt`, from `reference/ruelle/`): an H-shaped lane (map): cross lanes from 6e to 5e near Holt (`ruelle`) and near
-  Dandurand (`ruelle_verte`), joined by the middle lane we walk, looking at the 6e plexes' backs (Holt left). Lots of
-  `LOT_W` 365: backs (siding/brick, wooden galleries, zigzag stairs, clothesline pulleys) and fronts along the lane (board,
-  cedar, picket, chain-link fences, corrugated-metal garages "tôle", roll-up garages, sheds, planters and bench), Virginia
-  creeper by season, blue/brown bins, poles and wires, clotheslines across the lane with laundry (`_Clotheslines`), the
-  black cat, yard trees. Charlotte's yard is lot `OWN_LOT` (swing, Dad's bike, chalk hopscotch). At each end: click the
-  cross lane's vista for 6e, "↓ 5e Avenue" at the bottom for 5e. Streets add entrances with `_add_lane(art)`; arrivals:
-  `Transition.arrive` = "ruelle_from_<street>_<art>" and back "<street>_from_<art>" (`StreetScene._from_lane()`).
+- The back lanes, `scenes/ruelle.gd` (extends `StreetScene` but builds its own `_ready`; art in `world/lane_art.gd`,
+  `LaneArt`, from `reference/ruelle/`). The block's lanes make an H (map): one script, three scenes by `@export lane`:
+  `ruelle_dandurand.tscn` (the green cross lane, 6e → 5e, parallel to Dandurand, seen looking north: 5e left, 6e right),
+  `ruelle_holt.tscn` (the cross lane near Holt, seen looking south: 6e left, 5e right) and `ruelle.tscn` ("middle", behind
+  the 6e plexes, Holt's end left). A cross lane has the avenues at both ends (`LaneArt.street_end`: click to come out)
+  and the middle lane opening half way ("↑ Ruelle", `LaneArt.junction`); the middle lane opens on the two cross lanes at
+  its ends. `_plan()` lays out lots and `_openings` ({kind, scene, arrive, label, here}); `Transition.arrive` keys are
+  "<street_key>_from_<where>" (street_key "ruelle", "ruelle_dandurand", "ruelle_holt"; streets come in with
+  `_add_lane(art)` and go back out to "<street>_from_<art>", `StreetScene._from_lane()`).
+  Lots of `LOT_W` 365: backs (siding/brick, wooden galleries, zigzag or spiral stairs, clothesline pulleys) and fronts
+  along the lane (board, cedar, picket, chain-link fences, tôle garages, roll-up garages, sheds, planters and bench),
+  Virginia creeper by season, bins, poles and wires, clotheslines across the lane (`_Clotheslines`), the black cat, yard
+  trees. Charlotte's yard is the middle lane's lot `OWN_LOT` (swing, Dad's bike, chalk hopscotch).
 - Turning corners: `StreetScene._add_corner(cross_street, scene, key)` makes the cross street clickable: Charlotte walks to
   the curb, the other street loads with `Transition.arrive = key`, and that street's `_start_x()` checks `_arriving(key)`
   to put her at the matching corner (keys "<street_key>_from_<other>"). All four corners of the block work both ways. A

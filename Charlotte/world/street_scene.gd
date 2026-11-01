@@ -21,7 +21,6 @@ const STRAY_CAT_Y := 646.0
 const MAX_STRAY_CATS := 1
 ## Charlotte may cross a street on her own from this age; before that she stays on her block (corners and lanes).
 const CROSS_AGE := 8
-const LANE_SCENE := "res://scenes/ruelle.tscn"
 
 # ── The street's data (set by the subclass in _init) ────────────
 ## Buildings left to right (facade SVG names), with cross streets as gaps named in `cross_streets`.
@@ -263,15 +262,16 @@ func _cross(cs: CrossStreet) -> void:
 
 
 ## A back lane's entrance (the "ruelle" or "ruelle_verte" building in `layout`): click it and Charlotte walks into
-## the lane (scenes/ruelle.tscn), which knows which entrance from Transition.arrive.
+## that cross lane (the green one near Dandurand, or the one near Holt), arriving at this street's end of it.
 func _add_lane(art: String) -> void:
 	var i := layout.find(art)
 	var w := _tex(art).get_width()
+	var lane := "dandurand" if art == "ruelle_verte" else "holt"
 	var area := Rect2(_house_origin(i) + Vector2(70.0, 330.0) * HOUSE_SCALE, Vector2(w - 140.0, 370.0) * HOUSE_SCALE)
 	add_child(DoorSpot.make(area, func():
 		_control.enabled = false
-		Transition.arrive = "ruelle_from_%s_%s" % [street_key, art]
-		Transition.change_scene(self, LANE_SCENE), area.get_center().x))
+		Transition.arrive = "ruelle_%s_from_%s" % [lane, street_key]
+		Transition.change_scene(self, "res://scenes/ruelle_%s.tscn" % lane), area.get_center().x))
 
 
 ## Where Charlotte comes out of the lane onto this street (NAN if she isn't coming from it).

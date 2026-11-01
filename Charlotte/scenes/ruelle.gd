@@ -1,33 +1,45 @@
 extends StreetScene
-# The back lane of Charlotte's block (reference/ruelle photos, google_map_immediate_area.png). The lane is an H:
-# two cross lanes from 6e to 5e Avenue (near Holt, and the green lane near Dandurand) joined by this middle lane,
-# seen looking toward the backs of the 6e Avenue plexes: Holt's end on the left, Dandurand's on the right.
-# At each end, the cross lane: click the way down it to come out on 6e Avenue, the sign at the bottom for 5e.
+# The back lanes of Charlotte's block (reference/ruelle photos, google_map_immediate_area.png). They make an H:
+# two cross lanes running from 6e to 5e Avenue, like little streets parallel to Dandurand and Holt ("dandurand",
+# the green lane, and "holt"), joined in their middle by the "middle" lane that runs behind the 6e plexes.
+# One script, three scenes (ruelle.tscn, ruelle_dandurand.tscn, ruelle_holt.tscn: `lane`). In a cross lane the
+# avenues are at both ends (click the bright opening to come out) and the middle lane opens half way along
+# ("↑ Ruelle"); the middle lane opens on the two cross lanes at its ends. Seen looking at:
+#  - middle: the backs of the 6e plexes (east), Holt's end on the left;
+#  - dandurand: north, 5e Avenue on the left, 6e on the right;
+#  - holt: south, 6e on the left, 5e on the right.
 # Reuses StreetScene's helpers (Charlotte, camera, cats, wind, grade) but builds its own scene.
 
 const LOTS := 14
+const SIDE_LOTS := 3
 const LOT_W := 365.0
 const END_W := 320.0
 const JUNCTION_W := 300.0
-## Charlotte's yard: hers is the 7th plex from the Dandurand end on 6e Avenue.
+## Charlotte's yard, in the middle lane: hers is the 7th plex from the Dandurand end on 6e Avenue.
 const OWN_LOT := 8
 const FENCE_Y := 600.0
 const FRONT_KINDS := ["boards", "boards", "cedar", "tole", "picket", "chainlink", "tole", "garage", "shed", "boards", "cedar", "garden"]
+const SCENES := {
+	"middle": "res://scenes/ruelle.tscn", "dandurand": "res://scenes/ruelle_dandurand.tscn", "holt": "res://scenes/ruelle_holt.tscn",
+	"6e": "res://scenes/main.tscn", "5e": "res://scenes/cinquieme.tscn",
+}
 
-# Lots left to right (x from, x to; their kind), the two cross lanes' centres, clothesline pulleys.
+## Which lane this scene is: "middle", "dandurand" or "holt".
+@export var lane := "middle"
+
+# Lots left to right (x from, x to; their kind), the openings (to an avenue or another lane), clothesline pulleys.
 var _lots: Array[Vector2] = []
 var _kinds: Array[String] = []
-var _junctions: Array[float] = []
+var _openings: Array[Dictionary] = []
 var _pulleys: Array[Vector2] = []
 var _poles: Array[float] = []
-
-
-func _init() -> void:
-	street_key = "ruelle"
-	seed_value = 5151
+var _own := -1
 
 
 func _ready() -> void:
+	street_key = "ruelle" if lane == "middle" else "ruelle_" + lane
+	seed_value = 5151 + ["middle", "dandurand", "holt"].find(lane) * 97
+	_own = OWN_LOT if lane == "middle" else -1
 	_rng.seed = seed_value
 	_plan()
 	add_child(SkyBackdrop.new())
@@ -39,8 +51,7 @@ func _ready() -> void:
 	_build_poles()
 	var ground := _Ground.new()
 	ground.width = _street_width
-	ground.hopscotch = (_lots[OWN_LOT].x + _lots[OWN_LOT].y) / 2.0
-	ground.junctions = _junctions
+	ground.hopscotch = (_lots[_own].x + _lots[_own].y) / 2.0 if _own >= 0 else -1.0
 	add_child(ground)
 	var start_x := _start_x()
 	var x_arg := _arg("--x=")
@@ -49,7 +60,8 @@ func _ready() -> void:
 	_start = start_x
 	_charlotte = _spawn_charlotte(start_x)
 	_control.charlotte = _charlotte
-	_control.bounds = Vector2(90.0, _street_width - 90.0)
+	_control.bounds = Vector2(maxf(90.0, _openings[0].x if lane != "middle" else 90.0),
+		minf(_street_width - 90.0, _openings[-1].x if lane != "middle" else _street_width - 90.0))
 	_control.walk_top = 360.0
 	add_child(_control)
 	_build_exits()
@@ -64,7 +76,7 @@ func _ready() -> void:
 	# The lane's black cat, as in the photo.
 	var cat := StrayCat.random(_rng)
 	cat.coat = StrayCat.COATS[1]
-	cat.position = Vector2(start_x + 300.0, STRAY_CAT_Y)
+	cat.position = Vector2(clampf(start_x + 300.0, 100.0, _street_width - 100.0), STRAY_CAT_Y)
 	cat.bounds = Vector2(60.0, _street_width - 60.0)
 	cat.charlotte = _charlotte
 	_animals.add_child(cat)
@@ -94,18 +106,16 @@ func _ready() -> void:
 		_save_screenshot(shot)
 
 
-# Into the lane from 6e or 5e Avenue: at the cross lane she came down.
+# At the opening she came through (Transition.arrive = "<this lane>_from_<where>").
 func _start_x() -> float:
-	for street in ["6e", "5e"]:
-		if _arriving("ruelle_from_%s_ruelle" % street):
-			return _junctions[0]
-		if _arriving("ruelle_from_%s_ruelle_verte" % street):
-			return _junctions[1]
+	for o in _openings:
+		if _arriving(o.here):
+			return o.x
 	if not is_nan(Transition.street_x):
 		var x := Transition.street_x
 		Transition.street_x = NAN
 		return x
-	return _junctions[1] - 400.0
+	return _openings[-1].x - 400.0 if lane == "middle" else _openings[1].x
 
 
 func _music() -> Array:
@@ -121,41 +131,65 @@ func _found_x(at: float) -> float:
 # ── Layout ──────────────────────────────────────────────────────
 
 func _plan() -> void:
+	var lots := LOTS if lane == "middle" else SIDE_LOTS * 2
+	# An opening: where it leads (scene, Transition.arrive there), its label, and the key that arrives here.
+	var to_lane := func(other: String, label: String) -> Dictionary:
+		return {"kind": "lane", "scene": SCENES[other], "arrive": "%s_from_%s" % ["ruelle" if other == "middle" else "ruelle_" + other, lane if lane != "middle" else "middle"],
+			"label": label, "here": "%s_from_%s" % [street_key, "middle" if other == "middle" else other]}
+	var to_street := func(street: String) -> Dictionary:
+		var art := "ruelle_verte" if lane == "dandurand" else "ruelle"
+		return {"kind": "street", "scene": SCENES[street], "arrive": "%s_from_%s" % [street, art],
+			"label": "6e Avenue" if street == "6e" else "5e Avenue", "here": "%s_from_%s" % [street_key, street]}
+	var plan: Array = []
+	match lane:
+		"middle":
+			plan = ["end", to_lane.call("holt", "↑  Ruelle"), lots, to_lane.call("dandurand", "↑  Ruelle verte"), "end"]
+		"dandurand":
+			plan = [to_street.call("5e"), SIDE_LOTS, to_lane.call("middle", "↑  Ruelle"), SIDE_LOTS, to_street.call("6e")]
+		"holt":
+			plan = [to_street.call("6e"), SIDE_LOTS, to_lane.call("middle", "↑  Ruelle"), SIDE_LOTS, to_street.call("5e")]
 	var x := 0.0
-	var widths: Array[float] = [END_W]
-	for i in LOTS:
-		widths.append(LOT_W)
-	widths.append(END_W)
-	for i in widths.size():
-		if i == 1 or i == widths.size() - 1:
-			_junctions.append(x + JUNCTION_W / 2.0)
+	for part in plan:
+		if part is Dictionary:
+			part.x = x + JUNCTION_W / 2.0
+			_openings.append(part)
 			x += JUNCTION_W
-		_lots.append(Vector2(x, x + widths[i]))
-		x += widths[i]
+		elif part is String:
+			_lots.append(Vector2(x, x + END_W))
+			x += END_W
+		else:
+			for i in int(part):
+				_lots.append(Vector2(x, x + LOT_W))
+				x += LOT_W
 	_street_width = x
 	for i in _lots.size():
 		var kind: String = FRONT_KINDS[_rng.randi_range(0, FRONT_KINDS.size() - 1)]
-		if i == OWN_LOT:
+		if i == _own:
 			kind = "picket"
-		elif i == OWN_LOT - 1 or i == OWN_LOT + 1:
+		elif _own >= 0 and absi(i - _own) == 1:
 			kind = "cedar" if kind in ["picket", "chainlink", "garden"] else kind
 		_kinds.append(kind)
-	# The green lane's end (near Dandurand) has its planters.
-	_kinds[_lots.size() - 2] = "garden"
+	# The green lane has its planter boxes (and the middle lane's end near it).
+	if lane == "middle":
+		_kinds[_lots.size() - 2] = "garden"
+	elif lane == "dandurand":
+		_kinds[0] = "garden"
+		_kinds[-1] = "garden"
 
 
 func _build_backs() -> void:
 	for i in _lots.size():
 		var lot := _lots[i]
-		var made := LaneArt.back(_rng, lot.y - lot.x, i == OWN_LOT)
+		var made := LaneArt.back(_rng, lot.y - lot.x, i == _own)
 		var sprite := _sprite(made[0], 1.0)
 		sprite.position = Vector2(lot.x, FENCE_Y - LaneArt.H)
 		add_child(sprite)
-		if _rng.randf() < 0.35 or i == OWN_LOT:
+		if _rng.randf() < 0.35 or i == _own:
 			_pulleys.append(sprite.position + made[1])
-	for jx in _junctions:
-		var sprite := _sprite(LaneArt.junction(_rng, JUNCTION_W), 1.0)
-		sprite.position = Vector2(jx - JUNCTION_W / 2.0, FENCE_Y - LaneArt.H)
+	for o in _openings:
+		var art := LaneArt.junction(_rng, JUNCTION_W) if o.kind == "lane" else LaneArt.street_end(_rng, JUNCTION_W)
+		var sprite := _sprite(art, 1.0)
+		sprite.position = Vector2(o.x - JUNCTION_W / 2.0, FENCE_Y - LaneArt.H)
 		add_child(sprite)
 
 
@@ -185,10 +219,11 @@ func _build_fronts() -> void:
 		sprite.position = Vector2(lot.x, FENCE_Y - LaneArt.H)
 		add_child(sprite)
 	# Dad's bike leaning on Charlotte's fence.
-	var own := _lots[OWN_LOT]
-	var bike := _sprite(PropArt.bike(_rng), 0.8)
-	bike.position = Vector2(own.x + 40.0, FENCE_Y + 4.0 - 90.0 * 0.8)
-	add_child(bike)
+	if _own >= 0:
+		var own := _lots[_own]
+		var bike := _sprite(PropArt.bike(_rng), 0.8)
+		bike.position = Vector2(own.x + 40.0, FENCE_Y + 4.0 - 90.0 * 0.8)
+		add_child(bike)
 
 
 # Wooden poles along the far edge of the lane, wires from one to the next (no service drops: the galleries' own).
@@ -223,17 +258,18 @@ func _build_foreground() -> void:
 		x += rng.randf_range(900.0, 1500.0)
 
 
-# The two cross lanes: up the lane to 6e Avenue, down (toward us) to 5e Avenue.
+# Each opening: click it to go through. The avenues get their blue street plate, the lanes an arrow.
 func _build_exits() -> void:
-	var ends := [["ruelle", "6e_from_ruelle", "5e_from_ruelle"], ["ruelle_verte", "6e_from_ruelle_verte", "5e_from_ruelle_verte"]]
-	for i in 2:
-		var jx := _junctions[i]
-		add_child(DoorSpot.make(Rect2(jx - 110.0, 400.0, 220.0, 190.0), _leave.bind("res://scenes/main.tscn", ends[i][1]), jx))
-		add_child(DoorSpot.make(Rect2(jx - 140.0, 668.0, 280.0, 52.0), _leave.bind("res://scenes/cinquieme.tscn", ends[i][2]), jx))
-		_label("↑  6e Avenue", Vector2(jx, 392.0), Vector2(160, 26), 15, Color.WHITE, Color("#1D4F91"))
-		_label("↓  5e Avenue", Vector2(jx, 700.0), Vector2(160, 26), 15, Color.WHITE, Color("#1D4F91"))
-		if ends[i][0] == "ruelle_verte":
-			_label("RUELLE\nVERTE", Vector2(jx + 120.0, 446.0), Vector2(72, 36), 12, Color.WHITE, Color("#1E5E30"))
+	for o in _openings:
+		var x: float = o.x
+		add_child(DoorSpot.make(Rect2(x - 110.0, 400.0, 220.0, 190.0), _leave.bind(o.scene, o.arrive), x))
+		if o.kind == "street":
+			_label(o.label, Vector2(x, 380.0), Vector2(150, 26), 15, Color.WHITE, Color("#1D4F91"))
+		else:
+			_label(o.label, Vector2(x, 392.0), Vector2(170, 26), 15, Color.WHITE, Color("#1E5E30"))
+	if lane == "dandurand":
+		for o in [_openings[0], _openings[-1]]:
+			_label("RUELLE\nVERTE", Vector2(o.x + (110.0 if o == _openings[0] else -110.0), 446.0), Vector2(72, 36), 12, Color.WHITE, Color("#1E5E30"))
 
 
 func _leave(scene: String, arrive: String) -> void:
@@ -247,8 +283,7 @@ func _leave(scene: String, arrive: String) -> void:
 class _Ground:
 	extends Node2D
 	var width := 4000.0
-	var hopscotch := 0.0
-	var junctions: Array[float] = []
+	var hopscotch := -1.0
 
 	func _draw() -> void:
 		var rng := RandomNumberGenerator.new()
@@ -288,7 +323,7 @@ class _Ground:
 			var r := rng.randf_range(3.0, 6.0)
 			draw_colored_polygon(PackedVector2Array([c + Vector2.from_angle(a) * r, c + Vector2.from_angle(a + 1.9) * r * 0.5,
 				c + Vector2.from_angle(a + PI) * r, c + Vector2.from_angle(a - 1.9) * r * 0.5]), colors[i % colors.size()])
-		if not snow:
+		if not snow and hopscotch >= 0.0:
 			_hopscotch(Vector2(hopscotch - 170.0, 676.0))
 
 	# Chalk squares along the lane: 1, 2, 3, 4|5, 6, 7|8 (side by side across the lane: one above the other

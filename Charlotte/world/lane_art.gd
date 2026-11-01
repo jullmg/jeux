@@ -432,8 +432,55 @@ static func _vine(rng: RandomNumberGenerator, x: float, w: float, top: float, co
 
 # ── Where the lane meets its cross lanes ────────────────────
 
-## The cross lane running away toward 6e Avenue between two yards: concrete narrowing to a bright slice of
-## the avenue (the houses across it), board fences and a garage along it, creeper, a pole.
+## The end of a cross lane, where it meets an avenue: the lane narrowing a little to the sidewalk, the asphalt, and
+## across the avenue the sunlit plexes (bricks, windows, a door and its stairs), between a garage wall and a fence.
+static func street_end(rng: RandomNumberGenerator, w: float) -> ImageTexture:
+	var vp := Vector2(w / 2.0, 430.0)
+	var far := 0.5
+	var at := func(p: Vector2) -> Vector2: return vp + (p - vp) * (1.0 - far)
+	var s := ""
+	# Across the avenue: two plex fronts in the sun.
+	var a0: Vector2 = at.call(Vector2(-60, 120))
+	var a1: Vector2 = at.call(Vector2(w + 60, H - 70))
+	var split := lerpf(a0.x, a1.x, rng.randf_range(0.35, 0.65))
+	for part in [[a0.x, split], [split, a1.x]]:
+		var c: String = PropArt._pick(rng, BRICKS)
+		s += _rect(part[0], a0.y, part[1] - part[0], a1.y - a0.y, c)
+		s += _rect(part[0], a0.y - 6, part[1] - part[0], 8, "#55585C")
+		var x: float = part[0] + 10.0
+		while x < part[1] - 20.0:
+			for y in [a0.y + 18.0, a0.y + 78.0]:
+				s += _rect(x, y, 16, 30, "#F2F0EA") + _rect(x + 2, y + 2, 12, 26, "#8FA7B8")
+			x += 34.0
+	s += _rect(split - 12, a1.y - 52, 24, 52, "#7A4A2E", 'stroke="#F2F0EA" stroke-width="3"')
+	s += _line(Vector2(split + 14, a0.y + 60), Vector2(split + 40, a1.y), "#1F1F1F", 2.0)
+	# Their sidewalk, the avenue, our sidewalk.
+	s += _rect(a0.x, a1.y, a1.x - a0.x, 10, "#CFCAC0")
+	s += _rect(a0.x, a1.y + 10, a1.x - a0.x, 24, "#5A5956")
+	s += _rect(a0.x + 20, a1.y + 21, 26, 2, "#E9E4D8")
+	var walk: Vector2 = at.call(Vector2(0, H))
+	s += _poly([Vector2(a0.x, a1.y + 34), Vector2(a1.x, a1.y + 34), Vector2(a1.x, walk.y), Vector2(a0.x, walk.y)], "#CFCAC0")
+	# The lane running out to the sidewalk, between a brick garage wall (left) and a board fence (right).
+	s += _poly([Vector2(10, H), Vector2(w - 10, H), at.call(Vector2(w - 10, H)), at.call(Vector2(10, H))], "#A9A59D")
+	s += _line(Vector2(w / 2.0, H), at.call(Vector2(w / 2.0, H)), "#6E8A4A", 3.0)
+	var wall: String = PropArt._pick(rng, BRICKS)
+	s += _poly([Vector2(0, H - 240), at.call(Vector2(0, H - 240)), at.call(Vector2(0, H)), Vector2(0, H)], wall)
+	for k in 12:
+		var y := H - 230.0 + k * 19.0
+		s += _line(Vector2(0, y), at.call(Vector2(0, y)), _light(wall, 0.25), 1.0, 'opacity="0.6"')
+	var fence: String = PropArt._pick(rng, BOARDS)
+	s += _poly([Vector2(w, H - 175), at.call(Vector2(w, H - 175)), at.call(Vector2(w, H)), Vector2(w, H)], fence)
+	for k in 10:
+		var f := pow(k / 10.0, 0.7)
+		var top := Vector2(w, H - 175).lerp(at.call(Vector2(w, H - 175)), f)
+		var bottom := Vector2(w, H).lerp(at.call(Vector2(w, H)), f)
+		s += _line(top, bottom, _dark(fence, 0.3), 1.0)
+	s += _vine(rng, w - 60.0, 50.0, H - 175.0, vine_colors())
+	return _tex(w, s)
+
+
+## Another lane running away from this one between two yards: concrete narrowing to a bright slice at its far
+## end, board fences and a garage along it, creeper.
 static func junction(rng: RandomNumberGenerator, w: float) -> ImageTexture:
 	var vp := Vector2(w / 2.0, 430.0)
 	var far := 0.82
