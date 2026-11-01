@@ -728,30 +728,72 @@ static func wall_plate(outlet: bool) -> ImageTexture:
 ## Canvas 150x360: the kitchen fridge with its door swung open toward the viewer (door on the left, seen
 ## edge-on with its shelves), the lit inside full of food. Drawn over InteriorArt.kitchen()'s fridge.
 static func fridge_open() -> ImageTexture:
-	var s := '<rect x="44" y="2" width="104" height="356" rx="8" fill="#F2F2EF" stroke="#B9B4AA" stroke-width="3"/>'
-	s += '<rect x="52" y="10" width="88" height="114" fill="#EAF4FA"/><rect x="52" y="136" width="88" height="214" fill="#EAF4FA"/>'
-	s += '<rect x="52" y="10" width="88" height="10" fill="#FFFFFF" opacity="0.9"/>'
-	for y in [60.0, 196.0, 256.0, 312.0]:
-		s += '<rect x="52" y="%s" width="88" height="4" fill="#C9D9E2"/>' % y
-	# Freezer: ice cube tray and a tub of ice cream.
-	s += '<rect x="58" y="38" width="36" height="20" fill="#D6EAF5" stroke="#9AB8C8" stroke-width="1.5"/><rect x="100" y="26" width="32" height="32" rx="4" fill="#F7D6E0" stroke="#D97A9A" stroke-width="1.5"/>'
-	s += '<rect x="56" y="70" width="80" height="50" fill="#DCEBF3"/>'
-	# Fridge: milk, eggs, jam, leftovers, vegetables in the drawer.
-	s += '<path d="M60 194 V162 L66 154 H80 L86 162 V194 Z" fill="#FFFFFF" stroke="#4FA3E0" stroke-width="2"/><rect x="60" y="172" width="26" height="10" fill="#4FA3E0"/>'
-	for i in 4:
-		s += '<ellipse cx="%s" cy="188" rx="5" ry="6" fill="#F6E8D2" stroke="#D9C2A0" stroke-width="1"/>' % (96 + i * 11)
-	s += '<rect x="60" y="232" width="20" height="22" rx="3" fill="#C8202A" stroke="#8E1A20" stroke-width="1.5"/><rect x="58" y="228" width="24" height="6" fill="#F2C230"/>'
-	s += '<rect x="90" y="238" width="44" height="16" rx="4" fill="#F4E9C8" stroke="#C9B48A" stroke-width="1.5"/><rect x="92" y="236" width="40" height="5" fill="#7FB5D9"/>'
-	s += '<rect x="56" y="318" width="80" height="34" rx="4" fill="#D6EAF5" fill-opacity="0.8" stroke="#9AB8C8" stroke-width="1.5"/>'
-	for c in [[70, 336, "#7CCB5A"], [88, 340, "#FF8A3D"], [104, 334, "#E04F5F"], [120, 338, "#7CCB5A"]]:
-		s += '<circle cx="%s" cy="%s" r="8" fill="%s"/>' % c
-	s += '<rect x="58" y="274" width="34" height="34" rx="4" fill="#FFFFFF" stroke="#C9C2B4" stroke-width="1.5"/><rect x="98" y="282" width="38" height="26" fill="#F2C230" stroke="#C99410" stroke-width="1.5"/>'
-	# The open door, edge-on: its inner face with bottle shelves.
-	s += '<path d="M44 4 L4 22 V340 L44 358 Z" fill="#E6E6E2" stroke="#B9B4AA" stroke-width="3" stroke-linejoin="round"/>'
-	for y in [90.0, 180.0, 270.0]:
-		s += '<path d="M8 %s L40 %s V%s L8 %s Z" fill="#D6EAF5" fill-opacity="0.8" stroke="#9AB8C8" stroke-width="1.5"/>' % [y, y - 8, y + 20, y + 28]
-	s += '<rect x="14" y="150" width="9" height="28" rx="3" fill="#7CCB5A"/><rect x="26" y="146" width="9" height="30" rx="3" fill="#FFD23F"/>'
-	s += '<rect x="16" y="240" width="10" height="28" rx="3" fill="#E04F5F"/>'
+	var s := '<defs>'
+	s += '<linearGradient id="cold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.55" stop-color="#E6F1F8"/><stop offset="1" stop-color="#C9DCE8"/></linearGradient>'
+	s += '<linearGradient id="frost" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4FAFF"/><stop offset="1" stop-color="#D2E4F0"/></linearGradient>'
+	s += '<radialGradient id="bulb" cx="0.5" cy="0" r="0.9"><stop offset="0" stop-color="#FFFBEA" stop-opacity="0.9"/><stop offset="1" stop-color="#FFFBEA" stop-opacity="0"/></radialGradient>'
+	s += '<linearGradient id="side" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000000" stop-opacity="0.16"/><stop offset="0.25" stop-color="#000000" stop-opacity="0"/><stop offset="0.8" stop-color="#000000" stop-opacity="0"/><stop offset="1" stop-color="#000000" stop-opacity="0.2"/></linearGradient>'
+	s += '</defs>'
+	# Cabinet, gasket, the two lit compartments with their light and shaded sides.
+	s += '<rect x="44" y="2" width="104" height="356" rx="8" fill="#F2F2EF" stroke="#B9B4AA" stroke-width="3"/>'
+	s += '<rect x="50" y="8" width="92" height="118" rx="4" fill="#9AA4AC"/><rect x="50" y="132" width="92" height="222" rx="4" fill="#9AA4AC"/>'
+	s += '<rect x="53" y="11" width="86" height="112" fill="url(#frost)"/><rect x="53" y="135" width="86" height="216" fill="url(#cold)"/>'
+	s += '<rect x="53" y="135" width="86" height="216" fill="url(#side)"/><rect x="53" y="11" width="86" height="112" fill="url(#side)"/>'
+	s += '<rect x="53" y="135" width="86" height="90" fill="url(#bulb)"/>'
+	s += '<rect x="84" y="136" width="24" height="5" rx="2" fill="#FFFDF2"/>'
+	# Freezer: frost rim, a tub of ice cream, a bag of peas, an ice-cube tray.
+	s += '<path d="M53 11 H139 V18 Q120 22 96 17 Q74 22 53 18 Z" fill="#FFFFFF" opacity="0.9"/>'
+	s += '<rect x="58" y="80" width="36" height="40" rx="5" fill="#F7D6E0" stroke="#D97A9A" stroke-width="1.5"/><rect x="58" y="80" width="36" height="9" rx="4" fill="#E890B4"/><circle cx="76" cy="102" r="7" fill="#FFF3E0"/>'
+	s += '<path d="M98 96 q16 -10 34 0 l-2 24 h-30 z" fill="#4E9A3E" stroke="#2E6E2A" stroke-width="1.5"/>'
+	for k in 4:
+		s += '<circle cx="%d" cy="%d" r="2.6" fill="#8ED16E"/>' % [106 + k * 6, 108 + (k % 2) * 4]
+	s += '<rect x="58" y="60" width="78" height="14" rx="3" fill="#D6EAF5" stroke="#9AB8C8" stroke-width="1.5"/>'
+	for k in 6:
+		s += '<rect x="%d" y="63" width="9" height="8" rx="1.5" fill="#FFFFFF" opacity="0.8"/>' % (62 + k * 12)
+	s += '<rect x="53" y="76" width="86" height="3" fill="#FFFFFF" opacity="0.7"/>'
+	# Glass shelves with their bright front edges.
+	for y in [196.0, 254.0, 304.0]:
+		s += '<rect x="53" y="%s" width="86" height="4" fill="#BFD6E4" fill-opacity="0.85"/><rect x="53" y="%s" width="86" height="1.5" fill="#FFFFFF"/>' % [y, y]
+	# Top shelf: the milk-bag pitcher, a leftovers box, a cake under its dome.
+	s += '<path d="M60 194 V160 Q60 154 66 154 H80 Q86 154 86 160 V194 Z" fill="#FFFFFF" stroke="#9AA8B4" stroke-width="1.5"/>'
+	s += '<path d="M62 158 q11 -10 22 0 v6 h-22 z" fill="#FBFDFF" stroke="#7E95A8" stroke-width="1.2"/><rect x="62" y="170" width="22" height="7" fill="#4FA3E0"/>'
+	s += '<path d="M86 166 q8 2 6 14" stroke="#9AA8B4" stroke-width="2.5" fill="none"/>'
+	s += '<rect x="94" y="174" width="42" height="20" rx="4" fill="#F4E9C8" fill-opacity="0.85" stroke="#C9B48A" stroke-width="1.5"/><rect x="92" y="170" width="46" height="6" rx="2" fill="#7FB5D9"/>'
+	s += '<path d="M100 186 q8 -6 14 0 q6 -6 14 0" stroke="#E07A3A" stroke-width="3" fill="none"/>'
+	# Middle shelf: a piece of cake, cheese, butter, yogurt cups.
+	s += '<path d="M58 252 L58 232 L84 226 L84 246 Z" fill="#FBEBD2" stroke="#C9A878" stroke-width="1.5"/><path d="M58 232 L84 226" stroke="#E04F7A" stroke-width="4"/><circle cx="76" cy="226" r="3" fill="#E0303A"/>'
+	s += '<path d="M90 252 L90 236 L112 230 V246 Z" fill="#F2C230" stroke="#C99410" stroke-width="1.5"/><circle cx="98" cy="242" r="2.2" fill="#D9A41A"/><circle cx="106" cy="238" r="1.8" fill="#D9A41A"/>'
+	for k in 3:
+		s += '<path d="M%d 252 l1.5 -14 h7 l1.5 14 z" fill="%s" stroke="#FFFFFF" stroke-width="1"/><rect x="%d" y="237" width="9" height="3" fill="#FFFFFF"/>' % [114 + k * 8, ["#FF7BA3", "#FFD23F", "#7FC4E0"][k], 114 + k * 8 + 0.5]
+	# Lower shelf: a bowl of grapes, a jar of pickles, eggs.
+	s += '<path d="M58 300 q16 10 32 0 z" fill="#E8E4DA" stroke="#9A968E" stroke-width="1.5"/>'
+	for g in [[64, 294], [71, 292], [78, 294], [85, 293], [68, 287], [75, 286], [82, 287]]:
+		s += '<circle cx="%d" cy="%d" r="3.6" fill="#7E57C2"/>' % g
+	s += '<rect x="96" y="270" width="18" height="32" rx="4" fill="#BFD8A0" fill-opacity="0.8" stroke="#8AA870" stroke-width="1.5"/><rect x="95" y="266" width="20" height="6" rx="2" fill="#C8202A"/>'
+	s += '<path d="M104 278 v18 M100 284 v14 M108 282 v14" stroke="#5E8A3A" stroke-width="2.5" stroke-linecap="round"/>'
+	s += '<rect x="118" y="290" width="20" height="12" rx="2" fill="#E8D9B8" stroke="#B9A47A" stroke-width="1"/><circle cx="123" cy="290" r="3.5" fill="#F6EBD8"/><circle cx="132" cy="290" r="3.5" fill="#F6EBD8"/>'
+	# Crisper drawer at the bottom, see-through, full of vegetables.
+	s += '<rect x="55" y="312" width="82" height="38" rx="5" fill="#E6F2E0" fill-opacity="0.75" stroke="#9AB8A8" stroke-width="1.8"/>'
+	s += '<path d="M60 340 q8 -22 22 -14 q10 -14 18 6 q-14 14 -40 8 z" fill="#7CCB5A" stroke="#4E8A3A" stroke-width="1.2"/>'
+	s += '<path d="M100 332 l20 -10 l3 6 l-20 10 z" fill="#FF8A3D"/><path d="M122 322 l6 -4 M123 324 l7 0" stroke="#3E8E5A" stroke-width="2"/>'
+	s += '<circle cx="112" cy="342" r="6" fill="#E0303A"/><path d="M122 346 q0 -10 8 -10 q6 0 6 10 z" fill="#FFD23F" stroke="#C99410" stroke-width="1"/>'
+	s += '<rect x="58" y="314" width="76" height="4" rx="2" fill="#FFFFFF" opacity="0.6"/>'
+	# The open door, edge-on: gasket, its inner face with balconies of bottles, jars and the egg tray.
+	s += '<path d="M44 4 L4 22 V340 L44 358 Z" fill="#ECECE8" stroke="#B9B4AA" stroke-width="3" stroke-linejoin="round"/>'
+	s += '<path d="M40 10 L10 25 V336 L40 352" fill="none" stroke="#9AA4AC" stroke-width="3"/>'
+	s += '<path d="M12 40 L38 30 V54 L12 64 Z" fill="#F6EBD8" stroke="#C9C2B4" stroke-width="1"/>'
+	for k in 3:
+		s += '<ellipse cx="%d" cy="%d" rx="4" ry="5" fill="#FBF3E4" stroke="#D9C2A0" stroke-width="1"/>' % [18 + k * 7, 50 - k * 3]
+	for row in [[120.0, ["#E0303A", "#FFD23F", "#F4E9C8"]], [210.0, ["#FF8A3D", "#7CCB5A", "#FFFFFF"]], [290.0, ["#4FA3E0", "#C8202A", "#F2C230"]]]:
+		var y: float = row[0]
+		s += '<path d="M8 %s L40 %s V%s L8 %s Z" fill="#D6EAF5" fill-opacity="0.85" stroke="#9AB8C8" stroke-width="1.5"/>' % [y, y - 10, y + 16, y + 26]
+		var cols: Array = row[1]
+		for k in 3:
+			var bx := 11.0 + k * 9.0
+			var top := y - 24.0 - k * 3.0
+			s += '<rect x="%s" y="%s" width="8" height="%s" rx="3" fill="%s" stroke="#8E949A" stroke-width="0.8"/>' % [bx, top, y + 4.0 - top - k * 3.0, cols[k]]
+			s += '<rect x="%s" y="%s" width="6" height="4" rx="1" fill="#5E6A74"/>' % [bx + 1.0, top - 3.0]
+	s += '<path d="M6 24 L40 10" stroke="#FFFFFF" stroke-width="2" opacity="0.7"/>'
 	return tex(150, 360, s)
 
 
