@@ -3,7 +3,7 @@ extends Node2D
 ## Someone riding by on a bicycle in the street's traffic lane: spinning spoked wheels, the chain and cranks turning,
 ## and the rider, a Character like everyone else (Character.riding: leaning on the bars, legs pedalling with the
 ## cranks). City bikes (step-through frame, fenders, rack, sometimes a basket with the groceries) or hybrids; often a
-## helmet. Rides `speed` px/s in `direction` and frees itself once past `until_x`. Drawn facing right in its own units
+## helmet. Rides `speed` px/s in `direction` and frees itself once past `until_x` and off screen. Drawn facing right in its own units
 ## (wheels on y = 0); the whole node is mirrored for leftward riders. The bike is drawn between the rider's legs (the
 ## far leg behind the frame, the near one in front); the far pedal behind everything.
 
@@ -97,7 +97,10 @@ func _process(delta: float) -> void:
 	_turn += delta * speed / (TAU * WHEEL_R * scale.y) * TAU
 	if _rider:
 		_update_rider()
-	if (direction > 0.0 and position.x > until_x) or (direction < 0.0 and position.x < until_x):
+	# Gone once past `until_x` and out of sight (Charlotte may be running alongside).
+	var screen_x := get_global_transform_with_canvas().origin.x
+	var gone := screen_x > get_viewport_rect().size.x + 200.0 if direction > 0.0 else screen_x < -200.0
+	if gone and ((direction > 0.0 and position.x > until_x) or (direction < 0.0 and position.x < until_x)):
 		queue_free()
 	queue_redraw()
 	if _bike:
