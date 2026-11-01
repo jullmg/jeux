@@ -317,8 +317,10 @@ func _apply_pose() -> void:
 			if bar_grip == Vector2.INF:
 				arm.rotation = deg_to_rad(-62.0)
 			else:
+				# Pointed at the grip and reaching it (the far shoulder sits further back).
 				var v := _body.to_local(bar_grip) - arm.position
 				arm.rotation = atan2(-v.x, v.y)
+				arm.scale.y = clampf(v.length() / (_rig.arm_len as float), 0.8, 1.4)
 		return
 	# Breathing while she stands, and the idle gesture on top.
 	var still := 0.0 if is_walking else 1.0
