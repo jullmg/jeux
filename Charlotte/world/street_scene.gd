@@ -560,8 +560,18 @@ func _build_houses() -> void:
 			continue
 		var house := _sprite(_tex(layout[i]), HOUSE_SCALE)
 		house.position = _house_origin(i)
+		house.material = weathered(i)
 		add_child(house)
 		_decorate_house(i, house)
+
+
+## The weathering material for a facade (shaders/facade.gdshader), each building `index` wearing differently.
+static func weathered(index: int, grime := 0.2) -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	mat.shader = preload("res://shaders/facade.gdshader")
+	mat.set_shader_parameter("seed", float(index) * 7.31)
+	mat.set_shader_parameter("grime", grime)
+	return mat
 
 
 func _build_window_cats() -> void:

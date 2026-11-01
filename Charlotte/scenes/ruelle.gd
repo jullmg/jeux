@@ -183,6 +183,7 @@ func _build_backs() -> void:
 		var lot := _lots[i]
 		var made := LaneArt.back(_rng, lot.y - lot.x, i == _own)
 		var sprite := _sprite(made[0], 1.0)
+		sprite.material = weathered(i, 0.1)
 		sprite.position = Vector2(lot.x, FENCE_Y - LaneArt.H)
 		add_child(sprite)
 		if _rng.randf() < 0.35 or i == _own:
@@ -216,7 +217,8 @@ func _build_yard_trees() -> void:
 func _build_fronts() -> void:
 	for i in _lots.size():
 		var lot := _lots[i]
-		var sprite := _sprite(LaneArt.front(_rng, lot.y - lot.x, _kinds[i], i == OWN_LOT), 1.0)
+		var sprite := _sprite(LaneArt.front(_rng, lot.y - lot.x, _kinds[i], i == _own), 1.0)
+		sprite.material = weathered(i + 50, 0.25)
 		sprite.position = Vector2(lot.x, FENCE_Y - LaneArt.H)
 		add_child(sprite)
 	# Dad's bike leaning on Charlotte's fence.
