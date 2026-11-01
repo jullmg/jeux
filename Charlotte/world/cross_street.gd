@@ -346,22 +346,23 @@ func _draw_signs() -> void:
 		# At the corner of the sidewalk, by the curb, clear of the shop signs on the facades.
 		var corner := x0 + sidewalk - 22.0 if side < 0.0 else x1 - sidewalk + 22.0
 		var px := _fan(corner, 650.0)
-		draw_rect(Rect2(px - 3, 300, 6, 352), Color("#5A5F63"))
+		draw_rect(Rect2(px - 3, 236, 6, 416), Color("#5A5F63"))
 		if side == sign_side:
 			_traffic_sign(px, font)
-		_name_plates(Vector2(px, 300.0), font)
+		_name_plates(Vector2(px, 236.0), font)
 
 
 # Montreal-style blue street plates: the street we're on faces us, flat; the cross street's plate is turned to run
 # along that street, so it slants toward the vanishing point like the street itself.
 func _name_plates(top: Vector2, font: Font) -> void:
-	var flat := Rect2(top.x - 80, top.y + 30, 160, 26)
-	_plate(flat, along_name, font)
+	# The slanted plate on top, centred on the post; it tilts by at most ~30 px each way, so the flat one goes
+	# well below it.
 	var e := (_vp() - top).normalized()
 	if e.x < 0.0:
 		e = -e
 	var f := 0.72
-	var origin := top + Vector2(0, -4) - e * 80.0 * f
+	_plate(Rect2(top.x - 80, top.y + 64, 160, 26), along_name, font)
+	var origin := top + Vector2(0, 2) - e * 80.0 * f
 	draw_set_transform_matrix(Transform2D(e * f, Vector2(0, 1), origin))
 	_plate(Rect2(0, 0, 160, 26), street_name, font)
 	draw_set_transform(Vector2.ZERO)
