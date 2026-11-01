@@ -41,6 +41,11 @@ func _ready() -> void:
 	_finish([[700.0, "plant"], [1900.0, "plant"], [2900.0, "plant"], [5400.0, "plushie"], [6250.0, "plant"]])
 
 
+# Charlotte's own music at home (audio/music/maison-charlotte.mp3), else the generic house theme or the street's.
+func _music() -> Array:
+	return ["maison-charlotte", "house", "street_" + Season.current, "street"]
+
+
 # Walls, ceiling and floor of each room; white-painted trim in the hall (as in the photos), oak in the bedroom.
 func _build_shell() -> void:
 	var shell := RoomShell.new()

@@ -140,7 +140,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Buses "Effets" (effects) and "Musique". Music is the user's own tracks (made with Suno), never generated in code:
   `audio/music/<name>.mp3|.ogg|.wav`, played by the `Music` autoload (`audio/music.gd`): looping, crossfading.
   `Music.play([names…])` plays the first that exists, else leaves the current track playing. Names: `title` (intro;
-  present), `street` / `street_<season>` (streets, `StreetScene._music()`), `house` (`Interior._music()`), `depanneur`,
+  present), `street` / `street_<season>` (streets, `StreetScene._music()`), `maison-charlotte` (her flat; present), `house`
+  (other interiors, `Interior._music()`), `depanneur`,
   `night` (bedtime). Missing tracks are fine: the previous music carries on.
 - `Character.step_sound` (empty for passersby) plays footsteps; scripts run with `--check-only` report "Sfx not found"
   because autoloads aren't loaded there; run the scene instead to check.
