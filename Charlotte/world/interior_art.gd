@@ -430,7 +430,6 @@ static func bed() -> ImageTexture:
 	s += '<ellipse cx="250" cy="148" rx="20" ry="14" fill="#F7C6D4" stroke="#C26A84" stroke-width="2"/><circle cx="270" cy="136" r="11" fill="#F7C6D4" stroke="#C26A84" stroke-width="2"/>'
 	s += '<path d="M264 126 q-4 -20 2 -22 q6 2 4 22 M274 126 q2 -20 8 -20 q4 4 -2 22" fill="#F7C6D4" stroke="#C26A84" stroke-width="2"/>'
 	s += '<circle cx="273" cy="135" r="1.8" fill="#2B2B2B"/>'
-	s += '<path d="M330 150 q20 -16 50 -4 q10 10 -6 14 q-30 4 -44 -10 z" fill="#1E1E22"/>'
 	return tex(560, 300, s)
 
 
