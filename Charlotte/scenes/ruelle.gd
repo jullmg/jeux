@@ -167,13 +167,15 @@ func _build_yard_trees() -> void:
 		if _rng.randf() > 0.45:
 			continue
 		var lot := _lots[i]
-		var tree := _sprite(PropArt.tree(_rng), 0.6)
-		tree.position = Vector2(_rng.randf_range(lot.x - 60.0, lot.y - 170.0), FENCE_Y - 30.0 - 780.0 * 0.6)
+		# Yard trees of every age, from a young one just over the fence to an old giant.
+		var k: float = [0.45, 0.55, 0.65, 0.78][_rng.randi_range(0, 3)]
+		var tree := _sprite(PropArt.tree(_rng), k)
+		tree.position = Vector2(_rng.randf_range(lot.x - 60.0, lot.y - 170.0), FENCE_Y - 30.0 - 780.0 * k)
 		tree.material = _sway(6.0, phase)
 		phase += 1.3
 		add_child(tree)
 		_tree_sprites.append(tree)
-		add_child(_falling_leaves(leaf, tree.position + Vector2(190, 250) * 0.6))
+		add_child(_falling_leaves(leaf, tree.position + Vector2(190, 250) * k))
 
 
 func _build_fronts() -> void:

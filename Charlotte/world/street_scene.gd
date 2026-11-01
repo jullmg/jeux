@@ -14,6 +14,8 @@ const CHARLOTTE_Y := 638.0
 const NEIGHBOUR_Y := 612.0
 const CURB_Y := 664.0
 const TREE_SCALE := 0.55
+## Street tree sizes (scale of PropArt.tree's 380x780 canvas): small, medium, large, very large.
+const TREE_SIZES := [0.38, 0.48, 0.55, 0.62, 0.72]
 const MARGIN := 30.0
 const STRAY_CAT_Y := 646.0
 const MAX_STRAY_CATS := 1
@@ -56,6 +58,8 @@ var _control := PlayerControl.new()
 var _cross_streets: Array[CrossStreet] = []
 # The sidewalk's stretches between cross streets (x from, x to); Charlotte walks one at a time and crosses between them.
 var _segments: Array[Vector2] = []
+# Each street tree's scale (TREE_SIZES).
+var _tree_scales: Array[float] = []
 # The utility poles' x, left to right.
 var _pole_xs: Array[float] = []
 # The crossing guard at the school's crosswalk, if any (key: the CrossStreet).
@@ -542,11 +546,18 @@ func _tree_textures() -> Array[Texture2D]:
 	var trees: Array[Texture2D] = []
 	for i in trees_after.size():
 		trees.append(PropArt.tree(_rng))
+	# Each tree's size, young to old, from its own random numbers (so the rest of the street doesn't change).
+	var sizes := RandomNumberGenerator.new()
+	sizes.seed = seed_value + 5
+	_tree_scales.clear()
+	for i in trees_after.size():
+		_tree_scales.append(TREE_SIZES[sizes.randi_range(0, TREE_SIZES.size() - 1)])
 	return trees
 
 
 func _tree_origin(i: int) -> Vector2:
-	return Vector2(_starts[trees_after[i] + 1] - 190.0 * TREE_SCALE, CURB_Y - 780.0 * TREE_SCALE)
+	var k := _tree_scales[i]
+	return Vector2(_starts[trees_after[i] + 1] - 190.0 * k, CURB_Y - 780.0 * k)
 
 
 func _sway(strength: float, phase: float) -> ShaderMaterial:
@@ -563,7 +574,7 @@ func _build_tree_shadows(trees: Array[Texture2D]) -> void:
 	for i in trees.size():
 		if layout[trees_after[i] + 1].begins_with("ruelle"):
 			continue
-		var shadow := _sprite(trees[i], TREE_SCALE)
+		var shadow := _sprite(trees[i], _tree_scales[i])
 		shadow.position = _tree_origin(i) + Vector2(80, 14)
 		shadow.modulate = Color(0.22, 0.1, 0.12, 0.2)
 		shadow.material = _sway(7.0, i * 1.7)
@@ -578,12 +589,12 @@ func _build_trees(trees: Array[Texture2D]) -> void:
 		pit.position = Vector2(_starts[trees_after[i] + 1], CURB_Y)
 		pit.seed_value = seed_value * 31 + i
 		add_child(pit)
-		var tree := _sprite(trees[i], TREE_SCALE)
+		var tree := _sprite(trees[i], _tree_scales[i])
 		tree.position = _tree_origin(i)
 		tree.material = _sway(7.0, i * 1.7)
 		add_child(tree)
 		_tree_sprites.append(tree)
-		add_child(_falling_leaves(leaf, tree.position + Vector2(190, 250) * TREE_SCALE))
+		add_child(_falling_leaves(leaf, tree.position + Vector2(190, 250) * _tree_scales[i]))
 
 
 func _falling_leaves(leaf: Texture2D, at: Vector2) -> CPUParticles2D:
