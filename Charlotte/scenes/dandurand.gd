@@ -65,8 +65,8 @@ func _build_doors() -> void:
 		Transition.change_scene(self, "res://scenes/depanneur.tscn"), area.get_center().x))
 
 
-# The ice chest and the flattened boxes by the dépanneur's steps.
-func _build_extra_props() -> void:
+# The ice chest and the flattened boxes by the dépanneur's steps, against its wall (people walk in front).
+func _build_sidewalk_props() -> void:
 	var origin := _house_origin(layout.find("depanneur_front"))
 	var chest := _sprite(PropArt.ice_chest(), 0.5)
 	chest.position = origin + Vector2(500, 700) * HOUSE_SCALE + Vector2(0, -120 * 0.5 + 12)

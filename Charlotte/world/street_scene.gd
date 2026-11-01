@@ -70,6 +70,7 @@ func _ready() -> void:
 	add_child(street)
 	for cs in _cross_streets:
 		add_child(CrossStreet.make(CrossStreet.Part.GROUND, cs))
+	_build_sidewalk_props()
 	var trees := _tree_textures()
 	_build_tree_shadows(trees)
 	_build_passersby()
@@ -185,7 +186,14 @@ func _music() -> Array:
 	return ["street_" + Season.current, "street"]
 
 
-## Street-specific props, before the generic lamps, hydrants and racks.
+## Things standing at the back of the sidewalk, against the buildings: added right after the sidewalk, so the
+## passersby, Charlotte and the animals walk in front of them.
+func _build_sidewalk_props() -> void:
+	pass
+
+
+## Street-specific props, before the generic lamps, hydrants and racks (these are drawn in front of people,
+## like the curbside lamps).
 func _build_extra_props() -> void:
 	pass
 

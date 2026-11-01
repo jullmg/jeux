@@ -40,7 +40,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   lamps, hydrants, racks, passersby, cats, squirrels, Charlotte and the camera from data the street sets in `_init()`
   (`layout`: ordered house SVG names; `cross_streets`; `trees_after`, `lamps_after`, `hydrants_at`, `racks_at`,
   `squirrels_at`; fractional values = position across a building), plus hooks (`_start_x`, `_walk_bounds`,
-  `_build_cross_streets`, `_decorate_house`, `_build_landmarks`, `_build_doors`, `_build_extra_props`).
+  `_build_cross_streets`, `_decorate_house`, `_build_landmarks`, `_build_doors`, `_build_sidewalk_props` (against the
+  buildings, behind people), `_build_extra_props` (curbside, in front of people)).
 - `scenes/main.gd` (6e Avenue) is one such street; `scenes/dandurand.gd` (Rue Dandurand: dépanneur Xin-Xin's real front,
   `depanneur_front` in the generator, with 6e Avenue crossing at its right end) is another.
 - Turning corners: `StreetScene._add_corner(cross_street, scene, key)` makes the cross street clickable: Charlotte walks to
