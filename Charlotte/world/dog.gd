@@ -95,6 +95,10 @@ func _process(delta: float) -> void:
 	else:
 		var goal := walker.position.x + walker.facing * (_lead if walker.is_walking else _lead * 0.7)
 		var dx := goal - position.x
+		# The walker went off the street and came back in at the other end: so does the dog, out of sight.
+		if absf(dx) > 600.0:
+			position.x = goal
+			dx = 0.0
 		var max_speed := walker.walk_speed * 1.8
 		var v := clampf(dx * 4.0, -max_speed, max_speed)
 		if absf(dx) < 4.0:

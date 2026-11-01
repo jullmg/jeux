@@ -843,7 +843,7 @@ func _build_passersby() -> void:
 		npc.position = Vector2(_rng.randf_range(300.0, _street_width - 300.0), NEIGHBOUR_Y)
 		npc.scale = Vector2.ONE * CHAR_SCALE
 		npc.facing = 1 if _rng.randf() < 0.5 else -1
-		npc.bounds = Vector2(80.0, _street_width - 80.0)
+		npc.bounds = Vector2(-140.0, _street_width + 140.0)
 		npc.modulate = Color(0.94, 0.94, 0.96)
 		add_child(npc)
 		if passerby_ages[i] != "child" and _rng.randf() < 0.45:

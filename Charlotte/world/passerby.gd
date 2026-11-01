@@ -1,8 +1,10 @@
 class_name Passerby
 extends Character
-## A neighbour strolling along the sidewalk, stopping now and then.
+## A neighbour walking along the sidewalk, always the same way, as people do: off one end of the street and, a while
+## later, someone else's turn, back in from the other end. Only stops while Charlotte pets their dog.
 
-var bounds := Vector2(0, 1000)
+## Where they walk off the street (past either end, out of sight) and come back in at the other end.
+var bounds := Vector2(-140, 1000)
 var _pause := 0.0
 
 
@@ -18,12 +20,8 @@ func _process(delta: float) -> void:
 	else:
 		is_walking = true
 		position.x += facing * walk_speed * delta
-		if position.x < bounds.x:
-			facing = 1
-		elif position.x > bounds.y:
-			facing = -1
-		elif randf() < delta * 0.06:
-			_pause = randf_range(1.5, 4.0)
-			if randf() < 0.4:
-				facing = -facing
+		if facing > 0 and position.x > bounds.y:
+			position.x = bounds.x
+		elif facing < 0 and position.x < bounds.x:
+			position.x = bounds.y
 	super._process(delta)

@@ -278,7 +278,7 @@ func _build_passersby() -> void:
 		npc.position = Vector2(_rng.randf_range(zone.x, zone.y), CHARLOTTE_Y - 26.0)
 		npc.scale = Vector2.ONE * CHAR_SCALE
 		npc.facing = 1 if _rng.randf() < 0.5 else -1
-		npc.bounds = zone
+		npc.bounds = Vector2(-140.0, VIEW.x + 140.0)
 		npc.modulate = Color(0.92, 0.92, 0.94)
 		add_child(npc)
 		if i == 0:
