@@ -196,7 +196,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Street doors and stairs follow `reference/portes.jpg` and `reference/escaliers.jpg`: generator `DOOR_STYLES` (double,
   panel, oval, leaded stained glass, diamond, 1950s slots, slit, planks, slats, fan_top, grid, sunburst, porthole, grille,
   horizontal, arched_panels, double_leaded), optional stained-glass `sidelights`, and `door_surround` (lintel, cornice on brackets, pediment,
-  arch with fanlight), `ornate` stair railings (spades, scrolled newel), `stair_kind` "landing" (L with a landing on
+  arch with fanlight), door lights by `lamp_style` (lantern, globe, coach, cylinder, box, a single one hung over the
+  door, or one on the left; `_door_lamps`), `ornate` stair railings (spades, scrolled newel), `stair_kind` "landing" (L with a landing on
   posts) or "curve"; drawn last in `_variant` so other draws don't move. Spiral staircases only in the lane
   (`LaneArt._spiral`), never on the street side.
 - Lane entrances seen from the street (generator `_ruelle_verte`, `_ruelle`) use `_fine_tree` (trunk, limbs split three

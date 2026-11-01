@@ -317,6 +317,7 @@ func _variant(i: int) -> Dictionary:
 	cfg.ornate = rng.randf() < 0.5
 	cfg.stair_kind = "landing" if rng.randf() < 0.3 else "curve"
 	cfg.sidelights = rng.randf() < 0.3
+	cfg.lamp_style = ["lantern", "globe", "coach", "cylinder", "box", "single", "left", "globe"][rng.randi_range(0, 7)]
 	return cfg
 
 
@@ -743,8 +744,7 @@ func _door(cx: float, top: float, bottom: float) -> void:
 				_door_leaf(style, Rect2(x + 20, dy, w - 40, dh))
 			else:
 				_door_leaf(style, Rect2(x + 4, dy, w - 8, dh))
-	for sx in [-1.0, 1.0]:
-		_lantern(cx + sx * (w / 2 + 24), top + 34)
+	_door_lamps(cx, top, w)
 	if season == "winter":
 		_wreath(cx, top + 60)
 
@@ -885,6 +885,58 @@ func _leading(g: Rect2) -> void:
 	_path("M%s %s Q%s %s %s %s" % [_n(g.position.x), _n(g.end.y), _n(c.x), _n(g.position.y - g.size.y * 0.3), _n(g.end.x), _n(g.end.y)], "none", lead)
 	_path("M%s %s V%s M%s %s H%s" % [_n(c.x), _n(g.position.y), _n(g.end.y), _n(g.position.x), _n(c.y), _n(g.end.x)], "none", lead)
 	_circle(c.x, c.y, minf(g.size.x, g.size.y) * 0.18, "none", lead)
+
+
+# The lights by the front door, in this house's style (`lamp_style`): a pair either side, a single one hung over the
+# door, or just one on the left.
+func _door_lamps(cx: float, top: float, w: float) -> void:
+	var style: String = k.get("lamp_style", "lantern")
+	match style:
+		"single":
+			_lamp("pendant", cx, top - 30)
+		"left":
+			_lamp("lantern", cx - (w / 2 + 24), top + 34)
+		_:
+			for sx in [-1.0, 1.0]:
+				_lamp(style, cx + sx * (w / 2 + 24), top + 34)
+
+
+func _lamp(style: String, x: float, y: float) -> void:
+	match style:
+		"globe":
+			# A frosted glass globe on a little brass bracket.
+			_circle(x, y + 6, 24, "url(#glow)")
+			_path("M%s %s q8 -2 8 6" % [_n(x - 8), _n(y - 10)], "none", _stroke("#B08A3A", 2.5))
+			_rect(x - 3, y - 6, 6, 4, "#B08A3A")
+			_circle(x, y + 7, 9, "#FFF4DA", _stroke("#D9CBA8", 1.5))
+			_circle(x - 3, y + 4, 3, "#FFFFFF", 'opacity="0.7"')
+		"coach":
+			# A carriage lamp: gilded frame, a pointed cap and a finial.
+			_circle(x, y + 8, 24, "url(#glow)")
+			_path("M%s %s l8 -10 l8 10 z" % [_n(x - 8), _n(y - 4)], "#2B2B2B", _stroke("#C9A24A", 1.5))
+			_circle(x, y - 16, 2.5, "#C9A24A")
+			_path("M%s %s h14 l-2 20 h-10 z" % [_n(x - 7), _n(y - 4)], "#FFE7A3", _stroke("#C9A24A", 2))
+			_path("M%s %s V%s" % [_n(x), _n(y - 4), _n(y + 16)], "none", _stroke("#C9A24A", 1))
+			_rect(x - 6, y + 16, 12, 4, "#2B2B2B")
+		"cylinder":
+			# A modern up-and-down cylinder washing the brick with light.
+			_circle(x, y - 14, 16, "url(#glow)")
+			_circle(x, y + 30, 16, "url(#glow)")
+			_rect(x - 5, y - 6, 10, 26, "#3A3D42", 'rx="3"')
+			_rect(x - 4, y - 8, 8, 3, "#FFF1C9")
+			_rect(x - 4, y + 19, 8, 3, "#FFF1C9")
+		"box":
+			# A square black box with a frosted face.
+			_circle(x, y + 8, 22, "url(#glow)")
+			_rect(x - 8, y - 4, 16, 18, "#1E1E1E")
+			_rect(x - 5, y - 1, 10, 12, "#F4EEDC")
+			_path("M%s %s V%s M%s %s H%s" % [_n(x), _n(y - 1), _n(y + 11), _n(x - 5), _n(y + 5), _n(x + 5)], "none", _stroke("#1E1E1E", 1))
+		"pendant":
+			# Hung on a chain under the lintel, over the door.
+			_path("M%s %s V%s" % [_n(x), _n(y - 20), _n(y - 4)], "none", _stroke("#2B2B2B", 1.5) + ' stroke-dasharray="2 2"')
+			_lantern(x, y + 4)
+		_:
+			_lantern(x, y)
 
 
 func _lantern(x: float, y: float) -> void:
