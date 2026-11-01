@@ -294,6 +294,10 @@ func _build_charlotte() -> void:
 	var x := _starts[idx] + (_starts[idx + 1] - _starts[idx]) * 0.55
 	_charlotte = Character.new()
 	_charlotte.look = CharacterLook.charlotte()
+	# Outdoors in winter: coat, boots, tuque and scarf (a copy; her chosen outfit stays as it is).
+	if Season.is_winter():
+		_charlotte.look = _charlotte.look.duplicate(true)
+		Season.dress_for_weather(_charlotte.look)
 	_charlotte.position = Vector2(x, CHARLOTTE_Y)
 	_charlotte.scale = Vector2.ONE * CHAR_SCALE
 	_charlotte.facing = -1  # faces left / camera

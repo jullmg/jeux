@@ -147,6 +147,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   which keeps the look for every scene and saves it to `user://charlotte_outfit.tres`; `CharacterLook.charlotte()` returns it
   (else `usual()`, the yellow dress). Delete that file after tests that press "C'est parfait !". Picking a clothing colour drops
   Charlotte's exact-colour `overrides` for clothes (`cloth_*`, `accent_*`, `shoe_*`). Design sheets use `CharacterLook.usual()`.
+- Outdoors in winter Charlotte wears a copy of her look dressed by `Season.dress_for_weather` (coat, boots, tuque, scarf):
+  `StreetScene._spawn_charlotte` and the title screen; her saved outfit is unchanged.
 - `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through, breathing, soft shading by
   `shaders/character_shade.gdshader` (lit from the left, follows `facing`), hair strands clipped to each hairstyle (`CharacterArt._strands`), clothing folds
   (dress gathers and hem, top creases, elbow and knee creases), idle gestures when `fidgets` (wave, hop,
