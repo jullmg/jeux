@@ -4,6 +4,8 @@ extends RefCounted
 
 
 ## Shows `text` in a bubble whose bottom centre is at `at` (world position), under `parent`, for `seconds`.
+## A new line from the same speaker replaces their bubble; other people's bubbles stay, and the new one is lifted
+## above any it would overlap.
 static func say(parent: Node, at: Vector2, text: String, seconds := 2.4) -> void:
 	var bubble := Label.new()
 	bubble.text = text
@@ -17,9 +19,28 @@ static func say(parent: Node, at: Vector2, text: String, seconds := 2.4) -> void
 	box.set_content_margin_all(8)
 	bubble.add_theme_stylebox_override("normal", box)
 	bubble.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var others: Array[Rect2] = []
+	for old in parent.get_children():
+		if not old.is_in_group("bubble") or old.is_queued_for_deletion():
+			continue
+		if (old.get_meta("anchor") as Vector2).distance_to(at) < 40.0:
+			old.remove_from_group("bubble")
+			old.queue_free()
+		else:
+			others.append(old.get_rect())
+	bubble.add_to_group("bubble")
+	bubble.set_meta("anchor", at)
 	parent.add_child(bubble)
 	bubble.reset_size()
 	bubble.position = at - Vector2(bubble.size.x / 2.0, bubble.size.y)
+	for i in others.size():
+		var moved := false
+		for other in others:
+			if bubble.get_rect().grow(4.0).intersects(other):
+				bubble.position.y = other.position.y - bubble.size.y - 8.0
+				moved = true
+		if not moved:
+			break
 	bubble.modulate.a = 0.0
 	var tween := bubble.create_tween()
 	tween.tween_property(bubble, "modulate:a", 1.0, 0.2)
