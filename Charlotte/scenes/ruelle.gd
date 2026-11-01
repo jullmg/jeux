@@ -34,6 +34,7 @@ var _openings: Array[Dictionary] = []
 var _pulleys: Array[Vector2] = []
 var _poles: Array[float] = []
 var _own := -1
+var _lane_birds: WireBirds
 
 
 func _ready() -> void:
@@ -61,6 +62,7 @@ func _ready() -> void:
 	_start = start_x
 	_charlotte = _spawn_charlotte(start_x)
 	_control.charlotte = _charlotte
+	_lane_birds.charlotte = _charlotte
 	_control.bounds = Vector2(maxf(90.0, _openings[0].x if lane != "middle" else 90.0),
 		minf(_street_width - 90.0, _openings[-1].x if lane != "middle" else _street_width - 90.0))
 	_control.walk_top = 360.0
@@ -258,6 +260,10 @@ func _build_poles() -> void:
 	poles.drop_y = NAN
 	poles.seed_value = seed_value
 	add_child(poles)
+	_lane_birds = WireBirds.new()
+	_lane_birds.poles = _poles
+	_lane_birds.seed_value = seed_value
+	add_child(_lane_birds)
 
 
 # Blurred leaf piles and shrubs right in front of the camera (no street signs back here).

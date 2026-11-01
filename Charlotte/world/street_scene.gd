@@ -98,6 +98,7 @@ func _ready() -> void:
 	var x_arg := _arg("--x=")
 	if not x_arg.is_empty():
 		start_x = x_arg.to_float()
+	_build_kid(start_x)
 	_charlotte = _spawn_charlotte(start_x)
 	_control.charlotte = _charlotte
 	_segments = _walk_segments()
@@ -620,6 +621,74 @@ func _build_utility_poles() -> void:
 	poles.width = _street_width
 	poles.seed_value = seed_value
 	add_child(poles)
+	var birds := WireBirds.new()
+	birds.poles = _pole_xs
+	birds.charlotte = _charlotte
+	birds.seed_value = seed_value
+	add_child(birds)
+
+
+# A neighbourhood child skipping rope on the sidewalk, a little back from Charlotte's walking line (added with the
+# passersby, before her), from its own random numbers.
+func _build_kid(start_x: float) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + 31
+	var seg := _walk_segments()[0]
+	for s in _walk_segments():
+		if start_x >= s.x - 1.0 and start_x <= s.y + 1.0:
+			seg = s
+	var x := rng.randf_range(seg.x + 200.0, seg.y - 200.0)
+	if absf(x - start_x) < 300.0:
+		x = clampf(start_x + 500.0, seg.x + 150.0, seg.y - 150.0)
+	var kid := JumpRopeKid.new()
+	kid.look = CharacterLook.random(rng, "child")
+	Season.dress_for_weather(kid.look)
+	kid.position = Vector2(x, NEIGHBOUR_Y + 10.0)
+	kid.scale = Vector2.ONE * CHAR_SCALE
+	add_child(kid)
+
+
+# Winter: smoke rising from the chimneys, from its own random numbers.
+func _build_life() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + 37
+	if Season.is_winter():
+		for i in layout.size():
+			if cross_streets.has(layout[i]) or layout[i].begins_with("ruelle") or rng.randf() < 0.5:
+				continue
+			var top := _house_top(layout[i])
+			var cx := _house_origin(i).x + _tex(layout[i]).get_width() * HOUSE_SCALE * rng.randf_range(0.6, 0.85)
+			var stub := ColorRect.new()
+			stub.color = Color("#8A4A3A")
+			stub.size = Vector2(16, 22)
+			stub.position = Vector2(cx - 8.0, top - 26.0)
+			add_child(stub)
+			add_child(_smoke(Vector2(cx, top - 28.0)))
+
+
+func _smoke(at: Vector2) -> CPUParticles2D:
+	var p := CPUParticles2D.new()
+	p.position = at
+	p.texture = PropArt.flake()
+	p.amount = 7
+	p.lifetime = 5.0
+	p.preprocess = 5.0
+	p.gravity = Vector2(10, -16)
+	p.initial_velocity_min = 6.0
+	p.initial_velocity_max = 14.0
+	p.direction = Vector2(0.2, -1)
+	p.spread = 15.0
+	p.scale_amount_min = 1.8
+	p.scale_amount_max = 2.6
+	var grow := Curve.new()
+	grow.add_point(Vector2(0, 0.5))
+	grow.add_point(Vector2(1, 2.6))
+	p.scale_amount_curve = grow
+	var fade := Gradient.new()
+	fade.offsets = PackedFloat32Array([0.0, 0.2, 1.0])
+	fade.colors = PackedColorArray([Color(0.62, 0.62, 0.68, 0.0), Color(0.62, 0.62, 0.68, 0.7), Color(0.75, 0.75, 0.8, 0.0)])
+	p.color_ramp = fade
+	return p
 
 
 # The planted curb extensions at every corner (CurbGarden): our curb bulges into the parking lane on both sides
@@ -801,6 +870,7 @@ func _build_props() -> void:
 	_build_extra_props()
 	_build_utility_poles()
 	_build_curb_gardens()
+	_build_life()
 	for cs in _cross_streets:
 		add_child(CrossStreet.make(CrossStreet.Part.SIGNS, cs))
 	for after in lamps_after:
