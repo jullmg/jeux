@@ -6,7 +6,10 @@ extends RefCounted
 
 const SAVE_PATH := "user://save.json"
 const START_MONEY := 5.0
+const START_AGE := 7
 
+## Charlotte's age: she starts at 7 and grows up slowly (a whole year of seasons and many quests).
+static var age := START_AGE
 static var money := START_MONEY
 ## Quest id → "active" or "done" (see Quests).
 static var quests := {}
@@ -31,8 +34,8 @@ static func save_game(scene: String, x: float) -> void:
 	if not enabled() or scene.is_empty():
 		return
 	var data := {
-		"version": 1, "scene": scene, "x": x,
-		"day": Season.day, "season": Season.current,
+		"version": 2, "scene": scene, "x": x,
+		"day": Season.day, "season": Season.current, "age": age,
 		"money": money, "quests": quests, "flags": flags,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -49,6 +52,7 @@ static func load_game() -> String:
 		return ""
 	Season.day = int(data.get("day", 1))
 	Season.current = str(data.get("season", "autumn"))
+	age = int(data.get("age", START_AGE))
 	money = float(data.get("money", START_MONEY))
 	quests = data.get("quests", {})
 	flags = data.get("flags", {})
@@ -65,6 +69,7 @@ static func load_game() -> String:
 static func new_game() -> void:
 	Season.day = 1
 	Season.current = "autumn"
+	age = START_AGE
 	money = START_MONEY
 	quests = {}
 	flags = {}

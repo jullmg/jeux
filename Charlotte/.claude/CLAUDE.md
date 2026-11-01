@@ -16,7 +16,7 @@ Click the fridge: it opens (`InteriorArt.fridge_open()`) and she takes a random 
 Click the hallway TV to turn it on and change channels, then off. `world/tv_shows.gd` (`TvShows`) is the
 catalogue of channels, all original (no copyrighted shows or characters): news, animals, cartoon, hockey, weather, the
 sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas, t, on_for)`. `world/tv_screen.gd`
-(`TvScreen`, a `Control`) is one TV for any house: set its `channels` (TvShows ids) to give it its own lineup. No goals yet.
+(`TvScreen`, a `Control`) is one TV for any house: set its `channels` (TvShows ids) to give it its own lineup. Small quests in a notebook (see Quests).
 
 ## Run / verify
 
@@ -140,6 +140,28 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Petting: `Character.pet(seconds, low)` lunges (low 1 = deep, for cats/small dogs; 0 = standing, arm out, for big dogs) and
   strokes with the front hand. The animal is drawn just in front of Charlotte so her hand lands on its head: stray cats walk at
   y 646 (she is at 638); a dog being petted steps 32 px toward the camera and gets z_index 1, while its walker `hold()`s.
+
+## Quests and growing up
+
+- Vision (Julien): Charlotte starts at 7 (`GameState.age`, saved). As she completes quests and makes friends she grows up,
+  may go farther in the neighbourhood and gets more advanced quests. A year is slow: all four seasons must pass and dozens
+  of quests be done (the ageing rule isn't implemented yet). Gate new quests and places by age.
+- `world/quests.gd` (`Quests`): the catalogue (`ORDER`, `ALL`: `title`, `hint` = where to go, `find` = clue shown before it
+  starts, `age`, optional `after` = quest it waits for, `reward` in $). Several quests can be on at once. State in
+  `GameState.quests` (absent / "active" / "done"); `available`, `start`, `complete` (adds the reward), `stars`, `money_text`.
+- `ui/notebook.gd` is the `Notebook` autoload (CanvasLayer 75): button left of the mute button (N key), "Mon carnet" with
+  En cours (+ hint), Réussies (yellow stars), À découvrir (clues); age and pocket money; pauses the game while open. Hidden
+  on the title and `tools/` scenes. `Notebook.announce()` (called by `Quests`) pops "Nouvelle quête" / "Quête réussie !".
+- `QuestMark.make(at, condition, scale)` (`world/quest_mark.gd`): a bobbing yellow "!" over a quest giver, or over where
+  to go next, while `condition` is true.
+- The quests so far:
+  - milk: Mom gives it, buy the 4 L bag at the dépanneur (free, `flags.has_milk`), bring it to Mom;
+  - hamster: Dad gives it; feeding sets `flags.hamster_fed = Season.day`; going to bed unfed is refused, fed completes it;
+  - cat: the PERDU poster on the lamp post by `duplex_voisin_gauche` (`main.gd` `LostPoster`) starts it; Pistache (grey
+    tabby, `StrayCat.collar` blue, `stay`, `on_pet`) waits on Rue Dandurand while it's active; petting it completes it and
+    it `go_home()`s.
+- The dépanneur has prices (`_buy(picture, text, price)`, paid from `GameState.money`); the clerk says "Il te manque des
+  sous !" when she can't afford something.
 
 ## Saving
 

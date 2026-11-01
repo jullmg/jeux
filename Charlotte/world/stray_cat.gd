@@ -22,6 +22,12 @@ var facing := 1
 var wander := true
 var bounds := Vector2(0, 1000)
 var charlotte: Character
+## A lost pet's collar (transparent = a stray, no collar).
+var collar := Color.TRANSPARENT
+## Never wanders off on its own (until go_home()).
+var stay := false
+## Called after Charlotte pets it.
+var on_pet: Callable
 
 var _state := "sit"
 var _timer := 2.0
@@ -80,8 +86,15 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
+## Sets off for home: it leaves after a little sit.
+func go_home() -> void:
+	stay = false
+	_life = 0.0
+
+
 func _behave(delta: float) -> void:
-	_life -= delta
+	if not stay:
+		_life -= delta
 	match _state:
 		"pet":
 			_timer -= delta
@@ -176,6 +189,8 @@ func interact(who: Character) -> void:
 	Sfx.play("meow", global_position)
 	Sfx.play("purr", global_position, -4.0)
 	who.pet(PET_TIME)
+	if on_pet.is_valid():
+		on_pet.call()
 
 
 func _update_hearts(delta: float) -> void:
@@ -343,6 +358,10 @@ func _head(c: Vector2, tilt: float) -> void:
 	CritterDraw.ellipse(self, Vector2(-5, -6), Vector2(6, 3.5), Color(1, 0.97, 0.9, 0.18))
 	head.append(head[0])
 	draw_polyline(head, _line, 2.0, true)
+	if collar.a > 0.0:
+		draw_arc(Vector2(0, 1), 13.5, 0.55, PI - 0.55, 14, collar, 3.5, true)
+		draw_circle(Vector2(0, 15), 2.8, Color("#F2C230"))
+		draw_arc(Vector2(0, 15), 2.8, 0, TAU, 10, Color("#A47A12"), 1.0, true)
 	var mode := "happy" if _state == "pet" else ("open" if _blink > 0.0 else "closed")
 	CritterDraw.eye(self, Vector2(-2.5, 0), 3.2, Color(coat.eyes), _line, mode, true)
 	CritterDraw.eye(self, Vector2(7.5, 0), 3.6, Color(coat.eyes), _line, mode, true)

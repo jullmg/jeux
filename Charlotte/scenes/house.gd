@@ -76,12 +76,35 @@ func _build_shell() -> void:
 func _build_family() -> void:
 	_mom = _family_member(CharacterLook.mom(), KITCHEN_START + 300.0, -1)
 	_dad = _family_member(CharacterLook.dad(), 1720.0, -1)
-	add_child(DoorSpot.make(Rect2(_mom.position.x - 55.0, 330, 110, 340), func():
+	add_child(DoorSpot.make(Rect2(_mom.position.x - 55.0, 330, 110, 340), _talk_to_mom, _mom.position.x - 90.0))
+	add_child(DoorSpot.make(Rect2(_dad.position.x - 55.0, 330, 110, 340), _talk_to_dad, _dad.position.x - 90.0))
+	# A "!" over whoever has a quest for Charlotte, or is waiting for what she brings.
+	add_child(QuestMark.make(_mom.position + Vector2(0, -350), func() -> bool:
+		return Quests.available("milk") or Quests.active("milk") and GameState.flags.get("has_milk", false)))
+	add_child(QuestMark.make(_dad.position + Vector2(0, -360), func() -> bool: return Quests.available("hamster")))
+
+
+# Mom asks for milk, sends her to the dépanneur, and thanks her when she brings it home.
+func _talk_to_mom() -> void:
+	if Quests.active("milk") and GameState.flags.get("has_milk", false):
+		GameState.flags.erase("has_milk")
+		_say(_mom, "Du lait ! Merci, ma grande !", 350.0)
+		Quests.complete("milk")
+	elif Quests.start("milk"):
+		_say(_mom, "Chacha, peux-tu aller me chercher\ndu lait au dépanneur ?", 380.0, 3.5)
+	elif Quests.active("milk"):
+		_say(_mom, "Le dépanneur est au coin\nde la rue Dandurand !", 380.0)
+	else:
 		_say(_mom, MOM_LINES[_mom_line % MOM_LINES.size()], 350.0)
-		_mom_line += 1, _mom.position.x - 90.0))
-	add_child(DoorSpot.make(Rect2(_dad.position.x - 55.0, 330, 110, 340), func():
+		_mom_line += 1
+
+
+func _talk_to_dad() -> void:
+	if Quests.start("hamster"):
+		_say(_dad, "Avant le dodo, n'oublie pas\nde nourrir ton hamster !", 390.0, 3.5)
+	else:
 		_say(_dad, DAD_LINES[_dad_line % DAD_LINES.size()], 360.0)
-		_dad_line += 1, _dad.position.x - 90.0))
+		_dad_line += 1
 
 
 func _family_member(look: CharacterLook, x: float, facing: int) -> Character:
@@ -166,6 +189,11 @@ func _open_fridge() -> void:
 # Bedtime: the room goes night-blue and moonlit, she's tucked in ("Bonne nuit"), little z's float up from the
 # bed; then black, "Le lendemain matin…", a new day, and she's up beside the bed.
 func _go_to_sleep() -> void:
+	if Quests.active("hamster"):
+		if int(GameState.flags.get("hamster_fed", -1)) != Season.day:
+			_say(_charlotte, "Oh ! Mon hamster n'a pas mangé !", 300.0)
+			return
+		Quests.complete("hamster")
 	_control.enabled = false
 	Sfx.play("goodnight")
 	Music.play(["night"])
@@ -348,6 +376,8 @@ func _build_bedroom() -> void:
 	hamster.position = tank.position
 	hamster.scale = tank.scale
 	add_child(hamster)
+	add_child(QuestMark.make(tank.position + Vector2(140, -40) * tank.scale, func() -> bool:
+		return Quests.active("hamster") and int(GameState.flags.get("hamster_fed", -1)) != Season.day, 0.8))
 	_put(InteriorArt.terrarium(true), x + 30.0, 606.0, 0.85)
 	_put(InteriorArt.flower_painting(), x + 470.0, 330.0, 0.8, "wall")
 	_put(InteriorArt.bed(), x + 360.0, 608.0, 0.8, "floor")

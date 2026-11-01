@@ -183,25 +183,47 @@ func _build_spots() -> void:
 		_say(_clerk, HELLOS[_hello % HELLOS.size()], 250.0)
 		_hello += 1, COUNTER_X + 440.0))
 	add_child(DoorSpot.make(Rect2(CANDY_X, 160, 480, 330), func():
-		_buy(ShopArt.treat("candy" if randf() < 0.5 else "lollipop"), "Des bonbons !"), CANDY_X + 240.0))
+		_buy(ShopArt.treat("candy" if randf() < 0.5 else "lollipop"), "Des bonbons !", 0.25), CANDY_X + 240.0))
 	add_child(DoorSpot.make(Rect2(SLUSH_X, 200, 190, 270), func():
-		_buy(ShopArt.treat("slush"), "Une sloche !"), SLUSH_X + 95.0))
+		_buy(ShopArt.treat("slush"), "Une sloche !", 1.5), SLUSH_X + 95.0))
 	add_child(DoorSpot.make(Rect2(COFFEE_X, 340, 266, 266), func():
-		_buy(ShopArt.treat("chocolate"), "Un chocolat chaud !"), COFFEE_X + 133.0))
+		_buy(ShopArt.treat("chocolate"), "Un chocolat chaud !", 1.25), COFFEE_X + 133.0))
 	add_child(DoorSpot.make(Rect2(FREEZER_X, 500, 290, 150), func():
-		_buy(ShopArt.treat("popsicle"), "Un popsicle !"), FREEZER_X + 145.0))
+		_buy(ShopArt.treat("popsicle"), "Un popsicle !", 1.0), FREEZER_X + 145.0))
 	add_child(DoorSpot.make(Rect2(FRIDGE_X, 120, 440, 360), func():
-		_buy(ShopArt.treat("juice"), "Un jus !"), FRIDGE_X + 220.0))
+		_buy(ShopArt.treat("juice"), "Un jus !", 1.5), FRIDGE_X + 220.0))
 	add_child(DoorSpot.make(Rect2(DAIRY_X, 120, 440, 480), func():
-		_buy(ShopArt.treat("milk"), "Un sac de lait !"), DAIRY_X + 220.0))
+		_buy_milk(), DAIRY_X + 220.0))
+	# Mom's milk: a "!" over the dairy cooler while she still has to pick it up.
+	add_child(QuestMark.make(Vector2(DAIRY_X + 220.0, 100.0), func() -> bool:
+		return Quests.active("milk") and not GameState.flags.get("has_milk", false)))
 
 
-# She picks something; the shopkeeper thanks her.
-func _buy(picture: Texture2D, text: String) -> void:
-	_treat(picture, text)
+# She picks something and pays from her pocket money; the shopkeeper thanks her (or tells her she's short).
+func _buy(picture: Texture2D, text: String, price: float) -> void:
+	if GameState.money < price - 0.001:
+		_say(_clerk, "Il te manque des sous ! C'est %s." % Quests.money_text(price), 250.0, 3.0)
+		Sfx.play("pop")
+		return
+	GameState.money -= price
+	_treat(picture, "%s  − %s" % [text, Quests.money_text(price)])
+	_thanks("Merci, bonne journée !")
+
+
+# The bag of milk: Mom's money pays for it while she's on the "milk" quest; otherwise it's like anything else.
+func _buy_milk() -> void:
+	if Quests.active("milk") and not GameState.flags.get("has_milk", false):
+		GameState.flags["has_milk"] = true
+		_treat(ShopArt.treat("milk"), "Du lait pour Maman !")
+		_thanks("Bonjour à ta maman !")
+	else:
+		_buy(ShopArt.treat("milk"), "Un sac de lait !", 5.49)
+
+
+func _thanks(text: String) -> void:
 	var tween := create_tween()
 	tween.tween_interval(1.0)
-	tween.tween_callback(func(): _say(_clerk, "Merci, bonne journée !", 250.0))
+	tween.tween_callback(func(): _say(_clerk, text, 250.0))
 
 
 # The slush churning round inside one of the machine's bowls.
