@@ -253,7 +253,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     indoors); at the owner's front door (`_door_x(art)` from `art/decor/doors.json`, written by the generator; "!" and
     house number) the owner comes out (`_bring_home`), the cat is put down, quest done. Owners are always at a front
     door on a street, never in the lane.
-  - menage (Mom gives it, after the milk; the toys can't be picked up before): things on the bedroom floor (`MESS`,
+  - menage (Mom gives it, after the milk; the toys can't be picked up before): 11 things on the bedroom floor (`MESS`,
     `InteriorArt.mess`); clicking each, Charlotte crouches and it flies to its place (`PUT_AWAY`); `flags.tidied`.
   - plants (Dad gives it): five thirsty plants (`_plant(id, kind, …)`, `InteriorArt.house_plant(kind, thirsty)`:
     monstera and a hanging pothos in the salon, a fern on its stand and a fiddle-leaf fig in the corridor, a peace lily

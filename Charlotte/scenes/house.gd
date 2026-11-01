@@ -17,9 +17,11 @@ const BEDROOM_DOOR_X := 6440.0
 const MOM_LINES := ["Bonjour ma chouette !", "As-tu faim ? Il y a des fruits.", "N'oublie pas de nourrir le hamster !", "Je t'aime, Chachoue !"]
 const DAD_LINES := ["Salut Chachoue !", "On va au parc tantôt ?", "As-tu fait un beau dessin ?", "Tu veux jouer avec moi ?"]
 # What's lying on the bedroom floor (kind, x in the bedroom), and where each goes when she tidies it away.
-const MESS := [["teddy", 230.0], ["sock", 540.0], ["book", 700.0], ["ball", 880.0], ["tshirt", 1060.0], ["crayons", 1240.0]]
-const PUT_AWAY := {"sock": Vector2(1340, 560), "tshirt": Vector2(1340, 560), "book": Vector2(1010, 300),
-	"crayons": Vector2(1180, 470), "ball": Vector2(800, 600), "teddy": Vector2(800, 600)}
+const MESS := [["teddy", 200.0], ["pyjama", 313.0], ["sock", 426.0], ["blocks", 539.0], ["book", 652.0], ["puzzle", 765.0],
+	["ball", 878.0], ["car", 991.0], ["tshirt", 1104.0], ["crayons", 1217.0], ["sneaker", 1330.0]]
+const PUT_AWAY := {"sock": Vector2(1340, 560), "tshirt": Vector2(1340, 560), "pyjama": Vector2(1340, 560),
+	"sneaker": Vector2(1400, 610), "book": Vector2(1010, 300), "crayons": Vector2(1180, 470), "puzzle": Vector2(1180, 470),
+	"ball": Vector2(800, 600), "teddy": Vector2(800, 600), "blocks": Vector2(800, 600), "car": Vector2(800, 600)}
 const CAN_X := KITCHEN_START + 470.0
 const SNACKS := [["apple", "Une pomme !"], ["yogurt", "Un yogourt !"], ["cheese", "Du fromage !"],
 	["grapes", "Des raisins !"], ["carrot", "Une carotte !"], ["cookie", "Un biscuit !"]]

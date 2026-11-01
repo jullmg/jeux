@@ -1019,32 +1019,88 @@ static func watering_can() -> ImageTexture:
 	return tex(120, 90, s)
 
 
-## The things lying on Charlotte's bedroom floor until she tidies up. Canvas 80x50, "floor" at the bottom.
+## The things lying on Charlotte's bedroom floor until she tidies up. Canvas 80x50, "floor" at the bottom. Light from
+## the upper left: highlights there, a soft contact shadow under each.
 static func mess(kind: String) -> ImageTexture:
-	var s := '<ellipse cx="40" cy="47" rx="30" ry="3" fill="#000000" opacity="0.15"/>'
+	var s := '<ellipse cx="41" cy="47" rx="31" ry="3.2" fill="#3A2210" opacity="0.18"/>'
 	match kind:
 		"sock":
-			s += '<path d="M22 14 H40 V32 Q40 40 50 40 H60 Q66 40 66 46 H34 Q22 46 22 34 Z" fill="#F2A7B9" stroke="#C26A84" stroke-width="2"/>'
-			for y in [20, 28]:
-				s += '<rect x="22" y="%d" width="18" height="4" fill="#FFFFFF" opacity="0.8"/>' % y
+			# A pair of striped socks, one crumpled on the other.
+			for k in 2:
+				var dx := k * 14
+				var dy := -k * 6
+				s += '<path d="M%d %d H%d V%d Q%d %d %d %d H%d Q%d %d %d %d H%d Q%d %d %d %d Z" fill="%s" stroke="#B85A78" stroke-width="2" stroke-linejoin="round"/>' % [
+					14 + dx, 12 + dy, 30 + dx, 28 + dy, 30 + dx, 36 + dy, 40 + dx, 36 + dy, 50 + dx, 56 + dx, 36 + dy, 56 + dx, 42 + dy, 40 + dx, 14 + dx, 46 + dy, 14 + dx, 38 + dy, "#F7B3C6" if k == 0 else "#FFD1DC"]
+				for y in [17, 24]:
+					s += '<rect x="%d" y="%d" width="16" height="3.5" fill="#FFFFFF" opacity="0.85"/>' % [14 + dx, y + dy]
+				s += '<path d="M%d %d Q%d %d %d %d" stroke="#E07F9A" stroke-width="2" fill="none"/>' % [44 + dx, 37 + dy, 52 + dx, 37 + dy, 54 + dx, 41 + dy]
 		"book":
-			s += '<path d="M14 44 L40 36 L66 44 L40 48 Z" fill="#F4F1EA" stroke="#9A948A" stroke-width="1.5"/>'
-			s += '<path d="M12 46 L40 38 L40 42 L14 49 Z" fill="#3D7FD0"/><path d="M68 46 L40 38 L40 42 L66 49 Z" fill="#2F65A8"/>'
+			# An open picture book lying face down, its spine up.
+			s += '<path d="M10 44 L40 34 L70 44 L40 48 Z" fill="#F7F3EA" stroke="#A8A196" stroke-width="1.5"/>'
+			s += '<path d="M8 45 L40 32 L40 37 L11 48 Z" fill="#3D7FD0" stroke="#24589A" stroke-width="1.5"/><path d="M72 45 L40 32 L40 37 L69 48 Z" fill="#2F65A8" stroke="#24589A" stroke-width="1.5"/>'
+			s += '<path d="M18 42 L34 36" stroke="#FFD23F" stroke-width="3" stroke-linecap="round"/><circle cx="56" cy="40" r="3" fill="#FFD23F"/>'
+			s += '<path d="M40 32 V37" stroke="#1E4A80" stroke-width="2"/>'
 		"ball":
-			s += '<circle cx="40" cy="30" r="16" fill="#E74C3C" stroke="#9E2420" stroke-width="2"/>'
-			s += '<path d="M24 30 Q40 22 56 30" stroke="#FFFFFF" stroke-width="4" fill="none"/><circle cx="34" cy="24" r="4" fill="#FFFFFF" opacity="0.5"/>'
+			s += '<circle cx="40" cy="28" r="17" fill="#E74C3C" stroke="#9E2420" stroke-width="2"/>'
+			s += '<path d="M23 28 Q40 18 57 28" stroke="#FFFFFF" stroke-width="5" fill="none"/><path d="M26 36 Q40 44 54 36" stroke="#FFD23F" stroke-width="4" fill="none"/>'
+			s += '<ellipse cx="33" cy="21" rx="5" ry="3.5" fill="#FFFFFF" opacity="0.55" transform="rotate(-30 33 21)"/>'
 		"tshirt":
-			s += '<path d="M18 30 L30 22 H50 L62 30 L56 36 L52 33 V46 H28 V33 L24 36 Z" fill="#F2C230" stroke="#B5891E" stroke-width="2" stroke-linejoin="round"/>'
-			s += '<circle cx="40" cy="36" r="4" fill="#E85FA0"/>'
+			s += '<path d="M14 30 L28 20 Q40 25 52 20 L66 30 L59 38 L54 34 V47 H26 V34 L21 38 Z" fill="#F2C230" stroke="#B5891E" stroke-width="2" stroke-linejoin="round"/>'
+			s += '<path d="M33 21 Q40 27 47 21" stroke="#B5891E" stroke-width="2" fill="none"/>'
+			s += '<path d="M40 31 l2.5 5 l5.5 0.5 l-4 3.6 l1.3 5.4 l-5.3 -2.9 l-5.3 2.9 l1.3 -5.4 l-4 -3.6 l5.5 -0.5 z" fill="#FF5D8F"/>'
+			s += '<path d="M30 40 Q36 43 34 47" stroke="#D9A920" stroke-width="1.5" fill="none"/>'
 		"crayons":
-			s += '<rect x="20" y="34" width="26" height="12" fill="#3D8BD9" stroke="#2B5E9A" stroke-width="1.5"/>'
-			var colors := ["#E74C3C", "#F1C40F", "#2ECC71", "#9B59B6"]
-			for i in 4:
-				s += '<path d="M%d %d l18 -4 l3 3 l-18 4 z" fill="%s"/>' % [44 + i * 2, 40 + i * 2 - 8, colors[i]]
+			# The crayon box knocked over, crayons rolling out.
+			s += '<path d="M10 30 L42 26 L44 44 L12 47 Z" fill="#3D8BD9" stroke="#2B5E9A" stroke-width="1.5"/><path d="M14 33 L38 30" stroke="#FFD23F" stroke-width="3"/>'
+			var colors := ["#E74C3C", "#F1C40F", "#2ECC71", "#9B59B6", "#FF8A3D"]
+			for i in 5:
+				var x := 46 + i * 5
+				var y := 30 + (i % 2) * 7
+				s += '<g transform="rotate(%d %d %d)"><rect x="%d" y="%d" width="20" height="5" rx="1.5" fill="%s" stroke="#00000033" stroke-width="1"/><path d="M%d %d l4 2.5 l-4 2.5 z" fill="%s"/><rect x="%d" y="%d" width="10" height="5" fill="#FFFFFF" opacity="0.35"/></g>' % [
+					-12 + i * 9, x, y, x, y, colors[i], x + 20, y, colors[i], x + 5, y]
+		"pyjama":
+			# Pyjama bottoms, flowered, in a heap.
+			s += '<path d="M12 22 H44 L50 44 H36 L30 30 L24 46 H8 Z" fill="#B9A6E8" stroke="#7A64B8" stroke-width="2" stroke-linejoin="round"/>'
+			s += '<path d="M12 22 H44 V27 H12 Z" fill="#9A86D4" stroke="#7A64B8" stroke-width="1.5"/>'
+			for c in [[18, 34], [40, 36], [26, 26], [45, 41], [13, 41]]:
+				s += '<circle cx="%d" cy="%d" r="2.6" fill="#FFFFFF"/><circle cx="%d" cy="%d" r="1.1" fill="#FFD23F"/>' % [c[0], c[1], c[0], c[1]]
+			s += '<path d="M48 40 Q60 30 70 40 L68 46 H50 Z" fill="#B9A6E8" stroke="#7A64B8" stroke-width="2"/>'
+		"blocks":
+			# Three wooden letter blocks.
+			var blocks := [[10, 26, "#E74C3C", "A"], [32, 30, "#3D8BD9", "B"], [52, 20, "#2ECC71", "C"]]
+			for b in blocks:
+				s += '<rect x="%d" y="%d" width="18" height="18" rx="2" fill="%s" stroke="#00000055" stroke-width="1.5" transform="rotate(%d %d %d)"/>' % [b[0], b[1], b[2], -8 + b[0] % 13, b[0] + 9, b[1] + 9]
+				s += '<rect x="%d" y="%d" width="18" height="4" fill="#FFFFFF" opacity="0.3"/>' % [b[0], b[1]]
+				s += '<text x="%d" y="%d" font-family="sans-serif" font-weight="bold" font-size="13" fill="#FFFFFF" text-anchor="middle">%s</text>' % [b[0] + 9, b[1] + 14, b[3]]
+		"puzzle":
+			# Puzzle pieces scattered.
+			var cols := ["#FF8A3D", "#5DB6BE", "#F2C230", "#C97AB8"]
+			for k in 4:
+				var x := 10 + k * 16
+				var y := 32 + (k % 2) * 6 - k
+				s += '<path d="M%d %d h5 a3 3 0 1 1 5 0 h5 v5 a3 3 0 1 1 0 5 v5 h-15 Z" fill="%s" stroke="#00000044" stroke-width="1.2" transform="rotate(%d %d %d)"/>' % [x, y, cols[k], k * 23 - 20, x + 7, y + 7]
+		"car":
+			# A little red toy car on its side wheels.
+			s += '<path d="M10 38 Q12 28 24 27 L32 18 H52 L60 27 Q70 28 70 38 Z" fill="#E74C3C" stroke="#9E2420" stroke-width="2" stroke-linejoin="round"/>'
+			s += '<path d="M34 21 H44 V27 H29 Z M47 21 H51 L56 27 H47 Z" fill="#BFE3F5" stroke="#9E2420" stroke-width="1.2"/>'
+			for wx in [24, 56]:
+				s += '<circle cx="%d" cy="40" r="7" fill="#2B2B2B"/><circle cx="%d" cy="40" r="3" fill="#C9CED4"/>' % [wx, wx]
+			s += '<path d="M14 31 H22" stroke="#FFFFFF" stroke-width="2" opacity="0.6"/><circle cx="67" cy="32" r="2" fill="#FFD23F"/>'
+		"sneaker":
+			# One sneaker, laces undone.
+			s += '<path d="M10 42 Q10 30 18 28 L32 26 Q40 34 52 34 Q68 34 70 42 Z" fill="#F4F2EC" stroke="#9A948A" stroke-width="2" stroke-linejoin="round"/>'
+			s += '<path d="M18 28 L32 26 Q38 32 44 33 L38 22 Q30 22 22 18 Z" fill="#FF5D8F" stroke="#C2406E" stroke-width="2" stroke-linejoin="round"/>'
+			s += '<path d="M9 42 H71 V45 Q40 48 9 45 Z" fill="#E74C3C"/>'
+			s += '<path d="M30 26 Q38 20 44 24 M33 28 Q46 30 52 26" stroke="#FFFFFF" stroke-width="1.6" fill="none"/>'
 		_:
 			# A teddy bear, fallen on its back.
-			s += '<ellipse cx="44" cy="36" rx="18" ry="11" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2"/>'
-			s += '<circle cx="22" cy="32" r="11" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2"/>'
-			s += '<circle cx="16" cy="22" r="4" fill="#C49A6C" stroke="#7E5E3A" stroke-width="1.5"/><circle cx="26" cy="21" r="4" fill="#C49A6C" stroke="#7E5E3A" stroke-width="1.5"/>'
-			s += '<circle cx="19" cy="31" r="1.5" fill="#2B2B2B"/><circle cx="25" cy="31" r="1.5" fill="#2B2B2B"/>'
+			s += '<ellipse cx="46" cy="35" rx="19" ry="12" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2"/>'
+			s += '<ellipse cx="48" cy="35" rx="10" ry="6.5" fill="#E2C49A"/>'
+			s += '<ellipse cx="64" cy="27" rx="6" ry="4.5" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2"/><ellipse cx="62" cy="44" rx="7" ry="4.5" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2"/>'
+			s += '<circle cx="22" cy="32" r="12" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2"/>'
+			s += '<circle cx="15" cy="21" r="4.5" fill="#C49A6C" stroke="#7E5E3A" stroke-width="1.5"/><circle cx="27" cy="20" r="4.5" fill="#C49A6C" stroke="#7E5E3A" stroke-width="1.5"/>'
+			s += '<ellipse cx="21" cy="36" rx="5" ry="3.5" fill="#E2C49A"/><circle cx="21" cy="34.5" r="1.6" fill="#2B2B2B"/>'
+			s += '<circle cx="17" cy="29" r="1.6" fill="#2B2B2B"/><circle cx="25" cy="29" r="1.6" fill="#2B2B2B"/>'
+			s += '<path d="M32 30 Q40 26 44 30" stroke="#FF5D8F" stroke-width="3" fill="none"/>'
+			s += '<ellipse cx="17" cy="26" rx="3" ry="2" fill="#FFFFFF" opacity="0.4"/>'
 	return tex(80, 50, s)
