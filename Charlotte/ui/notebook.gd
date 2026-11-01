@@ -234,21 +234,153 @@ func _draw_icon() -> void:
 		_button.draw_string(ThemeDB.fallback_font, at + Vector2(-10, 5), str(stars), HORIZONTAL_ALIGNMENT_CENTER, 20, 13, BLUE)
 
 
-# The notebook's page: cream paper, blue rules, a red margin, spiral rings along the top.
+# The notebook's page: cream paper with a little grain, blue rules, a red margin, punched holes under the spiral
+# rings, the pages' thickness, a dog-eared corner, a ribbon bookmark and an elastic band; and Charlotte's crayon
+# doodles in the margins and corners (a smiling sun, a rainbow, stars and hearts, her hamster, a cat saying miaou,
+# a flower, her signature), drawn with a wobbly hand.
 class _Paper:
 	extends Control
 
+	const CRAYONS := [Color("#E85FA0"), Color("#3D8BD9"), Color("#F2C230"), Color("#4FA34A"), Color("#E8812E"), Color("#8E5FC4")]
+	var _rng := RandomNumberGenerator.new()
+
 	func _draw() -> void:
+		_rng.seed = 7
 		var r := Rect2(Vector2.ZERO, size)
 		draw_rect(Rect2(r.position + Vector2(6, 8), r.size), Color(0, 0, 0, 0.22))
+		# The other pages underneath, then this one.
+		for k in [3, 2, 1]:
+			draw_rect(Rect2(Vector2(k * 2.0, k * 2.5), size), Color("#EFE6D2").darkened(k * 0.04))
 		draw_rect(r, CREAM)
+		for i in 220:
+			draw_circle(Vector2(_rng.randf_range(4, size.x - 4), _rng.randf_range(4, size.y - 4)), 0.8, Color(0.55, 0.45, 0.3, 0.12))
 		for y in range(104, int(size.y) - 30, 30):
 			draw_line(Vector2(14, y), Vector2(size.x - 14, y), Color("#BFD3EA"), 1.5)
 		draw_line(Vector2(74, 0), Vector2(74, size.y), Color("#E59A9A"), 2.0)
 		for x in range(40, int(size.x) - 20, 36):
+			draw_circle(Vector2(x, 12), 4.5, Color("#D8CDB6"))
 			draw_circle(Vector2(x, 2), 8, Color("#2B2B33"))
 			draw_arc(Vector2(x, -8), 11, 0.3, PI - 0.3, 12, Color("#B9BEC6"), 4.0, true)
+		# Dog-eared bottom-right corner.
+		var c := size
+		draw_colored_polygon(PackedVector2Array([c - Vector2(34, 0), c, c - Vector2(0, 34)]), Color("#2A2A3A", 0.0))
+		draw_colored_polygon(PackedVector2Array([c - Vector2(34, 0), c - Vector2(0, 34), c - Vector2(30, 30)]), Color("#E6DBC4"))
+		draw_line(c - Vector2(34, 0), c - Vector2(0, 34), Color("#D0C3A8"), 1.5)
 		draw_rect(r, Color("#D8CDB6"), false, 2.0)
+		_doodles()
+		# Washi tape on two corners, the ribbon bookmark, the elastic band.
+		_tape(Vector2(8, size.y - 44), -0.6, Color("#F7C6D9", 0.8))
+		_tape(Vector2(size.x - 70, 46), 0.5, Color("#BFE3F7", 0.8))
+		# The ribbon bookmark hangs out below the page, its end cut in a V.
+		var bx := 230.0
+		draw_colored_polygon(PackedVector2Array([Vector2(bx, size.y - 4), Vector2(bx + 14, size.y - 4), Vector2(bx + 16, size.y + 44),
+			Vector2(bx + 9, size.y + 36), Vector2(bx + 2, size.y + 46)]), Color("#C8323C"))
+		draw_line(Vector2(bx + 3, size.y - 4), Vector2(bx + 4, size.y + 40), Color("#E0505A"), 2.0)
+		draw_rect(Rect2(size.x - 16, -4, 9, size.y + 8), Color("#2B2B33"))
+		draw_rect(Rect2(size.x - 16, -4, 3, size.y + 8), Color("#4A4A55"))
+
+	func _doodles() -> void:
+		var pink: Color = CRAYONS[0]
+		var blue: Color = CRAYONS[1]
+		var yellow: Color = CRAYONS[2]
+		var green: Color = CRAYONS[3]
+		var orange: Color = CRAYONS[4]
+		var purple: Color = CRAYONS[5]
+		# A smiling sun, top right.
+		var sun := Vector2(size.x - 60, 232)
+		_scribble_circle(sun, 22, yellow)
+		for k in 10:
+			var d := Vector2.from_angle(TAU * k / 10.0 + 0.2)
+			_wobble([sun + d * 28.0, sun + d * 40.0], orange)
+		_wobble([sun + Vector2(-9, -4), sun + Vector2(-7, -4)], Color("#3A3A48"), 3.0)
+		_wobble([sun + Vector2(7, -4), sun + Vector2(9, -4)], Color("#3A3A48"), 3.0)
+		_arc(sun + Vector2(0, 2), 9, 0.4, PI - 0.4, Color("#3A3A48"))
+		# A little rainbow between the title and the header.
+		for k in 4:
+			_arc(Vector2(392, 78), 30 - k * 6, PI, TAU, [pink, orange, yellow, green][k])
+		_cloud(Vector2(366, 80), Color("#BFD3EA"))
+		# Stars and hearts in the margin.
+		for at in [Vector2(36, 150), Vector2(38, 330), Vector2(34, 500)]:
+			_heart(at, pink)
+		for at in [Vector2(40, 240), Vector2(36, 420), Vector2(size.x - 44, 330)]:
+			_star(at, 9, yellow)
+		# Her hamster, in the margin: round, ears, whiskers.
+		var h := Vector2(38, 600 - 24)
+		_scribble_circle(h, 15, orange)
+		_scribble_circle(h + Vector2(-9, -13), 5, orange)
+		_scribble_circle(h + Vector2(9, -13), 5, orange)
+		draw_circle(h + Vector2(-5, -2), 1.8, Color("#3A3A48"))
+		draw_circle(h + Vector2(5, -2), 1.8, Color("#3A3A48"))
+		draw_circle(h + Vector2(0, 3), 1.6, pink)
+		for sx in [-1.0, 1.0]:
+			_wobble([h + Vector2(sx * 6, 4), h + Vector2(sx * 20, 1)], Color("#3A3A48"), 1.0)
+		# A cat saying miaou, bottom right.
+		var cat := Vector2(size.x - 120, size.y - 70)
+		_scribble_circle(cat, 18, blue)
+		_wobble([cat + Vector2(-16, -8), cat + Vector2(-12, -26), cat + Vector2(-4, -16)], blue)
+		_wobble([cat + Vector2(16, -8), cat + Vector2(12, -26), cat + Vector2(4, -16)], blue)
+		draw_circle(cat + Vector2(-6, -2), 2.0, Color("#3A3A48"))
+		draw_circle(cat + Vector2(6, -2), 2.0, Color("#3A3A48"))
+		_arc(cat + Vector2(-3, 5), 3, 0.2, PI - 0.2, Color("#3A3A48"))
+		_arc(cat + Vector2(3, 5), 3, 0.2, PI - 0.2, Color("#3A3A48"))
+		draw_string(ThemeDB.fallback_font, cat + Vector2(22, -18), "miaou !", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, purple)
+		# A flower by the cat, and her signature.
+		var f := Vector2(size.x - 190, size.y - 50)
+		_wobble([f, f + Vector2(2, 30)], green, 2.5)
+		_wobble([f + Vector2(1, 18), f + Vector2(12, 12)], green, 2.5)
+		for k in 6:
+			_scribble_circle(f + Vector2.from_angle(TAU * k / 6.0) * 8.0, 5, pink)
+		draw_circle(f, 4, yellow)
+		draw_string(ThemeDB.fallback_font, Vector2(size.x - 260, size.y - 14), "Chacha ♥", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, pink)
+
+	# Crayon strokes: a line through `pts`, each segment jittered a little, drawn twice like a child's hand.
+	func _wobble(pts: Array, color: Color, width := 2.2) -> void:
+		for twice in 2:
+			var line := PackedVector2Array()
+			for i in pts.size() - 1:
+				var a: Vector2 = pts[i]
+				var b: Vector2 = pts[i + 1]
+				for k in 4:
+					line.append(a.lerp(b, k / 4.0) + Vector2(_rng.randf_range(-1.2, 1.2), _rng.randf_range(-1.2, 1.2)))
+			line.append(pts[-1])
+			draw_polyline(line, Color(color, 0.85 - twice * 0.35), width, true)
+
+	func _scribble_circle(c: Vector2, r: float, color: Color) -> void:
+		var pts := []
+		for k in 19:
+			pts.append(c + Vector2.from_angle(TAU * k / 18.0) * (r + _rng.randf_range(-1.5, 1.5)))
+		_wobble(pts, color)
+
+	func _arc(c: Vector2, r: float, a0: float, a1: float, color: Color) -> void:
+		var pts := []
+		for k in 13:
+			pts.append(c + Vector2.from_angle(lerpf(a0, a1, k / 12.0)) * r)
+		_wobble(pts, color, 3.0)
+
+	func _heart(c: Vector2, color: Color) -> void:
+		var pts := []
+		for k in 25:
+			var t := TAU * k / 24.0
+			pts.append(c + Vector2(16 * pow(sin(t), 3), -(13 * cos(t) - 5 * cos(2 * t) - 2 * cos(3 * t) - cos(4 * t))) * 0.7)
+		_wobble(pts, color)
+
+	func _star(c: Vector2, r: float, color: Color) -> void:
+		var pts := []
+		for k in 11:
+			pts.append(c + Vector2.from_angle(-PI / 2.0 + TAU * k / 10.0) * (r if k % 2 == 0 else r * 0.45))
+		_wobble(pts, color)
+
+	func _cloud(c: Vector2, color: Color) -> void:
+		for k in [[-14, 4, 10], [0, -2, 13], [15, 4, 10]]:
+			_scribble_circle(c + Vector2(k[0], k[1]), k[2], color)
+
+	func _tape(at: Vector2, angle: float, color: Color) -> void:
+		var d := Vector2.from_angle(angle)
+		var n := d.orthogonal()
+		draw_colored_polygon(PackedVector2Array([at, at + d * 64, at + d * 64 + n * 18, at + n * 18]), color)
+		for k in 5:
+			var p := at + d * (8 + k * 12) + n * 4
+			draw_line(p, p + n * 10, Color(1, 1, 1, 0.5), 2.0)
 
 
 # A star: yellow and filled when the quest is done, an outline while she's on it, a dotted "?" to discover.
