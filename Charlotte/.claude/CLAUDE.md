@@ -253,11 +253,13 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     indoors); at the owner's front door (`_door_x(art)` from `art/decor/doors.json`, written by the generator; "!" and
     house number) the owner comes out (`_bring_home`), the cat is put down, quest done. Owners are always at a front
     door on a street, never in the lane.
-  - menage (after milk, Mom gives it): things on the bedroom floor (`MESS`, `InteriorArt.mess`); clicking each, Charlotte
-    crouches and it flies to its place (`PUT_AWAY`); `flags.tidied`.
-  - plants (Dad gives it): three thirsty plants (`_plants`: salon, corridor, chambre; yellowed and drooping) and the
-    watering can in the kitchen (`InteriorArt.watering_can`, carried with `Character.carry`, `flags.has_can`); water each
-    one (drops, it perks up), `flags.watered`; the can goes back when all have drunk.
+  - menage (Mom gives it, after the milk; the toys can't be picked up before): things on the bedroom floor (`MESS`,
+    `InteriorArt.mess`); clicking each, Charlotte crouches and it flies to its place (`PUT_AWAY`); `flags.tidied`.
+  - plants (Dad gives it): five thirsty plants (`_plant(id, kind, …)`, `InteriorArt.house_plant(kind, thirsty)`:
+    monstera and a hanging pothos in the salon, a fern on its stand and a fiddle-leaf fig in the corridor, a peace lily
+    in the bedroom; thirsty = drooping, yellowed, brown tips, dry soil, dead leaves; the sprite swaps to the healthy
+    picture when watered) and the watering can in the kitchen (`InteriorArt.watering_can`, carried with
+    `Character.carry`, `flags.has_can`); `flags.watered`; the can goes back when all have drunk.
 - The dépanneur has prices (`_buy(picture, text, price)`, paid from `GameState.money`); the clerk says "Il te manque des
   sous !" when she can't afford something.
 

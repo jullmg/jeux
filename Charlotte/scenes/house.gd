@@ -118,7 +118,7 @@ func _talk_to_dad() -> void:
 	elif Quests.start("plants"):
 		_say(_dad, "Les plantes ont soif ! L'arrosoir\nest dans la cuisine.", 390.0, 3.5)
 	elif Quests.active("plants"):
-		_say(_dad, "Une au salon, une dans le corridor,\nune dans ta chambre !", 390.0, 3.5)
+		_say(_dad, "Deux au salon, deux dans le corridor\net une dans ta chambre !", 390.0, 3.5)
 	else:
 		_say(_dad, DAD_LINES[_dad_line % DAD_LINES.size()], 360.0)
 		_dad_line += 1
@@ -137,8 +137,7 @@ func _build_chores() -> void:
 	for id in _plants:
 		var plant: Sprite2D = _plants[id]
 		if _thirsty(id):
-			plant.modulate = Color(0.86, 0.74, 0.38)
-			plant.skew = 0.2
+			plant.texture = plant.get_meta("thirsty")
 		var area := Rect2(plant.position, plant.texture.get_size() * plant.scale)
 		add_child(DoorSpot.make(area, _water.bind(id), area.get_center().x - 50.0))
 	_can = _put(InteriorArt.watering_can(), CAN_X, 606.0, 0.55, "floor")
@@ -147,6 +146,17 @@ func _build_chores() -> void:
 		return Quests.active("plants") and not GameState.flags.get("has_can", false), 0.8))
 	if GameState.flags.get("has_can", false):
 		_hold_can.call_deferred()
+
+
+# A plant to water: healthy and thirsty pictures kept on the sprite, a contact shadow when it stands on the floor.
+func _plant(id: String, kind: String, x: float, bottom: float, scale: float) -> void:
+	var healthy := InteriorArt.house_plant(kind, false)
+	if kind != "pothos":
+		_floor_shadow(x + 120.0 * scale, bottom, 40.0 * scale)
+	var sprite := _put(healthy, x, bottom, scale)
+	sprite.set_meta("healthy", healthy)
+	sprite.set_meta("thirsty", InteriorArt.house_plant(kind, true))
+	_plants[id] = sprite
 
 
 func _thirsty(id: String) -> bool:
@@ -197,8 +207,9 @@ func _hold_can() -> void:
 	_can.visible = false
 	var held := Sprite2D.new()
 	held.texture = _can.texture
-	held.scale = Vector2.ONE * 0.5
-	held.offset = Vector2(20, -10)
+	# Held up in front of her, a little bigger than it looks on the floor at the back of the kitchen.
+	held.scale = Vector2.ONE * 1.5
+	held.offset = Vector2(30, -4)
 	_charlotte.carry(held)
 
 
@@ -218,7 +229,8 @@ func _water(id: String) -> void:
 		drop.texture = PropArt.flake()
 		drop.modulate = Color(0.55, 0.78, 1.0, 0.9)
 		drop.scale = Vector2.ONE * 0.35
-		drop.position = _charlotte.position + Vector2(40.0 * _charlotte.facing, -150.0)
+		# From the can's spout.
+		drop.position = _charlotte.position + Vector2(85.0 * _charlotte.facing, -85.0)
 		add_child(drop)
 		var tween := create_tween()
 		tween.tween_interval(i * 0.06)
@@ -227,8 +239,9 @@ func _water(id: String) -> void:
 	Sfx.play("swoosh", pot)
 	var perk := create_tween()
 	perk.tween_interval(0.8)
-	perk.tween_property(plant, "modulate", Color.WHITE, 0.8)
-	perk.parallel().tween_property(plant, "skew", 0.0, 0.8).set_trans(Tween.TRANS_BACK)
+	perk.tween_callback(func(): plant.texture = plant.get_meta("healthy"))
+	perk.tween_property(plant, "modulate", Color(0.8, 1.15, 0.85), 0.25)
+	perk.tween_property(plant, "modulate", Color.WHITE, 0.6)
 	var watered: Array = GameState.flags.get("watered", [])
 	watered.append(id)
 	GameState.flags["watered"] = watered
@@ -468,7 +481,7 @@ func _build_vestibule() -> void:
 func _build_salon() -> void:
 	_put(InteriorArt.rug(), 900.0, 694.0, 0.9)
 	_plate(1700.0, 560.0, true)
-	_plants["salon"] = _put(InteriorArt.monstera(), 860.0, 606.0, 0.85, "floor")
+	_plant("salon", "monstera", 843.0, 606.0, 0.85)
 	for i in 3:
 		_put(InteriorArt.poster(i), 1030.0 + i * 130.0, 340.0, 0.85, "wall")
 	_put(InteriorArt.floor_lamp(), 1470.0, 604.0, 0.9, "floor")
@@ -477,6 +490,7 @@ func _build_salon() -> void:
 	_put(InteriorArt.side_table(), 1390.0, 610.0, 0.8, "floor")
 	_put(InteriorArt.window(170.0, 300.0), 1580.0, 470.0, 1.0, "wall")
 	_daylight(Vector2(1580.0, 170.0), 170.0, 0.12)
+	_plant("fenetre", "pothos", 1585.0, 360.0, 0.55)
 	_plate(1780.0, 330.0, false)
 	_put(InteriorArt.dining_table(), 1780.0, 606.0, 0.85, "floor")
 	_salon_pendant = _pendant(1984.0, 310.0)
@@ -495,7 +509,8 @@ func _build_hallway() -> void:
 	_put(InteriorArt.recycling_bin(), 2985.0, 608.0, 1.0, "floor")
 	_put(InteriorArt.panel_door(), CHACHA_DOOR_X, WALL_BASE)
 	_chacha_sign(Vector2(CHACHA_DOOR_X + 75.0, 330.0))
-	_plants["corridor"] = _put(InteriorArt.monstera(), 3300.0, 606.0, 0.55, "floor")
+	_plant("corridor", "fiddle", 3283.0, 606.0, 0.55)
+	_plant("fougere", "fern", 2585.0, 606.0, 0.5)
 	_put(InteriorArt.kitchen(), KITCHEN_START, WALL_BASE)
 	_fridge_art = Node2D.new()
 	add_child(_fridge_art)
@@ -518,7 +533,7 @@ func _build_bedroom() -> void:
 		return Quests.active("hamster") and not GameState.flags.get("hamster_fed", false), 0.8))
 	_put(InteriorArt.terrarium(true), x + 30.0, 606.0, 0.85)
 	_put(InteriorArt.flower_painting(), x + 470.0, 330.0, 0.8, "wall")
-	_plants["chambre"] = _put(InteriorArt.monstera(), x + 282.0, 606.0, 0.42, "floor")
+	_plant("chambre", "lily", x + 272.0, 606.0, 0.5)
 	_put(InteriorArt.bed(), x + 360.0, 608.0, 0.8, "floor")
 	_put(InteriorArt.kid_table(), x + 830.0, 612.0, 0.75, "floor")
 	_put(InteriorArt.book_ledges(), x + 960.0, 470.0, 0.8, "wall")

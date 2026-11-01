@@ -620,6 +620,193 @@ static func monstera() -> ImageTexture:
 	return tex(200, 330, s)
 
 
+## A house plant to water, healthy or thirsty (drooping, yellowed, brown tips, dry cracked soil, a few dead leaves
+## fallen by the pot). Canvas 240 wide, the pot centred, floor (or, hanging, the basket's bottom) at the canvas
+## bottom: "monstera" 240x330, "pothos" (hanging from the ceiling in its macramé) 240x420, "fern" (on a wooden
+## stand) 240x360, "fiddle" (fiddle-leaf fig) 240x420, "lily" (peace lily) 240x260.
+static func house_plant(kind: String, thirsty: bool) -> ImageTexture:
+	var t := 1.0 if thirsty else 0.0
+	var leaf := Color("#3E8E4A").lerp(Color("#A59A45"), t * 0.85)
+	var line := Color("#245E2E").lerp(Color("#6E5A2A"), t)
+	var h := {"monstera": 330, "pothos": 420, "fern": 360, "fiddle": 420, "lily": 260}[kind] as int
+	var cx := 120.0
+	var s := ""
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(kind)
+	match kind:
+		"monstera":
+			var soil := Vector2(cx, h - 82.0)
+			for l in [[-0.12, 140.0, 0.85], [-0.6, 112.0, 0.8], [0.55, 116.0, 0.82], [-0.95, 80.0, 0.72], [0.9, 84.0, 0.75], [0.18, 100.0, 0.8]]:
+				var a: float = l[0] + signf(l[0] + 0.01) * t * 0.6
+				var stem_end := soil + Vector2(sin(a), -cos(a)) * float(l[1]) * (1.0 - t * 0.35)
+				var droop := signf(l[0] + 0.01) * t * 1.3
+				s += '<path d="M%s %s Q%s %s %s %s" stroke="%s" stroke-width="4" fill="none"/>' % [soil.x, soil.y,
+					soil.x + sin(a) * 30.0, soil.y - 60.0 * (1.0 - t * 0.5), stem_end.x, stem_end.y, _hex(line)]
+				s += _curved_leaf(stem_end, a + droop * 0.5, 82.0 * float(l[2]), 34.0 * float(l[2]), droop * 0.6, leaf, line, t, "split")
+			s += _pot(cx, h, 92.0, 80.0, "#C2693F", "#7E3E22", t)
+		"pothos":
+			# Macramé cords from the hook, then vines spilling over the basket's rim and hanging down.
+			var rim := h - 200.0
+			for dx in [-44.0, 0.0, 44.0]:
+				s += '<path d="M%s 4 L%s %s" stroke="#E8DCC4" stroke-width="3"/>' % [cx, cx + dx, rim]
+			s += '<circle cx="%s" cy="6" r="6" fill="none" stroke="#B9A98A" stroke-width="3"/>' % cx
+			s += '<path d="M%s %s H%s L%s %s H%s Z" fill="#D9C9A8" stroke="#9A8660" stroke-width="3"/>' % [cx - 52, rim, cx + 52, cx + 40, rim + 66, cx - 40]
+			for k in 4:
+				s += '<path d="M%s %s H%s" stroke="#B9A580" stroke-width="2"/>' % [cx - 48 + k * 3, rim + 14 + k * 14, cx + 48 - k * 3]
+			s += _soil(cx, rim, 50.0, t)
+			for v in [[-46.0, 1.0, 130.0], [-26.0, 1.0, 190.0], [-6.0, -1.0, 100.0], [14.0, 1.0, 160.0], [34.0, -1.0, 200.0], [50.0, -1.0, 120.0]]:
+				var x0: float = cx + float(v[0])
+				var length: float = float(v[2]) * (1.0 + t * 0.1)
+				var pts: Array[Vector2] = []
+				for k in 9:
+					var q := k / 8.0
+					pts.append(Vector2(x0 + sin(q * 3.0 + x0) * 6.0 + float(v[1]) * q * 16.0, rim - 30.0 + q * length * 0.6 + (q * q * length * 0.4 if t > 0.0 else -sin(q * PI) * 30.0 * (1.0 - q))))
+				var path := "M%s %s" % [pts[0].x, pts[0].y]
+				for p in pts.slice(1):
+					path += " L%s %s" % [p.x, p.y]
+				s += '<path d="%s" stroke="%s" stroke-width="2.5" fill="none"/>' % [path, _hex(line)]
+				for k in range(1, pts.size()):
+					var side := 1.0 if k % 2 == 0 else -1.0
+					s += _curved_leaf(pts[k], side * (1.2 + t * 1.0), 26.0, 16.0, side * t * 0.8, leaf if (k + int(v[0])) % 4 != 0 else leaf.lerp(Color("#E8E2A0"), 0.5), line, t, "heart")
+		"fern":
+			# Wooden plant stand, then fronds arching out of the pot (hanging limp when thirsty).
+			s += '<rect x="%s" y="%s" width="120" height="12" rx="3" fill="#A8743E" stroke="#6E4520" stroke-width="2"/>' % [cx - 60, h - 150]
+			for lx in [cx - 52, cx + 44]:
+				s += '<path d="M%s %s L%s %s" stroke="#8E5E2E" stroke-width="8" stroke-linecap="round"/>' % [lx + 4, h - 140, lx + (-8 if lx < cx else 16), h - 4]
+			s += '<path d="M%s %s H%s" stroke="#8E5E2E" stroke-width="5"/>' % [cx - 52, h - 60, cx + 54]
+			var soil := Vector2(cx, h - 214.0)
+			for k in 11:
+				var a := lerpf(-1.35, 1.35, k / 10.0) + rng.randf_range(-0.08, 0.08)
+				var bend := signf(a) * (0.5 + t * 1.6) + a * 0.3
+				s += _frond(soil, a * (1.0 - t * 0.1), 120.0 + rng.randf_range(-20, 20) - absf(a) * 18.0, bend, leaf, line, t)
+			s += _pot(cx, h - 150.0, 84.0, 64.0, "#F2EEE6", "#A9A296", t)
+		"fiddle":
+			# A thin trunk with big violin-shaped leaves along it, the top ones upright, the rest hanging when dry.
+			var base := Vector2(cx, h - 78.0)
+			var top := Vector2(cx + 6.0, 80.0 + t * 20.0)
+			s += '<path d="M%s %s Q%s %s %s %s" stroke="#7A5A3A" stroke-width="7" fill="none" stroke-linecap="round"/>' % [base.x, base.y, cx - 8, (base.y + top.y) / 2.0, top.x, top.y]
+			for k in 9:
+				var q := 0.25 + k * 0.085
+				var at := base.lerp(top, q) + Vector2(sin(q * 5.0) * -4.0, 0)
+				var side := 1.0 if k % 2 == 0 else -1.0
+				var a := side * (1.25 - q * 0.5) + side * t * (1.2 - q * 0.5)
+				var brown := t > 0.0 and k % 3 == 0
+				s += _curved_leaf(at, a, 74.0 - q * 18.0, 40.0 - q * 8.0, side * t * 0.5, leaf.lerp(Color("#8E6A34"), 0.5 if brown else 0.0), line, t, "fiddle")
+			s += _curved_leaf(top, 0.1, 50.0, 26.0, t * 1.2, leaf, line, t, "fiddle")
+			s += _pot(cx, h, 96.0, 78.0, "#5E7E9A", "#36506A", t)
+		"lily":
+			# Peace lily: glossy dark leaves and white spathes; the textbook thirsty plant, flat over its pot.
+			var soil := Vector2(cx, h - 74.0)
+			for k in 9:
+				var a := lerpf(-1.1, 1.1, k / 8.0) + rng.randf_range(-0.1, 0.1)
+				var bend := signf(a) * t * 1.9 + a * 0.2
+				s += '<path d="M%s %s Q%s %s %s %s" stroke="%s" stroke-width="3" fill="none"/>' % [soil.x, soil.y, soil.x + sin(a) * 20.0, soil.y - 50.0 * (1.0 - t * 0.6),
+					soil.x + sin(a + bend * 0.5) * 70.0 * (1.0 - t * 0.2), soil.y - cos(a + bend * 0.5) * 70.0, _hex(line)]
+				s += _curved_leaf(soil + Vector2(sin(a + bend * 0.5), -cos(a + bend * 0.5)) * 70.0 * Vector2(1.0 - t * 0.2, 1.0), a + bend * 0.7, 70.0, 26.0, bend * 0.4, leaf.darkened(0.12), line, t, "leaf")
+			for k in 3:
+				var a := -0.35 + k * 0.35
+				var bend := (t * 2.0 if a >= 0.0 else -t * 2.0) + a * 0.2
+				var tip := soil + Vector2(sin(a + bend * 0.4), -cos(a + bend * 0.4)) * 130.0 * (1.0 - t * 0.35)
+				s += '<path d="M%s %s Q%s %s %s %s" stroke="%s" stroke-width="2.5" fill="none"/>' % [soil.x, soil.y, soil.x + sin(a) * 20.0, soil.y - 80.0 * (1.0 - t * 0.6), tip.x, tip.y, _hex(line)]
+				s += _curved_leaf(tip, a + bend * 0.8, 40.0, 22.0, bend * 0.3, Color("#F7F6F0").lerp(Color("#D8CFA0"), t * 0.6), Color("#B9B6A8"), 0.0, "leaf")
+				s += '<ellipse cx="%s" cy="%s" rx="3" ry="9" fill="#F2E7A8" transform="rotate(%s %s %s)"/>' % [tip.x, tip.y - 10.0, rad_to_deg(a + bend * 0.8), tip.x, tip.y]
+			s += _pot(cx, h, 86.0, 70.0, "#E8E4DA", "#A8A296", t)
+	# Fallen dead leaves on the floor by the pot.
+	if thirsty and kind != "pothos":
+		for k in 3:
+			var fx: float = cx + [-70.0, 58.0, 82.0][k]
+			s += '<ellipse cx="%s" cy="%s" rx="9" ry="3.5" fill="#9A6A30" stroke="#6E4520" stroke-width="1.5" transform="rotate(%s %s %s)"/>' % [fx, h - 4.0, [-12, 18, -6][k], fx, h - 4.0]
+	return tex(240, h, s)
+
+
+# A leaf along a curved midrib, from `base` toward `angle` (0 = up), its tip bending by `bend` radians. `shape`:
+# "leaf", "heart" (pothos), "fiddle" (wide near the tip), "split" (monstera, with slits). `t` = how thirsty (brown
+# tip and edge, wrinkles).
+static func _curved_leaf(base: Vector2, angle: float, length: float, width: float, bend: float, fill: Color, line: Color, t: float, shape: String) -> String:
+	var dir := func(a: float) -> Vector2: return Vector2(sin(a), -cos(a))
+	var p1: Vector2 = base + dir.call(angle) * length * 0.5
+	var p2: Vector2 = base + dir.call(angle + bend) * length * 0.88 + dir.call(angle) * length * 0.12
+	var left: Array[Vector2] = []
+	var right: Array[Vector2] = []
+	var mid: Array[Vector2] = []
+	for k in 13:
+		var q := k / 12.0
+		var c := base.lerp(p1, q).lerp(p1.lerp(p2, q), q)
+		var d := (p1 - base).lerp(p2 - p1, q).normalized()
+		var w := width * 0.5
+		match shape:
+			"heart":
+				w *= sin(PI * pow(q, 0.55)) * (1.0 + 0.3 * (1.0 - q))
+			"fiddle":
+				w *= sin(PI * pow(q, 0.45))
+			_:
+				w *= sin(PI * pow(q, 0.75))
+		w *= 1.0 - t * 0.25 * sin(q * 9.0)
+		mid.append(c)
+		left.append(c + d.orthogonal() * w)
+		right.append(c - d.orthogonal() * w)
+	var outline := "M%s %s" % [base.x, base.y]
+	for p in left:
+		outline += " L%.1f %.1f" % [p.x, p.y]
+	for i in range(right.size() - 1, -1, -1):
+		outline += " L%.1f %.1f" % [right[i].x, right[i].y]
+	var s := '<path d="%s Z" fill="%s" stroke="%s" stroke-width="2" stroke-linejoin="round"/>' % [outline, _hex(fill), _hex(line)]
+	if shape == "split":
+		for q in [0.35, 0.55, 0.75]:
+			var i := int(q * 12.0)
+			for side in [left, right]:
+				var e: Vector2 = side[i]
+				s += '<path d="M%.1f %.1f L%.1f %.1f" stroke="#F4EFE2" stroke-width="4" stroke-linecap="round"/>' % [e.x, e.y, e.lerp(mid[i], 0.55).x, e.lerp(mid[i], 0.55).y]
+	var vein := "M%s %s" % [base.x, base.y]
+	for p in mid:
+		vein += " L%.1f %.1f" % [p.x, p.y]
+	s += '<path d="%s" stroke="%s" stroke-width="1.5" fill="none" opacity="0.6"/>' % [vein, _hex(fill.lightened(0.35))]
+	if t > 0.0:
+		# A crisp brown tip.
+		var tip := mid[12]
+		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#8A5A2A" opacity="0.85"/>' % [tip.x, tip.y, width * 0.16]
+	return s
+
+
+# A fern frond: a midrib with little leaflets on both sides, shorter toward the tip.
+static func _frond(base: Vector2, angle: float, length: float, bend: float, fill: Color, line: Color, t: float) -> String:
+	var dir := func(a: float) -> Vector2: return Vector2(sin(a), -cos(a))
+	var p1: Vector2 = base + dir.call(angle) * length * 0.5
+	var p2: Vector2 = base + dir.call(angle + bend) * length
+	var s := '<path d="M%s %s Q%.1f %.1f %.1f %.1f" stroke="%s" stroke-width="2" fill="none"/>' % [base.x, base.y, p1.x, p1.y, p2.x, p2.y, _hex(line)]
+	for k in range(2, 15):
+		var q := k / 15.0
+		var c := base.lerp(p1, q).lerp(p1.lerp(p2, q), q)
+		var d := (p1 - base).lerp(p2 - p1, q).normalized()
+		var size := 13.0 * (1.0 - q * 0.75)
+		var col := fill.lerp(Color("#8A5A2A"), t * q * 0.8)
+		for side in [-1.0, 1.0]:
+			var tip: Vector2 = c + (d.orthogonal() * side * 0.85 + d * 0.5).normalized() * size + Vector2(0, t * size * 0.6)
+			s += '<path d="M%.1f %.1f L%.1f %.1f" stroke="%s" stroke-width="%.1f" stroke-linecap="round"/>' % [c.x, c.y, tip.x, tip.y, _hex(col), 5.0 * (1.0 - q * 0.5)]
+	return s
+
+
+# A pot standing at `bottom` (rim width `w`, height `ph`) with its soil, dark and moist, or pale, dry and cracked.
+static func _pot(cx: float, bottom: float, w: float, ph: float, fill: String, line: String, t: float) -> String:
+	var top := bottom - ph
+	var s := _soil(cx, top + 4.0, w * 0.46, t)
+	s += '<path d="M%s %s H%s L%s %s H%s Z" fill="%s" stroke="%s" stroke-width="3" stroke-linejoin="round"/>' % [cx - w / 2.0, top, cx + w / 2.0, cx + w * 0.38, bottom - 2.0, cx - w * 0.38, fill, line]
+	s += '<rect x="%s" y="%s" width="%s" height="13" rx="3" fill="%s" stroke="%s" stroke-width="2.5"/>' % [cx - w / 2.0 - 5.0, top - 4.0, w + 10.0, fill, line]
+	s += '<path d="M%s %s L%s %s" stroke="#FFFFFF" stroke-width="6" opacity="0.18" stroke-linecap="round"/>' % [cx - w * 0.36, top + 14.0, cx - w * 0.3, bottom - 10.0]
+	return s
+
+
+static func _hex(c: Color) -> String:
+	return PropArt._hex(c)
+
+
+static func _soil(cx: float, y: float, rx: float, t: float) -> String:
+	var s := '<ellipse cx="%s" cy="%s" rx="%s" ry="6" fill="%s"/>' % [cx, y, rx, "#4A3426" if t == 0.0 else "#A88A66"]
+	if t > 0.0:
+		s += '<path d="M%s %s l10 3 l8 -4 M%s %s l-8 3 l-6 -3" stroke="#6E5238" stroke-width="1.5" fill="none"/>' % [cx - rx * 0.5, y - 1.0, cx + rx * 0.4, y]
+	return s
+
+
 ## Canvas 120x420: brass floor lamp with a linen shade. Floor at y 420.
 static func floor_lamp() -> ImageTexture:
 	var s := '<path d="M20 70 L100 70 L86 10 L34 10 Z" fill="#F4E6C8" stroke="#C9B48A" stroke-width="2.5"/>'

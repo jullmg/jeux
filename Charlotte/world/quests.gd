@@ -27,7 +27,7 @@ const ALL := {
 	},
 	"plants": {
 		"title": "Arrose les plantes",
-		"hint": "L'arrosoir est dans la cuisine. Une plante au salon, une dans le corridor, une dans ta chambre.",
+		"hint": "L'arrosoir est dans la cuisine. Deux plantes au salon (une suspendue à la fenêtre), deux dans le corridor, une dans ta chambre.",
 		"find": "Les plantes de la maison ont l'air d'avoir soif…",
 		"age": 7, "reward": 1.0,
 	},
