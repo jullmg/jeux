@@ -4,6 +4,8 @@ extends Node2D
 
 const BACK_TINT := Color(0.82, 0.82, 0.86)
 const ARM_REST := deg_to_rad(6.0)
+## How far a rider leans forward over the bars (degrees).
+const RIDE_LEAN := 16.0
 ## Running speed, as a multiple of walk_speed.
 const RUN_SPEED := 1.9
 
@@ -41,6 +43,9 @@ var _hold := 0.0
 ## Sitting on a bicycle: leaning forward, hands on the bars, legs turning with `pedal` (the crank's angle).
 var riding := false
 var pedal := 0.0
+## Riding: where the two pedals are (global, back leg's first) and the handlebar grip, set by the bike each frame.
+var pedal_feet: Array[Vector2] = []
+var bar_grip := Vector2.INF
 # Riding, each leg is split in two at the knee (the same texture: thigh, then shin and shoe) so it can bend:
 # back thigh, back shin, front thigh, front shin.
 var _ride_legs: Array[Sprite2D] = []
@@ -182,8 +187,11 @@ func _pedal_legs() -> void:
 			_ride_legs.append_array([thigh, shin])
 	for k in 2:
 		var hip: Vector2 = (_leg_back if k == 0 else _leg_front).position
-		var centre := hip + Vector2(leg_len * 0.42, leg_len * 0.62)
-		var foot := centre + Vector2.from_angle(pedal + (PI if k == 0 else 0.0)) * leg_len * 0.2
+		var foot: Vector2
+		if pedal_feet.size() == 2:
+			foot = _body.to_local(pedal_feet[k])
+		else:
+			foot = hip + Vector2(leg_len * 0.42, leg_len * 0.62) + Vector2.from_angle(pedal + (PI if k == 0 else 0.0)) * leg_len * 0.2
 		var to_foot := foot - hip
 		var d := clampf(to_foot.length(), absf(thigh_len - shin_len) + 1.0, thigh_len + shin_len - 1.0)
 		var dir := to_foot.normalized()
@@ -275,12 +283,17 @@ func _apply_pose() -> void:
 	if _shade:
 		_shade.set_shader_parameter("facing", float(facing))
 	if riding:
-		_pedal_legs()
-		_arm_front.rotation = deg_to_rad(-64.0)
-		_arm_back.rotation = deg_to_rad(-58.0)
-		_body.rotation = deg_to_rad(16.0) * facing
+		_body.rotation = deg_to_rad(RIDE_LEAN) * facing
 		_body.position.y = 0.0
 		_head.rotation = deg_to_rad(-10.0)
+		_pedal_legs()
+		# Hands on the bars.
+		for arm: Sprite2D in [_arm_back, _arm_front]:
+			if bar_grip == Vector2.INF:
+				arm.rotation = deg_to_rad(-62.0)
+			else:
+				var v := _body.to_local(bar_grip) - arm.position
+				arm.rotation = atan2(-v.x, v.y)
 		return
 	# Breathing while she stands, and the idle gesture on top.
 	var still := 0.0 if is_walking else 1.0
