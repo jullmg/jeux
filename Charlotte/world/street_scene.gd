@@ -53,6 +53,10 @@ var _wind := Wind.new()
 var _animals: Node2D
 var _window_cats: WindowCats
 var _cat_timer := 3.0
+# Cyclists riding by in the traffic lane, from their own random numbers.
+var _traffic: Node2D
+var _bike_rng := RandomNumberGenerator.new()
+var _bike_timer := 4.0
 var _control := PlayerControl.new()
 var _cross_streets: Array[CrossStreet] = []
 # The sidewalk's stretches between cross streets (x from, x to); Charlotte walks one at a time and crosses between them.
@@ -147,7 +151,29 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_follow_charlotte()
 	_spawn_stray_cats(delta)
+	_spawn_cyclists(delta)
 	_push_round_corner(delta)
+
+
+# Now and then someone rides by in the traffic lane, from one end of the view to the other (rarer in winter).
+func _spawn_cyclists(delta: float) -> void:
+	if _traffic == null:
+		return
+	_bike_timer -= delta
+	if _bike_timer > 0.0:
+		return
+	_bike_timer = _bike_rng.randf_range(14.0, 32.0) * (2.5 if Season.is_winter() else 1.0)
+	var bike := Cyclist.random(_bike_rng)
+	bike.direction = 1.0 if _bike_rng.randf() < 0.5 else -1.0
+	var cx := _camera.get_screen_center_position().x
+	bike.position = Vector2(cx - bike.direction * (VIEW.x / 2.0 + 140.0), 712.0)
+	bike.until_x = cx + bike.direction * (VIEW.x / 2.0 + 900.0)
+	bike.scale = Vector2.ONE * 1.15
+	_traffic.add_child(bike)
+	if _bike_rng.randf() < 0.3:
+		get_tree().create_timer(_bike_rng.randf_range(1.0, 2.5)).timeout.connect(func():
+			if is_instance_valid(bike):
+				Sfx.play("bell", bike.global_position, -10.0, 1.4))
 
 
 # Walking into the curb at a corner with the arrow keys, and keeping on pushing for a moment, takes the corner
@@ -877,6 +903,9 @@ func _build_props() -> void:
 	_build_utility_poles()
 	_build_curb_gardens()
 	_build_life()
+	_traffic = Node2D.new()
+	add_child(_traffic)
+	_bike_rng.seed = seed_value + 53
 	for cs in _cross_streets:
 		add_child(CrossStreet.make(CrossStreet.Part.SIGNS, cs))
 	for after in lamps_after:
