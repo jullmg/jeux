@@ -11,7 +11,7 @@ const PORCH_FLOOR := 600.0
 const BASE := 614.0
 const GROUND := 700.0
 const RAIL_H := 48.0
-const VARIANTS := 26
+const VARIANTS := 36
 
 const DEFAULTS := {
 	"kind": "plex", "floors": 2, "width": 700.0,

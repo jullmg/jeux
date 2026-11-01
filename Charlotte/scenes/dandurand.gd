@@ -6,11 +6,11 @@ extends StreetScene
 func _init() -> void:
 	street_key = "dandurand"
 	# Back lanes only open onto the north-south streets (like 6e Avenue), never onto Dandurand.
-	layout = ["dandurand_sud", "rue_5e", "plex_11", "plex_12", "plex_10", "depanneur_front", "rue_6e", "dandurand_nord"]
+	layout = ["dandurand_sud", "rue_5e", "plex_11", "plex_12", "plex_10", "plex_27", "depanneur_front", "rue_6e", "dandurand_nord"]
 	cross_streets = {"rue_5e": 540.0, "rue_6e": 560.0}
 	trees_after = [2, 3]
 	lamps_after = [2]
-	hydrants_at = [5.97]
+	hydrants_at = [6.97]
 	squirrels_at = [3.4]
 	passerby_ages = ["adult"]
 	seed_value = 2891
@@ -26,7 +26,7 @@ func _start_x() -> float:
 		var x := Transition.street_x
 		Transition.street_x = NAN
 		return x
-	return _street_x(5.5)
+	return _street_x(6.5)
 
 
 # 5e Avenue (left) and 6e Avenue (right) seen down their length, both running north from here: just sky that way.

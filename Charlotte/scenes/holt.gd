@@ -7,7 +7,7 @@ extends StreetScene
 func _init() -> void:
 	street_key = "holt"
 	# Dépanneur Oh Bon! on the 6e corner (reference/holt_coin_6eme.png), then the plexes.
-	layout = ["holt_nord", "rue_6e", "ohbon", "plex_14", "plex_15", "plex_16", "rue_5e", "holt_sud"]
+	layout = ["holt_nord", "rue_6e", "ohbon", "plex_14", "plex_15", "plex_16", "plex_28", "rue_5e", "holt_sud"]
 	cross_streets = {"rue_6e": 560.0, "rue_5e": 540.0}
 	trees_after = [2, 4]
 	lamps_after = [3]

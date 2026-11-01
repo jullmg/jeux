@@ -10,12 +10,13 @@ func _init() -> void:
 		"cinq_holt_ouest", "rue_holt",
 		"coin_5e_holt", "plex_17", "plex_18", "ruelle",
 		"plex_19", "plex_20", "plex_21", "plex_22", "plex_23", "plex_24",
+		"plex_29", "plex_30", "plex_31", "plex_32", "plex_33", "plex_34", "plex_35", "plex_36",
 		"ruelle_verte", "plex_25", "plex_26", "coin_5e_dandurand",
 		"rue_dandurand", "ecole",
 	]
 	cross_streets = {"rue_holt": 520.0, "rue_dandurand": 560.0}
-	trees_after = [3, 6, 8, 10, 13]
-	lamps_after = [4, 9, 14]
+	trees_after = [3, 6, 8, 10, 13, 16, 18, 21]
+	lamps_after = [4, 9, 15, 22]
 	hydrants_at = [7.5]
 	racks_at = [10.5]
 	squirrels_at = [6.4, 10.4]

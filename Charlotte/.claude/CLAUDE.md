@@ -47,11 +47,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   buildings, behind people), `_build_extra_props` (curbside, in front of people)).
 - Charlotte's block, every side a `StreetScene` seen from across the road, walking right goes round it clockwise:
   `scenes/main.gd` (6e Avenue, `street_key` "6e": Dandurand left, Holt right), `scenes/holt.gd` (Rue Holt: 6e left, 5e right,
-  plex_13–16), `scenes/cinquieme.gd` (5e Avenue: Holt left, Dandurand right, the school across it; plex_17–26 and both lane
+  plex_13–16, 28), `scenes/cinquieme.gd` (5e Avenue: Holt left, Dandurand right, the school across it; plex_17–26 and 29–36 and both lane
   entrances), `scenes/dandurand.gd` (Rue Dandurand: 5e left, dépanneur Xin-Xin's real front `depanneur_front`, 6e right).
   Cross-street `facing` by Montreal's compass: from 6e they run west (Mount Royal), from Dandurand north, from 5e east,
   from Holt south. New corner/side walls in the generator: `holt_nord`, `holt_sud`, `cinq_holt_ouest`, `coin_5e_holt`,
-  `coin_5e_dandurand`, `dandurand_sud` (`VARIANTS` is 26).
+  `coin_5e_dandurand`, `dandurand_sud` (`VARIANTS` is 36: plex_27 on Dandurand, plex_28 on Holt, plex_29–36 on 5e, counted from the Google map).
 - The 6e/Holt corner follows `reference/6eme_coin_holt.png`, `holt_coin_6eme.png` and `entree_ruelle_6eme_coin_holt.png`:
   generator kinds `corner_holt` (`coin_holt`: long brown three-storey, stepped white lintels, diamonds, the beige
   corrugated annex with its shingle awning, the red corner window), `ohbon` (dépanneur Oh Bon! on Holt: red storefront,
