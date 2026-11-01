@@ -30,6 +30,8 @@ func _start_x() -> float:
 func _build_cross_streets() -> void:
 	var sixth := _cross_street("rue_6e", "6e Avenue", 1.0)
 	sixth.along_name = "Rue Dandurand"
+	# 6e Avenue runs north from here: no mountain that way, just sky.
+	sixth.facing = "north"
 	sixth.left_walls = [
 		{"to": 0.4, "top": _house_top("depanneur_front"), "kind": "plex", "color": Color("#6E3A2E")},
 		{"to": 0.9, "top": 300.0, "kind": "garage", "color": Color("#6B3A2E")},

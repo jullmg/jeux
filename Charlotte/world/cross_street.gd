@@ -38,6 +38,9 @@ var right_walls: Array = []
 ## Plates on the corner sign: the cross street, then the street we're on.
 var street_name := ""
 var along_name := "6e Avenue"
+## Which way the street runs away from us (Montreal's compass, the street grid's "north"): "west" ends on Mount
+## Royal; any other way ends in open sky and a few clouds.
+var facing := "west"
 ## Which corner (left or right edge of the gap) the signs stand on.
 var sign_side := 1.0
 
@@ -50,7 +53,7 @@ var _litter: Array[Color] = Season.litter()
 static func make(which: Part, from: CrossStreet) -> CrossStreet:
 	var cs := CrossStreet.new()
 	cs.part = which
-	for prop in ["x0", "x1", "sidewalk", "school", "left_walls", "right_walls", "street_name", "along_name", "sign_side"]:
+	for prop in ["x0", "x1", "sidewalk", "school", "left_walls", "right_walls", "street_name", "along_name", "facing", "sign_side"]:
 		cs.set(prop, from.get(prop))
 	return cs
 
@@ -94,7 +97,7 @@ func _draw() -> void:
 
 func _draw_vista() -> void:
 	var vp := _vp()
-	_mount_royal()
+	_horizon()
 	# The street and its sidewalks, all the way to the horizon.
 	_quad(Vector2(x0, FACADE_Y), Vector2(x1, FACADE_Y), 0.0, FAR, Color("#E9EEF2") if Season.is_winter() else CONCRETE)
 	_quad(Vector2(x0 + sidewalk, FACADE_Y), Vector2(x1 - sidewalk, FACADE_Y), 0.0, FAR, ASPHALT)
@@ -121,11 +124,9 @@ func _draw_vista() -> void:
 			_tree(Vector2(tx, FACADE_Y), d + (0.3 if side > 0.0 else 0.0))
 
 
-# Mount Royal on the horizon at the end of the street: a long hazy hill in the season's colours, the cross
-# on its summit. First, open sky over the gap hides the distant city behind it (nothing stands behind the
-# mountain); the top fades out so the clouds above stay.
-func _mount_royal() -> void:
-	var vp := _vp()
+# The end of the street: open sky over the gap hides the distant city behind it (the top fades out so the clouds
+# above stay); then Mount Royal if the street runs west, or just a few soft clouds low over the horizon.
+func _horizon() -> void:
 	var sky := Season.sky()
 	var grad := Gradient.new()
 	grad.offsets = PackedFloat32Array([0.0, 0.35, 0.62, 0.82, 1.0])
@@ -145,6 +146,25 @@ func _mount_royal() -> void:
 		for j in 3:
 			draw_polygon(PackedVector2Array([Vector2(xs[j], ya), Vector2(xs[j + 1], ya), Vector2(xs[j + 1], yb), Vector2(xs[j], yb)]),
 				PackedColorArray([Color(ca, ca.a * fades[j]), Color(ca, ca.a * fades[j + 1]), Color(cb, cb.a * fades[j + 1]), Color(cb, cb.a * fades[j])]))
+	if facing == "west":
+		_mount_royal()
+	else:
+		_far_clouds()
+
+
+# Soft clouds drifting low over the end of a street that doesn't face the mountain.
+func _far_clouds() -> void:
+	var vp := _vp()
+	var white := Color(1.0, 0.98, 0.95, 0.85).lerp(Season.sky()[2], 0.3)
+	for k in 3:
+		var c := vp + Vector2([-170.0, 40.0, 210.0][k], [-120.0, -170.0, -95.0][k])
+		for p in [Vector2(-34, 6), Vector2(-12, -10), Vector2(14, -14), Vector2(36, 2), Vector2(0, 8)]:
+			draw_circle(c + p * (1.0 - k * 0.15), 22.0 * (1.0 - k * 0.15), white)
+
+
+# Mount Royal on the horizon: a long hazy hill in the season's colours, the cross on its summit.
+func _mount_royal() -> void:
+	var vp := _vp()
 	var pts := PackedVector2Array()
 	for i in 25:
 		var t := i / 24.0
