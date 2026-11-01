@@ -550,8 +550,8 @@ func _walls_along(script_path: String, from_gap: String, direction: int, ours :=
 	if ours != "" and not walls.is_empty() and walls[0].kind != "gap":
 		walls[0].top = _house_top(ours)
 		walls[0].color = _wall_color(_tex(ours))
-	# The next cross street, then the next block's plexes on into the distance.
-	walls.append({"to": d + 0.5, "kind": "gap"})
+	# The next cross street (an open "cross" gap, with its crosswalk), then the next block's plexes into the distance.
+	walls.append({"to": d + 0.5, "kind": "cross"})
 	walls.append({"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": last.lerp(Color("#B5603F"), 0.5)})
 	return walls
 

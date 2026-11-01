@@ -49,6 +49,8 @@ var sign_side := 1.0
 
 var _rng := RandomNumberGenerator.new()
 var _tree_tex: Array[Texture2D] = []
+# Depth ranges where the next streets cross ours down the vista (from the walls' "cross" gaps).
+var _crossings: Array[Vector2] = []
 # This season's canopy colours and what lies in the gutters.
 var _foliage: Array[Color] = Season.foliage()
 var _litter: Array[Color] = Season.litter()
@@ -125,8 +127,10 @@ func _draw_vista() -> void:
 	_street_details()
 	_walls(left_walls, x0, -1.0)
 	_walls(right_walls, x1, 1.0)
+	_far_crosswalks()
 	_haze_band(3.0, 9.0, 0.0, 0.35)
 	_haze_band(9.0, FAR, 0.35, 0.6)
+	_lamps()
 	# Street trees on both sidewalks, far to near, then the utility poles along the curb with their wires.
 	var k := 0
 	for d in [14.0, 9.5, 6.6, 4.6, 3.2, 2.2, 1.3]:
@@ -135,6 +139,39 @@ func _draw_vista() -> void:
 			_tree(Vector2(tx, FACADE_Y), d + (0.3 if side > 0.0 else 0.0), k)
 			k += 1
 	_poles()
+
+
+# Where the next streets cross ours, further down: the road runs on through, its crosswalks painted across it.
+func _far_crosswalks() -> void:
+	var l := x0 + sidewalk
+	var r := x1 - sidewalk
+	for c in _crossings:
+		for edge: float in [c.x + 0.05, c.y - 0.12]:
+			if edge > DETAIL:
+				continue
+			var n := 9
+			for i in n:
+				var a := lerpf(l, r, (i + 0.2) / n)
+				var b := lerpf(l, r, (i + 0.75) / n)
+				draw_colored_polygon(PackedVector2Array([_at(Vector2(a, FACADE_Y), edge), _at(Vector2(b, FACADE_Y), edge),
+					_at(Vector2(b, FACADE_Y), edge + 0.07), _at(Vector2(a, FACADE_Y), edge + 0.07)]), Color(1, 1, 1, 0.75))
+
+
+# Street lamps along the right curb, receding (the poles are on the left).
+func _lamps() -> void:
+	var curb := x1 - sidewalk + 8.0
+	for d: float in [2.6, 5.6, 9.5, 14.0]:
+		var s := 1.0 / (1.0 + d)
+		var foot := _at(Vector2(curb, FACADE_Y), d)
+		var top := _at(Vector2(curb, FACADE_Y - 330.0), d)
+		var metal := Color("#6B7075").lerp(HAZE, clampf(d / FAR, 0.0, 0.6))
+		draw_line(foot, top, metal, maxf(1.0, 7.0 * s))
+		var arm := top + Vector2(-50.0, 6.0) * s
+		draw_line(top, arm, metal, maxf(1.0, 5.0 * s))
+		draw_set_transform(arm, 0.0, Vector2(1.0, 0.45))
+		draw_circle(Vector2.ZERO, 16.0 * s, metal.darkened(0.2))
+		draw_set_transform(Vector2.ZERO)
+		draw_circle(arm + Vector2(0, 4.0) * s, 7.0 * s, Color("#FFF1C9"))
 
 
 # The sidewalks' slab joints, the gutters along the curbs, a manhole cover in the road.
@@ -272,10 +309,28 @@ func _wall_quad(front_x: float, top: float, bottom: float, d0: float, d1: float,
 
 
 func _walls(walls: Array, front_x: float, side: float) -> void:
+	# First the end walls: a building taller than the one before it (or right after a lane or a cross street) shows
+	# its end wall, square to the street and facing us, above that one's roof; without it it looks like a flat
+	# cut-out. Drawn far to near and before the facades, so the nearer facades hide all but what rises above them.
+	var ends := []
+	var d := 0.0
+	var prev_top := FACADE_Y
+	for w in walls:
+		var open_gap: bool = w.kind in ["gap", "cross"]
+		if not open_gap and float(w.top) < prev_top - 2.0 and d > 0.0:
+			ends.append([d, float(w.top), prev_top, w.color])
+		prev_top = FACADE_Y if open_gap else float(w.top)
+		d = w.to
+	ends.reverse()
+	for e in ends:
+		_end_wall(front_x, side, e[1], e[2], e[0], e[3])
 	var d0 := 0.0
 	for w in walls:
 		var d1: float = w.to
 		match w.kind:
+			"cross":
+				# The next street across: open, its crosswalk painted over our road (see _far_crosswalks).
+				_crossings.append(Vector2(d0, d1))
 			"gap":
 				# A back lane: a tree over a board fence, the lane's opening between.
 				if not _tree_tex.is_empty() and d0 < DETAIL:
@@ -306,8 +361,33 @@ func _walls(walls: Array, front_x: float, side: float) -> void:
 				_wall_quad(front_x, top - 6.0, top + 2.0, d0, d1, col.lightened(0.2))
 				# Where one building ends and the next begins.
 				draw_line(_at(Vector2(front_x, top), d0), _at(Vector2(front_x, FACADE_Y), d0), col.darkened(0.5), maxf(1.0, 2.5 / (1.0 + d0)))
+				# A chimney or a vent box on the near roofs, set back from the edge.
+				if d0 < 4.0 and w.kind == "plex":
+					var cd := d0 + (d1 - d0) * 0.3
+					var cx := front_x + side * 70.0
+					var chim := PackedVector2Array([_at(Vector2(cx, top - 34.0), cd), _at(Vector2(cx + side * 26.0, top - 34.0), cd),
+						_at(Vector2(cx + side * 26.0, top), cd), _at(Vector2(cx, top), cd)])
+					draw_colored_polygon(chim, col.darkened(0.2))
+					draw_colored_polygon(PackedVector2Array([chim[0] + Vector2(0, -3), chim[1] + Vector2(0, -3), chim[1], chim[0]]), Color("#5A5E62"))
 				_wall_details(w, front_x, top, d0, d1)
 		d0 = d1
+
+
+# A building's end wall, square to the street at depth d (parallel to the screen), from its roof (top) down to `bottom`,
+# running back from the facade line by a building's depth; brick courses and the coping on top.
+func _end_wall(front_x: float, side: float, top: float, bottom: float, d: float, col: Color) -> void:
+	var back := front_x + side * 360.0
+	var face := col.lightened(0.04)
+	draw_colored_polygon(PackedVector2Array([_at(Vector2(front_x, top), d), _at(Vector2(back, top), d),
+		_at(Vector2(back, bottom), d), _at(Vector2(front_x, bottom), d)]), face)
+	if d < DETAIL:
+		var y := top + 22.0
+		while y < bottom - 2.0:
+			draw_line(_at(Vector2(front_x, y), d), _at(Vector2(back, y), d), Color(face.darkened(0.3), 0.35), 1.0)
+			y += 13.0
+	draw_colored_polygon(PackedVector2Array([_at(Vector2(front_x, top - 6.0), d), _at(Vector2(back, top - 6.0), d),
+		_at(Vector2(back, top + 2.0), d), _at(Vector2(front_x, top + 2.0), d)]), col.darkened(0.35))
+	draw_line(_at(Vector2(front_x, top), d), _at(Vector2(front_x, bottom), d), col.darkened(0.5), maxf(1.0, 2.0 / (1.0 + d)))
 
 
 func _wall_details(w: Dictionary, front_x: float, top: float, d0: float, d1: float) -> void:
