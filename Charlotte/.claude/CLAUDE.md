@@ -76,15 +76,18 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Real-world rules (from the Google Maps view): back lanes (ruelles) only open onto the north-south avenues like 6e
   Avenue, never onto Dandurand or Holt (no "gap" walls or `ruelle` buildings there). Every intersection has a street-name
   post at both corners (`CrossStreet` SIGNS): the plate of the street we're on faces us, the cross street's plate is
-  slanted along that street toward its vanishing point. Overhead wires run pole to pole across the whole view.
+  slanted along that street toward its vanishing point. Overhead wires run pole to pole across the whole view:
+  `world/utility_poles.gd` (`UtilityPoles`, one `_draw` node) draws the wooden poles (crossarms, insulators, transformers,
+  staples and torn posters) and all wires; `StreetScene._build_utility_poles()` puts them at the back of the sidewalk
+  (foot y 612, behind people), every 650-780 px clear of cross streets, trees, lamps, hydrants, racks (own RNG); the lane
+  uses them too. Lost-cat posters are stapled to the pole nearest the street's second lamp (`_poster_spot`).
   `layout` runs: `ecole` (école Saint-Jean-de-Brébeuf, across Dandurand), `rue_dandurand`, Charlotte's block (`depanneur`: the
   side of dépanneur Xin-Xin, which fronts Dandurand; `garages`; `ruelle_verte`, the green lane with its sign; … `coin_holt`),
   `rue_holt`, `coin_holt_est`. The first three buildings of the block are drawn from the photos in `reference/` (the user wants
   every detail as close to the pictures as possible). The cross-street vistas run to the horizon with Mount Royal at the end. Entries in `cross_streets` are gaps (width in px), not SVGs: `CrossStreet`
   (`world/cross_street.gd`) draws them in one-point perspective as three nodes in the draw order: `VISTA` (before the houses:
   receding street, walls along it from `left_walls`/`right_walls`, street trees), `GROUND` (after `Street`: asphalt through the
-  sidewalk, curb ramps, crosswalk, yellow in the school zone) and `SIGNS` (with the props: plates, stop/school sign, utility pole
-  and wires). Charlotte's bounds stop at the curbs (`CrossStreet.road_x`). Passersby already walk across on the crosswalks. `reference/` has photos of the Dandurand corner and `google_map_immediate_area.png`.
+  sidewalk, curb ramps, crosswalk, yellow in the school zone) and `SIGNS` (with the props: plates, stop/school sign). Charlotte's bounds stop at the curbs (`CrossStreet.road_x`). Passersby already walk across on the crosswalks. `reference/` has photos of the Dandurand corner and `google_map_immediate_area.png`.
 - `scenes/intro.gd` builds a shorter copy of the same street (5 houses around Charlotte's duplex), plus the logo and start button.
   Its geometry helpers mirror `main.gd`, so a layout/geometry change in one may need the same change in the other.
 - Interiors are built from reusable parts, meant for future house insides too:

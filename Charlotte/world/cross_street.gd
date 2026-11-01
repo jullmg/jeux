@@ -6,7 +6,8 @@ extends Node2D
 ##    the walls of the buildings along it, street trees, the street running to the horizon with
 ##    Mount Royal far away in the haze.
 ##  - GROUND (added after Street): the asphalt cutting through the 6e sidewalk, curb ramps, crosswalk.
-##  - SIGNS (added with the props): poles and signs at the corner.
+##  - SIGNS (added with the props): the street-name posts and the stop or school sign at the corner (the utility
+##    poles and wires are StreetScene's, see UtilityPoles).
 ## Every point is drawn as its projection at the facade line (y FACADE_Y) shrunk toward the vanishing
 ## point by 1 / (1 + depth).
 
@@ -342,7 +343,6 @@ func _draw_ground() -> void:
 
 func _draw_signs() -> void:
 	var font := ThemeDB.fallback_font
-	_wires()
 	# A name post at both corners of the intersection; the stop or school-zone sign only on `sign_side`'s.
 	for side in [-1.0, 1.0]:
 		# At the corner of the sidewalk, by the curb, clear of the shop signs on the facades.
@@ -374,24 +374,6 @@ func _plate(r: Rect2, text: String, font: Font) -> void:
 	draw_rect(r, Color.WHITE)
 	draw_rect(r.grow(-2.5), Color("#1D4F91"))
 	draw_string(font, Vector2(r.position.x, r.position.y + 19), text, HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 15, Color.WHITE)
-
-
-# Wooden utility poles every few hundred px, the wires sagging from one to the next, far past both ends of the view.
-func _wires() -> void:
-	var pole_x := _fan(x0 + 50.0 if sign_side > 0.0 else x1 - 50.0, 600.0)
-	draw_rect(Rect2(pole_x - 5, 120, 10, 482), Color("#6B5644"))
-	draw_rect(Rect2(pole_x - 5, 120, 3, 482), Color("#8A735E"))
-	draw_rect(Rect2(pole_x - 26, 136, 52, 6), Color("#5A4636"))
-	var span := 700.0
-	for i in 3:
-		var wy := 140.0 + i * 4.0
-		for k in range(-5, 5):
-			var a := pole_x + k * span
-			var pts := PackedVector2Array()
-			for t in 9:
-				var u := t / 8.0
-				pts.append(Vector2(a + u * span, wy + 4.0 * sin(u * PI) * 6.0))
-			draw_polyline(pts, Color(0.12, 0.1, 0.1, 0.7), 1.2, true)
 
 
 func _traffic_sign(px: float, font: Font) -> void:

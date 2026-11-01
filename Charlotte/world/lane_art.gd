@@ -445,16 +445,3 @@ static func junction(rng: RandomNumberGenerator, w: float) -> ImageTexture:
 	s += _vine(rng, 0.0, 50.0, H - 175.0, vine_colors())
 	s += _vine(rng, w - 60.0, 50.0, H - 175.0, vine_colors())
 	return _tex(w, s)
-
-
-## A wooden utility pole: canvas 80 wide, top at y 20, foot at y 600; crossarm with insulators.
-static func pole(transformer := false) -> ImageTexture:
-	var s := _rect(36, 20, 9, H - 20, "#6B5844") + _rect(36, 20, 3, H - 20, "#8C7664")
-	s += _rect(6, 52, 68, 7, "#5A4A3A")
-	for x in [10.0, 30.0, 50.0, 68.0]:
-		s += _rect(x - 2, 42, 5, 10, "#8FA9B8")
-	for y in range(160, 520, 34):
-		s += _rect(44, y, 6, 3, "#3A3A3A")
-	if transformer:
-		s += _rect(46, 90, 26, 46, "#7E8790", 'rx="6"') + _rect(48, 86, 22, 6, "#5E6670")
-	return PropArt.tex(PropArt._svg(80, H, s))

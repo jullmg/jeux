@@ -189,21 +189,19 @@ func _build_fronts() -> void:
 	add_child(bike)
 
 
-# Wooden poles along the far edge of the lane, wires looping from one to the next.
+# Wooden poles along the far edge of the lane, wires from one to the next (no service drops: the galleries' own).
 func _build_poles() -> void:
 	var x := 180.0
-	var k := 0
 	while x < _street_width - 100.0:
-		var pole := _sprite(LaneArt.pole(k % 3 == 1), 1.0)
-		pole.position = Vector2(x - 40.0, FENCE_Y + 10.0 - LaneArt.H)
-		add_child(pole)
 		_poles.append(x)
 		x += _rng.randf_range(820.0, 980.0)
-		k += 1
-	var wires := _Wires.new()
-	wires.poles = _poles
-	wires.width = _street_width
-	add_child(wires)
+	var poles := UtilityPoles.new()
+	poles.xs = _poles
+	poles.foot = FENCE_Y + 6.0
+	poles.width = _street_width
+	poles.drop_y = NAN
+	poles.seed_value = seed_value
+	add_child(poles)
 
 
 # Blurred leaf piles and shrubs right in front of the camera (no street signs back here).
@@ -312,29 +310,6 @@ class _Ground:
 		for k in 8:
 			var d := Vector2.from_angle(TAU * k / 8.0)
 			draw_line(sun + d * 13.0, sun + d * 19.0, chalk[2], 2.0)
-
-
-# Wires sagging from pole to pole, and off both ends.
-class _Wires:
-	extends Node2D
-	var poles: Array[float] = []
-	var width := 4000.0
-
-	func _draw() -> void:
-		var tops := [12.0 + 42.0, 12.0 + 42.0, 12.0 + 42.0, 12.0 + 120.0]
-		var xs: Array[float] = [-200.0]
-		xs.append_array(poles)
-		xs.append(width + 200.0)
-		for w in 4:
-			var off: float = [-30.0, -10.0, 10.0, 0.0][w]
-			for i in xs.size() - 1:
-				var a := Vector2(xs[i] + off, tops[w])
-				var b := Vector2(xs[i + 1] + off, tops[w])
-				var pts := PackedVector2Array()
-				for k in 17:
-					var t := k / 16.0
-					pts.append(a.lerp(b, t) + Vector2(0, sin(t * PI) * (26.0 + w * 4.0)))
-				draw_polyline(pts, Color(0.12, 0.12, 0.14, 0.85), 1.6, true)
 
 
 # Clotheslines from the back galleries' pulleys, running across the lane toward us (to the poles on our side,

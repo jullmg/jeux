@@ -56,6 +56,8 @@ var _control := PlayerControl.new()
 var _cross_streets: Array[CrossStreet] = []
 # The sidewalk's stretches between cross streets (x from, x to); Charlotte walks one at a time and crosses between them.
 var _segments: Array[Vector2] = []
+# The utility poles' x, left to right.
+var _pole_xs: Array[float] = []
 # The crossing guard at the school's crosswalk, if any (key: the CrossStreet).
 var _guards := {}
 # Where Charlotte started (worked out once: _start_x() may consume Transition's hand-over).
@@ -81,6 +83,7 @@ func _ready() -> void:
 	for cs in _cross_streets:
 		add_child(CrossStreet.make(CrossStreet.Part.GROUND, cs))
 	_build_sidewalk_props()
+	_build_utility_poles()
 	var trees := _tree_textures()
 	_build_tree_shadows(trees)
 	_build_passersby()
@@ -324,9 +327,14 @@ func _found_x(at: float) -> float:
 	return _street_x(at)
 
 
-## Where this street's "PERDU" poster hangs (its centre).
+## Where this street's "PERDU" poster hangs (its centre): stapled to the utility pole nearest the second lamp.
 func _poster_spot() -> Vector2:
-	return Vector2(_starts[lamps_after[mini(1, lamps_after.size() - 1)] + 1], 518.0)
+	var near := _starts[lamps_after[mini(1, lamps_after.size() - 1)] + 1]
+	var best := _pole_xs[0]
+	for x in _pole_xs:
+		if absf(x - near) < absf(best - near):
+			best = x
+	return Vector2(best, 528.0)
 
 
 ## x of a plex's front door (art/decor/doors.json, from the generator).
@@ -489,6 +497,44 @@ func _build_window_cats() -> void:
 	_window_cats = WindowCats.new()
 	_window_cats.setup(houses)
 	add_child(_window_cats)
+
+
+# ── Utility poles ───────────────────────────────────────────────
+
+## Wooden poles at the back of the sidewalk (behind the people), every 650-780 px, clear of the cross streets, the
+## trees, lamps, hydrants and bike racks; the wires run from one to the next. Their own random numbers, so the
+## street's other draws don't change.
+func _build_utility_poles() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + 99
+	var blocked: Array[Vector2] = []
+	for cs in _cross_streets:
+		blocked.append(Vector2(cs.x0 - 40.0, cs.x1 + 40.0))
+	for after in trees_after + lamps_after:
+		blocked.append(Vector2(_starts[after + 1] - 45.0, _starts[after + 1] + 45.0))
+	for at in hydrants_at:
+		blocked.append(Vector2(_street_x(at) - 35.0, _street_x(at) + 35.0))
+	for at in racks_at:
+		blocked.append(Vector2(_street_x(at) - 30.0, _street_x(at) + 190.0))
+	var x := 160.0
+	while true:
+		var moved := true
+		while moved:
+			moved = false
+			for b in blocked:
+				if x >= b.x and x <= b.y:
+					x = b.y + 1.0
+					moved = true
+		if x > _street_width - 100.0:
+			break
+		_pole_xs.append(x)
+		x += rng.randf_range(650.0, 780.0)
+	var poles := UtilityPoles.new()
+	poles.xs = _pole_xs
+	poles.foot = 612.0
+	poles.width = _street_width
+	poles.seed_value = seed_value
+	add_child(poles)
 
 
 # ── Trees ───────────────────────────────────────────────────────
