@@ -203,6 +203,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   licences): `Sfx.play(name, world_position = Vector2.INF, volume_db, pitch)`; names include steps (`Sfx.step_for(outside)`
   picks wood / street / leaves / snow by season), door, click, tv, fridge, miam, meow, purr, bark, squeak, nibble, page,
   swoosh, pop, chime, goodnight, bird, wind. `Sfx.ambience(scene)` adds birdsong outdoors (not in winter).
+- `ui/game_menu.gd` (`GameMenu` autoload, CanvasLayer 78): ☰ button top-left or Escape (unless the notebook is open)
+  pauses and opens Reprendre / Options (Musique and Effets sonores volume sliders on those buses, Plein écran) /
+  Écran titre / Quitter le jeu (both save through the scene's `Saver` first). Options in `user://settings.cfg` [options].
 - `ui/mute_button.gd` (`MuteButton` autoload): speaker button top-right on every screen, or the M key, mutes the Master bus;
   remembered in `user://settings.cfg`.
 - Buses "Effets" (effects) and "Musique". Music is the user's own tracks (made with Suno), never generated in code:
