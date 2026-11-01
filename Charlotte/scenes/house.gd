@@ -51,6 +51,7 @@ var _plants := {}
 var _can: Sprite2D
 # The can in her hands while she carries it, and whether she is pouring.
 var _held_can: Sprite2D
+var _can_shadows: Array[Node] = []
 var _pouring := false
 
 
@@ -156,7 +157,10 @@ func _build_chores() -> void:
 		var soil_x := _soil(id).x
 		spot.approach = func(from_x: float) -> float: return soil_x - POUR_REACH if from_x < soil_x else soil_x + POUR_REACH
 		add_child(spot)
+	var before := get_child_count()
 	_can = _put(InteriorArt.watering_can(), CAN_X, 606.0, 0.55, "floor")
+	# Its shadows (cast and on the floor) go and come back with it.
+	_can_shadows = get_children().slice(before, get_child_count() - 1)
 	add_child(DoorSpot.make(Rect2(_can.position - Vector2(10, 20), Vector2(86, 70)), _take_can, CAN_X + 30.0))
 	add_child(QuestMark.make(_can.position + Vector2(33, -40), func() -> bool:
 		return Quests.active("plants") and not GameState.flags.get("has_can", false), 0.8))
@@ -221,7 +225,7 @@ func _take_can() -> void:
 
 
 func _hold_can() -> void:
-	_can.visible = false
+	_show_can(false)
 	var held := Sprite2D.new()
 	_held_can = held
 	held.texture = _can.texture
@@ -230,6 +234,12 @@ func _hold_can() -> void:
 	held.offset = Vector2(30, -4)
 	_charlotte.carry(held)
 	_charlotte.carry_grip = CAN_HANDLE
+
+
+func _show_can(shown: bool) -> void:
+	_can.visible = shown
+	for shadow in _can_shadows:
+		shadow.visible = shown
 
 
 func _water(id: String) -> void:
@@ -282,7 +292,7 @@ func _water(id: String) -> void:
 		if last:
 			_charlotte.carry(null)
 			_held_can = null
-			_can.visible = true
+			_show_can(true)
 			_say(_charlotte, "Toutes les plantes ont bu !", 300.0)
 			Quests.complete("plants")
 		else:
