@@ -109,6 +109,9 @@ func _build() -> void:
 
 # Contact shadow, plus a longer soft one thrown to the right by the low sun on the left.
 func _draw() -> void:
+	# On a bike the feet are off the ground; the bike throws the shadow.
+	if riding:
+		return
 	var w := 50.0 * float(_rig.get("sx", 1.0))
 	draw_set_transform(Vector2(w * 0.9, 3), 0.0, Vector2(1.9, 0.2))
 	draw_circle(Vector2.ZERO, w, Color(0.15, 0.08, 0.05, 0.12))
@@ -149,6 +152,15 @@ func carry(thing: Node2D) -> void:
 
 func is_holding() -> bool:
 	return _held != null and is_instance_valid(_held)
+
+
+## Puts `node` into the puppet between its far and near legs (a bike's frame), in the puppet's parent's space. The
+## riding pose is fixed, so the node's transform is set once.
+func add_between_legs(node: Node2D) -> void:
+	var near: Node2D = _ride_legs[2] if _ride_legs.size() == 4 else _leg_front
+	_body.add_child(node)
+	_body.move_child(node, near.get_index())
+	node.transform = (transform * _body.transform).affine_inverse()
 
 
 # On a bike: each foot on its pedal going round in front of and below the hip, the knee bending forward (two-bone IK).

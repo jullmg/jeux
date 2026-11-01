@@ -293,6 +293,13 @@ func _hat() -> String:
 			for x in range(36, 192, 10):
 				s += _f('<path d="M%d 68 V86" stroke="{hat}" stroke-width="3" stroke-linecap="round" opacity="0.6"/>' % x)
 			return s + _f('<circle cx="112" cy="8" r="17" fill="{hat_light}" stroke="{hat_line}" stroke-width="2.5"/>')
+		"helmet":
+			# A bike helmet: a long shell with vents, a little visor at the front, the strap under the ear.
+			return _f('<path d="M168 90 L172 128" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"/>'
+				+ '<path d="M22 100 C12 52 56 10 116 8 C170 6 206 40 206 84 L216 90 C206 98 192 94 186 90 C150 80 84 86 22 100 Z" fill="{hat}" stroke="{hat_line}" stroke-width="3" stroke-linejoin="round"/>'
+				+ '<path d="M30 92 C80 80 150 76 204 86" stroke="#2B2B2B" stroke-width="5" fill="none" stroke-linecap="round"/>'
+				+ '<path d="M62 46 Q88 30 112 30 M76 66 Q110 48 148 52 M134 22 Q160 24 178 40" stroke="{hat_line}" stroke-width="8" fill="none" stroke-linecap="round"/>'
+				+ '<path d="M40 70 Q48 34 92 20" stroke="{hat_light}" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.8"/>')
 		"cap":
 			return _f('<path d="M36 94 C34 44 72 22 112 22 C152 22 188 44 188 94 Z" fill="{hat}" stroke="{hat_line}" stroke-width="3"/>'
 				+ '<path d="M150 84 Q200 80 228 96 Q196 102 150 96 Z" fill="{hat_line}" stroke="{hat_line}" stroke-width="2"/>'
