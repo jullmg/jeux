@@ -785,7 +785,25 @@ func _build_tree_shadows(trees: Array[Texture2D]) -> void:
 		shadow.position = _tree_origin(i) + Vector2(80, 14)
 		shadow.modulate = Color(0.22, 0.1, 0.12, 0.2)
 		shadow.material = _sway(7.0, i * 1.7)
-		add_child(shadow)
+		# Only on the walls: clipped to the facades' outline (never over their roofs into the sky, nor a street gap).
+		var x0 := shadow.position.x - 20.0
+		var x1 := shadow.position.x + trees[i].get_width() * _tree_scales[i] + 20.0
+		var outline := PackedVector2Array()
+		for j in layout.size():
+			var a := maxf(_starts[j], x0)
+			var b := minf(_starts[j + 1], x1)
+			if b <= a:
+				continue
+			var top := CURB_Y if cross_streets.has(layout[j]) else _house_origin(j).y + 40.0 * HOUSE_SCALE
+			outline.append_array([Vector2(a, top), Vector2(b, top)])
+		if outline.is_empty():
+			continue
+		outline.append_array([Vector2(outline[-1].x, CURB_Y + 40.0), Vector2(outline[0].x, CURB_Y + 40.0)])
+		var clip := Polygon2D.new()
+		clip.polygon = outline
+		clip.clip_children = CanvasItem.CLIP_CHILDREN_ONLY
+		add_child(clip)
+		clip.add_child(shadow)
 
 
 func _build_trees(trees: Array[Texture2D]) -> void:
