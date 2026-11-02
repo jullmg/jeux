@@ -1164,3 +1164,91 @@ static func wall_clock() -> ImageTexture:
 		s += '<path d="M%.1f %.1f L%.1f %.1f" stroke="#7A5A66" stroke-width="%s" stroke-linecap="round"/>' % [40 + d.x * 23, 40 + d.y * 23, 40 + d.x * 27, 40 + d.y * 27, "3" if k % 3 == 0 else "1.6"]
 	s += '<path d="M40 40 L28 30" stroke="#5A3A4A" stroke-width="4" stroke-linecap="round"/><path d="M40 40 L58 28" stroke="#5A3A4A" stroke-width="3" stroke-linecap="round"/><circle cx="40" cy="40" r="3" fill="#C2406E"/>'
 	return tex(80, 80, s)
+
+
+# ── Kitchen and entrance decor (any house) ───────────────────
+
+## Canvas 76x96: a paper wall calendar (red header, spiral, grid of days, a few circled, a star sticker) with a pencil on a string.
+static func wall_calendar() -> ImageTexture:
+	var s := '<rect x="2" y="2" width="72" height="92" rx="3" fill="#FFFDF6" stroke="#B9B4AA" stroke-width="2"/>'
+	s += '<rect x="2" y="2" width="72" height="30" rx="3" fill="#E5604D"/><circle cx="38" cy="14" r="9" fill="#FFD7A8" opacity="0.9"/><path d="M26 22 Q38 8 50 22 Z" fill="#7BB661"/>'
+	for k in 8:
+		s += '<circle cx="%d" cy="4" r="2.2" fill="#6E6E6E"/>' % (10 + k * 8)
+	for row in 5:
+		for col in 7:
+			var x := 8.0 + col * 9.4
+			var y := 40.0 + row * 10.4
+			s += '<rect x="%.1f" y="%.1f" width="6.4" height="2.2" rx="1" fill="%s" opacity="0.75"/>' % [x, y, "#D9453B" if col == 6 else "#8A8478"]
+	s += '<circle cx="27" cy="52" r="5.4" fill="none" stroke="#3E86C8" stroke-width="1.6"/><circle cx="64" cy="73" r="5.4" fill="none" stroke="#3E86C8" stroke-width="1.6"/>'
+	s += '<path d="M45 83 l1.8 3.8 4.2 .5 -3.1 2.8 .9 4.1 -3.8 -2.1 -3.8 2.1 .9 -4.1 -3.1 -2.8 4.2 -.5 z" fill="#FFD23F" stroke="#C99410" stroke-width="1"/>'
+	s += '<path d="M72 10 Q82 30 74 60" stroke="#B9B4AA" stroke-width="1.5" fill="none"/>'
+	return tex(84, 96, s)
+
+
+## Canvas 300x150: what sits on top of a fridge and the cabinet beside it: a bread box, cereal boxes and a fruit basket on the
+## fridge (floor of the picture at y 150), two baskets, a trailing plant and a cookie jar on the cabinet (top at y 80, x 118–270).
+static func kitchen_toppers() -> ImageTexture:
+	var s := _defs()
+	# Fridge top (x 4–108).
+	s += '<rect x="10" y="118" width="48" height="32" rx="4" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2"/><path d="M10 128 H58" stroke="#7E5E3A" stroke-width="1.5"/><rect x="28" y="122" width="12" height="3" rx="1.5" fill="#7E5E3A"/>'
+	s += '<rect x="62" y="102" width="20" height="48" rx="2" fill="#F2C94C" stroke="#B8901C" stroke-width="2"/><circle cx="72" cy="122" r="6" fill="#E5604D"/><path d="M62 112 H82" stroke="#B8901C" stroke-width="1.5"/>'
+	s += '<rect x="84" y="110" width="18" height="40" rx="2" fill="#6AB0DE" stroke="#2F6F9F" stroke-width="2"/><circle cx="93" cy="128" r="5" fill="#FFFFFF" opacity="0.85"/>'
+	# Cabinet top (top edge at y 80): baskets and a jar.
+	s += '<path d="M126 80 L130 50 H168 L172 80 Z" fill="#D7B07A" stroke="#8A6A40" stroke-width="2"/><path d="M128 64 H170 M127 72 H171" stroke="#8A6A40" stroke-width="1.4"/>'
+	for k in 6:
+		s += '<path d="M%d 50 V80" stroke="#B88F58" stroke-width="1.2" opacity="0.8"/>' % (134 + k * 6)
+	s += '<path d="M138 50 Q132 30 146 22 M150 50 Q152 26 162 18 M160 50 Q172 34 168 24" stroke="#4E8F3A" stroke-width="3" fill="none"/>'
+	for lf in [[146, 22], [162, 18], [168, 24], [140, 36], [158, 34]]:
+		s += '<ellipse cx="%d" cy="%d" rx="9" ry="5" fill="#6FB153" stroke="#3E7A2C" stroke-width="1.4" transform="rotate(-25 %d %d)"/>' % [lf[0], lf[1], lf[0], lf[1]]
+	s += '<path d="M168 52 Q176 70 172 98 M156 52 Q150 72 154 100" stroke="#5FA845" stroke-width="3" fill="none"/>'
+	s += '<path d="M190 80 L194 56 H226 L230 80 Z" fill="#C9A06A" stroke="#7E5E3A" stroke-width="2"/><path d="M192 66 H228" stroke="#7E5E3A" stroke-width="1.4"/><ellipse cx="210" cy="56" rx="16" ry="4" fill="#E7C98D" stroke="#7E5E3A" stroke-width="1.5"/>'
+	s += '<path d="M236 80 Q232 58 246 56 Q260 58 256 80 Z" fill="#F2A7C9" stroke="#B5557F" stroke-width="2"/><rect x="238" y="50" width="16" height="8" rx="4" fill="#F7F5EF" stroke="#B5557F" stroke-width="2"/><circle cx="246" cy="46" r="4" fill="#B5557F"/>'
+	s += '<circle cx="246" cy="70" r="6" fill="#FFFFFF" opacity="0.8"/>'
+	return tex(300, 150, s)
+
+
+## Canvas 150x64: a red-and-white gingham valance with scalloped edge and two tie-backs, for the kitchen door's glass.
+static func kitchen_curtain() -> ImageTexture:
+	var s := '<rect x="4" y="2" width="142" height="4" rx="2" fill="#8A6A40"/>'
+	s += '<path d="M6 6 H144 V32 Q135 46 125 32 Q115 46 105 32 Q95 46 85 32 Q75 46 65 32 Q55 46 45 32 Q35 46 25 32 Q15 46 6 32 Z" fill="#FFFFFF" stroke="#C9776A" stroke-width="1.5"/>'
+	for x in range(6, 144, 12):
+		s += '<rect x="%d" y="7" width="6" height="24" fill="#E5604D" opacity="0.55"/>' % x
+	for y in [9, 21]:
+		s += '<rect x="7" y="%d" width="136" height="6" fill="#E5604D" opacity="0.4"/>' % y
+	s += '<path d="M6 32 L6 62 Q16 54 22 36 Z" fill="#FFFFFF" stroke="#C9776A" stroke-width="1.5"/><path d="M144 32 L144 62 Q134 54 128 36 Z" fill="#FFFFFF" stroke="#C9776A" stroke-width="1.5"/>'
+	s += '<path d="M7 36 L7 58 Q13 52 17 38 Z" fill="#E5604D" opacity="0.5"/><path d="M143 36 L143 58 Q137 52 133 38 Z" fill="#E5604D" opacity="0.5"/>'
+	s += '<circle cx="12" cy="46" r="3" fill="#FFD23F"/><circle cx="138" cy="46" r="3" fill="#FFD23F"/>'
+	return tex(150, 64, s)
+
+
+## Canvas 220x34: a flat tea-towel check kitchen mat (red and cream), seen from the front like the doormat.
+static func kitchen_mat() -> ImageTexture:
+	var s := '<path d="M22 3 H198 L216 30 H4 Z" fill="#F6EEDC" stroke="#8E2A22" stroke-width="2"/>'
+	# Red squares, row by row, following the slanted sides.
+	for row in 4:
+		var y0 := 3.0 + row * 6.75
+		var y1 := y0 + 6.75
+		var l0 := 22.0 - 18.0 * (y0 - 3.0) / 27.0
+		var l1 := 22.0 - 18.0 * (y1 - 3.0) / 27.0
+		var r0 := 198.0 + 18.0 * (y0 - 3.0) / 27.0
+		var r1 := 198.0 + 18.0 * (y1 - 3.0) / 27.0
+		for col in 8:
+			if (col + row) % 2 == 0:
+				var t0 := col / 8.0
+				var t1 := (col + 1) / 8.0
+				s += '<path d="M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" fill="#D9453B"/>' % [lerpf(l0, r0, t0), y0, lerpf(l0, r0, t1), y0, lerpf(l1, r1, t1), y1, lerpf(l1, r1, t0), y1]
+	s += '<path d="M22 3 H198 L216 30 H4 Z" fill="none" stroke="#8E2A22" stroke-width="2"/>'
+	return tex(220, 34, s)
+
+
+## Canvas 70x150: a glazed ceramic umbrella stand with a furled yellow and a furled navy umbrella and a walking stick. Floor at y 150.
+static func umbrella_stand() -> ImageTexture:
+	var s := '<path d="M22 20 V110" stroke="#6E4A2A" stroke-width="4.5" stroke-linecap="round"/><path d="M15 20 Q22 6 31 20" stroke="#6E4A2A" stroke-width="4.5" fill="none" stroke-linecap="round"/>'
+	# Furled yellow umbrella (handle up) and navy one, leaning a little.
+	s += '<path d="M46 14 V32" stroke="#2B2B33" stroke-width="3.5" stroke-linecap="round"/><path d="M42 32 Q46 28 50 32 L52 98 Q46 104 40 98 Z" fill="#F2C94C" stroke="#B8901C" stroke-width="1.8"/><path d="M45 36 L44 96 M48 36 L49 96" stroke="#B8901C" stroke-width="1" opacity="0.7"/><rect x="43" y="60" width="6" height="5" rx="2" fill="#D9453B"/>'
+	s += '<path d="M34 24 V40" stroke="#6E4A2A" stroke-width="3.5" stroke-linecap="round"/><path d="M30 40 Q34 36 38 40 L39 104 Q34 110 29 104 Z" fill="#26335E" stroke="#141B38" stroke-width="1.8"/><path d="M33 44 L32 102" stroke="#4B5C94" stroke-width="1.2" opacity="0.8"/>'
+	s += '<path d="M12 78 Q35 71 58 78 L54 140 Q35 147 16 140 Z" fill="#3E86C8" stroke="#1F4F7E" stroke-width="2"/>'
+	s += '<path d="M12 78 Q35 71 58 78 L56 92 Q35 86 14 92 Z" fill="#6AB0DE" opacity="0.8"/><path d="M19 90 Q35 96 51 90" stroke="#FFFFFF" stroke-width="2" fill="none" opacity="0.6"/>'
+	s += '<path d="M20 112 Q26 118 32 112 Q38 118 44 112" stroke="#F2C94C" stroke-width="2" fill="none"/>'
+	s += '<ellipse cx="35" cy="148" rx="22" ry="3" fill="#000000" opacity="0.18"/>'
+	return tex(70, 150, s)

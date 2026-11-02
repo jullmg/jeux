@@ -134,7 +134,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     options: `pattern` ("stars", "dots", "stripes", "diamonds"), `pattern_color`, `pattern_alpha`, `wainscot` (Color) +
     `wainscot_height` (panelled lower wall); shops use `tile_colors`.
   - `world/interior_art.gd` (`InteriorArt`): one SVG function per piece of furniture; `world/fairy_lights.gd` (`FairyLights`).
-    Decor pieces for any bedroom/house: `moon_decal`, `mobile` (sways, tweened in the scene), `growth_chart`, `wall_clock`, `house_plant`.
+    Decor pieces for any bedroom/house: `moon_decal`, `mobile` (sways, tweened in the scene), `growth_chart`, `wall_clock`, `house_plant`; kitchen/entrance: `wall_calendar`, `kitchen_toppers` (things on the fridge and cabinet), `kitchen_curtain`, `kitchen_mat`, `umbrella_stand`. SVG `<pattern>` does not render in these textures: draw checks/stripes as plain shapes.
 - `scenes/house.gd` (extends `Interior`): Charlotte's flat, from the photos in `reference/charlotte_house_inside`:
   vestibule (0–640) → oak glass doorway → salon (–2260) → hallway → kitchen (3400–3960); Charlotte's bedroom is a separate
   area (5000–6650) reached through the "chacha" door (fade, camera limits switch). Charlotte is at scale 0.5 inside.

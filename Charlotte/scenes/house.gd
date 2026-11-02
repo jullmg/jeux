@@ -638,7 +638,8 @@ func _build_vestibule() -> void:
 	_daylight(Vector2(330.0, 230.0), 240.0, 0.08)
 	_put(InteriorArt.doormat(), 345.0, 630.0)
 	_put(InteriorArt.backpack(), 40.0, 616.0, 0.9, "floor")
-	_put(InteriorArt.boots(), 540.0, 612.0, 0.8, "floor")
+	_put(InteriorArt.boots(), 496.0, 612.0, 0.8, "floor")
+	_put(InteriorArt.umbrella_stand(), 590.0, 614.0, 0.85, "floor")
 	_put(InteriorArt.floor_clutter(), 150.0, 622.0)
 	_vestibule_light = _ceiling_light(320.0)
 	_put(InteriorArt.oak_doorway(), VESTIBULE_END, WALL_BASE)
@@ -679,11 +680,25 @@ func _build_hallway() -> void:
 	_plant("corridor", "fiddle", 3283.0, 606.0, 0.55)
 	_plant("fougere", "fern", 2585.0, 606.0, 0.5)
 	_put(InteriorArt.kitchen(), KITCHEN_START, WALL_BASE)
+	_dress_kitchen()
 	_fridge_art = Node2D.new()
 	add_child(_fridge_art)
 	_show_fridge_drawings()
 	_daylight(Vector2(KITCHEN_START + 322.0, 260.0), 126.0, 0.1)
 	_hall_lights.append(_ceiling_light(KITCHEN_START + 200.0))
+
+
+# What makes the kitchen lived in: things on top of the fridge and cabinet, a calendar, a curtain on the door glass, a
+# check mat in front of the counter, a clock and a pendant over the island. (Tex of the kitchen: its top is at WALL_BASE - 480.)
+func _dress_kitchen() -> void:
+	var top := WALL_BASE - 480.0
+	_put(InteriorArt.kitchen_toppers(), KITCHEN_START, top + 120.0)
+	_put(InteriorArt.wall_calendar(), KITCHEN_START - 100.0, 300.0, 0.9, "wall")
+	_put(InteriorArt.wall_clock(), KITCHEN_START - 80.0, 205.0, 0.55, "wall")
+	_put(InteriorArt.kitchen_curtain(), KITCHEN_START + 336.0, top + 220.0, 0.9)
+	_put(InteriorArt.kitchen_mat(), KITCHEN_START + 140.0, 636.0)
+	_put(InteriorArt.house_plant("pothos", false), KITCHEN_START + 500.0, top + 318.0, 0.28)
+	_hall_lights.append(_pendant(KITCHEN_START + 500.0, 270.0))
 
 
 func _build_bedroom() -> void:
