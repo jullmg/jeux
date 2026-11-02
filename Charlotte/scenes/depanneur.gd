@@ -28,6 +28,7 @@ const TUBES: Array[float] = [400.0, 1000.0, 1600.0, 2200.0, 2800.0, 3400.0]
 const HELLOS := ["Bonjour Charlotte !", "Bienvenue au dépanneur !", "Il fait beau aujourd'hui !", "Tu veux des bonbons ?"]
 
 var _clerk: Character
+var _lucky_cat: _LuckyCat
 var _hello := 0
 
 
@@ -119,9 +120,9 @@ func _build_counter() -> void:
 	_clerk.position = Vector2(COUNTER_X + 300.0, 556.0)
 	add_child(_clerk)
 	_put(ShopArt.counter(), COUNTER_X, 616.0, 1.0, "floor")
-	var cat := _LuckyCat.new()
-	cat.position = Vector2(COUNTER_X + 52.0, 616.0 - 240.0 + 70.0)
-	add_child(cat)
+	_lucky_cat = _LuckyCat.new()
+	_lucky_cat.position = Vector2(COUNTER_X + 52.0, 616.0 - 240.0 + 70.0)
+	add_child(_lucky_cat)
 	_put(InteriorArt.doormat(), COUNTER_X + 160.0, 640.0)
 
 
@@ -292,6 +293,11 @@ func _build_spots() -> void:
 	add_child(DoorSpot.make(Rect2(COUNTER_X + 250.0, 300, 100, 150), func():
 		_say(_clerk, HELLOS[_hello % HELLOS.size()], 250.0)
 		_hello += 1, COUNTER_X + 440.0))
+	# The lucky cat on the counter only waves when it is clicked.
+	add_child(DoorSpot.make(Rect2(COUNTER_X + 16.0, 340.0, 72.0, 106.0), func():
+		_lucky_cat.wave()
+		Sfx.play("chime", _lucky_cat.position)
+		_say(_charlotte, "Bonne chance, petit chat !", 300.0), COUNTER_X + 56.0))
 	add_child(DoorSpot.make(Rect2(CANDY_X, 160, 480, 285), func():
 		_buy(ShopArt.treat("candy" if randf() < 0.5 else "lollipop"), "Des bonbons !", 0.25), CANDY_X + 240.0))
 	add_child(DoorSpot.make(Rect2(CHIPS_X, 448, 374, 204), func():
@@ -392,9 +398,18 @@ class _Clock:
 # A little lucky cat on the counter, its paw beckoning, a gold coin on its chest, a bell at its neck. Origin: the base.
 class _LuckyCat:
 	extends Node2D
+	## Seconds of waving left: it starts when someone clicks the cat, and the paw stops again.
+	var _wave := 0.0
 	var _t := 0.0
 
+	func wave(seconds := 4.0) -> void:
+		_wave = seconds
+		_t = 0.0
+
 	func _process(delta: float) -> void:
+		if _wave <= 0.0:
+			return
+		_wave = maxf(_wave - delta, 0.0)
 		_t += delta
 		queue_redraw()
 
@@ -404,7 +419,8 @@ class _LuckyCat:
 		draw_circle(Vector2.ZERO, 26.0, Color(0, 0, 0, 0.18))
 		draw_set_transform(Vector2.ZERO)
 		# The waving paw first (behind the head): it swings from the shoulder.
-		var swing := sin(_t * 3.2) * 0.38
+		# At rest the paw stays still, raised; once clicked it beckons for a few seconds, settling back at the end.
+		var swing := sin(_t * 5.2) * 0.4 * minf(_wave, 1.0)
 		var shoulder := Vector2(14, -42)
 		var paw := shoulder + Vector2(sin(0.5 + swing), -cos(0.5 + swing)) * 26.0
 		draw_line(shoulder, paw, line, 11.0, true)

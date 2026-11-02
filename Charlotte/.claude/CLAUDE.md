@@ -153,7 +153,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   ceiling, stock on high shelves, hanging aisle signs, exit sign, extinguisher, bulletin board (with the lost-cat poster),
   security cameras (blinking light), baskets, wet-floor sign, floor wear, recessed ceiling panels (one flickers) with light
   cones and pools on the floor, cold glow before the fridges, daylight through the door, the neon OUVERT (`NeonSign`) and a
-  waving lucky cat on the counter (`_LuckyCat`); the blurred foreground is a red shopping basket (`"basket"`).
+  lucky cat on the counter that waves only when clicked (`_LuckyCat.wave()`); the blurred foreground is a red shopping basket (`"basket"`).
 - Charlotte's parents, from `reference/mere_charlotte.jpg` / `pere_charlotte.jpg`: `CharacterLook.mom()` (long wavy light-brown
   hair, brown eyes, teal floral dress, tights, boots) in the kitchen, `CharacterLook.dad()` (short brown hair, no cap,
   clean-shaven, blue eyes, navy T-shirt with the "bike" top pattern) in the salon; both stand at 1.18× Charlotte's scale. Click them and they say a line (`MOM_LINES` / `DAD_LINES`
