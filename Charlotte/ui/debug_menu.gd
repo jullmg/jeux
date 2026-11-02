@@ -1,13 +1,54 @@
 extends CanvasLayer
 ## Autoload. `--season=<spring|summer|autumn|winter>` (or printemps/été/automne/hiver) picks the season at
-## start. In debug builds, F1 opens a small menu to switch seasons while playing, and to reset or start any quest
-## (to test it again): the scene reloads with a fade and Charlotte reappears where she was.
+## start. In debug builds, F1 opens a small menu to switch seasons while playing, to reset, start or finish any quest
+## (to test it again) and to teleport to any place of the game: the scene reloads with a fade and Charlotte reappears
+## where she was (or at the chosen place). EVERY NEW PLACE goes in PLACES below; a scene (.tscn in res://scenes) that is not
+## listed shows up on its own under "Autres lieux" so it can never be forgotten.
 
 const ALIASES := {"printemps": "spring", "ete": "summer", "été": "summer", "automne": "autumn", "hiver": "winter"}
 ## The story flags each quest leaves behind, cleared with it.
 const QUEST_FLAGS := {"hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"]}
 ## What a quest puts in her arms (a lost cat's quest id is the cat's id, handled by `Carry.cat_id()`).
 const QUEST_CARRIES := {"milk": "milk", "plants": "can"}
+
+## The places to teleport to, in the order of the menu: {name, scene, and where: `x` (Charlotte's x in the scene), or `arrive`
+## (the Transition.arrive key of a corner or lane opening), or nothing for the scene's usual start}. A line with only a
+## "group" is a heading. Add a line here for each new place (a new street, room, shop, lane, a spot inside a building).
+const PLACES := [
+	{"group": "Rues"},
+	{"name": "6e Avenue : chez Charlotte", "scene": "main"},
+	{"name": "6e Avenue : coin Dandurand", "scene": "main", "arrive": "6e_from_dandurand"},
+	{"name": "6e Avenue : coin Holt", "scene": "main", "arrive": "6e_from_holt"},
+	{"name": "Rue Dandurand : dépanneur Xin-Xin", "scene": "dandurand"},
+	{"name": "Rue Dandurand : coin 6e", "scene": "dandurand", "arrive": "dandurand_from_6e"},
+	{"name": "Rue Dandurand : coin 5e", "scene": "dandurand", "arrive": "dandurand_from_5e"},
+	{"name": "5e Avenue : milieu", "scene": "cinquieme"},
+	{"name": "5e Avenue : coin Holt", "scene": "cinquieme", "arrive": "5e_from_holt"},
+	{"name": "5e Avenue : coin Dandurand", "scene": "cinquieme", "arrive": "5e_from_dandurand"},
+	{"name": "Rue Holt : dépanneur Oh Bon!", "scene": "holt"},
+	{"name": "Rue Holt : coin 6e", "scene": "holt", "arrive": "holt_from_6e"},
+	{"name": "Rue Holt : coin 5e", "scene": "holt", "arrive": "holt_from_5e"},
+	{"group": "Ruelles"},
+	{"name": "Ruelle du milieu (cour de Charlotte)", "scene": "ruelle"},
+	{"name": "Ruelle verte (parallèle à Dandurand)", "scene": "ruelle_dandurand"},
+	{"name": "Ruelle près de Holt", "scene": "ruelle_holt"},
+	{"group": "Chez Charlotte"},
+	{"name": "Vestibule", "scene": "house", "x": 300.0},
+	{"name": "Salon", "scene": "house", "x": 1500.0},
+	{"name": "Corridor (télé)", "scene": "house", "x": 2900.0},
+	{"name": "Cuisine (Maman, arrosoir)", "scene": "house", "x": 3700.0},
+	{"name": "Chambre de Charlotte", "scene": "house", "x": 5700.0},
+	{"group": "Dépanneur Xin-Xin"},
+	{"name": "Entrée", "scene": "depanneur"},
+	{"name": "Comptoir", "scene": "depanneur", "x": 1000.0},
+	{"name": "Bonbons et chips", "scene": "depanneur", "x": 1750.0},
+	{"name": "Sloche et café", "scene": "depanneur", "x": 2450.0},
+	{"name": "Frigos et lait", "scene": "depanneur", "x": 3100.0},
+	{"group": "Autres"},
+	{"name": "Écran titre", "scene": "intro"},
+]
+## Scenes that are not places to go to (listed nowhere on purpose).
+const NOT_PLACES: Array[String] = []
 
 var _panel: PanelContainer
 
@@ -64,6 +105,74 @@ func _open() -> void:
 		b.pressed.connect(_switch.bind(s))
 		list.add_child(b)
 	_quest_list(columns)
+	_places_list(columns)
+
+
+# A scrolling list of buttons, one per place (see PLACES), then any scene nobody listed.
+func _places_list(parent: Control) -> void:
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(300, 600)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	parent.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 4)
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(list)
+	var title := Label.new()
+	title.text = "Aller à…"
+	title.add_theme_color_override("font_color", Color("#FFD23F"))
+	title.add_theme_font_size_override("font_size", 20)
+	list.add_child(title)
+	var known := {}
+	for place: Dictionary in PLACES:
+		if place.has("group"):
+			var head := Label.new()
+			head.text = place.group
+			head.add_theme_color_override("font_color", Color("#9FD4F0"))
+			head.add_theme_font_size_override("font_size", 15)
+			list.add_child(head)
+			continue
+		known[place.scene] = true
+		list.add_child(_place_button(place.name, place))
+	var lost: Array[String] = []
+	var dir := DirAccess.open("res://scenes")
+	if dir:
+		for file in dir.get_files():
+			var id := file.get_basename()
+			if file.ends_with(".tscn") and not known.has(id) and not NOT_PLACES.has(id):
+				lost.append(id)
+	if not lost.is_empty():
+		var head := Label.new()
+		head.text = "Autres lieux (à classer dans PLACES)"
+		head.add_theme_color_override("font_color", Color("#FF9D6A"))
+		head.add_theme_font_size_override("font_size", 15)
+		list.add_child(head)
+		for id in lost:
+			list.add_child(_place_button(id, {"scene": id}))
+
+
+func _place_button(text: String, place: Dictionary) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.add_theme_font_size_override("font_size", 15)
+	b.pressed.connect(_teleport.bind(place))
+	return b
+
+
+# Straight to a place: the scene reloads with Charlotte there. Leaves her hands as they are (what she carries is saved).
+func _teleport(place: Dictionary) -> void:
+	_close()
+	Transition.street_x = NAN
+	Transition.inside_x = NAN
+	Transition.arrive = str(place.get("arrive", ""))
+	var scene_name := str(place.scene)
+	if place.has("x"):
+		if scene_name in ["house", "depanneur"]:
+			Transition.inside_x = float(place.x)
+		else:
+			Transition.street_x = float(place.x)
+	Transition.change_scene(get_tree().current_scene, "res://scenes/%s.tscn" % scene_name)
 
 
 # One row per quest: its state, "Effacer" (back to not started, its flags cleared), "Activer" (in the notebook now,
