@@ -269,7 +269,10 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     house number) the owner comes out (`_bring_home`), the cat is put down, quest done. Owners are always at a front
     door on a street, never in the lane.
   - menage (Mom gives it, after the milk; the toys can't be picked up before): 11 things on the bedroom floor (`MESS`,
-    `InteriorArt.mess`); clicking each, Charlotte crouches and it flies to its place (`PUT_AWAY`); `flags.tidied`.
+    `InteriorArt.mess`). Charlotte picks each one up IN HER ARMS (`Carry` kind "toy:<item>", so only one at a time), says
+    where it goes ("Mon toutou va sur mon lit !", from `ITEMS` / `DESTS`: bed, laundry basket, toy corner, shelf, desk, by
+    the door) and a "!" marks that spot; the child clicks the right place to put it away (a wrong one: "Pas ici !" and
+    she says it again); `flags.tidied` lists what is put away; the last one completes the quest;
   - plants (Dad gives it): five thirsty plants (`_plant(id, kind, …)`, `InteriorArt.house_plant(kind, thirsty)`:
     monstera and a pothos on a stool by the window in the salon, a fern on a low stool and a fiddle-leaf fig in the corridor, a peace lily
     in the bedroom; thirsty = drooping, yellowed, brown tips, dry soil, dead leaves; the sprite swaps to the healthy

@@ -1,7 +1,8 @@
 class_name Carry
 extends RefCounted
 ## Everything Charlotte holds in her arms, behind ONE saved indicator: `GameState.flags.carried` = "" (hands free), or
-## "<kind>" / "<kind>:<id>": "milk" (Mom's pint), "can" (the watering can), "cat:<quest id>" (a lost cat). One thing at a
+## "<kind>" / "<kind>:<id>": "milk" (Mom's pint), "can" (the watering can), "cat:<quest id>" (a lost cat), "toy:<item>" (a thing
+## from her bedroom floor while she tidies). One thing at a
 ## time, enforced here for every quest:
 ##   - `Carry.take(who, kind, id)` is the only way to put something in her arms; it refuses (returns false) when her hands
 ##     are not free, so the caller just says `Carry.FULL_HANDS`;
@@ -109,6 +110,15 @@ static func _build(kind: String, id: String) -> Node2D:
 			return can
 		"cat":
 			return LostCats.held(id)
+		"toy":
+			# Something from her bedroom floor (the tidying quest): the same picture as on the floor, bigger in her arms.
+			var toy := Sprite2D.new()
+			toy.texture = InteriorArt.mess(id)
+			toy.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			toy.scale = Vector2.ONE * 1.8
+			toy.offset = Vector2(0, -10)
+			toy.name = "toy"
+			return toy
 	push_error("Carry: nothing known as '%s'" % kind)
 	return null
 

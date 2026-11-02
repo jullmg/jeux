@@ -21,7 +21,7 @@ const ALL := {
 	},
 	"menage": {
 		"title": "Range ta chambre",
-		"hint": "Ramasse les jouets et les vêtements qui traînent par terre dans ta chambre.",
+		"hint": "Ramasse chaque jouet et chaque vêtement qui traîne dans ta chambre, puis range-le là où Charlotte te dit qu'il va.",
 		"find": "Maman trouve que ta chambre est un peu en désordre…",
 		"age": 7, "reward": 1.0,
 	},

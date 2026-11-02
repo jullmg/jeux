@@ -16,12 +16,32 @@ const CHACHA_DOOR_X := 3120.0
 const BEDROOM_DOOR_X := 6440.0
 const MOM_LINES := ["Bonjour ma chouette !", "As-tu faim ? Il y a des fruits.", "N'oublie pas de nourrir le hamster !", "Je t'aime, Chachoue !"]
 const DAD_LINES := ["Salut Chachoue !", "On va au parc tantôt ?", "As-tu fait un beau dessin ?", "Tu veux jouer avec moi ?"]
-# What's lying on the bedroom floor (kind, x in the bedroom), and where each goes when she tidies it away.
+# What's lying on the bedroom floor (kind, x in the bedroom). Tidying: she picks each one up in her arms (Carry "toy"), says
+# where it goes, and the child clicks that spot to put it away. ITEMS: how she names it ("va" / "vont") and its DESTS entry.
 const MESS := [["teddy", 200.0], ["pyjama", 313.0], ["sock", 426.0], ["blocks", 539.0], ["book", 652.0], ["puzzle", 765.0],
 	["ball", 878.0], ["car", 991.0], ["tshirt", 1104.0], ["crayons", 1217.0], ["sneaker", 1330.0]]
-const PUT_AWAY := {"sock": Vector2(1340, 560), "tshirt": Vector2(1340, 560), "pyjama": Vector2(1340, 560),
-	"sneaker": Vector2(1400, 610), "book": Vector2(1010, 300), "crayons": Vector2(1180, 470), "puzzle": Vector2(1180, 470),
-	"ball": Vector2(800, 600), "teddy": Vector2(800, 600), "blocks": Vector2(800, 600), "car": Vector2(800, 600)}
+const ITEMS := {
+	"teddy": {"name": "Mon toutou", "verb": "va", "dest": "lit"},
+	"pyjama": {"name": "Mon pyjama", "verb": "va", "dest": "panier"},
+	"sock": {"name": "Mes bas", "verb": "vont", "dest": "panier"},
+	"tshirt": {"name": "Mon t-shirt", "verb": "va", "dest": "panier"},
+	"blocks": {"name": "Mes blocs", "verb": "vont", "dest": "jouets"},
+	"ball": {"name": "Mon ballon", "verb": "va", "dest": "jouets"},
+	"car": {"name": "Mon auto", "verb": "va", "dest": "jouets"},
+	"book": {"name": "Mon livre", "verb": "va", "dest": "etagere"},
+	"puzzle": {"name": "Mon casse-tête", "verb": "va", "dest": "bureau"},
+	"crayons": {"name": "Mes crayons", "verb": "vont", "dest": "bureau"},
+	"sneaker": {"name": "Mon espadrille", "verb": "va", "dest": "porte"},
+}
+# Where things go, in the bedroom's own x: the clickable area, where she stands, and how she says it.
+const DESTS := {
+	"lit": {"text": "sur mon lit", "rect": Rect2(360, 380, 448, 228), "stand": 600.0},
+	"panier": {"text": "dans le panier à linge", "rect": Rect2(1290, 500, 120, 125), "stand": 1345.0},
+	"jouets": {"text": "dans le coin des jouets", "rect": Rect2(760, 500, 160, 130), "stand": 840.0},
+	"etagere": {"text": "sur l'étagère", "rect": Rect2(960, 280, 170, 200), "stand": 1040.0},
+	"bureau": {"text": "sur mon bureau", "rect": Rect2(1110, 430, 190, 180), "stand": 1170.0},
+	"porte": {"text": "près de la porte", "rect": Rect2(1440, 200, 150, 400), "stand": 1385.0},
+}
 const CAN_X := KITCHEN_START + 470.0
 # The tip of the watering can's spout, in the held can's own space (its texture is centred, offset by (30, -4)).
 const CAN_SPOUT := Vector2(86, -24)
@@ -142,10 +162,20 @@ func _build_chores() -> void:
 	var tidied: Array = GameState.flags.get("tidied", [])
 	if not Quests.done("menage"):
 		for m in MESS:
-			if tidied.has(m[0]):
+			# One she is holding right now (the scene reopened) or already put away is not on the floor.
+			if tidied.has(m[0]) or Carry.item() == "toy:" + str(m[0]):
 				continue
 			var item := _put(InteriorArt.mess(m[0]), BEDROOM.x + m[1], 690.0, 1.15)
-			add_child(DoorSpot.make(Rect2(item.position - Vector2(6, 10), Vector2(104, 66)), _tidy.bind(m[0], item), BEDROOM.x + m[1] + 32.0))
+			add_child(DoorSpot.make(Rect2(item.position - Vector2(6, 10), Vector2(104, 66)), _pick_up.bind(m[0], item), BEDROOM.x + m[1] + 32.0))
+		# The places things go: clickable (and marked with a "!") only while she holds a toy that goes there.
+		for dest_id: String in DESTS:
+			var d: Dictionary = DESTS[dest_id]
+			var rect: Rect2 = d.rect
+			var spot := DoorSpot.make(Rect2(rect.position + Vector2(BEDROOM.x, 0.0), rect.size), _put_away.bind(dest_id), BEDROOM.x + float(d.stand))
+			spot.condition = func() -> bool: return Carry.has("toy")
+			add_child(spot)
+			add_child(QuestMark.make(Vector2(BEDROOM.x + rect.get_center().x, rect.get_center().y - 20.0), func() -> bool:
+				return Carry.has("toy") and ITEMS[Carry.item().get_slice(":", 1)].dest == dest_id, 0.8))
 	for id in _plants:
 		var plant: Sprite2D = _plants[id]
 		if _thirsty(id):
@@ -183,24 +213,65 @@ func _thirsty(id: String) -> bool:
 	return not Quests.done("plants") and not (GameState.flags.get("watered", []) as Array).has(id)
 
 
-# She crouches, picks it up, and it flies to its place (the laundry basket, the toys, the bookshelf, the desk).
-func _tidy(kind: String, item: Sprite2D) -> void:
+# She crouches and picks it up in her arms (the one thing she holds), then says where it goes.
+func _pick_up(kind: String, item: Sprite2D) -> void:
 	if not is_instance_valid(item) or item.has_meta("taken"):
 		return
 	# Only once Mom has asked her to.
 	if not Quests.active("menage"):
 		_say(_charlotte, "Je rangerai ça plus tard…", 300.0)
 		return
+	if not Carry.take(_charlotte, "toy", kind):
+		_say(_charlotte, Carry.FULL_HANDS, 300.0)
+		return
 	item.set_meta("taken", true)
 	_charlotte.pet(0.7, 1.0)
 	Sfx.play("pop", item.position)
-	var to: Vector2 = BEDROOM.x * Vector2.RIGHT + PUT_AWAY[kind]
+	# It flies from the floor into her arms (hidden there until it arrives).
+	var held := _charlotte.held()
+	held.modulate.a = 0.0
 	var tween := create_tween()
 	tween.tween_interval(0.35)
-	tween.tween_property(item, "position", to, 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.parallel().tween_property(item, "scale", item.scale * 0.5, 0.5)
-	tween.parallel().tween_property(item, "modulate:a", 0.0, 0.5)
-	tween.tween_callback(item.queue_free)
+	tween.tween_property(item, "global_position", held.global_position + Vector2(0.0, -20.0), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(item, "modulate:a", 0.0, 0.35)
+	tween.tween_callback(func():
+		item.queue_free()
+		if is_instance_valid(held):
+			held.modulate.a = 1.0
+		_say(_charlotte, _where(kind), 300.0, 3.4))
+
+
+# "Mon toutou va sur mon lit !"
+func _where(kind: String) -> String:
+	var it: Dictionary = ITEMS[kind]
+	return "%s %s %s !" % [it.name, it.verb, DESTS[it.dest].text]
+
+
+# She clicked a place while holding a toy: right, it goes there; wrong, she says where it should go.
+func _put_away(dest_id: String) -> void:
+	if not Carry.has("toy"):
+		return
+	var kind := Carry.item().get_slice(":", 1)
+	if ITEMS[kind].dest != dest_id:
+		_say(_charlotte, "Pas ici ! " + _where(kind), 300.0, 3.4)
+		return
+	var held := _charlotte.held()
+	var from := held.global_position if held else _charlotte.position
+	Carry.put_down(_charlotte)
+	_charlotte.pet(0.6, 0.4)
+	Sfx.play("pop", from)
+	var rect: Rect2 = DESTS[dest_id].rect
+	var fly := Sprite2D.new()
+	fly.texture = InteriorArt.mess(kind)
+	fly.scale = Vector2.ONE * 0.75
+	fly.position = from
+	add_child(fly)
+	var tween := create_tween()
+	tween.tween_interval(0.25)
+	tween.tween_property(fly, "position", Vector2(BEDROOM.x + rect.get_center().x, rect.get_center().y), 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(fly, "scale", fly.scale * 0.5, 0.45)
+	tween.parallel().tween_property(fly, "modulate:a", 0.0, 0.45)
+	tween.tween_callback(fly.queue_free)
 	var tidied: Array = GameState.flags.get("tidied", [])
 	tidied.append(kind)
 	GameState.flags["tidied"] = tidied
@@ -208,6 +279,8 @@ func _tidy(kind: String, item: Sprite2D) -> void:
 		GameState.flags.erase("tidied")
 		_say(_charlotte, "Ma chambre est toute propre !", 300.0)
 		Quests.complete("menage")
+	else:
+		_say(_charlotte, "Voilà ! Encore %d !" % (MESS.size() - tidied.size()), 300.0, 2.0)
 
 
 func _take_can() -> void:
