@@ -7,6 +7,11 @@ extends RefCounted
 ## A new line from the same speaker replaces their bubble; other people's bubbles stay, and the new one is lifted
 ## above any it would overlap.
 static func say(parent: Node, at: Vector2, text: String, seconds := 2.4) -> void:
+	# Whoever stands under the bubble is the one talking: her mouth moves for as long as it stays.
+	for who in parent.get_children():
+		if who is Character and absf(who.position.x - at.x) < 90.0 and who.position.y > at.y:
+			who.express("talk", minf(seconds, 3.5) * 0.8)
+			break
 	var bubble := Label.new()
 	bubble.text = text
 	bubble.add_theme_font_size_override("font_size", 20)

@@ -11,6 +11,8 @@ var _pause := 0.0
 ## Stops walking for `seconds` (e.g. while Charlotte pets their dog).
 func hold(seconds: float) -> void:
 	_pause = seconds
+	if seconds >= 1.0:
+		express("happy", seconds)
 
 
 func _process(delta: float) -> void:

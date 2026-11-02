@@ -8,6 +8,17 @@ const ARM_REST := deg_to_rad(6.0)
 const RIDE_LEAN := 16.0
 ## Running speed, as a multiple of walk_speed.
 const RUN_SPEED := 1.9
+## Expressions: [eyes, brows, mouth] (the kinds in CharacterArt.EYE_KINDS / BROW_KINDS / MOUTH_KINDS; "talk" cycles the talking mouths).
+const EXPRESSIONS := {
+	"normal": ["normal", "normal", "smile"], "happy": ["happy", "raised_small", "grin"], "grin": ["normal", "raised_small", "grin"],
+	"yum": ["happy", "normal", "yum"], "laugh": ["happy", "raised", "laugh"], "focus": ["squint", "low", "flat"],
+	"effort": ["squint", "furrow", "grin"], "surprised": ["wide", "raised", "open"], "wonder": ["wide", "raised_small", "pursed"],
+	"sad": ["sad", "sad", "sad"], "worry": ["normal", "sad", "worry"], "sleep": ["closed", "normal", "sleep"],
+	"yawn": ["closed", "raised_small", "yawn"], "talk": ["normal", "normal", "talk"], "sip": ["normal", "normal", "pursed"],
+}
+## What the face does while a chore goes on.
+const TASK_FACES := {"stir": "happy", "read": "focus", "phone": "talk", "type": "focus", "wash": "focus", "drink": "normal", "fridge": "wonder",
+	"exercise": "effort", "watch": "happy"}
 
 var look: CharacterLook
 var walk_speed := 200.0
@@ -76,6 +87,16 @@ var hand_mode := ""
 var task := ""
 ## Which idle gestures she may do (a shopkeeper just looks round and stretches).
 var fidget_moves: Array[String] = ["wave", "hop", "stretch", "look", "look"]
+## The face: `expression` forces one ("" = whatever she is doing, see `_auto_expression`); `express(name, seconds)` shows one for a moment
+## (talking, a treat, an oops). Each is an eyes + brows + mouth picture (`EXPRESSIONS`), swapped on the face layers.
+var expression := ""
+var _express_name := ""
+var _express_left := 0.0
+var _art: CharacterArt
+var _eyes_spr: Sprite2D
+var _brows_spr: Sprite2D
+var _mouth_spr: Sprite2D
+var _face_now := ["", "", ""]
 var _shade: ShaderMaterial
 var _idle := 0.0
 var _gesture := ""
@@ -103,6 +124,7 @@ func set_look(new_look: CharacterLook) -> void:
 
 func _build() -> void:
 	var art := CharacterArt.build(look)
+	_art = art.art
 	_rig = art.rig
 	_shade = ShaderMaterial.new()
 	_shade.shader = preload("res://shaders/character_shade.gdshader")
@@ -131,11 +153,71 @@ func _build() -> void:
 	_head.scale = Vector2.ONE * (_rig.head_scale as float)
 	_body.add_child(_head)
 	_part(_head, tex.head, _rig.head_pivot, Vector2.ZERO)
+	_eyes_spr = _face_part("eyes", "normal")
+	if look.glasses != "":
+		_face_part("glasses", "")
 	_lids = _part(_head, tex.lids, _rig.head_pivot, Vector2.ZERO)
 	_lids.visible = false
+	_brows_spr = _face_part("brows", "normal")
+	_mouth_spr = _face_part("mouth", "smile")
+	_face_now = ["normal", "normal", "smile"]
 	_part(_head, tex.hair_front, _rig.head_pivot, Vector2.ZERO)
 	_arm_front = _make_arm(tex, Vector2(-(_rig.arm_x as float), _rig.shoulder_y), Color.WHITE)
 	_apply_pose()
+
+
+# One face layer (eyes, brows, mouth, glasses) as a child of the head, in its place on the face.
+func _face_part(layer: String, kind: String) -> Sprite2D:
+	return _part(_head, _art.face_texture(layer, kind), Vector2.ZERO, CharacterArt.face_offset(layer))
+
+
+## Shows `name` (a key of EXPRESSIONS) on her face for `seconds`: "talk" while she says something, "yum" for a treat, "worry" for an oops.
+func express(name: String, seconds := 2.0) -> void:
+	if EXPRESSIONS.has(name):
+		_express_name = name
+		_express_left = seconds
+
+
+# What her face says by itself, from what she is doing.
+func _auto_expression() -> String:
+	if _express_left > 0.0:
+		return _express_name
+	if expression != "":
+		return expression
+	if task != "":
+		if task == "drink" and fmod(_time, 5.0) > 0.8 and fmod(_time, 5.0) < 1.9:
+			return "sip"
+		return TASK_FACES.get(task, "normal")
+	if _gesture == "wave" or _gesture == "hop":
+		return "happy"
+	if _gesture == "stretch":
+		return "yawn"
+	if _pet > 0.5:
+		return "happy"
+	if carry_lift > 0.5:
+		return "focus"
+	if is_holding():
+		return str(_held.get_meta("face", "normal"))
+	if _run > 0.5:
+		return "grin"
+	return "normal"
+
+
+# Puts the face for this moment on the eyes, brows and mouth layers (swapping a picture only when it changes).
+func _update_face() -> void:
+	var parts: Array = EXPRESSIONS[_auto_expression()]
+	var mouth: String = parts[2]
+	if mouth == "talk":
+		mouth = ["talk_b", "talk_a", "talk_c", "talk_a"][int(_time * 8.0) % 4]
+	var want := [parts[0], parts[1], mouth]
+	var layers := [[_eyes_spr, "eyes"], [_brows_spr, "brows"], [_mouth_spr, "mouth"]]
+	for i in 3:
+		if _face_now[i] != want[i]:
+			_face_now[i] = want[i]
+			(layers[i][0] as Sprite2D).texture = _art.face_texture(layers[i][1], want[i])
+	# Eyes that are shut or smiling shut stay that way: no blink on top.
+	if want[0] == "closed" or want[0] == "happy":
+		_lids.visible = false
 
 
 # Contact shadow, plus a longer soft one thrown to the right by the low sun on the left.
@@ -274,6 +356,7 @@ func _process(delta: float) -> void:
 		return
 	_time += delta
 	_dt = delta
+	_express_left = maxf(_express_left - delta, 0.0)
 	_pet_time = maxf(_pet_time - delta, 0.0)
 	_pet = move_toward(_pet, 1.0 if _pet_time > 0.0 else 0.0, delta * 4.0)
 	_run = move_toward(_run, 1.0 if running and is_walking else 0.0, delta * 3.0)
@@ -289,7 +372,7 @@ func _process(delta: float) -> void:
 			Sfx.play(step_sound, global_position, -8.0)
 	_blink_in -= delta
 	if _blink_in <= 0.0:
-		_lids.visible = not _lids.visible
+		_lids.visible = not _lids.visible and _face_now[0] != "closed" and _face_now[0] != "happy"
 		_blink_in = 0.12 if _lids.visible else randf_range(1.8, 5.0)
 	var target := lerpf(0.09, 0.2, _run) if is_walking else 0.0
 	_hair_vel += ((target - _hair_angle) * 60.0 - _hair_vel * 7.0) * delta
@@ -298,6 +381,7 @@ func _process(delta: float) -> void:
 
 
 func _apply_pose() -> void:
+	_update_face()
 	var swing := sin(walk_phase * TAU) if is_walking else 0.0
 	# Petting: lunge down to the animal's height (deep for cats), lean in and stroke with the front hand.
 	var lunge := deg_to_rad(lerpf(8.0, 55.0, _pet_low)) * _pet

@@ -183,6 +183,7 @@ func _say(who: Node2D, text: String, height := 280.0, seconds := 2.4) -> void:
 
 ## Something Charlotte gets (a snack, a treat): its picture floats up above her with `text`, and a happy sound.
 func _treat(picture: Texture2D, text: String, delay := 0.0) -> void:
+	_charlotte.express("yum", 2.4 + delay)
 	var treat := Node2D.new()
 	treat.position = _charlotte.position + Vector2(0, -270)
 	treat.modulate.a = 0.0

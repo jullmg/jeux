@@ -116,6 +116,7 @@ static func _build(kind: String, id: String) -> Node2D:
 		"cat":
 			var cat: Node2D = LostCats.held(id)
 			cat.set_meta("hands", "open")
+			cat.set_meta("face", "happy")
 			return cat
 		"toy":
 			# Something from her bedroom floor (the tidying quest): the same picture as on the floor, bigger in her arms.

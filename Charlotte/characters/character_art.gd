@@ -76,7 +76,7 @@ func _build() -> Dictionary:
 	}
 	if look.backpack != "":
 		tex.backpack = _tex(_backpack_svg())
-	return {"rig": rig, "tex": tex}
+	return {"rig": rig, "tex": tex, "art": self}
 
 
 static func _tex(svg: String) -> ImageTexture:
@@ -164,63 +164,12 @@ func _head_svg(lids_only: bool) -> String:
 	if look.freckles:
 		for f in [[70, 150], [78, 146], [84, 152], [158, 148], [166, 152], [162, 144]]:
 			s += _f('<circle cx="%s" cy="%s" r="1.8" fill="{skin_line}" opacity="0.7"/>' % f)
-	if look.eyes == "almond":
-		s += _almond_eyes()
-		return _head_finish(s)
-	var lash1 := '<path d="M77 117 L72 109" stroke="{lash}" stroke-width="2.5" stroke-linecap="round"/><path d="M82 112 L79 104" stroke="{lash}" stroke-width="2.5" stroke-linecap="round"/>'
-	var lash2 := '<path d="M164 117 L169 109" stroke="{lash}" stroke-width="2.5" stroke-linecap="round"/><path d="M159 112 L162 104" stroke="{lash}" stroke-width="2.5" stroke-linecap="round"/>'
-	s += _eye_wrap(94, 130, _f('<ellipse cx="94" cy="130" rx="18" ry="22" fill="#FFFFFF"/>'
-		+ '<circle cx="97" cy="133" r="15" fill="{iris}"/><circle cx="97" cy="136" r="10" fill="{iris_dark}"/>'
-		+ '<circle cx="97" cy="135" r="6.5" fill="{pupil}"/><circle cx="103" cy="126" r="5.5" fill="#FFFFFF"/>'
-		+ '<circle cx="91" cy="141" r="2.5" fill="#FFFFFF"/>'
-		+ '<path d="M76 120 Q93 103 112 118" stroke="{lash}" stroke-width="3.5" fill="none" stroke-linecap="round"/>'
-		+ (lash1 if look.lashes else "")))
-	s += _eye_wrap(149, 130, _f('<ellipse cx="149" cy="130" rx="15" ry="21" fill="#FFFFFF"/>'
-		+ '<circle cx="152" cy="133" r="13" fill="{iris}"/><circle cx="152" cy="136" r="8.5" fill="{iris_dark}"/>'
-		+ '<circle cx="152" cy="135" r="5.5" fill="{pupil}"/><circle cx="157" cy="126" r="4.8" fill="#FFFFFF"/>'
-		+ '<circle cx="147" cy="141" r="2.2" fill="#FFFFFF"/>'
-		+ '<path d="M134 118 Q150 103 165 120" stroke="{lash}" stroke-width="3.5" fill="none" stroke-linecap="round"/>'
-		+ (lash2 if look.lashes else "")))
-	return _head_finish(s)
+	return _head_base_finish(s)
 
 
-## Narrow almond eyes: an almond-shaped white, a dark iris and pupil clipped to it, an upper lid line that flicks up at the
-## outer corner, the outer corners lifted a little, and flatter, lower brows; a smooth lid with no deep crease.
-func _almond_eyes() -> String:
-	var out := ""
-	for e in [[94.0, 130.0, 8.0, "eyeL", -1.0], [149.0, 130.0, -8.0, "eyeR", 1.0]]:
-		var cx: float = e[0]
-		var cy: float = e[1]
-		var side: float = e[4]
-		var w := 20.0 if side < 0.0 else 17.0
-		var shape := "M%.1f %.1f Q%.1f %.1f %.1f %.1f Q%.1f %.1f %.1f %.1f Z" % [cx - w, cy + 1, cx, cy - 15, cx + w, cy - 1, cx, cy + 11, cx - w, cy + 1]
-		var inner := '<clipPath id="%s"><path d="%s"/></clipPath>' % [e[3], shape]
-		inner += '<path d="%s" fill="#FBFAF6"/>' % shape
-		inner += _f('<g clip-path="url(#%s)"><circle cx="%.1f" cy="%.1f" r="11" fill="{iris}"/><circle cx="%.1f" cy="%.1f" r="8" fill="{iris_dark}"/><circle cx="%.1f" cy="%.1f" r="5.2" fill="{pupil}"/>' % [e[3], cx + 2, cy, cx + 2, cy + 1, cx + 2, cy + 1]
-			+ '<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f L%.1f %.1f L%.1f %.1f Z" fill="#000000" opacity="0.28"/></g>' % [cx - w, cy - 3, cx, cy - 12, cx + w, cy - 3, cx + w, cy - 8, cx - w, cy - 8])
-		inner += '<circle cx="%.1f" cy="%.1f" r="2.8" fill="#FFFFFF"/>' % [cx + 6, cy - 3]
-		inner += _f('<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="{lash}" stroke-width="3.6" fill="none" stroke-linecap="round"/>' % [cx - w - 1, cy + 1, cx, cy - 15, cx + w + 1, cy - 1])
-		# The flick at the outer corner and a thin line under the eye.
-		var corner := cx + side * (w + 1.0)
-		inner += _f('<path d="M%.1f %.1f L%.1f %.1f" stroke="{lash}" stroke-width="3" stroke-linecap="round"/>' % [corner, cy - 1 * 1.0 if side > 0.0 else cy + 1, corner + side * 5, cy - 6])
-		inner += _f('<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="{skin_line}" stroke-width="1.4" fill="none" opacity="0.6"/>' % [cx - w + 4, cy + 7, cx, cy + 13, cx + w - 4, cy + 7])
-		out += '<g transform="rotate(%.1f %.1f %.1f)">%s</g>' % [e[2], cx, cy, _eye_wrap_inner(cx, cy, inner)]
-	return out
-
-
-func _eye_wrap_inner(cx: float, cy: float, inner: String) -> String:
-	return _eye_wrap(cx, cy, inner)
-
-
-## The brows, nose, mouth, facial hair and glasses: what is left of the face once the eyes are drawn.
-func _head_finish(s: String) -> String:
-	var brow_w := "4.5" if look.age in ["adult", "senior"] and not look.lashes else "3.5"
-	if look.eyes == "almond":
-		s += _f('<path d="M78 99 Q93 93 108 97" stroke="{brow}" stroke-width="%s" fill="none" stroke-linecap="round"/>' % brow_w)
-		s += _f('<path d="M136 97 Q151 93 164 99" stroke="{brow}" stroke-width="%s" fill="none" stroke-linecap="round"/>' % brow_w)
-	else:
-		s += _f('<path d="M80 94 Q93 86 106 91" stroke="{brow}" stroke-width="%s" fill="none" stroke-linecap="round"/>' % brow_w)
-		s += _f('<path d="M138 91 Q150 86 162 94" stroke="{brow}" stroke-width="%s" fill="none" stroke-linecap="round"/>' % brow_w)
+## What is left of the bare head once the eyes, brows, mouth and glasses (the layers that change with the expression) are set apart:
+## the lines of age, the nose, and a beard or stubble.
+func _head_base_finish(s: String) -> String:
 	if look.age == "senior":
 		s += _f('<path d="M170 124 l9 -4 M171 133 l9 1 M60 150 q6 10 4 20" stroke="{skin_line}" stroke-width="2" fill="none" stroke-linecap="round"/>')
 	s += _f('<path d="M124 150 Q129 153 125 156" stroke="{nose}" stroke-width="2.5" fill="none" stroke-linecap="round"/>')
@@ -235,17 +184,228 @@ func _head_finish(s: String) -> String:
 			var x := lerpf(64.0, 168.0, a)
 			var y := 158.0 + sin(a * PI) * 40.0 + (i % 3) * 4.0
 			s += _f('<circle cx="%.1f" cy="%.1f" r="1.3" fill="{hair_line}" opacity="0.55"/>' % [x, y])
-	if look.mouth == "open_smile":
-		s += _f('<path d="M110 166 Q123 180 136 166 Z" fill="{mouth}" stroke="{mouth_line}" stroke-width="2" stroke-linejoin="round"/>')
-		s += _f('<path d="M116 172 Q123 178 130 172 Q123 170 116 172 Z" fill="{tongue}"/>')
-	else:
-		s += _f('<path d="M110 167 Q123 177 136 167" stroke="{mouth_line}" stroke-width="3" fill="none" stroke-linecap="round"/>')
+	return _head_frame(s)
+
+
+# --- The face layers: eyes, brows, mouth and glasses ---------------------------
+# Each is a small picture of its own, cut out of the face (`FACE_CROPS`, in face coordinates), so that a character can change
+# expression by swapping the pictures (`face_texture`; made when first wanted and kept).
+
+const FACE_CROPS := {
+	"eyes": Rect2(52, 90, 150, 82),
+	"brows": Rect2(60, 62, 130, 56),
+	"mouth": Rect2(90, 146, 68, 62),
+	"glasses": Rect2(38, 96, 156, 70),
+}
+const EYE_KINDS := ["normal", "wide", "happy", "closed", "squint", "sleepy", "sad"]
+const BROW_KINDS := ["normal", "raised", "raised_small", "furrow", "sad", "low"]
+const MOUTH_KINDS := ["smile", "grin", "open", "sad", "worry", "flat", "pursed", "talk_a", "talk_b", "talk_c", "yum", "laugh", "sleep", "yawn"]
+
+var _face_cache := {}
+
+
+## The picture of a face layer: `layer` "eyes", "brows", "mouth" or "glasses", `kind` one of EYE_KINDS / BROW_KINDS / MOUTH_KINDS.
+func face_texture(layer: String, kind: String) -> ImageTexture:
+	var key := layer + ":" + kind
+	if not _face_cache.has(key):
+		var body := ""
+		match layer:
+			"eyes":
+				body = _eyes_svg(kind)
+			"brows":
+				body = _brows_svg(kind)
+			"mouth":
+				body = _mouth_svg(kind)
+			_:
+				body = _glasses_svg()
+		var r: Rect2 = FACE_CROPS[layer]
+		_face_cache[key] = _tex('<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="%s %s %s %s">%s</svg>' % [
+			r.size.x, r.size.y, r.position.x, r.position.y, r.size.x, r.size.y, body])
+	return _face_cache[key]
+
+
+## Where a face layer's top-left corner sits in the head sprite's own space (the head picture's pivot is HEAD_PIVOT).
+static func face_offset(layer: String) -> Vector2:
+	var r: Rect2 = FACE_CROPS[layer]
+	return r.position + Vector2(10.0, 100.0) - HEAD_PIVOT
+
+
+func _eyes_svg(kind: String) -> String:
+	if look.eyes == "almond":
+		return _almond_eyes(kind)
+	var out := ""
+	var lash1 := '<path d="M77 117 L72 109" stroke="{lash}" stroke-width="2.5" stroke-linecap="round"/><path d="M82 112 L79 104" stroke="{lash}" stroke-width="2.5" stroke-linecap="round"/>'
+	var lash2 := '<path d="M164 117 L169 109" stroke="{lash}" stroke-width="2.5" stroke-linecap="round"/><path d="M159 112 L162 104" stroke="{lash}" stroke-width="2.5" stroke-linecap="round"/>'
+	# Left eye (the far one for a right-facing face: outer corner left), then right.
+	for e in [
+		{"cx": 94.0, "cy": 130.0, "rx": 18.0, "ry": 22.0, "ix": 97.0, "ir": 15.0, "dr": 10.0, "pr": 6.5, "h1": Vector2(103, 126), "r1": 5.5, "h2": Vector2(91, 141), "r2": 2.5,
+			"arc": "M76 120 Q93 103 112 118", "lash": lash1, "closed": "M76 132 Q94 144 112 132", "outer": -1.0, "id": "rl"},
+		{"cx": 149.0, "cy": 130.0, "rx": 15.0, "ry": 21.0, "ix": 152.0, "ir": 13.0, "dr": 8.5, "pr": 5.5, "h1": Vector2(157, 126), "r1": 4.8, "h2": Vector2(147, 141), "r2": 2.2,
+			"arc": "M134 118 Q150 103 165 120", "lash": lash2, "closed": "M134 132 Q150 143 165 132", "outer": 1.0, "id": "rr"}]:
+		var cx: float = e.cx
+		var cy: float = e.cy
+		var inner := ""
+		match kind:
+			"happy":
+				# A smiling arch, like a closed happy eye, lashes at the outer corner.
+				inner = _f('<path d="M%s %s Q%s %s %s %s" stroke="{lash}" stroke-width="4.4" fill="none" stroke-linecap="round"/>' % [cx - e.rx, cy + 5, cx, cy - 17, cx + e.rx, cy + 5])
+				if look.lashes:
+					inner += _f('<path d="M%s %s l%s -6" stroke="{lash}" stroke-width="2.5" stroke-linecap="round"/>' % [cx + e.outer * (e.rx + 1), cy + 1, e.outer * 4])
+			"closed":
+				inner = _f('<path d="%s" stroke="{lash}" stroke-width="3.8" fill="none" stroke-linecap="round"/>' % e.closed)
+				if look.lashes:
+					inner += _f('<path d="M%s %s l%s 5" stroke="{lash}" stroke-width="2.4" stroke-linecap="round"/>' % [cx + e.outer * e.rx * 0.9, cy + 9, e.outer * 4])
+			_:
+				var k := 1.0
+				var iris_k := 1.0
+				if kind == "wide":
+					k = 1.13
+					iris_k = 0.82
+				inner = '<g transform="translate(%s %s) scale(%s) translate(%s %s)">' % [cx, cy, k, -cx, -cy]
+				inner += _f('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="#FFFFFF"/>' % [cx, cy, e.rx, e.ry])
+				inner += '<g transform="translate(%s %s) scale(%s) translate(%s %s)">' % [e.ix, cy + 5, iris_k, -e.ix, -(cy + 5)]
+				inner += _f('<circle cx="%s" cy="%s" r="%s" fill="{iris}"/><circle cx="%s" cy="%s" r="%s" fill="{iris_dark}"/>' % [e.ix, cy + 3, e.ir, e.ix, cy + 6, e.dr])
+				inner += _f('<circle cx="%s" cy="%s" r="%s" fill="{pupil}"/>' % [e.ix, cy + 5, e.pr * (1.18 if kind == "wide" else 1.0)])
+				inner += '<circle cx="%s" cy="%s" r="%s" fill="#FFFFFF"/><circle cx="%s" cy="%s" r="%s" fill="#FFFFFF"/>' % [e.h1.x, e.h1.y, e.r1, e.h2.x, e.h2.y, e.r2]
+				inner += '</g>'
+				# A lid coming down over the top of the eye (squinting, sleepy, sad: the outer corner drooping).
+				var drop := {"squint": [0.62, 0.62], "sleepy": [1.0, 1.0], "sad": [0.8, 0.22]}.get(kind, [0.0, 0.0]) as Array
+				if kind in ["squint", "sleepy", "sad"]:
+					var left: float = e.ry * (drop[0] if e.outer < 0.0 else drop[1])
+					var right: float = e.ry * (drop[1] if e.outer < 0.0 else drop[0])
+					inner += '<clipPath id="%s"><ellipse cx="%s" cy="%s" rx="%s" ry="%s"/></clipPath>' % [e.id, cx, cy, e.rx, e.ry]
+					inner += _f('<g clip-path="url(#%s)"><path d="M%s %s L%s %s L%s %s L%s %s Z" fill="{skin}"/>' % [e.id, cx - e.rx - 4, cy - e.ry - 6, cx + e.rx + 4, cy - e.ry - 6, cx + e.rx + 4, cy - e.ry + right, cx - e.rx - 4, cy - e.ry + left])
+					inner += _f('<path d="M%s %s L%s %s" stroke="{lash}" stroke-width="3" stroke-linecap="round"/></g>' % [cx - e.rx - 4, cy - e.ry + left, cx + e.rx + 4, cy - e.ry + right])
+				inner += _f('<path d="%s" stroke="{lash}" stroke-width="3.5" fill="none" stroke-linecap="round"/>' % e.arc)
+				if look.lashes:
+					inner += _f(e.lash)
+				inner += '</g>'
+		out += _eye_wrap(cx, cy, inner)
+	return out
+
+
+## Narrow almond eyes: an almond-shaped white, a dark iris and pupil clipped to it, an upper lid line that flicks up at the
+## outer corner, the outer corners lifted a little; a smooth lid with no deep crease. `kind` as for `_eyes_svg`.
+func _almond_eyes(kind := "normal") -> String:
+	var out := ""
+	for e in [[94.0, 130.0, 8.0, "eyeL", -1.0], [149.0, 130.0, -8.0, "eyeR", 1.0]]:
+		var cx: float = e[0]
+		var cy: float = e[1]
+		var side: float = e[4]
+		var w := 20.0 if side < 0.0 else 17.0
+		var k := 1.12 if kind == "wide" else 1.0
+		var shape := "M%.1f %.1f Q%.1f %.1f %.1f %.1f Q%.1f %.1f %.1f %.1f Z" % [cx - w, cy + 1, cx, cy - 15, cx + w, cy - 1, cx, cy + 11, cx - w, cy + 1]
+		var inner := ""
+		if kind == "happy":
+			inner = _f('<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="{lash}" stroke-width="4" fill="none" stroke-linecap="round"/>' % [cx - w, cy + 4, cx, cy - 14, cx + w, cy + 4])
+		elif kind == "closed":
+			inner = _f('<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="{lash}" stroke-width="3.8" fill="none" stroke-linecap="round"/>' % [cx - w, cy + 1, cx, cy + 9, cx + w, cy - 1])
+		else:
+			inner = '<g transform="translate(%s %s) scale(%s) translate(%s %s)">' % [cx, cy, k, -cx, -cy]
+			inner += '<clipPath id="%s"><path d="%s"/></clipPath>' % [e[3], shape]
+			inner += '<path d="%s" fill="#FBFAF6"/>' % shape
+			inner += _f('<g clip-path="url(#%s)"><circle cx="%.1f" cy="%.1f" r="11" fill="{iris}"/><circle cx="%.1f" cy="%.1f" r="8" fill="{iris_dark}"/><circle cx="%.1f" cy="%.1f" r="5.2" fill="{pupil}"/>' % [e[3], cx + 2, cy, cx + 2, cy + 1, cx + 2, cy + 1]
+				+ '<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f L%.1f %.1f L%.1f %.1f Z" fill="#000000" opacity="0.28"/>' % [cx - w, cy - 3, cx, cy - 12, cx + w, cy - 3, cx + w, cy - 8, cx - w, cy - 8])
+			# A lid over the top of the eye: squinting, sleepy, sad (the outer corner lower).
+			var drops := {"squint": [10.0, 10.0], "sleepy": [17.0, 17.0], "sad": [14.0, 4.0]}
+			if drops.has(kind):
+				var d: Array = drops[kind]
+				var outer_drop: float = d[0]
+				var inner_drop: float = d[1]
+				var left: float = outer_drop if side < 0.0 else inner_drop
+				var right: float = inner_drop if side < 0.0 else outer_drop
+				inner += _f('<path d="M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" fill="{skin}"/>' % [cx - w - 3, cy - 20, cx + w + 3, cy - 20, cx + w + 3, cy - 14 + right, cx - w - 3, cy - 14 + left])
+				inner += _f('<path d="M%.1f %.1f L%.1f %.1f" stroke="{lash}" stroke-width="3" stroke-linecap="round"/>' % [cx - w, cy - 14 + left, cx + w, cy - 14 + right])
+			inner += '</g>'
+			inner += '<circle cx="%.1f" cy="%.1f" r="2.8" fill="#FFFFFF"/>' % [cx + 6, cy - 3]
+			inner += _f('<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="{lash}" stroke-width="3.6" fill="none" stroke-linecap="round"/>' % [cx - w - 1, cy + 1, cx, cy - 15, cx + w + 1, cy - 1])
+			# The flick at the outer corner and a thin line under the eye.
+			var corner := cx + side * (w + 1.0)
+			inner += _f('<path d="M%.1f %.1f L%.1f %.1f" stroke="{lash}" stroke-width="3" stroke-linecap="round"/>' % [corner, cy - 1 * 1.0 if side > 0.0 else cy + 1, corner + side * 5, cy - 6])
+			inner += _f('<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="{skin_line}" stroke-width="1.4" fill="none" opacity="0.6"/>' % [cx - w + 4, cy + 7, cx, cy + 13, cx + w - 4, cy + 7])
+		out += '<g transform="rotate(%.1f %.1f %.1f)">%s</g>' % [e[2], cx, cy, _eye_wrap(cx, cy, inner)]
+	return out
+
+
+func _brows_svg(kind: String) -> String:
+	var brow_w := "4.5" if look.age in ["adult", "senior"] and not look.lashes else "3.5"
+	# Outer end, the arch, the inner end of the left brow (the right one is its mirror about x = 122).
+	var base := [Vector2(80, 94), Vector2(93, 86), Vector2(106, 91)] if look.eyes != "almond" else [Vector2(78, 99), Vector2(93, 93), Vector2(108, 97)]
+	# (everything up by `dy`, the outer end by `out`, the inner end by `inn`, the arch by `arch`; positive = down)
+	var shape: Array = {"normal": [0, 0, 0, 0], "raised": [-6, 0, 0, -2], "raised_small": [-3, 0, 0, -1], "furrow": [1, -2, 6, 1],
+		"sad": [-1, 4, -7, 0], "low": [3, 0, 2, 1]}.get(kind, [0, 0, 0, 0])
+	var out := ""
+	for side in [-1.0, 1.0]:
+		var pts: Array = []
+		for i in 3:
+			var q: Vector2 = base[i]
+			if side > 0.0:
+				q.x = 244.0 - q.x
+			var adj: float = shape[0] + (shape[1] if i == 0 else (shape[3] if i == 1 else shape[2]))
+			pts.append(Vector2(q.x + (shape[2] * 0.25 * -side if i == 2 and kind == "furrow" else 0.0), q.y + adj))
+		var d := "M%.1f %.1f Q%.1f %.1f %.1f %.1f" % [pts[0].x, pts[0].y, pts[1].x, pts[1].y, pts[2].x, pts[2].y]
+		out += _f('<path d="%s" stroke="{brow}" stroke-width="%s" fill="none" stroke-linecap="round"/>' % [d, brow_w])
+	return out
+
+
+func _mouth_svg(kind: String) -> String:
+	var s := ""
+	var cx := 123.0
+	match kind:
+		"grin":
+			s += _f('<path d="M103 163 Q123 196 143 163 Q123 170 103 163 Z" fill="{mouth}" stroke="{mouth_line}" stroke-width="2.2" stroke-linejoin="round"/>')
+			s += '<path d="M107 165 Q123 172 139 165 L138 170 Q123 176 108 170 Z" fill="#FFFFFF"/>'
+			s += _f('<path d="M114 182 Q123 176 132 182 Q123 189 114 182 Z" fill="{tongue}"/>')
+		"laugh":
+			s += _f('<path d="M100 160 Q123 202 146 160 Q123 168 100 160 Z" fill="{mouth}" stroke="{mouth_line}" stroke-width="2.2" stroke-linejoin="round"/>')
+			s += '<path d="M105 162 Q123 171 141 162 L140 168 Q123 176 106 168 Z" fill="#FFFFFF"/>'
+			s += _f('<path d="M111 186 Q123 177 135 186 Q123 195 111 186 Z" fill="{tongue}"/>')
+		"yum":
+			s += _f('<path d="M106 164 Q123 190 140 164 Q123 169 106 164 Z" fill="{mouth}" stroke="{mouth_line}" stroke-width="2" stroke-linejoin="round"/>')
+			s += _f('<path d="M126 176 Q137 177 138 186 Q130 190 124 182 Z" fill="{tongue}" stroke="{mouth_line}" stroke-width="1.4" stroke-linejoin="round"/>')
+			s += _f('<path d="M134 167 Q139 166 141 161" stroke="{mouth_line}" stroke-width="2" fill="none" stroke-linecap="round"/>')
+		"open":
+			s += _f('<ellipse cx="123" cy="174" rx="7.5" ry="10" fill="{mouth}" stroke="{mouth_line}" stroke-width="2.4"/>')
+			s += _f('<ellipse cx="123" cy="180" rx="4.5" ry="3.4" fill="{tongue}"/>')
+		"yawn":
+			s += _f('<ellipse cx="123" cy="177" rx="10" ry="14" fill="{mouth}" stroke="{mouth_line}" stroke-width="2.4"/>')
+			s += _f('<ellipse cx="123" cy="186" rx="6.5" ry="5" fill="{tongue}"/>')
+		"pursed":
+			s += _f('<ellipse cx="123" cy="170" rx="4.5" ry="5.5" fill="{mouth}" stroke="{mouth_line}" stroke-width="2"/>')
+		"sad":
+			s += _f('<path d="M109 177 Q123 164 137 177" stroke="{mouth_line}" stroke-width="3" fill="none" stroke-linecap="round"/>')
+		"worry":
+			s += _f('<path d="M113 174 Q123 168 133 174" stroke="{mouth_line}" stroke-width="3" fill="none" stroke-linecap="round"/>')
+		"flat":
+			s += _f('<path d="M112 169 H134" stroke="{mouth_line}" stroke-width="3" fill="none" stroke-linecap="round"/>')
+		"sleep":
+			s += _f('<path d="M114 169 Q123 174 132 169" stroke="{mouth_line}" stroke-width="2.6" fill="none" stroke-linecap="round"/>')
+		"talk_a":
+			s += _f('<ellipse cx="123" cy="170" rx="9" ry="5.5" fill="{mouth}" stroke="{mouth_line}" stroke-width="2.2"/>')
+			s += _f('<ellipse cx="123" cy="173" rx="5" ry="2.2" fill="{tongue}"/>')
+		"talk_b":
+			s += _f('<ellipse cx="123" cy="172" rx="6" ry="8.5" fill="{mouth}" stroke="{mouth_line}" stroke-width="2.2"/>')
+			s += _f('<ellipse cx="123" cy="176" rx="3.6" ry="3" fill="{tongue}"/>')
+		"talk_c":
+			s += _f('<path d="M112 168 Q123 174 134 168" stroke="{mouth_line}" stroke-width="3" fill="none" stroke-linecap="round"/>')
+		_:
+			# The look's own mouth: a smile, or a small open smile.
+			if look.mouth == "open_smile":
+				s += _f('<path d="M110 166 Q123 180 136 166 Z" fill="{mouth}" stroke="{mouth_line}" stroke-width="2" stroke-linejoin="round"/>')
+				s += _f('<path d="M116 172 Q123 178 130 172 Q123 170 116 172 Z" fill="{tongue}"/>')
+			else:
+				s += _f('<path d="M110 167 Q123 177 136 167" stroke="{mouth_line}" stroke-width="3" fill="none" stroke-linecap="round"/>')
 	if look.facial_hair in ["beard", "mustache"]:
 		s += _f('<path d="M104 161 Q114 152 123 158 Q132 152 142 161 Q132 166 123 162 Q114 166 104 161 Z" fill="{hair}" stroke="{hair_line}" stroke-width="2"/>')
-	if look.glasses != "":
-		s += _f('<g fill="#FFFFFF" fill-opacity="0.15" stroke="{glasses}" stroke-width="3.5"><circle cx="94" cy="130" r="25"/><circle cx="150" cy="130" r="23"/></g>')
-		s += _f('<path d="M119 127 Q123 122 127 127 M69 126 L48 122" stroke="{glasses}" stroke-width="3.5" fill="none" stroke-linecap="round"/>')
-	return _head_frame(s)
+	return s
+
+
+func _glasses_svg() -> String:
+	if look.glasses == "":
+		return ""
+	var s := _f('<g fill="#FFFFFF" fill-opacity="0.15" stroke="{glasses}" stroke-width="3.5"><circle cx="94" cy="130" r="25"/><circle cx="150" cy="130" r="23"/></g>')
+	s += _f('<path d="M119 127 Q123 122 127 127 M69 126 L48 122" stroke="{glasses}" stroke-width="3.5" fill="none" stroke-linecap="round"/>')
+	return s
 
 
 # --- Hair & hats ----------------------------------------------------------

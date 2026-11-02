@@ -218,6 +218,14 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   bib pocket, denim texture and stitching; trousers a stitched cuff and an outer seam; socks a ribbed cuff with a stripe; shoes laces and eyelets,
   a buckled strap, a tread on the sole; caps seams, tuques a sheen, scarves knitted rows. Charlotte's own `overrides` (exact colours) still win over
   the derived palette, so her usual dress keeps its colours (a design sheet that changes `outfit_color` must clear `look.overrides`).
+- Faces have expressions: the head picture is only the bare face (skin, ears, blush, nose, beard); the eyes, brows, mouth and glasses are layers of their
+  own (`CharacterArt.face_texture(layer, kind)`, made when first wanted from `FACE_CROPS`; kinds `EYE_KINDS` / `BROW_KINDS` / `MOUTH_KINDS`, round or
+  almond eyes, lashes, beard and moustache handled) between the head and the hair. `Character.EXPRESSIONS` maps a name (normal, happy, grin, yum, laugh,
+  focus, effort, surprised, wonder, sad, worry, sleep, yawn, talk, sip) to [eyes, brows, mouth]. `_auto_expression()` chooses from what she is
+  doing (running: grin, petting or waving: happy, stretching: yawn, pouring: focus, holding a cat: happy via meta `face`, chores by `TASK_FACES`),
+  `expression` forces one, `express(name, seconds)` shows one for a moment. `Bubble.say` makes whoever stands under the bubble "talk" (mouth
+  cycling `talk_a/b/c`), `Interior._treat` gives "yum", the house tidy quest "worry" / "laugh", a petted dog's owner "happy". Closed or smiling eyes
+  suppress the blink. `tools/arms.tscn --set=5` and `--set=6` show every expression.
 - `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through, breathing, soft shading by
   `shaders/character_shade.gdshader` (lit from the left, follows `facing`), hair strands clipped to each hairstyle (`CharacterArt._strands`), clothing folds
   (dress gathers and hem, top creases, elbow and knee creases), idle gestures when `fidgets` (wave, hop,

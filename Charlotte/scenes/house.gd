@@ -289,6 +289,7 @@ func _put_away(dest_id: String) -> void:
 		return
 	var kind := Carry.id()
 	if ITEMS[kind].dest != dest_id:
+		_charlotte.express("worry", 2.2)
 		_say(_charlotte, "Pas ici ! " + _where(kind), 300.0, 3.4)
 		return
 	var held := _charlotte.held()
@@ -314,6 +315,7 @@ func _put_away(dest_id: String) -> void:
 	if tidied.size() >= MESS.size():
 		GameState.flags.erase("tidied")
 		_say(_charlotte, "Ma chambre est toute propre !", 300.0)
+		_charlotte.express("laugh", 2.4)
 		Quests.complete("menage")
 	else:
 		_say(_charlotte, "Voilà ! Encore %d !" % (MESS.size() - tidied.size()), 300.0, 2.0)

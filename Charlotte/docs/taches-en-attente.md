@@ -20,4 +20,4 @@
 9. ~~FAIT~~ **Personnages** : une articulation (coude) aux bras et des mains avec des doigts (`Character`, `CharacterArt`).
 10. ~~FAIT~~ **Genoux** aux jambes des personnages (articulation), puis **réviser tout** (cyclistes, objets portés, laisse, etc.) pour ne rien briser.
 11. ~~FAIT~~ **Améliorer l'apparence des vêtements** des personnages (`CharacterArt`).
-12. **Expressions faciales** des personnages selon leurs actions (yeux, bouche, sourcils : content, concentré, surpris, goûte, dort…).
+12. ~~FAIT~~ **Expressions faciales** des personnages selon leurs actions (yeux, bouche, sourcils : content, concentré, surpris, goûte, dort…).
