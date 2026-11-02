@@ -251,7 +251,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - `QuestMark.make(at, condition, scale)` (`world/quest_mark.gd`): a bobbing yellow "!" over a quest giver, or over where
   to go next, while `condition` is true.
 - The quests so far:
-  - milk: Mom gives it, buy the 4 L bag at the dépanneur (free, `flags.has_milk`), bring it to Mom;
+  - milk: Mom gives it, buy the pint of milk (a one-litre carton, `ShopArt.milk_pint`, its name "Québon" a plain label) at the
+    dépanneur (free, `flags.has_milk`); Charlotte carries it in her arms (`Carry.milk()`, restored in every scene) to Mom;
+  - one thing in her arms at a time (`world/carry.gd`, `Carry.busy()`): a lost cat, the milk or the watering can. Taking
+    another says "J'ai déjà les mains pleines !" (the shop won't sell her the milk, the lost cat stays put, the can stays on
+    the floor);
   - hamster: Dad gives it; feeding sets `flags.hamster_fed` (cleared at bedtime); going to bed unfed is refused, fed completes it;
   - lost cats, `world/lost_cats.gd` (`LostCats.ALL`, ids = quest ids cat, cat2, cat3, chained by `after`): Pistache
     (found on Dandurand, home 5684 6e Av.), Caramel (in the lane, home 5679 5e Av.), Bijou (in the lane, home 2655 rue

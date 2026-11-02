@@ -48,6 +48,8 @@ func _spawn_charlotte(x: float, facing := 1) -> void:
 	_charlotte.facing = facing
 	if LostCats.carrying() != "":
 		_charlotte.carry.call_deferred(LostCats.held(LostCats.carrying()))
+	elif GameState.flags.get("has_milk", false):
+		_charlotte.carry.call_deferred(Carry.milk())
 	if not is_nan(Transition.inside_x):
 		_charlotte.position.x = Transition.inside_x
 		Transition.inside_x = NAN

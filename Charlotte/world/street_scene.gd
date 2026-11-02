@@ -367,6 +367,8 @@ func _build_lost_cats() -> void:
 	var held := LostCats.carrying()
 	if held != "":
 		_charlotte.carry(LostCats.held(held))
+	elif GameState.flags.get("has_milk", false):
+		_charlotte.carry(Carry.milk())
 	for id in LostCats.ALL:
 		var info: Dictionary = LostCats.ALL[id]
 		if info.poster == street_key and LostCats.poster_up(id):
@@ -428,6 +430,10 @@ func _add_lost_cat(id: String) -> void:
 	cat.bounds = Vector2(maxf(x - 350.0, room.x), minf(x + 350.0, room.y))
 	cat.charlotte = _charlotte
 	cat.on_pet = func():
+		# With her arms already full (the milk, the can, another cat) she can't pick it up: it waits.
+		if Carry.busy():
+			Bubble.say(self, _charlotte.position + Vector2(0, -190), "%s\nJe reviens te chercher, %s !" % [Carry.FULL_HANDS, LostCats.ALL[id].name], 2.8)
+			return
 		cat.on_pet = Callable()
 		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je te tiens, %s !\nOn rentre chez toi." % LostCats.ALL[id].name, 2.6)
 		get_tree().create_timer(StrayCat.PET_TIME).timeout.connect(func():

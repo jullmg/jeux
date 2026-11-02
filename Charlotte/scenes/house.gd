@@ -110,6 +110,7 @@ func _build_family() -> void:
 func _talk_to_mom() -> void:
 	if Quests.active("milk") and GameState.flags.get("has_milk", false):
 		GameState.flags.erase("has_milk")
+		_charlotte.carry(null)
 		_say(_mom, "Du lait ! Merci, Chachoue !", 350.0)
 		Quests.complete("milk")
 	elif Quests.start("milk"):
@@ -215,8 +216,8 @@ func _take_can() -> void:
 	if Quests.done("plants") or GameState.flags.get("has_can", false):
 		_say(_charlotte, "C'est l'arrosoir.", 300.0)
 		return
-	if LostCats.carrying() != "":
-		_say(_charlotte, "J'ai les mains pleines !", 300.0)
+	if Carry.busy():
+		_say(_charlotte, Carry.FULL_HANDS, 300.0)
 		return
 	Quests.start("plants")
 	GameState.flags["has_can"] = true

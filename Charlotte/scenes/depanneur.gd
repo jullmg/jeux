@@ -81,7 +81,7 @@ func _build_counter() -> void:
 	_put(ShopArt.specials_board(), COUNTER_X + 360.0, 210.0, 0.9, "wall")
 	_wall_label("SPÉCIAUX", Vector2(COUNTER_X + 468.0, 82.0), 17, Color("#FFD23F"), Color("#1E2A24"))
 	var specials := Label.new()
-	specials.text = "Lait 4 L ...... 5,49 $\nPain tranché .. 2,99 $\nSloche ......... 1,50 $"
+	specials.text = "Pinte de lait . 2,49 $\nPain tranché .. 2,99 $\nSloche ......... 1,50 $"
 	specials.add_theme_font_size_override("font_size", 13)
 	specials.add_theme_color_override("font_color", Color("#F4F2EC"))
 	specials.position = Vector2(COUNTER_X + 382.0, 104.0)
@@ -331,14 +331,20 @@ func _buy_chips() -> void:
 	_buy(ShopArt.chip_treat(f), "%s !" % String(ShopArt.CHIPS[f].said).capitalize(), 1.75)
 
 
-# The bag of milk: Mom's money pays for it while she's on the "milk" quest; otherwise it's like anything else.
+# The pint of milk: Mom's money pays for it while she's on the "milk" quest, and Charlotte carries it home in her arms (if
+# her hands are free); otherwise it's like anything else.
 func _buy_milk() -> void:
 	if Quests.active("milk") and not GameState.flags.get("has_milk", false):
+		if Carry.busy():
+			_say(_charlotte, Carry.FULL_HANDS, 300.0)
+			return
 		GameState.flags["has_milk"] = true
-		_treat(ShopArt.treat("milk"), "Du lait pour Maman !")
+		_charlotte.carry(Carry.milk())
+		Sfx.play("pop", _charlotte.position)
+		_say(_charlotte, "Une pinte de lait pour Maman !", 300.0)
 		_thanks("Bonjour à ta maman !")
 	else:
-		_buy(ShopArt.treat("milk"), "Un sac de lait !", 5.49)
+		_buy(ShopArt.milk_pint(), "Une pinte de lait !", 2.49)
 
 
 func _thanks(text: String) -> void:
