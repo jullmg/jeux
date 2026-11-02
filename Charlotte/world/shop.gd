@@ -71,21 +71,47 @@ func _ad(kind: int, x: float, bottom: float, s := 0.8) -> void:
 	_wall_label(ad.title, Vector2(x + 50.0 * s, bottom - 140.0 * s + 18.0 * s), maxi(8, int(13.0 * s)), Color(ad.ink), Color(0, 0, 0, 0.0), 0)
 
 
-# She picks something and pays from her pocket money; the shopkeeper thanks her (or tells her she's short).
+## What things cost in a Montréal corner store (Québec dollars, 2026), the same in both shops.
+const PRICES := {
+	"candy": 1.25, "lollipop": 0.75, "chips": 2.99, "slush": 2.75, "chocolate": 2.25, "popsicle": 1.75, "juice": 2.25,
+	"milk": 3.29, "bread": 3.99, "coffee": 2.00,
+}
+var _asking := false
+
+
+# She picks something: a window shows it with its price (and what is left in her pocket) and asks first; if she says yes the
+# money goes and she gets it with the shopkeeper's thanks; if she is short the window says how much is missing.
 func _buy(picture: Texture2D, text: String, price: float) -> void:
-	if GameState.money < price - 0.001:
-		_say(_clerk, "Il te manque des sous ! C'est %s." % Quests.money_text(price), 250.0, 3.0)
-		Sfx.play("pop")
+	if _asking:
+		return
+	_asking = true
+	_control.enabled = false
+	var dialog := BuyDialog.ask(self, picture, text, price)
+	var bought: bool = await dialog.answered
+	_asking = false
+	_control.enabled = true
+	if not bought:
+		if GameState.money < price - 0.001:
+			_say(_clerk, "Reviens quand tu auras assez de sous !", 250.0, 3.0)
 		return
 	GameState.money -= price
 	_treat(picture, "%s  − %s" % [text, Quests.money_text(price)])
 	_thanks("Merci, bonne journée !")
 
 
+# A handful of candies or a lollipop, one or the other.
+func _buy_candy() -> void:
+	if randf() < 0.5:
+		_buy(ShopArt.treat("candy"), "Des bonbons !", PRICES.candy)
+	else:
+		_buy(ShopArt.treat("lollipop"), "Une sucette !", PRICES.lollipop)
+
+
 # A bag of chips: one of the classic flavours, picked at random (or the one she looked at).
 func _buy_chips() -> void:
 	var f := randi() % ShopArt.CHIPS.size()
-	_buy(ShopArt.chip_treat(f), "%s !" % String(ShopArt.CHIPS[f].said).capitalize(), 1.75)
+	var said: String = ShopArt.CHIPS[f].said
+	_buy(ShopArt.chip_treat(f), "%s !" % (said.substr(0, 1).to_upper() + said.substr(1)), PRICES.chips)
 
 
 # The pint of milk: Mom's money pays for it while she's on the "milk" quest, and Charlotte carries it home in her arms (if
@@ -99,7 +125,7 @@ func _buy_milk() -> void:
 		_say(_charlotte, "Une pinte de lait pour Maman !", 300.0)
 		_thanks("Bonjour à ta maman !")
 	else:
-		_buy(ShopArt.milk_pint(), "Une pinte de lait !", 2.49)
+		_buy(ShopArt.milk_pint(), "Une pinte de lait !", PRICES.milk)
 
 
 func _thanks(text: String) -> void:

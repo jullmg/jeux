@@ -265,7 +265,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 
 ## The map
 
-- `ui/town_map.gd` is the `TownMap` autoload (CanvasLayer 76): button left of the notebook's, or the **C** key, opens "Mon quartier",
+- `ui/town_map.gd` is the `TownMap` autoload (CanvasLayer 76): button left of the notebook's, or the **C** or **M** key (Shift+M now mutes), opens "Mon quartier",
   a big sheet of drawing paper drawn like a child (wax crayon, `CuteArt._shape/_stroke/_crayon_line`, wobbly lettering): north up,
   Rue Holt (west) and Rue Dandurand (east), 6e Avenue above and 5e below, 7e and 4e faded, her block washed in yellow with the
   houses in rows, the lanes as an H, her house (`HOUSE_X`), Oh Bon!, Xin-Xin, the school across Dandurand, Mount Royal with its cross to
@@ -350,7 +350,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - `ui/game_menu.gd` (`GameMenu` autoload, CanvasLayer 78): ☰ button top-left or Escape (unless the notebook is open)
   pauses and opens Reprendre / Options (Musique and Effets sonores volume sliders on those buses, Plein écran) /
   Écran titre / Quitter le jeu (both save through the scene's `Saver` first). Options in `user://settings.cfg` [options].
-- `ui/mute_button.gd` (`MuteButton` autoload): speaker button top-right on every screen, or the M key, mutes the Master bus;
+- `ui/mute_button.gd` (`MuteButton` autoload): speaker button top-right on every screen, or Shift+M, mutes the Master bus;
   remembered in `user://settings.cfg`.
 - Buses "Effets" (effects) and "Musique". Music is the user's own tracks (made with Suno), never generated in code:
   `audio/music/<name>.mp3|.ogg|.wav`, played by the `Music` autoload (`audio/music.gd`): looping, crossfading.

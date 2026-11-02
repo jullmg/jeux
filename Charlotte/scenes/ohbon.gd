@@ -223,13 +223,13 @@ func _build_spots() -> void:
 		_say(_clerk, HELLOS[_hello % HELLOS.size()], 230.0)
 		_hello += 1, COUNTER_X + 330.0 - 80.0))
 	add_child(DoorSpot.make(Rect2(CANDY_X, 160, 480, 285), func():
-		_buy(ShopArt.treat("candy" if randf() < 0.5 else "lollipop"), "Des bonbons !", 0.25), CANDY_X + 240.0))
+		_buy_candy(), CANDY_X + 240.0))
 	add_child(DoorSpot.make(Rect2(CHIPS_X, 448, 374, 204), func():
 		_buy_chips(), CHIPS_X + 187.0))
 	add_child(DoorSpot.make(Rect2(COFFEE_X, 340, 266, 266), func():
-		_buy(ShopArt.treat("chocolate"), "Un chocolat chaud !", 1.25), COFFEE_X + 133.0))
+		_buy(ShopArt.treat("chocolate"), "Un chocolat chaud !", PRICES.chocolate), COFFEE_X + 133.0))
 	add_child(DoorSpot.make(Rect2(FRIDGE_X, 120, 440, 360), func():
-		_buy(ShopArt.treat("juice"), "Un jus !", 1.5), FRIDGE_X + 220.0))
+		_buy(ShopArt.treat("juice"), "Un jus !", PRICES.juice), FRIDGE_X + 220.0))
 	add_child(DoorSpot.make(Rect2(DAIRY_X, 120, 440, 480), func():
 		_buy_milk(), DAIRY_X + 220.0))
 	add_child(QuestMark.make(Vector2(DAIRY_X + 220.0, 100.0), func() -> bool:

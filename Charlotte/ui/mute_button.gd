@@ -1,6 +1,6 @@
 extends CanvasLayer
 ## Autoload "MuteButton": a little speaker button in the top-right corner, on every screen, that cuts all sound
-## (music and effects) and brings it back; the M key does the same. Remembered between runs.
+## (music and effects) and brings it back; Shift+M does the same (plain M opens the map). Remembered between runs.
 
 const SETTINGS := "user://settings.cfg"
 
@@ -18,7 +18,7 @@ func _ready() -> void:
 	_button.custom_minimum_size = Vector2(52, 52)
 	_button.position = Vector2(1280 - 52 - 14, 14)
 	_button.focus_mode = Control.FOCUS_NONE
-	_button.tooltip_text = "Son (M)"
+	_button.tooltip_text = "Son (Maj+M)"
 	for state in ["normal", "hover", "pressed"]:
 		var box := StyleBoxFlat.new()
 		box.bg_color = Color(1, 1, 1, 0.85 if state == "normal" else 1.0)
@@ -33,7 +33,7 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_M:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_M and event.shift_pressed:
 		get_viewport().set_input_as_handled()
 		toggle()
 

@@ -41,7 +41,7 @@ func _ready() -> void:
 	_button.custom_minimum_size = Vector2(52, 52)
 	_button.position = Vector2(1280 - 52 - 14 - 64 - 64, 14)
 	_button.focus_mode = Control.FOCUS_NONE
-	_button.tooltip_text = "Ma carte (C)"
+	_button.tooltip_text = "Ma carte (C ou M)"
 	for state in ["normal", "hover", "pressed"]:
 		var box := StyleBoxFlat.new()
 		box.bg_color = Color(1, 1, 1, 0.85 if state == "normal" else 1.0)
@@ -71,10 +71,13 @@ func _process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
-	if _open and (event.keycode == KEY_C or event.keycode == KEY_ESCAPE):
+	if not _open and not get_tree().get_nodes_in_group("modal").is_empty():
+		return
+	var opens: bool = event.keycode == KEY_C or (event.keycode == KEY_M and not event.shift_pressed)
+	if _open and (opens or event.keycode == KEY_ESCAPE):
 		get_viewport().set_input_as_handled()
 		toggle()
-	elif not _open and event.keycode == KEY_C and _button.visible and not get_tree().paused:
+	elif not _open and opens and _button.visible and not get_tree().paused:
 		get_viewport().set_input_as_handled()
 		toggle()
 
@@ -171,7 +174,7 @@ func _build_page() -> void:
 	_you.set_process(false)
 	_sheet.add_child(_you)
 	var hint := Label.new()
-	hint.text = "C ou clique à côté pour fermer"
+	hint.text = "C, M ou clique à côté pour fermer"
 	hint.add_theme_font_size_override("font_size", 15)
 	hint.add_theme_color_override("font_color", Color(1, 1, 1, 0.8))
 	hint.position = Vector2(0, 690)

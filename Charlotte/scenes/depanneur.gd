@@ -90,7 +90,7 @@ func _build_counter() -> void:
 	_put(ShopArt.specials_board(), COUNTER_X + 360.0, 210.0, 0.9, "wall")
 	_wall_label("SPÉCIAUX", Vector2(COUNTER_X + 468.0, 82.0), 17, Color("#FFD23F"), Color("#1E2A24"))
 	var specials := Label.new()
-	specials.text = "Pinte de lait . 2,49 $\nPain tranché .. 2,99 $\nSloche ......... 1,50 $"
+	specials.text = "Pinte de lait . %s\nPain tranché .. %s\nSloche ......... %s" % [Quests.money_text(PRICES.milk), Quests.money_text(PRICES.bread), Quests.money_text(PRICES.slush)]
 	specials.add_theme_font_size_override("font_size", 13)
 	specials.add_theme_color_override("font_color", Color("#F4F2EC"))
 	specials.position = Vector2(COUNTER_X + 382.0, 104.0)
@@ -331,17 +331,17 @@ func _build_spots() -> void:
 		Sfx.play("chime", _lucky_cat.position)
 		_say(_charlotte, "Bonne chance, petit chat !", 300.0), COUNTER_X + 56.0))
 	add_child(DoorSpot.make(Rect2(CANDY_X, 160, 480, 285), func():
-		_buy(ShopArt.treat("candy" if randf() < 0.5 else "lollipop"), "Des bonbons !", 0.25), CANDY_X + 240.0))
+		_buy_candy(), CANDY_X + 240.0))
 	add_child(DoorSpot.make(Rect2(CHIPS_X, 448, 374, 204), func():
 		_buy_chips(), CHIPS_X + 187.0))
 	add_child(DoorSpot.make(Rect2(SLUSH_X, 200, 190, 270), func():
-		_buy(ShopArt.treat("slush"), "Une sloche !", 1.5), SLUSH_X + 95.0))
+		_buy(ShopArt.treat("slush"), "Une sloche !", PRICES.slush), SLUSH_X + 95.0))
 	add_child(DoorSpot.make(Rect2(COFFEE_X, 340, 266, 266), func():
-		_buy(ShopArt.treat("chocolate"), "Un chocolat chaud !", 1.25), COFFEE_X + 133.0))
+		_buy(ShopArt.treat("chocolate"), "Un chocolat chaud !", PRICES.chocolate), COFFEE_X + 133.0))
 	add_child(DoorSpot.make(Rect2(FREEZER_X, 500, 290, 150), func():
-		_buy(ShopArt.treat("popsicle"), "Un popsicle !", 1.0), FREEZER_X + 145.0))
+		_buy(ShopArt.treat("popsicle"), "Un popsicle !", PRICES.popsicle), FREEZER_X + 145.0))
 	add_child(DoorSpot.make(Rect2(FRIDGE_X, 120, 440, 360), func():
-		_buy(ShopArt.treat("juice"), "Un jus !", 1.5), FRIDGE_X + 220.0))
+		_buy(ShopArt.treat("juice"), "Un jus !", PRICES.juice), FRIDGE_X + 220.0))
 	add_child(DoorSpot.make(Rect2(DAIRY_X, 120, 440, 480), func():
 		_buy_milk(), DAIRY_X + 220.0))
 	# Mom's milk: a "!" over the dairy cooler while she still has to pick it up.

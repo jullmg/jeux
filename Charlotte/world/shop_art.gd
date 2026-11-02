@@ -439,7 +439,7 @@ static func lotto_poster() -> ImageTexture:
 ## Advertising light-box posters a corner store hangs on its walls (never house picture frames): title and background colour
 ## per kind, for the label the scene sets over the title strip.
 const AD_POSTERS := [
-	{"title": "CAFÉ 1 $", "bg": "#7A4A2A", "ink": "#FFF3D6"},
+	{"title": "CAFÉ 2 $", "bg": "#7A4A2A", "ink": "#FFF3D6"},
 	{"title": "GLACES", "bg": "#F29BBE", "ink": "#FFFFFF"},
 	{"title": "SLOCHE", "bg": "#2E86C1", "ink": "#FFFFFF"},
 	{"title": "HOT-DOGS", "bg": "#C8202A", "ink": "#FFE9A8"},

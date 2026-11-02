@@ -58,7 +58,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
 	var town_map := get_node_or_null("/root/TownMap")
-	if town_map and town_map._open:
+	if (town_map and town_map._open) or not get_tree().get_nodes_in_group("modal").is_empty():
 		return
 	if event.keycode == KEY_N and _button.visible or event.keycode == KEY_ESCAPE and _open:
 		get_viewport().set_input_as_handled()
