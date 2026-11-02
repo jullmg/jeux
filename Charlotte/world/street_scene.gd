@@ -364,16 +364,12 @@ func _build_extra_props() -> void:
 ## This street's part in the lost-cat quests: the cat in Charlotte's arms, the "PERDU" poster, the lost cat
 ## waiting here, and the owner's front door.
 func _build_lost_cats() -> void:
-	var held := LostCats.carrying()
-	if held != "":
-		_charlotte.carry(LostCats.held(held))
-	elif GameState.flags.get("has_milk", false):
-		_charlotte.carry(Carry.milk())
+	Carry.restore(_charlotte)
 	for id in LostCats.ALL:
 		var info: Dictionary = LostCats.ALL[id]
 		if info.poster == street_key and LostCats.poster_up(id):
 			_add_poster(id)
-		if info.found == street_key and Quests.active(id) and held != id:
+		if info.found == street_key and Quests.active(id) and Carry.cat_id() != id:
 			_add_lost_cat(id)
 		if info.home == street_key and Quests.active(id):
 			_add_owner_door(id)
@@ -438,8 +434,7 @@ func _add_lost_cat(id: String) -> void:
 		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je te tiens, %s !\nOn rentre chez toi." % LostCats.ALL[id].name, 2.6)
 		get_tree().create_timer(StrayCat.PET_TIME).timeout.connect(func():
 			cat.queue_free()
-			GameState.flags["carrying"] = id
-			_charlotte.carry(LostCats.held(id)))
+			Carry.take(_charlotte, "cat", id))
 	_animals.add_child(cat)
 
 
@@ -483,8 +478,7 @@ func _bring_home(id: String, x: float) -> void:
 		Sfx.play("meow", owner.position))
 	tween.tween_interval(1.2)
 	tween.tween_callback(func():
-		_charlotte.carry(null)
-		GameState.flags.erase("carrying")
+		Carry.put_down(_charlotte)
 		var cat := LostCats.make(id)
 		cat.position = Vector2(x + 18.0, STRAY_CAT_Y)
 		cat.wander = false

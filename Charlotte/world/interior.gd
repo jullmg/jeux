@@ -46,10 +46,7 @@ func _spawn_charlotte(x: float, facing := 1) -> void:
 	_charlotte.step_sound = Sfx.step_for(false)
 	_charlotte.position = Vector2(x, FEET_Y)
 	_charlotte.facing = facing
-	if LostCats.carrying() != "":
-		_charlotte.carry.call_deferred(LostCats.held(LostCats.carrying()))
-	elif GameState.flags.get("has_milk", false):
-		_charlotte.carry.call_deferred(Carry.milk())
+	Carry.restore.call_deferred(_charlotte)
 	if not is_nan(Transition.inside_x):
 		_charlotte.position.x = Transition.inside_x
 		Transition.inside_x = NAN

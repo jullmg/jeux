@@ -162,6 +162,11 @@ func carry(thing: Node2D) -> void:
 		_body.move_child(thing, _arm_front.get_index())
 
 
+## What she holds in her arms, or null.
+func held() -> Node2D:
+	return _held if is_holding() else null
+
+
 func is_holding() -> bool:
 	return _held != null and is_instance_valid(_held)
 

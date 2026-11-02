@@ -20,7 +20,7 @@ static var age := START_AGE
 static var money := START_MONEY
 ## Quest id → "active" or "done" (see Quests).
 static var quests := {}
-## Story flags, e.g. "has_milk".
+## Story flags, e.g. "hamster_fed"; what she carries is `Carry`'s single flag.
 static var flags := {}
 
 
@@ -134,6 +134,7 @@ static func load_game(n: int) -> String:
 	money = float(data.get("money", START_MONEY))
 	quests = data.get("quests", {})
 	flags = data.get("flags", {})
+	Carry.migrate()
 	var scene := str(data.get("scene", ""))
 	var x := float(data.get("x", NAN))
 	if scene.contains("/scenes/house") or scene.contains("/scenes/depanneur"):

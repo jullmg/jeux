@@ -311,7 +311,7 @@ func _build_spots() -> void:
 		_buy_milk(), DAIRY_X + 220.0))
 	# Mom's milk: a "!" over the dairy cooler while she still has to pick it up.
 	add_child(QuestMark.make(Vector2(DAIRY_X + 220.0, 100.0), func() -> bool:
-		return Quests.active("milk") and not GameState.flags.get("has_milk", false)))
+		return Quests.active("milk") and not Carry.has("milk")))
 
 
 # She picks something and pays from her pocket money; the shopkeeper thanks her (or tells her she's short).
@@ -334,12 +334,10 @@ func _buy_chips() -> void:
 # The pint of milk: Mom's money pays for it while she's on the "milk" quest, and Charlotte carries it home in her arms (if
 # her hands are free); otherwise it's like anything else.
 func _buy_milk() -> void:
-	if Quests.active("milk") and not GameState.flags.get("has_milk", false):
-		if Carry.busy():
+	if Quests.active("milk") and not Carry.has("milk"):
+		if not Carry.take(_charlotte, "milk"):
 			_say(_charlotte, Carry.FULL_HANDS, 300.0)
 			return
-		GameState.flags["has_milk"] = true
-		_charlotte.carry(Carry.milk())
 		Sfx.play("pop", _charlotte.position)
 		_say(_charlotte, "Une pinte de lait pour Maman !", 300.0)
 		_thanks("Bonjour à ta maman !")

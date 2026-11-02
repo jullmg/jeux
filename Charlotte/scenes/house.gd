@@ -25,7 +25,6 @@ const PUT_AWAY := {"sock": Vector2(1340, 560), "tshirt": Vector2(1340, 560), "py
 const CAN_X := KITCHEN_START + 470.0
 # The tip of the watering can's spout, in the held can's own space (its texture is centred, offset by (30, -4)).
 const CAN_SPOUT := Vector2(86, -24)
-const CAN_HANDLE := Vector2(18, -33)
 # She steps up to the plant (toward the wall it stands against) to pour.
 const POUR_STEP := 54.0
 # How far in front of Charlotte the spout is while she pours (world px): she stands that far from the soil.
@@ -102,15 +101,14 @@ func _build_family() -> void:
 	add_child(DoorSpot.make(Rect2(_dad.position.x - 55.0, 330, 110, 340), _talk_to_dad, _dad.position.x - 90.0))
 	# A "!" over whoever has a quest for Charlotte, or is waiting for what she brings.
 	add_child(QuestMark.make(_mom.position + Vector2(0, -350), func() -> bool:
-		return Quests.available("milk") or Quests.available("menage") or Quests.active("milk") and GameState.flags.get("has_milk", false)))
+		return Quests.available("milk") or Quests.available("menage") or Quests.active("milk") and Carry.has("milk")))
 	add_child(QuestMark.make(_dad.position + Vector2(0, -360), func() -> bool: return Quests.available("hamster") or Quests.available("plants")))
 
 
 # Mom asks for milk, sends her to the dépanneur, and thanks her when she brings it home.
 func _talk_to_mom() -> void:
-	if Quests.active("milk") and GameState.flags.get("has_milk", false):
-		GameState.flags.erase("has_milk")
-		_charlotte.carry(null)
+	if Quests.active("milk") and Carry.has("milk"):
+		Carry.put_down(_charlotte)
 		_say(_mom, "Du lait ! Merci, Chachoue !", 350.0)
 		Quests.complete("milk")
 	elif Quests.start("milk"):
@@ -164,9 +162,9 @@ func _build_chores() -> void:
 	_can_shadows = get_children().slice(before, get_child_count() - 1)
 	add_child(DoorSpot.make(Rect2(_can.position - Vector2(10, 20), Vector2(86, 70)), _take_can, CAN_X + 30.0))
 	add_child(QuestMark.make(_can.position + Vector2(33, -40), func() -> bool:
-		return Quests.active("plants") and not GameState.flags.get("has_can", false), 0.8))
-	if GameState.flags.get("has_can", false):
-		_hold_can.call_deferred()
+		return Quests.active("plants") and not Carry.has("can"), 0.8))
+	if Carry.has("can"):
+		_adopt_can.call_deferred()
 
 
 # A plant to water: healthy and thirsty pictures kept on the sprite, a contact shadow when it stands on the floor.
@@ -213,28 +211,22 @@ func _tidy(kind: String, item: Sprite2D) -> void:
 
 
 func _take_can() -> void:
-	if Quests.done("plants") or GameState.flags.get("has_can", false):
+	if Quests.done("plants") or Carry.has("can"):
 		_say(_charlotte, "C'est l'arrosoir.", 300.0)
 		return
-	if Carry.busy():
+	if not Carry.take(_charlotte, "can"):
 		_say(_charlotte, Carry.FULL_HANDS, 300.0)
 		return
 	Quests.start("plants")
-	GameState.flags["has_can"] = true
 	Sfx.play("pop", _can.position)
-	_hold_can()
+	_adopt_can()
 
 
-func _hold_can() -> void:
+# The can in her arms (just taken, or put back there by Carry as the scene opened): the one on the kitchen floor goes.
+func _adopt_can() -> void:
+	Carry.restore(_charlotte)
+	_held_can = _charlotte.held() as Sprite2D
 	_show_can(false)
-	var held := Sprite2D.new()
-	_held_can = held
-	held.texture = _can.texture
-	# Held up in front of her, a little bigger than it looks on the floor at the back of the kitchen.
-	held.scale = Vector2.ONE * 1.5
-	held.offset = Vector2(30, -4)
-	_charlotte.carry(held)
-	_charlotte.carry_grip = CAN_HANDLE
 
 
 func _show_can(shown: bool) -> void:
@@ -248,7 +240,7 @@ func _water(id: String) -> void:
 	if not _thirsty(id):
 		_say(_charlotte, "Elle a assez bu !" if Quests.done("plants") or Quests.active("plants") else "Elle est belle, cette plante.", 300.0)
 		return
-	if not GameState.flags.get("has_can", false) or _held_can == null:
+	if not Carry.has("can") or _held_can == null:
 		_say(_charlotte, "Elle a soif… Il me faut\nl'arrosoir de la cuisine !", 300.0, 3.0)
 		return
 	if _pouring:
@@ -286,12 +278,11 @@ func _water(id: String) -> void:
 	var last := watered.size() >= _plants.size()
 	if last:
 		GameState.flags.erase("watered")
-		GameState.flags.erase("has_can")
 	tween.tween_callback(func():
 		_pouring = false
 		_control.enabled = true
 		if last:
-			_charlotte.carry(null)
+			Carry.put_down(_charlotte)
 			_held_can = null
 			_show_can(true)
 			_say(_charlotte, "Toutes les plantes ont bu !", 300.0)

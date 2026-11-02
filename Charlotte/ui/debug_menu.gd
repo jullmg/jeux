@@ -5,7 +5,9 @@ extends CanvasLayer
 
 const ALIASES := {"printemps": "spring", "ete": "summer", "été": "summer", "automne": "autumn", "hiver": "winter"}
 ## The story flags each quest leaves behind, cleared with it.
-const QUEST_FLAGS := {"milk": ["has_milk"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered", "has_can"]}
+const QUEST_FLAGS := {"hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"]}
+## What a quest puts in her arms (a lost cat's quest id is the cat's id, handled by `Carry.cat_id()`).
+const QUEST_CARRIES := {"milk": "milk", "plants": "can"}
 
 var _panel: PanelContainer
 
@@ -117,8 +119,8 @@ func _clear_quest(id: String) -> void:
 	GameState.quests.erase(id)
 	for flag: String in QUEST_FLAGS.get(id, []):
 		GameState.flags.erase(flag)
-	if LostCats.carrying() == id:
-		GameState.flags.erase("carrying")
+	if Carry.what() == QUEST_CARRIES.get(id, "-") or Carry.cat_id() == id:
+		Carry.clear()
 
 
 func _close() -> void:

@@ -1,48 +1,124 @@
 class_name Carry
 extends RefCounted
-## What Charlotte holds in her arms. Only one thing at a time: a lost cat (`GameState.flags.carrying`), Mom's pint of milk
-## (`flags.has_milk`) or the watering can (`flags.has_can`). Anything that would put something else in her arms first asks
-## `Carry.busy()`, and says `Carry.FULL_HANDS` if she is already holding something. The flags are saved, and each scene puts
-## the thing back in her arms when it opens (`Interior`, `StreetScene._build_lost_cats`, the house for the can).
-##
-## A new quest that puts something in her arms: (1) keep a flag for it in `GameState.flags` and add it to `what()` here;
-## (2) before handing it over, `if Carry.busy(): say Carry.FULL_HANDS; return`; (3) restore it when a scene opens, next to the
-## milk; (4) clear the flag and `carry(null)` when she puts it down. `Character.carry()` itself refuses a second thing as a
-## last resort (a warning in the console).
+## Everything Charlotte holds in her arms, behind ONE saved indicator: `GameState.flags.carried` = "" (hands free), or
+## "<kind>" / "<kind>:<id>": "milk" (Mom's pint), "can" (the watering can), "cat:<quest id>" (a lost cat). One thing at a
+## time, enforced here for every quest:
+##   - `Carry.take(who, kind, id)` is the only way to put something in her arms; it refuses (returns false) when her hands
+##     are not free, so the caller just says `Carry.FULL_HANDS`;
+##   - `Carry.put_down(who)` empties her arms; `Carry.has(kind)` / `Carry.busy()` / `Carry.cat_id()` ask what she holds;
+##   - the scenes (`Interior`, `StreetScene._build_lost_cats`) call `Carry.restore(who)` as they open, so it follows her
+##     through doors and saves, with nothing for a quest to remember.
+## A NEW thing to carry = one more case in `_build()` (its node and where her hands grip it) and that is all.
 
+const KEY := "carried"
 const FULL_HANDS := "J'ai déjà les mains pleines !"
+## Where her hands hold the watering can, in the can's own space (its handle).
+const CAN_HANDLE := Vector2(18, -33)
 
 
-## "cat", "milk", "can" or "" (her hands are free).
+## What is in her arms: "cat", "milk", "can" or "".
 static func what() -> String:
-	if LostCats.carrying() != "":
-		return "cat"
-	if GameState.flags.get("has_milk", false):
-		return "milk"
-	if GameState.flags.get("has_can", false):
-		return "can"
-	return ""
+	return item().get_slice(":", 0)
+
+
+## The saved indicator itself ("milk", "can", "cat:cat2", or "").
+static func item() -> String:
+	return str(GameState.flags.get(KEY, ""))
+
+
+static func has(kind: String) -> bool:
+	return what() == kind
 
 
 static func busy() -> bool:
-	return what() != ""
+	return item() != ""
 
 
-## The pint of milk for Mom, a one-litre carton held against her chest; its name is a plain label on the blue band.
-static func milk() -> Sprite2D:
+## The lost cat she holds (its quest id), or "".
+static func cat_id() -> String:
+	var parts := item().split(":")
+	return parts[1] if parts.size() > 1 and parts[0] == "cat" else ""
+
+
+## Puts `kind` (with its `id` for a cat) in her arms. False, and nothing changes, if her hands are not free.
+static func take(who: Character, kind: String, id := "") -> bool:
+	if busy():
+		return false
+	GameState.flags[KEY] = kind if id == "" else "%s:%s" % [kind, id]
+	_hold(who)
+	return true
+
+
+## Empties her arms (what she held is gone: given away, put back, handed over).
+static func put_down(who: Character) -> void:
+	GameState.flags.erase(KEY)
+	if who:
+		who.carry(null)
+		who.carry_grip = Vector2.ZERO
+
+
+## Gives the thing back to a fresh Character (a new scene, a loaded game); does nothing if her hands are already full.
+static func restore(who: Character) -> void:
+	if busy() and who and not who.is_holding():
+		_hold(who)
+
+
+## Forgets what she holds without a Character at hand (the debug menu, a new game).
+static func clear() -> void:
+	GameState.flags.erase(KEY)
+
+
+## Old saves kept three separate flags; fold them into the single one.
+static func migrate() -> void:
+	var flags: Dictionary = GameState.flags
+	var old := ""
+	if flags.has("carrying") and str(flags.carrying) != "":
+		old = "cat:%s" % flags.carrying
+	elif flags.get("has_milk", false):
+		old = "milk"
+	elif flags.get("has_can", false):
+		old = "can"
+	for key in ["carrying", "has_milk", "has_can"]:
+		flags.erase(key)
+	if old != "" and not flags.has(KEY):
+		flags[KEY] = old
+
+
+static func _hold(who: Character) -> void:
+	var node := _build(what(), cat_id())
+	if node == null:
+		clear()
+		return
+	who.carry(node)
+	who.carry_grip = CAN_HANDLE if what() == "can" else Vector2.ZERO
+
+
+# The node for each kind of thing: add a case for a new one.
+static func _build(kind: String, id: String) -> Node2D:
+	match kind:
+		"milk":
+			return _milk()
+		"can":
+			var can := Sprite2D.new()
+			can.texture = InteriorArt.watering_can()
+			can.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			# Held up in front of her, a little bigger than it looks on the floor at the back of the kitchen.
+			can.scale = Vector2.ONE * 1.5
+			can.offset = Vector2(30, -4)
+			can.name = "can"
+			return can
+		"cat":
+			return LostCats.held(id)
+	push_error("Carry: nothing known as '%s'" % kind)
+	return null
+
+
+## The pint of milk for Mom, a one-litre carton held against her chest.
+static func _milk() -> Sprite2D:
 	var carton := Sprite2D.new()
 	carton.texture = ShopArt.milk_pint()
 	carton.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	carton.scale = Vector2.ONE * 0.78
 	carton.offset = Vector2(2, -4)
-	var name := Label.new()
-	name.text = "Québon"
-	name.add_theme_font_size_override("font_size", 19)
-	name.add_theme_color_override("font_color", Color.WHITE)
-	name.add_theme_color_override("font_outline_color", Color("#1D5E96"))
-	name.add_theme_constant_override("outline_size", 3)
-	name.size = Vector2(72, 26)
-	name.position = Vector2(-34, 6)
-	name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	carton.add_child(name)
+	carton.name = "milk"
 	return carton

@@ -1,7 +1,7 @@
 class_name LostCats
 extends RefCounted
 ## The neighbourhood's lost cats, one quest each (same id in Quests). A poster on a pole starts the quest; the cat
-## waits where it got lost (a street or the lane); petting it, Charlotte picks it up (GameState.flags.carrying)
+## waits where it got lost (a street or the lane); petting it, Charlotte picks it up (Carry)
 ## and carries it, from scene to scene, to its owner's front door on the street, where the owner comes out.
 ## Streets build all of this in StreetScene._build_lost_cats().
 
@@ -33,7 +33,7 @@ static func poster_up(id: String) -> bool:
 
 ## The lost cat Charlotte is carrying ("" if none).
 static func carrying() -> String:
-	return str(GameState.flags.get("carrying", ""))
+	return Carry.cat_id()
 
 
 ## The cat itself, as it looks when lost: its coat and its collar.
