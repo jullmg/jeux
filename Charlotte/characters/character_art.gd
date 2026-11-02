@@ -212,6 +212,10 @@ func _strands(d: String) -> String:
 
 
 func _hair_back() -> String:
+	# Under a tuque the hair is tucked in: no bun or buns sticking out above it, and curls only round the sides.
+	var tucked := look.hat == "tuque"
+	if tucked and look.hair_style in ["bun", "space_buns"]:
+		return _hair_shape(_CAP_BACK)
 	match look.hair_style:
 		"long_wavy":
 			return _hair_shape("M110 22 C170 20 205 60 200 120 C198 160 210 200 196 236 C188 256 168 258 160 244 C150 258 132 256 128 240 L110 190 L80 200 C78 230 70 252 52 256 C34 258 26 244 30 228 C14 220 14 196 24 180 C12 150 16 100 34 70 C52 38 80 24 110 22 Z") \
@@ -232,7 +236,9 @@ func _hair_back() -> String:
 			for i in 15:
 				var a := lerpf(PI * 0.62, PI * 2.38, i / 14.0)
 				var c := Vector2(112, 118) + Vector2(cos(a) * 88.0, sin(a) * 92.0)
-				s += _f('<circle cx="%.1f" cy="%.1f" r="30" fill="{hair}" stroke="{hair_line}" stroke-width="3"/>' % [c.x, c.y])
+				if tucked and c.y < 96.0:
+					continue
+				s += _f('<circle cx="%.1f" cy="%.1f" r="%d" fill="{hair}" stroke="{hair_line}" stroke-width="3"/>' % [c.x, c.y, 24 if tucked else 30])
 			return s + _hair_shape("M30 120 C30 50 70 22 112 22 C160 22 196 50 194 120 C190 170 40 170 30 120 Z", 0.0)
 		"pigtails":
 			return _hair_shape(_CAP_BACK) \
