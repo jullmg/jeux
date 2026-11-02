@@ -302,7 +302,6 @@ func _apply_pose() -> void:
 	_body.rotation = ((_rig.lean as float) + deg_to_rad(10.0) * _pet + deg_to_rad(9.0) * _run) * facing
 	var tilt := bounce if is_walking else sin(_time * 2.2) * 0.6
 	_head.rotation = deg_to_rad(2.0) * tilt + deg_to_rad(10.0) * _pet - deg_to_rad(4.0) * _run
-	_hair_back.rotation = _head.rotation + _hair_angle + (0.025 * bounce if is_walking else 0.0)
 	_torso.skew = 0.035 * swing
 	_body.scale.x = facing
 	if _shade:
@@ -312,6 +311,7 @@ func _apply_pose() -> void:
 		_body.position.y = 0.0
 		_head.rotation = deg_to_rad(-10.0)
 		_pedal_legs()
+		_follow_head()
 		# Hands on the bars.
 		for arm: Sprite2D in [_arm_back, _arm_front]:
 			if bar_grip == Vector2.INF:
@@ -340,6 +340,14 @@ func _apply_pose() -> void:
 				_torso.scale.y += 0.03 * w
 			"look":
 				_head.rotation += sin(t * TAU) * 0.18 * w
+	_follow_head()
+
+
+## The hair behind the head moves with it: wherever the head is this frame (breathing, a gesture, petting, riding), and tilted
+## the same, a little more as it trails in the wind of her walk.
+func _follow_head() -> void:
+	_hair_back.position = _head.position
+	_hair_back.rotation = _head.rotation + _hair_angle + (0.025 * sin(walk_phase * TAU * 2.0) if is_walking else 0.0)
 
 
 func _part(parent: Node2D, tex: Texture2D, pivot: Vector2, pos: Vector2, tint := Color.WHITE) -> Sprite2D:
