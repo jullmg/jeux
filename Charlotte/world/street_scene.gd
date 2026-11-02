@@ -63,6 +63,11 @@ var _cross_streets: Array[CrossStreet] = []
 var _segments: Array[Vector2] = []
 # Each street tree's scale (TREE_SIZES).
 var _tree_scales: Array[float] = []
+# Where each lamp stands (x of its post), a lamp being moved aside when it would stand in a tree pit or a cross street.
+var _lamp_x: Array[float] = []
+var _rack_w := 0.0
+# The garbage bag's footprint (sidewalk x range), which the utility poles keep clear of.
+var _bag_range := Vector2.ZERO
 # Corners Charlotte can take by walking into the curb (direction → action), from her home stretch of sidewalk.
 # The utility poles' x, left to right.
 var _pole_xs: Array[float] = []
@@ -94,6 +99,7 @@ func _ready() -> void:
 		add_child(CrossStreet.make(CrossStreet.Part.GROUND, cs))
 	_build_sidewalk_props()
 	var trees := _tree_textures()
+	_separate_props()
 	_build_tree_shadows(trees)
 	_build_passersby()
 	var start_x := _start_x()
@@ -362,9 +368,78 @@ func _found_x(at: float) -> float:
 	return _street_x(at)
 
 
+## Footprints on the sidewalk (x ranges): a tree's pit, a lamp (its post and the arm to its left), a hydrant, a bike rack with
+## its bikes.
+const TRUNK_CLEAR := 72.0
+const LAMP_LEFT := 65.0
+const LAMP_RIGHT := 12.0
+const RACK_LEFT := 35.0
+
+
+# Nothing on the sidewalk may stand on anything else: lamps, hydrants and racks are moved along to the nearest free
+# spot clear of the cross streets, the tree pits and each other (the utility poles and the garbage bag do the same when
+# they are placed).
+func _separate_props() -> void:
+	_rack_w = PropArt.rack().get_width() * 0.8 + 30.0
+	var fixed: Array[Vector2] = []
+	for cs in _cross_streets:
+		fixed.append(Vector2(cs.x0 - 30.0, cs.x1 + 30.0))
+	for after in trees_after:
+		var x := _starts[after + 1]
+		fixed.append(Vector2(x - TRUNK_CLEAR, x + TRUNK_CLEAR))
+	_lamp_x.clear()
+	# A lamp is tall: it also keeps its head clear of the canopies.
+	var lamp_fixed := fixed.duplicate()
+	for i in trees_after.size():
+		var reach := 130.0 * _tree_scales[i] + 15.0
+		lamp_fixed.append(Vector2(_starts[trees_after[i] + 1] - reach, _starts[trees_after[i] + 1] + reach))
+	for after in lamps_after:
+		var x := _free_x(_starts[after + 1], LAMP_LEFT, LAMP_RIGHT, lamp_fixed)
+		lamp_fixed.append(Vector2(x - LAMP_LEFT - 20.0, x + LAMP_RIGHT + 20.0))
+		_lamp_x.append(x)
+		fixed.append(Vector2(x - LAMP_LEFT - 20.0, x + LAMP_RIGHT + 20.0))
+	for i in hydrants_at.size():
+		var x := _free_x(_street_x(hydrants_at[i]), 30.0, 30.0, fixed)
+		hydrants_at[i] = _at_of(x)
+		fixed.append(Vector2(x - 40.0, x + 40.0))
+	for i in racks_at.size():
+		var x := _free_x(_street_x(racks_at[i]), RACK_LEFT, _rack_w, fixed)
+		racks_at[i] = _at_of(x)
+		fixed.append(Vector2(x - RACK_LEFT - 15.0, x + _rack_w + 15.0))
+
+
+func _overlaps(lo: float, hi: float, ranges: Array[Vector2]) -> bool:
+	for r in ranges:
+		if lo < r.y and r.x < hi:
+			return true
+	return false
+
+
+# `x` itself if [x - left, x + right] is free, else the nearest x along the street that is.
+func _free_x(x: float, left: float, right: float, blocked: Array[Vector2]) -> float:
+	if not _overlaps(x - left, x + right, blocked):
+		return x
+	var step := 10.0
+	while step <= 700.0:
+		for dir in [-1.0, 1.0]:
+			var c: float = x + dir * step
+			if c - left > 120.0 and c + right < _street_width - 120.0 and not _overlaps(c - left, c + right, blocked):
+				return c
+		step += 10.0
+	return x
+
+
+# The `at` (fractional building position) of a world x.
+func _at_of(x: float) -> float:
+	for i in _starts.size() - 1:
+		if x < _starts[i + 1]:
+			return i + (x - _starts[i]) / maxf(_starts[i + 1] - _starts[i], 1.0)
+	return float(_starts.size() - 2)
+
+
 ## Where this street's "PERDU" poster hangs (its centre): stapled to the utility pole nearest the second lamp.
 func _poster_spot() -> Vector2:
-	var near := _starts[lamps_after[mini(1, lamps_after.size() - 1)] + 1]
+	var near := _lamp_x[mini(1, _lamp_x.size() - 1)]
 	var best := _pole_xs[0]
 	for x in _pole_xs:
 		if absf(x - near) < absf(best - near):
@@ -619,12 +694,18 @@ func _build_utility_poles() -> void:
 	var blocked: Array[Vector2] = []
 	for cs in _cross_streets:
 		blocked.append(Vector2(cs.x0 - 40.0, cs.x1 + 40.0))
-	for after in trees_after + lamps_after:
-		blocked.append(Vector2(_starts[after + 1] - 45.0, _starts[after + 1] + 45.0))
+	# A pole is tall, so it keeps clear of a tree's whole canopy, not only its pit.
+	for i in trees_after.size():
+		var reach := 130.0 * _tree_scales[i] + 35.0
+		blocked.append(Vector2(_starts[trees_after[i] + 1] - reach, _starts[trees_after[i] + 1] + reach))
+	for lx in _lamp_x:
+		blocked.append(Vector2(lx - LAMP_LEFT - 25.0, lx + LAMP_RIGHT + 25.0))
 	for at in hydrants_at:
-		blocked.append(Vector2(_street_x(at) - 35.0, _street_x(at) + 35.0))
+		blocked.append(Vector2(_street_x(at) - 50.0, _street_x(at) + 50.0))
 	for at in racks_at:
-		blocked.append(Vector2(_street_x(at) - 30.0, _street_x(at) + 190.0))
+		blocked.append(Vector2(_street_x(at) - RACK_LEFT - 25.0, _street_x(at) + _rack_w + 25.0))
+	if _bag_range != Vector2.ZERO:
+		blocked.append(_bag_range + Vector2(-30.0, 30.0))
 	var x := 160.0
 	while true:
 		var moved := true
@@ -758,18 +839,28 @@ func _sway(strength: float, phase: float) -> ShaderMaterial:
 	return mat
 
 
+## How far a tree's shadow leans right per unit of height (the low sun on the left).
+const TREE_SHADOW_LEAN := 0.45
+
+
 # The low sun on the left throws the canopies' shadows up and to the right, onto the facades.
 func _build_tree_shadows(trees: Array[Texture2D]) -> void:
 	for i in trees.size():
 		if layout[trees_after[i] + 1].begins_with("ruelle"):
 			continue
 		var shadow := _sprite(trees[i], _tree_scales[i])
-		shadow.position = _tree_origin(i) + Vector2(80, 14)
+		# Sheared away from the sun: the trunk's shadow starts at the foot of the tree and leans right as it climbs the wall,
+		# the canopy's far from the trunk (a plain offset copy left the shadow floating beside the tree).
+		var k := _tree_scales[i]
+		var foot := Vector2(_starts[trees_after[i] + 1], CURB_Y)
+		var x_axis := Vector2(k, 0.0)
+		var y_axis := Vector2(-TREE_SHADOW_LEAN * k, k)
+		shadow.transform = Transform2D(x_axis, y_axis, foot - 190.0 * x_axis - 780.0 * y_axis)
 		shadow.modulate = Color(0.22, 0.1, 0.12, 0.2)
 		shadow.material = _sway(7.0, i * 1.7)
 		# Only on the walls: clipped to the facades' outline (never over their roofs into the sky, nor a street gap).
-		var x0 := shadow.position.x - 20.0
-		var x1 := shadow.position.x + trees[i].get_width() * _tree_scales[i] + 20.0
+		var x0 := foot.x - 190.0 * k - 20.0
+		var x1 := foot.x + (trees[i].get_width() - 190.0 + 780.0 * TREE_SHADOW_LEAN) * k + 20.0
 		var outline := PackedVector2Array()
 		for j in layout.size():
 			var a := maxf(_starts[j], x0)
@@ -876,30 +967,33 @@ func _build_trash_bag() -> void:
 	var blocked: Array[Vector2] = []
 	for cs in _cross_streets:
 		blocked.append(Vector2(cs.x0 - 120.0, cs.x1 + 120.0))
-	for after in trees_after + lamps_after:
-		blocked.append(Vector2(_starts[after + 1] - 120.0, _starts[after + 1] + 120.0))
+	for after in trees_after:
+		blocked.append(Vector2(_starts[after + 1] - TRUNK_CLEAR - 40.0, _starts[after + 1] + TRUNK_CLEAR + 40.0))
+	for lx in _lamp_x:
+		blocked.append(Vector2(lx - LAMP_LEFT - 60.0, lx + LAMP_RIGHT + 60.0))
 	for at in hydrants_at:
-		blocked.append(Vector2(_street_x(at) - 110.0, _street_x(at) + 110.0))
+		blocked.append(Vector2(_street_x(at) - 70.0, _street_x(at) + 70.0))
 	for at in racks_at:
-		blocked.append(Vector2(_street_x(at) - 100.0, _street_x(at) + 260.0))
+		blocked.append(Vector2(_street_x(at) - RACK_LEFT - 60.0, _street_x(at) + _rack_w + 60.0))
 	blocked.append(Vector2(_charlotte.position.x - 450.0, _charlotte.position.x + 450.0))
+	# The bag, and the squirrel on its side of it, must be clear of everything else.
+	var side := 1.0 if randf() < 0.5 else -1.0
+	var left := 50.0 + (70.0 if side < 0.0 else 0.0)
+	var right := 50.0 + (70.0 if side > 0.0 else 0.0)
 	var spots: Array[float] = []
 	var x := 260.0
 	while x < _street_width - 260.0:
-		var free := true
-		for b in blocked:
-			if x >= b.x and x <= b.y:
-				free = false
-		if free:
+		if not _overlaps(x - left, x + right, blocked):
 			spots.append(x)
 		x += 40.0
 	if spots.is_empty():
 		return
 	var bag := TrashBag.new()
 	bag.position = Vector2(spots[randi() % spots.size()], 652.0)
-	bag.side = 1.0 if randf() < 0.5 else -1.0
+	bag.side = side
 	bag.seed_value = randi()
 	bag.scale = Vector2.ONE * 0.85
+	_bag_range = Vector2(bag.position.x - left, bag.position.x + right)
 	add_child(bag)
 	var squirrel := Squirrel.new()
 	squirrel.bag = bag
@@ -970,9 +1064,9 @@ func _build_props() -> void:
 	_bike_rng.seed = seed_value + 53
 	for cs in _cross_streets:
 		add_child(CrossStreet.make(CrossStreet.Part.SIGNS, cs))
-	for after in lamps_after:
+	for lx in _lamp_x:
 		var lamp := _sprite(PropArt.lamppost(), 0.62)
-		lamp.position = Vector2(_starts[after + 1] - 101.0 * 0.62, CURB_Y + 2.0 - 518.0 * 0.62)
+		lamp.position = Vector2(lx - 101.0 * 0.62, CURB_Y + 2.0 - 518.0 * 0.62)
 		add_child(lamp)
 	var hydrant_tex := PropArt.hydrant()
 	for at in hydrants_at:
