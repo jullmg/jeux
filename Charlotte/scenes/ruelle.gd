@@ -563,10 +563,11 @@ class _Clotheslines:
 		rng.seed = seed_value
 		for p in pulleys:
 			var end := p + Vector2(rng.randf_range(450.0, 750.0) * (1.0 if rng.randf() < 0.5 else -1.0), -p.y - 40.0)
+			# Hung within reach of the gallery, near the pulley, not out in the sky over the lane.
 			var line := []
 			if not Season.is_winter():
 				for k in rng.randi_range(2, 6):
-					line.append([rng.randf_range(0.12, 0.8), rng.randi_range(0, 3), Color(PropArt._pick(rng,
+					line.append([rng.randf_range(0.06, 0.3), rng.randi_range(0, 3), Color(PropArt._pick(rng,
 						["#E74C3C", "#FFFFFF", "#3498DB", "#F1C40F", "#9B59B6", "#F7C6D9", "#2ECC71", "#ECF0F1"])), rng.randf_range(0, TAU)])
 			_items.append([p, end, line])
 
@@ -586,11 +587,11 @@ class _Clotheslines:
 				for k in 21:
 					var t := k / 20.0
 					pts.append(_point(a + Vector2(0, off * 0.3), b + Vector2(off * 3.0, off), t))
-				draw_polyline(pts, Color(0.92, 0.92, 0.9, 0.9), 1.2 + 1.5, true)
+				draw_polyline(pts, Color(0.92, 0.92, 0.9, 0.9), 1.6, true)
 			for thing in item[2]:
 				var t: float = thing[0]
 				var at := _point(a, b, t)
-				var k := 0.6 + t * 1.6
+				var k := 0.62 + t * 0.7
 				var sway := sin(_t * 1.6 + thing[3]) * 0.06
 				draw_set_transform(at, sway, Vector2(k, k))
 				var c: Color = thing[2]
@@ -602,7 +603,7 @@ class _Clotheslines:
 						draw_colored_polygon(PackedVector2Array([Vector2(-11, 0), Vector2(11, 0), Vector2(12, 36), Vector2(3, 36),
 							Vector2(0, 10), Vector2(-3, 36), Vector2(-12, 36)]), c.darkened(0.3))
 					2:  # A sheet.
-						draw_rect(Rect2(-22, 0, 44, 40), c.lightened(0.3))
+						draw_rect(Rect2(-17, 0, 34, 30), c.lightened(0.3))
 					_:  # Socks.
 						draw_colored_polygon(PackedVector2Array([Vector2(-4, 0), Vector2(2, 0), Vector2(2, 14), Vector2(7, 18), Vector2(-4, 18)]), c)
 				draw_rect(Rect2(-3, -2, 6, 4), Color("#C9A24A"))

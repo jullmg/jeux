@@ -110,30 +110,61 @@ static func tree(rng: RandomNumberGenerator) -> ImageTexture:
 	blobs.sort_custom(func(a, b): return a[1] < b[1])
 	for b in blobs:
 		s += '<path d="%s" fill="%s"/>' % [_lobed(b[0] + 10, b[1] + 14, b[2], rng), _hex(Color(b[3]).darkened(0.4))]
+	# Each clump's shape, in shade: the leaves go on top of it.
 	for b in blobs:
-		s += '<path d="%s" fill="%s"/>' % [_lobed(b[0], b[1], b[2], rng), b[3]]
-	# Depth: darker clusters tucked into the lower half, sunlit tufts on the upper left of each clump.
+		s += '<path d="%s" fill="%s"/>' % [_lobed(b[0], b[1], b[2], rng), _hex(Color(b[3]).darkened(0.26))]
+	# Depth: darker clusters tucked into the lower half.
 	for b in blobs:
 		if b[1] > 270.0:
-			s += '<path d="%s" fill="%s" opacity="0.55"/>' % [_lobed(b[0] + b[2] * 0.15, b[1] + b[2] * 0.3, b[2] * 0.5, rng), _hex(Color(b[3]).darkened(0.25))]
+			s += '<path d="%s" fill="%s" opacity="0.55"/>' % [_lobed(b[0] + b[2] * 0.15, b[1] + b[2] * 0.3, b[2] * 0.5, rng), _hex(Color(b[3]).darkened(0.4))]
 	for b in blobs:
 		if b[1] < 300.0:
-			s += '<path d="%s" fill="%s" opacity="0.7"/>' % [_lobed(b[0] - b[2] * 0.3, b[1] - b[2] * 0.35, b[2] * 0.45, rng), _hex(Color(b[3]).lightened(0.28))]
+			_lobed(b[0] - b[2] * 0.3, b[1] - b[2] * 0.35, b[2] * 0.45, rng)
+	# The shared random numbers the leaves used to draw from: the rest of the street still starts from the same place.
 	for i in 190:
-		var a := rng.randf_range(0.0, TAU)
-		var d := pow(rng.randf(), 0.35)
-		var x := 190.0 + cos(a) * d * 178.0
-		var y := 250.0 + sin(a) * d * 198.0
-		var leaf := '<ellipse cx="%.1f" cy="%.1f" rx="5.5" ry="3" fill="%s" transform="rotate(%d %.1f %.1f)"/>' % [
-			x, y, _hex(Color(_pick(rng, pal)).lightened(rng.randf_range(-0.25, 0.25))), rng.randi_range(0, 180), x, y]
-		# Only on the foliage: a leaf out past every clump would hang in the air with no branch behind it.
-		for b in blobs:
-			if Vector2(x, y).distance_to(Vector2(b[0], b[1])) < b[2] * 1.02:
-				s += leaf
-				break
+		rng.randf()
+		rng.randf()
+		_pick(rng, pal)
+		rng.randf()
+		rng.randi()
 	if bare:
-		s = _bare_crown(s, blobs)
+		return tex(_svg(380, 780, _bare_crown(s, blobs)))
+	s += _tree_leaves(blobs, pal, int(blobs[0][0] * 37.0 + blobs[-1][1] * 91.0))
 	return tex(_svg(380, 780, s))
+
+
+# The tree's leaves, from their own random numbers: as the lanes' (LaneArt._leaf), each taking its clump's colour most of the time,
+# turned outward from the clump's middle and lit from the upper left, only where there is a clump to hold it.
+static func _tree_leaves(blobs: Array, pal: Array, seed_value: int) -> String:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var shades := {}
+	var s := ""
+	for i in 1000:
+		var a := rng.randf() * TAU
+		var d := sqrt(rng.randf())
+		var p := Vector2(190.0 + cos(a) * d * 200.0, 250.0 + sin(a) * d * 215.0)
+		var size := rng.randf_range(11.5, 17.5)
+		var other := rng.randf()
+		var other_tone: String = pal[rng.randi() % pal.size()]
+		var jitter := rng.randf_range(-0.7, 0.7)
+		var best: Array = []
+		var best_d := 1.08
+		for b in blobs:
+			var near := p.distance_to(Vector2(b[0], b[1])) / float(b[2])
+			if near < best_d:
+				best_d = near
+				best = b
+		if best.is_empty():
+			continue
+		var off := p - Vector2(best[0], best[1])
+		var lit: int = clampi(int(2.5 + (-off.x - off.y) / float(best[2]) * 1.6), 0, 4)
+		var tone: String = best[3] if other < 0.72 else other_tone
+		var key := "%s%d" % [tone, lit]
+		if not shades.has(key):
+			shades[key] = _hex(Color(tone).lerp(Color.WHITE, 0.08 * (lit - 2)) if lit >= 2 else Color(tone).darkened(0.16 * (2 - lit)))
+		s += LaneArt._leaf(p, size, off.angle() + PI / 2.0 + jitter, shades[key])
+	return s
 
 
 # Winter: drop the leaves, keep the trunk, and grow branches out to where the clumps were, snow on top.
