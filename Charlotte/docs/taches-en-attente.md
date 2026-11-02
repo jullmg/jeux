@@ -10,3 +10,10 @@
 5. ~~FAIT (mouvement et tâches ; apparence : vêtements seulement)~~ Améliorer l'apparence des **parents de Charlotte**, les faire **bouger** et leur faire faire des **tâches au hasard**.
 
 (Fait aussi : une panoplie d'objets de commerce supplémentaires dans `ShopArt`, voir `.claude/CLAUDE.md`.)
+
+## Demandées ensuite (2026-11-02)
+
+6. **Carte (map)** du quartier que Charlotte consulte, dessinée comme par un enfant ; et **les coins ne se tournent plus tout seuls** en
+   marchant vers l'intersection : il faut cliquer la rue transversale ou appuyer sur ↑ au coin. (Coins : FAIT. Carte : en cours.)
+7. Améliorer l'apparence des **objets du dépanneur** (les dessins de `ShopArt` : produits, meubles, accessoires).
+8. Les **écureuils** peuvent parfois **monter sur les poteaux électriques** puis **marcher sur les fils** (`Squirrel`, `UtilityPoles`).

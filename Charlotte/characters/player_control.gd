@@ -133,9 +133,12 @@ func _door_ahead() -> DoorSpot:
 	var x := charlotte.position.x
 	for node in get_tree().get_nodes_in_group("interactable"):
 		var door := node as DoorSpot
-		if door == null or not door.can_interact() or x < door.rect.position.x - 20.0 or x > door.rect.end.x + 20.0:
+		if door == null or not door.can_interact():
 			continue
-		var d := absf(door.rect.get_center().x - x)
+		var span := door.up_rect if door.up_rect.has_area() else door.rect
+		if x < span.position.x - 20.0 or x > span.end.x + 20.0:
+			continue
+		var d := absf(span.get_center().x - x)
 		if d < best_d:
 			best = door
 			best_d = d

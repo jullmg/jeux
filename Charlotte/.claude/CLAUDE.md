@@ -4,7 +4,7 @@ A small Godot 4.7 2D game (GL Compatibility, 1280×720, `canvas_items` stretch) 
 a little girl (nicknamed **Chachoue**: her parents and friends call her that; neighbours and shopkeepers say "Charlotte"), on her street in Montréal (Rosemont): her side of **6e Avenue** between
 **Rue Dandurand** (left) and **Rue Holt** (right), in autumn. In-game text is in **French** (Québec).
 
-Current state: a living, side-scrolling street. Charlotte walks with ←/→ or A/D (W = ↑, added to the `ui_*` actions by `PlayerControl`) or by clicking/tapping the street; double-pressing the arrow or double-clicking/tapping makes her run; ↑ in front of a door (any `DoorSpot` whose area spans her x) goes through it (`PlayerControl._door_ahead`)
+Current state: a living, side-scrolling street. Charlotte walks with ←/→ or A/D (W = ↑, added to the `ui_*` actions by `PlayerControl`) or by clicking/tapping the street; double-pressing the arrow or double-clicking/tapping makes her run; ↑ in front of a door (any `DoorSpot` whose area, or `up_rect`, spans her x) goes through it (`PlayerControl._door_ahead`)
 (`Character.running`, `RUN_SPEED` × walk speed, eased; `Character.speed()` gives the current speed).
 Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks over and pets it. Click her front door
 (ground floor of `duplex_charlotte`, n° 5672) to go inside her flat. In her bedroom, click the dresser's drawers to open her
@@ -96,8 +96,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Turning corners: `StreetScene._add_corner(cross_street, scene, key)` makes the cross street clickable: Charlotte walks to
   the curb, the other street loads with `Transition.arrive = key`, and that street's `_start_x()` checks `_arriving(key)`
   to put her at the matching corner (keys "<street_key>_from_<other>"). All four corners of the block work both ways. A
-  corner only works from the sidewalk Charlotte started on, and its click area is the vista above the crosswalk; walking
-  into the curb with the arrow keys and pushing on for a moment takes it too (`_push_round_corner`).
+  corner only works from the sidewalk Charlotte started on, and its click area is the vista above the crosswalk; the arrow keys
+  never turn it (walking into the curb does nothing): ↑ at the curb does, through `DoorSpot.up_rect` read by `PlayerControl._door_ahead`.
 - Crossing streets: the sidewalk is split into stretches at each cross street's curbs (`StreetScene._segments`); Charlotte
   walks one stretch at a time. Every crosswalk is clickable (`_add_crossing`, automatic): she goes to the curb on her side,
   says "Je regarde des deux côtés !" and looks both ways, then walks across on her own (`PlayerControl.hands_off`) to the

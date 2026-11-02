@@ -8,6 +8,8 @@ var stand_x := NAN
 var action: Callable
 ## Optional: where to stand, worked out from where Charlotte is (from_x → x), instead of `stand_x`.
 var approach := Callable()
+## Optional: where ↑ works, in world x (instead of `rect`), e.g. at the curb for a street corner whose click area is far above.
+var up_rect := Rect2()
 ## Optional: whether it can be clicked right now.
 var condition := Callable()
 
