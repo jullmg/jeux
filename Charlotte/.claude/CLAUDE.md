@@ -170,9 +170,10 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   is kept clear of small items; the crowding also shows in a long row of blurred foreground shelves, `Interior._build_foreground` kind
   "shelves" [x, "shelves", seed], one every ~340 px) so the two feel different.
 - Shop walls get advertising posters, never house picture frames: `ShopArt.ad_poster(kind)` (`AD_POSTERS`: coffee, ice cream, slush, hot dogs, cold drinks), hung with `Shop._ad(kind, x, bottom, scale)` (title label over the strip).
+- `tools/shop_objects.tscn` is the catalogue of every `ShopArt` object, twelve to a page, to judge their drawing: `Godot --path . --screen 1 res://tools/shop_objects.tscn -- --screenshot=/path/p.png --page=0` (pages 0–5; wait for `RenderingServer.frame_post_draw` before capturing in a tool scene, or the shot comes out transparent).
 - More shop objects in `ShopArt` (shopping cart, old cash register, spinner rack, produce crates, flower buckets, gumball machine,
   box stacks, pallet of cases, hand truck, mop and bucket, broom, step ladder, A-frame sign, open sign, bin, newspapers, vending
-  machine, egg tray, water cooler, toy rack, umbrella stand, salt bag, tin pyramid, CCTV monitor, `floor_junk`): pick from these
+  machine, egg tray, water cooler, toy rack, salt bag, tin pyramid, CCTV monitor, `floor_junk`): pick from these
   when a new shop or street scene needs props.
 - The parents go about chores: `world/family_routine.gd` (`FamilyRoutine`) walks one character between tasks
   (`MOM_TASKS` / `DAD_TASKS` in house.gd: dicts {x, facing, task, prop, secs, say}); `Character.task` poses ("stir", "read", "phone",
@@ -270,7 +271,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   houses in rows, the lanes as an H, her house (`HOUSE_X`), Oh Bon!, Xin-Xin, the school across Dandurand, Mount Royal with its cross to
   the west, a compass (N, S, O, E), and a stop sign "Pas le droit d'aller plus loin toute seule !" while `GameState.age < StreetScene.CROSS_AGE`.
   A little Charlotte (`_You`) shows "Je suis ici !" where she is: `TownMap._here()` maps each scene (street scenes by how far along
-  they she is, lanes, the house, the shops) onto the sheet. The game pauses while it is open; Esc, C or a click outside closes it; the
+  far along she is, lanes, the house, the shops) onto the sheet. The game pauses while it is open; Esc, C or a click outside closes it; the
   notebook (N) and the menu (Esc) ignore their keys while it is open. Geometry constants (`HOLT_X`, `DAND_X`, `SIX_Y`, lanes…) are at the
   top of the file: a new place on the block = a drawing in `_Sheet` + a case in `_here()`.
 - `--map` (a user arg, after `--`) opens it one second after the scene starts, for screenshots: `Godot --path . --screen 1 res://scenes/holt.tscn -- --screenshot=/path/map.png --wait=2.5 --map`.

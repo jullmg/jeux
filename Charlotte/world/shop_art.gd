@@ -844,15 +844,36 @@ static func atm() -> ImageTexture:
 	return tex(150, 340, s)
 
 
-## Canvas 120x120: the convex security mirror in a top corner, the shop reflected small and bent in it.
+## Canvas 120x120: a convex security mirror: a dark rim on a bracket, the aisles bent in the glass (shelves, a customer in a red
+## coat, the ceiling lights), darker toward the edge, and a bright glare.
 static func security_mirror() -> ImageTexture:
 	var s := _defs()
-	s += '<circle cx="60" cy="60" r="55" fill="#4E555B"/><circle cx="60" cy="60" r="50" fill="#B9D0DC"/>'
-	s += '<path d="M14 84 Q60 54 106 84 L106 100 Q60 112 14 100 Z" fill="#E8E4DA" opacity="0.85"/>'
-	s += '<path d="M20 70 Q60 40 100 70 L100 78 Q60 56 20 78 Z" fill="#C9A26E" opacity="0.8"/>'
-	s += '<rect x="44" y="56" width="32" height="14" fill="#C8202A" opacity="0.7"/><circle cx="80" cy="48" r="5" fill="#FFD23F" opacity="0.8"/><circle cx="38" cy="50" r="6" fill="#7CCB5A" opacity="0.7"/>'
-	s += '<circle cx="60" cy="60" r="50" fill="url(#dome)"/><path d="M26 34 Q46 16 72 20" stroke="#FFFFFF" stroke-width="6" fill="none" opacity="0.75" stroke-linecap="round"/>'
-	s += '<circle cx="60" cy="60" r="50" fill="none" stroke="#2E343A" stroke-width="3"/>'
+	s += '<defs><radialGradient id="vig" cx="0.5" cy="0.5" r="0.5"><stop offset="0.55" stop-color="#000000" stop-opacity="0"/><stop offset="1" stop-color="#000000" stop-opacity="0.45"/></radialGradient>'
+	s += '<linearGradient id="floorg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8E8A80"/><stop offset="1" stop-color="#5E5A52"/></linearGradient>'
+	s += '<clipPath id="lens"><circle cx="60" cy="60" r="50"/></clipPath></defs>'
+	s += '<path d="M54 108 H66 L70 120 H50 Z" fill="#3A4046"/><rect x="48" y="112" width="24" height="6" rx="2" fill="#2E343A"/>'
+	s += '<circle cx="60" cy="60" r="56" fill="#3E454C"/><circle cx="60" cy="60" r="53" fill="none" stroke="#6E757D" stroke-width="1.5"/>'
+	s += '<g clip-path="url(#lens)">'
+	s += '<rect x="0" y="0" width="120" height="120" fill="#C9DCE6"/>'
+	s += '<rect x="0" y="0" width="120" height="46" fill="#E9E4D6"/>'
+	# Ceiling lights, bent.
+	for l in [[34, 22, 10], [60, 16, 12], [88, 24, 9]]:
+		s += '<ellipse cx="%d" cy="%d" rx="%d" ry="3.2" fill="#FFFFFF"/>' % l
+	# Shelves each side, curved toward the centre.
+	for side in [-1, 1]:
+		var mid_x: int = 60 + side * 38
+		for k in 4:
+			s += '<path d="M%d %d Q%d %d %d %d" stroke="#8A6238" stroke-width="2.2" fill="none"/>' % [60 + side * 52, 38 + k * 14, mid_x, 44 + k * 13, 60 + side * 20, 50 + k * 9]
+			for j in 5:
+				s += '<rect x="%d" y="%d" width="5" height="9" fill="%s" opacity="0.9"/>' % [60 + side * (46 - j * 6) - 2, 32 + k * 14 + j * 2, ["#E04F5F", "#FFD23F", "#4FA3E0", "#7CCB5A", "#FF8A3D"][(k + j) % 5]]
+	s += '<path d="M0 78 Q60 56 120 78 V120 H0 Z" fill="url(#floorg)"/>'
+	s += '<path d="M20 100 Q60 80 100 100" stroke="#FFFFFF" stroke-width="2" fill="none" opacity="0.35"/>'
+	# A customer in a red coat with a hat, small and bent.
+	s += '<ellipse cx="62" cy="86" rx="9" ry="3" fill="#000000" opacity="0.3"/><path d="M54 84 Q54 62 62 60 Q70 62 70 84 Z" fill="#C8202A"/><circle cx="62" cy="55" r="6" fill="#F3C9A6"/><path d="M55 54 Q62 44 69 54 Z" fill="#2E5FB0"/>'
+	s += '</g>'
+	s += '<circle cx="60" cy="60" r="50" fill="url(#vig)"/><circle cx="60" cy="60" r="50" fill="url(#dome)"/>'
+	s += '<path d="M24 36 Q44 14 74 20" stroke="#FFFFFF" stroke-width="6" fill="none" opacity="0.8" stroke-linecap="round"/><circle cx="92" cy="92" r="4" fill="#FFFFFF" opacity="0.4"/>'
+	s += '<circle cx="60" cy="60" r="50" fill="none" stroke="#2E343A" stroke-width="2.5"/>'
 	return tex(120, 120, s)
 
 
@@ -869,25 +890,43 @@ static func specials_board() -> ImageTexture:
 	return tex(240, 170, s)
 
 
-## Canvas 170x440: the grey metal back door to the stockroom: a push bar, a wired window, louvres, a fire-door sticker
-## ("PRIVÉ" is a label).
+## Canvas 170x440: the steel back door of the stockroom: brushed metal, hinges, a wired window, a push bar, a kick plate with
+## screws, an "employés seulement" note, an alarm sticker, scuffs and a rust streak, an exit pictogram.
 static func back_door() -> ImageTexture:
 	var s := _defs()
 	s += '<rect x="0" y="0" width="170" height="440" fill="url(#metal)" stroke="#5E6A74" stroke-width="3"/>'
 	s += '<rect x="12" y="12" width="146" height="428" fill="url(#steel)" stroke="#5E6A74" stroke-width="2"/>'
-	s += '<rect x="46" y="96" width="78" height="86" fill="#B9D0DC" stroke="#4E555B" stroke-width="3"/>'
-	for k in range(52, 124, 12):
-		s += '<path d="M%d 96 V182" stroke="#7E95A8" stroke-width="1" opacity="0.7"/>' % k
-	for k in range(108, 182, 12):
-		s += '<path d="M46 %d H124" stroke="#7E95A8" stroke-width="1" opacity="0.7"/>' % k
-	s += '<path d="M50 100 L84 100 L50 160 Z" fill="#FFFFFF" opacity="0.35"/>'
-	for k in 6:
-		s += '<rect x="30" y="%d" width="110" height="3" fill="#7E858D" opacity="0.8"/>' % (336 + k * 8)
-	s += '<rect x="22" y="228" width="126" height="16" rx="7" fill="url(#steel)" stroke="#4E555B" stroke-width="1.8"/>'
+	for x in range(20, 152, 6):
+		s += '<path d="M%d 14 V438" stroke="#FFFFFF" stroke-width="0.8" opacity="%.2f"/>' % [x, 0.12 if x % 12 == 0 else 0.06]
+	# Door closer at the top.
+	s += '<rect x="30" y="16" width="78" height="14" rx="3" fill="#8E949A" stroke="#4E555B" stroke-width="1.5"/><path d="M108 22 L140 40" stroke="#4E555B" stroke-width="3"/><circle cx="140" cy="40" r="3" fill="#3A4046"/>'
 	s += '<rect x="22" y="40" width="126" height="36" fill="#F4F2EC" stroke="#9AA3AC" stroke-width="1.5"/>'
+	# The wired window.
+	s += '<rect x="44" y="94" width="82" height="92" fill="#B9D0DC" stroke="#4E555B" stroke-width="3"/>'
+	for k in range(52, 124, 12):
+		s += '<path d="M%d 94 V186" stroke="#7E95A8" stroke-width="1" opacity="0.7"/>' % k
+	for k in range(106, 186, 12):
+		s += '<path d="M44 %d H126" stroke="#7E95A8" stroke-width="1" opacity="0.7"/>' % k
+	s += '<path d="M48 98 L84 98 L48 162 Z" fill="#FFFFFF" opacity="0.35"/>'
+	# Lock cylinder and the push bar.
+	s += '<circle cx="132" cy="214" r="7" fill="#C6CCD2" stroke="#4E555B" stroke-width="1.5"/><rect x="130" y="210" width="4" height="9" fill="#2B2B2B"/>'
+	s += '<rect x="22" y="228" width="126" height="16" rx="7" fill="url(#steel)" stroke="#4E555B" stroke-width="1.8"/><path d="M28 232 H142" stroke="#FFFFFF" stroke-width="2" opacity="0.6"/>'
+	s += '<rect x="22" y="228" width="12" height="16" rx="3" fill="#6E757D"/><rect x="136" y="228" width="12" height="16" rx="3" fill="#6E757D"/>'
+	# Stickers: alarm triangle and a taped note.
+	s += '<path d="M60 262 L78 294 H42 Z" fill="#FFD23F" stroke="#B8891A" stroke-width="2"/><rect x="58" y="272" width="4" height="12" fill="#2B2B2B"/><circle cx="60" cy="289" r="2.2" fill="#2B2B2B"/>'
+	s += '<rect x="26" y="306" width="46" height="34" fill="#FBF8EE" stroke="#D6CFC0" stroke-width="1" transform="rotate(-2 49 323)"/><path d="M32 316 H66 M32 324 H62 M32 332 H56" stroke="#8A8478" stroke-width="1.6" transform="rotate(-2 49 323)"/><rect x="40" y="302" width="18" height="6" fill="#F4E4A8" opacity="0.8" transform="rotate(-2 49 305)"/>'
 	s += '<rect x="106" y="286" width="34" height="34" fill="#2E8B57" stroke="#FFFFFF" stroke-width="2"/><circle cx="123" cy="297" r="3.5" fill="#FFFFFF"/><path d="M123 301 v8 l-6 6 M123 305 l6 -4 M123 309 l5 6" stroke="#FFFFFF" stroke-width="2" fill="none"/>'
-	for y in [60, 380]:
-		s += '<rect x="4" y="%d" width="10" height="22" rx="2" fill="#4E555B"/>' % y
+	# Kick plate with screws, scuffs and a rust streak.
+	s += '<rect x="22" y="372" width="126" height="56" fill="#9AA3AC" stroke="#5E6A74" stroke-width="1.5"/>'
+	for x in [28, 60, 90, 120, 142]:
+		s += '<circle cx="%d" cy="378" r="1.6" fill="#4E555B"/><circle cx="%d" cy="422" r="1.6" fill="#4E555B"/>' % [x, x]
+	for k in 6:
+		s += '<rect x="30" y="%d" width="110" height="2.4" fill="#7E858D" opacity="0.7"/>' % (344 + k * 5)
+	s += '<path d="M40 410 L70 404 M86 416 L120 410 M54 392 L64 389" stroke="#5E6A74" stroke-width="2" opacity="0.5" stroke-linecap="round"/>'
+	s += '<path d="M132 372 q-3 14 1 26" stroke="#B5703A" stroke-width="3" fill="none" opacity="0.4" stroke-linecap="round"/>'
+	# Hinges.
+	for y in [60, 200, 380]:
+		s += '<rect x="2" y="%d" width="12" height="26" rx="2" fill="#4E555B"/><path d="M4 %d H12 M4 %d H12" stroke="#8E949A" stroke-width="1"/>' % [y, y + 8, y + 18]
 	return tex(170, 440, s)
 
 
@@ -999,21 +1038,33 @@ static func wet_floor_sign() -> ImageTexture:
 	return tex(70, 100, s)
 
 
-## Canvas 60x40: a ceiling security camera dome (its blinking light is drawn by the scene).
+## Canvas 60x40: a ceiling dome camera: a mounting plate, a ring, the smoked dome with its lens, a blue iris and infra-red dots.
 static func camera_dome() -> ImageTexture:
 	var s := _defs()
-	s += '<rect x="6" y="0" width="48" height="8" fill="#E8EDF2" stroke="#9AA3AC" stroke-width="1.5"/><path d="M8 8 a22 22 0 0 0 44 0 z" fill="#2A2F36" stroke="#14181D" stroke-width="2"/>'
-	s += '<path d="M14 10 a16 16 0 0 0 20 12" stroke="#FFFFFF" stroke-width="3" fill="none" opacity="0.5" stroke-linecap="round"/><circle cx="30" cy="20" r="6" fill="#0F1318"/><circle cx="28" cy="18" r="2" fill="#7FD4F0" opacity="0.8"/>'
+	s += '<rect x="2" y="0" width="56" height="6" rx="2" fill="#DDE2E7" stroke="#9AA3AC" stroke-width="1.5"/><rect x="10" y="5" width="40" height="4" fill="#C6CCD2" stroke="#9AA3AC" stroke-width="1"/>'
+	s += '<path d="M8 9 a22 24 0 0 0 44 0 z" fill="#1E2329" stroke="#0F1318" stroke-width="2"/>'
+	s += '<path d="M8 9 a22 24 0 0 0 44 0 z" fill="url(#cyl)"/>'
+	s += '<ellipse cx="30" cy="22" rx="11" ry="9" fill="#0B0E12"/><circle cx="30" cy="22" r="6.5" fill="#1B2A44"/><circle cx="30" cy="22" r="3.4" fill="#0A0F18"/><circle cx="28" cy="20" r="1.6" fill="#8FD8F5"/><circle cx="32.5" cy="24" r="0.9" fill="#4FA3E0"/>'
+	for k in 6:
+		var a := PI * (0.12 + k * 0.152)
+		s += '<circle cx="%.1f" cy="%.1f" r="1.1" fill="#7A1F1F"/>' % [30.0 + cos(a) * 17.0, 12.0 + sin(a) * 14.0]
+	s += '<path d="M12 12 a18 20 0 0 0 14 22" stroke="#FFFFFF" stroke-width="3" fill="none" opacity="0.45" stroke-linecap="round"/>'
 	return tex(60, 40, s)
 
 
-## Canvas 44x120: a red fire extinguisher on a wall bracket, with its gauge and hose.
+## Canvas 44x120: a red fire extinguisher on a wall bracket: handle and pin, a gauge with its green zone, a white label with a
+## flame, the hose clipped to the side and a strap round the middle.
 static func fire_extinguisher() -> ImageTexture:
 	var s := _defs()
-	s += '<rect x="4" y="20" width="36" height="6" fill="#4E555B"/><rect x="4" y="76" width="36" height="6" fill="#4E555B"/>'
-	s += '<path d="M12 112 V36 q0 -10 10 -10 q10 0 10 10 V112 q0 6 -10 6 q-10 0 -10 -6 z" fill="#D8262E" stroke="#8E1A20" stroke-width="2"/>'
-	s += '<path d="M12 112 V36 q0 -10 10 -10 q10 0 10 10 V112 q0 6 -10 6 q-10 0 -10 -6 z" fill="url(#cyl)"/>'
-	s += '<rect x="14" y="58" width="16" height="22" fill="#F4F2EC"/><path d="M22 4 v14 h14 v-4 h-8 v-6 z" fill="#2B2B2B"/><rect x="16" y="14" width="12" height="8" rx="2" fill="#2B2B2B"/><circle cx="22" cy="40" r="5" fill="#F4F2EC" stroke="#4E555B" stroke-width="1.5"/><path d="M36 14 q6 14 -2 30" stroke="#2B2B2B" stroke-width="2.4" fill="none"/>'
+	s += '<rect x="2" y="70" width="40" height="6" rx="2" fill="#4E555B"/><rect x="20" y="64" width="4" height="12" fill="#3A4046"/>'
+	s += '<path d="M10 112 V38 q0 -10 12 -10 q12 0 12 10 V112 q0 7 -12 7 q-12 0 -12 -7 z" fill="#D8262E" stroke="#8E1A20" stroke-width="2"/>'
+	s += '<path d="M10 112 V38 q0 -10 12 -10 q12 0 12 10 V112 q0 7 -12 7 q-12 0 -12 -7 z" fill="url(#cyl)"/>'
+	s += '<path d="M14 40 V108" stroke="#FFFFFF" stroke-width="2" opacity="0.35"/>'
+	s += '<rect x="12" y="82" width="20" height="26" rx="2" fill="#F8F5EC" stroke="#C9C2B4" stroke-width="1"/><path d="M22 86 q-6 8 -2 12 q-4 -1 -3 5 q5 4 9 0 q3 -5 -2 -9 q1 -4 -2 -8 z" fill="#E8412E"/><path d="M14 104 H30" stroke="#8A8478" stroke-width="1.2"/>'
+	s += '<rect x="16" y="22" width="12" height="9" rx="2" fill="#2B2B2B"/><path d="M14 14 H34 L36 18 H12 Z" fill="#2B2B2B"/><path d="M16 14 L8 20 L12 22 L18 18" fill="#3A3A3A" stroke="#14181D" stroke-width="1"/>'
+	s += '<circle cx="34" cy="26" r="2.4" fill="none" stroke="#E8C230" stroke-width="1.6"/><path d="M32 26 H28" stroke="#E8C230" stroke-width="1.2"/>'
+	s += '<circle cx="22" cy="48" r="6.4" fill="#F4F2EC" stroke="#4E555B" stroke-width="1.6"/><path d="M17.5 49 A5 5 0 0 1 22 43" stroke="#E04F5F" stroke-width="1.6" fill="none"/><path d="M22 43 A5 5 0 0 1 26.5 49" stroke="#3FA34D" stroke-width="2" fill="none"/><path d="M22 48 L24.5 45" stroke="#2B2B2B" stroke-width="1.2"/>'
+	s += '<path d="M33 22 q9 6 6 24 q-2 12 -8 22" stroke="#2B2B2B" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="28" y="66" width="8" height="6" rx="2" fill="#2B2B2B"/>'
 	return tex(44, 120, s)
 
 
@@ -1198,7 +1249,8 @@ static func produce_crates() -> ImageTexture:
 	return tex(230, 120, s)
 
 
-## Canvas 110x130: two galvanised buckets of cut flowers, tulips and daisies, wrapped in paper.
+## Canvas 110x130: two galvanised buckets of flowers wrapped in kraft paper (mums, daisies, roses, tulips, greenery), a little
+## chalk price tag hooked on the rim.
 static func flower_bucket() -> ImageTexture:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 29
@@ -1206,14 +1258,39 @@ static func flower_bucket() -> ImageTexture:
 	s += '<ellipse cx="55" cy="126" rx="48" ry="4" fill="#000000" opacity="0.2"/>'
 	for b in 2:
 		var x := 8.0 + b * 50.0
-		for k in 8:
-			var fx := x + 8 + k * 4.2
-			var fy := 22.0 + (k % 3) * 8
-			s += '<path d="M%.1f %.1f L%.1f 78" stroke="#3E8E3A" stroke-width="2"/>' % [fx, fy + 6, x + 22]
-			s += '<circle cx="%.1f" cy="%.1f" r="7" fill="%s"/><circle cx="%.1f" cy="%.1f" r="2.4" fill="%s"/>' % [fx, fy, ["#E8505B", "#F2C230", "#FF8A3D", "#C97AB8", "#FFFFFF"][rng.randi_range(0, 4)], fx, fy, "#7A4A2A"]
+		var cx := x + 22.0
+		# The bouquet: stems, then a kraft cone of paper, then the heads on top.
+		for k in 9:
+			var fx := x + 6.0 + k * 4.0
+			s += '<path d="M%.1f %.1f L%.1f 76" stroke="#3E8E3A" stroke-width="2"/>' % [fx, 26.0 + (k % 3) * 8.0 + 6.0, cx]
+		for l in 5:
+			var lx := x + 4.0 + l * 8.5
+			s += '<ellipse cx="%.1f" cy="%.1f" rx="3.2" ry="7" fill="#4E9A52" transform="rotate(%d %.1f %.1f)"/>' % [lx, 44.0 + (l % 2) * 5.0, (l - 2) * 18, lx, 44.0 + (l % 2) * 5.0]
+		for k in 9:
+			var fx := x + 6.0 + k * 4.0
+			var fy := 22.0 + (k % 3) * 8.0
+			var kind := rng.randi_range(0, 3)
+			var col: String = ["#E8505B", "#F2C230", "#FF8A3D", "#C97AB8", "#FFFFFF", "#E85FA0"][rng.randi_range(0, 5)]
+			match kind:
+				0:
+					s += '<circle cx="%.1f" cy="%.1f" r="7" fill="%s"/><circle cx="%.1f" cy="%.1f" r="2.4" fill="#7A4A2A"/>' % [fx, fy, col, fx, fy]
+				1:
+					s += '<circle cx="%.1f" cy="%.1f" r="6.6" fill="%s"/><path d="M%.1f %.1f q3 -3 6 0 M%.1f %.1f q-3 3 -6 0" stroke="#00000033" stroke-width="1.2" fill="none"/>' % [fx, fy, col, fx - 3, fy - 1, fx + 3, fy + 1]
+				2:
+					s += '<path d="M%.1f %.1f q-5 -9 -2 -13 q3 4 2 3 q1 -1 2 -3 q3 4 -2 13 z" fill="%s"/>' % [fx, fy + 4, col]
+				_:
+					s += '<ellipse cx="%.1f" cy="%.1f" rx="3" ry="8" fill="%s" transform="rotate(%d %.1f %.1f)"/><circle cx="%.1f" cy="%.1f" r="2" fill="#FFFFFF" opacity="0.8"/>' % [fx, fy, col, rng.randi_range(-25, 25), fx, fy, fx - 1, fy - 3]
+		s += '<path d="M%.1f 62 L%.1f 96 L%.1f 96 Z" fill="#C9A26E" stroke="#8A6A40" stroke-width="1.2" opacity="0.95"/>' % [cx - 15.0, cx, cx + 15.0]
+		s += '<path d="M%.1f 62 L%.1f 70 L%.1f 62" fill="#E0C898" stroke="#8A6A40" stroke-width="1"/>' % [cx - 15.0, cx - 2.0, cx + 15.0]
+		# The bucket: galvanised, ribbed, with a rim and a wire handle.
 		s += '<path d="M%.1f 70 H%.1f L%.1f 122 H%.1f Z" fill="url(#steel)" stroke="#6E757D" stroke-width="2"/>' % [x, x + 44, x + 40, x + 4]
-		s += '<path d="M%.1f 70 H%.1f L%.1f 96 H%.1f Z" fill="#E0C898" opacity="0.8"/>' % [x + 2, x + 42, x + 40, x + 6]
+		s += '<path d="M%.1f 70 H%.1f L%.1f 96 H%.1f Z" fill="#E0C898" opacity="0.7"/>' % [x + 2, x + 42, x + 40, x + 6]
+		for r in [84, 98, 112]:
+			s += '<path d="M%.1f %d H%.1f" stroke="#6E757D" stroke-width="1.2" opacity="0.7"/>' % [x + 1.6 + (r - 70) * 0.075, r, x + 42.4 - (r - 70) * 0.075]
 		s += '<path d="M%.1f 70 H%.1f L%.1f 122 H%.1f Z" fill="url(#cyl)"/>' % [x, x + 44, x + 40, x + 4]
+		s += '<rect x="%.1f" y="68" width="48" height="5" rx="2.5" fill="#9AA3AC" stroke="#6E757D" stroke-width="1.2"/>' % (x - 2.0)
+	s += '<path d="M44 76 Q55 66 66 76" stroke="#6E757D" stroke-width="1.6" fill="none"/>'
+	s += '<rect x="42" y="86" width="26" height="16" rx="2" fill="#2E3A34" stroke="#B98A52" stroke-width="2" transform="rotate(-4 55 94)"/><path d="M46 91 H64 M46 96 H58" stroke="#F4F2EC" stroke-width="1.6" transform="rotate(-4 55 94)"/>'
 	return tex(110, 130, s)
 
 
@@ -1256,33 +1333,60 @@ static func box_stack(seed_value := 1) -> ImageTexture:
 	return tex(160, 130, s)
 
 
-## Canvas 190x120: a pallet stacked with cases of water and pop, wrapped in plastic film.
+## Canvas 190x120: a pallet of drink cases under stretch film: labelled cases, two straps, the plastic's glare, a real pallet with
+## top boards, stringers and fork openings.
 static func pallet_cases() -> ImageTexture:
 	var s := _defs()
-	s += '<ellipse cx="95" cy="116" rx="86" ry="4" fill="#000000" opacity="0.22"/>'
-	s += '<rect x="10" y="100" width="170" height="12" fill="url(#wood)" stroke="#5E4228" stroke-width="2"/>'
-	for x in [14, 84, 156]:
-		s += '<rect x="%d" y="108" width="20" height="8" fill="#8A6238" stroke="#5E4228" stroke-width="1.5"/>' % x
+	s += '<ellipse cx="95" cy="116" rx="88" ry="4.5" fill="#000000" opacity="0.24"/>'
+	# The pallet: top boards, stringers, bottom boards.
+	s += '<rect x="8" y="98" width="174" height="7" fill="#B98A52" stroke="#5E4228" stroke-width="1.5"/>'
+	for x in [8, 54, 100, 146]:
+		s += '<path d="M%d 98 V105" stroke="#5E4228" stroke-width="1.2"/>' % x
+	for x in [12, 86, 162]:
+		s += '<rect x="%d" y="105" width="18" height="9" fill="#8A6238" stroke="#5E4228" stroke-width="1.5"/>' % x
+	s += '<rect x="8" y="112" width="174" height="4" fill="#A67A45" stroke="#5E4228" stroke-width="1.2"/>'
+	s += '<rect x="30" y="105" width="52" height="7" fill="#1B1410" opacity="0.5"/><rect x="108" y="105" width="52" height="7" fill="#1B1410" opacity="0.5"/>'
+	# Cases, three by three, each with a label and a barcode.
 	for row in 3:
 		for col in 3:
 			var x := 14.0 + col * 54.0
-			var y := 14.0 + row * 28.0
+			var y := 12.0 + row * 29.0
 			var c: String = [["#2E86C1", "#7CCB5A", "#D9342B"], ["#F08A24", "#2E86C1", "#4E9A52"], ["#D9342B", "#F2C230", "#2E86C1"]][row][col]
-			s += '<rect x="%.1f" y="%.1f" width="50" height="26" fill="%s" stroke="#00000044" stroke-width="1.5"/><rect x="%.1f" y="%.1f" width="50" height="8" fill="#FFFFFF" opacity="0.45"/>' % [x, y, c, x, y + 10]
+			s += '<rect x="%.1f" y="%.1f" width="50" height="27" fill="%s" stroke="#00000055" stroke-width="1.5"/><rect x="%.1f" y="%.1f" width="50" height="9" fill="#FFFFFF" opacity="0.4"/>' % [x, y, c, x, y + 11]
 			for b in 4:
-				s += '<circle cx="%.1f" cy="%.1f" r="3.4" fill="#FFFFFF" opacity="0.7"/>' % [x + 8 + b * 11, y + 5]
-	s += '<rect x="10" y="10" width="170" height="92" fill="url(#glare)" opacity="0.45"/><path d="M12 30 L170 18 M12 66 L170 80" stroke="#FFFFFF" stroke-width="1.2" opacity="0.5"/>'
+				s += '<circle cx="%.1f" cy="%.1f" r="3.4" fill="#FFFFFF" opacity="0.75"/>' % [x + 8 + b * 11, y + 6]
+			s += '<rect x="%.1f" y="%.1f" width="20" height="9" fill="#FBF8EE" stroke="#C9C2B4" stroke-width="0.8"/>' % [x + 28, y + 16]
+			for k in 6:
+				s += '<rect x="%.1f" y="%.1f" width="%.1f" height="5" fill="#2B2B2B"/>' % [x + 30 + k * 2.8, y + 18, 1.0 + (k % 2)]
+	# Two black straps, the film's creases and glare.
+	for y in [36, 70]:
+		s += '<rect x="12" y="%d" width="166" height="3" fill="#1E2329" opacity="0.7"/>' % y
+	s += '<rect x="12" y="10" width="166" height="90" fill="url(#glare)" opacity="0.5"/>'
+	s += '<path d="M14 30 L172 16 M14 52 L172 66 M14 84 L172 74 M60 10 L52 100 M128 10 L138 100" stroke="#FFFFFF" stroke-width="1.2" opacity="0.5"/>'
+	s += '<path d="M14 12 H176 M14 98 H176" stroke="#FFFFFF" stroke-width="1.6" opacity="0.5"/>'
 	return tex(190, 120, s)
 
 
-## Canvas 70x160: a hand truck (a "diable"): a blue steel frame, two wheels, a toe plate, with two boxes strapped on.
+## Canvas 70x160: a hand truck (a "diable"): a blue steel frame with a highlight, rubber handle loops, rungs, a riveted toe plate,
+## a tyre on a hub, two boxes with tape and labels strapped on.
 static func hand_truck() -> ImageTexture:
 	var s := _defs()
 	s += '<ellipse cx="35" cy="156" rx="30" ry="3.5" fill="#000000" opacity="0.2"/>'
-	s += '<rect x="22" y="40" width="26" height="40" fill="#C9A26E" stroke="#8A6A40" stroke-width="1.5"/><rect x="20" y="82" width="30" height="34" fill="#D9B27A" stroke="#8A6A40" stroke-width="1.5"/><path d="M22 66 H48 M20 98 H50" stroke="#8A6A40" stroke-width="3" opacity="0.6"/>'
-	s += '<path d="M16 8 V130 M44 8 V130" stroke="#2E5FB0" stroke-width="5" stroke-linecap="round"/><path d="M16 8 H44" stroke="#2E5FB0" stroke-width="6" stroke-linecap="round"/>'
-	s += '<path d="M16 50 H44 M16 90 H44" stroke="#2E5FB0" stroke-width="3"/><path d="M12 130 H56 L60 142 H10 Z" fill="#8E949A" stroke="#4E555B" stroke-width="1.5"/>'
-	s += '<circle cx="46" cy="140" r="12" fill="#2B2B2B"/><circle cx="46" cy="140" r="5" fill="#9AA3AC"/>'
+	# The boxes, strapped on.
+	s += '<rect x="20" y="40" width="30" height="40" fill="#C9A26E" stroke="#8A6A40" stroke-width="1.5"/><rect x="18" y="82" width="34" height="36" fill="#D9B27A" stroke="#8A6A40" stroke-width="1.5"/>'
+	s += '<path d="M35 40 V80 M35 82 V118" stroke="#E8DCC0" stroke-width="5" opacity="0.7"/><rect x="24" y="52" width="12" height="9" fill="#FBF8EE" stroke="#C9C2B4" stroke-width="0.8"/><path d="M26 55 H34 M26 58 H32" stroke="#8A8478" stroke-width="1"/>'
+	s += '<rect x="22" y="96" width="14" height="10" fill="#FBF8EE" stroke="#C9C2B4" stroke-width="0.8"/><path d="M24 99 H34 M24 102 H31" stroke="#8A8478" stroke-width="1"/>'
+	s += '<path d="M18 66 H52 M18 96 H52" stroke="#1E2329" stroke-width="2.4" opacity="0.8"/><rect x="48" y="62" width="5" height="8" fill="#6E757D"/><rect x="48" y="92" width="5" height="8" fill="#6E757D"/>'
+	# The frame: two uprights and the handle loop, with a lighter edge.
+	s += '<path d="M14 8 V132 M46 8 V132" stroke="#1F4A92" stroke-width="6" stroke-linecap="round"/><path d="M14 8 V132 M46 8 V132" stroke="#4A83D6" stroke-width="2" stroke-linecap="round" transform="translate(-1.4 0)"/>'
+	s += '<path d="M14 8 Q14 2 30 2 Q46 2 46 8" stroke="#1F4A92" stroke-width="6" fill="none" stroke-linecap="round"/>'
+	s += '<path d="M9 6 H21 M39 6 H51" stroke="#1E2329" stroke-width="7" stroke-linecap="round"/>'
+	s += '<path d="M14 50 H46 M14 90 H46 M14 124 H46" stroke="#1F4A92" stroke-width="3.4"/>'
+	# Toe plate and wheel.
+	s += '<path d="M10 130 H58 L62 144 H8 Z" fill="#9AA3AC" stroke="#4E555B" stroke-width="1.5"/><path d="M12 133 H56" stroke="#FFFFFF" stroke-width="1.4" opacity="0.6"/>'
+	for x in [14, 30, 46, 56]:
+		s += '<circle cx="%d" cy="139" r="1.2" fill="#4E555B"/>' % x
+	s += '<circle cx="46" cy="140" r="13" fill="#1E2329"/><circle cx="46" cy="140" r="12" fill="none" stroke="#3A4046" stroke-width="1.4" stroke-dasharray="2 2"/><circle cx="46" cy="140" r="7" fill="#C6CCD2" stroke="#6E757D" stroke-width="1.5"/><circle cx="46" cy="140" r="2.4" fill="#4E555B"/>'
 	return tex(70, 160, s)
 
 
@@ -1333,14 +1437,40 @@ static func a_frame_sign() -> ImageTexture:
 	return tex(100, 130, s)
 
 
-## Canvas 100x54: an "open" sign with an LED border (the word is a label in the game).
+## 5x7 dot-matrix letters for the open sign: rows from the top, "#" is a lit LED.
+const LED_FONT := {
+	"O": ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
+	"U": ["10001", "10001", "10001", "10001", "10001", "10001", "01110"],
+	"V": ["10001", "10001", "10001", "10001", "10001", "01010", "00100"],
+	"E": ["11111", "10000", "10000", "11110", "10000", "10000", "11111"],
+	"R": ["11110", "10001", "10001", "11110", "10100", "10010", "10001"],
+	"T": ["11111", "00100", "00100", "00100", "00100", "00100", "00100"],
+}
+
+
+## Canvas 100x54: a hanging LED sign spelling OUVERT in red dots (the unlit dots show faintly), chasing lights round the edge.
 static func open_sign() -> ImageTexture:
 	var s := _defs()
+	s += '<defs><radialGradient id="ledglow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#FF4A3A" stop-opacity="0.9"/><stop offset="1" stop-color="#FF4A3A" stop-opacity="0"/></radialGradient></defs>'
 	s += '<path d="M10 4 V10 M90 4 V10" stroke="#7E858D" stroke-width="2"/>'
 	s += '<rect x="2" y="10" width="96" height="42" rx="6" fill="#14181D" stroke="#4E555B" stroke-width="2"/>'
 	for k in 22:
 		var t := k / 22.0
 		s += '<circle cx="%.1f" cy="14" r="1.6" fill="%s"/><circle cx="%.1f" cy="48" r="1.6" fill="%s"/>' % [8 + t * 84, "#FF4A3A" if k % 2 == 0 else "#FFD23F", 8 + t * 84, "#FFD23F" if k % 2 == 0 else "#FF4A3A"]
+	var word := "OUVERT"
+	var step := 2.45
+	var x0 := 50.0 - (word.length() * 6.0 - 1.0) * step / 2.0
+	for i in word.length():
+		var rows: Array = LED_FONT[word[i]]
+		for r in 7:
+			for c in 5:
+				var lit: bool = rows[r][c] == "1"
+				var cx := x0 + (i * 6 + c) * step + step / 2.0
+				var cy := 21.0 + r * step + step / 2.0
+				if lit:
+					s += '<circle cx="%.1f" cy="%.1f" r="2.6" fill="url(#ledglow)"/><circle cx="%.1f" cy="%.1f" r="1.05" fill="#FF6A55"/>' % [cx, cy, cx, cy]
+				else:
+					s += '<circle cx="%.1f" cy="%.1f" r="0.7" fill="#3A1A16"/>' % [cx, cy]
 	return tex(100, 54, s)
 
 
@@ -1429,17 +1559,6 @@ static func toy_rack() -> ImageTexture:
 			else:
 				s += '<circle cx="%.1f" cy="%.1f" r="7" fill="%s" stroke="#FFFFFF" stroke-width="1.5"/><path d="M%.1f %.1f V%.1f" stroke="#FFFFFF" stroke-width="1.5"/>' % [x + 13, y + 24, _bright(rng), x + 13, y + 17, y + 9]
 	return tex(100, 120, s)
-
-
-## Canvas 70x120: an umbrella stand by the door, two folded umbrellas and a long red one with a curved handle.
-static func umbrella_stand() -> ImageTexture:
-	var s := _defs()
-	s += '<ellipse cx="35" cy="116" rx="26" ry="3.5" fill="#000000" opacity="0.2"/>'
-	s += '<path d="M24 12 V90 M38 6 V88 M30 18 V92" stroke="#2B2B33" stroke-width="3"/>'
-	s += '<path d="M18 4 Q30 -2 44 4 L40 56 H22 Z" fill="#D9342B" stroke="#8E1A20" stroke-width="1.5"/><path d="M22 56 L40 56 L36 62 H26 Z" fill="#8E1A20"/>'
-	s += '<path d="M16 28 H48 L52 108 H12 Z" fill="url(#steel)" stroke="#6E757D" stroke-width="2"/><path d="M16 28 H48 L52 108 H12 Z" fill="url(#cyl)"/>'
-	s += '<path d="M16 40 H50" stroke="#6E757D" stroke-width="2"/>'
-	return tex(70, 120, s)
 
 
 ## Canvas 80x96: a bag of ice-melting salt and a snow shovel against it (a Montréal winter classic).
