@@ -100,10 +100,10 @@ func _music() -> Array:
 func _build_shell() -> void:
 	var shell := RoomShell.new()
 	shell.rooms = [
-		{"from": 0.0, "to": VESTIBULE_END, "wall": Color("#ECE8DF"), "base": Color("#F4F1EA")},
-		{"from": VESTIBULE_END, "to": SALON_END, "wall": Color("#E9DCC2"), "base": Color("#6E4424")},
-		{"from": SALON_END, "to": HALL.y, "wall": Color("#EEEBE5"), "base": Color("#F4F1EA")},
-		{"from": BEDROOM.x, "to": BEDROOM.y, "wall": Color("#E4E3DF"), "base": Color("#6E4424")},
+		{"from": 0.0, "to": VESTIBULE_END, "wall": Color("#ECE8DF"), "base": Color("#F4F1EA"), "wainscot": Color("#DCD6C8"), "wainscot_height": 170.0},
+		{"from": VESTIBULE_END, "to": SALON_END, "wall": Color("#E9DCC2"), "base": Color("#6E4424"), "pattern": "stripes", "pattern_color": Color("#C9B48A"), "pattern_alpha": 0.5},
+		{"from": SALON_END, "to": HALL.y, "wall": Color("#EEEBE5"), "base": Color("#F4F1EA"), "pattern": "diamonds", "pattern_color": Color("#C9C2B4"), "pattern_alpha": 0.45, "wainscot": Color("#E6E0D2"), "wainscot_height": 150.0},
+		{"from": BEDROOM.x, "to": BEDROOM.y, "wall": Color("#F2E6EE"), "base": Color("#F4F1EA"), "pattern": "stars", "pattern_color": Color("#E6A3C2"), "pattern_alpha": 0.5, "wainscot": Color("#F7C9DA"), "wainscot_height": 150.0},
 	]
 	shell.chair_rails = [{"from": 0.0, "to": VESTIBULE_END, "y": 420.0}]
 	shell.posts = [SALON_END]
@@ -700,6 +700,30 @@ func _build_bedroom() -> void:
 		return Quests.active("hamster") and not GameState.flags.get("hamster_fed", false), 0.8))
 	_put(InteriorArt.terrarium(true), x + 30.0, 606.0, 0.85)
 	_put(InteriorArt.flower_painting(), x + 470.0, 330.0, 0.8, "wall")
+	_put(InteriorArt.moon_decal(), x + 340.0, 330.0, 0.85, "wall")
+	_put(InteriorArt.growth_chart(), x + 1365.0, 500.0, 0.85, "wall")
+	_put(InteriorArt.wall_clock(), x + 1300.0, 260.0, 0.8, "wall")
+	# A baby mobile over the bed, turning gently; stars on the ceiling that glow a little.
+	var mobile := _put(InteriorArt.mobile(), x + 540.0, 270.0, 0.8)
+	mobile.centered = true
+	mobile.offset = Vector2(45.0, 0.0)
+	mobile.position = Vector2(x + 540.0 + 36.0, CEILING + 6.0)
+	var sway := create_tween().set_loops()
+	sway.tween_property(mobile, "rotation", 0.06, 2.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	sway.tween_property(mobile, "rotation", -0.06, 2.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 33
+	for i in 16:
+		var star := Polygon2D.new()
+		var c := Vector2(x + rng.randf_range(20.0, 1620.0), rng.randf_range(CEILING + 2.0, CEILING + 30.0))
+		var r := rng.randf_range(2.5, 4.5)
+		var pts := PackedVector2Array()
+		for k in 10:
+			pts.append(Vector2.from_angle(-PI / 2.0 + TAU * k / 10.0) * (r if k % 2 == 0 else r * 0.45))
+		star.polygon = pts
+		star.position = c
+		star.color = Color("#E8F3A8", 0.55)
+		add_child(star)
 	_plant("chambre", "lily", x + 272.0, 606.0, 0.5)
 	_put(InteriorArt.bed(), x + 360.0, 608.0, 0.8, "floor")
 	_put(InteriorArt.kid_table(), x + 830.0, 612.0, 0.75, "floor")

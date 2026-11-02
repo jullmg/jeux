@@ -108,7 +108,7 @@ static func mom() -> CharacterLook:
 
 ## Charlotte's father (from reference/pere_charlotte.jpg): short brown hair (no cap), clean-shaven, blue eyes,
 ## fair skin, a navy T-shirt with a bicycle on it.
-static func dad() -> CharacterLook:
+static func dad() -> CharacterLook:  # navy bike T-shirt, dark jeans, white sneakers
 	var look := CharacterLook.new()
 	look.age = "adult"
 	look.skin = Color("#F0CDB2")
@@ -118,14 +118,14 @@ static func dad() -> CharacterLook:
 	look.lashes = false
 	look.mouth = "smile"
 	look.outfit = "tshirt"
-	look.outfit_color = Color("#2F4A6E")
+	look.outfit_color = Color("#34588A")
 	look.accent_color = Color("#F2EBDD")
 	look.pattern = "bike"
 	look.sleeve = "short"
 	look.legwear = "pants"
-	look.legwear_color = Color("#2E2E30")
+	look.legwear_color = Color("#3E5A86")
 	look.shoes = "sneaker"
-	look.shoe_color = Color("#2B2B2B")
+	look.shoe_color = Color("#F4F1EA")
 	return look
 
 

@@ -130,8 +130,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     `_switchable(area, stand_x, lights, room)` (wall switches/lamps that toggle lights and dim the room), and `_finish()`
     (foreground, colour grade, fade-in, `--screenshot=`).
   - `world/room_shell.gd` (`RoomShell`): walls/ceiling/crown moulding/baseboards and a glossy narrow-strip hardwood floor, all from
-    data (`rooms`, `chair_rails`, `posts`, `casings`, `gleams` = x of lights mirrored on the floor).
+    data (`rooms`, `chair_rails`, `posts`, `casings`, `gleams` = x of lights mirrored on the floor). Per-room wallpaper
+    options: `pattern` ("stars", "dots", "stripes", "diamonds"), `pattern_color`, `pattern_alpha`, `wainscot` (Color) +
+    `wainscot_height` (panelled lower wall); shops use `tile_colors`.
   - `world/interior_art.gd` (`InteriorArt`): one SVG function per piece of furniture; `world/fairy_lights.gd` (`FairyLights`).
+    Decor pieces for any bedroom/house: `moon_decal`, `mobile` (sways, tweened in the scene), `growth_chart`, `wall_clock`, `house_plant`.
 - `scenes/house.gd` (extends `Interior`): Charlotte's flat, from the photos in `reference/charlotte_house_inside`:
   vestibule (0–640) → oak glass doorway → salon (–2260) → hallway → kitchen (3400–3960); Charlotte's bedroom is a separate
   area (5000–6650) reached through the "chacha" door (fade, camera limits switch). Charlotte is at scale 0.5 inside.
@@ -169,6 +172,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   box stacks, pallet of cases, hand truck, mop and bucket, broom, step ladder, A-frame sign, open sign, bin, newspapers, vending
   machine, egg tray, water cooler, toy rack, umbrella stand, salt bag, tin pyramid, CCTV monitor, `floor_junk`): pick from these
   when a new shop or street scene needs props.
+- The parents go about chores: `world/family_routine.gd` (`FamilyRoutine`) walks one character between tasks
+  (`MOM_TASKS` / `DAD_TASKS` in house.gd: dicts {x, facing, task, prop, secs, say}); `Character.task` poses ("stir", "read", "phone",
+  "type", "wash", "drink", "fridge", "exercise", "watch", set in `_task_pose()`), props are drawn by `FamilyRoutine._Prop`; their click
+  spot and "!" mark follow them, and `pause(secs, toward_x)` stops them when Charlotte talks to them. Shops have walking customers
+  (`world/shop_customer.gd`, `ShopCustomer`, `Shop._add_customers`).
 - Charlotte's parents, from `reference/mere_charlotte.jpg` / `pere_charlotte.jpg`: `CharacterLook.mom()` (long wavy light-brown
   hair, brown eyes, teal floral dress, tights, boots) in the kitchen, `CharacterLook.dad()` (short brown hair, no cap,
   clean-shaven, blue eyes, navy T-shirt with the "bike" top pattern) in the salon; both stand at 1.18× Charlotte's scale. Click them and they say a line (`MOM_LINES` / `DAD_LINES`

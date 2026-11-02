@@ -9,7 +9,9 @@ const WALL_BASE := 600.0
 const BOTTOM := 720.0
 const FLOOR_TONES := [Color("#D39A58"), Color("#C98C4C"), Color("#DDA968"), Color("#BF8042"), Color("#D6A060"), Color("#C48748")]
 
-## Each room: {"from": x, "to": x, "wall": Color, "base": Color (baseboard)}.
+## Each room: {"from": x, "to": x, "wall": Color, "base": Color (baseboard)}, and optionally the wall's look:
+## "pattern": "stars" | "dots" | "stripes" | "diamonds" (a wallpaper in `pattern_color`, `pattern_alpha`), "wainscot": Color
+## (painted panels on the lower wall under a white rail, `wainscot_height` tall). Reusable for any house interior.
 var rooms: Array = []
 ## Wooden chair rails along a wall: {"from": x, "to": x, "y": y}.
 var chair_rails: Array = []
@@ -34,6 +36,7 @@ func _draw() -> void:
 	rng.seed = seed_value
 	for r in rooms:
 		_room(r.from, r.to, r.wall, r.base, rng)
+		_wallpaper(r, rng)
 	for rail in chair_rails:
 		draw_rect(Rect2(rail.from, rail.y, rail.to - rail.from, 12), Color("#B07A44"))
 		draw_rect(Rect2(rail.from, rail.y, rail.to - rail.from, 3), Color("#C99560"))
@@ -97,6 +100,76 @@ func _room(x0: float, x1: float, wall: Color, base: Color, rng: RandomNumberGene
 		_tiles(x0, x1)
 	else:
 		_floor(x0, x1, rng)
+
+
+# The wall's wallpaper and wainscot, over the plain plaster (see `rooms`).
+func _wallpaper(r: Dictionary, rng: RandomNumberGenerator) -> void:
+	var x0: float = r.from
+	var x1: float = r.to
+	var top := CEILING + 36.0
+	var wain: float = r.get("wainscot_height", 190.0) if r.has("wainscot") else 0.0
+	var bottom := WALL_BASE - 30.0 - wain
+	var color: Color = r.get("pattern_color", Color(1, 1, 1))
+	var alpha: float = r.get("pattern_alpha", 0.32)
+	match str(r.get("pattern", "")):
+		"stars":
+			var y := top + 14.0
+			var row := 0
+			while y < bottom - 8.0:
+				var x := x0 + 30.0 + (row % 2) * 48.0
+				while x < x1 - 20.0:
+					var c := Vector2(x + rng.randf_range(-6, 6), y + rng.randf_range(-5, 5))
+					var rr := rng.randf_range(4.0, 7.0)
+					var pts := PackedVector2Array()
+					for k in 10:
+						pts.append(c + Vector2.from_angle(-PI / 2.0 + TAU * k / 10.0) * (rr if k % 2 == 0 else rr * 0.45))
+					draw_colored_polygon(pts, Color(color, alpha))
+					x += 96.0
+				y += 52.0
+				row += 1
+		"dots":
+			var y2 := top + 10.0
+			var row2 := 0
+			while y2 < bottom:
+				var x2 := x0 + 20.0 + (row2 % 2) * 24.0
+				while x2 < x1 - 10.0:
+					draw_circle(Vector2(x2, y2), 3.2, Color(color, alpha))
+					x2 += 48.0
+				y2 += 30.0
+				row2 += 1
+		"stripes":
+			var x3 := x0
+			var k3 := 0
+			while x3 < x1:
+				if k3 % 2 == 0:
+					draw_rect(Rect2(x3, top - 10.0, minf(30.0, x1 - x3), bottom - top + 10.0 + wain), Color(color, alpha * 0.45))
+				x3 += 30.0
+				k3 += 1
+		"diamonds":
+			var y4 := top + 20.0
+			var row4 := 0
+			while y4 < bottom:
+				var x4 := x0 + 24.0 + (row4 % 2) * 30.0
+				while x4 < x1 - 10.0:
+					draw_colored_polygon(PackedVector2Array([Vector2(x4, y4 - 8), Vector2(x4 + 6, y4), Vector2(x4, y4 + 8), Vector2(x4 - 6, y4)]), Color(color, alpha))
+					x4 += 60.0
+				y4 += 36.0
+				row4 += 1
+	if wain > 0.0:
+		var wc: Color = r.wainscot
+		var wy := WALL_BASE - 28.0 - wain
+		draw_rect(Rect2(x0, wy, x1 - x0, wain), wc)
+		draw_rect(Rect2(x0, wy, x1 - x0, 8), wc.lightened(0.55))
+		draw_rect(Rect2(x0, wy + 8, x1 - x0, 3), Color(0.2, 0.1, 0.04, 0.18))
+		var px := x0 + 18.0
+		while px < x1 - 40.0:
+			var pw := 74.0
+			draw_rect(Rect2(px, wy + 26.0, pw, wain - 42.0), wc.darkened(0.06))
+			draw_rect(Rect2(px, wy + 26.0, pw, 3), Color(0.2, 0.1, 0.04, 0.2))
+			draw_rect(Rect2(px, wy + 26.0, 3, wain - 42.0), Color(0.2, 0.1, 0.04, 0.14))
+			draw_rect(Rect2(px + pw - 3, wy + 28.0, 3, wain - 44.0), Color(1, 1, 1, 0.3))
+			draw_rect(Rect2(px, wy + wain - 19.0, pw, 3), Color(1, 1, 1, 0.3))
+			px += pw + 22.0
 
 
 # Narrow honey-coloured strips running along the room, rows growing toward the camera, staggered butt

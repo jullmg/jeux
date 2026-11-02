@@ -1111,3 +1111,56 @@ static func mess(kind: String) -> ImageTexture:
 			s += '<path d="M32 30 Q40 26 44 30" stroke="#FF5D8F" stroke-width="3" fill="none"/>'
 			s += '<ellipse cx="17" cy="26" rx="3" ry="2" fill="#FFFFFF" opacity="0.4"/>'
 	return tex(80, 50, s)
+
+
+# ── Wall and ceiling decorations (for any room, especially a child's) ───────────────
+
+## Canvas 110x120: a crescent moon wall decal with two small stars, pale yellow with a soft edge.
+static func moon_decal() -> ImageTexture:
+	var s := '<path d="M70 12 A44 44 0 1 0 98 86 A34 34 0 1 1 70 12 Z" fill="#FFE9A8" stroke="#E8C86A" stroke-width="2.5" stroke-linejoin="round"/>'
+	s += '<path d="M46 30 Q34 50 40 78" stroke="#FFFFFF" stroke-width="5" fill="none" opacity="0.5" stroke-linecap="round"/>'
+	s += '<path d="M92 22 l3 7 l8 1 l-6 5 l2 8 l-7 -4 l-7 4 l2 -8 l-6 -5 l8 -1 z" fill="#FFE9A8" stroke="#E8C86A" stroke-width="1.5"/>'
+	s += '<path d="M24 98 l2 5 l6 1 l-4 4 l1 6 l-5 -3 l-5 3 l1 -6 l-4 -4 l6 -1 z" fill="#FFE9A8" stroke="#E8C86A" stroke-width="1.2"/>'
+	return tex(110, 120, s)
+
+
+## Canvas 90x230: a hanging baby mobile over a bed: a cord, a crossbar and four little felt shapes on strings (a star, a
+## moon, a cloud, a heart), swaying a little (the scene rotates the node).
+static func mobile() -> ImageTexture:
+	var s := '<path d="M45 0 V40" stroke="#B9B1A0" stroke-width="2"/><path d="M8 44 H82" stroke="#C9A26E" stroke-width="4" stroke-linecap="round"/><circle cx="45" cy="42" r="5" fill="#E8C86A"/>'
+	for k in [[12, 110, "#FFD23F", "star"], [34, 150, "#9ECFF0", "moon"], [56, 130, "#FFFFFF", "cloud"], [78, 160, "#FF8FB0", "heart"]]:
+		s += '<path d="M%d 46 V%d" stroke="#B9B1A0" stroke-width="1.6"/>' % [k[0], k[1] - 16]
+		match k[3]:
+			"star":
+				s += '<path d="M%d %d l5 11 l12 1 l-9 8 l3 12 l-11 -6 l-11 6 l3 -12 l-9 -8 l12 -1 z" fill="%s" stroke="#C99410" stroke-width="1.5"/>' % [k[0], k[1] - 16, k[2]]
+			"moon":
+				s += '<path d="M%d %d A13 13 0 1 0 %d %d A10 10 0 1 1 %d %d Z" fill="%s" stroke="#6E9CC0" stroke-width="1.5"/>' % [k[0] + 3, k[1] - 16, k[0] + 12, k[1] + 12, k[0] + 3, k[1] - 16, k[2]]
+			"cloud":
+				s += '<circle cx="%d" cy="%d" r="8" fill="%s" stroke="#C9D2D8" stroke-width="1.5"/><circle cx="%d" cy="%d" r="10" fill="%s" stroke="#C9D2D8" stroke-width="1.5"/><circle cx="%d" cy="%d" r="7" fill="%s" stroke="#C9D2D8" stroke-width="1.5"/>' % [k[0] - 8, k[1], k[2], k[0], k[1] - 4, k[2], k[0] + 9, k[1] + 1, k[2]]
+			_:
+				s += '<path d="M%d %d c-12 -10 -16 6 0 16 c16 -10 12 -26 0 -16 z" fill="%s" stroke="#C2406E" stroke-width="1.5"/>' % [k[0], k[1] - 6, k[2]]
+	return tex(90, 230, s)
+
+
+## Canvas 70x280: a growth chart on the wall: a painted ruler with a mark and a date at each height, a few heights in
+## coloured pencil, Charlotte's the latest.
+static func growth_chart() -> ImageTexture:
+	var s := '<rect x="14" y="2" width="42" height="276" rx="4" fill="#F7EFD8" stroke="#B59A66" stroke-width="2.5"/>'
+	for k in 28:
+		var y := 270.0 - k * 9.5
+		var long := k % 5 == 0
+		s += '<path d="M14 %.1f H%d" stroke="#8A6E3A" stroke-width="%s"/>' % [y, 38 if long else 28, "2" if long else "1.2"]
+	for m in [[200, "#E8505B", "S"], [160, "#4FA3E0", "L"], [120, "#7CCB5A", "C"]]:
+		s += '<path d="M14 %d H56" stroke="%s" stroke-width="3.2" stroke-linecap="round"/><circle cx="62" cy="%d" r="3.5" fill="%s"/>' % [m[0], m[1], m[0], m[1]]
+	s += '<path d="M10 120 l-6 -4 v8 z" fill="#E8505B"/>'
+	return tex(70, 280, s)
+
+
+## Canvas 80x80: a round wall clock with a pastel rim and fat hands, ticking at the time it was painted (10 past 10).
+static func wall_clock() -> ImageTexture:
+	var s := '<circle cx="40" cy="40" r="36" fill="#F7C9DA" stroke="#C2406E" stroke-width="3"/><circle cx="40" cy="40" r="29" fill="#FFFDF6" stroke="#E8D2A8" stroke-width="1.5"/>'
+	for k in 12:
+		var d := Vector2.from_angle(TAU * k / 12.0)
+		s += '<path d="M%.1f %.1f L%.1f %.1f" stroke="#7A5A66" stroke-width="%s" stroke-linecap="round"/>' % [40 + d.x * 23, 40 + d.y * 23, 40 + d.x * 27, 40 + d.y * 27, "3" if k % 3 == 0 else "1.6"]
+	s += '<path d="M40 40 L28 30" stroke="#5A3A4A" stroke-width="4" stroke-linecap="round"/><path d="M40 40 L58 28" stroke="#5A3A4A" stroke-width="3" stroke-linecap="round"/><circle cx="40" cy="40" r="3" fill="#C2406E"/>'
+	return tex(80, 80, s)
