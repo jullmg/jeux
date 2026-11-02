@@ -2,12 +2,14 @@ extends Node2D
 # Design sheet for the arms and hands: characters of every age in the poses of the game, big. Pick a row with --set=N.
 # Godot --path . --screen 1 res://tools/arms.tscn -- --screenshot=/tmp/arms.png [--set=0] [--zoom=1.0] [--only=N (one pose, centred)]
 #   set 0: standing, walking (two phases), running      set 1: gestures (wave, stretch), petting, holding things
-#   set 2: tasks (stir, read, phone, type, wash, drink, fridge, exercise)       set 3: ages and long sleeves
+#   set 2: tasks (stir, read, phone, type, wash, drink, fridge, exercise)       set 3: legs (pants, tights, socks, boots) walking, running, hop
+#   set 4: ages and long sleeves
 
 const SETS := [
 	[["rest", {}], ["walk 0", {"walk": 0.0}], ["walk .25", {"walk": 0.25}], ["walk .5", {"walk": 0.5}], ["walk .75", {"walk": 0.75}], ["run 0", {"walk": 0.1, "run": true}], ["run .5", {"walk": 0.6, "run": true}]],
 	[["wave", {"gesture": "wave"}], ["stretch", {"gesture": "stretch"}], ["pet low", {"pet": 1.0}], ["pet high", {"pet": 0.0}], ["milk", {"carry": "milk"}], ["can", {"carry": "can"}], ["pour", {"carry": "can", "lift": 1.0}], ["cat", {"carry": "cat:cat"}]],
 	[["stir", {"task": "stir"}], ["read", {"task": "read"}], ["phone", {"task": "phone"}], ["type", {"task": "type"}], ["wash", {"task": "wash"}], ["drink", {"task": "drink"}], ["fridge", {"task": "fridge"}], ["exercise", {"task": "exercise"}]],
+	[["pants walk", {"age": "child", "legwear": "pants", "shoes": "sneaker", "walk": 0.0}], ["tights walk", {"age": "child", "legwear": "tights", "walk": 0.1}], ["socks walk", {"age": "child", "legwear": "socks", "walk": 0.2}], ["rain boots", {"age": "child", "legwear": "pants", "shoes": "rain_boot", "walk": 0.0}], ["boots adult", {"age": "adult", "legwear": "pants", "shoes": "boot", "walk": 0.1}], ["adult run", {"age": "adult", "legwear": "pants", "shoes": "sneaker", "walk": 0.05, "run": true}], ["teen run", {"age": "teen", "legwear": "tights", "walk": 0.6, "run": true}], ["hop", {"age": "child", "legwear": "pants", "gesture": "hop"}]],
 	[["child", {"age": "child"}], ["teen", {"age": "teen"}], ["adult", {"age": "adult"}], ["senior", {"age": "senior"}], ["long sleeve", {"age": "child", "sleeve": "long"}], ["short", {"age": "child", "sleeve": "short"}], ["adult long", {"age": "adult", "sleeve": "long"}]],
 ]
 
@@ -30,6 +32,14 @@ func _ready() -> void:
 		var look := CharacterLook.usual() if not spec.has("age") else CharacterLook.random(rng, spec.age)
 		if spec.has("sleeve"):
 			look.sleeve = spec.sleeve
+		if spec.has("legwear"):
+			look.legwear = spec.legwear
+			if look.legwear == "pants" or look.legwear == "tights":
+				look.legwear_color = Color("#2F3E5C") if look.legwear == "pants" else Color("#8E3A5E")
+		if spec.has("shoes"):
+			look.shoes = spec.shoes
+		if spec.has("outfit"):
+			look.outfit = spec.outfit
 		var c := Character.new()
 		c.look = look
 		c.scale = Vector2.ONE * 0.62 * zoom

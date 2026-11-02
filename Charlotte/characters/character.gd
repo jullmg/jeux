@@ -27,8 +27,12 @@ var _head: Node2D
 var _torso: Sprite2D
 var _lids: Sprite2D
 var _hair_back: Sprite2D
+## The legs, back one first: thigh (a Sprite2D at the hip; `_leg_front` / `_leg_back`, its `rotation` is the hip angle) and shin with
+## its shoe (child, at the knee; its `rotation` is the knee's flex, the lower leg folding back).
 var _leg_front: Sprite2D
 var _leg_back: Sprite2D
+var _shin_front: Sprite2D
+var _shin_back: Sprite2D
 ## The arms, back one first: upper arm (a Sprite2D at the shoulder), forearm (its child, at the elbow) and hand (the forearm's
 ## child, at the wrist). `_arm_front` / `_arm_back` are the upper arms; the shoulder angle is their `rotation`, the elbow's flex
 ## is `_elbow` (radians, the forearm folding forward and up), and the hand's picture is chosen by `_hand_goal`.
@@ -63,9 +67,6 @@ var pedal := 0.0
 ## Riding: where the two pedals are (global, back leg's first) and the handlebar grip, set by the bike each frame.
 var pedal_feet: Array[Vector2] = []
 var bar_grip := Vector2.INF
-# Riding, each leg is split in two at the knee (the same texture: thigh, then shin and shoe) so it can bend:
-# back thigh, back shin, front thigh, front shin.
-var _ride_legs: Array[Sprite2D] = []
 ## Little idle gestures when she stands still a while (Charlotte, her parents): a wave, a hop, a stretch, a look round.
 var fidgets := false
 ## The front hand's shape when it has nothing special to do ("grip" for a passerby holding a leash, say); "" = relaxed.
@@ -113,7 +114,8 @@ func _build() -> void:
 	# Children are drawn back to front.
 	_hair_back = _part(_body, tex.hair_back, _rig.head_pivot, neck)
 	_hair_back.scale = Vector2.ONE * (_rig.head_scale as float)
-	_leg_back = _part(_body, tex.leg, _rig.leg_pivot, Vector2(_rig.leg_x, -leg), BACK_TINT)
+	_leg_back = _part(_body, tex.thigh, _rig.leg_pivot, Vector2(_rig.leg_x, -leg), BACK_TINT)
+	_shin_back = _part(_leg_back, tex.shin, _rig.shin_pivot, Vector2(0, (_rig.knee_y as float) - (_rig.leg_pivot.y as float)))
 	_hand_tex = {"relaxed": tex.hand_relaxed, "open": tex.hand_open, "flat": tex.hand_flat, "grip": tex.hand_grip}
 	_arms = []
 	_fores = []
@@ -121,7 +123,8 @@ func _build() -> void:
 	_arm_back = _make_arm(tex, Vector2(_rig.arm_x, _rig.shoulder_y), BACK_TINT)
 	if tex.has("backpack"):
 		_part(_body, tex.backpack, _rig.pack_pivot, Vector2(-30.0 * (_rig.sx as float), _rig.shoulder_y + 4.0))
-	_leg_front = _part(_body, tex.leg, _rig.leg_pivot, Vector2(-(_rig.leg_x as float), -leg))
+	_leg_front = _part(_body, tex.thigh, _rig.leg_pivot, Vector2(-(_rig.leg_x as float), -leg))
+	_shin_front = _part(_leg_front, tex.shin, _rig.shin_pivot, Vector2(0, (_rig.knee_y as float) - (_rig.leg_pivot.y as float)))
 	_torso = _part(_body, tex.torso, _rig.torso_pivot, Vector2(0, _rig.torso_top))
 	_head = Node2D.new()
 	_head.position = neck
@@ -208,48 +211,21 @@ func is_holding() -> bool:
 ## Puts `node` into the puppet between its far and near legs (a bike's frame), in the puppet's parent's space. The
 ## riding pose is fixed, so the node's transform is set once.
 func add_between_legs(node: Node2D) -> void:
-	var near: Node2D = _ride_legs[2] if _ride_legs.size() == 4 else _leg_front
 	_body.add_child(node)
-	_body.move_child(node, near.get_index())
+	_body.move_child(node, _leg_front.get_index())
 	node.transform = (transform * _body.transform).affine_inverse()
 
 
-# On a bike: each foot on its pedal going round in front of and below the hip, the knee bending forward (two-bone IK).
+# On a bike: each foot on its pedal going round in front of and below the hip, the knee bending forward (two-bone IK on the thigh and
+# the shin).
 func _pedal_legs() -> void:
 	var leg_len: float = _rig.leg_len
 	var thigh_len := leg_len * 0.5 - 6.0
 	var shin_len := leg_len * 0.5
-	if _ride_legs.is_empty():
-		var tex := _leg_front.texture
-		var pivot: Vector2 = _rig.leg_pivot
-		for leg: Sprite2D in [_leg_back, _leg_front]:
-			var at := leg.get_index()
-			var thigh := Sprite2D.new()
-			thigh.texture = tex
-			thigh.texture_filter = leg.texture_filter
-			thigh.region_enabled = true
-			thigh.region_rect = Rect2(0, 0, tex.get_width(), leg_len * 0.5 + 6.0)
-			thigh.centered = false
-			thigh.offset = -pivot
-			thigh.modulate = leg.modulate
-			thigh.material = _shade
-			var shin := Sprite2D.new()
-			shin.texture = tex
-			shin.texture_filter = leg.texture_filter
-			shin.region_enabled = true
-			shin.region_rect = Rect2(0, leg_len * 0.5, tex.get_width(), tex.get_height() - leg_len * 0.5)
-			shin.centered = false
-			shin.offset = -Vector2(pivot.x, 0)
-			shin.modulate = leg.modulate
-			shin.material = _shade
-			_body.add_child(thigh)
-			_body.move_child(thigh, at)
-			_body.add_child(shin)
-			_body.move_child(shin, at + 1)
-			leg.visible = false
-			_ride_legs.append_array([thigh, shin])
 	for k in 2:
-		var hip: Vector2 = (_leg_back if k == 0 else _leg_front).position
+		var thigh := _leg_back if k == 0 else _leg_front
+		var shin := _shin_back if k == 0 else _shin_front
+		var hip := thigh.position
 		var foot: Vector2
 		if pedal_feet.size() == 2:
 			foot = _body.to_local(pedal_feet[k])
@@ -264,12 +240,9 @@ func _pedal_legs() -> void:
 		var knee_a := hip + dir * along + dir.orthogonal() * up
 		var knee_b := hip + dir * along - dir.orthogonal() * up
 		var knee := knee_a if knee_a.x > knee_b.x else knee_b
-		var thigh := _ride_legs[k * 2]
-		var shin := _ride_legs[k * 2 + 1]
-		thigh.position = hip
-		thigh.rotation = atan2(-(knee - hip).x, (knee - hip).y)
-		shin.position = knee
-		shin.rotation = atan2(-(hip + dir * d - knee).x, (hip + dir * d - knee).y)
+		var thigh_angle := atan2(-(knee - hip).x, (knee - hip).y)
+		thigh.rotation = thigh_angle
+		shin.rotation = atan2(-(hip + dir * d - knee).x, (hip + dir * d - knee).y) - thigh_angle
 
 
 # Standing still a while, now and then: one little gesture, then back to rest.
@@ -331,6 +304,7 @@ func _apply_pose() -> void:
 	var stride := deg_to_rad(lerpf(26.0, 38.0, _run))
 	_leg_front.rotation = stride * swing - lunge
 	_leg_back.rotation = -stride * swing + lunge
+	_knees(swing, lunge)
 	# Shoulders at their usual places and arms their usual length (riding moves and stretches them below).
 	_arm_back.position = Vector2(_rig.arm_x, _rig.shoulder_y)
 	_arm_front.position = Vector2(-(_rig.arm_x as float), _rig.shoulder_y)
@@ -367,7 +341,7 @@ func _apply_pose() -> void:
 			_hand_goal[1] = "grip"
 	var bounce := sin(walk_phase * TAU * 2.0)
 	# Running: a little hop at each push-off instead of the walk's dip.
-	_body.position.y = (1.0 - cos(_leg_front.rotation)) * (_rig.leg_len as float) * (1.0 - _run) - absf(bounce) * 6.0 * _run
+	_body.position.y = _stance_drop() * (1.0 - _run) - absf(bounce) * 6.0 * _run
 	_body.rotation = ((_rig.lean as float) + deg_to_rad(10.0) * _pet + deg_to_rad(9.0) * _run) * facing
 	var tilt := bounce if is_walking else sin(_time * 2.2) * 0.6
 	_head.rotation = deg_to_rad(2.0) * tilt + deg_to_rad(10.0) * _pet - deg_to_rad(4.0) * _run
@@ -419,6 +393,10 @@ func _apply_pose() -> void:
 				_hand_goal[1] = "open"
 			"hop":
 				_body.position.y -= absf(sin(t * TAU)) * 16.0 * w
+				# Knees tucked while she is in the air.
+				var tuck := absf(sin(t * TAU)) * 0.7 * w
+				_shin_front.rotation += tuck
+				_shin_back.rotation += tuck
 			"stretch":
 				_arm_front.rotation = lerpf(_arm_front.rotation, deg_to_rad(-165.0), w)
 				_arm_back.rotation = lerpf(_arm_back.rotation, deg_to_rad(-160.0), w)
@@ -435,6 +413,31 @@ func _apply_pose() -> void:
 		_hand_goal[1] = hand_mode
 	_follow_head()
 	_finish_arms()
+
+
+# The knees: a little bend at rest, the leg that swings forward folds its lower leg up under it (more when running). In a lunge
+# (petting) both legs stay straight and symmetrical, so both feet stay on the ground.
+func _knees(swing: float, _lunge: float) -> void:
+	var phase := walk_phase * TAU
+	var fwd_front := maxf(-cos(phase), 0.0) if is_walking else 0.0
+	var fwd_back := maxf(cos(phase), 0.0) if is_walking else 0.0
+	var walk_flex := deg_to_rad(lerpf(40.0, 74.0, _run))
+	var base := deg_to_rad(3.0)
+	_shin_front.rotation = base + walk_flex * fwd_front
+	_shin_back.rotation = base + walk_flex * fwd_back
+
+
+# How far the hips sit below standing height so that the lower foot stays on the ground (a lunge, a bent knee).
+func _stance_drop() -> float:
+	var knee: float = _rig.knee_y
+	var thigh := knee - (_rig.leg_pivot.y as float)
+	var shin := (_rig.leg_len as float) + 5.0 - knee
+	var lowest := 0.0
+	for leg in [[_leg_front, _shin_front], [_leg_back, _shin_back]]:
+		var a: float = (leg[0] as Sprite2D).rotation
+		var f: float = (leg[1] as Sprite2D).rotation
+		lowest = maxf(lowest, thigh * cos(a) + shin * cos(a + f))
+	return thigh + shin - lowest
 
 
 # The arms' own flex while they hang and swing: a slight bend, more as the arm swings forward, a good deal when running.
@@ -546,6 +549,8 @@ func _task_pose() -> void:
 			_aim(0, -95.0 + s * 58.0, 0.94)
 			_hand_goal = ["grip", "grip"]
 			_body.position.y -= absf(s) * 7.0
+			_shin_front.rotation += absf(s) * 0.5
+			_shin_back.rotation += absf(s) * 0.5
 		"watch":
 			_aim(1, -10.0, 0.96)
 			_aim(0, -10.0, 0.96)

@@ -12,6 +12,8 @@ const RIGS := {
 }
 
 ## How big the hands are, by age (the arms' width is the same for everyone).
+## The shin's picture reaches this far above the knee (the round cap of the joint).
+const SHIN_PAD := 14.0
 const HAND_SCALE := {"child": 1.0, "teen": 1.1, "adult": 1.22, "senior": 1.18}
 
 var look: CharacterLook
@@ -48,6 +50,7 @@ func _build() -> Dictionary:
 		"torso_top": torso_top, "neck_y": torso_top + 8.0 * sy, "shoulder_y": torso_top + 18.0 * sy,
 		"arm_x": 36.0 * sx, "leg_x": 8.0 * sx, "torso_pivot": Vector2(65.0 * sx, 0.0),
 		"head_pivot": HEAD_PIVOT, "leg_pivot": Vector2(20, 6), "arm_pivot": Vector2(15, 8),
+		"knee_y": roundf(leg * 0.5), "shin_pivot": Vector2(20, SHIN_PAD),
 		"pack_pivot": Vector2(54, 10), "lean": deg_to_rad(5.0) if look.age == "senior" else 0.0,
 	}
 	var tex := {
@@ -62,7 +65,8 @@ func _build() -> Dictionary:
 		"hand_open": _tex(_hand_svg("open", hs)),
 		"hand_flat": _tex(_hand_svg("flat", hs)),
 		"hand_grip": _tex(_hand_svg("grip", hs)),
-		"leg": _tex(_leg_svg(leg)),
+		"thigh": _tex(_thigh_svg(leg)),
+		"shin": _tex(_shin_svg(leg)),
 	}
 	if look.backpack != "":
 		tex.backpack = _tex(_backpack_svg())
@@ -667,7 +671,7 @@ func _hand_svg(mode: String, scale: float) -> String:
 	return '<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 44 50">%s</svg>' % [w, h, s]
 
 
-func _leg_svg(length: float) -> String:
+func _leg_body(length: float) -> String:
 	var off := length - 110.0
 	var s := ""
 	match look.legwear:
@@ -679,7 +683,6 @@ func _leg_svg(length: float) -> String:
 		_:
 			s += _f('<rect x="8" y="0" width="24" height="%s" rx="4" fill="{leg}" stroke="{leg_line}" stroke-width="2.5"/>' % (length - 14.0))
 			s += _f('<rect x="8" y="%s" width="24" height="6" fill="{leg_line}" opacity="0.5"/>' % (length - 20.0))
-			s += _f('<path d="M12 %s q8 5 16 0 M14 %s q6 3 12 0" stroke="{leg_line}" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.45"/>' % [length * 0.48, length * 0.48 + 7.0])
 	s += '<g transform="translate(0 %s)">' % off
 	match look.shoes:
 		"mary_jane":
@@ -691,16 +694,54 @@ func _leg_svg(length: float) -> String:
 			s += '<path d="M36 92 Q48 94 48 106 L36 106 Z" fill="#FFFFFF" opacity="0.85"/>'
 			s += '<path d="M18 92 L28 90 M18 98 L30 96" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>'
 		"boot":
-			s += _f('<path d="M8 66 H32 V96 Q48 94 48 106 Q49 110 44 110 H6 Q4 100 8 92 Z" fill="{shoe}" stroke="{shoe_line}" stroke-width="2.5" stroke-linejoin="round"/>')
-			s += _f('<rect x="7" y="64" width="26" height="8" rx="3" fill="{shoe_line}"/>')
+			s += _f('<path d="M8 70 H32 V96 Q48 94 48 106 Q49 110 44 110 H6 Q4 100 8 92 Z" fill="{shoe}" stroke="{shoe_line}" stroke-width="2.5" stroke-linejoin="round"/>')
+			s += _f('<rect x="7" y="68" width="26" height="8" rx="3" fill="{shoe_line}"/>')
 		"rain_boot":
-			s += _f('<path d="M7 50 H33 V94 Q48 94 48 106 Q49 110 44 110 H6 Q4 100 7 90 Z" fill="{shoe}" stroke="{shoe_line}" stroke-width="2.5" stroke-linejoin="round"/>')
-			s += _f('<rect x="5" y="46" width="30" height="9" rx="4" fill="{shoe_line}"/>')
-			s += '<path d="M13 58 V88" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" opacity="0.5"/>'
+			s += _f('<path d="M7 70 H33 V94 Q48 94 48 106 Q49 110 44 110 H6 Q4 100 7 90 Z" fill="{shoe}" stroke="{shoe_line}" stroke-width="2.5" stroke-linejoin="round"/>')
+			s += _f('<rect x="5" y="66" width="30" height="8" rx="4" fill="{shoe_line}"/>')
+			s += '<path d="M13 78 V88" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" opacity="0.5"/>'
 			s += _f('<circle cx="40" cy="101" r="3" fill="{shoe_light}"/>')
 	s += _f('<rect x="3" y="106" width="46" height="9" rx="4.5" fill="{sole}" stroke="{sock_line}" stroke-width="1.5"/>')
 	s += "</g>"
-	return '<svg xmlns="http://www.w3.org/2000/svg" width="52" height="%d" viewBox="0 0 52 %d">%s</svg>' % [ceili(length + 10.0), ceili(length + 10.0), s]
+	return s
+
+
+
+## The leg in two pieces joined at the knee (`rig.knee_y`, half way down): the thigh (hip pivot at (20, 6)) and the shin with its shoe
+## (pivot at the knee, `SHIN_PAD` below the top of its picture). The shin carries a round cap with the knee's crease so the bend stays
+## clean. Both are cut from the same drawing (`_leg_body`).
+func _thigh_svg(length: float) -> String:
+	var knee := roundf(length * 0.5)
+	var h := ceili(knee + 2.0)
+	var s := '<defs><clipPath id="th"><rect x="0" y="0" width="52" height="%s"/></clipPath></defs><g clip-path="url(#th)">%s</g>' % [knee + 1.0, _leg_body(length)]
+	return '<svg xmlns="http://www.w3.org/2000/svg" width="52" height="%d" viewBox="0 0 52 %d">%s</svg>' % [h, h, s]
+
+
+func _shin_svg(length: float) -> String:
+	var knee := roundf(length * 0.5)
+	var total := ceili(length + 10.0 - knee + SHIN_PAD)
+	var r := 9.0
+	var fill := "{leg}"
+	var line := "{leg_line}"
+	match look.legwear:
+		"socks":
+			fill = "{skin}"
+			line = "{skin_line}"
+		"tights":
+			pass
+		_:
+			r = 12.0
+	var s := '<defs><clipPath id="sh"><rect x="0" y="%s" width="52" height="%s"/></clipPath></defs>' % [knee, length + 12.0 - knee]
+	s += '<g transform="translate(0 %s)"><g clip-path="url(#sh)">%s</g>' % [SHIN_PAD - knee, _leg_body(length)]
+	s += _f('<circle cx="20" cy="%s" r="%s" fill="%s" stroke="%s" stroke-width="2.5"/>' % [knee, r, fill, line])
+	s += _f('<rect x="%s" y="%s" width="%s" height="%s" fill="%s"/>' % [20.0 - r + 1.5, knee - r - 1.0, 2.0 * r - 3.0, 2.0 * r + 2.4, fill])
+	if look.legwear == "socks":
+		s += '<ellipse cx="23" cy="%s" rx="3.4" ry="4.4" fill="#FFFFFF" opacity="0.2"/>' % (knee + 1.0)
+	else:
+		s += _f('<path d="M%s %s q%s 4.5 %s 0 M%s %s q%s 3 %s 0" stroke="%s" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>' % [
+			20.0 - r * 0.6, knee + 3.0, r * 0.6, r * 1.2, 20.0 - r * 0.45, knee + 9.0, r * 0.45, r * 0.9, line])
+	s += '</g>'
+	return '<svg xmlns="http://www.w3.org/2000/svg" width="52" height="%d" viewBox="0 0 52 %d">%s</svg>' % [total, total, s]
 
 
 func _backpack_svg() -> String:

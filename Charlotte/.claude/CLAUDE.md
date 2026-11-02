@@ -205,6 +205,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   would put it, the elbow slightly bent), `_finish_arms` (eases the elbow, picks the hand). Carried things may set meta `hands` (the hand shape; a cat:
   "open") and `keep_upright` (not mirrored); `hand_mode` forces the front hand's shape (a dog walker's "grip"). Riding: each shoulder slides forward along the chest (and the arm stretches a little if needed) so both hands land on the grip. Design sheet: `tools/arms.tscn`
   (`--set=0..3`, `--only=N`, `--zoom=`: standing/walking/running, gestures/pet/carry, chores, ages and sleeves).
+- Legs have knees: each leg is a thigh (hip pivot; `_leg_front`/`_leg_back`, `rotation` = hip angle) and a shin with its shoe (child at the knee,
+  `_shin_front`/`_shin_back`, `rotation` = knee flex, the lower leg folding back). `CharacterArt._leg_body` draws the whole leg once and
+  `_thigh_svg` / `_shin_svg` cut it at `rig.knee_y` (half the leg); the shin has a round cap with a knee crease so the bend stays clean (boots
+  start below the knee). `Character._knees` bends the swinging leg when walking (more when running), `_stance_drop` lowers the hips so the
+  lower foot stays on the ground; a lunge (petting) keeps both legs straight and symmetrical so both feet stay down; hop and exercise tuck the
+  knees; on a bike `_pedal_legs` solves thigh and shin to the pedal (IK).
 - `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through, breathing, soft shading by
   `shaders/character_shade.gdshader` (lit from the left, follows `facing`), hair strands clipped to each hairstyle (`CharacterArt._strands`), clothing folds
   (dress gathers and hem, top creases, elbow and knee creases), idle gestures when `fidgets` (wave, hop,
