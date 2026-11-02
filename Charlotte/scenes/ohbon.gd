@@ -183,6 +183,12 @@ func _build_aisles() -> void:
 	_put(ShopArt.spinner_rack(), 1450.0, 640.0, 0.95, "floor")
 	_put(ShopArt.gumball_machine(), 3680.0, 640.0, 0.9, "floor")
 	_put(ShopArt.water_cooler(), 3790.0, 640.0, 0.95, "floor")
+	# Neat wall displays over the bare stretches: lottery poster and a tidy notice board above the chips, two framed posters
+	# above the coffee corner.
+	_put(ShopArt.lotto_poster(), CHIPS_X + 70.0, 330.0, 0.75, "wall")
+	_put(ShopArt.bulletin_board(), CHIPS_X + 215.0, 300.0, 0.8, "wall")
+	for i in 2:
+		_put(InteriorArt.poster(i + 1), COFFEE_X + 20.0 + i * 95.0, 230.0, 0.52, "wall")
 	_put(ShopArt.exit_sign(), SHOP.y - 150.0, 158.0)
 	_glow(Vector2(SHOP.y - 110.0, 138.0), 70.0, Color(0.3, 1.0, 0.5, 0.25))
 
