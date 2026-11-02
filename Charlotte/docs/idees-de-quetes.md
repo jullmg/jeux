@@ -7,7 +7,7 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 1. **Trouver les morceaux de pizza cachés par un écureuil** (première quête de la liste)
 2. **Aller faire du jogging avec papa**
 3. **Aller acheter des chips crème sure et oignons au dépanneur** en bas de la rue, sur Dandurand
-   (le dépanneur Xin-Xin vend déjà ces chips : présentoir `chips_gondola`, saveur `creme` dans `ShopArt.CHIPS`)
+   (le dépanneur Xin-Xin vend déjà ces chips, de marque **Ruffles** : présentoir `chips_gondola`, saveur `creme` dans `ShopArt.CHIPS`)
 
 ## Notes de départ (à préciser avec Julien avant de programmer)
 

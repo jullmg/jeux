@@ -56,7 +56,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   generator kinds `corner_holt` (`coin_holt`: long brown three-storey, stepped white lintels, diamonds, the beige
   corrugated annex with its shingle awning, the red corner window), `ohbon` (dépanneur Oh Bon! on Holt: red storefront,
   checkerboard under the white stairs, canopy with red fascia, light-box sign; "OH BON!" / "DÉPANNEUR" as labels and
-  the red "OH / BON!" neon in the big window, a generic "BIÈRE" neon, in `holt.gd`, no logos; `world/neon_sign.gd`,
+  the red "OH / BON!" neon in the big window, a generic "BIÈRE" neon, in `holt.gd`, no real logos on it yet; `world/neon_sign.gd`,
   `NeonSign`: glowing, flickering window neon) and the Holt-side
   `ruelle` entrance (iron stair, conduits, tags, garage door, one-way sign, the post for the "RALENTISSEZ" sign).
 - Vista detail (`CrossStreet`): street trees drawn from two `PropArt.tree` textures (`_tree_tex`, own RNG) in their pits,
@@ -140,8 +140,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   black hair, warm light skin, dark eyes; on a raised floor behind the counter) and a wall of shelves behind her, a real-time
   clock, a specials board, the candy wall, low gondolas mid-floor, bread rack, coffee/hot chocolate corner, the sloche
   machine (animated swirls; Québec word "sloche", not "barbotine"), freezer, drinks fridges, dairy cooler with 4 L milk
-  bags, stockroom door, security mirror. Furniture from `world/shop_art.gd` (`ShopArt`): original artwork, never real logos;
-  real names only as plain text labels ("LOTO-QUÉBEC", "SLUSH PUPPIE"). Checkered floor
+  bags, stockroom door, security mirror. Furniture from `world/shop_art.gd` (`ShopArt`): drawn artwork with the **real
+  logos** stamped on it (`ShopArt._stamped`, files in `art/brands/`: Québon on the milk cartons, Ruffles and Lay's on the
+  chip bags, Loto-Québec on the poster, Slush Puppie on the machine). Checkered floor
   and suspended ceiling (`RoomShell.floor_style = "tiles"`, `ceiling_style = "drop"`); blurred "shelf" foreground. Click
   the shopkeeper to say hello; candy, sloche, coffee corner, freezer, fridges or dairy to buy something.
   `Interior._say(who, text)` (speech bubble) and `Interior._treat(picture, text)` (what Charlotte gets) are reusable.
@@ -339,6 +340,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 ## Conventions
 
 - Art is made procedurally in code: SVG strings or `_draw()`. There are no hand-drawn sprites except the logo.
+- **Real brands and their logos are allowed** (Julien's decision, 2026-11-01; it replaces the old "original artwork, never real
+  logos" rule). Put the logo file in `art/brands/` (a transparent PNG or SVG, cropped from the brand's site, Wikimedia Commons
+  or a product photo such as Open Food Facts), write where it comes from in `art/brands/SOURCES.md`, and lay it over the drawn
+  art with `ShopArt._stamped(w, h, svg, [[file, Rect2i]])` (or as a Sprite/label in a scene). Chips: crème sure et oignons is
+  always **Ruffles**. Not covered by this: TV shows and characters stay original (see the TV catalogue).
 - Performance: a `_draw()` node spanning the whole street is never culled and redraws every command each frame, and every
   `draw_set_transform` breaks batching. Thousands of small shapes (leaves, grit) therefore go into one vertex-coloured mesh
   (`Street._Batch`); before that the street ran at about 35 fps on an M1. Check with

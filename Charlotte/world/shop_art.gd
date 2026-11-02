@@ -12,6 +12,44 @@ static func tex(w: float, h: float, body: String) -> ImageTexture:
 	return InteriorArt.tex(w, h, body)
 
 
+## Real logos (art/brands/, see SOURCES.md) laid over the drawn picture: each stamp is [file name, Rect2i]; the logo is
+## scaled to fit its rectangle (keeping its shape) and centred in it.
+static func _stamped(w: float, h: float, body: String, stamps: Array) -> ImageTexture:
+	var base := tex(w, h, body)
+	if stamps.is_empty():
+		return base
+	var img := base.get_image()
+	for st in stamps:
+		var logo := _logo(str(st[0]))
+		if logo == null:
+			continue
+		var r: Rect2i = st[1]
+		var k := minf(float(r.size.x) / logo.get_width(), float(r.size.y) / logo.get_height())
+		var sw := maxi(1, int(logo.get_width() * k))
+		var sh := maxi(1, int(logo.get_height() * k))
+		var scaled := logo.duplicate() as Image
+		scaled.resize(sw, sh, Image.INTERPOLATE_LANCZOS)
+		img.blend_rect(scaled, Rect2i(0, 0, sw, sh), r.position + Vector2i((r.size.x - sw) / 2, (r.size.y - sh) / 2))
+	img.generate_mipmaps()
+	return ImageTexture.create_from_image(img)
+
+
+static var _logo_cache := {}
+
+
+## A brand logo as an image (cached), from res://art/brands/<name>.
+static func _logo(name: String) -> Image:
+	if not _logo_cache.has(name):
+		var t := load("res://art/brands/" + name) as Texture2D
+		var img: Image = null
+		if t:
+			img = t.get_image()
+			img.decompress()
+			img.convert(Image.FORMAT_RGBA8)
+		_logo_cache[name] = img
+	return _logo_cache[name]
+
+
 static func _bright(rng: RandomNumberGenerator) -> String:
 	return ["#E04F5F", "#FFD23F", "#4FA3E0", "#7CCB5A", "#FF8A3D", "#C084FC", "#FF7BA3", "#1FB5C4"][rng.randi_range(0, 7)]
 
@@ -382,29 +420,31 @@ static func halloween_display() -> ImageTexture:
 	return tex(200, 140, s)
 
 
-## Canvas 160x200: a lottery poster: a deep blue field, a big golden ball with shine, stars and a ribbon (the word
-## is a label in the game).
+## Canvas 160x200: the Loto-Québec poster: a deep blue field, a white banner with the real logo, a big golden ball with
+## shine, stars and a red ribbon.
 static func lotto_poster() -> ImageTexture:
 	var s := _defs()
 	s += '<rect x="2" y="2" width="156" height="196" fill="#1D4F91" stroke="#102A56" stroke-width="3"/>'
 	s += '<rect x="8" y="8" width="144" height="184" fill="none" stroke="#FFD23F" stroke-width="1.5" opacity="0.8"/>'
 	s += '<path d="M2 2 H158 L120 80 L2 120 Z" fill="#FFFFFF" opacity="0.07"/>'
-	s += '<circle cx="80" cy="122" r="46" fill="#FFD23F" stroke="#C99410" stroke-width="3"/><circle cx="80" cy="122" r="46" fill="url(#cyl)"/>'
-	s += '<circle cx="64" cy="102" r="12" fill="#FFFFFF" opacity="0.5"/><circle cx="80" cy="122" r="30" fill="none" stroke="#C99410" stroke-width="2" opacity="0.6"/>'
-	for st in [[30, 54], [130, 44], [24, 172], [138, 174], [80, 34]]:
+	s += '<rect x="14" y="14" width="132" height="44" rx="6" fill="#FFFFFF" stroke="#C9D2DC" stroke-width="1.5"/>'
+	s += '<circle cx="80" cy="128" r="42" fill="#FFD23F" stroke="#C99410" stroke-width="3"/><circle cx="80" cy="128" r="42" fill="url(#cyl)"/>'
+	s += '<circle cx="66" cy="110" r="11" fill="#FFFFFF" opacity="0.5"/><circle cx="80" cy="128" r="28" fill="none" stroke="#C99410" stroke-width="2" opacity="0.6"/>'
+	for st in [[24, 82], [136, 80], [24, 170], [138, 172]]:
 		s += '<path d="M%s %s l4 9 l10 1 l-8 6 l3 10 l-9 -5 l-9 5 l3 -10 l-8 -6 l10 -1 z" fill="#FFF3B0"/>' % [st[0], st[1] - 10]
-	s += '<rect x="2" y="170" width="156" height="14" fill="#C8202A"/>'
-	return tex(160, 200, s)
+	s += '<rect x="2" y="176" width="156" height="14" fill="#C8202A"/>'
+	return _stamped(160, 200, s, [["loto_quebec_logo.png", Rect2i(20, 17, 120, 38)]])
 
 
-## The classic chip flavours, in the order of the display: id, the name on the shelf, the bag's colour, its accent.
+## The classic chip flavours, in the order of the display: id, the brand's real logo (crème sure et oignons is Ruffles, as the
+## real ones are; ketchup, barbecue, nature and sel et vinaigre are Lay's), the name on the shelf, the bag's colour, its accent.
 const CHIPS := [
-	{"id": "creme", "name": "Crème sure et oignons", "short": "CRÈME SURE\n& OIGNONS", "bag": "#4E9A52", "accent": "#F4F2E6", "said": "des chips à la crème sure et oignons"},
-	{"id": "ketchup", "name": "Ketchup", "short": "KETCHUP", "bag": "#D8352E", "accent": "#FFD23F", "said": "des chips au ketchup"},
-	{"id": "bbq", "name": "Barbecue", "short": "BARBECUE", "bag": "#8E3A22", "accent": "#FF8A3D", "said": "des chips barbecue"},
-	{"id": "nature", "name": "Nature", "short": "NATURE", "bag": "#F2C230", "accent": "#FFF3B0", "said": "des chips nature"},
-	{"id": "vinaigre", "name": "Sel et vinaigre", "short": "SEL &\nVINAIGRE", "bag": "#2E86C1", "accent": "#E8F4FA", "said": "des chips sel et vinaigre"},
-	{"id": "fromage", "name": "Fromage", "short": "FROMAGE", "bag": "#F08A24", "accent": "#FFE066", "said": "des chips au fromage"},
+	{"id": "creme", "logo": "ruffles_logo.png", "name": "Crème sure et oignons", "short": "CRÈME SURE\n& OIGNONS", "bag": "#4E9A52", "accent": "#F4F2E6", "said": "des chips à la crème sure et oignons"},
+	{"id": "ketchup", "logo": "lays_logo.svg", "name": "Ketchup", "short": "KETCHUP", "bag": "#D8352E", "accent": "#FFD23F", "said": "des chips au ketchup"},
+	{"id": "bbq", "logo": "lays_logo.svg", "name": "Barbecue", "short": "BARBECUE", "bag": "#8E3A22", "accent": "#FF8A3D", "said": "des chips barbecue"},
+	{"id": "nature", "logo": "lays_logo.svg", "name": "Nature", "short": "NATURE", "bag": "#F2C230", "accent": "#FFF3B0", "said": "des chips nature"},
+	{"id": "vinaigre", "logo": "lays_logo.svg", "name": "Sel et vinaigre", "short": "SEL &\nVINAIGRE", "bag": "#2E86C1", "accent": "#E8F4FA", "said": "des chips sel et vinaigre"},
+	{"id": "fromage", "logo": "ruffles_logo.png", "name": "Fromage", "short": "FROMAGE", "bag": "#F08A24", "accent": "#FFE066", "said": "des chips au fromage"},
 ]
 
 
@@ -445,11 +485,16 @@ static func _chip_bag(x: float, y: float, w: float, h: float, f: int) -> String:
 		x + 1, y + 5, x + w * 0.17, y + 1, x + w * 0.33, y + 5, x + w * 0.5, y + 1, x + w * 0.67, y + 5, x + w * 0.83, y + 1, x + w - 1, y + 5, x + w, y + h - 4, x + w - 2, y + h, x + w / 2, y + h + 3, x + 2, y + h, c]
 	s += '<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f L%.1f %.1f L%.1f %.1f Z" fill="%s" opacity="0.95"/>' % [x + 1, y + h * 0.62, x + w * 0.5, y + h * 0.45, x + w, y + h * 0.62, x + w, y + h - 2, x + 1, y + h - 2, a]
 	s += '<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="%s" stroke-width="%.1f" fill="none" opacity="0.7"/>' % [x + 1, y + h * 0.58, x + w * 0.5, y + h * 0.41, x + w, y + h * 0.58, a, h * 0.03]
-	s += _chip_icon(f, x + w / 2, y + h * 0.36, w * 0.8)
+	s += _chip_icon(f, x + w / 2, y + h * 0.6, w * 0.5)
 	s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#F7D56A" opacity="0.95" stroke="#C99410" stroke-width="0.6"/>' % [x + w / 2, y + h * 0.8, w * 0.22, w * 0.15]
 	s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="url(#cyl)"/>' % [x, y + 4, w, h - 4]
 	s += '<path d="M%.1f %.1f q%.1f %.1f 0 %.1f" stroke="#FFFFFF" stroke-width="%.1f" opacity="0.55" fill="none" stroke-linecap="round"/>' % [x + w * 0.16, y + 10, w * 0.04, h * 0.25, h * 0.04, w * 0.08]
 	return s
+
+
+## Where a bag's brand logo goes (x, y, w, h as given to `_chip_bag`).
+static func _chip_logo(f: int, x: float, y: float, w: float, h: float) -> Array:
+	return [CHIPS[f].logo, Rect2i(int(x) + 2, int(y) + 7, int(w) - 4, int(h * 0.3))]
 
 
 ## Canvas 440x240: the chips gondola: a header with the six classic flavours' colours (names are labels in the game),
@@ -462,23 +507,25 @@ static func chips_gondola() -> ImageTexture:
 		s += '<rect x="%d" y="3" width="70" height="34" fill="%s" stroke="#FFFFFF" stroke-width="1.5"/>' % [3 + f * 72, CHIPS[f].bag]
 		s += '<rect x="%d" y="3" width="70" height="9" fill="#FFFFFF" opacity="0.3"/>' % (3 + f * 72)
 	s += '<rect x="0" y="40" width="440" height="6" fill="#C8202A"/>'
+	var stamps := []
 	for row in 3:
 		var y := 50.0 + row * 62.0
 		for f in 6:
 			for k in 2:
 				s += _chip_bag(10 + f * 72 + k * 31, y + 4, 28, 50, f)
+				stamps.append(_chip_logo(f, 10 + f * 72 + k * 31, y + 4, 28, 50))
 		s += _lip(4, y + 56, 432)
 		for f in 6:
 			s += _tag(14 + f * 72 + 22, y + 59, f == row + 2 and row != 1)
 	s += '<rect x="0" y="228" width="440" height="12" fill="#6E6A62"/>'
 	s += '<rect x="0" y="40" width="5" height="190" fill="#000000" opacity="0.12"/><rect x="435" y="40" width="5" height="190" fill="#000000" opacity="0.2"/>'
-	return tex(440, 240, s)
+	return _stamped(440, 240, s, stamps)
 
 
 ## Canvas 64x64: a bag of chips of flavour `f` (what Charlotte gets).
 static func chip_treat(f: int) -> ImageTexture:
 	var s := _defs() + _chip_bag(12, 6, 40, 52, f)
-	return tex(64, 64, s)
+	return _stamped(64, 64, s, [_chip_logo(f, 12, 6, 40, 52)])
 
 
 ## Canvas 38x170: a clip strip of mini bags of chips hanging from a shelf.
@@ -573,16 +620,22 @@ static func gondola() -> ImageTexture:
 	return tex(440, 200, s)
 
 
-## A one-litre milk carton (a "pinte"): gable top with its fold, white with a blue band, cow spots and a screw cap.
-## Original design; the name goes on it as a label in the game.
+## A one-litre milk carton (a "pinte") like the real Québon 3,25 % one: red, a white panel for the logo on the upper front,
+## a lighter band, white hills and a little tree at the bottom, a screw cap on the gable top. (The logo is stamped on
+## by the caller.)
 static func _carton(x: float, y: float, w: float, h: float) -> String:
-	var s := '<path d="M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" fill="#EEF3F7" stroke="#7E95A8" stroke-width="1.6" stroke-linejoin="round"/>' % [
-		x, y + h * 0.2, x + w * 0.3, y, x + w * 0.7, y, x + w, y + h * 0.2, x + w, y + h * 0.2]
-	s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#FBFDFF" stroke="#7E95A8" stroke-width="1.6"/>' % [x, y + h * 0.2, w, h * 0.8]
-	s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#2E86C1"/><rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#FFFFFF" opacity="0.25"/>' % [x, y + h * 0.5, w, h * 0.22, x, y + h * 0.5, w, h * 0.05]
-	for sp in [[0.2, 0.3, 0.1], [0.62, 0.36, 0.12], [0.4, 0.8, 0.09], [0.8, 0.85, 0.1], [0.15, 0.9, 0.07]]:
-		s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#2B3A55" opacity="0.85"/>' % [x + w * sp[0], y + h * sp[1], w * sp[2], w * sp[2] * 0.7]
-	s += '<path d="M%.1f %.1f L%.1f %.1f" stroke="#7E95A8" stroke-width="1.6"/><rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="1.5" fill="#FFD23F" stroke="#C99410" stroke-width="1"/>' % [x + w * 0.5, y, x + w * 0.5, y + h * 0.2, x + w * 0.4, y - h * 0.04, w * 0.2, h * 0.06]
+	var s := '<path d="M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" fill="#FBFBFB" stroke="#8E1A22" stroke-width="1.6" stroke-linejoin="round"/>' % [
+		x, y + h * 0.2, x + w * 0.28, y, x + w * 0.72, y, x + w, y + h * 0.2]
+	s += '<path d="M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" fill="#C8202A" opacity="0.9"/>' % [x + w * 0.05, y + h * 0.19, x + w * 0.3, y + h * 0.03, x + w * 0.7, y + h * 0.03, x + w * 0.95, y + h * 0.19]
+	s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#C8202A" stroke="#8E1A22" stroke-width="1.6"/>' % [x, y + h * 0.2, w, h * 0.8]
+	s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#FFFFFF"/>' % [x + w * 0.02, y + h * 0.21, w * 0.96, h * 0.25]
+	# The sun's rays and the "3,25" banner.
+	s += '<path d="M%.1f %.1f L%.1f %.1f L%.1f %.1f Z" fill="#FFD23F" opacity="0.8"/>' % [x + w * 0.5, y + h * 0.78, x + w * 0.2, y + h * 0.6, x + w * 0.8, y + h * 0.6]
+	s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#B01820"/><rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#FFFFFF" opacity="0.9"/>' % [x + w * 0.3, y + h * 0.5, w * 0.4, h * 0.11, x + w * 0.35, y + h * 0.54, w * 0.3, h * 0.03]
+	# Hills and a little tree, in white and pale pink.
+	s += '<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f L%.1f %.1f L%.1f %.1f Z" fill="#F4A0A6"/>' % [x, y + h * 0.82, x + w * 0.5, y + h * 0.66, x + w, y + h * 0.84, x + w, y + h, x, y + h]
+	s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#FFFFFF" opacity="0.85"/><rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#FFFFFF" opacity="0.85"/>' % [x + w * 0.22, y + h * 0.86, w * 0.1, x + w * 0.21, y + h * 0.9, w * 0.02, h * 0.08]
+	s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="1.5" fill="#FFFFFF" stroke="#C9C2B4" stroke-width="1"/>' % [x + w * 0.4, y - h * 0.035, w * 0.2, h * 0.05]
 	s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="url(#cyl)" opacity="0.8"/>' % [x, y + h * 0.2, w, h * 0.8]
 	return s
 
@@ -592,6 +645,7 @@ static func _carton(x: float, y: float, w: float, h: float) -> String:
 static func milk_cooler() -> ImageTexture:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 9
+	var stamps := []
 	var s := _defs()
 	s += '<rect x="0" y="0" width="440" height="480" fill="url(#metal)" stroke="#6E757D" stroke-width="3"/>'
 	s += '<rect x="8" y="6" width="424" height="38" rx="4" fill="#3B8FD0" stroke="#1D5E96" stroke-width="2"/><rect x="12" y="9" width="416" height="12" rx="4" fill="#FFFFFF" opacity="0.3"/>'
@@ -610,6 +664,7 @@ static func milk_cooler() -> ImageTexture:
 					x += 56.0
 				1:
 					s += _carton(x, y + 10, 32, 62)
+					stamps.append(["quebon_logo.png", Rect2i(int(x) + 2, int(y) + 10 + 15, 28, 9)])
 					x += 38.0
 				2:
 					# Yogurt cups with foil lids.
@@ -634,7 +689,7 @@ static func milk_cooler() -> ImageTexture:
 	s += '<rect x="14" y="442" width="412" height="30" fill="#4A525A"/>'
 	for x in range(22, 420, 10):
 		s += '<rect x="%d" y="448" width="4" height="18" fill="#2C3238"/>' % x
-	return tex(440, 480, s)
+	return _stamped(440, 480, s, stamps)
 
 
 ## Canvas 220x320: a slush machine on its stainless cabinet: two clear bowls (blue, red) with domed lids and taps, a lit
@@ -657,7 +712,7 @@ static func slush_machine() -> ImageTexture:
 	s += '<rect x="6" y="186" width="208" height="10" rx="3" fill="url(#metal)" stroke="#7E858D" stroke-width="1.5"/>'
 	for i in 3:
 		s += '<path d="M%d 306 l3 -34 h22 l3 34 z" fill="#FBFDFF" stroke="#9AA3AC" stroke-width="1.2"/><rect x="%d" y="272" width="28" height="5" fill="%s" opacity="0.9"/>' % [150 + i * 20 - 40 + 40, 150 + i * 20 - 40 + 40, ["#3D7FD0", "#E0303A", "#FFD23F"][i]]
-	return tex(220, 320, s)
+	return _stamped(220, 320, s, [["slush_puppie_logo.png", Rect2i(26, 17, 168, 20)]])
 
 
 ## Canvas 280x280: the coffee and hot-chocolate corner: cabinet, two insulated dispensers with taps and a drip tray,
@@ -807,11 +862,9 @@ static func treat(kind: String) -> ImageTexture:
 	return tex(64, 64, s)
 
 
-## Canvas 84x140: the pint of milk Charlotte carries home for Mom: a one-litre carton, held up in her arms (its name is a
-## label added by the game).
+## Canvas 84x140: the pint of milk Charlotte carries home for Mom: a one-litre Québon carton (real logo), held up in her arms.
 static func milk_pint() -> ImageTexture:
-	var s := _defs() + _carton(6, 8, 72, 126)
-	return tex(84, 140, s)
+	return _stamped(84, 140, _defs() + _carton(6, 8, 72, 126), [["quebon_logo.png", Rect2i(10, 36, 64, 26)]])
 
 
 ## Canvas 400x130: a high shelf along the wall, stocked with bulk goods: toilet paper and paper towel packs, cases of
