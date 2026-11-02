@@ -299,7 +299,7 @@ func _build_backs() -> void:
 	for o in _openings:
 		if o.kind != "lane":
 			continue
-		var sprite := _sprite(LaneArt.junction(_rng, JUNCTION_W), 1.0)
+		var sprite := _sprite(LaneArt.junction(_rng, JUNCTION_W, lane == "middle"), 1.0)
 		sprite.position = Vector2(o.x - JUNCTION_W / 2.0, FENCE_Y - LaneArt.H)
 		add_child(sprite)
 
@@ -451,6 +451,7 @@ class _Ground:
 	var hopscotch := -1.0
 	# Where an avenue crosses: no grass along a fence there.
 	var open: Array[Vector2] = []
+	var _mesh: ArrayMesh
 
 	func _draw() -> void:
 		var rng := RandomNumberGenerator.new()
@@ -474,29 +475,55 @@ class _Ground:
 			pts.append(Vector2(x, 660.0 + sin(x * 0.013) * 4.0 + rng.randf_range(-1.5, 1.5)))
 			x += 18.0
 		draw_polyline(pts, concrete.darkened(0.35), 2.0)
+		# Thousands of little shapes: one mesh (see Street._Batch).
+		var bits := Street._Batch.new()
+		var greens: Array[Color] = [weed, weed.lightened(0.18), weed.darkened(0.22)]
 		for p in pts:
-			if rng.randf() < 0.5:
-				draw_colored_polygon(PackedVector2Array([p + Vector2(-5, 1), p + Vector2(rng.randf_range(-3, 3), -rng.randf_range(6, 13)), p + Vector2(5, 1)]), weed)
-		# Grass tufts along the fences.
+			if rng.randf() < 0.62:
+				_clump(bits, rng, p + Vector2(rng.randf_range(-8.0, 8.0), 0), rng.randi_range(4, 7), 11.0, greens, 0.8)
+			if rng.randf() < 0.12:
+				_clump(bits, rng, p + Vector2(rng.randf_range(-6.0, 6.0), 1.0), 9, 17.0, greens, 0.5)
+		# Grass along the foot of the fences, wild flowers or seed heads here and there.
+		var dots: Array = [Color("#F4D03F"), Color("#FFFFFF"), Color("#F7C6D9")] if Season.current in ["spring", "summer"] else [Color("#A8863A"), Color("#8E7A50")]
 		x = 0.0
 		while x < width:
-			var tuft := PackedVector2Array([Vector2(x - 8, 604), Vector2(x + rng.randf_range(-4, 4), 590 - rng.randf_range(0, 12)), Vector2(x + 8, 604)])
+			var at := Vector2(x, 604.0 + rng.randf_range(-1.0, 3.0))
+			var tall := rng.randf_range(12.0, 26.0)
+			var blades := rng.randi_range(6, 11)
+			var flower := rng.randf() < 0.1
 			var on_avenue := false
 			for gap in open:
 				on_avenue = on_avenue or (x >= gap.x and x <= gap.y)
 			if not on_avenue:
-				draw_colored_polygon(tuft, weed.darkened(0.1))
-			x += rng.randf_range(10.0, 40.0)
-		# Leaves, petals or nothing, by the season.
+				_clump(bits, rng, at, blades, tall, greens, 1.0)
+				if flower and not snow:
+					bits.circle(Transform2D(0.0, at + Vector2(rng.randf_range(-6.0, 6.0), -tall)), 2.4, dots[rng.randi_range(0, dots.size() - 1)], 6)
+			x += rng.randf_range(16.0, 44.0)
+		# Leaves, petals or nothing, by the season: strewn over the lane, drifted along the fences.
 		var colors := Season.litter()
-		for i in int(width / 8.0 * Season.litter_amount()):
-			var c := Vector2(rng.randf_range(0, width), rng.randf_range(606, 718))
+		var leaf := func(c: Vector2, r: float, tone: Color) -> void:
 			var a := rng.randf_range(0, TAU)
-			var r := rng.randf_range(3.0, 6.0)
-			draw_colored_polygon(PackedVector2Array([c + Vector2.from_angle(a) * r, c + Vector2.from_angle(a + 1.9) * r * 0.5,
-				c + Vector2.from_angle(a + PI) * r, c + Vector2.from_angle(a - 1.9) * r * 0.5]), colors[i % colors.size()])
+			var q := [c + Vector2.from_angle(a) * r, c + Vector2.from_angle(a + 1.9) * r * 0.5, c + Vector2.from_angle(a + PI) * r, c + Vector2.from_angle(a - 1.9) * r * 0.5]
+			bits._tri(q[0], q[1], q[2], tone)
+			bits._tri(q[0], q[2], q[3], tone)
+		for i in int(width / 8.0 * Season.litter_amount()):
+			leaf.call(Vector2(rng.randf_range(0, width), rng.randf_range(606, 718)), rng.randf_range(3.0, 6.0), colors[i % colors.size()])
+		x = rng.randf_range(0.0, 200.0)
+		while x < width:
+			for i in int(26.0 * Season.litter_amount()):
+				leaf.call(Vector2(x + rng.randf_range(-60.0, 60.0), 605.0 + absf(rng.randfn(0.0, 7.0))), rng.randf_range(3.0, 6.5), colors[i % colors.size()])
+			x += rng.randf_range(180.0, 420.0)
+		_mesh = bits.draw(self)
 		if not snow and hopscotch >= 0.0:
 			_hopscotch(Vector2(hopscotch - 170.0, 676.0))
+
+	# A clump rooted at `at`: `count` blades (`flat` squashes them toward the ground, a rosette).
+	func _clump(bits: Street._Batch, rng: RandomNumberGenerator, at: Vector2, count: int, tall: float, greens: Array[Color], flat: float) -> void:
+		for i in count:
+			var dir := Vector2.from_angle(-PI / 2.0 + rng.randf_range(-1.1, 1.1))
+			var side := dir.orthogonal() * rng.randf_range(0.9, 1.7)
+			var tip := at + Vector2(dir.x, dir.y * flat) * tall * rng.randf_range(0.55, 1.0)
+			bits._tri(at + side, at - side, tip, greens[rng.randi_range(0, greens.size() - 1)])
 
 	# Chalk squares along the lane: 1, 2, 3, 4|5, 6, 7|8 (side by side across the lane: one above the other
 	# here), then the CIEL half-circle; a chalk sun beside it.

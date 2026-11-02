@@ -113,7 +113,10 @@ static func back(rng: RandomNumberGenerator, w: float, own := false) -> Array:
 			s += _rect(x, rail + 5, 3, 31, wood)
 			x += 8.0
 		if rng.randf() < 0.3 and f > 0:
-			s += '<ellipse cx="%.1f" cy="%.1f" rx="11" ry="9" fill="%s"/>' % [g0 + (g1 - g0) * 0.7, rail - 4, PropArt._pick(rng, ["#C0392B", "#E3A33A", "#3E7A30"])]
+			# A pot of something on the railing.
+			var pot := Vector2(g0 + (g1 - g0) * 0.7, rail - 2.0)
+			s += _foliage(rng, pot + Vector2(0, -12), Vector2(13, 10), shrub_colors(), 4.0, 16)
+			s += _rect(pot.x - 8, pot.y - 8, 16, 10, "#B5603F")
 		if f == floors - 1:
 			# The top gallery's little roof, and the clothesline pulley on its outer post.
 			s += _rect(g0 - 6, py - fh + 10, g1 - g0 + 12, 8, "#55585C")
@@ -170,6 +173,10 @@ static func _spiral(x: float, top: float, bottom: float, turns: int) -> String:
 static func front(rng: RandomNumberGenerator, w: float, kind: String, own := false) -> ImageTexture:
 	var vines := vine_colors()
 	var s := ""
+	# A hedge or big shrub showing over the fence from the yard.
+	if rng.randf() < 0.65 and not own:
+		var rx := rng.randf_range(60.0, 96.0)
+		s += _foliage(rng, Vector2(rng.randf_range(rx + 6.0, w - rx - 6.0), H - 190), Vector2(rx, rng.randf_range(36.0, 56.0)), shrub_colors(), 8.0, 70)
 	if kind in ["picket", "chainlink", "garden"]:
 		s += _yard(rng, w, own)
 	match kind:
@@ -201,7 +208,14 @@ static func front(rng: RandomNumberGenerator, w: float, kind: String, own := fal
 	# Creeper over the tops (fences, garages) and down their faces.
 	var reach := 3 if kind in ["tole", "shed", "boards"] else 1
 	for i in rng.randi_range(1, reach + 1):
-		s += _vine(rng, rng.randf_range(10.0, w - 60.0), rng.randf_range(60.0, 140.0), H - (230.0 if kind == "tole" else 170.0), vines)
+		var vw := rng.randf_range(60.0, 140.0)
+		s += _vine(rng, rng.randf_range(10.0, w - vw - 10.0), vw, H - {"tole": 230.0, "garage": 226.0, "shed": 165.0}.get(kind, 170.0), vines)
+	# What grows along the foot of the fence: a shrub spilling toward the lane, clumps of grass.
+	if rng.randf() < 0.55 and kind != "garden":
+		var rx := rng.randf_range(38.0, 62.0)
+		s += _foliage(rng, Vector2(rng.randf_range(rx + 4.0, w - rx - 4.0), H - 30), Vector2(rx, rng.randf_range(26.0, 40.0)), shrub_colors(), 7.0, 46)
+	for i in 3:
+		s += _grass(rng, Vector2(rng.randf_range(14.0, w - 14.0), H - 2), rng.randf_range(20.0, 34.0))
 	# Bins against the fence: blue recycling, sometimes the brown compost bin.
 	if kind != "garden" and rng.randf() < 0.45:
 		var bx := rng.randf_range(20.0, w - 70.0)
@@ -216,9 +230,11 @@ static func front(rng: RandomNumberGenerator, w: float, kind: String, own := fal
 static func _yard(rng: RandomNumberGenerator, w: float, own: bool) -> String:
 	var grass: String = {"spring": "#8FBF5A", "summer": "#6DA544", "autumn": "#9A9A4A", "winter": "#F2F5F7"}[Season.current]
 	var s := _rect(0, H - 70, w, 70, grass)
-	for i in 6:
-		var x := rng.randf_range(10.0, w - 30.0)
-		s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="%s"/>' % [x, H - 72, rng.randf_range(18, 34), rng.randf_range(14, 24), _dark(grass, 0.2)]
+	for i in 3:
+		var rx := rng.randf_range(30.0, 46.0)
+		s += _foliage(rng, Vector2(rng.randf_range(rx + 4.0, w - rx - 4.0), H - 84), Vector2(rx, rng.randf_range(20.0, 30.0)), shrub_colors(), 6.5, 36)
+	for i in 5:
+		s += _grass(rng, Vector2(rng.randf_range(10.0, w - 10.0), H - rng.randf_range(4.0, 40.0)), 16.0, 6)
 	if own:
 		# Her swing set: an A-frame and a yellow seat.
 		var x := w * 0.62
@@ -233,7 +249,9 @@ static func _yard(rng: RandomNumberGenerator, w: float, own: bool) -> String:
 			for i in 4:
 				var x := w * 0.2 + i * 34.0
 				s += _line(Vector2(x, H - 20), Vector2(x, H - 110), "#8E6A44", 3.0)
-				s += '<ellipse cx="%.1f" cy="%.1f" rx="14" ry="22" fill="%s"/>' % [x, H - 70, "#4F8E3A" if not Season.is_winter() else "#8E7A60"]
+				s += _foliage(rng, Vector2(x, H - 72), Vector2(15, 26), ["#3E7A30", "#4F8E3A", "#6DA544"] if not Season.is_winter() else [], 5.0, 22)
+				if Season.current in ["summer", "autumn"]:
+					s += '<circle cx="%.1f" cy="%.1f" r="3.5" fill="#D9482B"/>' % [x + 5.0, H - 66]
 		else:
 			var x := w * 0.55
 			s += _poly([Vector2(x, H - 110), Vector2(x + 14, H - 110), Vector2(x + 90, H - 20), Vector2(x + 70, H - 20)], "#E74C3C")
@@ -386,11 +404,22 @@ static func _planters(rng: RandomNumberGenerator, w: float) -> String:
 		var c := "#9C7A55"
 		for k in 4:
 			s += _rect(x, H - 72 + k * 17, bw, 16, _light(c, rng.randf_range(-0.1, 0.1)), 'stroke="%s" stroke-width="1"' % _dark(c, 0.3))
-		if not Season.is_winter():
-			for i in 7:
-				var fx := x + 10 + i * (bw - 20) / 6.0
-				s += _line(Vector2(fx, H - 72), Vector2(fx + rng.randf_range(-6, 6), H - 72 - rng.randf_range(20, 50)), "#4F8E3A", 3.0)
-				s += '<circle cx="%.1f" cy="%.1f" r="6" fill="%s"/>' % [fx, H - 72 - rng.randf_range(30, 55), PropArt._pick(rng, ["#F1C40F", "#E74C3C", "#9B59B6", "#FFFFFF", "#E67E22"])]
+		# Leaves over the box's rim, flowers on stems above them (this season's; dry stalks in winter).
+		var bloom_colors: Array = {"spring": ["#E8476A", "#F1C40F", "#FF8FB1", "#FFFFFF", "#C45BD6"], "summer": ["#F1C40F", "#E74C3C", "#9B59B6", "#FFFFFF", "#E67E22"],
+			"autumn": ["#C9562E", "#E3A33A", "#8E3A5E", "#D9682B", "#F1C40F"], "winter": []}[Season.current]
+		var plants := shrub_colors()
+		if not plants.is_empty():
+			plants = ["#4F8E3A", "#3E7A30", "#6DA544"] if Season.current != "autumn" else ["#5E7A30", "#7E8A3A", "#8E7A2E"]
+		s += _foliage(rng, Vector2(x + bw / 2.0, H - 80), Vector2(bw * 0.5, 15), plants, 7.0, int(bw / 2.5))
+		for i in 7:
+			var fx := x + 10 + i * (bw - 20) / 6.0
+			var tip := Vector2(fx + rng.randf_range(-6, 6), H - 72 - rng.randf_range(30, 58))
+			var bloom := _tone(rng, bloom_colors)
+			s += _line(Vector2(fx, H - 72), tip, "#4F8E3A" if bloom != "" else "#8E7A60", 2.0)
+			if bloom != "":
+				s += _bloom(tip, rng.randf_range(4.5, 6.5), bloom)
+			else:
+				rng.randf()
 		x += bw + 30.0
 	# The bench: two concrete blocks and a plank.
 	var bx := w - 120.0
@@ -410,24 +439,197 @@ static func _bin(x: float, color: String, size := 1.0) -> String:
 
 
 # Virginia creeper: a mat over a fence top, tendrils hanging down, leaves in this season's colours.
+# ── Vegetation ──────────────────────────────────────────────
+# As in the photos (reference/ruelle): leaves you can tell are leaves, massed over a dark shade, lighter toward the sun on the
+# upper left. Everything here draws the same random numbers in every season; only what gets written changes.
+
+## A leaf's outline, pointing up from its stalk at the origin: broad, with a point (they read as a mass, not as stars).
+const LEAF_SHAPE := [Vector2(0, 0.12), Vector2(-0.46, -0.08), Vector2(-0.66, -0.42), Vector2(-0.46, -0.78), Vector2(0, -1.14), Vector2(0.46, -0.78), Vector2(0.66, -0.42), Vector2(0.46, -0.08)]
+const SMALL_LEAF := [Vector2(0, 0.12), Vector2(-0.58, -0.42), Vector2(0, -1.14), Vector2(0.58, -0.42)]
+
+
+## This season's shrubs (empty in winter: bare twigs).
+static func shrub_colors() -> Array:
+	match Season.current:
+		"spring":
+			return ["#6FA048", "#8FBF5A", "#B5D97A", "#5E8F3C", "#A6D07A"]
+		"summer":
+			return ["#2F6E2C", "#3E8E3A", "#55A048", "#2C5E2A", "#6DB05A"]
+		"winter":
+			return []
+	return ["#8E8A2E", "#B5892E", "#C9562E", "#A8442A", "#6E7A2E", "#D9A02E"]
+
+
+## Grass and weeds, whatever the season (straw under the snow).
+static func grass_colors() -> Array:
+	match Season.current:
+		"spring":
+			return ["#6DA544", "#8FBF5A", "#5A9A3C"]
+		"summer":
+			return ["#4F8E3A", "#3E7A30", "#6DA544"]
+		"winter":
+			return ["#A89A7A", "#8E8268", "#BDB29A"]
+	return ["#7E8A3A", "#9A9A4A", "#A8863A"]
+
+
+static func _leaf(p: Vector2, size: float, angle: float, color: String) -> String:
+	var shape: Array = SMALL_LEAF if size < 4.0 else LEAF_SHAPE
+	var c := cos(angle) * size
+	var n := sin(angle) * size
+	var d := ""
+	for i in shape.size():
+		var q: Vector2 = shape[i]
+		d += "%s%.1f %.1f" % ["M" if i == 0 else "L", p.x + q.x * c - q.y * n, p.y + q.x * n + q.y * c]
+	return '<path d="%sZ" fill="%s"/>' % [d, color]
+
+
+# One of `colors` from one random number (nothing if there are none).
+static func _tone(rng: RandomNumberGenerator, colors: Array) -> String:
+	var t := rng.randf()
+	return "" if colors.is_empty() else colors[mini(int(t * colors.size()), colors.size() - 1)]
+
+
+## A mass of leaves round `c`, radii `r`: dark shade behind, each leaf turned outward, lit from the upper left. Bare twigs
+## from its foot when there are no `colors`.
+static func _foliage(rng: RandomNumberGenerator, c: Vector2, r: Vector2, colors: Array, leaf: float, count: int) -> String:
+	var bare := colors.is_empty()
+	var twig_seed := rng.randi()
+	var s := _twigs(twig_seed, Vector2(c.x, c.y + r.y), r) if bare else ""
+	for k in 6:
+		var b := c + Vector2(rng.randf_range(-0.6, 0.6) * r.x, rng.randf_range(-0.5, 0.5) * r.y)
+		var k_r := rng.randf_range(0.45, 0.7)
+		if not bare:
+			s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="%s"/>' % [b.x, b.y, r.x * k_r, r.y * k_r, _dark(colors[k % colors.size()], 0.42)]
+	# Enough leaves to cover it, whatever its size.
+	for i in maxi(count, mini(int(PI * r.x * r.y / (leaf * leaf) * 1.1), 240)):
+		var a := rng.randf() * TAU
+		var d := sqrt(rng.randf())
+		var p := c + Vector2(cos(a) * d * r.x, sin(a) * d * r.y)
+		var size := leaf * rng.randf_range(0.75, 1.25)
+		var turn := a + PI / 2.0 + rng.randf_range(-0.7, 0.7)
+		var tone := _tone(rng, colors)
+		if bare:
+			continue
+		var lit := (-(p.x - c.x) / maxf(r.x, 1.0) - (p.y - c.y) / maxf(r.y, 1.0)) * 0.5
+		s += _leaf(p, size, turn, _light(tone, lit * 0.25) if lit > 0.0 else _dark(tone, -lit * 0.34))
+	return s
+
+
+## Bare branches rising from `foot`: stems forking twice, a few red berries (from their own random numbers).
+static func _twigs(seed_value: int, foot: Vector2, r: Vector2) -> String:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var d := ""
+	var berries := ""
+	for i in rng.randi_range(5, 8):
+		var a := foot + Vector2(rng.randf_range(-0.3, 0.3) * r.x, 0)
+		var b := a + Vector2(rng.randf_range(-0.7, 0.7) * r.x, -rng.randf_range(0.8, 1.5) * r.y)
+		d += "M%.1f %.1f L%.1f %.1f " % [a.x, a.y, b.x, b.y]
+		for k in 3:
+			var from := a.lerp(b, rng.randf_range(0.4, 0.9))
+			var to := from + Vector2(rng.randf_range(-0.5, 0.5) * r.x, -rng.randf_range(0.2, 0.6) * r.y)
+			d += "M%.1f %.1f L%.1f %.1f " % [from.x, from.y, to.x, to.y]
+			if seed_value % 2 == 0:
+				berries += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#B5302A"/>' % [to.x, to.y, maxf(r.x * 0.03, 0.8)]
+	return '<path d="%s" stroke="#5E4A3C" stroke-width="%.1f" fill="none" stroke-linecap="round"/>%s' % [d, maxf(r.x * 0.03, 0.8), berries]
+
+
+## Virginia creeper over the top of a fence and down its face: a mass of leaves along the top, strands trailing from it with
+## their leaves thinning out; only the stems in winter.
 static func _vine(rng: RandomNumberGenerator, x: float, w: float, top: float, colors: Array) -> String:
+	var bare := colors.is_empty()
 	var s := ""
-	if colors.is_empty():
-		for i in 8:
-			var a := Vector2(x + rng.randf_range(0, w), top + rng.randf_range(-6, 10))
-			s += _line(a, a + Vector2(rng.randf_range(-20, 20), rng.randf_range(20, 90)), "#6A5444", 1.5)
-		return s
-	for i in int(w / 4.0):
-		var p := Vector2(x + rng.randf_range(0, w), top + rng.randf_range(-14, 12))
-		s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="%s"/>' % [p.x, p.y, rng.randf_range(4, 8), rng.randf_range(3, 6), PropArt._pick(rng, colors)]
-	for t in rng.randi_range(2, 5):
+	if not bare:
+		s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="7" fill="%s"/>' % [x + w / 2.0, top, w * 0.46, _dark(colors[0], 0.4)]
+	var leaves := ""
+	for i in int(w / 1.3):
+		var p := Vector2(x + rng.randf_range(0, w), top + rng.randf_range(-12, 12))
+		var size := rng.randf_range(5.5, 8.5)
+		var turn := rng.randf_range(-1.2, 1.2) + PI
+		var tone := _tone(rng, colors)
+		if not bare:
+			leaves += _leaf(p, size, turn, tone)
+	for t in rng.randi_range(3, 5):
 		var tx := x + rng.randf_range(0, w)
 		var length := rng.randf_range(40.0, 140.0)
 		var y := top
+		var stem := "M%.1f %.1f" % [tx, y]
 		while y < top + length:
-			s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="%s"/>' % [tx + sin(y * 0.08) * 6.0 + rng.randf_range(-4, 4), y, rng.randf_range(4, 7), rng.randf_range(3, 5), PropArt._pick(rng, colors)]
+			var f := (y - top) / length
+			var sway := tx + sin(y * 0.08) * 6.0
+			stem += " L%.1f %.1f" % [sway, y]
+			var side := 1.0 if int(y) % 2 == 0 else -1.0
+			var size := lerpf(7.5, 3.5, f) * rng.randf_range(0.85, 1.15)
+			var turn := PI + side * rng.randf_range(0.5, 1.2)
+			var tone := _tone(rng, colors)
+			if not bare:
+				leaves += _leaf(Vector2(sway + side * 2.0, y), size, turn, tone)
 			y += rng.randf_range(5.0, 9.0)
+		s += '<path d="%s" stroke="%s" stroke-width="1.2" fill="none"/>' % [stem, "#6A5444" if bare else _dark(colors[0], 0.5)]
+	return s + leaves
+
+
+## Creeper covering a stretch of wall, as on the photos: a sheet of leaves from the ground up, its top and sides uneven, thinner
+## toward the top with a few runners ahead of it; only the stems in winter.
+static func _climber(rng: RandomNumberGenerator, x: float, w: float, top: float, bottom: float, colors: Array) -> String:
+	var bare := colors.is_empty()
+	var h := bottom - top
+	var outline := []
+	# The shade behind the leaves stops well short of their edge, so only leaves show at the top and sides.
+	for k in 9:
+		outline.append(Vector2(x + 8.0 + rng.randf_range(-4.0, 4.0), lerpf(bottom, top + h * 0.26, k / 8.0)))
+	for k in 7:
+		outline.append(Vector2(lerpf(x + 8.0, x + w - 8.0, k / 6.0), top + h * 0.2 + rng.randf_range(-4.0, 4.0)))
+	for k in 9:
+		outline.append(Vector2(x + w - 8.0 + rng.randf_range(-4.0, 4.0), lerpf(top + h * 0.26, bottom, k / 8.0)))
+	var s := ""
+	if bare:
+		var stems := ""
+		for k in 7:
+			var sx := x + w * k / 6.0
+			stems += "M%.1f %.1f Q%.1f %.1f %.1f %.1f " % [sx, bottom, sx + 14.0 * sin(k * 2.1), top + h * 0.5, sx + 18.0 * cos(k * 1.7), top + h * (0.05 + 0.08 * (k % 3))]
+		s += '<path d="%s" stroke="#6A5444" stroke-width="1.4" fill="none"/>' % stems
+	else:
+		s += _poly(outline, _dark(colors[0], 0.42))
+	for i in mini(int(w * h / 38.0), 460):
+		var p := Vector2(x + rng.randf_range(-6.0, w + 6.0), bottom - pow(rng.randf(), 0.95) * h)
+		var size := rng.randf_range(5.5, 8.5)
+		var turn := PI + rng.randf_range(-0.9, 0.9)
+		var tone := _tone(rng, colors)
+		if not bare:
+			s += _leaf(p, size, turn, _light(tone, 0.14) if p.x < x + w * 0.35 else _dark(tone, 0.1))
+	# Runners feeling their way up the bricks above it.
+	for k in 3:
+		var rx := x + rng.randf_range(0.1, 0.9) * w
+		var ry := top + rng.randf_range(0.0, h * 0.1)
+		var run := rng.randf_range(30.0, 60.0)
+		for n in 5:
+			var q := Vector2(rx + sin(n * 1.3) * 5.0, ry - n / 4.0 * run)
+			var tone := _tone(rng, colors)
+			if not bare:
+				s += _leaf(q, 4.5, PI + (0.8 if n % 2 == 0 else -0.8), tone)
 	return s
+
+
+## A clump of arching grass blades rooted at `p`.
+static func _grass(rng: RandomNumberGenerator, p: Vector2, h: float, blades := 10) -> String:
+	var colors := grass_colors()
+	var s := ""
+	for i in blades:
+		var lean := rng.randf_range(-0.9, 0.9) * h
+		var tall := h * rng.randf_range(0.6, 1.0)
+		var root := p + Vector2(rng.randf_range(-h * 0.15, h * 0.15), 0)
+		s += '<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="%s" stroke-width="%.1f" fill="none" stroke-linecap="round"/>' % [root.x, root.y, root.x + lean * 0.2, root.y - tall, root.x + lean, root.y - tall * 0.65, _tone(rng, colors), maxf(h * 0.05, 0.7)]
+	return s
+
+
+## A flower with six petals.
+static func _bloom(p: Vector2, r: float, color: String) -> String:
+	var s := ""
+	for i in 6:
+		var a := TAU * i / 6.0
+		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="%s"/>' % [p.x + cos(a) * r * 0.62, p.y + sin(a) * r * 0.62, r * 0.52, color]
+	return s + '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#E8B32E"/>' % [p.x, p.y, r * 0.38]
 
 
 ## A croque-livre (a little free library): a painted wooden box with a pitched roof on a post, books behind its
@@ -540,8 +742,11 @@ static func side_wall(rng: RandomNumberGenerator, w: float, top: float, color: C
 	if rng.randf() < 0.5:
 		var tx := front + inward * w * rng.randf_range(0.55, 0.75) - 40.0
 		s += '<path d="M%.1f %.1f q10 -22 18 -2 t16 -6 q6 -14 14 0 t18 -4" stroke="%s" stroke-width="3.5" fill="none" stroke-linecap="round"/>' % [tx, H - 62.0, PropArt._pick(rng, ["#2B2F6B", "#1F1F1F", "#7A1F5C"])]
-	# A bin at its foot.
-	s += _bin(front + inward * (w - 96.0) - 22.0, "#2F6DB5")
+	# Creeper climbing its far end, a bin at its foot.
+	var climb := front + inward * (w - 60.0) - 50.0
+	s += _climber(rng, climb, 110.0, H - rng.randf_range(210.0, 300.0), H - 2.0, vine_colors())
+	s += _grass(rng, Vector2(front + inward * 90.0, H - 2.0), 26.0)
+	s += _bin(front + inward * (w - 170.0) - 22.0, "#2F6DB5")
 	if Season.is_winter():
 		s += _rect(-2, top - 13, w + 4, 6, "#F4F6F8")
 		s += _rect(cornice, top - 23, 26, 6, "#F4F6F8")
@@ -575,13 +780,13 @@ static func near_fence(rng: RandomNumberGenerator, w: float, h: float) -> String
 			bx += bw
 		# The rail across the boards.
 		s += _rect(x, top + 20.0, stretch, 7, _dark(tint, 0.3), 'opacity="0.5"')
-		# Creeper over the top here and there, this season's colours.
-		if not vines.is_empty():
-			for k in rng.randi_range(0, 2):
-				var vx := x + rng.randf_range(20.0, stretch - 20.0)
-				for n in 14:
-					s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="%s"/>' % [vx + rng.randf_range(-46.0, 46.0), rng.randf_range(4.0, 40.0), rng.randf_range(7.0, 11.0), rng.randf_range(5.0, 8.0), PropArt._pick(rng, vines)]
-		else:
+		# Creeper over the top here and there, this season's colours; snow along the top in winter.
+		for k in rng.randi_range(0, 2):
+			var vx := x + rng.randf_range(20.0, stretch - 20.0)
+			var creeper := _foliage(rng, Vector2(clampf(vx, 54.0, w - 54.0), 18.0), Vector2(50.0, 20.0), vines, 13.0, 26)
+			if not vines.is_empty():
+				s += creeper
+		if vines.is_empty():
 			s += _rect(x, top - 5.0, stretch, 7, "#F4F6F8")
 		# The post at the end of the stretch, standing a little proud.
 		s += _rect(x + stretch - 13.0, 2, 26, h - 2, _dark(tint, 0.25))
@@ -594,41 +799,255 @@ static func near_fence(rng: RandomNumberGenerator, w: float, h: float) -> String
 	return s
 
 
-## Another lane running away from this one between two yards: concrete narrowing to a bright slice at its far
-## end, board fences and a garage along it, creeper.
-static func junction(rng: RandomNumberGenerator, w: float) -> ImageTexture:
-	var vp := Vector2(w / 2.0, 430.0)
-	var far := 0.82
-	var at := func(p: Vector2) -> Vector2: return vp + (p - vp) * (1.0 - far)
-	var s := ""
-	# The avenue's houses at the far end, in the light.
-	var a0: Vector2 = at.call(Vector2(-40, 300))
-	var a1: Vector2 = at.call(Vector2(w + 40, H))
-	s += _rect(a0.x - 30, a0.y - 20, a1.x - a0.x + 60, a1.y - a0.y + 20, "#C8A27A", 'opacity="0.85"')
-	for i in 4:
-		s += _rect(a0.x - 22 + i * 18, a0.y - 8, 7, 9, "#E8EEF2", 'opacity="0.9"')
-	s += _rect(a0.x - 30, a1.y - 6, a1.x - a0.x + 60, 6, "#9A9890")
-	var ground_l := Vector2(10, H)
-	var ground_r := Vector2(w - 10, H)
-	s += _poly([ground_l, ground_r, at.call(ground_r), at.call(ground_l)], "#A9A59D")
-	s += _line(Vector2(w / 2.0, H), at.call(Vector2(w / 2.0, H)), "#6E8A4A", 3.0)
-	# Fences receding on both sides, boards converging.
-	for side in [[Vector2(0, H - 175), Vector2(0, H)], [Vector2(w, H - 175), Vector2(w, H)]]:
-		var t0: Vector2 = side[0]
-		var b0: Vector2 = side[1]
-		var c: String = PropArt._pick(rng, BOARDS)
-		s += _poly([t0, at.call(t0), at.call(b0), b0], c)
-		for k in 14:
-			var f := k / 14.0
-			var top := t0.lerp(at.call(t0), pow(f, 0.6))
-			var bottom := b0.lerp(at.call(b0), pow(f, 0.6))
-			s += _line(top, bottom, _dark(c, 0.3), 1.0)
-	# A garage on the right, part way down.
-	var g0 := Vector2(w, H - 240).lerp(at.call(Vector2(w, H - 240)), 0.35)
-	var g1 := Vector2(w, H - 240).lerp(at.call(Vector2(w, H - 240)), 0.6)
-	var b0 := Vector2(w, H).lerp(at.call(Vector2(w, H)), 0.35)
-	var b1 := Vector2(w, H).lerp(at.call(Vector2(w, H)), 0.6)
-	s += _poly([g0, g1, b1, b0], "#B8BCC0")
-	s += _vine(rng, 0.0, 50.0, H - 175.0, vine_colors())
-	s += _vine(rng, w - 60.0, 50.0, H - 175.0, vine_colors())
+## Another lane running away from us between the yards, as in the photos: one-point perspective on CrossStreet's horizon.
+## Far to near: sky down the gap, what closes it (`to_avenue`: the plexes across an avenue; else the far lane's fences under
+## its trees), the backs of the plexes either side with their galleries, trees arching over, the cracked concrete with its strip
+## of weeds down the middle and leaves drifted along the edges, then fences, sheds and garages one after another, poles
+## and wires, shrubs spilling onto the concrete and creeper over the fences.
+static func junction(rng: RandomNumberGenerator, w: float, to_avenue := false) -> ImageTexture:
+	const FAR_D := 14.0
+	var vp := Vector2(w / 2.0, CrossStreet.HORIZON_Y)
+	var at := func(p: Vector2, d: float) -> Vector2: return vp + (p - vp) / (1.0 + d)
+	var hazed := func(c: String, d: float) -> String: return "#" + Color(c).lerp(Color("#CFD6DC"), clampf(d / FAR_D, 0.0, 0.6)).to_html(false)
+	var hazy_all := func(colors: Array, d: float) -> Array:
+		var out := []
+		for c in colors:
+			out.append(hazed.call(c, d))
+		return out
+	var quad := func(x: float, top: float, bottom: float, d0: float, d1: float, fill: String, extra := "") -> String:
+		return _poly([at.call(Vector2(x, top), d0), at.call(Vector2(x, top), d1), at.call(Vector2(x, bottom), d1), at.call(Vector2(x, bottom), d0)], fill, extra)
+	var winter := Season.is_winter()
+	# The sky down the gap, hiding the distant city behind it, fading in from above.
+	var grad := Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.35, 0.62, 0.82, 1.0])
+	grad.colors = Season.sky()
+	var stops := ""
+	for k in 5:
+		var y := lerpf(120.0, 470.0, k / 4.0)
+		var c := grad.sample(y / 720.0)
+		stops += '<stop offset="%.2f" stop-color="#%s" stop-opacity="%.2f"/>' % [k / 4.0, c.to_html(false), clampf((y - 120.0) / 160.0, 0.0, 1.0)]
+	var s := '<defs><linearGradient id="gapsky" x1="0" y1="0" x2="0" y2="1">%s</linearGradient></defs>' % stops
+	var strip := 0.0
+	while strip < w:
+		s += '<rect x="%.1f" y="120" width="12" height="350" fill="url(#gapsky)" opacity="%.2f"/>' % [strip, clampf(minf(strip, w - strip) / 80.0, 0.0, 1.0)]
+		strip += 12.0
+	# What closes the far end.
+	if to_avenue:
+		s += quad.call(-120.0, 190.0, H - 40.0, FAR_D, FAR_D, "#000000")
+		var a0: Vector2 = at.call(Vector2(-140.0, 200.0), FAR_D)
+		var a1: Vector2 = at.call(Vector2(w + 140.0, H - 30.0), FAR_D)
+		s += _rect(a0.x, a0.y, a1.x - a0.x, a1.y - a0.y, hazed.call("#C8A27A", FAR_D))
+		for i in 6:
+			s += _rect(a0.x + 3.0 + i * 8.0, a0.y + 4.0, 4, 6, "#E8EEF2", 'opacity="0.9"')
+			s += _rect(a0.x + 3.0 + i * 8.0, a0.y + 13.0, 4, 6, "#E8EEF2", 'opacity="0.9"')
+	else:
+		var f0: Vector2 = at.call(Vector2(-120.0, H - 175.0), FAR_D)
+		var f1: Vector2 = at.call(Vector2(w + 120.0, H), FAR_D)
+		s += _rect(f0.x, f0.y, f1.x - f0.x, f1.y - f0.y, hazed.call(BOARDS[0], FAR_D))
+	# The backs of the plexes along the yards, either side, far to near.
+	var rows := []
+	for side: float in [-1.0, 1.0]:
+		var d := 1.0
+		while d < FAR_D:
+			var d1 := (1.0 + d) * rng.randf_range(1.32, 1.6) - 1.0
+			var x := w / 2.0 + side * 320.0
+			var top := H - rng.randf_range(240.0, 340.0)
+			var brick: String = hazed.call(PropArt._pick(rng, SIDINGS if rng.randf() < 0.35 else BRICKS), d)
+			var row: String = quad.call(x, top, H - 60.0, d, d1, brick)
+			row += quad.call(x, top, H - 60.0, d, d1, "#000000", 'opacity="0.14"')
+			row += quad.call(x, top - 6.0, top + 4.0, d, d1, hazed.call("#55585C", d))
+			if d < 6.0:
+				for k in 2:
+					var wd := lerpf(d, d1, 0.25 + 0.5 * k)
+					var we := wd + (d1 - d) * 0.14
+					for floor_y: float in [top + 30.0, top + 130.0]:
+						row += quad.call(x, floor_y, floor_y + 60.0, wd, we, hazed.call("#7F97A8", d))
+				var wood: String = hazed.call(PropArt._pick(rng, WOODS), d)
+				for rail: float in [top + 96.0, top + 196.0]:
+					row += _line(at.call(Vector2(x, rail), d), at.call(Vector2(x, rail), d1), wood, maxf(8.0 / (1.0 + d), 1.0))
+				var post := d
+				while post < d1:
+					row += _line(at.call(Vector2(x, top + 70.0), post), at.call(Vector2(x, H - 60.0), post), wood, maxf(5.0 / (1.0 + post), 0.8))
+					post += (d1 - d) / 3.0
+			rows.append([d, row])
+			d = d1
+	rows.sort_custom(func(p, q): return p[0] > q[0])
+	for row in rows:
+		s += row[1]
+	# Trees in the yards arching toward the middle, far to near.
+	var palettes := Season.tree_palettes()
+	var trees := []
+	for side: float in [-1.0, 1.0]:
+		for base_d: float in [1.4, 2.9, 5.6, 10.0]:
+			var d := base_d * rng.randf_range(0.9, 1.15)
+			var x := w / 2.0 + side * rng.randf_range(190.0, 250.0)
+			var foot: Vector2 = at.call(Vector2(x, H - 60.0), d)
+			var crown: Vector2 = at.call(Vector2(x - side * rng.randf_range(30.0, 70.0), rng.randf_range(170.0, 250.0)), d)
+			var size := rng.randf_range(120.0, 170.0) / (1.0 + d)
+			var pal_i := rng.randi()
+			var tree := _line(foot, crown, hazed.call("#5E4A3C", d), maxf(16.0 / (1.0 + d), 1.2))
+			var pal: Array = [] if palettes.is_empty() else hazy_all.call(palettes[pal_i % palettes.size()], d)
+			tree += _foliage(rng, crown, Vector2(size, size * 0.85), pal, maxf(18.0 / (1.0 + d), 2.6), int(clampf(150.0 / (1.0 + d), 26.0, 70.0)))
+			trees.append([d, tree])
+	trees.sort_custom(func(p, q): return p[0] > q[0])
+	for tree in trees:
+		s += tree[1]
+	# The concrete, lighter with distance, sun patches and slab joints.
+	var concrete := "#E9EDF0" if winter else "#A9A59D"
+	s += _poly([Vector2(8, H), Vector2(w - 8, H), at.call(Vector2(w - 8, H), FAR_D), at.call(Vector2(8, H), FAR_D)], concrete)
+	s += _poly([at.call(Vector2(8, H), 1.5), at.call(Vector2(w - 8, H), 1.5), at.call(Vector2(w - 8, H), FAR_D), at.call(Vector2(8, H), FAR_D)], "#E8DCC4", 'opacity="0.35"')
+	var joint := 0.18
+	while joint < FAR_D:
+		s += _line(at.call(Vector2(8, H), joint), at.call(Vector2(w - 8, H), joint), _dark(concrete, 0.2), maxf(1.6 / (1.0 + joint), 0.5))
+		joint += 0.3 * (1.0 + joint)
+	for k in 3:
+		var from := rng.randf_range(0.05, 1.5)
+		var cx := w / 2.0 + rng.randf_range(-90.0, 90.0)
+		var crack := "M%.1f %.1f" % [at.call(Vector2(cx, H), from).x, at.call(Vector2(cx, H), from).y]
+		for n in 6:
+			var q: Vector2 = at.call(Vector2(cx + rng.randf_range(-14.0, 14.0), H), from + n * 0.12)
+			crack += " L%.1f %.1f" % [q.x, q.y]
+		s += '<path d="%s" stroke="%s" stroke-width="1.1" fill="none"/>' % [crack, _dark(concrete, 0.4)]
+	# Down the middle: the crack and its strip of weeds.
+	s += _line(Vector2(w / 2.0, H), vp, _dark(concrete, 0.45), 1.6)
+	var weeds := grass_colors()
+	var weed := 0.0
+	while weed < FAR_D * 0.7:
+		var p: Vector2 = at.call(Vector2(w / 2.0 + rng.randf_range(-9.0, 9.0), H), weed)
+		for k in 8:
+			var size := rng.randf_range(8.0, 14.0) / (1.0 + weed)
+			var turn := rng.randf_range(-1.4, 1.4)
+			var tone := _tone(rng, weeds)
+			if not winter:
+				s += _leaf(p, maxf(size, 1.4), turn, tone)
+		weed += 0.09 * (1.0 + weed)
+	# Leaves drifted along the edges, and a few strewn over the concrete.
+	var litter := Season.litter()
+	for i in 90:
+		var edge := i < 66
+		var d := pow(rng.randf(), 2.2) * FAR_D * 0.6
+		var x: float = (8.0 + rng.randf_range(0.0, 34.0) if i % 2 == 0 else w - 8.0 - rng.randf_range(0.0, 34.0)) if edge else rng.randf_range(20.0, w - 20.0)
+		var p: Vector2 = at.call(Vector2(x, H), d)
+		var size := rng.randf_range(5.0, 8.0) / (1.0 + d)
+		var turn := rng.randf() * TAU
+		var pick := rng.randf()
+		if float(i % 10) / 10.0 < Season.litter_amount() and not litter.is_empty():
+			s += _leaf(p, maxf(size, 1.2), turn, "#" + litter[mini(int(pick * litter.size()), litter.size() - 1)].to_html(false))
+	# Then, far to near on both sides: fences, sheds and garages, poles, shrubs, creeper, grass.
+	var near := []
+	var vines := vine_colors()
+	var shrubs := shrub_colors()
+	var pole_side := -1.0 if rng.randf() < 0.5 else 1.0
+	for side: float in [-1.0, 1.0]:
+		var x := 0.0 if side < 0.0 else w
+		var d := 0.0
+		var first := true
+		while d < FAR_D:
+			var d1 := (1.0 + d) * rng.randf_range(1.35, 1.75) - 1.0
+			var kind: String = "boards" if first else PropArt._pick(rng, ["boards", "chainlink", "picket", "tole", "shed", "boards"])
+			first = false
+			var height: float = {"boards": 175.0, "chainlink": 150.0, "picket": 108.0, "tole": 225.0, "shed": 240.0}[kind]
+			var top := H - height
+			var seg := ""
+			match kind:
+				"boards":
+					var c: String = hazed.call(PropArt._pick(rng, BOARDS), d)
+					seg += quad.call(x, top, H, d, d1, c)
+					var fd := d
+					while fd < d1:
+						seg += _line(at.call(Vector2(x, top), fd), at.call(Vector2(x, H), fd), _dark(c, 0.32), maxf(1.2 / (1.0 + fd), 0.4))
+						fd += 0.05 * (1.0 + fd)
+				"chainlink":
+					var c: String = hazed.call("#2F5E3E", d)
+					seg += quad.call(x, top, H, d, d1, c)
+					for rail: float in [0.25, 0.5, 0.75]:
+						seg += _line(at.call(Vector2(x, lerpf(top, H, rail)), d), at.call(Vector2(x, lerpf(top, H, rail)), d1), _light(c, 0.18), maxf(1.6 / (1.0 + d), 0.4))
+					var fd := d
+					while fd < d1:
+						seg += _line(at.call(Vector2(x, top - 4.0), fd), at.call(Vector2(x, H), fd), _dark(c, 0.3), maxf(3.5 / (1.0 + fd), 0.6))
+						fd += 0.22 * (1.0 + fd)
+				"picket":
+					var c: String = hazed.call("#C9A877", d)
+					seg += quad.call(x, top + 22.0, top + 30.0, d, d1, _dark(c, 0.2))
+					seg += quad.call(x, H - 34.0, H - 26.0, d, d1, _dark(c, 0.2))
+					var fd := d
+					while fd < d1:
+						var fe := fd + 0.018 * (1.0 + fd)
+						seg += quad.call(x, top, H, fd, fe, c)
+						fd += 0.04 * (1.0 + fd)
+				"tole":
+					var c: String = hazed.call(PropArt._pick(rng, TOLE + PAINTED_TOLE), d)
+					seg += quad.call(x, top, H, d, d1, c)
+					seg += quad.call(x, top - 8.0, top + 2.0, d, d1, hazed.call("#55585C", d))
+					for n in 7:
+						var y := lerpf(top + 12.0, H, n / 7.0)
+						seg += _line(at.call(Vector2(x, y), d), at.call(Vector2(x, y), d1), _dark(c, 0.2), maxf(1.0 / (1.0 + d), 0.4))
+				"shed":
+					var c: String = hazed.call(PropArt._pick(rng, ["#E9E6DF", "#4FA3A0", "#C9D3D1", "#B5893A"]), d)
+					seg += quad.call(x, top, H, d, d1, c)
+					seg += quad.call(x, top - 10.0, top + 2.0, d, d1, hazed.call("#55585C", d))
+					var fd := d
+					while fd < d1:
+						seg += _line(at.call(Vector2(x, top), fd), at.call(Vector2(x, H), fd), _dark(c, 0.18), maxf(1.0 / (1.0 + fd), 0.4))
+						fd += 0.1 * (1.0 + fd)
+					var wd := lerpf(d, d1, 0.3)
+					var we := lerpf(d, d1, 0.55)
+					seg += quad.call(x, top + 40.0, top + 100.0, wd, we, hazed.call("#7F97A8", d), 'stroke="#F2F0EA" stroke-width="%.1f"' % maxf(3.0 / (1.0 + d), 0.5))
+			# Shade on the fences away from the sun, a dark foot, snow along the top.
+			if side > 0.0:
+				seg += quad.call(x, top, H, d, d1, "#000000", 'opacity="0.1"')
+			seg += quad.call(x, H - 22.0, H, d, d1, "#2A2418", 'opacity="0.18"')
+			if winter:
+				seg += quad.call(x, top - 4.0, top + 2.0, d, d1, "#F4F6F8")
+			near.append([d1, seg])
+			# Creeper over this stretch, a shed or tôle garage all but swallowed by it now and then.
+			var md := lerpf(d, d1, rng.randf_range(0.25, 0.75))
+			var creeper := _foliage(rng, at.call(Vector2(x, top + 8.0), md), Vector2(46.0, 22.0) / (1.0 + md), hazy_all.call(vines, md), maxf(9.0 / (1.0 + md), 2.2), int(clampf(50.0 / (1.0 + md), 12.0, 40.0)))
+			if rng.randf() < 0.7:
+				near.append([md - 0.01, creeper])
+			if kind in ["shed", "tole"]:
+				var sheet := _foliage(rng, at.call(Vector2(x, top + height * 0.5), md), Vector2(70.0, height * 0.5) / (1.0 + md), hazy_all.call(vines, md), maxf(9.0 / (1.0 + md), 2.2), int(clampf(120.0 / (1.0 + md), 20.0, 80.0)))
+				if rng.randf() < 0.5:
+					near.append([md - 0.01, sheet])
+			d = d1
+		# Shrubs spilling onto the concrete, big near us, and ornamental grass.
+		for base_d: float in [0.35, 0.8, 1.6, 2.8, 4.6, 7.5]:
+			var bd := base_d * rng.randf_range(0.85, 1.2)
+			var bx := x - side * rng.randf_range(6.0, 30.0)
+			var r := Vector2(rng.randf_range(44.0, 70.0), rng.randf_range(48.0, 78.0)) / (1.0 + bd)
+			var foot: Vector2 = at.call(Vector2(bx, H), bd)
+			var bush := _foliage(rng, foot - Vector2(0, r.y * 0.8), r, hazy_all.call(shrubs, bd), maxf(10.0 / (1.0 + bd), 2.2), int(clampf(110.0 / (1.0 + bd), 20.0, 70.0)))
+			var grass := _grass(rng, at.call(Vector2(x - side * rng.randf_range(10.0, 40.0), H), bd + 0.1), maxf(34.0 / (1.0 + bd), 3.0), 9)
+			if rng.randf() < 0.75:
+				near.append([bd, bush])
+			if rng.randf() < 0.7:
+				near.append([bd + 0.1, grass])
+	# A blue bin near us.
+	var bin_d := rng.randf_range(0.5, 0.9)
+	var bin_x := 16.0 if rng.randf() < 0.5 else w - 62.0
+	var b0: Vector2 = at.call(Vector2(bin_x, H - 74.0), bin_d)
+	var b1: Vector2 = at.call(Vector2(bin_x + 46.0, H), bin_d)
+	near.append([bin_d, _rect(b0.x, b0.y, b1.x - b0.x, b1.y - b0.y, "#2F6DB5") + _rect(b0.x - 1.0, b0.y - 2.0, b1.x - b0.x + 2.0, 4.0, "#26588F")])
+	# Poles down one side, wires from one to the next and across.
+	var tops: Array[Vector2] = []
+	for base_d: float in [8.5, 3.6, 1.2]:
+		var pd := base_d * rng.randf_range(0.9, 1.1)
+		var px := (10.0 if pole_side < 0.0 else w - 10.0)
+		var ptop: Vector2 = at.call(Vector2(px, 70.0), pd)
+		var pfoot: Vector2 = at.call(Vector2(px, H), pd)
+		var thick := maxf(11.0 / (1.0 + pd), 1.2)
+		var pole := _line(pfoot, ptop, hazed.call("#6E5A48", pd), thick)
+		pole += _line(ptop + Vector2(-34.0, 8.0) / (1.0 + pd), ptop + Vector2(34.0, 8.0) / (1.0 + pd), hazed.call("#5E4A3C", pd), maxf(5.0 / (1.0 + pd), 0.8))
+		if not tops.is_empty():
+			var wires := ""
+			for off: float in [-28.0, 0.0, 28.0]:
+				var a: Vector2 = tops[-1] + Vector2(off / (1.0 + base_d * 2.0), 2.0)
+				var b := ptop + Vector2(off / (1.0 + pd), 8.0 / (1.0 + pd))
+				wires += '<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="#2A2622" stroke-width="%.1f" fill="none"/>' % [a.x, a.y, (a.x + b.x) / 2.0, (a.y + b.y) / 2.0 + 8.0 / (1.0 + pd), b.x, b.y, maxf(1.6 / (1.0 + pd), 0.5)]
+			pole = wires + pole
+		tops.append(ptop)
+		near.append([pd, pole])
+	near.sort_custom(func(p, q): return p[0] > q[0])
+	for item in near:
+		s += item[1]
 	return _tex(w, s)
