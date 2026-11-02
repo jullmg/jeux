@@ -169,6 +169,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   (`_build_clutter`: boxes on top of the fridges, a pallet, a hand truck, a ladder, a cart, a mop, a full bin, crooked price cards; the floor
   is kept clear of small items; the crowding also shows in a long row of blurred foreground shelves, `Interior._build_foreground` kind
   "shelves" [x, "shelves", seed], one every ~340 px) so the two feel different.
+- Shop walls get advertising posters, never house picture frames: `ShopArt.ad_poster(kind)` (`AD_POSTERS`: coffee, ice cream, slush, hot dogs, cold drinks), hung with `Shop._ad(kind, x, bottom, scale)` (title label over the strip).
 - More shop objects in `ShopArt` (shopping cart, old cash register, spinner rack, produce crates, flower buckets, gumball machine,
   box stacks, pallet of cases, hand truck, mop and bucket, broom, step ladder, A-frame sign, open sign, bin, newspapers, vending
   machine, egg tray, water cooler, toy rack, umbrella stand, salt bag, tin pyramid, CCTV monitor, `floor_junk`): pick from these

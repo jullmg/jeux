@@ -436,6 +436,60 @@ static func lotto_poster() -> ImageTexture:
 	return _stamped(160, 200, s, [["loto_quebec_logo.png", Rect2i(20, 17, 120, 38)]])
 
 
+## Advertising light-box posters a corner store hangs on its walls (never house picture frames): title and background colour
+## per kind, for the label the scene sets over the title strip.
+const AD_POSTERS := [
+	{"title": "CAFÉ 1 $", "bg": "#7A4A2A", "ink": "#FFF3D6"},
+	{"title": "GLACES", "bg": "#F29BBE", "ink": "#FFFFFF"},
+	{"title": "SLOCHE", "bg": "#2E86C1", "ink": "#FFFFFF"},
+	{"title": "HOT-DOGS", "bg": "#C8202A", "ink": "#FFE9A8"},
+	{"title": "BIEN FROID", "bg": "#1F9E8E", "ink": "#FFFFFF"},
+]
+
+
+## Canvas 100x140: an aluminium-framed advertising poster behind a pane of plastic (kind: an index into AD_POSTERS): a big
+## picture on a coloured ground and a title strip at the top (the scene lays the words, see `ad_title_at`).
+static func ad_poster(kind: int) -> ImageTexture:
+	var ad: Dictionary = AD_POSTERS[kind % AD_POSTERS.size()]
+	var s := '<rect x="1" y="1" width="98" height="138" rx="3" fill="#B7BCC2" stroke="#7E858C" stroke-width="2"/>'
+	s += '<rect x="5" y="5" width="90" height="130" fill="%s"/>' % ad.bg
+	s += '<rect x="5" y="5" width="90" height="26" fill="#000000" opacity="0.22"/>'
+	s += '<path d="M5 5 H95 L5 70 Z" fill="#FFFFFF" opacity="0.08"/>'
+	match kind % AD_POSTERS.size():
+		0:
+			# A steaming paper cup of coffee with its lid and sleeve.
+			s += '<path d="M30 62 H70 L65 118 H35 Z" fill="#FFFFFF" stroke="#E8DCC8" stroke-width="2"/><path d="M32 78 H68 L66 100 H34 Z" fill="#B5603A"/>'
+			s += '<rect x="27" y="54" width="46" height="10" rx="4" fill="#4A2C18"/>'
+			s += '<path d="M40 48 q-8 -10 0 -18 M52 48 q-8 -10 0 -18 M62 48 q-8 -10 0 -18" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>'
+		1:
+			# A three-scoop ice-cream cone.
+			s += '<path d="M36 82 H64 L50 126 Z" fill="#E8B96A" stroke="#B88434" stroke-width="2"/><path d="M40 90 L58 90 M44 102 L56 102" stroke="#B88434" stroke-width="1.5"/>'
+			s += '<circle cx="50" cy="74" r="15" fill="#FFF3B0" stroke="#E8D070" stroke-width="2"/><circle cx="50" cy="56" r="14" fill="#8A4B2E" stroke="#5E301A" stroke-width="2"/><circle cx="50" cy="40" r="12" fill="#FFFFFF" stroke="#D9D9D9" stroke-width="2"/>'
+			s += '<circle cx="50" cy="28" r="4" fill="#D9342B"/>'
+		2:
+			# A tall slush cup with a bendy straw and a swirl.
+			s += '<path d="M31 50 H69 L63 124 H37 Z" fill="#FFFFFF" opacity="0.9" stroke="#CFE6F5" stroke-width="2"/><path d="M33 64 H67 L63 124 H37 Z" fill="#D9342B"/><path d="M34 84 H66 L64 124 H36 Z" fill="#3D8BD9"/>'
+			s += '<path d="M36 74 q14 -10 28 0" stroke="#FFFFFF" stroke-width="3" fill="none" opacity="0.7"/><path d="M56 50 L62 30 L72 26" stroke="#FFD23F" stroke-width="4" fill="none" stroke-linecap="round"/>'
+		3:
+			# A hot dog with mustard and ketchup zigzags.
+			s += '<path d="M20 92 Q50 72 80 92 L76 110 Q50 124 24 110 Z" fill="#E8B96A" stroke="#B88434" stroke-width="2"/>'
+			s += '<rect x="16" y="70" width="68" height="18" rx="9" fill="#C9503C" stroke="#8E2A20" stroke-width="2"/>'
+			s += '<path d="M24 78 l8 -6 8 8 8 -8 8 8 8 -8 8 8 8 -8" stroke="#FFD23F" stroke-width="3" fill="none" stroke-linejoin="round"/>'
+			s += '<path d="M26 84 l8 -5 8 7 8 -7 8 7 8 -7 8 7" stroke="#D9342B" stroke-width="2.5" fill="none" stroke-linejoin="round"/>'
+		_:
+			# Three cold cans with frost drops on ice.
+			for c in [[24, "#D9342B"], [40, "#F2C230"], [56, "#3D8BD9"]]:
+				s += '<rect x="%d" y="60" width="18" height="52" rx="4" fill="%s" stroke="#FFFFFF" stroke-width="1.5"/><rect x="%d" y="60" width="18" height="6" fill="#E8E8E8" opacity="0.8"/>' % [c[0], c[1], c[0]]
+			s += '<path d="M12 112 L40 120 L88 112 L84 128 L16 128 Z" fill="#DFF3FA" stroke="#9ED2E8" stroke-width="2"/>'
+			for d in [[30, 80], [46, 90], [62, 76], [48, 72]]:
+				s += '<path d="M%d %d q3 5 0 8 q-3 -3 0 -8" fill="#FFFFFF" opacity="0.85"/>' % [d[0], d[1]]
+	# Glare on the plastic and the little clips holding it.
+	s += '<path d="M8 8 L40 8 L8 60 Z" fill="#FFFFFF" opacity="0.2"/>'
+	for c in [[8, 8], [92, 8], [8, 132], [92, 132]]:
+		s += '<circle cx="%d" cy="%d" r="2.4" fill="#7E858C"/>' % c
+	return tex(100, 140, s)
+
+
 ## The classic chip flavours, in the order of the display: id, the brand's real logo (crème sure et oignons is Ruffles, as the
 ## real ones are; ketchup, barbecue, nature and sel et vinaigre are Lay's), the name on the shelf, the bag's colour, its accent.
 const CHIPS := [

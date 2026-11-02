@@ -82,8 +82,9 @@ func _build_entrance() -> void:
 	_put(ShopArt.fire_extinguisher(), 440.0, 560.0, 1.0, "wall")
 	var plant := _put(InteriorArt.house_plant("fiddle", false), 470.0, 630.0, 0.6, "floor")
 	plant.z_index = 0
+	# Advertising posters by the door, as a corner store has.
 	for i in 3:
-		_put(InteriorArt.poster(i), 520.0 + i * 100.0, 330.0, 0.62, "wall")
+		_ad(i, 520.0 + i * 96.0, 330.0, 0.8)
 
 
 # The counter, the shopkeeper behind it and the tidy shelves behind her.
@@ -183,12 +184,12 @@ func _build_aisles() -> void:
 	_put(ShopArt.spinner_rack(), 1450.0, 640.0, 0.95, "floor")
 	_put(ShopArt.gumball_machine(), 3680.0, 640.0, 0.9, "floor")
 	_put(ShopArt.water_cooler(), 3790.0, 640.0, 0.95, "floor")
-	# Neat wall displays over the bare stretches: lottery poster and a tidy notice board above the chips, two framed posters
-	# above the coffee corner.
+	# Neat wall displays over the bare stretches: lottery poster and a tidy notice board above the chips, two advertising posters
+	# (coffee, hot dogs) above the coffee corner.
 	_put(ShopArt.lotto_poster(), CHIPS_X + 70.0, 330.0, 0.75, "wall")
 	_put(ShopArt.bulletin_board(), CHIPS_X + 215.0, 300.0, 0.8, "wall")
-	for i in 2:
-		_put(InteriorArt.poster(i + 1), COFFEE_X + 20.0 + i * 95.0, 230.0, 0.52, "wall")
+	_ad(0, COFFEE_X + 6.0, 290.0, 0.75)
+	_ad(3, COFFEE_X + 92.0, 290.0, 0.75)
 	_put(ShopArt.exit_sign(), SHOP.y - 150.0, 158.0)
 	_glow(Vector2(SHOP.y - 110.0, 138.0), 70.0, Color(0.3, 1.0, 0.5, 0.25))
 

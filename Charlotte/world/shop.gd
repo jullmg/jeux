@@ -64,6 +64,13 @@ func _wall_label(text: String, center: Vector2, size: int, color: Color, outline
 	add_child(label)
 
 
+# An advertising light-box poster (ShopArt.ad_poster) hung with its title over the strip at the top.
+func _ad(kind: int, x: float, bottom: float, s := 0.8) -> void:
+	_put(ShopArt.ad_poster(kind), x, bottom, s, "wall")
+	var ad: Dictionary = ShopArt.AD_POSTERS[kind % ShopArt.AD_POSTERS.size()]
+	_wall_label(ad.title, Vector2(x + 50.0 * s, bottom - 140.0 * s + 18.0 * s), maxi(8, int(13.0 * s)), Color(ad.ink), Color(0, 0, 0, 0.0), 0)
+
+
 # She picks something and pays from her pocket money; the shopkeeper thanks her (or tells her she's short).
 func _buy(picture: Texture2D, text: String, price: float) -> void:
 	if GameState.money < price - 0.001:
