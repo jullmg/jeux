@@ -104,6 +104,7 @@ func _build_counter() -> void:
 	look.hair_color = Color("#1A1412")
 	look.eye_color = Color("#3A2618")
 	look.lashes = false
+	look.eyes = "almond"
 	look.mouth = "smile"
 	look.outfit = "sweater"
 	look.outfit_color = Color("#25408F")

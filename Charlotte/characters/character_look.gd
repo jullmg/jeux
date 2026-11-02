@@ -24,6 +24,8 @@ const ADULT_HAIR: Array[String] = ["short", "bob", "bun", "curly", "long_straigh
 @export var hair_color := Color("#B0623A")
 @export var eye_color := Color("#8A5530")
 @export var lashes := true
+## "round" (big storybook eyes) or "almond" (narrow, lids with the outer corner lifted).
+@export var eyes := "round"
 @export var mouth := "open_smile"
 @export var freckles := false
 @export var glasses := ""
