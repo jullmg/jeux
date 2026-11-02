@@ -3,7 +3,8 @@ extends CanvasLayer
 ## opens a big sheet of drawing paper: her block between Rue Holt and Rue Dandurand, 6e and 5e Avenue, with the houses
 ## in a row, the lanes (an H), her house, dépanneur Xin-Xin, Oh Bon!, the school across Rue Dandurand and Mount Royal at
 ## the far left, all in wobbly wax crayon (CuteArt). A little Charlotte stands where she is ("Je suis ici !") and follows her
-## as the scene changes. Before 8 years old a stop sign says she may not go farther alone. The game pauses while it is open.
+## as the scene changes. What she can't reach is greyed over (`_Sheet._reachable`, by her age); before 8 years old a stop sign
+## says she may not go farther alone. The game pauses while it is open.
 ## `--map` (a user arg) opens it a second after the scene starts, for screenshots.
 
 const BLUE := Color("#1D4F91")
@@ -261,6 +262,7 @@ class _Sheet:
 		_block_houses()
 		_yards()
 		_shops_and_home()
+		_grey_out()
 		_labels()
 		_decor()
 		_frame()
@@ -563,6 +565,33 @@ class _Sheet:
 		draw_rect(Rect2(x + Vector2(-15, -22), Vector2(30, 22)), Color("#BFE3F7"))
 		draw_rect(Rect2(x + Vector2(-15, -22), Vector2(30, 22)), Color("#5E6B80"), false, 1.5)
 		CuteArt.star(self, x + Vector2(0, -12), 5.0, CRAYONS[4], false, _rng)
+
+	# ── Where she may not go ──
+
+	# What she can reach: her block and the streets round it; from 8 (she may cross), also the corners across them and the school.
+	# The rest (7e, 4e, Mount Royal) leads nowhere in the game yet.
+	func _reachable() -> Rect2:
+		var top := SIX_Y - AVE_W / 2.0
+		var bottom := FIVE_Y + AVE_W / 2.0
+		if GameState.age >= StreetScene.CROSS_AGE:
+			return Rect2(182.0, top - 52.0, 780.0, bottom - top + 104.0)
+		return Rect2(HOLT_X - ST_W / 2.0, top, DAND_X - HOLT_X + ST_W, bottom - top)
+
+	# Everything else coloured over in grey crayon, scribbled by hand, with a line round what stays hers. The names go on top, so
+	# they can still be read, and the title and the doodles too.
+	func _grey_out() -> void:
+		var open := _reachable()
+		var first := 66.0
+		var grey := Color("#8E8F96", 0.8)
+		var scribble := Color("#6E6F78", 0.5)
+		for r: Rect2 in [Rect2(0, first, size.x, open.position.y - first), Rect2(0, open.end.y, size.x, size.y - open.end.y),
+				Rect2(0, open.position.y, open.position.x, open.size.y), Rect2(open.end.x, open.position.y, size.x - open.end.x, open.size.y)]:
+			draw_rect(r, grey)
+			var y := r.position.y + 5.0
+			while y < r.end.y - 5.0:
+				CuteArt._crayon_line(self, [Vector2(r.position.x + 3.0, y), Vector2(r.end.x - 3.0, y + _rng.randf_range(-3.0, 3.0))], scribble, 2.0, _rng, 1)
+				y += 12.0
+		CuteArt._crayon_line(self, [open.position, Vector2(open.end.x, open.position.y), open.end, Vector2(open.position.x, open.end.y), open.position, open.position + Vector2(30, 0)], Color("#F2C230"), 3.4, _rng)
 
 	# ── Names ──
 

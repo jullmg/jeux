@@ -315,6 +315,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   far along she is, lanes, the house, the shops) onto the sheet. The game pauses while it is open; Esc, C or a click outside closes it; the
   notebook (N) and the menu (Esc) ignore their keys while it is open. Geometry constants (`HOLT_X`, `DAND_X`, `SIX_Y`, lanes…) are at the
   top of the file: a new place on the block = a drawing in `_Sheet` + a case in `_here()`.
+- Whatever she can't reach is coloured over in grey crayon (`_Sheet._reachable`, `_grey_out`, names, title and doodles on top): before `CROSS_AGE` all but her block and the streets round it; from then on the corners across them and the school come back, and 7e, 4e and Mount Royal stay grey (no scene goes there). A new place she can reach = widen `_reachable`.
 - `--map` (a user arg, after `--`) opens it one second after the scene starts, for screenshots: `Godot --path . --screen 1 res://scenes/holt.tscn -- --screenshot=/path/map.png --wait=2.5 --map`.
 
 ## Quests and growing up
