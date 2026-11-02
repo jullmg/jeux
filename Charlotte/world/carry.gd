@@ -114,7 +114,9 @@ static func _build(kind: String, id: String) -> Node2D:
 			can.name = "can"
 			return can
 		"cat":
-			return LostCats.held(id)
+			var cat: Node2D = LostCats.held(id)
+			cat.set_meta("hands", "open")
+			return cat
 		"toy":
 			# Something from her bedroom floor (the tidying quest): the same picture as on the floor, bigger in her arms.
 			var toy := Sprite2D.new()

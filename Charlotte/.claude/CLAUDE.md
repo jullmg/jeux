@@ -196,6 +196,15 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   Charlotte's exact-colour `overrides` for clothes (`cloth_*`, `accent_*`, `shoe_*`). Design sheets use `CharacterLook.usual()`.
 - Outdoors in winter Charlotte wears a copy of her look dressed by `Season.dress_for_weather` (coat, boots, tuque, scarf):
   `StreetScene._spawn_charlotte` and the title screen; her saved outfit is unchanged.
+- Arms have an elbow and hands with fingers: each arm is three sprites, upper arm (shoulder pivot; `_arm_front`/`_arm_back`, whose
+  `rotation` is the shoulder angle), forearm (child, `rotation = -elbow flex`) and hand (child of the forearm, one of four pictures
+  `relaxed` / `open` / `flat` / `grip`, chosen by `_hand_goal`). `CharacterArt._upper_arm_svg/_forearm_svg/_hand_svg` draw them (long sleeves
+  carry on over the elbow; hand size by age, `HAND_SCALE`); the rig has `upper_len`, `fore_len`, `hand_center`, `arm_len` (shoulder to the middle of
+  the palm, as before: `hand_position()` is that point). Poses set shoulder angles and elbow goals in `Character._apply_pose`: `_arms_rest` (swing),
+  `_ik`/`_reach_blend` (two-bone reach: carrying, pouring, handlebars), `_aim(i, old_degrees, reach)` (chores: a hand where a straight arm at that angle
+  would put it, the elbow slightly bent), `_finish_arms` (eases the elbow, picks the hand). Carried things may set meta `hands` (the hand shape; a cat:
+  "open") and `keep_upright` (not mirrored); `hand_mode` forces the front hand's shape (a dog walker's "grip"). Design sheet: `tools/arms.tscn`
+  (`--set=0..3`, `--only=N`, `--zoom=`: standing/walking/running, gestures/pet/carry, chores, ages and sleeves).
 - `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through, breathing, soft shading by
   `shaders/character_shade.gdshader` (lit from the left, follows `facing`), hair strands clipped to each hairstyle (`CharacterArt._strands`), clothing folds
   (dress gathers and hem, top creases, elbow and knee creases), idle gestures when `fidgets` (wave, hop,

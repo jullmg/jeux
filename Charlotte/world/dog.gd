@@ -59,6 +59,8 @@ var _greet := 0.0
 static func random(rng: RandomNumberGenerator, walker: Character) -> Dog:
 	var dog := Dog.new()
 	dog.owner_walker = walker
+	# Her hand closes round the leash.
+	walker.hand_mode = "grip"
 	dog.breed = BREEDS.keys()[rng.randi_range(0, BREEDS.size() - 1)]
 	dog._b = BREEDS[dog.breed]
 	var coat: Array = dog._b.coats[rng.randi_range(0, dog._b.coats.size() - 1)]

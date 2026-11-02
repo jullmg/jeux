@@ -29,8 +29,20 @@ var _lids: Sprite2D
 var _hair_back: Sprite2D
 var _leg_front: Sprite2D
 var _leg_back: Sprite2D
+## The arms, back one first: upper arm (a Sprite2D at the shoulder), forearm (its child, at the elbow) and hand (the forearm's
+## child, at the wrist). `_arm_front` / `_arm_back` are the upper arms; the shoulder angle is their `rotation`, the elbow's flex
+## is `_elbow` (radians, the forearm folding forward and up), and the hand's picture is chosen by `_hand_goal`.
+var _arms: Array[Sprite2D] = []
+var _fores: Array[Sprite2D] = []
+var _hands: Array[Sprite2D] = []
 var _arm_front: Sprite2D
 var _arm_back: Sprite2D
+var _hand_tex := {}
+var _elbow := [0.14, 0.14]
+var _elbow_goal := [0.14, 0.14]
+var _hand_goal := ["relaxed", "relaxed"]
+var _snap := [false, false]
+var _dt := 0.016
 var _hair_angle := 0.0
 var _hair_vel := 0.0
 var _blink_in := 2.0
@@ -56,6 +68,8 @@ var bar_grip := Vector2.INF
 var _ride_legs: Array[Sprite2D] = []
 ## Little idle gestures when she stands still a while (Charlotte, her parents): a wave, a hop, a stretch, a look round.
 var fidgets := false
+## The front hand's shape when it has nothing special to do ("grip" for a passerby holding a leash, say); "" = relaxed.
+var hand_mode := ""
 ## A chore she is doing in place (a family member's routine): "stir", "read", "phone", "type", "wash", "drink", "fridge",
 ## "exercise" or "watch"; "" = none. Poses the arms and head; the routine adds the prop in her hand.
 var task := ""
@@ -100,7 +114,11 @@ func _build() -> void:
 	_hair_back = _part(_body, tex.hair_back, _rig.head_pivot, neck)
 	_hair_back.scale = Vector2.ONE * (_rig.head_scale as float)
 	_leg_back = _part(_body, tex.leg, _rig.leg_pivot, Vector2(_rig.leg_x, -leg), BACK_TINT)
-	_arm_back = _part(_body, tex.arm, _rig.arm_pivot, Vector2(_rig.arm_x, _rig.shoulder_y), BACK_TINT)
+	_hand_tex = {"relaxed": tex.hand_relaxed, "open": tex.hand_open, "flat": tex.hand_flat, "grip": tex.hand_grip}
+	_arms = []
+	_fores = []
+	_hands = []
+	_arm_back = _make_arm(tex, Vector2(_rig.arm_x, _rig.shoulder_y), BACK_TINT)
 	if tex.has("backpack"):
 		_part(_body, tex.backpack, _rig.pack_pivot, Vector2(-30.0 * (_rig.sx as float), _rig.shoulder_y + 4.0))
 	_leg_front = _part(_body, tex.leg, _rig.leg_pivot, Vector2(-(_rig.leg_x as float), -leg))
@@ -113,7 +131,7 @@ func _build() -> void:
 	_lids = _part(_head, tex.lids, _rig.head_pivot, Vector2.ZERO)
 	_lids.visible = false
 	_part(_head, tex.hair_front, _rig.head_pivot, Vector2.ZERO)
-	_arm_front = _part(_body, tex.arm, _rig.arm_pivot, Vector2(-(_rig.arm_x as float), _rig.shoulder_y))
+	_arm_front = _make_arm(tex, Vector2(-(_rig.arm_x as float), _rig.shoulder_y), Color.WHITE)
 	_apply_pose()
 
 
@@ -144,7 +162,18 @@ func is_petting() -> bool:
 
 
 func hand_position() -> Vector2:
-	return _arm_front.to_global(Vector2(0, _rig.arm_len))
+	return _hands[1].to_global(Vector2(0, _rig.hand_center))
+
+
+# An arm chain in the body: the upper arm at the shoulder, the forearm at its elbow, the hand at the wrist. Returns the upper arm.
+func _make_arm(tex: Dictionary, shoulder: Vector2, tint: Color) -> Sprite2D:
+	var upper := _part(_body, tex.upper, _rig.arm_pivot, shoulder, tint)
+	var fore := _part(upper, tex.fore, _rig.arm_pivot, Vector2(0, _rig.upper_len))
+	var hand := _part(fore, tex.hand_relaxed, _rig.hand_pivot, Vector2(0, _rig.fore_len))
+	_arms.append(upper)
+	_fores.append(fore)
+	_hands.append(hand)
+	return upper
 
 
 ## Current ground speed, easing between walking and running.
@@ -271,6 +300,7 @@ func _process(delta: float) -> void:
 		_apply_pose()
 		return
 	_time += delta
+	_dt = delta
 	_pet_time = maxf(_pet_time - delta, 0.0)
 	_pet = move_toward(_pet, 1.0 if _pet_time > 0.0 else 0.0, delta * 4.0)
 	_run = move_toward(_run, 1.0 if running and is_walking else 0.0, delta * 3.0)
@@ -303,15 +333,30 @@ func _apply_pose() -> void:
 	_leg_back.rotation = -stride * swing + lunge
 	var arm_swing := deg_to_rad(lerpf(22.0, 48.0, _run)) * swing
 	var stroke := deg_to_rad(lerpf(-82.0, -62.0, _pet_low)) + sin(_time * 6.0) * deg_to_rad(12.0)
-	_arm_front.rotation = lerpf(lerpf(ARM_REST - arm_swing, stroke, _pet), deg_to_rad(-58.0), _hold)
-	_arm_back.rotation = lerpf(-ARM_REST + arm_swing, deg_to_rad(-72.0), _hold)
+	_arm_front.rotation = lerpf(ARM_REST - arm_swing, stroke, _pet)
+	_arm_back.rotation = -ARM_REST + arm_swing
+	_arms_rest(swing)
+	# Stroking: the forearm sweeps to and fro as well, the hand flat.
+	_elbow_goal[1] = lerpf(_elbow_goal[1], deg_to_rad(10.0) + sin(_time * 6.0 + 1.2) * deg_to_rad(9.0), _pet)
+	if _pet > 0.3:
+		_hand_goal[1] = "flat"
+	# Carrying something in her arms: both hands reach round it.
+	if _hold > 0.0 and is_holding():
+		var hands: String = _held.get_meta("hands", "grip")
+		_reach_blend(0, _arm_back.position + Vector2.from_angle(deg_to_rad(18.0)) * (_rig.arm_len as float) * 0.86, _hold, false)
+		_reach_blend(1, _arm_front.position + Vector2.from_angle(deg_to_rad(32.0)) * (_rig.arm_len as float) * 0.86, _hold, false)
+		if _hold > 0.5:
+			_hand_goal[0] = hands
+			_hand_goal[1] = hands
 	if carry_lift > 0.0 and is_holding():
 		var arm: float = _rig.arm_len
 		_held.position = _held_base + Vector2(arm * 0.05, -arm * 0.7) * carry_lift
 		var grip := _held.transform * carry_grip
-		for a: Sprite2D in [_arm_back, _arm_front]:
-			var v := grip - a.position
-			a.rotation = lerp_angle(a.rotation, atan2(-v.x, v.y), carry_lift)
+		for i in 2:
+			_reach_blend(i, grip, carry_lift, true)
+		if carry_lift > 0.5:
+			_hand_goal[0] = "grip"
+			_hand_goal[1] = "grip"
 	var bounce := sin(walk_phase * TAU * 2.0)
 	# Running: a little hop at each push-off instead of the walk's dip.
 	_body.position.y = (1.0 - cos(_leg_front.rotation)) * (_rig.leg_len as float) * (1.0 - _run) - absf(bounce) * 6.0 * _run
@@ -331,15 +376,15 @@ func _apply_pose() -> void:
 		_head.rotation = deg_to_rad(-10.0)
 		_pedal_legs()
 		_follow_head()
-		# Hands on the bars.
-		for arm: Sprite2D in [_arm_back, _arm_front]:
-			if bar_grip == Vector2.INF:
-				arm.rotation = deg_to_rad(-62.0)
-			else:
-				# Pointed at the grip and reaching it (the far shoulder sits further back).
-				var v := _body.to_local(bar_grip) - arm.position
-				arm.rotation = atan2(-v.x, v.y)
-				arm.scale.y = clampf(v.length() / (_rig.arm_len as float), 0.8, 1.4)
+		# Hands on the bars: each arm reaches the grip (the far shoulder sits further back), elbows bent and pointing down.
+		for i in 2:
+			var target := _body.to_local(bar_grip) if bar_grip != Vector2.INF else _arms[i].position + Vector2.from_angle(deg_to_rad(38.0)) * (_rig.arm_len as float) * 0.8
+			var reach := _ik(_arms[i], target)
+			_arms[i].rotation = reach.x
+			_elbow_goal[i] = reach.y
+			_snap[i] = true
+			_hand_goal[i] = "grip"
+		_finish_arms()
 		return
 	# Breathing while she stands, and the idle gesture on top.
 	var still := 0.0 if is_walking else 1.0
@@ -350,65 +395,142 @@ func _apply_pose() -> void:
 		var w := sin(PI * clampf(t, 0.0, 1.0))
 		match _gesture:
 			"wave":
-				_arm_front.rotation = lerpf(_arm_front.rotation, deg_to_rad(-150.0) + sin(_time * 14.0) * deg_to_rad(18.0), w)
+				# The arm up beside her head, the forearm swinging from side to side at the elbow, the hand open.
+				_arm_front.rotation = lerpf(_arm_front.rotation, deg_to_rad(-172.0), w)
+				_elbow_goal[1] = lerpf(_elbow_goal[1], deg_to_rad(30.0) + sin(_time * 13.0) * deg_to_rad(24.0), w)
+				_hand_goal[1] = "open"
 			"hop":
 				_body.position.y -= absf(sin(t * TAU)) * 16.0 * w
 			"stretch":
 				_arm_front.rotation = lerpf(_arm_front.rotation, deg_to_rad(-165.0), w)
 				_arm_back.rotation = lerpf(_arm_back.rotation, deg_to_rad(-160.0), w)
+				_elbow_goal[0] = lerpf(_elbow_goal[0], deg_to_rad(14.0), w)
+				_elbow_goal[1] = lerpf(_elbow_goal[1], deg_to_rad(14.0), w)
+				_hand_goal[0] = "open"
+				_hand_goal[1] = "open"
 				_torso.scale.y += 0.03 * w
 			"look":
 				_head.rotation += sin(t * TAU) * 0.18 * w
 	if task != "":
 		_task_pose()
+	if hand_mode != "" and _hand_goal[1] == "relaxed":
+		_hand_goal[1] = hand_mode
 	_follow_head()
+	_finish_arms()
 
 
-# Arms and head for the chore in `task`: standing at the work, the front arm doing it, the back one helping.
+# The arms' own flex while they hang and swing: a slight bend, more as the arm swings forward, a good deal when running.
+func _arms_rest(swing: float) -> void:
+	var fwd_front := maxf(swing, 0.0) if is_walking else 0.0
+	var fwd_back := maxf(-swing, 0.0) if is_walking else 0.0
+	_elbow_goal[1] = deg_to_rad(9.0) + deg_to_rad(24.0) * fwd_front + _run * (deg_to_rad(56.0) + deg_to_rad(16.0) * fwd_front)
+	_elbow_goal[0] = deg_to_rad(9.0) + deg_to_rad(24.0) * fwd_back + _run * (deg_to_rad(56.0) + deg_to_rad(16.0) * fwd_back)
+	_hand_goal = ["relaxed", "relaxed"]
+	_snap = [false, false]
+
+
+# The shoulder angle and elbow flex (as x, y) that bring the middle of the palm to `target` (body space) from `arm`'s shoulder, the
+# elbow bending down and back; out of reach the arm just stretches straight at it.
+func _ik(arm: Sprite2D, target: Vector2) -> Vector2:
+	var u: float = _rig.upper_len
+	var f: float = (_rig.fore_len as float) + (_rig.hand_center as float)
+	var v := target - arm.position
+	var base := atan2(-v.x, v.y)
+	var d := clampf(v.length(), absf(u - f) + 0.5, u + f - 0.01)
+	var a := acos(clampf((u * u + d * d - f * f) / (2.0 * u * d), -1.0, 1.0))
+	var c := acos(clampf((f * f + d * d - u * u) / (2.0 * f * d), -1.0, 1.0))
+	return Vector2(base + a, a + c)
+
+
+# Arm `i` (0 back, 1 front) moves `amount` of the way from whatever pose it has to reaching `target`.
+func _reach_blend(i: int, target: Vector2, amount: float, snap: bool) -> void:
+	var reach := _ik(_arms[i], target)
+	_arms[i].rotation = lerp_angle(_arms[i].rotation, reach.x, amount)
+	_elbow_goal[i] = lerpf(_elbow_goal[i], reach.y, amount)
+	if snap and amount > 0.99:
+		_snap[i] = true
+
+
+# Puts the forearms and hands where this frame's goals say: the elbow eases toward its flex (at once for a static pose or a reach).
+func _finish_arms() -> void:
+	for i in 2:
+		if animate and not _snap[i]:
+			_elbow[i] = lerpf(_elbow[i], _elbow_goal[i], 1.0 - exp(-_dt * 16.0))
+		else:
+			_elbow[i] = _elbow_goal[i]
+		_fores[i].rotation = -(_elbow[i] as float)
+		# The wrist folds forward a little as the elbow bends.
+		_hands[i].rotation = -0.1 * clampf(_elbow[i] as float, 0.0, 1.6)
+		var tex: Texture2D = _hand_tex[_hand_goal[i]]
+		if _hands[i].texture != tex:
+			_hands[i].texture = tex
+
+
+# Arm `i` (0 back, 1 front) reaching where a straight arm at `degrees` (the old way of aiming it) would, `reach` of the way out, so
+# the elbow is bent a little (the less reach, the more), plus `wobble` px for the motion of the work. The elbow follows at once.
+func _aim(i: int, degrees: float, reach := 0.93, wobble := Vector2.ZERO) -> void:
+	var theta := deg_to_rad(degrees)
+	var target := _arms[i].position + Vector2(-sin(theta), cos(theta)) * (_rig.arm_len as float) * reach + wobble
+	var r := _ik(_arms[i], target)
+	_arms[i].rotation = r.x
+	_elbow_goal[i] = r.y
+	_snap[i] = true
+
+
+# Arms and head for the chore in `task`: standing at the work, the front arm doing it, the back one helping. Each arm aims where
+# its hand belongs (`_aim`); the hands take the shape the work needs.
 func _task_pose() -> void:
 	var t := _time
 	var f := float(facing)
 	match task:
 		"stir":
-			_arm_front.rotation = deg_to_rad(-62.0) + sin(t * 5.0) * 0.3
-			_arm_back.rotation = deg_to_rad(-52.0)
+			_aim(1, -62.0, 0.9, Vector2(cos(t * 5.0), sin(t * 5.0)) * 7.0)
+			_aim(0, -52.0, 0.9)
+			_hand_goal = ["grip", "grip"]
 			_body.rotation += 0.05 * f
 			_head.rotation += 0.1 * f
 		"read":
-			_arm_front.rotation = deg_to_rad(-64.0)
-			_arm_back.rotation = deg_to_rad(-70.0)
+			_aim(1, -64.0, 0.88)
+			_aim(0, -70.0, 0.88)
+			_hand_goal = ["flat", "grip"]
 			_head.rotation += 0.14 * f + sin(t * 0.6) * 0.02
 		"phone":
-			_arm_front.rotation = deg_to_rad(-78.0) + sin(t * 1.4) * 0.03
-			_arm_back.rotation = deg_to_rad(-12.0)
+			_aim(1, -74.0, 0.78, Vector2(0, sin(t * 1.4) * 1.5))
+			_aim(0, -12.0, 0.97)
+			_hand_goal = ["relaxed", "grip"]
 			_head.rotation += 0.15 * f
 		"type":
-			_arm_front.rotation = deg_to_rad(-70.0) + sin(t * 15.0) * 0.05
-			_arm_back.rotation = deg_to_rad(-74.0) + sin(t * 13.0 + 1.0) * 0.05
+			_aim(1, -70.0, 0.9, Vector2(0, sin(t * 15.0) * 2.5))
+			_aim(0, -74.0, 0.9, Vector2(0, sin(t * 13.0 + 1.0) * 2.5))
+			_hand_goal = ["flat", "flat"]
 			_body.rotation += 0.05 * f
 			_head.rotation += 0.12 * f
 		"wash":
-			_arm_front.rotation = deg_to_rad(-62.0) + sin(t * 6.0) * 0.22
-			_arm_back.rotation = deg_to_rad(-60.0) - sin(t * 6.0) * 0.22
+			_aim(1, -62.0, 0.88, Vector2(sin(t * 6.0) * 7.0, 0))
+			_aim(0, -60.0, 0.88, Vector2(-sin(t * 6.0) * 7.0, 0))
+			_hand_goal = ["open", "open"]
 			_body.rotation += 0.06 * f
 			_head.rotation += 0.12 * f
 		"drink":
 			var up := smoothstep(0.0, 0.5, fmod(t, 5.0)) * (1.0 - smoothstep(1.6, 2.1, fmod(t, 5.0)))
-			_arm_front.rotation = lerpf(deg_to_rad(-58.0), deg_to_rad(-124.0), up)
-			_arm_back.rotation = deg_to_rad(-20.0)
+			_aim(1, lerpf(-58.0, -130.0, up), lerpf(0.92, 0.62, up))
+			_aim(0, -14.0, 0.97)
+			_hand_goal = ["relaxed", "grip"]
 			_head.rotation += 0.08 * f * up
 		"fridge":
-			_arm_front.rotation = deg_to_rad(-78.0) + sin(t * 1.5) * 0.06
-			_arm_back.rotation = deg_to_rad(-24.0)
+			_aim(1, -76.0, 0.9, Vector2(0, sin(t * 1.5) * 2.0))
+			_aim(0, -24.0, 0.96)
+			_hand_goal = ["relaxed", "grip"]
 			_body.rotation += 0.05 * f
 		"exercise":
 			var s := sin(t * 4.0)
-			_arm_front.rotation = deg_to_rad(-95.0) - s * 1.3
-			_arm_back.rotation = deg_to_rad(-95.0) + s * 1.3
+			_aim(1, -95.0 - s * 58.0, 0.94)
+			_aim(0, -95.0 + s * 58.0, 0.94)
+			_hand_goal = ["grip", "grip"]
 			_body.position.y -= absf(s) * 7.0
 		"watch":
-			_arm_front.rotation = deg_to_rad(-10.0)
-			_arm_back.rotation = deg_to_rad(-10.0)
+			_aim(1, -10.0, 0.96)
+			_aim(0, -10.0, 0.96)
 			_head.rotation -= 0.05 * f
 
 

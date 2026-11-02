@@ -17,4 +17,4 @@
    marchant vers l'intersection : il faut cliquer la rue transversale ou appuyer sur ↑ au coin. (Coins : FAIT. Carte : FAITE, touche C ou bouton à gauche du carnet.)
 7. ~~FAIT (miroir, caméra, extincteur, porte arrière, seaux de fleurs, palette, diable, enseigne OUVERT ; catalogue `tools/shop_objects`)~~ Améliorer l'apparence des **objets du dépanneur** (les dessins de `ShopArt` : produits, meubles, accessoires).
 8. ~~FAIT~~ Les **écureuils** peuvent parfois **monter sur les poteaux électriques** puis **marcher sur les fils** (`Squirrel`, `UtilityPoles`).
-9. **Personnages** : une articulation (coude) aux bras et des mains avec des doigts (`Character`, `CharacterArt`).
+9. ~~FAIT~~ **Personnages** : une articulation (coude) aux bras et des mains avec des doigts (`Character`, `CharacterArt`).

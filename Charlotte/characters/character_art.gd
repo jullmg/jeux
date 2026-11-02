@@ -11,6 +11,9 @@ const RIGS := {
 	"senior": {"leg": 196.0, "torso": 148.0, "arm": 124.0, "head": 0.74, "sx": 1.14},
 }
 
+## How big the hands are, by age (the arms' width is the same for everyone).
+const HAND_SCALE := {"child": 1.0, "teen": 1.1, "adult": 1.22, "senior": 1.18}
+
 var look: CharacterLook
 var p := {}
 
@@ -33,7 +36,14 @@ func _build() -> Dictionary:
 	var sx: float = r.sx * look.build
 	var sy: float = torso_h / 90.0
 	var torso_top := -(leg + torso_h)
+	# The arm is three parts: upper arm (shoulder to elbow), forearm (elbow to wrist) and the hand with its fingers. `arm` stays the
+	# reach from the shoulder to the middle of the palm, as it was when the arm was one straight piece.
+	var hs: float = HAND_SCALE[look.age]
+	var hand_center := 12.0 * hs
+	var upper := (arm - hand_center) * 0.55
+	var fore := (arm - hand_center) * 0.45
 	var rig := {
+		"upper_len": upper, "fore_len": fore, "hand_center": hand_center, "hand_pivot": Vector2(22.0, 6.0) * hs,
 		"leg_len": leg, "arm_len": arm, "sx": sx, "head_scale": r.head,
 		"torso_top": torso_top, "neck_y": torso_top + 8.0 * sy, "shoulder_y": torso_top + 18.0 * sy,
 		"arm_x": 36.0 * sx, "leg_x": 8.0 * sx, "torso_pivot": Vector2(65.0 * sx, 0.0),
@@ -46,7 +56,12 @@ func _build() -> Dictionary:
 		"hair_back": _tex(_head_frame(_hair_back())),
 		"hair_front": _tex(_head_frame(_hair_front() + _hat())),
 		"torso": _tex(_torso_svg(sx, sy)),
-		"arm": _tex(_arm_svg(arm)),
+		"upper": _tex(_upper_arm_svg(upper)),
+		"fore": _tex(_forearm_svg(fore)),
+		"hand_relaxed": _tex(_hand_svg("relaxed", hs)),
+		"hand_open": _tex(_hand_svg("open", hs)),
+		"hand_flat": _tex(_hand_svg("flat", hs)),
+		"hand_grip": _tex(_hand_svg("grip", hs)),
 		"leg": _tex(_leg_svg(leg)),
 	}
 	if look.backpack != "":
@@ -538,29 +553,118 @@ func _coat() -> String:
 	return s
 
 
-func _arm_svg(length: float) -> String:
-	var hy := 8.0 + length
-	var s := _f('<rect x="9" y="20" width="12" height="%s" rx="5" fill="{skin}" stroke="{skin_line}" stroke-width="2.5"/>' % (length - 16.0))
-	s += _f('<circle cx="15" cy="%s" r="10" fill="{skin}" stroke="{skin_line}" stroke-width="2.5"/>' % hy)
-	# Under overalls the sleeves belong to the shirt, in the accent colour.
+# Under overalls the sleeves belong to the shirt, in the accent colour: run `build` with that palette and put the palette back.
+func _sleeve_palette(build: Callable) -> String:
 	var palette := p.duplicate()
 	if look.outfit == "overalls":
 		p.cloth = p.accent
 		p.cloth_line = p.accent_line
-	match look.sleeve:
-		"puff":
-			s += _f('<path d="M2 10 Q15 -3 28 10 Q30 24 24 30 H6 Q0 24 2 10 Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>')
-			if look.pattern == "dots":
-				s += '<circle cx="18" cy="14" r="2.8" fill="#FFFFFF"/>'
-			s += '<path d="M5 28 Q15 33 25 28" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>'
-		"short":
-			s += _f('<path d="M3 8 Q15 -2 27 8 L26 36 Q15 40 4 36 Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>')
-		"long":
-			s += _f('<path d="M3 8 Q15 -2 27 8 L25 %s Q15 %s 5 %s Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [hy - 9, hy - 5, hy - 9])
-			s += _f('<rect x="5" y="%s" width="20" height="7" rx="2" fill="{cloth_line}" opacity="0.6"/>' % (hy - 17))
-			s += _f('<path d="M8 %s q7 4 14 0 M10 %s q6 3 11 0" stroke="{cloth_line}" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.45"/>' % [hy * 0.55, hy * 0.55 + 6.0])
+	var s: String = build.call()
 	p = palette
-	return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="%d" viewBox="0 0 30 %d">%s</svg>' % [ceili(hy + 12), ceili(hy + 12), s]
+	return s
+
+
+## Shoulder to elbow: the skin (with the round of the elbow at the bottom, no seam) and the sleeve, which for a long sleeve
+## goes all the way down to a cloth elbow. Canvas 30 wide; the shoulder pivot is at (15, 8) and the elbow at (15, 8 + length).
+func _upper_arm_svg(length: float) -> String:
+	var ey := 8.0 + length
+	var s := _f('<rect x="9" y="14" width="12" height="%s" rx="5" fill="{skin}" stroke="{skin_line}" stroke-width="2.5"/>' % (length - 4.0))
+	s += _f('<circle cx="15" cy="%s" r="6.5" fill="{skin}" stroke="{skin_line}" stroke-width="2.5"/>' % ey)
+	s += _f('<rect x="10.4" y="%s" width="9.2" height="13" fill="{skin}"/>' % (ey - 9.0))
+	s += _sleeve_palette(func() -> String:
+		var t := ""
+		match look.sleeve:
+			"puff":
+				t += _f('<path d="M2 10 Q15 -3 28 10 Q30 24 24 30 H6 Q0 24 2 10 Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>')
+				if look.pattern == "dots":
+					t += '<circle cx="18" cy="14" r="2.8" fill="#FFFFFF"/>'
+				t += '<path d="M5 28 Q15 33 25 28" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>'
+			"short":
+				t += _f('<path d="M3 8 Q15 -2 27 8 L26 36 Q15 40 4 36 Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>')
+			"long":
+				t += _f('<path d="M3 8 Q15 -2 27 8 L25 %s Q15 %s 5 %s Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [ey, ey + 4.0, ey])
+				t += _f('<circle cx="15" cy="%s" r="8.4" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5"/>' % ey)
+				t += _f('<rect x="7" y="%s" width="16" height="12" fill="{cloth}"/>' % (ey - 11.0))
+				t += _f('<path d="M8 %s q7 4 14 0 M10 %s q6 3 11 0" stroke="{cloth_line}" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.45"/>' % [length * 0.4 + 8.0, length * 0.4 + 14.0])
+		return t)
+	return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="%d" viewBox="0 0 30 %d">%s</svg>' % [ceili(ey + 12), ceili(ey + 12), s]
+
+
+## Elbow to wrist: slimmer than the upper arm, a round cap at the elbow, and for a long sleeve the cloth down to a cuff, with the
+## little creases of a bent elbow. Canvas 30 wide; the elbow pivot is at (15, 8); the wrist at (15, 8 + length).
+func _forearm_svg(length: float) -> String:
+	var wy := 8.0 + length
+	var s := _f('<rect x="9.8" y="8" width="10.4" height="%s" rx="4.5" fill="{skin}" stroke="{skin_line}" stroke-width="2.2"/>' % (length + 3.0))
+	s += _f('<circle cx="15" cy="8" r="5.8" fill="{skin}" stroke="{skin_line}" stroke-width="2.2"/>')
+	s += _f('<rect x="11" y="3" width="8" height="12" fill="{skin}"/>')
+	s += _f('<path d="M11 14 V%s" stroke="{skin_shade}" stroke-width="2" opacity="0.5"/>' % (wy - 4.0))
+	s += _sleeve_palette(func() -> String:
+		var t := ""
+		if look.sleeve == "long":
+			t += _f('<path d="M5.5 8 L7.6 %s L22.4 %s L24.5 8 Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [wy - 5.0, wy - 5.0])
+			t += _f('<circle cx="15" cy="8" r="8.4" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5"/>')
+			t += _f('<rect x="6.4" y="3" width="17.2" height="13" fill="{cloth}"/>')
+			t += _f('<rect x="6.6" y="%s" width="16.8" height="8" rx="3" fill="{cloth_line}" opacity="0.55"/>' % (wy - 12.0))
+			t += _f('<path d="M8.5 14 q6.5 4.5 13 0 M9.5 19.5 q5.5 3.5 11 0 M10.5 25 q4.5 3 9 0" stroke="{cloth_line}" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.4"/>')
+		return t)
+	return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="%d" viewBox="0 0 30 %d">%s</svg>' % [ceili(wy + 10), ceili(wy + 10), s]
+
+
+# One finger: two segments (`a1` then `a2` degrees, negative = curling forward) from its root at (x, y), width `w`.
+func _finger(x: float, y: float, w: float, l1: float, l2: float, a1: float, a2: float) -> String:
+	var rx := w / 2.0
+	var s := '<g transform="translate(%s %s) rotate(%s)">' % [x, y, a1]
+	s += _f('<rect x="%s" y="0" width="%s" height="%s" rx="%s" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>' % [-rx, w, l1, rx])
+	s += '<g transform="translate(0 %s) rotate(%s)">' % [l1 - 1.0, a2]
+	s += _f('<rect x="%s" y="0" width="%s" height="%s" rx="%s" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>' % [-rx * 0.96, w * 0.96, l2, rx * 0.96])
+	s += _f('<ellipse cx="0" cy="%s" rx="%s" ry="1.6" fill="{skin_shade}" opacity="0.55"/>' % [l2 - 2.5, rx * 0.55])
+	s += '</g></g>'
+	return s
+
+
+## A hand, wrist at the top centre, thumb on the +x (front) side: "relaxed" (fingers loosely curled, hanging), "open" (spread,
+## for a wave or a stretch), "flat" (fingers together, stroking a cat or typing) or "grip" (a fist on a handle or a carton).
+## Canvas 44 x 50 units (times `scale`); the wrist is at (22, 6).
+func _hand_svg(mode: String, scale: float) -> String:
+	var s := ""
+	var palm_top := '<rect x="17" y="2" width="10" height="7" fill="{skin}"/>'
+	match mode:
+		"relaxed":
+			# Pinky, ring, middle, index: each a little longer than the last and curled a little more.
+			for f in [[16.8, 3.8, 7.5, 5.0, -2.0, -20.0], [20.8, 4.2, 9.5, 6.0, -4.0, -22.0], [24.8, 4.2, 10.0, 6.5, -6.0, -24.0], [28.6, 4.0, 9.0, 6.0, -9.0, -26.0]]:
+				s += _finger(f[0], 14.0, f[1], f[2], f[3], f[4], f[5])
+			s += _f('<rect x="14.2" y="4" width="15.6" height="16.5" rx="6.2" fill="{skin}" stroke="{skin_line}" stroke-width="1.7"/>')
+			s += _f('<path d="M16 17.5 Q22 19.8 28.4 17.5" stroke="{skin_shade}" stroke-width="1.4" fill="none" opacity="0.6"/>')
+			s += '<g transform="translate(29.2 8.5) rotate(-36)">'
+			s += _f('<rect x="-2.7" y="0" width="5.4" height="8.2" rx="2.7" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
+			s += '<g transform="translate(0 7) rotate(-16)">'
+			s += _f('<rect x="-2.5" y="-1" width="5" height="6.4" rx="2.5" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g></g>')
+		"open":
+			for f in [[16.8, 3.8, 15.0, 0.0, 14.0, 0.0], [20.8, 4.2, 18.0, 0.0, 6.0, 0.0], [24.8, 4.2, 19.0, 0.0, -3.0, 0.0], [28.6, 4.0, 17.0, 0.0, -12.0, 0.0]]:
+				s += _finger(f[0], 14.0, f[1], f[2], 0.01, f[4], 0.0)
+			s += _f('<rect x="14.2" y="4" width="15.6" height="16.5" rx="6.2" fill="{skin}" stroke="{skin_line}" stroke-width="1.7"/>')
+			s += '<g transform="translate(29.4 9.5) rotate(-58)">'
+			s += _f('<rect x="-2.8" y="0" width="5.6" height="13" rx="2.8" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
+		"flat":
+			for f in [[17.3, 4.4, 13.0, 0.01, -1.0, 0.0], [21.3, 4.6, 16.0, 0.01, -2.0, 0.0], [25.3, 4.6, 17.0, 0.01, -3.0, 0.0], [29.0, 4.4, 15.5, 0.01, -4.0, 0.0]]:
+				s += _finger(f[0], 14.0, f[1], f[2], f[3], f[4], 0.0)
+			s += _f('<rect x="14.2" y="4" width="15.8" height="16.5" rx="6.2" fill="{skin}" stroke="{skin_line}" stroke-width="1.7"/>')
+			s += '<g transform="translate(29.6 9) rotate(-14)">'
+			s += _f('<rect x="-2.7" y="0" width="5.4" height="11" rx="2.7" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
+		_:
+			# The fist: a block of palm, four curled fingers stacked on the front of it, the thumb folded over them.
+			s += _f('<rect x="13.5" y="4" width="17" height="18" rx="7" fill="{skin}" stroke="{skin_line}" stroke-width="1.7"/>')
+			for i in 4:
+				var y := 8.5 + i * 4.3
+				var len := 13.0 - absf(i - 1.5) * 1.0
+				s += _f('<rect x="20" y="%s" width="%s" height="4.6" rx="2.3" fill="{skin}" stroke="{skin_line}" stroke-width="1.4"/>' % [y, len])
+			s += _f('<path d="M20.5 8.2 H31 M20.5 12.5 H31.6 M20.5 16.8 H31.4" stroke="{skin_shade}" stroke-width="1" opacity="0.55"/>')
+			s += '<g transform="translate(26 6.5) rotate(-72)">'
+			s += _f('<rect x="-2.7" y="-1" width="5.4" height="10" rx="2.7" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
+	s += _f(palm_top)
+	var w := ceili(44.0 * scale)
+	var h := ceili(50.0 * scale)
+	return '<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 44 50">%s</svg>' % [w, h, s]
 
 
 func _leg_svg(length: float) -> String:
