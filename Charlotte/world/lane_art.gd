@@ -462,37 +462,71 @@ static func croque_livre(rng: RandomNumberGenerator) -> ImageTexture:
 
 # ── Where the lane meets its cross lanes ────────────────────
 
-## The end of a cross lane, where it meets an avenue: the lane narrowing a little to the sidewalk, the asphalt, and
-## across the avenue the sunlit plexes (bricks, windows, a door and its stairs), between a garage wall and a fence.
+## The end of a cross lane, where it meets an avenue, as you see it from inside the lane: the lane runs straight ahead
+## between a brick garage wall (left) and a board fence (right) and stops at the avenue's sidewalk, which runs ACROSS the
+## view (slabs and a curb, a dip where the lane comes out), then the street (asphalt, kerb, a dashed line), the far sidewalk,
+## and the sunlit plexes on the other side (bricks, windows, a door and its stairs). The sidewalk and the street reach both
+## edges of the picture, only the walls' near sides hide a little of them.
 static func street_end(rng: RandomNumberGenerator, w: float) -> ImageTexture:
 	var vp := Vector2(w / 2.0, 430.0)
-	var far := 0.5
+	var far := 0.2
 	var at := func(p: Vector2) -> Vector2: return vp + (p - vp) * (1.0 - far)
+	var lane_end: float = at.call(Vector2(0, H)).y
+	# The bands across the view, near to far: our sidewalk, the street, the far sidewalk.
+	var walk_near := lane_end
+	var walk_far := walk_near - 30.0
+	var road_far := walk_far - 54.0
+	var far_walk := road_far - 14.0
 	var s := ""
-	# Across the avenue: two plex fronts in the sun.
-	var a0: Vector2 = at.call(Vector2(-60, 120))
-	var a1: Vector2 = at.call(Vector2(w + 60, H - 70))
-	var split := lerpf(a0.x, a1.x, rng.randf_range(0.35, 0.65))
-	for part in [[a0.x, split], [split, a1.x]]:
+	# Across the avenue: two plex fronts in the sun, from edge to edge.
+	var top := far_walk - 214.0
+	var split := w * rng.randf_range(0.35, 0.65)
+	for part in [[-4.0, split], [split, w + 4.0]]:
 		var c: String = PropArt._pick(rng, BRICKS)
-		s += _rect(part[0], a0.y, part[1] - part[0], a1.y - a0.y, c)
-		s += _rect(part[0], a0.y - 6, part[1] - part[0], 8, "#55585C")
-		var x: float = part[0] + 10.0
-		while x < part[1] - 20.0:
-			for y in [a0.y + 18.0, a0.y + 78.0]:
-				s += _rect(x, y, 16, 30, "#F2F0EA") + _rect(x + 2, y + 2, 12, 26, "#8FA7B8")
-			x += 34.0
-	s += _rect(split - 12, a1.y - 52, 24, 52, "#7A4A2E", 'stroke="#F2F0EA" stroke-width="3"')
-	s += _line(Vector2(split + 14, a0.y + 60), Vector2(split + 40, a1.y), "#1F1F1F", 2.0)
-	# Their sidewalk, the avenue, our sidewalk.
-	s += _rect(a0.x, a1.y, a1.x - a0.x, 10, "#CFCAC0")
-	s += _rect(a0.x, a1.y + 10, a1.x - a0.x, 24, "#5A5956")
-	s += _rect(a0.x + 20, a1.y + 21, 26, 2, "#E9E4D8")
-	var walk: Vector2 = at.call(Vector2(0, H))
-	s += _poly([Vector2(a0.x, a1.y + 34), Vector2(a1.x, a1.y + 34), Vector2(a1.x, walk.y), Vector2(a0.x, walk.y)], "#CFCAC0")
-	# The lane running out to the sidewalk, between a brick garage wall (left) and a board fence (right).
+		var x0: float = part[0]
+		var x1: float = part[1]
+		s += _rect(x0, top, x1 - x0, far_walk - top, c)
+		s += _rect(x0, top - 7, x1 - x0, 9, "#55585C")
+		s += _rect(x0, top + 2, x1 - x0, 3, _light(c, 0.2), 'opacity="0.7"')
+		var x := x0 + 14.0
+		while x < x1 - 24.0:
+			for y in [top + 28.0, top + 98.0]:
+				s += _rect(x - 2, y - 2, 20, 36, _light(c, 0.35)) + _rect(x, y, 16, 32, "#8FA7B8") + _rect(x, y, 16, 6, "#B8CAD6")
+			x += 36.0
+		s += _rect(x0, far_walk - 46, x1 - x0, 3, "#C9C2B2", 'opacity="0.8"')
+	# A door with its stairs and a railing, where the two plexes meet.
+	s += _rect(split - 13, far_walk - 62, 26, 62, "#7A4A2E", 'stroke="#F2F0EA" stroke-width="3"')
+	for k in 4:
+		s += _rect(split - 18 - k * 2, far_walk - 12 + k * 3, 36 + k * 4, 3, "#BDB7AA")
+	s += _line(Vector2(split + 24, top + 140), Vector2(split + 44, far_walk), "#1F1F1F", 2.0)
+	# Far sidewalk with its kerb.
+	s += _rect(-4, road_far - 14, w + 8, 14, "#D8D3C8")
+	s += _rect(-4, road_far - 2, w + 8, 3, "#9A968C")
+	# The street: asphalt, a darker band along the kerbs, patches, a dashed line down the middle.
+	s += _rect(-4, road_far, w + 8, walk_far - road_far, "#5A5956")
+	s += _rect(-4, road_far, w + 8, 6, "#4A4947")
+	s += _rect(-4, walk_far - 7, w + 8, 7, "#4A4947")
+	for k in 3:
+		s += _rect(rng.randf_range(10.0, w - 60.0), rng.randf_range(road_far + 12.0, walk_far - 14.0), rng.randf_range(24.0, 50.0), 5, "#656461", 'opacity="0.8"')
+	var dash := -6.0
+	var line_y := (road_far + walk_far) / 2.0 - 1.0
+	while dash < w:
+		s += _rect(dash, line_y, 26, 2.5, "#E9E4D8", 'opacity="0.9"')
+		dash += 44.0
+	# Our sidewalk: slabs with joints across it, the kerb on its far edge, a shadow under the kerb.
+	s += _rect(-4, walk_far, w + 8, walk_near - walk_far + 2, "#CFCAC0")
+	s += _rect(-4, walk_far, w + 8, 4, "#A8A397")
+	s += _rect(-4, walk_far + 4, w + 8, 2, "#B8B3A7", 'opacity="0.7"')
+	var joint := fmod(rng.randf_range(0.0, 60.0), 60.0) - 60.0
+	while joint < w + 60.0:
+		s += _line(Vector2(joint, walk_far + 5.0), Vector2(joint - 10.0, walk_near + 2.0), "#A8A397", 1.4)
+		joint += 62.0
+	# The sidewalk dips where the lane comes out (a ramp, lighter, with its slanted sides).
+	s += _poly([Vector2(52, walk_near + 2), Vector2(w - 52, walk_near + 2), Vector2(w - 70, walk_far + 1), Vector2(70, walk_far + 1)], "#BDB8AC", 'opacity="0.8"')
+	# The lane running straight out to the sidewalk.
 	s += _poly([Vector2(10, H), Vector2(w - 10, H), at.call(Vector2(w - 10, H)), at.call(Vector2(10, H))], "#A9A59D")
 	s += _line(Vector2(w / 2.0, H), at.call(Vector2(w / 2.0, H)), "#6E8A4A", 3.0)
+	# ...between a brick garage wall (left) and a board fence (right), their far ends where the sidewalk begins.
 	var wall: String = PropArt._pick(rng, BRICKS)
 	s += _poly([Vector2(0, H - 240), at.call(Vector2(0, H - 240)), at.call(Vector2(0, H)), Vector2(0, H)], wall)
 	for k in 12:
@@ -502,9 +536,9 @@ static func street_end(rng: RandomNumberGenerator, w: float) -> ImageTexture:
 	s += _poly([Vector2(w, H - 175), at.call(Vector2(w, H - 175)), at.call(Vector2(w, H)), Vector2(w, H)], fence)
 	for k in 10:
 		var f := pow(k / 10.0, 0.7)
-		var top := Vector2(w, H - 175).lerp(at.call(Vector2(w, H - 175)), f)
+		var top_p := Vector2(w, H - 175).lerp(at.call(Vector2(w, H - 175)), f)
 		var bottom := Vector2(w, H).lerp(at.call(Vector2(w, H)), f)
-		s += _line(top, bottom, _dark(fence, 0.3), 1.0)
+		s += _line(top_p, bottom, _dark(fence, 0.3), 1.0)
 	s += _vine(rng, w - 60.0, 50.0, H - 175.0, vine_colors())
 	return _tex(w, s)
 
