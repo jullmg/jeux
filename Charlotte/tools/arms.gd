@@ -3,13 +3,15 @@ extends Node2D
 # Godot --path . --screen 1 res://tools/arms.tscn -- --screenshot=/tmp/arms.png [--set=0] [--zoom=1.0] [--only=N (one pose, centred)]
 #   set 0: standing, walking (two phases), running      set 1: gestures (wave, stretch), petting, holding things
 #   set 2: tasks (stir, read, phone, type, wash, drink, fridge, exercise)       set 3: legs (pants, tights, socks, boots) walking, running, hop
-#   set 4: ages and long sleeves
+#   set 4: clothes (dress, tshirt, sweater, coat, hoodie, overalls)       set 5: ages and long sleeves
 
 const SETS := [
 	[["rest", {}], ["walk 0", {"walk": 0.0}], ["walk .25", {"walk": 0.25}], ["walk .5", {"walk": 0.5}], ["walk .75", {"walk": 0.75}], ["run 0", {"walk": 0.1, "run": true}], ["run .5", {"walk": 0.6, "run": true}]],
 	[["wave", {"gesture": "wave"}], ["stretch", {"gesture": "stretch"}], ["pet low", {"pet": 1.0}], ["pet high", {"pet": 0.0}], ["milk", {"carry": "milk"}], ["can", {"carry": "can"}], ["pour", {"carry": "can", "lift": 1.0}], ["cat", {"carry": "cat:cat"}]],
 	[["stir", {"task": "stir"}], ["read", {"task": "read"}], ["phone", {"task": "phone"}], ["type", {"task": "type"}], ["wash", {"task": "wash"}], ["drink", {"task": "drink"}], ["fridge", {"task": "fridge"}], ["exercise", {"task": "exercise"}]],
 	[["pants walk", {"age": "child", "legwear": "pants", "shoes": "sneaker", "walk": 0.0}], ["tights walk", {"age": "child", "legwear": "tights", "walk": 0.1}], ["socks walk", {"age": "child", "legwear": "socks", "walk": 0.2}], ["rain boots", {"age": "child", "legwear": "pants", "shoes": "rain_boot", "walk": 0.0}], ["boots adult", {"age": "adult", "legwear": "pants", "shoes": "boot", "walk": 0.1}], ["adult run", {"age": "adult", "legwear": "pants", "shoes": "sneaker", "walk": 0.05, "run": true}], ["teen run", {"age": "teen", "legwear": "tights", "walk": 0.6, "run": true}], ["hop", {"age": "child", "legwear": "pants", "gesture": "hop"}]],
+	[["dress dots", {"outfit": "dress", "pattern": "dots", "color": "#E85FA0"}], ["dress flowers", {"outfit": "dress", "pattern": "flowers", "color": "#5DB6BE", "sleeve": "long"}], ["tshirt stripes", {"outfit": "tshirt", "pattern": "stripes", "color": "#3D8BD9", "legwear": "pants", "shoes": "sneaker"}], ["sweater", {"outfit": "sweater", "pattern": "zigzag", "color": "#E8812E", "sleeve": "long", "legwear": "pants", "shoes": "boot"}],
+	 ["coat", {"outfit": "coat", "pattern": "none", "color": "#C9503C", "sleeve": "long", "legwear": "pants", "shoes": "rain_boot", "scarf": "#FFD23F", "hat": "tuque"}], ["hoodie", {"outfit": "hoodie", "pattern": "none", "color": "#6DB35A", "sleeve": "long", "legwear": "pants", "shoes": "sneaker"}], ["overalls", {"outfit": "overalls", "pattern": "none", "color": "#3E6FB0", "sleeve": "long", "legwear": "pants", "shoes": "sneaker"}], ["tshirt heart", {"outfit": "tshirt", "pattern": "heart", "color": "#F2A7C9", "legwear": "tights", "shoes": "mary_jane"}]],
 	[["child", {"age": "child"}], ["teen", {"age": "teen"}], ["adult", {"age": "adult"}], ["senior", {"age": "senior"}], ["long sleeve", {"age": "child", "sleeve": "long"}], ["short", {"age": "child", "sleeve": "short"}], ["adult long", {"age": "adult", "sleeve": "long"}]],
 ]
 
@@ -40,6 +42,16 @@ func _ready() -> void:
 			look.shoes = spec.shoes
 		if spec.has("outfit"):
 			look.outfit = spec.outfit
+		if spec.has("pattern"):
+			look.pattern = spec.pattern
+		if spec.has("color"):
+			look.outfit_color = Color(spec.color)
+			# Charlotte's exact colours would win over the new one (the wardrobe drops them too).
+			look.overrides = {}
+		if spec.has("scarf"):
+			look.scarf = spec.scarf
+		if spec.has("hat"):
+			look.hat = spec.hat
 		var c := Character.new()
 		c.look = look
 		c.scale = Vector2.ONE * 0.62 * zoom

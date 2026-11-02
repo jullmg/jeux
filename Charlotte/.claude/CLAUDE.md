@@ -211,6 +211,13 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   start below the knee). `Character._knees` bends the swinging leg when walking (more when running), `_stance_drop` lowers the hips so the
   lower foot stays on the ground; a lunge (petting) keeps both legs straight and symmetrical so both feet stay down; hop and exercise tuck the
   knees; on a bike `_pedal_legs` solves thigh and shin to the pedal (IK).
+- Clothes carry light and detail: `CharacterArt.CLOTH_DEFS` (a sheen from the upper left, shade toward the hem; `_sheen(path)` lays it over any garment
+  outline: `TOP_BODY`, `DRESS_SKIRT`, `DRESS_BODICE`, `COAT_BODY`), `LEG_DEFS` (light across a leg). Tops have a slight waist and a curved hem;
+  T-shirts a ribbed collar and a stitched hem; sweaters and hoodies knitted ribbing, a rolled neck and (hoodie) a stitched kangaroo pocket; dresses
+  darts, panel seams and piping along the hem; coats pockets with flaps, belt and buckle, epaulettes, two buttons rows and a sewn hem; overalls a
+  bib pocket, denim texture and stitching; trousers a stitched cuff and an outer seam; socks a ribbed cuff with a stripe; shoes laces and eyelets,
+  a buckled strap, a tread on the sole; caps seams, tuques a sheen, scarves knitted rows. Charlotte's own `overrides` (exact colours) still win over
+  the derived palette, so her usual dress keeps its colours (a design sheet that changes `outfit_color` must clear `look.overrides`).
 - `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through, breathing, soft shading by
   `shaders/character_shade.gdshader` (lit from the left, follows `facing`), hair strands clipped to each hairstyle (`CharacterArt._strands`), clothing folds
   (dress gathers and hem, top creases, elbow and knee creases), idle gestures when `fidgets` (wave, hop,

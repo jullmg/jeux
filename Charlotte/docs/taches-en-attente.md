@@ -19,4 +19,5 @@
 8. ~~FAIT~~ Les **écureuils** peuvent parfois **monter sur les poteaux électriques** puis **marcher sur les fils** (`Squirrel`, `UtilityPoles`).
 9. ~~FAIT~~ **Personnages** : une articulation (coude) aux bras et des mains avec des doigts (`Character`, `CharacterArt`).
 10. ~~FAIT~~ **Genoux** aux jambes des personnages (articulation), puis **réviser tout** (cyclistes, objets portés, laisse, etc.) pour ne rien briser.
-11. **Améliorer l'apparence des vêtements** des personnages (`CharacterArt`).
+11. ~~FAIT~~ **Améliorer l'apparence des vêtements** des personnages (`CharacterArt`).
+12. **Expressions faciales** des personnages selon leurs actions (yeux, bouche, sourcils : content, concentré, surpris, goûte, dort…).
