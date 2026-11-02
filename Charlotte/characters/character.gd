@@ -336,8 +336,10 @@ func _apply_pose() -> void:
 	_arm_front.rotation = lerpf(ARM_REST - arm_swing, stroke, _pet)
 	_arm_back.rotation = -ARM_REST + arm_swing
 	_arms_rest(swing)
-	# Stroking: the forearm sweeps to and fro as well, the hand flat.
-	_elbow_goal[1] = lerpf(_elbow_goal[1], deg_to_rad(10.0) + sin(_time * 6.0 + 1.2) * deg_to_rad(9.0), _pet)
+	# Stroking: the hand reaches where the straight arm used to (the arm nearly out, the forearm sweeping to and fro), flat.
+	if _pet > 0.0:
+		var out := Vector2(-sin(stroke), cos(stroke)) * (_rig.arm_len as float) * 0.95
+		_reach_blend(1, _arm_front.position + out + Vector2(0, sin(_time * 6.0 + 1.2) * 4.0), _pet, false)
 	if _pet > 0.3:
 		_hand_goal[1] = "flat"
 	# Carrying something in her arms: both hands reach round it.
