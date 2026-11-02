@@ -864,6 +864,53 @@ func _build_squirrels() -> void:
 		if not Season.is_winter():
 			squirrel.trees = _tree_sprites
 		add_child(squirrel)
+	_build_trash_bag()
+
+
+# Now and then (about one visit in three) a garbage bag sits on the sidewalk and a squirrel is tearing a hole in it. Placed
+# clear of the cross streets, trees, lamps, hydrants and racks, and not right where Charlotte starts, with the
+# global random numbers (so it changes from visit to visit) and a squirrel of its own.
+func _build_trash_bag() -> void:
+	if randf() > 0.34:
+		return
+	var blocked: Array[Vector2] = []
+	for cs in _cross_streets:
+		blocked.append(Vector2(cs.x0 - 120.0, cs.x1 + 120.0))
+	for after in trees_after + lamps_after:
+		blocked.append(Vector2(_starts[after + 1] - 120.0, _starts[after + 1] + 120.0))
+	for at in hydrants_at:
+		blocked.append(Vector2(_street_x(at) - 110.0, _street_x(at) + 110.0))
+	for at in racks_at:
+		blocked.append(Vector2(_street_x(at) - 100.0, _street_x(at) + 260.0))
+	blocked.append(Vector2(_charlotte.position.x - 450.0, _charlotte.position.x + 450.0))
+	var spots: Array[float] = []
+	var x := 260.0
+	while x < _street_width - 260.0:
+		var free := true
+		for b in blocked:
+			if x >= b.x and x <= b.y:
+				free = false
+		if free:
+			spots.append(x)
+		x += 40.0
+	if spots.is_empty():
+		return
+	var bag := TrashBag.new()
+	bag.position = Vector2(spots[randi() % spots.size()], 652.0)
+	bag.side = 1.0 if randf() < 0.5 else -1.0
+	bag.seed_value = randi()
+	bag.scale = Vector2.ONE * 0.85
+	add_child(bag)
+	var squirrel := Squirrel.new()
+	squirrel.bag = bag
+	squirrel.position = Vector2(bag.work_x(), 652.0)
+	squirrel.scale = Vector2.ONE * 0.85
+	squirrel.bounds = Vector2(maxf(bag.position.x - 500.0, 60.0), minf(bag.position.x + 500.0, _street_width - 60.0))
+	squirrel.threat = _charlotte
+	squirrel.poles = _pole_xs
+	if not Season.is_winter():
+		squirrel.trees = _tree_sprites
+	add_child(squirrel)
 
 
 # Now and then a stray cat wanders in from just off screen.

@@ -255,6 +255,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   by season, striped flexible bollards; drawn in front of people.
 - Tree limbs (`PropArt.tree`, `LIMB_TIPS`): the trunk outline's two limb ends are flat cuts that random foliage may not hide, so both limbs go on as thinner rounded branches with a fork (also in winter, before `_bare_crown`), and in leaf seasons a small tuft (own RNG, seed 5, so the tree's draws don't change) sits at each tip. Never end a branch in a flat cut.
 - Seniors lean forward only 1.5° (`rig.lean`); 5° made the head hang well ahead of the feet.
+- Garbage bag with a squirrel (`world/trash_bag.gd`, `TrashBag`; `StreetScene._build_trash_bag`, about one street visit in three, global random numbers, clear of cross streets/trees/lamps/hydrants/racks and Charlotte's start): a black bag with a knot; its own `Squirrel` (`bag` set) sits beside it in state "gnaw" (`_draw_gnaw`), the hole (`TrashBag.hole` 0..1, ~20 s) grows and scraps spill out (chip bag, crust, apple core, crumbs). Charlotte inside `SCARE` (or `SCARE_RUNNING`) makes it flee as usual; the torn bag stays, and once she is far off (`_bag_is_quiet`) the squirrel may come back (`to_bag`) and carry on.
+- Charlotte's mouth is always the closed smile (`CharacterLook.usual()` and `charlotte()` force `mouth = "smile"`, also for old saved outfits); other characters keep a random smile or open smile.
 - Street trees come in sizes (`StreetScene.TREE_SIZES` 0.38–0.72, `_tree_scales`, own RNG; lane yard trees 0.45–0.78).
   Squirrels work from each sprite's position, scale and texture alpha, so any size is climbable.
 - Street trees stand in a `TreePit` (`world/tree_pit.gd`, added in `StreetScene._build_trees`): grass, a neighbour's

@@ -4,7 +4,8 @@ extends Node2D
 ## often up the nearest tree, where it hides in the canopy and now and then pokes its head out. Now and then one climbs a
 ## utility pole instead, steps onto the thick cable and walks along the wire (sitting a while, going on to the next pole
 ## or back down). Squirrels are added before the trees, so a tree's canopy and trunk hide them naturally; up on a pole
-## or the wire they are drawn above the poles (z_index 1).
+## or the wire they are drawn above the poles (z_index 1). One squirrel may work at a `TrashBag` (`bag`): it sits beside it
+## gnawing a hole in it, runs off when Charlotte comes close and, once she has gone, comes back to carry on.
 
 const SCARE := 170.0
 const SCARE_RUNNING := 280.0
@@ -24,6 +25,8 @@ var fur := Color("#7D7670")
 var trees: Array[Sprite2D] = []
 ## Utility pole x positions (the scene's list, filled later), left to right.
 var poles: Array[float] = []
+## The garbage bag it is gnawing (state "gnaw"), if any.
+var bag: TrashBag
 
 var _state := "idle"
 var _timer := 1.0
@@ -47,6 +50,7 @@ var _pole_i := 0
 var _span := 0
 var _wire_goal := 0.0
 var _wire_budget := 0.0
+var _gnaw_bite := 0.0
 
 static var _canopy_images := {}
 
@@ -56,6 +60,8 @@ func _ready() -> void:
 	_timer = randf_range(0.5, 3.0)
 	if randf() < 0.35:
 		fur = Color("#2B2826")
+	if bag:
+		_start_gnaw()
 
 
 func _process(delta: float) -> void:
@@ -75,10 +81,12 @@ func _process(delta: float) -> void:
 						_run_to_tree(tree, 170.0)
 					elif pole >= 0 and randf() < 0.14:
 						_run_to_pole(pole, 170.0)
+					elif bag and randf() < 0.6 and _bag_is_quiet():
+						_go(bag.work_x(), 170.0, "to_bag")
 					else:
 						_go(position.x + randf_range(-260, 260), 170.0, "run")
-		"run", "flee", "to_tree", "to_pole":
-			if _state == "run" and near:
+		"run", "flee", "to_tree", "to_pole", "to_bag":
+			if (_state == "run" or _state == "to_bag") and near:
 				_flee()
 			var step := signf(_target - position.x) * _speed * delta
 			if absf(_target - position.x) <= absf(step):
@@ -87,12 +95,19 @@ func _process(delta: float) -> void:
 					_start_climb()
 				elif _state == "to_pole":
 					_start_pole_climb()
+				elif _state == "to_bag":
+					_start_gnaw()
 				else:
 					_state = "idle"
 					_timer = randf_range(1.5, 4.5)
 			else:
 				position.x += step
 			_hop = fmod(_hop + delta * _speed / 38.0, 1.0)
+		"gnaw":
+			if near:
+				_flee()
+			else:
+				_gnaw(delta)
 		"up":
 			position.y -= CLIMB_SPEED * delta
 			_hop = fmod(_hop + delta * CLIMB_SPEED / 30.0, 1.0)
@@ -156,6 +171,29 @@ func _process(delta: float) -> void:
 	# Up a pole or on the wire it is in front of the poles (and the houses behind them), but not down among the people.
 	z_index = 1 if (_state in ["pole_up", "pole_down", "wire", "wire_sit"] and position.y < 520.0) else 0
 	queue_redraw()
+
+
+# Back to the bag only when Charlotte is well away from it.
+func _bag_is_quiet() -> bool:
+	return threat == null or absf(threat.global_position.x - bag.global_position.x) > SCARE_RUNNING + 220.0
+
+
+# Sit beside the bag, facing it, head down at the hole.
+func _start_gnaw() -> void:
+	_state = "gnaw"
+	position.x = bag.work_x()
+	scale.x = absf(scale.x) * -bag.side
+	_gnaw_bite = 0.0
+
+
+# The hole grows while it works (about twenty seconds in all) and it nibbles at what is inside.
+func _gnaw(delta: float) -> void:
+	bag.hole = minf(bag.hole + delta / 20.0, 1.0)
+	_gnaw_bite -= delta
+	if _gnaw_bite <= 0.0:
+		_gnaw_bite = randf_range(0.5, 1.1)
+		if threat != null and absf(threat.global_position.x - global_position.x) < 700.0:
+			Sfx.play("nibble", global_position, -16.0, randf_range(0.9, 1.15))
 
 
 func _threat_near() -> bool:
@@ -427,6 +465,9 @@ func _draw() -> void:
 	if _state == "peek":
 		_draw_peek(dark)
 		return
+	if _state == "gnaw":
+		_draw_gnaw(dark)
+		return
 	var climbing := _state in ["up", "down", "pole_up", "pole_down"]
 	var on_wire := _state == "wire" or _state == "wire_sit"
 	var moving := _state != "idle" and _state != "wire_sit"
@@ -467,6 +508,37 @@ func _draw() -> void:
 		draw_circle(Vector2(9, -20), 2.6, dark)
 		draw_line(Vector2(-6, -1), Vector2(6, -1), dark, 3.0)
 	_face(Vector2(14, -14) if moving else Vector2(6, -28), dark)
+
+
+# Sitting hunched beside the bag, head down at the hole: the head bobs as it tears at the plastic, paws on the bag,
+# tail up and flicking now and then.
+func _draw_gnaw(dark: Color) -> void:
+	var belly := fur.lightened(0.35)
+	draw_set_transform(Vector2(0, 1), 0.0, Vector2(1, 0.22))
+	draw_circle(Vector2.ZERO, 16, Color(0, 0, 0, 0.2))
+	draw_set_transform(Vector2.ZERO)
+	var flick := sin(_t * 12.0) * 3.0 if fmod(_t, 3.5) < 0.6 else 0.0
+	var tail: Array[Vector3] = []
+	for c in [Vector3(-8, -6, 5), Vector3(-15, -14, 7), Vector3(-19, -25, 8.5), Vector3(-17, -37, 9.5), Vector3(-10, -45, 8.5), Vector3(-3, -45, 6)]:
+		tail.append(Vector3(c.x + flick * (-c.y / 45.0), c.y, c.z))
+	_bushy_tail(tail, dark)
+	var bob := sin(_t * 9.0)
+	var tug := maxf(bob, 0.0)
+	# Crouched body, leaning toward the bag.
+	draw_set_transform(Vector2(0, 0), 0.0, Vector2(0.95, 1.05))
+	draw_circle(Vector2(0, -11), 11, dark)
+	draw_circle(Vector2(0.5, -12), 10, fur)
+	draw_circle(Vector2(5, -9), 5.5, belly)
+	draw_set_transform(Vector2.ZERO)
+	var head := Vector2(11.0 + tug * 1.5, -17.0 + absf(bob) * 1.5)
+	draw_circle(head, 7.2, fur)
+	draw_line(Vector2(8, -8), head + Vector2(5, 3), dark, 2.6)
+	draw_line(Vector2(5, -7), head + Vector2(3, 5), dark, 2.6)
+	draw_line(Vector2(-6, -1), Vector2(6, -1), dark, 3.0)
+	_face(head, dark)
+	# Bits of plastic in its teeth.
+	if bag.hole > 0.1 and tug > 0.5:
+		draw_line(head + Vector2(7, 1.5), head + Vector2(11, 4.0), Color("#6B6E79"), 1.4)
 
 
 # Just the head and front paws, poking out of the leaves (the canopy, drawn on top, hides the rest).

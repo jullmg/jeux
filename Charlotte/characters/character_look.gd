@@ -60,7 +60,10 @@ static func charlotte() -> CharacterLook:
 	if _outfit == null and ResourceLoader.exists(outfit_path()):
 		_outfit = ResourceLoader.load(outfit_path(), "", ResourceLoader.CACHE_MODE_IGNORE) as CharacterLook
 	if _outfit:
-		return _outfit.duplicate(true)
+		var look := _outfit.duplicate(true) as CharacterLook
+		# Her mouth is always the closed smile, also in outfits saved before that (the wardrobe doesn't change it).
+		look.mouth = "smile"
+		return look
 	return usual()
 
 
@@ -132,6 +135,7 @@ static func dad() -> CharacterLook:  # navy bike T-shirt, dark jeans, white snea
 ## Her usual look: the yellow polka-dot dress.
 static func usual() -> CharacterLook:
 	var look := CharacterLook.new()
+	look.mouth = "smile"
 	look.overrides = {
 		"skin_line": "#D9A88E", "skin_shade": "#F2C7AE", "neck": "#EDC3AC", "blush": "#F5A3A0", "nose": "#D9947A",
 		"hair_line": "#8A4527", "hair_light": "#E3A06A", "hair_mid": "#C97A4A",
