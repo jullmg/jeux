@@ -107,7 +107,8 @@ func _build_page() -> void:
 	paper.add_child(_header)
 	var scroll := ScrollContainer.new()
 	scroll.position = Vector2(92, 108)
-	scroll.size = Vector2(PAGE.x - 92 - 40, PAGE.y - 108 - 50)
+	# The right margin (110 px) is for her doodles: the words stop before it.
+	scroll.size = Vector2(PAGE.x - 92 - 112, PAGE.y - 108 - 50)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	paper.add_child(scroll)
 	_list = VBoxContainer.new()
@@ -241,6 +242,7 @@ func _draw_icon() -> void:
 class _Paper:
 	extends Control
 
+	const INK_CRAYON := Color("#5A5A6A")
 	const CRAYONS := [Color("#E85FA0"), Color("#3D8BD9"), Color("#F2C230"), Color("#4FA34A"), Color("#E8812E"), Color("#8E5FC4")]
 	var _rng := RandomNumberGenerator.new()
 
@@ -302,25 +304,28 @@ class _Paper:
 		CuteArt.flower(self, Vector2(size.x - 170, size.y - 40), 12, pink, true, _rng)
 		CuteArt._stroke(self, [Vector2(size.x - 170, size.y - 30), Vector2(size.x - 168, size.y - 8)], CRAYONS[3], 2.5, true, _rng)
 		CuteArt.house(self, Vector2(size.x - 52, 470), 22, true, _rng)
+		# The house stands on a line of grass; two birds fly over the rainbow.
+		var gy := 470.0 + 22.0 * 0.9
+		_wobble([Vector2(size.x - 96, gy), Vector2(size.x - 6, gy + 1)], CRAYONS[3], 2.6)
+		for gx in [-84.0, -70.0, -30.0, -12.0]:
+			_wobble([Vector2(size.x + gx, gy), Vector2(size.x + gx - 2, gy - 7)], CRAYONS[3], 2.0)
+			_wobble([Vector2(size.x + gx, gy), Vector2(size.x + gx + 3, gy - 6)], CRAYONS[3], 2.0)
+		for b in [Vector2(470, 70), Vector2(496, 58)]:
+			_wobble([b + Vector2(-8, 2), b + Vector2(-3, -4), b, b + Vector2(3, -4), b + Vector2(8, 2)], INK_CRAYON, 1.8)
 		CuteArt.me(self, Vector2(size.x - 54, 130), 20, true, _rng)
 		draw_string(ThemeDB.fallback_font, Vector2(size.x - 290, size.y - 14), "Chachoue ♥", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, pink)
 
 	# Crayon strokes: a line through `pts`, each segment jittered a little, drawn twice like a child's hand.
 	func _wobble(pts: Array, color: Color, width := 2.2) -> void:
-		for twice in 2:
-			var line := PackedVector2Array()
-			for i in pts.size() - 1:
-				var a: Vector2 = pts[i]
-				var b: Vector2 = pts[i + 1]
-				for k in 4:
-					line.append(a.lerp(b, k / 4.0) + Vector2(_rng.randf_range(-1.2, 1.2), _rng.randf_range(-1.2, 1.2)))
-			line.append(pts[-1])
-			draw_polyline(line, Color(color, 0.85 - twice * 0.35), width, true)
+		CuteArt._crayon_line(self, pts, color, width * 1.2, _rng)
 
+	# A child's circle: it drifts a little, and runs past the start before it stops.
 	func _scribble_circle(c: Vector2, r: float, color: Color) -> void:
 		var pts := []
-		for k in 19:
-			pts.append(c + Vector2.from_angle(TAU * k / 18.0) * (r + _rng.randf_range(-1.5, 1.5)))
+		var a0 := _rng.randf() * TAU
+		for k in 22:
+			var t := k / 20.0
+			pts.append(c + Vector2.from_angle(a0 + TAU * t) * (r * (1.0 + 0.08 * t) + _rng.randf_range(-1.0, 1.0)))
 		_wobble(pts, color)
 
 	func _arc(c: Vector2, r: float, a0: float, a1: float, color: Color) -> void:

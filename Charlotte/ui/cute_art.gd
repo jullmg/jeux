@@ -7,6 +7,8 @@ extends RefCounted
 
 const LINE := Color("#3A3A48")
 const PINK := Color("#F2A7B4")
+## The notebook paper: the little gaps the wax leaves on its grain are this colour.
+const PAPER := Color("#FBF6EA")
 
 
 static func cat_head(ci: CanvasItem, c: Vector2, r: float, fur: Color, crayon := false, rng: RandomNumberGenerator = null) -> void:
@@ -131,7 +133,8 @@ static func _oval(c: Vector2, radii: Vector2) -> Array:
 	return pts
 
 
-# A filled, outlined shape. Crayon: a light wash, hatching clipped to the shape, and a wobbly outline gone over twice.
+# A filled, outlined shape. Crayon: a light wash, a back-and-forth scribble that strays a little over the edge like a
+# 7-year-old's colouring, and a wobbly outline pressed harder in places, that overshoots where it closes.
 static func _shape(ci: CanvasItem, pts: Array, fill: Color, crayon: bool, rng: RandomNumberGenerator, outline := true) -> void:
 	var poly := PackedVector2Array(pts)
 	if not crayon:
@@ -141,28 +144,93 @@ static func _shape(ci: CanvasItem, pts: Array, fill: Color, crayon: bool, rng: R
 			ring.append(poly[0])
 			ci.draw_polyline(ring, LINE, 2.0, true)
 		return
-	ci.draw_colored_polygon(poly, Color(fill, 0.35))
-	var box := Rect2(poly[0], Vector2.ZERO)
-	for p in poly:
-		box = box.expand(p)
-	var x := box.position.x - box.size.y
-	while x < box.end.x:
-		var line := PackedVector2Array([Vector2(x, box.end.y + 2.0), Vector2(x + box.size.y + 4.0, box.position.y - 2.0)])
-		for piece in Geometry2D.intersect_polyline_with_polygon(line, poly):
-			ci.draw_polyline(piece, Color(fill, 0.8), 2.2, true)
-		x += 3.5
+	ci.draw_colored_polygon(poly, Color(fill, 0.3))
+	_scribble_fill(ci, poly, fill, rng)
 	if outline:
 		var ring := pts.duplicate()
 		ring.append(pts[0])
-		_stroke(ci, ring, fill.darkened(0.35), 1.8, true, rng)
+		# The pen comes back past where it started.
+		var along: Vector2 = (pts[1] - pts[0]).normalized()
+		ring.append(pts[0] + along * rng.randf_range(2.0, 4.5))
+		_crayon_line(ci, ring, fill.darkened(0.42), 2.1, rng)
 
 
+## Colours a polygon with one continuous back-and-forth scribble at a slant, spacing and pressure changing a little, the
+## ends of the strokes straying a few pixels past the outline.
+static func _scribble_fill(ci: CanvasItem, poly: PackedVector2Array, fill: Color, rng: RandomNumberGenerator) -> void:
+	var box := Rect2(poly[0], Vector2.ZERO)
+	for p in poly:
+		box = box.expand(p)
+	var grown := Geometry2D.offset_polygon(poly, 1.4)
+	var area: PackedVector2Array = grown[0] if not grown.is_empty() else poly
+	var dir := Vector2.from_angle(-0.95 + rng.randf_range(-0.12, 0.12))
+	var across := dir.orthogonal()
+	var reach := box.size.length() * 0.75
+	var centre := box.get_center()
+	var t := -reach
+	var flip := false
+	var last := Vector2.INF
+	while t < reach:
+		var a := centre + across * t - dir * reach
+		var b := centre + across * t + dir * reach
+		for piece in Geometry2D.intersect_polyline_with_polygon(PackedVector2Array([a, b]), area):
+			if piece.size() < 2:
+				continue
+			var from: Vector2 = piece[0]
+			var to: Vector2 = piece[piece.size() - 1]
+			if flip:
+				var swap := from
+				from = to
+				to = swap
+			var d := (to - from).normalized()
+			from -= d * rng.randf_range(0.0, 2.6)
+			to += d * rng.randf_range(0.0, 2.6)
+			if last != Vector2.INF:
+				ci.draw_line(last, from, Color(fill, 0.55), 2.2, true)
+			ci.draw_line(from, to, Color(fill, rng.randf_range(0.6, 0.9)), rng.randf_range(2.4, 3.4), true)
+			last = to
+		flip = not flip
+		t += rng.randf_range(3.0, 4.4)
+
+
+# A stroke (a line that isn't a closed shape): the same crayon hand.
 static func _stroke(ci: CanvasItem, pts: Array, color: Color, width: float, crayon: bool, rng: RandomNumberGenerator) -> void:
 	if not crayon:
 		ci.draw_polyline(PackedVector2Array(pts), color, width, true)
 		return
-	for twice in 2:
-		var line := PackedVector2Array()
-		for p in pts:
-			line.append(p + Vector2(rng.randf_range(-0.9, 0.9), rng.randf_range(-0.9, 0.9)))
-		ci.draw_polyline(line, Color(color, 0.85 - twice * 0.35), width, true)
+	_crayon_line(ci, pts, color, width * 1.15, rng)
+
+
+## A line drawn with wax crayon: it wobbles slowly, presses harder and lighter along its length, is gone over a second time a
+## hair to the side, and the paper's grain shows through in small gaps.
+static func _crayon_line(ci: CanvasItem, pts: Array, color: Color, width: float, rng: RandomNumberGenerator, passes := 2) -> void:
+	var line := _resample(pts, 4.0)
+	if line.size() < 2:
+		return
+	for pass_i in passes:
+		var phase := rng.randf() * TAU
+		var shift := Vector2(rng.randf_range(-0.8, 0.8), rng.randf_range(-0.8, 0.8)) * pass_i
+		var prev := Vector2.ZERO
+		for i in line.size():
+			var p: Vector2 = line[i] + shift + Vector2(sin(i * 0.5 + phase), cos(i * 0.43 + phase * 1.3)) * 0.9
+			if i > 0:
+				var press := 0.8 + 0.35 * sin(i * 0.27 + phase * 2.0)
+				var alpha := (0.92 if pass_i == 0 else 0.5) * (0.88 + 0.12 * sin(i * 1.9 + phase))
+				ci.draw_line(prev, p, Color(color, alpha), width * press, true)
+			prev = p
+	for i in line.size():
+		if rng.randf() < 0.4:
+			ci.draw_circle(line[i] + Vector2(rng.randf_range(-0.5, 0.5), rng.randf_range(-0.5, 0.5)) * width, rng.randf_range(0.4, 0.8), Color(PAPER, 0.55))
+
+
+# The polyline through `pts` with a point about every `step` px.
+static func _resample(pts: Array, step: float) -> Array:
+	var out := []
+	for i in pts.size() - 1:
+		var a: Vector2 = pts[i]
+		var b: Vector2 = pts[i + 1]
+		var n := maxi(1, int(a.distance_to(b) / step))
+		for k in n:
+			out.append(a.lerp(b, float(k) / n))
+	out.append(pts[pts.size() - 1])
+	return out
