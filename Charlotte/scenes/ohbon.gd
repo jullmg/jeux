@@ -40,6 +40,8 @@ func _ready() -> void:
 	_build_tv()
 	_build_aisles()
 	_build_lighting()
+	_add_customers(2, [420.0, 1250.0, 1700.0, 2200.0, 2700.0, 3200.0], 29)
+	_steam(Vector2(COFFEE_X + 100.0, 330.0))
 	_spawn_charlotte(DOOR_X + 240.0)
 	_build_spots()
 	_enter_area(SHOP)
@@ -112,6 +114,8 @@ func _build_counter() -> void:
 	_clerk.look = look
 	_clerk.scale = Vector2.ONE * CHAR_SCALE * 1.04
 	_clerk.position = Vector2(COUNTER_X + 520.0, 556.0)
+	_clerk.fidgets = true
+	_clerk.fidget_moves = ["look", "look", "stretch"]
 	add_child(_clerk)
 	_put(ShopArt.modern_counter(), COUNTER_X, 616.0, 1.0, "floor")
 	_put(InteriorArt.doormat(), COUNTER_X + 190.0, 640.0)

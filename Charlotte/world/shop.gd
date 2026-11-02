@@ -13,6 +13,40 @@ func _hang(x: float, text: String, color: Color) -> void:
 	_put(ShopArt.hanging_sign(color.to_html(false).insert(0, "#")), x, CEILING + 100.0 * sc - 6.0, sc)
 	_wall_label(text, Vector2(x + 68.0 * sc * 1.0 - 8.0, CEILING + 100.0 * sc - 6.0 - 100.0 * sc + 67.0 * sc), 15, Color.WHITE, color.darkened(0.55), 3)
 
+## Adds `count` customers browsing at `stops` (x of the shelves), in this season's clothes, at their own pace.
+func _add_customers(count: int, stops: Array[float], seed_value: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	for i in count:
+		var person := ShopCustomer.new()
+		person.look = CharacterLook.random(rng, ["adult", "senior", "teen", "adult"][i % 4])
+		Season.dress_for_weather(person.look)
+		person.stops = stops
+		person.scale = Vector2.ONE * CHAR_SCALE
+		person.position = Vector2(stops[(i * 2 + 1) % stops.size()], FEET_Y - 6.0)
+		person.modulate = Color(0.96, 0.95, 0.97)
+		add_child(person)
+
+
+## A thin wisp of steam rising from a hot drinks machine at `at`.
+func _steam(at: Vector2) -> void:
+	var puff := CPUParticles2D.new()
+	puff.position = at
+	puff.amount = 8
+	puff.lifetime = 2.4
+	puff.preprocess = 2.4
+	puff.direction = Vector2(0.15, -1.0)
+	puff.spread = 12.0
+	puff.initial_velocity_min = 14.0
+	puff.initial_velocity_max = 22.0
+	puff.scale_amount_min = 3.0
+	puff.scale_amount_max = 6.0
+	puff.color = Color(1, 1, 1, 0.22)
+	var fade := Gradient.new()
+	fade.colors = PackedColorArray([Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.5), Color(1, 1, 1, 0.0)])
+	puff.color_ramp = fade
+	add_child(puff)
+
 
 func _wall_label(text: String, center: Vector2, size: int, color: Color, outline: Color, outline_size := 5) -> void:
 	var label := Label.new()

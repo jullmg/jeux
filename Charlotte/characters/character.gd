@@ -56,6 +56,8 @@ var bar_grip := Vector2.INF
 var _ride_legs: Array[Sprite2D] = []
 ## Little idle gestures when she stands still a while (Charlotte, her parents): a wave, a hop, a stretch, a look round.
 var fidgets := false
+## Which idle gestures she may do (a shopkeeper just looks round and stretches).
+var fidget_moves: Array[String] = ["wave", "hop", "stretch", "look", "look"]
 var _shade: ShaderMaterial
 var _idle := 0.0
 var _gesture := ""
@@ -251,7 +253,7 @@ func _fidget(delta: float) -> void:
 		return
 	_idle += delta
 	if _idle >= _next_gesture:
-		_gesture = ["wave", "hop", "stretch", "look", "look"][randi() % 5]
+		_gesture = fidget_moves[randi() % fidget_moves.size()]
 		_gesture_len = {"wave": 1.6, "hop": 0.9, "stretch": 1.4, "look": 2.2}[_gesture]
 		_gesture_t = _gesture_len
 		_next_gesture = _idle + randf_range(7.0, 14.0)
