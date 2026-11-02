@@ -145,6 +145,14 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   and suspended ceiling (`RoomShell.floor_style = "tiles"`, `ceiling_style = "drop"`); blurred "shelf" foreground. Click
   the shopkeeper to say hello; candy, sloche, coffee corner, freezer, fridges or dairy to buy something.
   `Interior._say(who, text)` (speech bubble) and `Interior._treat(picture, text)` (what Charlotte gets) are reusable.
+  Its art (`ShopArt`) is built from product helpers (`_can`, `_bottle`, `_bag`, `_box`, `_jar`, `_carton`, `_tag`, `_lip`) and
+  shared gradients (`_defs()`: cylinders, brushed metal, glass, laminate), light from the upper left. Chips: `ShopArt.CHIPS`
+  (the six classic flavours: crème sure et oignons, ketchup, barbecue, nature, sel et vinaigre, fromage) on a gondola
+  (`chips_gondola`, flavour names as labels in the header; click it to buy a random bag, 1,75 $). Also: a red frieze under the
+  ceiling, stock on high shelves, hanging aisle signs, exit sign, extinguisher, bulletin board (with the lost-cat poster),
+  security cameras (blinking light), baskets, wet-floor sign, floor wear, recessed ceiling panels (one flickers) with light
+  cones and pools on the floor, cold glow before the fridges, daylight through the door, the neon OUVERT (`NeonSign`) and a
+  waving lucky cat on the counter (`_LuckyCat`); the blurred foreground is a red shopping basket (`"basket"`).
 - Charlotte's parents, from `reference/mere_charlotte.jpg` / `pere_charlotte.jpg`: `CharacterLook.mom()` (long wavy light-brown
   hair, brown eyes, teal floral dress, tights, boots) in the kitchen, `CharacterLook.dad()` (short brown hair, no cap,
   clean-shaven, blue eyes, navy T-shirt with the "bike" top pattern) in the salon; both stand at 1.18× Charlotte's scale. Click them and they say a line (`MOM_LINES` / `DAD_LINES`

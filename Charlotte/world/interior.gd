@@ -328,6 +328,13 @@ func _build_foreground(items: Array) -> void:
 				for i in 12:
 					body += '<rect x="%d" y="%d" width="26" height="46" fill="%s"/>' % [22 + i * 30, 60 + (i % 2) * 70, ["#E04F5F", "#FFD23F", "#4FA3E0", "#7CCB5A", "#FF8A3D", "#C084FC"][(i * 7) % 6]]
 				Foreground.add(layer, body, Vector2(x, 720.0 + 120.0), Vector2(400, 240)).modulate = Color(0.5, 0.48, 0.46)
+			"basket":
+				# A red shopping basket right in front of the lens, a baguette and a box of cereal sticking out.
+				var basket := '<rect x="190" y="30" width="26" height="170" rx="8" fill="#D9A04A" transform="rotate(14 200 120)"/><rect x="90" y="70" width="64" height="110" fill="#5DB6BE" transform="rotate(-10 120 120)"/>'
+				basket += '<path d="M10 120 H250 L232 220 H28 Z" fill="#D8262E"/><rect x="4" y="106" width="252" height="22" rx="8" fill="#E8484F"/>'
+				for k in 8:
+					basket += '<rect x="%d" y="140" width="10" height="56" rx="4" fill="#8E1A20" opacity="0.5"/>' % (34 + k * 26)
+				Foreground.add(layer, basket, Vector2(x, 720.0 + 150.0), Vector2(260, 230)).modulate = Color(0.6, 0.55, 0.54)
 			"plushie":
 				Foreground.add(layer, '<circle cx="90" cy="110" r="70" fill="#F2A7C9"/><circle cx="40" cy="50" r="28" fill="#F2A7C9"/><circle cx="140" cy="50" r="28" fill="#F2A7C9"/>', Vector2(x, 720.0 + 95.0), Vector2(180, 180)).modulate = Color(0.55, 0.5, 0.5)
 
