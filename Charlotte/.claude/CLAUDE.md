@@ -209,7 +209,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `Foreground` (blurred near-camera layer, `Parallax2D` scroll 1.35), `Squirrel` (flees Charlotte, from further away when she
   runs, often up the nearest street tree; climbs the trunk's side, hides in the canopy and pokes its head out at the
   canopy outline, found from the tree texture's alpha. Squirrels are added before the trees so the tree hides them;
-  `squirrel.trees` shares the scene's `_tree_sprites` array, filled later), `CritterDraw` (shared static drawing helpers for the
+  `squirrel.trees` shares the scene's `_tree_sprites` array, filled later). Squirrels also climb the utility poles now and then (`squirrel.poles` shares the scene's `_pole_xs`, filled later; states `to_pole`, `pole_up`, `wire`, `wire_sit`, `pole_down`): they step onto the thick cable (`UtilityPoles.CABLE_Y`, sag `WireBirds.SAG`), walk and sit along the spans, go on to the next pole or back down, and are drawn above the poles (z_index 1) while up there, `CritterDraw` (shared static drawing helpers for the
   animals: shaded outlined bodies, tapered limbs/tails built from convex quads, glossy eyes, hearts).
   `PropArt` generates trees, lamp posts, hydrants, bikes, leaves as textures. `PropArt.car()`/`wheel()` still exist but
   cars were removed from both scenes on purpose (2026-10-31); see git history to bring them back.

@@ -1,8 +1,10 @@
 class_name Squirrel
 extends Node2D
 ## Montreal squirrel: sits and flicks its tail, scurries around, bolts away when someone comes close,
-## often up the nearest tree, where it hides in the canopy and now and then pokes its head out.
-## Squirrels are added before the trees, so a tree's canopy and trunk hide them naturally.
+## often up the nearest tree, where it hides in the canopy and now and then pokes its head out. Now and then one climbs a
+## utility pole instead, steps onto the thick cable and walks along the wire (sitting a while, going on to the next pole
+## or back down). Squirrels are added before the trees, so a tree's canopy and trunk hide them naturally; up on a pole
+## or the wire they are drawn above the poles (z_index 1).
 
 const SCARE := 170.0
 const SCARE_RUNNING := 280.0
@@ -12,12 +14,16 @@ const TRUNK_X := 190.0
 const CANOPY := Vector2(190, 250)
 const CANOPY_BOTTOM := 470.0
 const HIDE_AT := 330.0
+## On the wire: the cable's own sag and how fast it walks.
+const WIRE_SPEED := 78.0
 
 var threat: Node2D
 var bounds := Vector2(0, 1000)
 var fur := Color("#7D7670")
 ## Street trees it can climb (sprites from PropArt.tree, unscaled origin top-left). May be filled later.
 var trees: Array[Sprite2D] = []
+## Utility pole x positions (the scene's list, filled later), left to right.
+var poles: Array[float] = []
 
 var _state := "idle"
 var _timer := 1.0
@@ -35,6 +41,12 @@ var _peek_at := Vector2.ZERO
 var _peek_dir := Vector2.UP
 var _peek := 0.0
 var _peek_timer := 0.0
+# Up a pole: its index in `poles`, the span (index of the pole on its left) it walks along, where it is heading on the wire,
+# and how long it will stay up there.
+var _pole_i := 0
+var _span := 0
+var _wire_goal := 0.0
+var _wire_budget := 0.0
 
 static var _canopy_images := {}
 
@@ -58,11 +70,14 @@ func _process(delta: float) -> void:
 				_timer -= delta
 				if _timer <= 0.0:
 					var tree := _nearest_tree(position.x, 320.0)
+					var pole := _nearest_pole(position.x, 320.0)
 					if tree and randf() < 0.2:
 						_run_to_tree(tree, 170.0)
+					elif pole >= 0 and randf() < 0.14:
+						_run_to_pole(pole, 170.0)
 					else:
 						_go(position.x + randf_range(-260, 260), 170.0, "run")
-		"run", "flee", "to_tree":
+		"run", "flee", "to_tree", "to_pole":
 			if _state == "run" and near:
 				_flee()
 			var step := signf(_target - position.x) * _speed * delta
@@ -70,6 +85,8 @@ func _process(delta: float) -> void:
 				position.x = _target
 				if _state == "to_tree":
 					_start_climb()
+				elif _state == "to_pole":
+					_start_pole_climb()
 				else:
 					_state = "idle"
 					_timer = randf_range(1.5, 4.5)
@@ -83,6 +100,25 @@ func _process(delta: float) -> void:
 				_state = "hidden"
 				_timer = randf_range(6.0, 14.0)
 				_peek_timer = randf_range(1.0, 3.0)
+		"pole_up":
+			position.y -= CLIMB_SPEED * delta
+			_hop = fmod(_hop + delta * CLIMB_SPEED / 30.0, 1.0)
+			if position.y <= UtilityPoles.CABLE_Y:
+				_step_onto_wire()
+		"wire", "wire_sit":
+			_wire_process(delta)
+		"pole_down":
+			if near and position.y < _ground_y - 40.0:
+				_state = "pole_up"
+				_orient_on_pole()
+			else:
+				position.y += CLIMB_SPEED * 0.8 * delta
+				_hop = fmod(_hop + delta * CLIMB_SPEED / 30.0, 1.0)
+				if position.y >= _ground_y:
+					position.y = _ground_y
+					rotation = 0.0
+					_state = "idle"
+					_timer = randf_range(1.0, 3.0)
 		"hidden":
 			_timer -= delta
 			_peek_timer -= delta
@@ -117,6 +153,8 @@ func _process(delta: float) -> void:
 					rotation = 0.0
 					_state = "idle"
 					_timer = randf_range(1.0, 3.0)
+	# Up a pole or on the wire it is in front of the poles (and the houses behind them), but not down among the people.
+	z_index = 1 if (_state in ["pole_up", "pole_down", "wire", "wire_sit"] and position.y < 520.0) else 0
 	queue_redraw()
 
 
@@ -142,6 +180,11 @@ func _flee() -> void:
 	if best and randf() < 0.8:
 		_run_to_tree(best, 340.0)
 		return
+	if best == null:
+		var pole := _nearest_pole(position.x, 420.0, away, threat.global_position.x)
+		if pole >= 0 and randf() < 0.6:
+			_run_to_pole(pole, 340.0)
+			return
 	var dash := randf_range(320, 480)
 	# Cornered at the end of its patch: dart back past her instead of running on the spot.
 	if absf(clampf(position.x + away * dash, bounds.x, bounds.y) - position.x) < 60.0:
@@ -156,6 +199,132 @@ func _nearest_tree(x: float, within: float) -> Sprite2D:
 		if absf(_trunk_x(tree) - x) < within and (best == null or absf(_trunk_x(tree) - x) < absf(_trunk_x(best) - x)):
 			best = tree
 	return best
+
+
+# The index of the pole nearest to x (within `within`), only on the `away` side of the threat if given, or -1.
+func _nearest_pole(x: float, within: float, away := 0.0, threat_x := 0.0) -> int:
+	var best := -1
+	for i in poles.size():
+		var d := poles[i] - x
+		if absf(d) > within:
+			continue
+		if away != 0.0 and not (signf(d) == away or absf(d) < 40.0):
+			continue
+		if away != 0.0 and absf(poles[i] - threat_x) < 60.0:
+			continue
+		if best < 0 or absf(d) < absf(poles[best] - x):
+			best = i
+	return best
+
+
+func _run_to_pole(i: int, speed: float) -> void:
+	_pole_i = i
+	_side = -1.0 if position.x < poles[i] else 1.0
+	_speed = speed
+	_state = "to_pole"
+	_target = poles[i] + _side * 9.0
+	if _target != position.x:
+		scale.x = absf(scale.x) * signf(_target - position.x)
+
+
+# Head up, belly against the pole, on the side it came from.
+func _start_pole_climb() -> void:
+	_state = "pole_up"
+	position.x = poles[_pole_i] + _side * 9.0
+	_orient_on_pole()
+
+
+func _orient_on_pole() -> void:
+	scale.x = absf(scale.x) * -_side
+	rotation = -PI / 2.0 * -_side
+
+
+# At the cable: hop onto it (it hangs from each pole's right side) and set off along one of the spans.
+func _step_onto_wire() -> void:
+	position.x = poles[_pole_i] + 9.0
+	if _pole_i >= poles.size() - 1:
+		_span = _pole_i - 1
+	elif _pole_i == 0:
+		_span = 0
+	else:
+		_span = _pole_i - (1 if randf() < 0.5 else 0)
+	_wire_budget = randf_range(16.0, 38.0)
+	_state = "wire"
+	_pick_wire_goal()
+	_wire_pose()
+
+
+func _span_ends() -> Vector2:
+	return Vector2(poles[_span] + 9.0, poles[_span + 1] + 9.0)
+
+
+# Somewhere along this span (or, once it has been up long enough, the nearest pole to go down).
+func _pick_wire_goal() -> void:
+	var ends := _span_ends()
+	if _wire_budget <= 0.0:
+		_wire_goal = ends.x if absf(position.x - ends.x) < absf(position.x - ends.y) else ends.y
+	elif randf() < 0.7:
+		_wire_goal = lerpf(ends.x, ends.y, randf_range(0.15, 0.85))
+	else:
+		_wire_goal = ends.x if randf() < 0.5 else ends.y
+	if absf(_wire_goal - position.x) > 1.0:
+		scale.x = absf(scale.x) * signf(_wire_goal - position.x)
+
+
+func _wire_process(delta: float) -> void:
+	_wire_budget -= delta
+	if _state == "wire_sit":
+		_timer -= delta
+		if _timer <= 0.0:
+			_state = "wire"
+			_pick_wire_goal()
+		_wire_pose()
+		return
+	var dir := signf(_wire_goal - position.x)
+	var step := WIRE_SPEED * delta
+	if absf(_wire_goal - position.x) <= step:
+		position.x = _wire_goal
+		_wire_arrived()
+	else:
+		position.x += dir * step
+	_hop = fmod(_hop + delta * WIRE_SPEED / 38.0, 1.0)
+	_wire_pose()
+
+
+func _wire_arrived() -> void:
+	var ends := _span_ends()
+	var at_left := absf(position.x - ends.x) < 2.0
+	var at_right := absf(position.x - ends.y) < 2.0
+	if not (at_left or at_right):
+		# Mid-span: sit a while on the wire, looking about.
+		_state = "wire_sit"
+		_timer = randf_range(2.0, 6.0)
+		return
+	var pole := _span if at_left else _span + 1
+	# Carry on over to the next span, or go back down this pole.
+	if _wire_budget > 0.0 and randf() < 0.6:
+		if at_right and pole < poles.size() - 1:
+			_span += 1
+			_pick_wire_goal()
+			return
+		if at_left and _span > 0:
+			_span -= 1
+			_pick_wire_goal()
+			return
+	_pole_i = pole
+	_side = 1.0
+	position.x = poles[pole] + _side * 9.0
+	_state = "pole_down"
+	scale.x = absf(scale.x) * _side
+	rotation = PI / 2.0 * _side
+
+
+# On the sagging cable: feet on it, tilted along its slope.
+func _wire_pose() -> void:
+	var ends := _span_ends()
+	var t := clampf((position.x - ends.x) / (ends.y - ends.x), 0.0, 1.0)
+	position.y = UtilityPoles.CABLE_Y + sin(t * PI) * WireBirds.SAG - 1.5
+	rotation = atan(cos(t * PI) * PI * WireBirds.SAG / (ends.y - ends.x))
 
 
 func _run_to_tree(tree: Sprite2D, speed: float) -> void:
@@ -258,11 +427,12 @@ func _draw() -> void:
 	if _state == "peek":
 		_draw_peek(dark)
 		return
-	var climbing := _state == "up" or _state == "down"
-	var moving := _state != "idle"
-	var lift := -absf(sin(_hop * PI)) * 10.0 if moving and not climbing else 0.0
+	var climbing := _state in ["up", "down", "pole_up", "pole_down"]
+	var on_wire := _state == "wire" or _state == "wire_sit"
+	var moving := _state != "idle" and _state != "wire_sit"
+	var lift := -absf(sin(_hop * PI)) * (3.0 if on_wire else 10.0) if moving and not climbing else 0.0
 	var belly := fur.lightened(0.35)
-	if not climbing:
+	if not climbing and not on_wire:
 		draw_set_transform(Vector2(0, 1), 0.0, Vector2(1, 0.22))
 		draw_circle(Vector2.ZERO, 16, Color(0, 0, 0, 0.2))
 	draw_set_transform(Vector2(0, lift))

@@ -858,6 +858,8 @@ func _build_squirrels() -> void:
 		squirrel.scale = Vector2.ONE * 0.85
 		squirrel.bounds = Vector2(maxf(x - 700.0, 60.0), minf(x + 700.0, _street_width - 60.0))
 		squirrel.threat = _charlotte
+		# The utility poles (filled later) they can climb to walk along the wire.
+		squirrel.poles = _pole_xs
 		# Bare winter trees have no canopy to hide in.
 		if not Season.is_winter():
 			squirrel.trees = _tree_sprites
