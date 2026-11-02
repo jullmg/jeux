@@ -616,6 +616,11 @@ func _walls_along(script_path: String, from_gap: String, direction: int, ours :=
 		walls[0].erase("tex")
 	# The next cross street (an open "cross" gap, with its crosswalk), then the next block's plexes into the distance.
 	walls.append({"to": d + 0.5, "kind": "cross"})
+	var beyond := i + direction
+	if beyond >= 0 and beyond < lay.size() and lay[beyond] == "ecole":
+		# Down 5e or 6e past Dandurand: the school, then more plexes.
+		var school := _tex("ecole")
+		walls.append({"to": d + 3.1, "top": HOUSE_BASE_Y - (school.get_height() - 40.0) * HOUSE_SCALE, "kind": "school", "color": Color("#A9472F")})
 	walls.append({"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": last.lerp(Color("#B5603F"), 0.5)})
 	return walls
 

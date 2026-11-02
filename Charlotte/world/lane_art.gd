@@ -460,86 +460,92 @@ static func croque_livre(rng: RandomNumberGenerator) -> ImageTexture:
 	return PropArt.tex(PropArt._svg(100, 200, s))
 
 
-# ── Where the lane meets its cross lanes ────────────────────
+# ── Where the lane meets the avenues and the other lanes ────
 
-## The end of a cross lane, where it meets an avenue, as you see it from inside the lane: the lane runs straight ahead
-## between a brick garage wall (left) and a board fence (right) and stops at the avenue's sidewalk, which runs ACROSS the
-## view (slabs and a curb, a dip where the lane comes out), then the street (asphalt, kerb, a dashed line), the far sidewalk,
-## and the sunlit plexes on the other side (bricks, windows, a door and its stairs). The sidewalk and the street reach both
-## edges of the picture, only the walls' near sides hide a little of them.
-static func street_end(rng: RandomNumberGenerator, w: float) -> ImageTexture:
-	var vp := Vector2(w / 2.0, 430.0)
-	var far := 0.2
-	var at := func(p: Vector2) -> Vector2: return vp + (p - vp) * (1.0 - far)
-	var lane_end: float = at.call(Vector2(0, H)).y
-	# The bands across the view, near to far: our sidewalk, the street, the far sidewalk.
-	var walk_near := lane_end
-	var walk_far := walk_near - 30.0
-	var road_far := walk_far - 54.0
-	var far_walk := road_far - 14.0
-	var s := ""
-	# Across the avenue: two plex fronts in the sun, from edge to edge.
-	var top := far_walk - 214.0
-	var split := w * rng.randf_range(0.35, 0.65)
-	for part in [[-4.0, split], [split, w + 4.0]]:
-		var c: String = PropArt._pick(rng, BRICKS)
-		var x0: float = part[0]
-		var x1: float = part[1]
-		s += _rect(x0, top, x1 - x0, far_walk - top, c)
-		s += _rect(x0, top - 7, x1 - x0, 9, "#55585C")
-		s += _rect(x0, top + 2, x1 - x0, 3, _light(c, 0.2), 'opacity="0.7"')
-		var x := x0 + 14.0
-		while x < x1 - 24.0:
-			for y in [top + 28.0, top + 98.0]:
-				s += _rect(x - 2, y - 2, 20, 36, _light(c, 0.35)) + _rect(x, y, 16, 32, "#8FA7B8") + _rect(x, y, 16, 6, "#B8CAD6")
-			x += 36.0
-		s += _rect(x0, far_walk - 46, x1 - x0, 3, "#C9C2B2", 'opacity="0.8"')
-	# A door with its stairs and a railing, where the two plexes meet.
-	s += _rect(split - 13, far_walk - 62, 26, 62, "#7A4A2E", 'stroke="#F2F0EA" stroke-width="3"')
-	for k in 4:
-		s += _rect(split - 18 - k * 2, far_walk - 12 + k * 3, 36 + k * 4, 3, "#BDB7AA")
-	s += _line(Vector2(split + 24, top + 140), Vector2(split + 44, far_walk), "#1F1F1F", 2.0)
-	# Far sidewalk with its kerb.
-	s += _rect(-4, road_far - 14, w + 8, 14, "#D8D3C8")
-	s += _rect(-4, road_far - 2, w + 8, 3, "#9A968C")
-	# The street: asphalt, a darker band along the kerbs, patches, a dashed line down the middle.
-	s += _rect(-4, road_far, w + 8, walk_far - road_far, "#5A5956")
-	s += _rect(-4, road_far, w + 8, 6, "#4A4947")
-	s += _rect(-4, walk_far - 7, w + 8, 7, "#4A4947")
-	for k in 3:
-		s += _rect(rng.randf_range(10.0, w - 60.0), rng.randf_range(road_far + 12.0, walk_far - 14.0), rng.randf_range(24.0, 50.0), 5, "#656461", 'opacity="0.8"')
-	var dash := -6.0
-	var line_y := (road_far + walk_far) / 2.0 - 1.0
-	while dash < w:
-		s += _rect(dash, line_y, 26, 2.5, "#E9E4D8", 'opacity="0.9"')
-		dash += 44.0
-	# Our sidewalk: slabs with joints across it, the kerb on its far edge, a shadow under the kerb.
-	s += _rect(-4, walk_far, w + 8, walk_near - walk_far + 2, "#CFCAC0")
-	s += _rect(-4, walk_far, w + 8, 4, "#A8A397")
-	s += _rect(-4, walk_far + 4, w + 8, 2, "#B8B3A7", 'opacity="0.7"')
-	var joint := fmod(rng.randf_range(0.0, 60.0), 60.0) - 60.0
-	while joint < w + 60.0:
-		s += _line(Vector2(joint, walk_far + 5.0), Vector2(joint - 10.0, walk_near + 2.0), "#A8A397", 1.4)
-		joint += 62.0
-	# The sidewalk dips where the lane comes out (a ramp, lighter, with its slanted sides).
-	s += _poly([Vector2(52, walk_near + 2), Vector2(w - 52, walk_near + 2), Vector2(w - 70, walk_far + 1), Vector2(70, walk_far + 1)], "#BDB8AC", 'opacity="0.8"')
-	# The lane running straight out to the sidewalk.
-	s += _poly([Vector2(10, H), Vector2(w - 10, H), at.call(Vector2(w - 10, H)), at.call(Vector2(10, H))], "#A9A59D")
-	s += _line(Vector2(w / 2.0, H), at.call(Vector2(w / 2.0, H)), "#6E8A4A", 3.0)
-	# ...between a brick garage wall (left) and a board fence (right), their far ends where the sidewalk begins.
-	var wall: String = PropArt._pick(rng, BRICKS)
-	s += _poly([Vector2(0, H - 240), at.call(Vector2(0, H - 240)), at.call(Vector2(0, H)), Vector2(0, H)], wall)
-	for k in 12:
-		var y := H - 230.0 + k * 19.0
-		s += _line(Vector2(0, y), at.call(Vector2(0, y)), _light(wall, 0.25), 1.0, 'opacity="0.6"')
-	var fence: String = PropArt._pick(rng, BOARDS)
-	s += _poly([Vector2(w, H - 175), at.call(Vector2(w, H - 175)), at.call(Vector2(w, H)), Vector2(w, H)], fence)
-	for k in 10:
-		var f := pow(k / 10.0, 0.7)
-		var top_p := Vector2(w, H - 175).lerp(at.call(Vector2(w, H - 175)), f)
-		var bottom := Vector2(w, H).lerp(at.call(Vector2(w, H)), f)
-		s += _line(top_p, bottom, _dark(fence, 0.3), 1.0)
-	s += _vine(rng, w - 60.0, 50.0, H - 175.0, vine_colors())
+## The side of the plex at a cross lane's corner, square to the lane and facing us (its facade runs away from us down the
+## avenue, CrossStreet's first wall): exposed brick up to the coping, the cornice's return at the corner, a stone
+## foundation, a few small windows, a downspout, the meters, patched mortar. `top` and `color` are that facade's;
+## `front_left`: the avenue is on the left of this wall.
+static func side_wall(rng: RandomNumberGenerator, w: float, top: float, color: Color, front_left: bool) -> ImageTexture:
+	var brick := "#" + color.to_html(false)
+	var front := 0.0 if front_left else w
+	var inward := 1.0 if front_left else -1.0
+	var s := _rect(0, top, w, H - top, brick)
+	# Courses, and the staggered joints between the bricks.
+	var courses := ""
+	var joints := ""
+	var row := 0
+	var y := top + 6.0
+	while y < H - 44.0:
+		courses += "M0 %.1f H%.1f " % [y, w]
+		var x := 7.0 if row % 2 == 0 else 18.0
+		while x < w:
+			joints += "M%.1f %.1f V%.1f " % [x, y, y + 7.0]
+			x += 22.0
+		y += 7.0
+		row += 1
+	s += '<path d="%s" stroke="%s" stroke-width="1" fill="none" opacity="0.55"/>' % [courses, _light(brick, 0.28)]
+	s += '<path d="%s" stroke="%s" stroke-width="1" fill="none" opacity="0.4"/>' % [joints, _dark(brick, 0.3)]
+	# Patches of newer mortar and brick.
+	for i in 5:
+		var pw := rng.randf_range(40.0, 110.0)
+		var ph := rng.randf_range(28.0, 70.0)
+		s += _rect(rng.randf_range(10.0, w - pw - 10.0), rng.randf_range(top + 20.0, H - ph - 60.0), pw, ph, _dark(brick, 0.16) if i % 2 == 0 else _light(brick, 0.12), 'opacity="0.3"')
+	# Small windows on each floor, stone sill and lintel, away from the corner.
+	var floors := int(round((H - top - 40.0) / 118.0))
+	var columns: Array[float] = [w * 0.36, w * 0.66]
+	for f in floors:
+		var base := H - 62.0 - f * 118.0
+		for cx in columns:
+			var wx: float = (front + inward * cx) - 18.0
+			if rng.randf() < 0.25:
+				continue
+			s += _rect(wx - 4, base - 74, 44, 7, "#C9C2B2")
+			s += _rect(wx - 2, base - 67, 40, 62, "#EDE9DF")
+			s += _rect(wx + 2, base - 63, 32, 54, "#7F97A8")
+			s += _poly([Vector2(wx + 2, base - 63), Vector2(wx + 18, base - 63), Vector2(wx + 2, base - 34)], "#FFFFFF", 'opacity="0.25"')
+			if rng.randf() < 0.5:
+				s += _rect(wx + 2, base - 63, 32, rng.randf_range(12.0, 30.0), PropArt._pick(rng, ["#F2EEE4", "#E8D9B8", "#C9D3D1"]), 'opacity="0.9"')
+			s += _rect(wx - 5, base - 5, 46, 6, "#C9C2B2")
+			s += _rect(wx - 5, base + 1, 46, 2, "#000000", 'opacity="0.2"')
+	# Stone foundation with a low basement window.
+	s += _rect(0, H - 44, w, 44, "#9A968C")
+	s += _rect(0, H - 46, w, 3, "#C2BDB1")
+	s += _rect(0, H - 22, w, 1.5, "#7E7A72", 'opacity="0.7"')
+	var low := front + inward * w * 0.5 - 26.0
+	s += _rect(low, H - 38, 52, 22, "#55524C") + _rect(low + 3, H - 35, 46, 16, "#6E8290")
+	# Sunlit left, shaded right, darker low down where the rain splashes.
+	s += _rect(0, top, 12, H - top, "#FFFFFF", 'opacity="0.1"')
+	s += _rect(w - 16, top, 16, H - top, "#000000", 'opacity="0.14"')
+	s += _rect(0, H - 90, w, 90, "#000000", 'opacity="0.07"')
+	# Coping along the top, the facade's cornice coming round the corner.
+	s += _rect(-2, top - 8, w + 4, 12, "#55585C")
+	s += _rect(-2, top + 4, w + 4, 3, "#000000", 'opacity="0.22"')
+	var cornice := front if front_left else front - 26.0
+	s += _rect(cornice, top - 16, 26, 26, "#6A6E72") + _rect(cornice, top - 18, 26, 4, "#8E9399")
+	s += _rect(cornice, top + 10, 26, 3, "#000000", 'opacity="0.25"')
+	# The downspout at the far end, the hydro and gas meters near the corner with their conduits.
+	var spout := front + inward * (w - 26.0)
+	s += _line(Vector2(spout, top + 2), Vector2(spout, H - 6), "#7E8388", 5.0)
+	s += _line(Vector2(spout - 2, top + 2), Vector2(spout - 2, H - 6), "#A9AEB3", 1.2)
+	for k in floors:
+		s += _rect(spout - 5, H - 90.0 - k * 118.0, 10, 4, "#55585C")
+	var mx := front + inward * 46.0 - 10.0
+	s += _line(Vector2(mx + 10, top + 30), Vector2(mx + 10, H - 150), "#55585C", 2.5)
+	s += _rect(mx, H - 150, 20, 30, "#8E9399", 'stroke="#55585C" stroke-width="1.5"')
+	s += '<circle cx="%.1f" cy="%.1f" r="6" fill="#DDE3E6" stroke="#55585C" stroke-width="1"/>' % [mx + 10, H - 135]
+	s += _rect(mx + 2, H - 88, 16, 26, "#D9B13A", 'stroke="#8E7420" stroke-width="1.2"')
+	s += _line(Vector2(mx + 10, H - 62), Vector2(mx + 10, H - 44), "#8E7420", 3.0)
+	# A tag low on the bricks, now and then.
+	if rng.randf() < 0.5:
+		var tx := front + inward * w * rng.randf_range(0.55, 0.75) - 40.0
+		s += '<path d="M%.1f %.1f q10 -22 18 -2 t16 -6 q6 -14 14 0 t18 -4" stroke="%s" stroke-width="3.5" fill="none" stroke-linecap="round"/>' % [tx, H - 62.0, PropArt._pick(rng, ["#2B2F6B", "#1F1F1F", "#7A1F5C"])]
+	# A bin at its foot.
+	s += _bin(front + inward * (w - 96.0) - 22.0, "#2F6DB5")
+	if Season.is_winter():
+		s += _rect(-2, top - 13, w + 4, 6, "#F4F6F8")
+		s += _rect(cornice, top - 23, 26, 6, "#F4F6F8")
+		s += _rect(0, H - 6, w, 6, "#F4F6F8")
 	return _tex(w, s)
 
 

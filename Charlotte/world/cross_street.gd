@@ -8,15 +8,18 @@ extends Node2D
 ##  - GROUND (added after Street): the asphalt cutting through the 6e sidewalk, curb ramps, crosswalk.
 ##  - SIGNS (added with the props): the street-name posts and the stop or school sign at the corner (the utility
 ##    poles and wires are StreetScene's, see UtilityPoles).
+##  - MOUTH (instead of GROUND, in a back lane that comes out on this street): the street's sidewalks and road carrying
+##    on toward us, to the bottom of the view, past the end of the lane's concrete.
 ## Every point is drawn as its projection at the facade line (y FACADE_Y) shrunk toward the vanishing
 ## point by 1 / (1 + depth).
 
-enum Part { VISTA, GROUND, SIGNS }
+enum Part { VISTA, GROUND, SIGNS, MOUTH }
 
 const FACADE_Y := 592.0
 const HORIZON_Y := 452.0
 const SIDEWALK_TOP := 590.0
 const ROAD_BOTTOM := 676.0
+const VIEW_BOTTOM := 720.0
 const FAR := 24.0
 ## Beyond this depth, details (windows) are too small to draw.
 const DETAIL := 8.0
@@ -30,7 +33,8 @@ var part := Part.VISTA
 var x0 := 0.0
 var x1 := 560.0
 ## Sidewalk width on each side of the cross street, at the facade line.
-var sidewalk := 96.0
+const SIDEWALK := 96.0
+var sidewalk := SIDEWALK
 ## School zone: yellow crosswalk and a school sign.
 var school := false
 ## Walls along each side, nearest first: {"to": depth, "top": y at the facade line, "kind", "color"}.
@@ -46,6 +50,11 @@ var facing := "west"
 var guard := false
 ## Which corner (left or right edge of the gap) the signs stand on.
 var sign_side := 1.0
+## MOUTH: which side of the street the lane comes in from (-1 left, 1 right): its curb is dropped.
+var lane_side := 1.0
+## Seen from a back lane: no corner here, so no planted curb extensions right before us; and the open sky painted over the
+## distant city fades in slowly, leaving the sun (see _horizon).
+var from_lane := false
 
 var _rng := RandomNumberGenerator.new()
 var _tree_tex: Array[Texture2D] = []
@@ -59,7 +68,7 @@ var _litter: Array[Color] = Season.litter()
 static func make(which: Part, from: CrossStreet) -> CrossStreet:
 	var cs := CrossStreet.new()
 	cs.part = which
-	for prop in ["x0", "x1", "sidewalk", "school", "left_walls", "right_walls", "street_name", "along_name", "facing", "sign_side"]:
+	for prop in ["x0", "x1", "sidewalk", "school", "left_walls", "right_walls", "street_name", "along_name", "facing", "sign_side", "lane_side"]:
 		cs.set(prop, from.get(prop))
 	return cs
 
@@ -102,6 +111,8 @@ func _draw() -> void:
 			_draw_ground()
 		Part.SIGNS:
 			_draw_signs()
+		Part.MOUTH:
+			_draw_mouth()
 
 
 # ── Vista ───────────────────────────────────────────────────────
@@ -161,7 +172,9 @@ func _far_crosswalks() -> void:
 # The planted curb extensions of the cross street too (like CurbGarden on ours): on both curbs just past the corner,
 # and either side of the next crossing down; a rounded bed bulging into the road, perennials, striped bollards.
 func _curb_gardens() -> void:
-	var spans: Array[Vector2] = [Vector2(0.1, 0.8)]
+	var spans: Array[Vector2] = []
+	if not from_lane:
+		spans.append(Vector2(0.1, 0.8))
 	for c in _crossings:
 		spans.append(Vector2(c.x - 0.6, c.x - 0.04))
 		spans.append(Vector2(c.y + 0.04, c.y + 0.6))
@@ -283,14 +296,16 @@ func _horizon() -> void:
 	grad.offsets = PackedFloat32Array([0.0, 0.35, 0.62, 0.82, 1.0])
 	grad.colors = sky
 	var sky_top := 90.0
-	var bands := 8
+	# From a lane the gap is where the sun hangs: a long fade, the sun and the city's roofs dissolving into the haze.
+	var fade := 240.0 if from_lane else 50.0
+	var bands := 16 if from_lane else 8
 	for i in bands:
 		var ya := lerpf(sky_top, HORIZON_Y + 4.0, float(i) / bands)
 		var yb := lerpf(sky_top, HORIZON_Y + 4.0, float(i + 1) / bands)
 		var ca := grad.sample(ya / 720.0)
 		var cb := grad.sample(yb / 720.0)
-		ca.a = clampf((ya - sky_top) / 50.0, 0.0, 1.0)
-		cb.a = clampf((yb - sky_top) / 50.0, 0.0, 1.0)
+		ca.a = clampf((ya - sky_top) / fade, 0.0, 1.0)
+		cb.a = clampf((yb - sky_top) / fade, 0.0, 1.0)
 		# Fade out toward the sides too, so the patch has no visible edge.
 		var xs := [x0, x0 + 140.0, x1 - 140.0, x1]
 		var fades := [0.0, 1.0, 1.0, 0.0]
@@ -636,6 +651,55 @@ func _draw_ground() -> void:
 		var x := _rng.randf_range(_fan(l, y), _fan(r, y))
 		draw_set_transform(Vector2(x, y), _rng.randf_range(0.0, PI), Vector2(1.0, 0.5))
 		var size := _rng.randf_range(3.0, 5.0)
+		var lc: Color = _litter[_rng.randi_range(0, 4) % _litter.size()]
+		if float(i % 10) / 10.0 < Season.litter_amount():
+			draw_circle(Vector2.ZERO, size, lc)
+	draw_set_transform(Vector2.ZERO)
+
+
+# ── Where a back lane comes out ─────────────────────────────────
+
+# The street coming toward us past the lane's mouth: its two sidewalks and the road, fanning out to the bottom of the view,
+# slab joints across the sidewalks (depths below 0: in front of the facade line), the curb dropped where the lane meets it.
+func _draw_mouth() -> void:
+	var y0 := SIDEWALK_TOP
+	var y1 := VIEW_BOTTOM
+	var l := x0 + sidewalk
+	var r := x1 - sidewalk
+	var walk := Color("#E9EEF2") if Season.is_winter() else CONCRETE
+	var band := func(a: float, b: float, col: Color) -> void:
+		draw_colored_polygon(PackedVector2Array([Vector2(_fan(a, y0), y0), Vector2(_fan(b, y0), y0), Vector2(_fan(b, y1), y1), Vector2(_fan(a, y1), y1)]), col)
+	band.call(x0, l, walk)
+	band.call(r, x1, walk)
+	band.call(l, r, ASPHALT)
+	# The curbs, and on the lane's side the dropped curb the lane's traffic drives over.
+	var dropped := r if lane_side > 0.0 else l
+	var kerb := l if lane_side > 0.0 else r
+	draw_line(Vector2(_fan(kerb, y0), y0), Vector2(_fan(kerb, y1), y1), CURB, 3.0)
+	band.call(dropped, dropped + lane_side * 22.0, Color("#BDB7AD"))
+	draw_line(Vector2(_fan(dropped, y0), y0), Vector2(_fan(dropped, y1), y1), Color("#A8A397"), 2.0)
+	# The seam where the lane's concrete meets the sidewalk.
+	var edge := x1 if lane_side > 0.0 else x0
+	draw_line(Vector2(_fan(edge, y0), y0), Vector2(_fan(edge, y1), y1), walk.darkened(0.28), 2.0)
+	# Slab joints, closer together with distance.
+	var d := 0.0
+	var nearest := (FACADE_Y - HORIZON_Y) / (y1 - HORIZON_Y) - 1.0
+	while d > nearest:
+		var thick := 1.6 / (1.0 + d)
+		for side in [[x0, l], [r, x1]]:
+			draw_line(_at(Vector2(side[0], FACADE_Y), d), _at(Vector2(side[1], FACADE_Y), d), walk.darkened(0.16), thick)
+		d -= 0.07
+	# Faded centre line, as down the vista.
+	var vp := _vp()
+	draw_line(_at(Vector2(vp.x, FACADE_Y), -0.05), _at(Vector2(vp.x, FACADE_Y), -0.2), Color(0.95, 0.85, 0.4, 0.35), 3.0)
+	draw_line(_at(Vector2(vp.x, FACADE_Y), -0.3), _at(Vector2(vp.x, FACADE_Y), -0.42), Color(0.95, 0.85, 0.4, 0.35), 4.0)
+	# Leaves in the gutters and blown onto the road.
+	for i in 26:
+		var y := _rng.randf_range(y0 + 4.0, y1 - 4.0)
+		var gutter := _rng.randf() < 0.6
+		var x := _fan((l if i % 2 == 0 else r) + _rng.randf_range(-6.0, 6.0), y) if gutter else _rng.randf_range(_fan(l, y), _fan(r, y))
+		draw_set_transform(Vector2(x, y), _rng.randf_range(0.0, PI), Vector2(1.0, 0.5))
+		var size := _rng.randf_range(3.0, 5.5)
 		var lc: Color = _litter[_rng.randi_range(0, 4) % _litter.size()]
 		if float(i % 10) / 10.0 < Season.litter_amount():
 			draw_circle(Vector2.ZERO, size, lc)
