@@ -276,6 +276,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     against it), lifts the can with her hands on its handle (`Character.carry_lift`, `carry_grip`), tips it, and drops arc
     from the spout (`CAN_SPOUT`) onto the soil (`InteriorArt.plant_soil`)) and the watering can in the kitchen (`InteriorArt.watering_can`, carried with
     `Character.carry`, `flags.has_can`); `flags.watered`; the can goes back when all have drunk.
+- Julien's list of quest ideas for later is in `docs/idees-de-quetes.md` (pizza hidden by a squirrel, jogging with Dad,
+  buying sour-cream-and-onion chips at the dépanneur…): read it before inventing new quests, and tick them off there.
 - The dépanneur has prices (`_buy(picture, text, price)`, paid from `GameState.money`); the clerk says "Il te manque des
   sous !" when she can't afford something.
 
