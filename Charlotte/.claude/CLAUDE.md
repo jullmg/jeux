@@ -203,7 +203,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   the palm, as before: `hand_position()` is that point). Poses set shoulder angles and elbow goals in `Character._apply_pose`: `_arms_rest` (swing),
   `_ik`/`_reach_blend` (two-bone reach: carrying, pouring, handlebars), `_aim(i, old_degrees, reach)` (chores: a hand where a straight arm at that angle
   would put it, the elbow slightly bent), `_finish_arms` (eases the elbow, picks the hand). Carried things may set meta `hands` (the hand shape; a cat:
-  "open") and `keep_upright` (not mirrored); `hand_mode` forces the front hand's shape (a dog walker's "grip"). Design sheet: `tools/arms.tscn`
+  "open") and `keep_upright` (not mirrored); `hand_mode` forces the front hand's shape (a dog walker's "grip"). Riding: each shoulder slides forward along the chest (and the arm stretches a little if needed) so both hands land on the grip. Design sheet: `tools/arms.tscn`
   (`--set=0..3`, `--only=N`, `--zoom=`: standing/walking/running, gestures/pet/carry, chores, ages and sleeves).
 - `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through, breathing, soft shading by
   `shaders/character_shade.gdshader` (lit from the left, follows `facing`), hair strands clipped to each hairstyle (`CharacterArt._strands`), clothing folds

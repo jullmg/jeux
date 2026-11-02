@@ -331,6 +331,12 @@ func _apply_pose() -> void:
 	var stride := deg_to_rad(lerpf(26.0, 38.0, _run))
 	_leg_front.rotation = stride * swing - lunge
 	_leg_back.rotation = -stride * swing + lunge
+	# Shoulders at their usual places and arms their usual length (riding moves and stretches them below).
+	_arm_back.position = Vector2(_rig.arm_x, _rig.shoulder_y)
+	_arm_front.position = Vector2(-(_rig.arm_x as float), _rig.shoulder_y)
+	for i in 2:
+		_arms[i].scale.y = 1.0
+		_hands[i].scale.y = 1.0
 	var arm_swing := deg_to_rad(lerpf(22.0, 48.0, _run)) * swing
 	var stroke := deg_to_rad(lerpf(-82.0, -62.0, _pet_low)) + sin(_time * 6.0) * deg_to_rad(12.0)
 	_arm_front.rotation = lerpf(ARM_REST - arm_swing, stroke, _pet)
@@ -378,14 +384,24 @@ func _apply_pose() -> void:
 		_head.rotation = deg_to_rad(-10.0)
 		_pedal_legs()
 		_follow_head()
-		# Hands on the bars: each arm reaches the grip (the far shoulder sits further back), elbows bent and pointing down.
+		# Hands on the bars: each arm reaches the grip, elbows bent and pointing down. Seen from the side the shoulders are not ±36 px
+		# apart, so a shoulder that is too far from the grip slides forward along the chest to reach it, and only if that is still not
+		# enough does the arm stretch a little.
+		var span := (_rig.upper_len as float) + (_rig.fore_len as float) + (_rig.hand_center as float)
 		for i in 2:
-			var target := _body.to_local(bar_grip) if bar_grip != Vector2.INF else _arms[i].position + Vector2.from_angle(deg_to_rad(38.0)) * (_rig.arm_len as float) * 0.8
+			var shoulder := Vector2((_rig.arm_x as float) * (1.0 if i == 0 else -1.0), _rig.shoulder_y)
+			var target := _body.to_local(bar_grip) if bar_grip != Vector2.INF else shoulder + Vector2.from_angle(deg_to_rad(38.0)) * span * 0.8
+			var slide := clampf((target - shoulder).length() - span * 0.95, 0.0, (_rig.arm_x as float) * 2.0)
+			shoulder.x += slide * signf(target.x - shoulder.x)
+			_arms[i].position = shoulder
 			var reach := _ik(_arms[i], target)
 			_arms[i].rotation = reach.x
 			_elbow_goal[i] = reach.y
 			_snap[i] = true
 			_hand_goal[i] = "grip"
+			var stretch := maxf((target - shoulder).length() / span, 1.0)
+			_arms[i].scale.y = stretch
+			_hands[i].scale.y = 1.0 / stretch
 		_finish_arms()
 		return
 	# Breathing while she stands, and the idle gesture on top.
