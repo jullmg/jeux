@@ -321,8 +321,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     `Character.carry`, `flags.has_can`); `flags.watered`; the can goes back when all have drunk.
 - Julien's list of quest ideas for later is in `docs/idees-de-quetes.md` (pizza hidden by a squirrel, jogging with Dad,
   buying sour-cream-and-onion chips at the dépanneur…): read it before inventing new quests, and tick them off there.
-- The dépanneur has prices (`_buy(picture, text, price)`, paid from `GameState.money`); the clerk says "Il te manque des
-  sous !" when she can't afford something.
+- The dépanneurs have real Montréal prices (2026), in `Shop.PRICES` (candy 1,25 $, lollipop 0,75 $, chips 2,99 $, sloche 2,75 $, hot chocolate 2,25 $, popsicle 1,75 $, juice 2,25 $, pint of milk 3,29 $, bread 3,99 $, coffee 2,00 $; the specials board and the "CAFÉ 2 $" poster use them). `Shop._buy(picture, text, price)` first opens `ui/buy_dialog.gd` (`BuyDialog`, CanvasLayer 62, group "modal": item, price, pocket money and what is left, "Acheter" / "Non merci"; when short, how much is missing and only "D'accord"), then pays from `GameState.money`. Start money is 5,00 $ and quest rewards are 1–3 $ so a snack costs one or two quests.
 
 ## Saving
 
