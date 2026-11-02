@@ -35,10 +35,14 @@ static func busy() -> bool:
 	return item() != ""
 
 
+## The part after the colon: which cat (its quest id) or which toy; "" for milk and the can.
+static func id() -> String:
+	return item().get_slice(":", 1) if item().contains(":") else ""
+
+
 ## The lost cat she holds (its quest id), or "".
 static func cat_id() -> String:
-	var parts := item().split(":")
-	return parts[1] if parts.size() > 1 and parts[0] == "cat" else ""
+	return id() if what() == "cat" else ""
 
 
 ## Puts `kind` (with its `id` for a cat) in her arms. False, and nothing changes, if her hands are not free.
@@ -86,7 +90,7 @@ static func migrate() -> void:
 
 
 static func _hold(who: Character) -> void:
-	var node := _build(what(), cat_id())
+	var node := _build(what(), id())
 	if node == null:
 		clear()
 		return

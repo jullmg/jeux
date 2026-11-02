@@ -175,7 +175,7 @@ func _build_chores() -> void:
 			spot.condition = func() -> bool: return Carry.has("toy")
 			add_child(spot)
 			add_child(QuestMark.make(Vector2(BEDROOM.x + rect.get_center().x, rect.get_center().y - 20.0), func() -> bool:
-				return Carry.has("toy") and ITEMS[Carry.item().get_slice(":", 1)].dest == dest_id, 0.8))
+				return Carry.has("toy") and ITEMS[Carry.id()].dest == dest_id, 0.8))
 	for id in _plants:
 		var plant: Sprite2D = _plants[id]
 		if _thirsty(id):
@@ -251,7 +251,7 @@ func _where(kind: String) -> String:
 func _put_away(dest_id: String) -> void:
 	if not Carry.has("toy"):
 		return
-	var kind := Carry.item().get_slice(":", 1)
+	var kind := Carry.id()
 	if ITEMS[kind].dest != dest_id:
 		_say(_charlotte, "Pas ici ! " + _where(kind), 300.0, 3.4)
 		return
