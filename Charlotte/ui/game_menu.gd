@@ -52,6 +52,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		var notebook := get_node_or_null("/root/Notebook")
 		if notebook and notebook._open:
 			return
+		var town_map := get_node_or_null("/root/TownMap")
+		if town_map and town_map._open:
+			return
 		get_viewport().set_input_as_handled()
 		toggle()
 

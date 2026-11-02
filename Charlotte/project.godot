@@ -25,6 +25,7 @@ Sfx="*res://audio/sfx.gd"
 Music="*res://audio/music.gd"
 MuteButton="*res://ui/mute_button.gd"
 Notebook="*res://ui/notebook.gd"
+TownMap="*res://ui/town_map.gd"
 GameMenu="*res://ui/game_menu.gd"
 
 [gui]

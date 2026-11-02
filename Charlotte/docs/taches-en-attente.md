@@ -14,6 +14,6 @@
 ## Demandées ensuite (2026-11-02)
 
 6. **Carte (map)** du quartier que Charlotte consulte, dessinée comme par un enfant ; et **les coins ne se tournent plus tout seuls** en
-   marchant vers l'intersection : il faut cliquer la rue transversale ou appuyer sur ↑ au coin. (Coins : FAIT. Carte : en cours.)
+   marchant vers l'intersection : il faut cliquer la rue transversale ou appuyer sur ↑ au coin. (Coins : FAIT. Carte : FAITE, touche C ou bouton à gauche du carnet.)
 7. Améliorer l'apparence des **objets du dépanneur** (les dessins de `ShopArt` : produits, meubles, accessoires).
 8. Les **écureuils** peuvent parfois **monter sur les poteaux électriques** puis **marcher sur les fils** (`Squirrel`, `UtilityPoles`).
