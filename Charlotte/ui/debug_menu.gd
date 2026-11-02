@@ -44,6 +44,11 @@ const PLACES := [
 	{"name": "Bonbons et chips", "scene": "depanneur", "x": 1750.0},
 	{"name": "Sloche et café", "scene": "depanneur", "x": 2450.0},
 	{"name": "Frigos et lait", "scene": "depanneur", "x": 3100.0},
+	{"group": "Dépanneur Oh Bon!"},
+	{"name": "Entrée", "scene": "ohbon"},
+	{"name": "Comptoir et télé", "scene": "ohbon", "x": 1100.0},
+	{"name": "Bonbons et chips", "scene": "ohbon", "x": 1900.0},
+	{"name": "Frigos et lait", "scene": "ohbon", "x": 2800.0},
 	{"group": "Autres"},
 	{"name": "Écran titre", "scene": "intro"},
 ]
@@ -168,7 +173,7 @@ func _teleport(place: Dictionary) -> void:
 	Transition.arrive = str(place.get("arrive", ""))
 	var scene_name := str(place.scene)
 	if place.has("x"):
-		if scene_name in ["house", "depanneur"]:
+		if scene_name in ["house", "depanneur", "ohbon"]:
 			Transition.inside_x = float(place.x)
 		else:
 			Transition.street_x = float(place.x)

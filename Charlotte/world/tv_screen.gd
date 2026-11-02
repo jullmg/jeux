@@ -10,11 +10,14 @@ const SWITCH_TIME := 0.3
 var channels: Array[String] = TvShows.ALL.duplicate()
 ## Index into `channels`; -1 = off.
 var channel := -1
+## A shop's TV that keeps playing: seconds before it moves on to the next channel by itself (0 = only when clicked).
+var auto_cycle := 0.0
 ## Where Charlotte stands to use it, and the room glow it drives (both set by the house).
 var stand_x := 0.0
 var glow: Sprite2D
 
 var _t := 0.0
+var _cycle := 0.0
 var _switching := 0.0
 var _osd := 0.0
 var _on_for := 0.0
@@ -33,6 +36,10 @@ func _process(delta: float) -> void:
 	_switching = maxf(_switching - delta, 0.0)
 	_osd = maxf(_osd - delta, 0.0)
 	_on_for += delta
+	if auto_cycle > 0.0 and channel >= 0:
+		_cycle += delta
+		if _cycle >= auto_cycle:
+			turn_on((channel + 1) % channels.size())
 	if glow and channel >= 0:
 		glow.modulate.a = 0.75 + 0.15 * sin(_t * 7.0) + 0.1 * sin(_t * 17.0) if _switching == 0.0 else 0.4 + randf() * 0.4
 	if channel >= 0:
@@ -66,12 +73,23 @@ func release() -> void:
 
 
 func interact(_who: Character) -> void:
+	_cycle = 0.0
 	channel += 1
 	if channel >= channels.size():
 		channel = -1
 	Sfx.play("tv" if channel >= 0 else "click", get_global_rect().get_center())
 	_switching = SWITCH_TIME if channel >= 0 else 0.0
 	_osd = 2.0
+	_on_for = -SWITCH_TIME
+	_update_glow()
+	queue_redraw()
+
+
+## Puts channel `index` on (with the burst of static between shows).
+func turn_on(index: int) -> void:
+	channel = index
+	_cycle = 0.0
+	_switching = SWITCH_TIME
 	_on_for = -SWITCH_TIME
 	_update_glow()
 	queue_redraw()

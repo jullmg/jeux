@@ -79,3 +79,11 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 func _build_doors() -> void:
 	_add_corner(_cross_streets[0], "res://scenes/main.tscn", "6e_from_holt")
 	_add_corner(_cross_streets[1], "res://scenes/cinquieme.tscn", "5e_from_holt")
+	# Oh Bon!'s black-framed glass door (SVG x 134-208, y 694-889): in to the shop.
+	var origin := _house_origin(layout.find("ohbon"))
+	var area := Rect2(origin + Vector2(134.0, 694.0) * HOUSE_SCALE, Vector2(74.0, 195.0) * HOUSE_SCALE)
+	add_child(DoorSpot.make(area, func():
+		_control.enabled = false
+		Transition.street_x = area.get_center().x
+		Sfx.play("bell")
+		Transition.change_scene(self, "res://scenes/ohbon.tscn"), area.get_center().x))

@@ -24,6 +24,8 @@ var floor_style := "wood"
 ## "moulding" (a home's crown moulding) or "drop" (a shop's suspended ceiling: tiles in a metal grid).
 var ceiling_style := "moulding"
 const TILES := [Color("#ECE8DE"), Color("#9AA092")]
+## The two colours of the checkered floor (a shop sets its own).
+var tile_colors: Array[Color] = [Color("#ECE8DE"), Color("#9AA092")]
 var seed_value := 77
 
 
@@ -146,7 +148,7 @@ func _tiles(x0: float, x1: float) -> void:
 			var a := maxf(mid + k * w, x0)
 			var b := minf(mid + (k + 1) * w, x1)
 			if b > a:
-				draw_rect(Rect2(a, y, b - a, h), TILES[(k + row) & 1])
+				draw_rect(Rect2(a, y, b - a, h), tile_colors[(k + row) & 1])
 			k += 1
 		draw_line(Vector2(x0, y), Vector2(x1, y), Color(0, 0, 0, 0.08), 1.0)
 		y += h

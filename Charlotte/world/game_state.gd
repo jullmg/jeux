@@ -137,7 +137,7 @@ static func load_game(n: int) -> String:
 	Carry.migrate()
 	var scene := str(data.get("scene", ""))
 	var x := float(data.get("x", NAN))
-	if scene.contains("/scenes/house") or scene.contains("/scenes/depanneur"):
+	if scene.contains("/scenes/house") or scene.contains("/scenes/depanneur") or scene.contains("/scenes/ohbon"):
 		Transition.inside_x = x
 	else:
 		Transition.street_x = x

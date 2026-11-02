@@ -44,6 +44,7 @@ func _ready() -> void:
 	_build_aisles()
 	_build_coolers()
 	_build_extras()
+	_build_clutter()
 	_build_lighting()
 	_spawn_charlotte(DOOR_X + 240.0)
 	_build_spots()
@@ -218,6 +219,55 @@ func _floor_wear() -> void:
 		scuff.width = rng.randf_range(1.0, 2.2)
 		scuff.default_color = Color(0.25, 0.2, 0.15, rng.randf_range(0.06, 0.14))
 		add_child(scuff)
+
+
+# Xin-Xin's is a crowded, hard-working corner store: boxes of stock piled on top of the fridges and wherever there is room,
+# a pallet nobody had time to unpack, a hand truck and a ladder left where they were used, a cart in the aisle, a mop
+# by the counter, a bin that is full, newspapers, things that fell on the floor, and a few things hung crooked.
+func _build_clutter() -> void:
+	var tilt := func(sprite: Sprite2D, degrees: float) -> Sprite2D:
+		sprite.rotation_degrees = degrees
+		return sprite
+	# On top of everything.
+	tilt.call(_put(ShopArt.box_stack(2), FRIDGE_X + 30.0, 124.0, 0.85), -2.0)
+	tilt.call(_put(ShopArt.box_stack(3), FRIDGE_X + 250.0, 124.0, 0.75), 3.0)
+	tilt.call(_put(ShopArt.box_stack(4), DAIRY_X + 120.0, 124.0, 0.8), -1.5)
+	tilt.call(_put(ShopArt.box_stack(5), DAIRY_X + 330.0, 124.0, 0.7), 2.0)
+	_put(ShopArt.box_stack(6), BREAD_X + 40.0, 250.0, 0.6)
+	_put(ShopArt.box_stack(7), CANDY_X + 330.0, 160.0, 0.55)
+	# In the way.
+	_put(ShopArt.box_stack(1), 200.0, 646.0, 0.95, "floor")
+	_put(ShopArt.newspaper_pile(), 560.0, 650.0, 0.95)
+	_put(ShopArt.trash_can(), 715.0, 648.0, 1.0, "floor")
+	tilt.call(_put(ShopArt.shopping_cart(), 1325.0, 656.0, 0.95, "floor"), -4.0)
+	_put(ShopArt.mop_bucket(), 1390.0, 640.0, 0.95, "floor")
+	tilt.call(_put(ShopArt.broom(), 1455.0, 606.0, 0.9), 7.0)
+	_put(ShopArt.hand_truck(), 1930.0, 650.0, 0.95, "floor")
+	_put(ShopArt.pallet_cases(), 2290.0, 700.0, 0.95, "floor")
+	tilt.call(_put(ShopArt.step_ladder(), 3258.0, 640.0, 1.0, "floor"), 2.0)
+	_put(ShopArt.egg_tray(), 1520.0, 442.0, 0.8)
+	_put(ShopArt.tin_pyramid(), 1700.0, 655.0, 0.9, "floor")
+	_put(ShopArt.salt_bag(), 270.0, 650.0, 0.9, "floor")
+	_put(ShopArt.cctv_monitor(), 2150.0, 255.0, 0.7)
+	# A handwritten price card taped crooked on the candy wall, and a second one lower.
+	for at in [[CANDY_X + 120.0, 300.0, 6.0], [CANDY_X + 380.0, 380.0, -8.0]]:
+		var card := Polygon2D.new()
+		card.polygon = PackedVector2Array([Vector2(0, 0), Vector2(46, 0), Vector2(46, 26), Vector2(0, 26)])
+		card.color = Color("#FFF3A8")
+		card.position = Vector2(at[0], at[1])
+		card.rotation_degrees = at[2]
+		add_child(card)
+		var line := Line2D.new()
+		line.points = PackedVector2Array([Vector2(6, 8), Vector2(38, 8), Vector2(6, 16), Vector2(28, 16)])
+		line.width = 1.6
+		line.default_color = Color("#5A4A2A")
+		card.add_child(line)
+	# What fell on the floor, here and there, mostly near the front where Charlotte walks.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 606
+	for i in 14:
+		var junk := _put(ShopArt.floor_junk(i), rng.randf_range(120.0, SHOP.y - 160.0), rng.randf_range(676.0, 712.0), rng.randf_range(0.7, 1.0))
+		junk.modulate = Color(1, 1, 1, 0.95)
 
 
 # The ceiling's recessed panels with their light falling on the wall and floor, the cold glow of the fridges on the floor,
