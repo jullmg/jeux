@@ -56,6 +56,9 @@ var bar_grip := Vector2.INF
 var _ride_legs: Array[Sprite2D] = []
 ## Little idle gestures when she stands still a while (Charlotte, her parents): a wave, a hop, a stretch, a look round.
 var fidgets := false
+## A chore she is doing in place (a family member's routine): "stir", "read", "phone", "type", "wash", "drink", "fridge",
+## "exercise" or "watch"; "" = none. Poses the arms and head; the routine adds the prop in her hand.
+var task := ""
 ## Which idle gestures she may do (a shopkeeper just looks round and stretches).
 var fidget_moves: Array[String] = ["wave", "hop", "stretch", "look", "look"]
 var _shade: ShaderMaterial
@@ -353,7 +356,57 @@ func _apply_pose() -> void:
 				_torso.scale.y += 0.03 * w
 			"look":
 				_head.rotation += sin(t * TAU) * 0.18 * w
+	if task != "":
+		_task_pose()
 	_follow_head()
+
+
+# Arms and head for the chore in `task`: standing at the work, the front arm doing it, the back one helping.
+func _task_pose() -> void:
+	var t := _time
+	var f := float(facing)
+	match task:
+		"stir":
+			_arm_front.rotation = deg_to_rad(-62.0) + sin(t * 5.0) * 0.3
+			_arm_back.rotation = deg_to_rad(-52.0)
+			_body.rotation += 0.05 * f
+			_head.rotation += 0.1 * f
+		"read":
+			_arm_front.rotation = deg_to_rad(-64.0)
+			_arm_back.rotation = deg_to_rad(-70.0)
+			_head.rotation += 0.14 * f + sin(t * 0.6) * 0.02
+		"phone":
+			_arm_front.rotation = deg_to_rad(-78.0) + sin(t * 1.4) * 0.03
+			_arm_back.rotation = deg_to_rad(-12.0)
+			_head.rotation += 0.15 * f
+		"type":
+			_arm_front.rotation = deg_to_rad(-70.0) + sin(t * 15.0) * 0.05
+			_arm_back.rotation = deg_to_rad(-74.0) + sin(t * 13.0 + 1.0) * 0.05
+			_body.rotation += 0.05 * f
+			_head.rotation += 0.12 * f
+		"wash":
+			_arm_front.rotation = deg_to_rad(-62.0) + sin(t * 6.0) * 0.22
+			_arm_back.rotation = deg_to_rad(-60.0) - sin(t * 6.0) * 0.22
+			_body.rotation += 0.06 * f
+			_head.rotation += 0.12 * f
+		"drink":
+			var up := smoothstep(0.0, 0.5, fmod(t, 5.0)) * (1.0 - smoothstep(1.6, 2.1, fmod(t, 5.0)))
+			_arm_front.rotation = lerpf(deg_to_rad(-58.0), deg_to_rad(-124.0), up)
+			_arm_back.rotation = deg_to_rad(-20.0)
+			_head.rotation += 0.08 * f * up
+		"fridge":
+			_arm_front.rotation = deg_to_rad(-78.0) + sin(t * 1.5) * 0.06
+			_arm_back.rotation = deg_to_rad(-24.0)
+			_body.rotation += 0.05 * f
+		"exercise":
+			var s := sin(t * 4.0)
+			_arm_front.rotation = deg_to_rad(-95.0) - s * 1.3
+			_arm_back.rotation = deg_to_rad(-95.0) + s * 1.3
+			_body.position.y -= absf(s) * 7.0
+		"watch":
+			_arm_front.rotation = deg_to_rad(-10.0)
+			_arm_back.rotation = deg_to_rad(-10.0)
+			_head.rotation -= 0.05 * f
 
 
 ## The hair behind the head moves with it: wherever the head is this frame (breathing, a gesture, petting, riding), and tilted

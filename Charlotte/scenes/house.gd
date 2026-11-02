@@ -61,6 +61,8 @@ var _bedroom_lights: FairyLights
 # Charlotte's drawings stuck on the fridge door with magnets.
 var _fridge_art: Node2D
 var _fridge_busy := false
+var _mom_routine: FamilyRoutine
+var _dad_routine: FamilyRoutine
 var _mom: Character
 var _dad: Character
 var _mom_line := 0
@@ -113,20 +115,53 @@ func _build_shell() -> void:
 	add_child(shell)
 
 
-# Mom in the kitchen by the stove, Dad in the salon by the dining table. Click them for a word.
+# Mom starts in the kitchen by the stove, Dad in the salon by the dining table, and each goes about their own chores (a
+# FamilyRoutine). Click them for a word: they stop and turn to Charlotte.
+const MOM_TASKS := [
+	{"x": KITCHEN_START + 200.0, "facing": 1, "task": "stir", "prop": "bowl", "secs": 9.0, "say": ["Mmm, ça sent bon !", "Un petit gâteau !"]},
+	{"x": KITCHEN_START + 138.0, "facing": -1, "task": "fridge", "prop": "", "secs": 5.0, "say": ["Qu'est-ce qu'on mange ?", "Il manque du lait…"]},
+	{"x": KITCHEN_START + 300.0, "facing": 1, "task": "wash", "prop": "plate", "secs": 8.0, "say": ["J'essuie la vaisselle."]},
+	{"x": KITCHEN_START + 340.0, "facing": -1, "task": "drink", "prop": "mug", "secs": 8.0, "say": ["Un petit café…"]},
+	{"x": KITCHEN_START + 250.0, "facing": 1, "task": "phone", "prop": "phone", "secs": 7.0, "say": ["Ah, un message de mamie !"]},
+	{"x": KITCHEN_START - 140.0, "facing": 1, "task": "watch", "prop": "", "secs": 5.0, "say": []},
+]
+const DAD_TASKS := [
+	{"x": 1880.0, "facing": 1, "task": "type", "prop": "laptop", "secs": 10.0, "say": ["Encore des courriels…"]},
+	{"x": 1650.0, "facing": -1, "task": "drink", "prop": "mug", "secs": 8.0, "say": ["Quel beau temps !"]},
+	{"x": 2150.0, "facing": 1, "task": "read", "prop": "book", "secs": 10.0, "say": ["Passionnant, ce livre."]},
+	{"x": 1150.0, "facing": 1, "task": "phone", "prop": "phone", "secs": 7.0, "say": ["Tiens, le match !"]},
+	{"x": 930.0, "facing": 1, "task": "exercise", "prop": "", "secs": 8.0, "say": ["Un, deux, un, deux !"]},
+	{"x": 2530.0, "facing": 1, "task": "watch", "prop": "", "secs": 8.0, "say": ["Bonne émission."]},
+]
+
+
 func _build_family() -> void:
 	_mom = _family_member(CharacterLook.mom(), KITCHEN_START + 300.0, -1)
 	_dad = _family_member(CharacterLook.dad(), 1720.0, -1)
-	add_child(DoorSpot.make(Rect2(_mom.position.x - 55.0, 330, 110, 340), _talk_to_mom, _mom.position.x - 90.0))
-	add_child(DoorSpot.make(Rect2(_dad.position.x - 55.0, 330, 110, 340), _talk_to_dad, _dad.position.x - 90.0))
-	# A "!" over whoever has a quest for Charlotte, or is waiting for what she brings.
-	add_child(QuestMark.make(_mom.position + Vector2(0, -350), func() -> bool:
-		return Quests.available("milk") or Quests.available("menage") or Quests.active("milk") and Carry.has("milk")))
-	add_child(QuestMark.make(_dad.position + Vector2(0, -360), func() -> bool: return Quests.available("hamster") or Quests.available("plants")))
+	_mom_routine = _routine(_mom, MOM_TASKS, _talk_to_mom, Vector2(0, -350), func() -> bool:
+		return Quests.available("milk") or Quests.available("menage") or Quests.active("milk") and Carry.has("milk"))
+	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
+		return Quests.available("hamster") or Quests.available("plants"))
+
+
+# A parent's routine with its click area and its "!" (over whoever has a quest for Charlotte, or is waiting for what she brings).
+func _routine(who: Character, tasks: Array, on_click: Callable, mark_at: Vector2, has_quest: Callable) -> FamilyRoutine:
+	var routine := FamilyRoutine.new()
+	routine.who = who
+	routine.tasks = tasks
+	routine.spot = DoorSpot.make(Rect2(who.position.x - 55.0, 330, 110, 340), on_click, who.position.x - 90.0)
+	add_child(routine.spot)
+	var mark := QuestMark.make(who.position + mark_at, has_quest)
+	add_child(mark)
+	routine.mark = mark
+	routine.mark_offset = mark_at
+	add_child(routine)
+	return routine
 
 
 # Mom asks for milk, sends her to the dépanneur, and thanks her when she brings it home.
 func _talk_to_mom() -> void:
+	_mom_routine.pause(4.0, _charlotte.position.x)
 	if Quests.active("milk") and Carry.has("milk"):
 		Carry.put_down(_charlotte)
 		_say(_mom, "Du lait ! Merci, Chachoue !", 350.0)
@@ -145,6 +180,7 @@ func _talk_to_mom() -> void:
 
 
 func _talk_to_dad() -> void:
+	_dad_routine.pause(4.0, _charlotte.position.x)
 	if Quests.start("hamster"):
 		_say(_dad, "Avant le dodo, n'oublie pas\nde nourrir ton hamster !", 390.0, 3.5)
 	elif Quests.start("plants"):
