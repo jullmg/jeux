@@ -51,7 +51,15 @@ func _ready() -> void:
 	_spawn_charlotte(DOOR_X + 240.0)
 	_build_spots()
 	_enter_area(SHOP)
-	_finish([[640.0, "basket"], [1900.0, "basket"], [3100.0, "basket"]])
+	# Shelves right in front of the lens, one every ~340 px of the shop with a basket here and there.
+	var near: Array = []
+	var at := 260.0
+	var n := 0
+	while at < SHOP.y - 150.0:
+		near.append([at, "basket" if n % 5 == 3 else "shelves", n])
+		at += 330.0 + (n % 3) * 40.0
+		n += 1
+	_finish(near)
 	Sfx.play("bell")
 
 
@@ -227,7 +235,7 @@ func _floor_wear() -> void:
 
 # Xin-Xin's is a crowded, hard-working corner store: boxes of stock piled on top of the fridges and wherever there is room,
 # a pallet nobody had time to unpack, a hand truck and a ladder left where they were used, a cart in the aisle, a mop
-# by the counter, a bin that is full, newspapers, things that fell on the floor, and a few things hung crooked.
+# by the counter, a bin that is full, newspapers, and a few things hung crooked. The floor itself is kept clear: the crowding is in the blurred shelves close to the lens.
 func _build_clutter() -> void:
 	var tilt := func(sprite: Sprite2D, degrees: float) -> Sprite2D:
 		sprite.rotation_degrees = degrees
@@ -266,12 +274,6 @@ func _build_clutter() -> void:
 		line.width = 1.6
 		line.default_color = Color("#5A4A2A")
 		card.add_child(line)
-	# What fell on the floor, here and there, mostly near the front where Charlotte walks.
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 606
-	for i in 14:
-		var junk := _put(ShopArt.floor_junk(i), rng.randf_range(120.0, SHOP.y - 160.0), rng.randf_range(676.0, 712.0), rng.randf_range(0.7, 1.0))
-		junk.modulate = Color(1, 1, 1, 0.95)
 
 
 # The ceiling's recessed panels with their light falling on the wall and floor, the cold glow of the fridges on the floor,

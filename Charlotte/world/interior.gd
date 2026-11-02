@@ -65,7 +65,7 @@ func _spawn_charlotte(x: float, facing := 1) -> void:
 	add_child(saver)
 
 
-## Out-of-focus foreground (`items`: [world x, "plant" | "plushie" | "shelf"]), colour grade, fade-in, `--screenshot=`.
+## Out-of-focus foreground (`items`: [world x, "plant" | "plushie" | "shelf" | "shelves" | "basket", optional seed]), colour grade, fade-in, `--screenshot=`.
 func _finish(foreground: Array) -> void:
 	_build_foreground(foreground)
 	_build_grade()
@@ -327,6 +327,25 @@ func _build_foreground(items: Array) -> void:
 				for i in 12:
 					body += '<rect x="%d" y="%d" width="26" height="46" fill="%s"/>' % [22 + i * 30, 60 + (i % 2) * 70, ["#E04F5F", "#FFD23F", "#4FA3E0", "#7CCB5A", "#FF8A3D", "#C084FC"][(i * 7) % 6]]
 				Foreground.add(layer, body, Vector2(x, 720.0 + 120.0), Vector2(400, 240)).modulate = Color(0.5, 0.48, 0.46)
+			"shelves":
+				# The end of a shelving unit right in front of the lens: two boards, rows of packs, a price strip; `item[2]`
+				# varies the stock.
+				var r := RandomNumberGenerator.new()
+				r.seed = 700 + int(item[2] if item.size() > 2 else 0)
+				var hues := ["#E04F5F", "#FFD23F", "#4FA3E0", "#7CCB5A", "#FF8A3D", "#C084FC", "#F2A7C9", "#E8E2D0"]
+				var rack := '<rect x="6" y="14" width="14" height="200" fill="#8A8176"/><rect x="380" y="14" width="14" height="200" fill="#8A8176"/>'
+				for board in 2:
+					var y := 66.0 + board * 84.0
+					var px := 28.0
+					while px < 366.0:
+						var w := r.randf_range(22.0, 44.0)
+						var h := r.randf_range(28.0, 58.0)
+						rack += '<rect x="%.0f" y="%.0f" width="%.0f" height="%.0f" rx="5" fill="%s"/>' % [px, y - h, w, h, hues[r.randi_range(0, hues.size() - 1)]]
+						rack += '<rect x="%.0f" y="%.0f" width="%.0f" height="8" fill="#FFFFFF" opacity="0.45"/>' % [px, y - h * 0.55, w]
+						px += w + r.randf_range(2.0, 8.0)
+					rack += '<rect x="6" y="%.0f" width="388" height="14" fill="#B8B0A2"/><rect x="6" y="%.0f" width="388" height="6" fill="#FFD23F" opacity="0.8"/>' % [y, y + 14.0]
+				rack += '<rect x="6" y="180" width="388" height="30" fill="#8A8176"/>'
+				Foreground.add(layer, rack, Vector2(x, 720.0 + 90.0), Vector2(400, 210)).modulate = Color(0.5, 0.47, 0.45)
 			"basket":
 				# A red shopping basket right in front of the lens, a baguette and a box of cereal sticking out.
 				var basket := '<rect x="190" y="30" width="26" height="170" rx="8" fill="#D9A04A" transform="rotate(14 200 120)"/><rect x="90" y="70" width="64" height="110" fill="#5DB6BE" transform="rotate(-10 120 120)"/>'
