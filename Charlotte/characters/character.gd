@@ -320,6 +320,9 @@ func _apply_pose() -> void:
 	_head.rotation = deg_to_rad(2.0) * tilt + deg_to_rad(10.0) * _pet - deg_to_rad(4.0) * _run
 	_torso.skew = 0.035 * swing
 	_body.scale.x = facing
+	# Something with writing on it (the milk carton) is not mirrored with her body when she turns to the left.
+	if is_holding() and _held.has_meta("keep_upright"):
+		_held.scale.x = absf(_held.scale.x) * facing
 	if _shade:
 		_shade.set_shader_parameter("facing", float(facing))
 	if riding:

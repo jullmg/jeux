@@ -9,7 +9,8 @@ extends RefCounted
 ##   - `Carry.put_down(who)` empties her arms; `Carry.has(kind)` / `Carry.busy()` / `Carry.cat_id()` ask what she holds;
 ##   - the scenes (`Interior`, `StreetScene._build_lost_cats`) call `Carry.restore(who)` as they open, so it follows her
 ##     through doors and saves, with nothing for a quest to remember.
-## A NEW thing to carry = one more case in `_build()` (its node and where her hands grip it) and that is all.
+## A NEW thing to carry = one more case in `_build()` (its node and where her hands grip it) and that is all. A thing with
+## writing on it sets the meta `keep_upright` so it is not mirrored when she faces left.
 
 const KEY := "carried"
 const FULL_HANDS := "J'ai déjà les mains pleines !"
@@ -135,4 +136,6 @@ static func _milk() -> Sprite2D:
 	carton.scale = Vector2.ONE * 0.78
 	carton.offset = Vector2(2, -4)
 	carton.name = "milk"
+	# Its "Québon" must read the right way round whichever way she faces (see Character._apply_pose).
+	carton.set_meta("keep_upright", true)
 	return carton
