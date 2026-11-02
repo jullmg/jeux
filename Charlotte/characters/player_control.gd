@@ -1,6 +1,6 @@
 class_name PlayerControl
 extends Node
-## Moves Charlotte with ←/→ or click/tap-to-walk (double-press or double-click/tap to run), and walks her
+## Moves Charlotte with ←/→ (or A/D) or click/tap-to-walk (double-press or double-click/tap to run), and walks her
 ## to clicked interactables before calling their interact(); ↑ in front of a door (any DoorSpot) goes through it. Shared by the street and the house. Interactables join the "interactable" group and
 ## implement can_interact(), hit_test(point), approach_x(from_x), reserve(), release(), interact(charlotte).
 
@@ -26,9 +26,18 @@ var _last_click := Vector2.ZERO
 var _last_click_at := -10.0
 
 
+## W A S D (by position on the keyboard) do what the arrows do: left, right, and up in front of a door.
+const WASD := {"ui_left": KEY_A, "ui_right": KEY_D, "ui_up": KEY_W, "ui_down": KEY_S}
+
+
 func _init() -> void:
 	# Run before the scene script so the camera follows the position set this frame.
 	process_priority = -1
+	for action: String in WASD:
+		var key := InputEventKey.new()
+		key.physical_keycode = WASD[action]
+		if not InputMap.action_has_event(action, key):
+			InputMap.action_add_event(action, key)
 
 
 func _process(delta: float) -> void:
