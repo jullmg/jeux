@@ -23,7 +23,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Godot binary: `/Applications/Godot.app/Contents/MacOS/Godot` (not on PATH).
 - Main scene: `res://scenes/intro.tscn` (title screen) → "Démarrer" / Enter → `res://scenes/main.tscn` (street)
   ⇄ `res://scenes/house.tscn` (inside, through her front door).
-- Screenshots (use them to check visual changes):
+- Screenshots (use them to check visual changes). Julien's main display is an HDMI monitor: add `--screen 1` (engine arg, before `--`) so the window opens on the MacBook's built-in screen and doesn't interrupt their work:
   - `Godot --path . res://scenes/intro.tscn -- --screenshot=/path/intro.png`
   - `Godot --path . res://scenes/main.tscn -- --screenshot=/path/main.png [--x=1234] [--wait=6]` (`--x` = Charlotte's start x, `--wait` = seconds before the shot)
   - `Godot --path . res://scenes/house.tscn -- --screenshot=/path/house.png [--x=1234] [--wait=1]` (x ≥ 5000 = bedroom)
