@@ -253,6 +253,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Every corner has planted curb extensions (`world/curb_garden.gd`, `CurbGarden`, `StreetScene._build_curb_gardens`, from
   `reference/terre_plein_01/02.png`): the curb bulges into the parking lane on both sides of each cross street, perennials
   by season, striped flexible bollards; drawn in front of people.
+- Tree limbs (`PropArt.tree`, `LIMB_TIPS`): the trunk outline's two limb ends are flat cuts that random foliage may not hide, so both limbs go on as thinner rounded branches with a fork (also in winter, before `_bare_crown`), and in leaf seasons a small tuft (own RNG, seed 5, so the tree's draws don't change) sits at each tip. Never end a branch in a flat cut.
+- Seniors lean forward only 1.5° (`rig.lean`); 5° made the head hang well ahead of the feet.
 - Street trees come in sizes (`StreetScene.TREE_SIZES` 0.38–0.72, `_tree_scales`, own RNG; lane yard trees 0.45–0.78).
   Squirrels work from each sprite's position, scale and texture alpha, so any size is climbable.
 - Street trees stand in a `TreePit` (`world/tree_pit.gd`, added in `StreetScene._build_trees`): grass, a neighbour's

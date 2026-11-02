@@ -57,7 +57,7 @@ func _build() -> Dictionary:
 		"arm_x": 36.0 * sx, "leg_x": 8.0 * sx, "torso_pivot": Vector2(65.0 * sx, 0.0),
 		"head_pivot": HEAD_PIVOT, "leg_pivot": Vector2(20, 6), "arm_pivot": Vector2(15, 8),
 		"knee_y": roundf(leg * 0.5), "shin_pivot": Vector2(20, SHIN_PAD),
-		"pack_pivot": Vector2(54, 10), "lean": deg_to_rad(5.0) if look.age == "senior" else 0.0,
+		"pack_pivot": Vector2(54, 10), "lean": deg_to_rad(1.5) if look.age == "senior" else 0.0,
 	}
 	var tex := {
 		"head": _tex(_head_svg(false)),

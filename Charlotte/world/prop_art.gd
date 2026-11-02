@@ -73,6 +73,14 @@ static func _pick(rng: RandomNumberGenerator, items: Array) -> Variant:
 # Canvas 380x780, trunk base at (190, 780). Light comes from the low sun on the upper left.
 # In winter the tree is bare: its branches, dusted with snow. The random draws are the same in every season,
 # so the rest of the street (built from the same generator afterwards) doesn't change.
+## The trunk's two limbs carried on past the flat ends of its outline, thinning to a twig and forking once (see `tree`).
+const LIMB_TIPS := ('<path d="M135 388 Q118 366 104 338" stroke="#6E5A4C" stroke-width="10" fill="none" stroke-linecap="round"/>'
+	+ '<path d="M259 386 Q276 362 288 334" stroke="#6E5A4C" stroke-width="10" fill="none" stroke-linecap="round"/>'
+	+ '<path d="M135 388 Q118 366 104 338 M259 386 Q276 362 288 334" stroke="#4A3A30" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.35" transform="translate(2 0)"/>'
+	+ '<path d="M118 366 Q104 358 94 350 M270 364 Q284 356 296 350" stroke="#6E5A4C" stroke-width="5" fill="none" stroke-linecap="round"/>'
+	+ '<path d="M104 338 Q98 318 101 298 M288 334 Q294 314 292 296" stroke="#6E5A4C" stroke-width="4" fill="none" stroke-linecap="round"/>')
+
+
 static func tree(rng: RandomNumberGenerator) -> ImageTexture:
 	var palettes := Season.tree_palettes()
 	var bare := palettes.is_empty()
@@ -83,6 +91,17 @@ static func tree(rng: RandomNumberGenerator) -> ImageTexture:
 	var s := '<path d="M172 780 C174 700 168 600 176 520 C178 470 160 430 128 392 L142 382 C168 410 182 436 188 466 C196 428 220 398 254 378 L264 392 C234 414 210 450 204 520 C200 600 208 700 212 780 Z" fill="#6E5A4C" stroke="#4A3A30" stroke-width="3" stroke-linejoin="round"/>'
 	s += '<path d="M184 760 C182 700 186 640 182 580 M196 740 C198 680 194 620 198 560" stroke="#4A3A30" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
 	s += '<path d="M180 770 C178 700 182 620 176 540" stroke="#8C7664" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.7"/>'
+	# The two big limbs do not stop short where the trunk's outline ends: they go on as thinner branches (and, with leaves, as a tuft at
+	# the tip), so no cut end ever shows under the foliage. Drawn with their own random numbers so the tree's draws are unchanged.
+	s += LIMB_TIPS
+	if not bare:
+		var tuft_rng := RandomNumberGenerator.new()
+		tuft_rng.seed = 5
+		for t in [[Vector2(106, 338), 34.0, 0], [Vector2(288, 334), 34.0, 1]]:
+			var c: Vector2 = t[0]
+			var leaf_color: String = pal[t[2] % pal.size()]
+			s += '<path d="%s" fill="%s"/>' % [_lobed(c.x + 8, c.y + 12, t[1], tuft_rng), _hex(Color(leaf_color).darkened(0.4))]
+			s += '<path d="%s" fill="%s"/>' % [_lobed(c.x, c.y, t[1], tuft_rng), leaf_color]
 	var blobs := []
 	for i in 19:
 		var a := rng.randf_range(0.0, TAU)
@@ -121,7 +140,7 @@ static func tree(rng: RandomNumberGenerator) -> ImageTexture:
 static func _bare_crown(svg: String, blobs: Array) -> String:
 	# The trunk is the first three paths; everything after them is foliage.
 	var trunk := svg.substr(0, svg.find('opacity="0.7"/>') + 15)
-	var out := trunk
+	var out := trunk + LIMB_TIPS
 	var forks := [Vector2(150, 400), Vector2(232, 386), Vector2(192, 470)]
 	for i in blobs.size():
 		var b: Array = blobs[i]
