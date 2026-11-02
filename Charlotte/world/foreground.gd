@@ -28,13 +28,13 @@ static func build(parent: Node, street_width: float, view_width: float, seed_val
 	return layer
 
 
-## Places a blurred element with its bottom centre at `bottom`.
-static func add(layer: Node, svg_body: String, bottom: Vector2, size: Vector2) -> Sprite2D:
+## Places a blurred element with its bottom centre at `bottom`. `blur`: how small it is rasterized (smaller is softer).
+static func add(layer: Node, svg_body: String, bottom: Vector2, size: Vector2, blur := BLUR) -> Sprite2D:
 	var svg := '<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">%s</svg>' % [size.x, size.y, size.x, size.y, svg_body]
 	var sprite := Sprite2D.new()
-	sprite.texture = PropArt.tex(svg, BLUR)
+	sprite.texture = PropArt.tex(svg, blur)
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	sprite.scale = Vector2.ONE / BLUR
+	sprite.scale = Vector2.ONE / blur
 	sprite.centered = false
 	sprite.position = bottom - size
 	sprite.modulate = SHADE

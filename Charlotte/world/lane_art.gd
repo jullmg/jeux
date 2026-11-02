@@ -549,6 +549,51 @@ static func side_wall(rng: RandomNumberGenerator, w: float, top: float, color: C
 	return _tex(w, s)
 
 
+## SVG body, `w` by `h`: the fence along the near side of a cross lane, right in front of the camera, only its upper part in
+## view: wide weathered boards, stretch by stretch between posts, a rail, knots and nails, creeper hanging over it by season,
+## snow along the top in winter. For Foreground.add.
+static func near_fence(rng: RandomNumberGenerator, w: float, h: float) -> String:
+	var s := ""
+	var vines := vine_colors()
+	var x := 0.0
+	while x < w:
+		var stretch := minf(rng.randf_range(300.0, 460.0), w - x)
+		var family: String = PropArt._pick(rng, BOARDS)
+		var tint: String = PropArt._pick(rng, ["#6E5A44", "#7A4A2E", family, family])
+		var top := 8.0 + rng.randf_range(0.0, 6.0)
+		var bx := x
+		while bx < x + stretch:
+			var bw := minf(rng.randf_range(30.0, 40.0), x + stretch - bx)
+			var by := top + rng.randf_range(-3.0, 3.0)
+			var c := _dark(tint, rng.randf_range(0.0, 0.18))
+			s += _rect(bx, by, bw, h - by, c)
+			s += _rect(bx, by, 3, h - by, _light(c, 0.25), 'opacity="0.6"')
+			s += _line(Vector2(bx + bw, by), Vector2(bx + bw, h), _dark(c, 0.45), 2.0)
+			if rng.randf() < 0.3:
+				s += '<ellipse cx="%.1f" cy="%.1f" rx="4" ry="6" fill="%s"/>' % [bx + bw * 0.5, by + rng.randf_range(20.0, 60.0), _dark(c, 0.3)]
+			s += '<circle cx="%.1f" cy="%.1f" r="1.6" fill="#3A3A3A"/>' % [bx + bw * 0.5, top + 26.0]
+			bx += bw
+		# The rail across the boards.
+		s += _rect(x, top + 20.0, stretch, 7, _dark(tint, 0.3), 'opacity="0.5"')
+		# Creeper over the top here and there, this season's colours.
+		if not vines.is_empty():
+			for k in rng.randi_range(0, 2):
+				var vx := x + rng.randf_range(20.0, stretch - 20.0)
+				for n in 14:
+					s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="%s"/>' % [vx + rng.randf_range(-46.0, 46.0), rng.randf_range(4.0, 40.0), rng.randf_range(7.0, 11.0), rng.randf_range(5.0, 8.0), PropArt._pick(rng, vines)]
+		else:
+			s += _rect(x, top - 5.0, stretch, 7, "#F4F6F8")
+		# The post at the end of the stretch, standing a little proud.
+		s += _rect(x + stretch - 13.0, 2, 26, h - 2, _dark(tint, 0.25))
+		s += _rect(x + stretch - 13.0, 2, 5, h - 2, _light(tint, 0.1), 'opacity="0.6"')
+		s += _rect(x + stretch - 15.0, 0, 30, 5, _dark(tint, 0.4))
+		x += stretch
+	# First post, at the avenue's end.
+	s += _rect(0, 2, 22, h - 2, _dark(PropArt._pick(rng, BOARDS), 0.3))
+	s += _rect(0, 0, 24, 5, "#55524C")
+	return s
+
+
 ## Another lane running away from this one between two yards: concrete narrowing to a bright slice at its far
 ## end, board fences and a garage along it, creeper.
 static func junction(rng: RandomNumberGenerator, w: float) -> ImageTexture:

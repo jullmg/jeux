@@ -16,7 +16,11 @@ extends StreetScene
 # Reuses StreetScene's helpers (Charlotte, camera, cats, wind, grade) but builds its own scene.
 
 const LOTS := 14
-const SIDE_LOTS := 3
+## Yards on either side of the middle lane, along a cross lane (between the corner plexes' side walls).
+const SIDE_LOTS := 1
+## The fence along a cross lane's near side: the top of it in view, and where it stops short of the avenue's sidewalk.
+const NEAR_FENCE_TOP := 664.0
+const NEAR_FENCE_END := 280.0
 const LOT_W := 365.0
 const END_W := 320.0
 const JUNCTION_W := 300.0
@@ -184,9 +188,9 @@ func _plan() -> void:
 		"middle":
 			plan = ["end", to_lane.call("holt", "↑  Ruelle"), lots, to_lane.call("dandurand", "↑  Ruelle verte"), "end"]
 		"dandurand":
-			plan = [to_street.call("5e"), "wall", SIDE_LOTS - 1, to_lane.call("middle", "↑  Ruelle"), SIDE_LOTS - 1, "wall", to_street.call("6e")]
+			plan = [to_street.call("5e"), "wall", SIDE_LOTS, to_lane.call("middle", "↑  Ruelle"), SIDE_LOTS, "wall", to_street.call("6e")]
 		"holt":
-			plan = [to_street.call("6e"), "wall", SIDE_LOTS - 1, to_lane.call("middle", "↑  Ruelle"), SIDE_LOTS - 1, "wall", to_street.call("5e")]
+			plan = [to_street.call("6e"), "wall", SIDE_LOTS, to_lane.call("middle", "↑  Ruelle"), SIDE_LOTS, "wall", to_street.call("5e")]
 	var x := 0.0
 	for part in plan:
 		if part is Dictionary:
@@ -225,6 +229,10 @@ func _plan() -> void:
 	if lane != "middle":
 		_kinds[0] = "wall"
 		_kinds[-1] = "wall"
+	# A yard one side of the middle lane, a garage the other.
+	if lane == "holt":
+		_kinds[1] = "boards"
+		_kinds[-2] = "garage"
 
 
 # Where she stands on the avenue's sidewalk at the lane's end: the middle of that sidewalk, on her walking line.
@@ -350,13 +358,15 @@ func _open_croque_livre() -> void:
 
 # Wooden poles along the far edge of the lane, wires from one to the next (no service drops: the galleries' own).
 func _build_poles() -> void:
-	# In a cross lane: between the windows of the two corner side walls, and along the yards between them.
-	var x := 180.0 if lane == "middle" else float(_openings[0].x1) + WALL_W / 2.0
-	var stop := _street_width - 100.0 if lane == "middle" else _lots[-1].x - 60.0
-	while x < stop:
-		_poles.append(x)
-		x += _rng.randf_range(820.0, 980.0)
-	if lane != "middle":
+	if lane == "middle":
+		var x := 180.0
+		while x < _street_width - 100.0:
+			_poles.append(x)
+			x += _rng.randf_range(820.0, 980.0)
+	else:
+		# Between the windows of the two corner side walls, and at the corner of the middle lane.
+		_poles.append(float(_openings[0].x1) + WALL_W / 2.0)
+		_poles.append(float(_openings[1].x) - JUNCTION_W / 2.0 - 22.0)
 		_poles.append(float(_openings[-1].x0) - WALL_W / 2.0)
 	var poles := UtilityPoles.new()
 	poles.xs = _poles
@@ -371,10 +381,23 @@ func _build_poles() -> void:
 	add_child(_lane_birds)
 
 
-# Blurred leaf piles and shrubs right in front of the camera (no street signs back here).
+# Blurred leaf piles and shrubs right in front of the camera (no street signs back here). A cross lane is narrow: the fence
+# of the yards on our side runs along the bottom of the view instead, nearer than the lane (so it scrolls faster), from
+# just short of one avenue's sidewalk to just short of the other's: its ends line up when the camera stops at the ends.
 func _build_foreground() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 11
+	if lane != "middle":
+		var layer := Parallax2D.new()
+		layer.scroll_scale = Vector2(Foreground.SCROLL, 1.0)
+		add_child(layer)
+		var from: float = _openings[0].x1 + NEAR_FENCE_END
+		var to: float = _openings[-1].x0 - NEAR_FENCE_END + (Foreground.SCROLL - 1.0) * (_street_width - VIEW.x)
+		var size := Vector2(to - from, VIEW.y - NEAR_FENCE_TOP + 40.0)
+		rng.seed = seed_value + 7
+		var fence := Foreground.add(layer, LaneArt.near_fence(rng, size.x, size.y), Vector2(to, NEAR_FENCE_TOP + size.y), size, 0.45)
+		fence.modulate = Foreground.SHADE.lerp(Color.WHITE, 0.45)
+		return
 	var layer := Parallax2D.new()
 	layer.scroll_scale = Vector2(Foreground.SCROLL, 1.0)
 	add_child(layer)
