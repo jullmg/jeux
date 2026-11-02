@@ -27,6 +27,13 @@ const HAZE := Color("#B9C6D6")
 const ASPHALT := Color("#5A5956")
 const CONCRETE := Color("#CFCAC0")
 const CURB := Color("#E2DDD4")
+## Street trees down the vista: how far along (depths, clear of the poles at 1.6, 4, 7.2, 11.5 and the lamps at 2.6, 5.6, 9.5, 14), how
+## far from the curb, and the size of their pits (half across the sidewalk, half along the street in depth at d = 0).
+const TREES_LEFT: Array[float] = [1.05, 2.8, 5.5, 9.2, 14.0]
+const TREES_RIGHT: Array[float] = [1.3, 4.0, 7.4, 11.6, 16.0]
+const TREE_FROM_CURB := 26.0
+const PIT_HALF := 19.0
+const PIT_ALONG := 0.09
 
 var part := Part.VISTA
 ## Gap between the corner buildings, in world x at the facade line.
@@ -144,12 +151,17 @@ func _draw_vista() -> void:
 	_haze_band(9.0, FAR, 0.35, 0.6)
 	_lamps()
 	# Street trees on both sidewalks, far to near, then the utility poles along the curb with their wires.
+	# At the curb, as on the street itself, not in the middle of the sidewalk: between the poles (left curb) and lamps (right curb).
+	var planted := []
+	for d: float in TREES_LEFT:
+		planted.append([d, x0 + sidewalk - TREE_FROM_CURB])
+	for d: float in TREES_RIGHT:
+		planted.append([d, x1 - sidewalk + TREE_FROM_CURB])
+	planted.sort_custom(func(a, b): return a[0] > b[0])
 	var k := 0
-	for d in [14.0, 9.5, 6.6, 4.6, 3.2, 2.2, 1.3]:
-		for side in [-1.0, 1.0]:
-			var tx := x0 + sidewalk * 0.35 if side < 0.0 else x1 - sidewalk * 0.35
-			_tree(Vector2(tx, FACADE_Y), d + (0.3 if side > 0.0 else 0.0), k)
-			k += 1
+	for t in planted:
+		_tree(Vector2(t[1], FACADE_Y), t[0], k)
+		k += 1
 	_poles()
 
 
@@ -607,9 +619,14 @@ func _windows(front_x: float, y: float, d0: float, d1: float, count: int, glass:
 func _tree(base: Vector2, d: float, k := 0) -> void:
 	var s := 1.0 / (1.0 + d)
 	var foot := _at(base, d)
-	draw_set_transform(foot, 0.0, Vector2(1.0, 0.3))
-	draw_circle(Vector2.ZERO, 46.0 * s, Color("#5A4232").lerp(HAZE, clampf(d / FAR, 0.0, 0.6)))
-	draw_set_transform(Vector2.ZERO)
+	# Its pit, cut into the sidewalk along the curb: earth (snow in winter) inside a stone edge.
+	var along := PIT_ALONG * (1.0 + d)
+	var earth := (Color("#E6ECF0") if Season.is_winter() else Color("#5A4232")).lerp(HAZE, clampf(d / FAR, 0.0, 0.6))
+	var edge := Color("#A8A397").lerp(HAZE, clampf(d / FAR, 0.0, 0.6))
+	var inner := Vector2(base.x - PIT_HALF, FACADE_Y)
+	var outer := Vector2(base.x + PIT_HALF, FACADE_Y)
+	_quad(inner, outer, d - along, d + along, edge)
+	_quad(inner + Vector2(5, 0), outer - Vector2(5, 0), d - along * 0.8, d + along * 0.8, earth)
 	var sizes: Array[float] = [1.0, 0.85, 1.15]
 	var size := Vector2(380, 780) * 0.5 * s * sizes[k % 3]
 	draw_texture_rect(_tree_tex[k % _tree_tex.size()], Rect2(foot - Vector2(size.x * 0.5, size.y), size), false,

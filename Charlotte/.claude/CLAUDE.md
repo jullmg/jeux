@@ -59,7 +59,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   the red "OH / BON!" neon in the big window, a generic "BIÈRE" neon, in `holt.gd`, no real logos on it yet; `world/neon_sign.gd`,
   `NeonSign`: glowing, flickering window neon) and the Holt-side
   `ruelle` entrance (iron stair, conduits, tags, garage door, one-way sign, the post for the "RALENTISSEZ" sign).
-- Vista detail (`CrossStreet`): street trees drawn from two `PropArt.tree` textures (`_tree_tex`, own RNG) in their pits,
+- Vista detail (`CrossStreet`): street trees drawn from two `PropArt.tree` textures (`_tree_tex`, own RNG) in their pits at the curb (`TREES_LEFT`/`TREES_RIGHT`, between the poles and lamps, `TREE_FROM_CURB`; never mid-sidewalk),
   hazier with distance; utility poles and wires down the left curb (`_poles`); sidewalk joints, gutters, a manhole
   (`_street_details`); walls with brick courses, cornice lip, building edges, window lintels/sills/mullions; plex walls
   with doors and steps, iron balconies on the upper floors and the outdoor stair; lanes as a board fence and a tree.
