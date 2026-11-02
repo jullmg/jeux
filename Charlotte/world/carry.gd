@@ -4,6 +4,11 @@ extends RefCounted
 ## (`flags.has_milk`) or the watering can (`flags.has_can`). Anything that would put something else in her arms first asks
 ## `Carry.busy()`, and says `Carry.FULL_HANDS` if she is already holding something. The flags are saved, and each scene puts
 ## the thing back in her arms when it opens (`Interior`, `StreetScene._build_lost_cats`, the house for the can).
+##
+## A new quest that puts something in her arms: (1) keep a flag for it in `GameState.flags` and add it to `what()` here;
+## (2) before handing it over, `if Carry.busy(): say Carry.FULL_HANDS; return`; (3) restore it when a scene opens, next to the
+## milk; (4) clear the flag and `carry(null)` when she puts it down. `Character.carry()` itself refuses a second thing as a
+## last resort (a warning in the console).
 
 const FULL_HANDS := "J'ai déjà les mains pleines !"
 

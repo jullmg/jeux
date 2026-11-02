@@ -146,6 +146,12 @@ func hand_position() -> Vector2:
 ## Carries `thing` in her arms (a cat): both arms come round it and it rides on her body, between her arms.
 ## carry(null) puts it down (frees it).
 func carry(thing: Node2D) -> void:
+	# One thing in her arms at a time: whoever hands her something checks `Carry.busy()` first. If one forgets, the new thing
+	# is dropped (and reported) rather than silently replacing what she holds.
+	if thing and is_holding() and thing != _held:
+		push_warning("Character.carry: her arms are already full (%s); ask Carry.busy() before giving her something." % _held.name)
+		thing.queue_free()
+		return
 	if _held and is_instance_valid(_held):
 		_held.queue_free()
 	_held = thing
