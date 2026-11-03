@@ -356,7 +356,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     starts it; the collared cat waits at `found_at` (`_found_x`; lane = lot index); petting it, Charlotte picks it up
     (`GameState.flags.carrying`, `Character.carry(node)` / `is_holding()`, `LostCats.held(id)`, kept across scenes and
     indoors); at the owner's front door (`_door_x(art)` from `art/decor/doors.json`, written by the generator; "!" and
-    house number) the owner comes out (`_bring_home`), the cat is put down, quest done. Owners are always at a front
+    house number) the owner comes out (`_bring_home`), takes the cat in her arms (`Character.carry`, `LostCats.held`), thanks Charlotte, quest done, and goes back in through her door with it. Owners are always at a front
     door on a street, never in the lane.
   - menage (Mom gives it, after the milk; the toys can't be picked up before): 11 things on the bedroom floor (`MESS`,
     `InteriorArt.mess`). Charlotte picks each one up IN HER ARMS (`Carry` kind "toy:<item>", so only one at a time), says

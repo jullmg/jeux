@@ -524,27 +524,36 @@ func _bring_home(id: String, x: float) -> void:
 		owner.look.hair_style = "short"
 	Season.dress_for_weather(owner.look)
 	owner.scale = Vector2.ONE * CHAR_SCALE
-	owner.position = Vector2(x + 46.0, CHARLOTTE_Y - 4.0)
-	owner.facing = -1
+	# She comes out of her door, takes the cat in her arms and goes back in with it.
+	owner.position = Vector2(x, CHARLOTTE_Y - 4.0)
+	owner.facing = 1
+	owner.is_walking = true
 	owner.modulate.a = 0.0
 	add_child(owner)
 	var tween := create_tween()
-	tween.tween_property(owner, "modulate:a", 1.0, 0.4)
+	tween.tween_property(owner, "modulate:a", 1.0, 0.3)
+	tween.parallel().tween_property(owner, "position:x", x + 46.0, 0.6)
 	tween.tween_callback(func():
+		owner.is_walking = false
+		owner.facing = -1
 		Bubble.say(self, owner.position + Vector2(0, -200), "%s ! Tu l'as retrouvé%s !\nMerci, Charlotte !" % [info.name, info.get("e", "")], 3.0)
 		Sfx.play("meow", owner.position))
-	tween.tween_interval(1.2)
+	tween.tween_interval(1.4)
 	tween.tween_callback(func():
 		Carry.put_down(_charlotte)
-		var cat := LostCats.make(id)
-		cat.position = Vector2(x + 18.0, STRAY_CAT_Y)
-		cat.wander = false
-		cat.facing = 1
-		_animals.add_child(cat)
+		owner.carry(LostCats.held(id))
+		owner.express("happy", 3.0)
 		Quests.complete(id)
 		_control.enabled = true)
-	tween.tween_interval(3.0)
-	tween.tween_property(owner, "modulate:a", 0.0, 0.6)
+	tween.tween_interval(0.7)
+	tween.tween_callback(func():
+		owner.is_walking = true
+		Bubble.say(self, owner.position + Vector2(0, -200), "Viens, %s !" % info.name, 1.6))
+	tween.tween_property(owner, "position:x", x + 4.0, 0.9)
+	tween.tween_callback(func():
+		owner.is_walking = false
+		Sfx.play("door", Vector2(x, 500.0)))
+	tween.tween_property(owner, "modulate:a", 0.0, 0.3)
 	tween.tween_callback(owner.queue_free)
 
 
