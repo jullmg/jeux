@@ -9,6 +9,11 @@ const YELLOW := Color("#FFD23F")
 const CREAM := Color("#FBF6EA")
 const INK := Color("#3A3A48")
 const PAGE := Vector2(760, 600)
+## Her friends, once she has met them (the story flag). A new friend = one more line here.
+const FRIENDS := [
+	{"name": "Alphée Turcotte", "note": "La jumelle aux cheveux détachés. On se voit dans la ruelle.", "flag": "met_twins"},
+	{"name": "Constance Turcotte", "note": "La jumelle à la queue de cheval. On se voit dans la ruelle.", "flag": "met_twins"},
+]
 
 var _button: Button
 var _open := false
@@ -133,11 +138,21 @@ func _fill() -> void:
 	var later := Quests.ORDER.size() - on.size() - done.size() - next.size()
 	_section("En cours", on, "active", "title", "hint")
 	_section("Réussies  ★ %d" % done.size(), done, "done", "title", "")
+	_friends()
 	_section("À découvrir", next, "unknown", "find", "")
 	if later > 0:
 		_list.add_child(_label("… et d'autres quand tu seras plus grande !", 17, Color(INK, 0.6)))
 	if on.is_empty() and done.is_empty() and next.is_empty():
 		_list.add_child(_label("Rien pour l'instant. Va jouer dehors !", 20, INK))
+
+
+func _friends() -> void:
+	_list.add_child(_label("Mes amis", 22, BLUE))
+	var met := FRIENDS.filter(func(friend: Dictionary) -> bool: return GameState.flags.get(friend.flag, false))
+	if met.is_empty():
+		_list.add_child(_label("Pas encore d'amis ici. Va jouer dehors, tu vas en rencontrer !", 17, Color(INK, 0.6)))
+	for friend in met:
+		_list.add_child(_row("friend", friend.name, friend.note, INK))
 
 
 func _section(heading: String, ids: Array, kind: String, line: String, hint: String) -> void:
@@ -146,25 +161,29 @@ func _section(heading: String, ids: Array, kind: String, line: String, hint: Str
 	var head := _label(heading, 22, BLUE)
 	_list.add_child(head)
 	for id in ids:
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 12)
-		var star := _Star.new()
-		star.kind = kind
-		star.custom_minimum_size = Vector2(34, 34)
-		star.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-		row.add_child(star)
-		var words := VBoxContainer.new()
-		words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		words.add_theme_constant_override("separation", 0)
-		var text := _label(Quests.ALL[id][line], 20, INK if kind != "unknown" else Color(INK, 0.7))
-		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		words.add_child(text)
-		if not hint.is_empty():
-			var small := _label(Quests.ALL[id][hint], 16, Color(INK, 0.65))
-			small.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			words.add_child(small)
-		row.add_child(words)
-		_list.add_child(row)
+		_list.add_child(_row(kind, Quests.ALL[id][line], Quests.ALL[id][hint] if not hint.is_empty() else "", INK if kind != "unknown" else Color(INK, 0.7)))
+
+
+func _row(kind: String, line: String, small_line: String, color: Color) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	var star := _Star.new()
+	star.kind = kind
+	star.custom_minimum_size = Vector2(34, 34)
+	star.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_child(star)
+	var words := VBoxContainer.new()
+	words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	words.add_theme_constant_override("separation", 0)
+	var text := _label(line, 20, color)
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	words.add_child(text)
+	if not small_line.is_empty():
+		var small := _label(small_line, 16, Color(INK, 0.65))
+		small.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		words.add_child(small)
+	row.add_child(words)
+	return row
 
 
 func _label(text: String, font_size: int, color: Color) -> Label:
@@ -363,7 +382,7 @@ class _Paper:
 			draw_line(p, p + n * 10, Color(1, 1, 1, 0.5), 2.0)
 
 
-# A star: yellow and filled when the quest is done, an outline while she's on it, a dotted "?" to discover.
+# A star: yellow and filled when the quest is done, an outline while she's on it, a dotted "?" to discover; a heart for a friend.
 class _Star:
 	extends Control
 	var kind := "active"
@@ -380,6 +399,8 @@ class _Star:
 		var outline := pts.duplicate()
 		outline.append(pts[0])
 		match kind:
+			"friend":
+				CuteArt.heart(self, c, 14.0, Color("#E85FA0"))
 			"done":
 				draw_colored_polygon(pts, YELLOW)
 				draw_polyline(outline, Color("#C99A12"), 2.0, true)
