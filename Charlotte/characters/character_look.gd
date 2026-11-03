@@ -95,7 +95,7 @@ static func mom() -> CharacterLook:
 	look.age = "adult"
 	look.skin = Color("#F3D3BC")
 	look.hair_style = "long_wavy"
-	look.hair_color = Color("#9C7550")
+	look.hair_color = Color("#B58F5F")
 	look.eye_color = Color("#6B4E2E")
 	look.lashes = true
 	look.mouth = "smile"
