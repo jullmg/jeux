@@ -11,6 +11,8 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 4. **Aller cueillir des framboises dans la cour**
 5. **Aller cueillir des raisins dans la cour**
 6. **Trouver le livre perdu d'un ami dans le croque-livre** (mission donnée par un ami)
+7. **Planifier une soirée cinéma avec des amis** : elle se fait d'abord donner de l'argent de poche pour aller acheter des trucs pour la soirée
+8. **La fête d'un ami** : elle va acheter un cadeau avec Maman
 
 ## Notes de départ (à préciser avec Julien avant de programmer)
 
@@ -22,6 +24,9 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 - Framboises et raisins : la cour de Charlotte est le lot `OWN_LOT` de la ruelle du milieu (balançoire, vélo de Papa, marelle). Il faudra y
   dessiner les plants (`LaneArt._yard`, `_foliage` pour les feuilles) ; ils dépendent de la saison (framboises en été, raisins à l'automne),
   et on peut les porter par `Carry` comme le lait. Le bas de clôture ne permet pas encore d'entrer dans la cour : à décider.
+- Alphée et Constance Turcotte (`world/twins.gd`) donneront des quêtes, lesquelles restent à décider : plusieurs idées ici leur iraient (le livre perdu, la soirée cinéma, la fête).
+- Soirée cinéma : le dépanneur vend déjà de quoi grignoter (`Shop._buy`, `Shop.PRICES`) et l'argent de poche existe (`GameState.money`) ; il faudrait que Maman ou Papa lui en donne (nouveau), et un lieu où regarder le film (la télé du corridor, `TvScreen`).
+- La fête : il n'y a pas encore de magasin de cadeaux, et Maman ne sort pas encore de la maison (elle marche seulement à l'intérieur, `FamilyRoutine`). À décider.
 - Le livre perdu : il y a déjà un croque-livre dans chaque ruelle (`LaneArt.croque_livre`, `_open_croque_livre` en attente d'une quête) et des
   enfants qui jouent dans les ruelles (`JumpRopeKid`, `BallKid`, cliquables) qui pourraient être l'ami qui donne la mission. Le lecteur de
   livres `BookReader` peut montrer le livre retrouvé.
