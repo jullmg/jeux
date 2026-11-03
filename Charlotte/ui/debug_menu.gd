@@ -7,6 +7,8 @@ extends CanvasLayer
 
 const ALIASES := {"printemps": "spring", "ete": "summer", "été": "summer", "automne": "autumn", "hiver": "winter"}
 ## The story flags each quest leaves behind, cleared with it.
+## Story flags that belong to no quest, cleared by "Tout effacer".
+const OTHER_FLAGS := ["met_twins"]
 const QUEST_FLAGS := {"hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"]}
 ## What a quest puts in her arms (a lost cat's quest id is the cat's id, handled by `Carry.cat_id()`).
 const QUEST_CARRIES := {"milk": "milk", "plants": "can", "menage": "toy"}
@@ -30,6 +32,7 @@ const PLACES := [
 	{"name": "Rue Holt : coin 5e", "scene": "holt", "arrive": "holt_from_5e"},
 	{"group": "Ruelles"},
 	{"name": "Ruelle du milieu (cour de Charlotte)", "scene": "ruelle"},
+	{"name": "Ruelle du milieu : Alphée et Constance", "scene": "ruelle", "x": 2400.0},
 	{"name": "Ruelle verte (parallèle à Dandurand)", "scene": "ruelle_dandurand"},
 	{"name": "Ruelle près de Holt", "scene": "ruelle_holt"},
 	{"group": "Chez Charlotte"},
@@ -214,6 +217,8 @@ func _quest_list(parent: Control) -> void:
 	all.pressed.connect(func():
 		for id: String in Quests.ORDER:
 			_clear_quest(id)
+		for flag: String in OTHER_FLAGS:
+			GameState.flags.erase(flag)
 		_close()
 		_reload())
 	list.add_child(all)

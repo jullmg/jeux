@@ -29,6 +29,8 @@ const TEE_HALF := 150.0
 ## An avenue at the end of a cross lane: its gap at the facade line, and the corner plex's side wall beside it.
 const AVENUE_W := 560.0
 const WALL_W := 470.0
+## Where Alphée and Constance hang out, in the middle lane: this lot, just short of Charlotte's yard.
+const TWINS_LOT := 5
 ## Charlotte's yard, in the middle lane: hers is the 7th plex from the Dandurand end on 6e Avenue.
 const OWN_LOT := 7
 const FENCE_Y := 600.0
@@ -106,6 +108,8 @@ func _ready() -> void:
 	ball.position = Vector2(bx, NEIGHBOUR_Y + 10.0)
 	ball.scale = Vector2.ONE * CHAR_SCALE
 	add_child(ball)
+	if lane == "middle":
+		_build_twins()
 	_charlotte = _spawn_charlotte(start_x)
 	_control.charlotte = _charlotte
 	_lane_birds.charlotte = _charlotte
@@ -458,6 +462,15 @@ func _build_foreground() -> void:
 		else:
 			Foreground.add(layer, Foreground.shrub(rng), Vector2(x, 720.0 + 70.0), Vector2(260, 170))
 		x += rng.randf_range(900.0, 1500.0)
+
+
+func _build_twins() -> void:
+	var twins := Twins.new()
+	twins.position = Vector2((_lots[TWINS_LOT].x + _lots[TWINS_LOT].y) / 2.0, NEIGHBOUR_Y + 10.0)
+	twins.scale = Vector2.ONE * CHAR_SCALE
+	twins.control = _control
+	add_child(twins)
+	add_child(QuestMark.make(twins.position + Vector2(0, -190), twins.waiting))
 
 
 # Each opening: click it to go through. The avenues get their blue street plate (click the vista, or ↑ on the sidewalk),

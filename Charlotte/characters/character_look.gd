@@ -43,6 +43,9 @@ const ADULT_HAIR: Array[String] = ["short", "bob", "bun", "curly", "long_straigh
 @export var hat_color := Color("#2B2B2B")
 @export var scarf := ""
 @export var backpack := ""
+## A cord with a stone on it, over a top (the stone's colour; "": none), and a small stud in the ear.
+@export var necklace := ""
+@export var earring := false
 # Exact hex colours that win over the derived palette (used to keep Charlotte pixel-identical).
 @export var overrides := {}
 
@@ -129,6 +132,49 @@ static func dad() -> CharacterLook:  # navy bike T-shirt, dark jeans, white snea
 	look.legwear_color = Color("#3E5A86")
 	look.shoes = "sneaker"
 	look.shoe_color = Color("#F4F1EA")
+	return look
+
+
+## The twins Alphée and Constance Turcotte (reference/alfée-et-constance-turcotte.jpg): the same face and honey hair, a head
+## taller than Charlotte ("tween"). What tells them apart: their hair and their clothes.
+static func _twin() -> CharacterLook:
+	var look := CharacterLook.new()
+	look.age = "tween"
+	look.skin = Color("#F6D9C5")
+	look.hair_color = Color("#BC9260")
+	look.eye_color = Color("#6F8FA8")
+	look.lashes = true
+	look.mouth = "smile"
+	look.legwear = "pants"
+	look.legwear_color = Color("#4A6FA5")
+	look.shoes = "sneaker"
+	look.shoe_color = Color("#F4F1EA")
+	return look
+
+
+## Alphée: her hair down, a pale teal T-shirt with a pink heart, a stone on a cord.
+static func alphee() -> CharacterLook:
+	var look := _twin()
+	look.hair_style = "long_straight"
+	look.outfit = "tshirt"
+	look.outfit_color = Color("#A8D5DB")
+	look.accent_color = Color("#F5C6D6")
+	look.pattern = "heart"
+	look.sleeve = "short"
+	look.necklace = "#3F3A63"
+	return look
+
+
+## Constance: a ponytail, a beige sweater with little birds on skateboards, a stud in her ear.
+static func constance() -> CharacterLook:
+	var look := _twin()
+	look.hair_style = "ponytail"
+	look.outfit = "sweater"
+	look.outfit_color = Color("#EBD9BE")
+	look.accent_color = Color("#E8812E")
+	look.pattern = "birds"
+	look.sleeve = "long"
+	look.earring = true
 	return look
 
 

@@ -6,6 +6,7 @@ const HEAD_CANVAS := Vector2(240, 380)
 const HEAD_PIVOT := Vector2(118, 296)
 const RIGS := {
 	"child": {"leg": 110.0, "torso": 90.0, "arm": 76.0, "head": 1.0, "sx": 1.0},
+	"tween": {"leg": 178.0, "torso": 126.0, "arm": 104.0, "head": 0.95, "sx": 1.02},
 	"teen": {"leg": 162.0, "torso": 120.0, "arm": 100.0, "head": 0.84, "sx": 1.05},
 	"adult": {"leg": 210.0, "torso": 154.0, "arm": 128.0, "head": 0.72, "sx": 1.14},
 	"senior": {"leg": 196.0, "torso": 148.0, "arm": 124.0, "head": 0.74, "sx": 1.14},
@@ -20,7 +21,7 @@ const CLOTH_DEFS := ('<defs><linearGradient id="cs" x1="0" y1="0" x2="1" y2="0.5
 	+ '<stop offset="1" stop-color="#000000" stop-opacity="0.07"/></linearGradient></defs>')
 ## The shin's picture reaches this far above the knee (the round cap of the joint).
 const SHIN_PAD := 14.0
-const HAND_SCALE := {"child": 1.0, "teen": 1.1, "adult": 1.22, "senior": 1.18}
+const HAND_SCALE := {"child": 1.0, "tween": 1.05, "teen": 1.1, "adult": 1.22, "senior": 1.18}
 
 var look: CharacterLook
 var p := {}
@@ -158,6 +159,8 @@ func _head_svg(lids_only: bool) -> String:
 				+ _f('<path d="%s" stroke="{lash}" stroke-width="3.5" fill="none" stroke-linecap="round"/>' % e[4]))
 		return _head_frame(s)
 	s += _f('<ellipse cx="44" cy="132" rx="10" ry="14" fill="{skin_shade}" stroke="{skin_line}" stroke-width="3"/>')
+	if look.earring:
+		s += '<circle cx="43" cy="145" r="3.2" fill="#F7E08A" stroke="#B58A2E" stroke-width="1"/>'
 	s += _f('<path d="M36 120 C36 76 70 58 110 58 C152 58 186 78 186 122 C186 168 156 202 112 202 C68 202 36 166 36 120 Z" fill="{skin}" stroke="{skin_line}" stroke-width="3"/>')
 	s += _f('<ellipse cx="76" cy="160" rx="14" ry="9" fill="{blush}" opacity="0.6"/>')
 	s += _f('<ellipse cx="164" cy="158" rx="11" ry="8" fill="{blush}" opacity="0.6"/>')
@@ -706,6 +709,10 @@ func _top() -> String:
 			s += _f('<g transform="translate(65 60) scale(0.62) translate(-65 -60)" stroke="{accent}" stroke-width="3.6" fill="none" stroke-linecap="round" stroke-linejoin="round">'
 				+ '<circle cx="48" cy="70" r="11"/><circle cx="82" cy="70" r="11"/>'
 				+ '<path d="M48 70 L60 70 L76 52 L60 52 Z M60 70 L56 46 M76 52 L82 70 M52 46 H60 M76 52 L74 44 H81"/></g>')
+		"birds":
+			# Little birds riding skateboards, all over.
+			for bird: Array in [[42, 40, "#E8812E"], [78, 36, "#3D8BD9"], [58, 62, "#C9453A"], [92, 62, "#E8812E"], [38, 76, "#3D8BD9"], [72, 86, "#7A5232"]]:
+				s += '<g transform="translate(%d %d)"><ellipse cx="0" cy="-3" rx="6" ry="4.5" fill="%s"/><circle cx="5" cy="-7" r="3" fill="%s"/><path d="M8 -7 l3 1 l-3 1 z" fill="#E8B23A"/><path d="M-7 2 H7" stroke="#4A4048" stroke-width="1.8" stroke-linecap="round"/><circle cx="-4" cy="4" r="1.2" fill="#4A4048"/><circle cx="4" cy="4" r="1.2" fill="#4A4048"/></g>' % [bird[0], bird[1], bird[2], bird[2]]
 		_:
 			s += _pattern([[38, 44], [66, 54], [94, 44], [44, 78], [74, 86], [98, 74]], [[56, 34], [84, 68]])
 	s += _top_folds()
@@ -725,6 +732,10 @@ func _top() -> String:
 		s += _f('<path d="M44 13 Q65 29 86 13" stroke="{cloth_line}" stroke-width="5" fill="none" stroke-linecap="round"/>')
 		s += _f('<path d="M46 14 Q65 27 84 14" stroke="{cloth}" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.6"/>')
 		s += '<path d="M27 98 Q65 104 103 98" stroke="#FFFFFF" stroke-width="1.5" fill="none" stroke-dasharray="3 3" opacity="0.5"/>'
+	if look.necklace != "":
+		# A thin cord, and a stone hanging on it.
+		s += '<path d="M48 17 Q58 30 65 34 Q72 30 82 17" stroke="#2F2A3A" stroke-width="1.6" fill="none"/>'
+		s += '<path d="M65 33 L68 38 L65 46 L62 38 Z" fill="%s" stroke="#2F2A3A" stroke-width="1.2"/>' % look.necklace
 	return s
 
 
