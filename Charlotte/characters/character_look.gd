@@ -7,7 +7,7 @@ const SKINS: Array[String] = ["#F9DCC8", "#F3CDB0", "#E8B892", "#D29A6E", "#B57A
 const SKIN_WEIGHTS: Array[float] = [26.0, 24.0, 20.0, 10.0, 8.0, 7.0, 5.0]
 const HAIRS: Array[String] = ["#B0623A", "#3A2618", "#5A3A22", "#1E1612", "#C9A060", "#E3C78A", "#8A3B1E", "#2B2B2B"]
 const GREYS: Array[String] = ["#D9D6D0", "#BDB8B0", "#F2F0EC", "#A8A39A"]
-const EYES: Array[String] = ["#8A5530", "#4A6FA5", "#5E8A4A", "#3A2618", "#6B4E2E"]
+const EYES: Array[String] = ["#8A5530", "#2F7FD6", "#3F9B45", "#3A2618", "#6B4E2E"]
 const CLOTHES: Array[String] = [
 	"#FFD23F", "#E04F5F", "#4A6FA5", "#1FB5C4", "#7E57C2", "#FF8A3D", "#3E8E5A",
 	"#F4F1EA", "#2E3440", "#C2185B", "#8D6E63", "#5C6BC0", "#A5D6A7", "#FFB3C7",
@@ -120,7 +120,7 @@ static func dad() -> CharacterLook:  # navy bike T-shirt, dark jeans, white snea
 	look.skin = Color("#F0CDB2")
 	look.hair_style = "short"
 	look.hair_color = Color("#5A3E2A")
-	look.eye_color = Color("#5B8FC4")
+	look.eye_color = Color("#2F7FD6")
 	look.lashes = false
 	look.mouth = "smile"
 	look.outfit = "tshirt"
@@ -142,7 +142,7 @@ static func _twin() -> CharacterLook:
 	look.age = "tween"
 	look.skin = Color("#F6D9C5")
 	look.hair_color = Color("#BC9260")
-	look.eye_color = Color("#6F8FA8")
+	look.eye_color = Color("#6E9CBF")
 	look.lashes = true
 	look.mouth = "smile"
 	look.legwear = "pants"

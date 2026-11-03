@@ -226,6 +226,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `expression` forces one, `express(name, seconds)` shows one for a moment. `Bubble.say` makes whoever stands under the bubble "talk" (mouth
   cycling `talk_a/b/c`), `Interior._treat` gives "yum", the house tidy quest "worry" / "laugh", a petted dog's owner "happy". Closed or smiling eyes
   suppress the blink. `tools/arms.tscn --set=5` and `--set=6` show every expression.
+- Eye colours must read at game size: the iris is a dark rim (`iris_dark`) round the flat colour (`iris`), lighter low down (`iris_light`), with a small pupil. `CharacterLook.EYES` (hazel, blue, green, two browns) for passersby; keep its size so the random draws don't move. Dad is bright blue, the twins a paler grey-blue, Mom and Charlotte brown.
 - `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through, breathing, soft shading by
   `shaders/character_shade.gdshader` (lit from the left, follows `facing`), hair strands clipped to each hairstyle (`CharacterArt._strands`), clothing folds
   (dress gathers and hem, top creases, elbow and knee creases), idle gestures when `fidgets` (wave, hop,

@@ -97,7 +97,7 @@ func _palette() -> Dictionary:
 	var d := {
 		"skin": _hex(skin), "skin_line": _hex(_tone(skin, 0.16, 0.25)), "skin_shade": _hex(_tone(skin, 0.04, 0.05)),
 		"neck": _hex(_tone(skin, 0.06, 0.06)), "blush": "#F5A3A0", "nose": _hex(_tone(skin, 0.18, 0.3)),
-		"iris": _hex(look.eye_color), "iris_dark": _hex(_tone(look.eye_color, 0.35, 0.0)), "pupil": "#22140B",
+		"iris": _hex(look.eye_color), "iris_dark": _hex(_tone(look.eye_color, 0.35, 0.0)), "iris_light": _hex(look.eye_color.lightened(0.28)), "pupil": "#22140B",
 		"lash": "#2E1C12", "mouth": "#B23A48", "mouth_line": "#8E2A37", "tongue": "#F08A93",
 		"hair": _hex(hair), "hair_line": _hex(_tone(hair, 0.22, 0.1)), "hair_light": _hex(hair.lightened(0.3)),
 		"hair_mid": _hex(hair.lightened(0.15)),
@@ -241,9 +241,9 @@ func _eyes_svg(kind: String) -> String:
 	var lash2 := '<path d="M164 117 L169 109" stroke="{lash}" stroke-width="2.5" stroke-linecap="round"/><path d="M159 112 L162 104" stroke="{lash}" stroke-width="2.5" stroke-linecap="round"/>'
 	# Left eye (the far one for a right-facing face: outer corner left), then right.
 	for e in [
-		{"cx": 94.0, "cy": 130.0, "rx": 18.0, "ry": 22.0, "ix": 97.0, "ir": 15.0, "dr": 10.0, "pr": 6.5, "h1": Vector2(103, 126), "r1": 5.5, "h2": Vector2(91, 141), "r2": 2.5,
+		{"cx": 94.0, "cy": 130.0, "rx": 18.0, "ry": 22.0, "ix": 97.0, "ir": 15.0, "lr": 8.5, "pr": 5.5, "h1": Vector2(103, 126), "r1": 5.5, "h2": Vector2(91, 141), "r2": 2.5,
 			"arc": "M76 120 Q93 103 112 118", "lash": lash1, "closed": "M76 132 Q94 144 112 132", "outer": -1.0, "id": "rl"},
-		{"cx": 149.0, "cy": 130.0, "rx": 15.0, "ry": 21.0, "ix": 152.0, "ir": 13.0, "dr": 8.5, "pr": 5.5, "h1": Vector2(157, 126), "r1": 4.8, "h2": Vector2(147, 141), "r2": 2.2,
+		{"cx": 149.0, "cy": 130.0, "rx": 15.0, "ry": 21.0, "ix": 152.0, "ir": 13.0, "lr": 7.5, "pr": 4.7, "h1": Vector2(157, 126), "r1": 4.8, "h2": Vector2(147, 141), "r2": 2.2,
 			"arc": "M134 118 Q150 103 165 120", "lash": lash2, "closed": "M134 132 Q150 143 165 132", "outer": 1.0, "id": "rr"}]:
 		var cx: float = e.cx
 		var cy: float = e.cy
@@ -267,7 +267,8 @@ func _eyes_svg(kind: String) -> String:
 				inner = '<g transform="translate(%s %s) scale(%s) translate(%s %s)">' % [cx, cy, k, -cx, -cy]
 				inner += _f('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="#FFFFFF"/>' % [cx, cy, e.rx, e.ry])
 				inner += '<g transform="translate(%s %s) scale(%s) translate(%s %s)">' % [e.ix, cy + 5, iris_k, -e.ix, -(cy + 5)]
-				inner += _f('<circle cx="%s" cy="%s" r="%s" fill="{iris}"/><circle cx="%s" cy="%s" r="%s" fill="{iris_dark}"/>' % [e.ix, cy + 3, e.ir, e.ix, cy + 6, e.dr])
+				# A dark rim round the colour, which catches the light low down, so the colour shows even from afar.
+				inner += _f('<circle cx="%s" cy="%s" r="%s" fill="{iris_dark}"/><circle cx="%s" cy="%s" r="%s" fill="{iris}"/><circle cx="%s" cy="%s" r="%s" fill="{iris_light}"/>' % [e.ix, cy + 3, e.ir, e.ix, cy + 3, e.ir - 2.0, e.ix, cy + 7, e.lr])
 				inner += _f('<circle cx="%s" cy="%s" r="%s" fill="{pupil}"/>' % [e.ix, cy + 5, e.pr * (1.18 if kind == "wide" else 1.0)])
 				inner += '<circle cx="%s" cy="%s" r="%s" fill="#FFFFFF"/><circle cx="%s" cy="%s" r="%s" fill="#FFFFFF"/>' % [e.h1.x, e.h1.y, e.r1, e.h2.x, e.h2.y, e.r2]
 				inner += '</g>'
@@ -307,7 +308,7 @@ func _almond_eyes(kind := "normal") -> String:
 			inner = '<g transform="translate(%s %s) scale(%s) translate(%s %s)">' % [cx, cy, k, -cx, -cy]
 			inner += '<clipPath id="%s"><path d="%s"/></clipPath>' % [e[3], shape]
 			inner += '<path d="%s" fill="#FBFAF6"/>' % shape
-			inner += _f('<g clip-path="url(#%s)"><circle cx="%.1f" cy="%.1f" r="11" fill="{iris}"/><circle cx="%.1f" cy="%.1f" r="8" fill="{iris_dark}"/><circle cx="%.1f" cy="%.1f" r="5.2" fill="{pupil}"/>' % [e[3], cx + 2, cy, cx + 2, cy + 1, cx + 2, cy + 1]
+			inner += _f('<g clip-path="url(#%s)"><circle cx="%.1f" cy="%.1f" r="11" fill="{iris_dark}"/><circle cx="%.1f" cy="%.1f" r="9.4" fill="{iris}"/><circle cx="%.1f" cy="%.1f" r="5.8" fill="{iris_light}"/><circle cx="%.1f" cy="%.1f" r="4.4" fill="{pupil}"/>' % [e[3], cx + 2, cy, cx + 2, cy, cx + 2, cy + 3, cx + 2, cy + 1]
 				+ '<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f L%.1f %.1f L%.1f %.1f Z" fill="#000000" opacity="0.28"/>' % [cx - w, cy - 3, cx, cy - 12, cx + w, cy - 3, cx + w, cy - 8, cx - w, cy - 8])
 			# A lid over the top of the eye: squinting, sleepy, sad (the outer corner lower).
 			var drops := {"squint": [10.0, 10.0], "sleepy": [17.0, 17.0], "sad": [14.0, 4.0]}
