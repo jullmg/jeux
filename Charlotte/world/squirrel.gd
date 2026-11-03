@@ -61,7 +61,7 @@ static var _canopy_images := {}
 func _ready() -> void:
 	_ground_y = position.y
 	_timer = randf_range(0.5, 3.0)
-	if randf() < 0.35:
+	if randf() < 0.12:
 		fur = Color("#2B2826")
 	if bag:
 		_start_gnaw()
