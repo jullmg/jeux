@@ -9,6 +9,9 @@ extends RefCounted
 const H := 600.0
 ## The near part of a T (`tee`): down to the bottom of the view.
 const H_NEAR := 720.0
+const NEAR_FENCE_ROOM := 20.0
+## How many of the near fence's stretches are overgrown with creeper.
+const NEAR_FENCE_VINES := 0.75
 const TEE_PAD := 130.0
 const BRICKS := ["#A8473A", "#8A4A3A", "#B5603F", "#7E4436", "#C8A27A", "#9C5A44"]
 const SIDINGS := ["#E8E6DF", "#D9D4C7", "#C9D3D1", "#E9DDC4", "#BFC5C9", "#F2EEE4"]
@@ -797,10 +800,11 @@ static func side_wall(rng: RandomNumberGenerator, w: float, top: float, color: C
 
 ## SVG body, `w` by `h`: the fence along the near side of a cross lane, right in front of the camera, only its upper part in
 ## view: wide weathered boards, stretch by stretch between posts, a rail, knots and nails, creeper hanging over it by season,
-## snow along the top in winter. For Foreground.add.
+## snow along the top in winter. For Foreground.add. The top NEAR_FENCE_ROOM of `h` is left for the creeper above the boards.
 static func near_fence(rng: RandomNumberGenerator, w: float, h: float) -> String:
 	var s := ""
 	var vines := vine_colors()
+	var fence_h := h - NEAR_FENCE_ROOM
 	var x := 0.0
 	while x < w:
 		var stretch := minf(rng.randf_range(300.0, 460.0), w - x)
@@ -812,32 +816,33 @@ static func near_fence(rng: RandomNumberGenerator, w: float, h: float) -> String
 			var bw := minf(rng.randf_range(30.0, 40.0), x + stretch - bx)
 			var by := top + rng.randf_range(-3.0, 3.0)
 			var c := _dark(tint, rng.randf_range(0.0, 0.18))
-			s += _rect(bx, by, bw, h - by, c)
-			s += _rect(bx, by, 3, h - by, _light(c, 0.25), 'opacity="0.6"')
-			s += _line(Vector2(bx + bw, by), Vector2(bx + bw, h), _dark(c, 0.45), 2.0)
+			s += _rect(bx, by, bw, fence_h - by, c)
+			s += _rect(bx, by, 3, fence_h - by, _light(c, 0.25), 'opacity="0.6"')
+			s += _line(Vector2(bx + bw, by), Vector2(bx + bw, fence_h), _dark(c, 0.45), 2.0)
 			if rng.randf() < 0.3:
 				s += '<ellipse cx="%.1f" cy="%.1f" rx="4" ry="6" fill="%s"/>' % [bx + bw * 0.5, by + rng.randf_range(20.0, 60.0), _dark(c, 0.3)]
 			s += '<circle cx="%.1f" cy="%.1f" r="1.6" fill="#3A3A3A"/>' % [bx + bw * 0.5, top + 26.0]
 			bx += bw
 		# The rail across the boards.
 		s += _rect(x, top + 20.0, stretch, 7, _dark(tint, 0.3), 'opacity="0.5"')
-		# Creeper over the top here and there, this season's colours; snow along the top in winter.
-		for k in rng.randi_range(0, 2):
-			var vx := x + rng.randf_range(20.0, stretch - 20.0)
-			var creeper := _foliage(rng, Vector2(clampf(vx, 54.0, w - 54.0), 18.0), Vector2(50.0, 20.0), vines, 13.0, 26)
-			if not vines.is_empty():
-				s += creeper
 		if vines.is_empty():
 			s += _rect(x, top - 5.0, stretch, 7, "#F4F6F8")
 		# The post at the end of the stretch, standing a little proud.
-		s += _rect(x + stretch - 13.0, 2, 26, h - 2, _dark(tint, 0.25))
-		s += _rect(x + stretch - 13.0, 2, 5, h - 2, _light(tint, 0.1), 'opacity="0.6"')
+		s += _rect(x + stretch - 13.0, 2, 26, fence_h - 2, _dark(tint, 0.25))
+		s += _rect(x + stretch - 13.0, 2, 5, fence_h - 2, _light(tint, 0.1), 'opacity="0.6"')
 		s += _rect(x + stretch - 15.0, 0, 30, 5, _dark(tint, 0.4))
+		# Most stretches have creeper growing over the top and trailing down, this season's colours; bare stems in winter.
+		var overgrown := rng.randf() < NEAR_FENCE_VINES
+		for k in rng.randi_range(2, 3):
+			var vw := rng.randf_range(90.0, 170.0)
+			var vine := _vine(rng, x + rng.randf_range(0.0, maxf(stretch - vw, 1.0)), vw, top, vines)
+			if overgrown:
+				s += vine
 		x += stretch
 	# First post, at the avenue's end.
-	s += _rect(0, 2, 22, h - 2, _dark(PropArt._pick(rng, BOARDS), 0.3))
+	s += _rect(0, 2, 22, fence_h - 2, _dark(PropArt._pick(rng, BOARDS), 0.3))
 	s += _rect(0, 0, 24, 5, "#55524C")
-	return s
+	return '<g transform="translate(0 %.1f)">%s</g>' % [NEAR_FENCE_ROOM, s]
 
 
 ## Where a long lane ends on a cross lane, a T, for a sprite of its own either side of the ground. We stand in the long lane looking

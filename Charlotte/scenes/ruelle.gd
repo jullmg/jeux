@@ -18,7 +18,7 @@ extends StreetScene
 const LOTS := 14
 ## Yards on either side of the middle lane, along a cross lane (between the corner plexes' side walls).
 const SIDE_LOTS := 1
-## The fence along a cross lane's near side: the top of it in view, and where it stops short of the avenue's sidewalk.
+## The fence along a lane's near side: the top of it in view, and where it stops short of the avenue's sidewalk.
 const NEAR_FENCE_TOP := 664.0
 const NEAR_FENCE_END := 280.0
 const LOT_W := 365.0
@@ -445,30 +445,18 @@ func _build_poles() -> void:
 # of the yards on our side runs along the bottom of the view instead, nearer than the lane (so it scrolls faster), from
 # just short of one avenue's sidewalk to just short of the other's: its ends line up when the camera stops at the ends.
 func _build_foreground() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 11
-	if lane != "middle":
-		var layer := Parallax2D.new()
-		layer.scroll_scale = Vector2(Foreground.SCROLL, 1.0)
-		add_child(layer)
-		var from: float = _openings[0].x1 + NEAR_FENCE_END
-		var to: float = _openings[-1].x0 - NEAR_FENCE_END + (Foreground.SCROLL - 1.0) * (_street_width - VIEW.x)
-		var size := Vector2(to - from, VIEW.y - NEAR_FENCE_TOP + 40.0)
-		rng.seed = seed_value + 7
-		var fence := Foreground.add(layer, LaneArt.near_fence(rng, size.x, size.y), Vector2(to, NEAR_FENCE_TOP + size.y), size, 0.45)
-		fence.modulate = Foreground.SHADE.lerp(Color.WHITE, 0.45)
-		return
 	var layer := Parallax2D.new()
 	layer.scroll_scale = Vector2(Foreground.SCROLL, 1.0)
 	add_child(layer)
-	var span := VIEW.x + Foreground.SCROLL * (_street_width - VIEW.x) + 300.0
-	var x := rng.randf_range(150.0, 500.0)
-	while x < span:
-		if rng.randf() < 0.5:
-			Foreground.add(layer, Foreground.leaf_pile(rng), Vector2(x, 720.0 + 26.0), Vector2(300, 110))
-		else:
-			Foreground.add(layer, Foreground.shrub(rng), Vector2(x, 720.0 + 70.0), Vector2(260, 170))
-		x += rng.randf_range(900.0, 1500.0)
+	# Up to a cross lane going off past us at a T, short of the sidewalk at an avenue.
+	var left: float = _openings[0].x + TEE_HALF if lane == "middle" else _openings[0].x1 + NEAR_FENCE_END
+	var right: float = _openings[-1].x - TEE_HALF if lane == "middle" else _openings[-1].x0 - NEAR_FENCE_END
+	var to := right + (Foreground.SCROLL - 1.0) * (_street_width - VIEW.x)
+	var size := Vector2(to - left, VIEW.y - NEAR_FENCE_TOP + 40.0 + LaneArt.NEAR_FENCE_ROOM)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + 7
+	var fence := Foreground.add(layer, LaneArt.near_fence(rng, size.x, size.y), Vector2(to, VIEW.y + 40.0), size, 0.45)
+	fence.modulate = Foreground.SHADE.lerp(Color.WHITE, 0.45)
 
 
 # Up the yard trees (bare in winter: none to hide in) and the poles when she comes, along the fences otherwise. Own random numbers.
