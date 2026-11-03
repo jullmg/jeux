@@ -10,9 +10,9 @@ const NAMES := {
 	"holt": "Rue Holt",
 	"cinquieme": "5e Avenue",
 	"dandurand": "Rue Dandurand",
-	"ruelle": "Ruelle du milieu",
-	"ruelle_dandurand": "Ruelle verte",
-	"ruelle_holt": "Ruelle près de Holt",
+	"ruelle": "Ruelle entre la 5e et la 6e Avenue",
+	"ruelle_dandurand": "Ruelle verte, entre la 5e et la 6e Avenue",
+	"ruelle_holt": "Ruelle près de Holt, entre la 5e et la 6e Avenue",
 	"depanneur": "Dépanneur Xin-Xin, rue Dandurand",
 	"ohbon": "Dépanneur Oh Bon!, rue Holt",
 }
