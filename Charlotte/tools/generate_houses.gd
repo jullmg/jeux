@@ -170,9 +170,9 @@ const HOUSES := [
 		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "lintel_style": "plain", "basement": [],
 		"door": "#7A2E2E", "door_dark": "#4E1C1C",
 	},
-	{"name": "ruelle", "kind": "ruelle", "width": 300.0},
+	{"name": "ruelle", "kind": "ruelle", "width": 560.0},
 	# The green lane near the Dandurand corner (reference/Entrée_ruelle_coin_dandurand.jpg).
-	{"name": "ruelle_verte", "kind": "ruelle_verte", "width": 400.0},
+	{"name": "ruelle_verte", "kind": "ruelle_verte", "width": 640.0},
 	# Dépanneur Xin-Xin's real front, on Rue Dandurand (reference/dépanneur_on_dandurant.jpg).
 	{
 		"name": "depanneur_front", "kind": "depanneur_front", "width": 780.0, "halloween": true,
@@ -1612,6 +1612,7 @@ func _garages() -> void:
 # dots, a wooden planter box, a red pole carrying the "Ruelle verte" sign (text added in the game) and
 # orange trees arching over it all.
 func _ruelle_verte() -> void:
+	const TREE_SEED := 41
 	var vp := Vector2(k.width / 2.0, 470.0)
 	var at := func(p: Vector2, d: float) -> Vector2: return vp + (p - vp) * (1.0 - d)
 	var poly := func(pts: Array, fill: String, extra := "") -> void:
@@ -1624,10 +1625,11 @@ func _ruelle_verte() -> void:
 	var r0 := Vector2(X1, 60)
 	var gl := Vector2(X0, ground_y)
 	var gr := Vector2(X1, ground_y)
+	_lane_backdrop()
 	# Bright far end: the lane goes on, greener and paler.
 	poly.call([at.call(l0, far), at.call(r0, far), at.call(gr, far), at.call(gl, far)], "#DCE6D8")
-	for i in 4:
-		_circle(lerpf(at.call(gl, far).x, at.call(gr, far).x, (i + 0.5) / 4.0), at.call(gl, far).y - 30, 22, _pick(["#7FA34A", "#9DB85A", "#E3A33A"]))
+	for i in 14:
+		_circle(lerpf(at.call(gl, far).x, at.call(gr, far).x, (i + 0.5) / 14.0), at.call(gl, far).y - rng.randf_range(10.0, 48.0), rng.randf_range(9.0, 16.0), _canopy(_pick(["#7FA34A", "#9DB85A", "#E3A33A"])))
 	# Concrete path, darker at the entrance, with a joint across it.
 	poly.call([gl, gr, at.call(gr, far), at.call(gl, far)], "#A8A49C")
 	poly.call([gl, gr, at.call(gr, 0.25), at.call(gl, 0.25)], "#9A968E")
@@ -1663,7 +1665,7 @@ func _ruelle_verte() -> void:
 		var f: Vector2 = at.call(Vector2(X1, 520 + i * 40), lerpf(m0, m1, (i + 0.5) / 3.0))
 		out.append('<ellipse cx="%s" cy="%s" rx="5" ry="9" fill="#F2C230" stroke="#2B2B2B" stroke-width="1"/>' % [_n(f.x), _n(f.y)])
 	# Leaves carpeting the path, thickest along the right.
-	for i in 140:
+	for i in int(k.width * 0.35):
 		var d := pow(rng.randf(), 1.6) * far
 		var u := rng.randf()
 		if rng.randf() < 0.5:
@@ -1711,8 +1713,22 @@ func _ruelle_verte() -> void:
 	_circle(trike.x - 12, trike.y - 8, 8, "none", _stroke("#2B2B2B", 2.5))
 	_circle(trike.x + 12, trike.y - 8, 8, "none", _stroke("#2B2B2B", 2.5))
 	_path("M%s %s l12 -16 l12 16 M%s %s v-10 h8" % [_n(trike.x - 12), _n(trike.y - 8), _n(trike.x), _n(trike.y - 24)], "none", _stroke("#D9342B", 4) + ' stroke-linecap="round"')
-	# The lane tree from the photo: rising on the right and arching right over the entrance.
-	_fine_tree(Vector2(X1 - 54, ground_y - 46), 330.0, -PI * 0.78, 1.15, ["#E3A33A", "#D9682B", "#C9562E", "#B5442E", "#E8B54A"])
+	# The lane tree from the photo: rising on the right and arching right over the entrance. Own seed, so the entrance's width doesn't change it.
+	rng.seed = TREE_SEED
+	_fine_tree(Vector2(X1 - 54, ground_y - 46), 400.0, -PI * 0.78, 1.05, ["#E3A33A", "#D9682B", "#C9562E", "#B5442E", "#E8B54A"])
+
+
+# What closes a wide lane entrance above its far end: the back of a plex across the next lane, hazy with distance, so the
+# far skyline doesn't show between the side walls.
+func _lane_backdrop() -> void:
+	var top := 96.0
+	_rect(X0, top, X1 - X0, ground_y - top, "#A98D7E")
+	_rect(X0, top, X1 - X0, 8, "#8A7265")
+	for row in 3:
+		var x := X0 + 18.0
+		while x < X1 - 40.0:
+			_rect(x, top + 26.0 + row * 78.0, 26, 44, "#C6D2D6", _stroke("#E4DCCF", 2))
+			x += 62.0
 
 
 # A tree drawn branch by branch: a trunk to `fork_y`, limbs splitting three times around `heading` (radians, -PI/2 =
@@ -1781,6 +1797,7 @@ func _ruelle() -> void:
 		_path(" ".join(parts) + " Z", fill, extra)
 	var gl := Vector2(X0, ground_y)
 	var gr := Vector2(X1, ground_y)
+	_lane_backdrop()
 	# The far end: a brick wall, the white garage door in its red frame, a black railing above.
 	var f0: Vector2 = at.call(Vector2(X0, 200), far)
 	var f1: Vector2 = at.call(gr, far)

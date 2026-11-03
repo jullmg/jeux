@@ -285,6 +285,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   door, or one on the left; `_door_lamps`), `ornate` stair railings (spades, scrolled newel), `stair_kind` "landing" (L with a landing on
   posts) or "curve"; drawn last in `_variant` so other draws don't move. Spiral staircases only in the lane
   (`LaneArt._spiral`), never on the street side.
+- Lane entrances are wide (generator widths: `ruelle` 560, `ruelle_verte` 640, about a plex); `_lane_backdrop` closes them with a hazy plex back, or the skyline would show between the side walls. Labels on them go by the texture's width.
 - Lane entrances seen from the street (generator `_ruelle_verte`, `_ruelle`) use `_fine_tree` (trunk, limbs split three
   times, hundreds of small leaves in this season's colours, bare and snowy in winter) instead of round blobs; the Holt-side
   entrance is drawn in perspective (fences, tôle garage, creeper, clothesline, weeds, bin, bunting).
