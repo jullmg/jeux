@@ -3,7 +3,7 @@ extends RefCounted
 ## The back lane's pieces as SVG (from the photos in reference/ruelle): the backs of the plexes with their wooden
 ## galleries and zigzag stairs, and in front, along the lane, what closes each yard: weathered board fences, cedar
 ## slats, pickets, green chain-link, old corrugated-metal garages, painted sheds, planter boxes; Virginia creeper
-## (red in autumn) over all of it, blue recycling bins. Each canvas is the lot's width by 600, the lane's edge at
+## (red in autumn) over all of it. Each canvas is the lot's width by 600, the lane's edge at
 ## y 600, in world pixels.
 
 const H := 600.0
@@ -177,7 +177,7 @@ static func _spiral(x: float, top: float, bottom: float, turns: int) -> String:
 # ── Along the lane ──────────────────────────────────────────
 
 ## What closes one yard along the lane: "boards", "cedar", "picket", "chainlink", "tole" (old corrugated-metal
-## garage), "garage" (with a roll-up door), "shed" or "garden" (planter boxes and a bench), with creeper, bins
+## garage), "garage" (with a roll-up door), "shed" or "garden" (planter boxes and a bench), with creeper
 ## and, behind the low ones, a bit of the yard. `own`: Charlotte's yard (her swing).
 static func front(rng: RandomNumberGenerator, w: float, kind: String, own := false) -> ImageTexture:
 	var vines := vine_colors()
@@ -225,12 +225,10 @@ static func front(rng: RandomNumberGenerator, w: float, kind: String, own := fal
 		s += _foliage(rng, Vector2(rng.randf_range(rx + 4.0, w - rx - 4.0), H - 30), Vector2(rx, rng.randf_range(26.0, 40.0)), shrub_colors(), 7.0, 46)
 	for i in 3:
 		s += _grass(rng, Vector2(rng.randf_range(14.0, w - 14.0), H - 2), rng.randf_range(20.0, 34.0))
-	# Bins against the fence: blue recycling, sometimes the brown compost bin.
+	# The draws of the bins that used to stand here, so the lots after this one stay as they are.
 	if kind != "garden" and rng.randf() < 0.45:
-		var bx := rng.randf_range(20.0, w - 70.0)
-		s += _bin(bx, "#2F6DB5")
-		if rng.randf() < 0.5:
-			s += _bin(bx + 48.0, "#6B4A2E", 0.8)
+		rng.randf()
+		rng.randf()
 	if Season.is_winter():
 		s += _rect(0, H - 6, w, 6, "#F4F6F8")
 	return _tex(w, s)
@@ -434,16 +432,6 @@ static func _planters(rng: RandomNumberGenerator, w: float) -> String:
 	var bx := w - 120.0
 	s += _rect(bx, H - 40, 26, 40, "#C9C6BE") + _rect(bx + 74, H - 40, 26, 40, "#C9C6BE")
 	s += _rect(bx - 8, H - 50, 116, 12, "#D9C8A4", 'stroke="#A89878" stroke-width="1.5"')
-	return s
-
-
-static func _bin(x: float, color: String, size := 1.0) -> String:
-	var w := 44.0 * size
-	var h := 64.0 * size
-	var s := _poly([Vector2(x, H - h), Vector2(x + w, H - h), Vector2(x + w - 4, H), Vector2(x + 4, H)], color, 'stroke="%s" stroke-width="2"' % _dark(color, 0.4))
-	s += _rect(x - 3, H - h - 6, w + 6, 9, _dark(color, 0.2), 'rx="3"')
-	if color == "#2F6DB5":
-		s += '<path d="M%.1f %.1f l6 -9 l6 9 z" fill="none" stroke="#FFFFFF" stroke-width="2"/>' % [x + w / 2.0 - 6, H - h * 0.45]
 	return s
 
 
@@ -786,11 +774,10 @@ static func side_wall(rng: RandomNumberGenerator, w: float, top: float, color: C
 	if rng.randf() < 0.5:
 		var tx := front + inward * w * rng.randf_range(0.55, 0.75) - 40.0
 		s += '<path d="M%.1f %.1f q10 -22 18 -2 t16 -6 q6 -14 14 0 t18 -4" stroke="%s" stroke-width="3.5" fill="none" stroke-linecap="round"/>' % [tx, H - 62.0, PropArt._pick(rng, ["#2B2F6B", "#1F1F1F", "#7A1F5C"])]
-	# Creeper climbing its far end, a bin at its foot.
+	# Creeper climbing its far end.
 	var climb := front + inward * (w - 60.0) - 50.0
 	s += _climber(rng, climb, 110.0, H - rng.randf_range(210.0, 300.0), H - 2.0, vine_colors())
 	s += _grass(rng, Vector2(front + inward * 90.0, H - 2.0), 26.0)
-	s += _bin(front + inward * (w - 170.0) - 22.0, "#2F6DB5")
 	if Season.is_winter():
 		s += _rect(-2, top - 13, w + 4, 6, "#F4F6F8")
 		s += _rect(cornice, top - 23, 26, 6, "#F4F6F8")
@@ -1099,11 +1086,6 @@ static func tee(rng: RandomNumberGenerator, w: float, vx: float, s: float, half:
 	far += creeper.call(half, 0.0, YARD, 0.7 if lush else 0.45)
 	far += shrubbery.call(-half, 0.14, YARD, 3 if lush else 1)
 	far += shrubbery.call(half, 0.14, YARD, 3 if lush else 1)
-	# The neighbours' bins against the far fence.
-	for bin: Array in [[0.3, "#2F6DB5", 8.0], [0.2, "#5B4A3A", 8.0]]:
-		far += facing.call(-half + bin[2], -half + bin[2] + 52.0, H - 82.0, H, bin[0], bin[1])
-		far += facing.call(-half + bin[2] - 3.0, -half + bin[2] + 55.0, H - 88.0, H - 78.0, bin[0], _dark(bin[1], 0.25))
-		far += facing.call(-half + bin[2], -half + bin[2] + 52.0, H - 16.0, H, bin[0], "#000000", 'opacity="0.2"')
 	# A pole at the lane's end on the far side, its wires going off over the corner.
 	var pole_top: Vector2 = at.call(-half + 10.0, 70.0, 0.9)
 	far += _line(at.call(-half + 10.0, H, 0.9), pole_top, "#6E5A48", 6.0)
@@ -1112,7 +1094,7 @@ static func tee(rng: RandomNumberGenerator, w: float, vx: float, s: float, half:
 		var a := pole_top + Vector2(off, 4.0)
 		var b := Vector2(vx + s * (half + 24.0) + off, 100.0)
 		far += '<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="#2A2622" stroke-width="1.3" fill="none"/>' % [a.x, a.y, (a.x + b.x) / 2.0, (a.y + b.y) / 2.0 + 10.0, b.x, b.y]
-	# The near part: the slabs and the weeds coming toward us, then the far side's fence going off past us, bins against it.
+	# The near part: the slabs and the weeds coming toward us, then the far side's fence going off past us.
 	var near := ""
 	for jd: float in [-0.09, -0.2, -0.31, -0.41]:
 		near += _line(at.call(-half, H, jd), at.call(half, H, jd), _dark(concrete, 0.16), 2.0)
@@ -1347,12 +1329,9 @@ static func junction(rng: RandomNumberGenerator, w: float) -> ImageTexture:
 				near.append([bd, bush])
 			if rng.randf() < 0.7:
 				near.append([bd + 0.1, grass])
-	# A blue bin near us.
-	var bin_d := rng.randf_range(0.5, 0.9)
-	var bin_x := 16.0 if rng.randf() < 0.5 else w - 62.0
-	var b0: Vector2 = at.call(Vector2(bin_x, H - 74.0), bin_d)
-	var b1: Vector2 = at.call(Vector2(bin_x + 46.0, H), bin_d)
-	near.append([bin_d, _rect(b0.x, b0.y, b1.x - b0.x, b1.y - b0.y, "#2F6DB5") + _rect(b0.x - 1.0, b0.y - 2.0, b1.x - b0.x + 2.0, 4.0, "#26588F")])
+	# The draws of the bin that used to stand here.
+	rng.randf()
+	rng.randf()
 	# Poles down one side, wires from one to the next and across.
 	var tops: Array[Vector2] = []
 	for base_d: float in [8.5, 3.6, 1.2]:
