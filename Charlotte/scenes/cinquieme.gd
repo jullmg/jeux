@@ -62,7 +62,7 @@ func _build_cross_streets() -> void:
 
 func _decorate_house(i: int, house: Sprite2D) -> void:
 	if layout[i] == "ruelle_verte":
-		_label("RUELLE\nVERTE", house.position + Vector2(_tex("ruelle_verte").get_width() / 2.0 + 14.0, 416.0) * HOUSE_SCALE, Vector2(72, 36), 12, Color.WHITE, Color("#1E5E30"))
+		_label("RUELLE\nVERTE", house.position + Vector2(_tex("ruelle_verte").get_width() / 2.0 + 90.0, 416.0) * HOUSE_SCALE, Vector2(72, 36), 12, Color.WHITE, Color("#1E5E30"))
 
 
 func _build_doors() -> void:

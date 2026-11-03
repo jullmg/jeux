@@ -1625,11 +1625,7 @@ func _ruelle_verte() -> void:
 	var r0 := Vector2(X1, 60)
 	var gl := Vector2(X0, ground_y)
 	var gr := Vector2(X1, ground_y)
-	_lane_backdrop()
-	# Bright far end: the lane goes on, greener and paler.
-	poly.call([at.call(l0, far), at.call(r0, far), at.call(gr, far), at.call(gl, far)], "#DCE6D8")
-	for i in 14:
-		_circle(lerpf(at.call(gl, far).x, at.call(gr, far).x, (i + 0.5) / 14.0), at.call(gl, far).y - rng.randf_range(10.0, 48.0), rng.randf_range(9.0, 16.0), _canopy(_pick(["#7FA34A", "#9DB85A", "#E3A33A"])))
+	_lane_through(vp, 1.0 - far)
 	# Concrete path, darker at the entrance, with a joint across it.
 	poly.call([gl, gr, at.call(gr, far), at.call(gl, far)], "#A8A49C")
 	poly.call([gl, gr, at.call(gr, 0.25), at.call(gl, 0.25)], "#9A968E")
@@ -1689,7 +1685,7 @@ func _ruelle_verte() -> void:
 		var a := lerpf(-2.6, -0.5, i / 6.0)
 		_path("M%s %s q%s %s %s %s" % [_n(pc.x), _n(pc.y - 4), _n(cos(a) * 20), _n(sin(a) * 40), _n(cos(a) * 34), _n(sin(a) * 30)], "none", _stroke(_pick(["#5F8F3A", "#7FA34A", "#4E7A30"]), 5) + ' stroke-linecap="round"')
 	# Red pole with the green lane sign.
-	var px: float = k.width / 2.0 + 14.0
+	var px: float = k.width / 2.0 + 90.0
 	_rect(px - 3, 440, 6, ground_y - 446, "#C8202A", _stroke("#8E1A20", 1))
 	out.append('<ellipse cx="%s" cy="%s" rx="7" ry="2.5" fill="#000000" opacity="0.25"/>' % [_n(px + 2), _n(ground_y - 4)])
 	_rect(px - 66, 384, 132, 64, "#2E8B47", 'rx="8" ' + _stroke("#F4F1EA", 4))
@@ -1718,17 +1714,128 @@ func _ruelle_verte() -> void:
 	_fine_tree(Vector2(X1 - 54, ground_y - 46), 400.0, -PI * 0.78, 1.05, ["#E3A33A", "#D9682B", "#C9562E", "#B5442E", "#E8B54A"])
 
 
-# What closes a wide lane entrance above its far end: the back of a plex across the next lane, hazy with distance, so the
-# far skyline doesn't show between the side walls.
-func _lane_backdrop() -> void:
-	var top := 96.0
-	_rect(X0, top, X1 - X0, ground_y - top, "#A98D7E")
-	_rect(X0, top, X1 - X0, 8, "#8A7265")
-	for row in 3:
-		var x := X0 + 18.0
-		while x < X1 - 40.0:
-			_rect(x, top + 26.0 + row * 78.0, 26, 44, "#C6D2D6", _stroke("#E4DCCF", 2))
-			x += 62.0
+# The lanes of all the blocks are in line: looking in from the street we see down this one to the next avenue, across it
+# to the next block's lane entrance, and so on to the vanishing point `vp`, under the open sky. `start`: the scale where the
+# entrance's own walls end (the art draws them over this). Scale at depth z is 1 / (1 + z), z counted in entrance widths or so.
+func _lane_through(vp: Vector2, start: float) -> void:
+	const BLOCK := 3.6
+	const AVENUE := 1.2
+	const BLOCKS := 4
+	_lane_sky()
+	var last := BLOCKS * BLOCK + (BLOCKS - 1) * AVENUE
+	_lane_quad(vp, X0 - vp.x, X1 - vp.x, 1.0 / (1.0 + last), 0.0, _hazed("#B3AFA6", 0.8))
+	for b in range(BLOCKS - 1, -1, -1):
+		var near := b * (BLOCK + AVENUE)
+		var far := near + BLOCK
+		if b < BLOCKS - 1:
+			_lane_avenue(vp, far, far + AVENUE, b)
+		if b == 0:
+			near = 1.0 / start - 1.0
+		_lane_stretch(vp, near, far, b)
+
+
+# The open sky down the lane, hiding the distant city behind it, fading in from above.
+func _lane_sky() -> void:
+	# Season.sky()'s colours: this script can't load Season (autoloads aren't there in a --script run).
+	var grad := Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.35, 0.62, 0.82, 1.0])
+	grad.colors = PackedColorArray({
+		"spring": [Color("#5A9BD8"), Color("#93C6EC"), Color("#D3E8F3"), Color("#F4E9D6"), Color("#F3D9C4")],
+		"summer": [Color("#3A82D4"), Color("#6CB2EA"), Color("#B6DCF2"), Color("#E8F1EE"), Color("#F5E4C4")],
+		"winter": [Color("#8EA6C0"), Color("#B2C4D5"), Color("#D6DFE7"), Color("#E7E3DE"), Color("#E0D3CA")],
+		"autumn": [Color("#4F86C6"), Color("#86B5E0"), Color("#C9DDEB"), Color("#F6D9B4"), Color("#F4B98C")]}[season])
+	var stops := ""
+	for i in 5:
+		# The sprite's y in the view: its foot on the houses' base line, at the houses' scale.
+		var y := lerpf(0.0, ground_y - 200.0, i / 4.0)
+		var view_y := 592.0 + (y - ground_y) * 0.57
+		stops += '<stop offset="%s" stop-color="#%s" stop-opacity="%s"/>' % [_n(i / 4.0), grad.sample(view_y / 720.0).to_html(false), _n(clampf(y / 120.0, 0.0, 1.0))]
+	out.append('<defs><linearGradient id="lanesky" x1="0" y1="0" x2="0" y2="1">%s</linearGradient></defs>' % stops)
+	_rect(X0, 0, X1 - X0, ground_y - 200.0, "url(#lanesky)")
+
+
+func _hazed(c: String, amount: float) -> String:
+	return "#" + Color(c).lerp(Color("#CFD6DC"), clampf(amount, 0.0, 0.8)).to_html(false)
+
+
+func _lane_point(vp: Vector2, u: float, y: float, scale: float) -> Vector2:
+	return vp + Vector2(u, y - vp.y) * scale
+
+
+# A strip of ground between u0 and u1 from scale s0 to s1.
+func _lane_quad(vp: Vector2, u0: float, u1: float, s0: float, s1: float, fill: String) -> void:
+	_lane_poly([_lane_point(vp, u0, ground_y, s0), _lane_point(vp, u1, ground_y, s0), _lane_point(vp, u1, ground_y, s1), _lane_point(vp, u0, ground_y, s1)], fill)
+
+
+func _lane_poly(pts: Array, fill: String) -> void:
+	var parts := PackedStringArray()
+	for i in pts.size():
+		parts.append("%s%s %s" % ["M" if i == 0 else "L", _n(pts[i].x), _n(pts[i].y)])
+	_path(" ".join(parts) + " Z", fill)
+
+
+# A wall along the lane at u, from scale s0 to s1, up to `top`.
+func _lane_wall(vp: Vector2, u: float, top: float, s0: float, s1: float, fill: String) -> void:
+	_lane_poly([_lane_point(vp, u, top, s0), _lane_point(vp, u, top, s1), _lane_point(vp, u, ground_y, s1), _lane_point(vp, u, ground_y, s0)], fill)
+
+
+# The avenue between two blocks: its sidewalks and road, seen across.
+func _lane_avenue(vp: Vector2, z0: float, z1: float, b: int) -> void:
+	var haze := (b + 1) * 0.2
+	var wide := (X1 - X0) * 6.0
+	var snowy := season == "winter"
+	_lane_quad(vp, -wide, wide, 1.0 / (1.0 + z0), 1.0 / (1.0 + z1), _hazed("#E4E8EC" if snowy else "#C9C4B8", haze))
+	_lane_quad(vp, -wide, wide, 1.0 / (1.0 + z0 + 0.25), 1.0 / (1.0 + z1 - 0.25), _hazed("#6A6C70" if snowy else "#57544F", haze))
+
+
+# One block's lane, from depth z0 to z1, far to near: the ground, the plex backs set back behind the yards, trees in the yards,
+# the yard fences, the corner buildings' sides and (except this entrance's own) their facades on the avenue, which make the entrance.
+func _lane_stretch(vp: Vector2, z0: float, z1: float, b: int) -> void:
+	var haze := b * 0.2
+	var ul := X0 - vp.x
+	var ur := X1 - vp.x
+	var at_z := func(z: float) -> float: return 1.0 / (1.0 + z)
+	var s0: float = at_z.call(z0)
+	var s1: float = at_z.call(z1)
+	_lane_quad(vp, ul, ur, s0, s1, _hazed("#E4E8EC" if season == "winter" else "#B3AFA6", haze))
+	var corner := z0 + 0.9
+	var yards: float = s0 if b == 0 else at_z.call(corner)
+	for u in [ul, ur]:
+		var brick: String = _pick(["#8E5A46", "#A0654C", "#7E4E3E", "#B08A68"])
+		_lane_wall(vp, u * 2.4, 130.0, yards, s1, _hazed(brick, haze + 0.12))
+		var kinds: int = rng.randi_range(3, 5)
+		for n in kinds:
+			# Far to near along the yards.
+			var z := lerpf(z1, maxf(z0, corner), (n + 0.5) / kinds)
+			var scale: float = at_z.call(z)
+			var tree: Vector2 = Vector2(vp.x + u * 1.55 * scale, vp.y + (ground_y - vp.y) * scale)
+			var crown: float = vp.y + (rng.randf_range(150.0, 260.0) - vp.y) * scale
+			_path("M%s %s L%s %s" % [_n(tree.x), _n(tree.y), _n(tree.x), _n(crown)], "none", _stroke(_hazed("#4A3428", haze), maxf(10.0 * scale, 0.8)))
+			for c in 7:
+				var at: Vector2 = Vector2(tree.x + rng.randf_range(-85.0, 85.0) * scale, crown + rng.randf_range(-55.0, 45.0) * scale)
+				_circle(at.x, at.y, maxf(rng.randf_range(30.0, 52.0) * scale, 1.0), _hazed(_canopy(_pick(["#E3A33A", "#D9682B", "#C9562E", "#B5442E"])), haze + 0.05))
+		_lane_wall(vp, u, ground_y - 170.0, yards, s1, _hazed("#8A7A62", haze))
+		if b == 0:
+			# Boards on the near fences.
+			var z := z1 - 0.35
+			while z > z0:
+				var a: Vector2 = _lane_point(vp, u, ground_y - 170.0, at_z.call(z))
+				var c: Vector2 = _lane_point(vp, u, ground_y, at_z.call(z))
+				_path("M%s %s L%s %s" % [_n(a.x), _n(a.y), _n(c.x), _n(c.y)], "none", _stroke("#5E5344", 1.0))
+				z -= 0.3
+		else:
+			var top := 90.0 + rng.randf_range(0.0, 40.0)
+			_lane_wall(vp, u, top, s0, yards, _hazed(brick, haze))
+			var side: float = signf(u)
+			var near_x: float = vp.x + u * s0
+			var wide: float = absf(u) * 6.0 * s0
+			var y0: float = vp.y + (top - vp.y) * s0
+			var y1: float = vp.y + (ground_y - vp.y) * s0
+			_rect(minf(near_x, near_x + side * wide), y0, wide, y1 - y0, _hazed(brick, haze - 0.05))
+			for row in 3:
+				for col in 6:
+					var wx: float = near_x + side * (0.1 + col * 0.16) * wide
+					_rect(wx - 0.03 * wide, y0 + (0.12 + row * 0.28) * (y1 - y0), 0.06 * wide, 0.16 * (y1 - y0), _hazed("#C6D2D6", haze))
 
 
 # A tree drawn branch by branch: a trunk to `fork_y`, limbs splitting three times around `heading` (radians, -PI/2 =
@@ -1797,23 +1904,7 @@ func _ruelle() -> void:
 		_path(" ".join(parts) + " Z", fill, extra)
 	var gl := Vector2(X0, ground_y)
 	var gr := Vector2(X1, ground_y)
-	_lane_backdrop()
-	# The far end: a brick wall, the white garage door in its red frame, a black railing above.
-	var f0: Vector2 = at.call(Vector2(X0, 200), far)
-	var f1: Vector2 = at.call(gr, far)
-	_rect(f0.x - 6, f0.y, f1.x - f0.x + 12, f1.y - f0.y, "#9C5A44")
-	var gd0: Vector2 = at.call(Vector2(X0 + 40, ground_y - 230), far)
-	var gd1: Vector2 = at.call(Vector2(X1 - 60, ground_y), far)
-	_rect(gd0.x - 3, gd0.y - 3, gd1.x - gd0.x + 6, gd1.y - gd0.y + 3, "#B5302A")
-	_rect(gd0.x, gd0.y, gd1.x - gd0.x, gd1.y - gd0.y, "#F2F0EA")
-	for k2 in 5:
-		var y := lerpf(gd0.y, gd1.y, (k2 + 1) / 6.0)
-		_path("M%s %s H%s" % [_n(gd0.x), _n(y), _n(gd1.x)], "none", _stroke("#C9C3B8", 1))
-	_rect(gd0.x - 8, gd0.y - 26, gd1.x - gd0.x + 16, 3, "#1F1F1F")
-	var bx := gd0.x - 6.0
-	while bx < gd1.x + 8.0:
-		_rect(bx, gd0.y - 24, 1.5, 18, "#1F1F1F")
-		bx += 5.0
+	_lane_through(vp, 1.0 - far)
 	# The lane: concrete, its joints, a seam of weeds.
 	poly.call([gl, gr, at.call(gr, far), at.call(gl, far)], "#B3AFA6")
 	for d in [0.25, 0.5]:
@@ -1826,6 +1917,11 @@ func _ruelle() -> void:
 	while y < ground_y - 6.0:
 		_path("M%s %s L%s %s" % [_n(X0), _n(y), _n(at.call(Vector2(X0, y), far).x), _n(at.call(Vector2(X0, y), far).y)], "none", _stroke(lw[1], 0.8) + ' opacity="0.6"')
 		y += 10.0
+	# The white garage door in its red frame, in the wall further along, a black railing above.
+	var door := func(y: float, d: float) -> Vector2: return at.call(Vector2(X0, y), d)
+	poly.call([door.call(ground_y - 236, 0.5), door.call(ground_y - 236, 0.66), door.call(ground_y, 0.66), door.call(ground_y, 0.5)], "#B5302A")
+	poly.call([door.call(ground_y - 226, 0.51), door.call(ground_y - 226, 0.65), door.call(ground_y, 0.65), door.call(ground_y, 0.51)], "#F2F0EA")
+	_path("M%s %s L%s %s" % [_n(door.call(ground_y - 262, 0.5).x), _n(door.call(ground_y - 262, 0.5).y), _n(door.call(ground_y - 262, 0.66).x), _n(door.call(ground_y - 262, 0.66).y)], "none", _stroke("#1F1F1F", 3))
 	var s0 := Vector2(X0 + 64, ground_y - 4)
 	var s3: Vector2 = at.call(Vector2(X0, 380), 0.35)
 	var s1 := Vector2(X0 + 120, ground_y - 150)

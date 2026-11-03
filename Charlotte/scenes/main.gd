@@ -81,7 +81,7 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 		_label("RALENTISSEZ !", Vector2(mid, sign.position.y + 12.0), Vector2(72, 12), 9, Color("#C8202A"), Color("#FFD23F"))
 		_label("ENFANTS\nEN LIBERTÉ !", Vector2(mid, sign.position.y + 51.0), Vector2(72, 22), 8, Color("#1E1E1E"), Color("#FFD23F"))
 	if layout[i] == "ruelle_verte":
-		_label("RUELLE\nVERTE", house.position + Vector2(_tex("ruelle_verte").get_width() / 2.0 + 14.0, 416.0) * HOUSE_SCALE, Vector2(72, 36), 12, Color.WHITE, Color("#1E5E30"))
+		_label("RUELLE\nVERTE", house.position + Vector2(_tex("ruelle_verte").get_width() / 2.0 + 90.0, 416.0) * HOUSE_SCALE, Vector2(72, 36), 12, Color.WHITE, Color("#1E5E30"))
 
 
 # The neighbours' cat on its railing.
