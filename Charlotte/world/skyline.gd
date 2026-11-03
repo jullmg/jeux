@@ -3,7 +3,14 @@ extends RefCounted
 ## Distant parallax layers: hazy city with church steeples, back-street rooftops, backyard trees.
 
 const HAZE := Color("#BCD0E4")
-const AUTUMN := ["#C0392B", "#E67E22", "#F1C40F", "#D35400", "#9BAE4A"]
+const TREE_KINDS := 4
+const TREE_W := 340
+const TREE_FOOT := 590
+const TREE_CROWN := 210.0
+## They are drawn small and scaled up: they are far off, a little soft is right.
+const TREE_RASTER := 0.6
+
+static var _trees := {}
 
 
 static func build(parent: Node, street_width: float, view_width: float) -> void:
@@ -81,22 +88,39 @@ static func _rooftops(layer: Parallax2D, span: float, rng: RandomNumberGenerator
 		x += w
 
 
+# The trees of the yards behind the buildings: a few real trees, hazy with distance (limbs and clumps of leaves, bare in winter),
+# their trunks hidden behind the houses. Drawn once per season, then shared by every scene.
 static func _backyard_trees(layer: Parallax2D, span: float, rng: RandomNumberGenerator) -> void:
+	var pictures := _tree_pictures()
 	var x := -100.0
 	while x < span:
-		var base := Season.foliage()[rng.randi_range(0, AUTUMN.size() - 1)].lerp(HAZE, 0.45)
-		var cy := rng.randf_range(200, 250)
-		for i in 6:
-			var c := Vector2(x + rng.randf_range(-50, 50), cy + rng.randf_range(-40, 30))
-			var r := rng.randf_range(30, 55)
-			_circle(layer, c + Vector2(-6, 8), r, base.darkened(0.15))
-			_circle(layer, c, r, base)
+		var tree := Sprite2D.new()
+		tree.texture = pictures[rng.randi_range(0, pictures.size() - 1)]
+		tree.centered = false
+		var k := rng.randf_range(0.62, 0.85)
+		var pixel := k / TREE_RASTER
+		tree.scale = Vector2(pixel if rng.randf() < 0.5 else -pixel, pixel)
+		# The crown just over the roofs, the trunk going down behind the houses.
+		tree.position = Vector2(x + (TREE_W * k / 2.0) * (1.0 if tree.scale.x < 0.0 else -1.0), rng.randf_range(215.0, 245.0) - TREE_CROWN * k)
+		layer.add_child(tree)
 		x += rng.randf_range(160, 380)
 
 
-static func _circle(layer: Node, c: Vector2, r: float, col: Color) -> void:
-	var pts := []
-	for i in 20:
-		var a := TAU * i / 20.0
-		pts.append(c + Vector2(cos(a), sin(a)) * r)
-	_poly(layer, pts, col)
+static func _tree_pictures() -> Array:
+	if _trees.has(Season.current):
+		return _trees[Season.current]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 43
+	var palettes := Season.tree_palettes()
+	var pictures := []
+	for i in TREE_KINDS:
+		var colors := []
+		if not palettes.is_empty():
+			for c: String in palettes[i % palettes.size()]:
+				colors.append("#" + Color(c).lerp(HAZE, 0.5).to_html(false))
+		var bark := "#" + Color("#5E4A3C").lerp(HAZE, 0.5).to_html(false)
+		var body := LaneArt._distant_tree(rng, Vector2(TREE_W / 2.0, TREE_FOOT), Vector2(TREE_W / 2.0, TREE_CROWN), rng.randf_range(105.0, 135.0), colors, bark)
+		var svg := '<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">%s</svg>' % [TREE_W, TREE_FOOT, TREE_W, TREE_FOOT, body]
+		pictures.append(PropArt.tex(svg, TREE_RASTER))
+	_trees[Season.current] = pictures
+	return pictures
