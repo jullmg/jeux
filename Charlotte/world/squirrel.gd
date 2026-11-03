@@ -25,6 +25,9 @@ var fur := Color("#7D7670")
 var trees: Array[Sprite2D] = []
 ## Utility pole x positions (the scene's list, filled later), left to right.
 var poles: Array[float] = []
+## Added in front of the trees (a lane, where the ground covers what's behind it): it slips behind the tree it climbs, and back.
+var slips_behind := false
+var _home_index := -1
 ## The garbage bag it is gnawing (state "gnaw"), if any.
 var bag: TrashBag
 
@@ -166,6 +169,9 @@ func _process(delta: float) -> void:
 				if position.y >= _ground_y:
 					position.y = _ground_y
 					rotation = 0.0
+					if _home_index >= 0:
+						get_parent().move_child(self, _home_index)
+						_home_index = -1
 					_state = "idle"
 					_timer = randf_range(1.0, 3.0)
 	# Up a pole or on the wire it is in front of the poles (and the houses behind them), but not down among the people.
@@ -379,6 +385,9 @@ func _run_to_tree(tree: Sprite2D, speed: float) -> void:
 # Head up, belly against the trunk.
 func _start_climb() -> void:
 	_state = "up"
+	if slips_behind and _home_index < 0:
+		_home_index = get_index()
+		get_parent().move_child(self, _tree.get_index())
 	scale.x = absf(scale.x) * -_side
 	rotation = -PI / 2.0 * -_side
 	position.x = _trunk_x(_tree) + _side * 9.0

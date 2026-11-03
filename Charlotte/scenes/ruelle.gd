@@ -31,6 +31,10 @@ const AVENUE_W := 560.0
 const WALL_W := 470.0
 ## Where Alphée and Constance hang out, in the middle lane: this lot, just short of Charlotte's yard.
 const TWINS_LOT := 5
+## Squirrels in a lane, along the foot of the fences.
+const SQUIRRELS_MIDDLE := 6
+const SQUIRRELS_CROSS := 2
+const SQUIRREL_Y := 612.0
 ## Charlotte's yard, in the middle lane: hers is the 7th plex from the Dandurand end on 6e Avenue.
 const OWN_LOT := 7
 const FENCE_Y := 600.0
@@ -110,7 +114,10 @@ func _ready() -> void:
 	add_child(ball)
 	if lane == "middle":
 		_build_twins()
+	var squirrels := _build_lane_squirrels()
 	_charlotte = _spawn_charlotte(start_x)
+	for squirrel in squirrels:
+		squirrel.threat = _charlotte
 	_control.charlotte = _charlotte
 	_lane_birds.charlotte = _charlotte
 	_control.bounds = _walk_segments()[0]
@@ -462,6 +469,28 @@ func _build_foreground() -> void:
 		else:
 			Foreground.add(layer, Foreground.shrub(rng), Vector2(x, 720.0 + 70.0), Vector2(260, 170))
 		x += rng.randf_range(900.0, 1500.0)
+
+
+# Up the yard trees (bare in winter: none to hide in) and the poles when she comes, along the fences otherwise. Own random numbers.
+func _build_lane_squirrels() -> Array[Squirrel]:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + 41
+	var walk: Vector2 = _walk_segments()[0]
+	var count := SQUIRRELS_MIDDLE if lane == "middle" else SQUIRRELS_CROSS
+	var out: Array[Squirrel] = []
+	for i in count:
+		var squirrel := Squirrel.new()
+		var x := lerpf(walk.x, walk.y, (i + rng.randf_range(0.25, 0.75)) / count)
+		squirrel.position = Vector2(x, SQUIRREL_Y)
+		squirrel.scale = Vector2.ONE * 0.8
+		squirrel.bounds = Vector2(maxf(x - 700.0, walk.x), minf(x + 700.0, walk.y))
+		squirrel.poles = _poles
+		squirrel.slips_behind = true
+		if not Season.is_winter():
+			squirrel.trees = _tree_sprites
+		add_child(squirrel)
+		out.append(squirrel)
+	return out
 
 
 func _build_twins() -> void:
