@@ -76,6 +76,22 @@ var _can_shadows: Array[Node] = []
 var _pouring := false
 
 
+## For the plate at the top of the screen (PlaceLabel).
+func room_name() -> String:
+	if _charlotte == null:
+		return ""
+	var x := _charlotte.position.x
+	if x >= BEDROOM.x:
+		return "Ma chambre"
+	if x >= KITCHEN_START:
+		return "Chez moi : la cuisine"
+	if x >= SALON_END:
+		return "Chez moi : le corridor"
+	if x >= VESTIBULE_END:
+		return "Chez moi : le salon"
+	return "Chez moi : le vestibule"
+
+
 func _ready() -> void:
 	_build_shell()
 	_build_vestibule()

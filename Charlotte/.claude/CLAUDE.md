@@ -317,6 +317,10 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Whatever she can't reach is coloured over in grey crayon (`_Sheet._reachable`, `_grey_out`, names, title and doodles on top): before `CROSS_AGE` all but her block and the streets round it; from then on the corners across them and the school come back, and 7e, 4e and the houses farther west stay grey (no scene goes there). A new place she can reach = widen `_reachable`.
 - `--map` (a user arg, after `--`) opens it one second after the scene starts, for screenshots: `Godot --path . --screen 1 res://scenes/holt.tscn -- --screenshot=/path/map.png --wait=2.5 --map`.
 
+## Where she is
+
+- `ui/place_label.gd` is the `PlaceLabel` autoload (CanvasLayer 52: above the grade, under the bedtime night and every window; clicks go through it): a plate at the top middle of the screen naming the place, from `NAMES` (key: the scene file's name; a scene not listed, like the title screen or `tools/`, shows no plate) or the scene's own `room_name()` (the house: "Chez moi : le salon", "Ma chambre"; it follows her as she walks). **A new place = one line in `NAMES`** (or `room_name()` for a scene with rooms).
+
 ## Quests and growing up
 
 - Vision (Julien): Charlotte starts at 7 (`GameState.age`, saved). As she completes quests and makes friends she grows up,
