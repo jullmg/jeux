@@ -9,29 +9,33 @@ extends CanvasLayer
 
 const BLUE := Color("#1D4F91")
 const INK := Color("#3A3A48")
-const SHEET := Vector2(1000, 640)
-const SCALE := 0.94
+const SHEET := Vector2(1000, 680)
+const SCALE := 1.0
 const CRAYONS := [Color("#E85FA0"), Color("#3D8BD9"), Color("#F2C230"), Color("#4FA34A"), Color("#E8812E"), Color("#8E5FC4")]
-## The map's geometry, in sheet pixels. North is up, west left: Rue Holt on top, the avenues run down the sheet.
-const FOUR_X := 100.0
-const FIVE_X := 300.0
-const SIX_X := 680.0
-const SEVEN_X := 880.0
-const HOLT_Y := 100.0
-const DAND_Y := 455.0
-const AVE_W := 34.0
-const ST_W := 30.0
-const LANE_X := 490.0
-const LANE_T := 170.0
-const LANE_B := 385.0
-const HOUSE_Y := 300.0
-const HOUSE_X := 632.0
-const SHOP_X := 640.0
+## The map's geometry, in sheet pixels, in the real proportions (reference/google_map_immediate_area.png): a block is about three
+## times as long, Holt to Dandurand, as it is wide, 5e to 6e; the lanes run about 18 % of the way in from each street. North is up,
+## west left: Rue Holt on top, the avenues run down the sheet. Left of SIDE is the paper's margin: the title, the compass, the stop sign.
+const SIDE := 300.0
+const FOUR_X := 345.0
+const FIVE_X := 498.0
+const SIX_X := 651.0
+const SEVEN_X := 804.0
+const EIGHT_X := 957.0
+const HOLT_Y := 50.0
+const DAND_Y := 510.0
+const AVE_W := 20.0
+const ST_W := 22.0
+const LANE_X := 574.0
+const LANE_T := 133.0
+const LANE_B := 427.0
+const HOUSE_Y := 290.0
+const HOUSE_X := 621.0
+const SHOP_X := 618.0
 ## Charlotte on the sidewalks round her block.
-const WALK_W := FIVE_X + 18.0
-const WALK_E := SIX_X - 18.0
-const WALK_N := HOLT_Y + 18.0
-const WALK_S := DAND_Y - 18.0
+const WALK_W := FIVE_X + 14.0
+const WALK_E := SIX_X - 14.0
+const WALK_N := HOLT_Y + 15.0
+const WALK_S := DAND_Y - 15.0
 
 var _button: Button
 var _open := false
@@ -141,7 +145,7 @@ func _place_you() -> void:
 	var here := _here()
 	_you.position = here.at
 	_you.text = here.say
-	_you.bubble_left = here.at.x > 560.0
+	_you.bubble_left = here.at.x > 800.0
 
 
 # ── The page ────────────────────────────────────────────────
@@ -183,7 +187,7 @@ func _build_page() -> void:
 	hint.text = "C, M ou clique à côté pour fermer"
 	hint.add_theme_font_size_override("font_size", 15)
 	hint.add_theme_color_override("font_color", Color(1, 1, 1, 0.8))
-	hint.position = Vector2(0, 690)
+	hint.position = Vector2(0, 696)
 	hint.size = Vector2(1280, 24)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_page.add_child(hint)
@@ -253,6 +257,7 @@ class _Sheet:
 	const DASH := Color("#F7D154")
 	const WALLS := [Color("#E8812E"), Color("#F2C230"), Color("#E85FA0"), Color("#3D8BD9"), Color("#8E5FC4"), Color("#E0A878"), Color("#C9503C"), Color("#6DB35A")]
 	const ROOFS := [Color("#C9503C"), Color("#7A5232"), Color("#3D8BD9"), Color("#4FA34A"), Color("#8E5FC4"), Color("#3A3A48")]
+	const AVENUES := [FOUR_X, FIVE_X, SIX_X, SEVEN_X, EIGHT_X]
 	var _rng := RandomNumberGenerator.new()
 
 	func _draw() -> void:
@@ -333,18 +338,18 @@ class _Sheet:
 
 	func _title() -> void:
 		var title := "Mon quartier"
-		var x := 40.0
+		var x := 28.0
 		var font := ThemeDB.fallback_font
 		for i in title.length():
 			var ch := title[i]
 			var col: Color = CRAYONS[i % CRAYONS.size()]
-			var w := font.get_char_size(ch.unicode_at(0), 44).x
+			var w := font.get_char_size(ch.unicode_at(0), 40).x
 			for pass_i in 2:
 				draw_set_transform(Vector2(x, 54 + _rng.randf_range(-3, 3)) + Vector2(1.0, 0.8) * pass_i, _rng.randf_range(-0.12, 0.12), Vector2.ONE)
-				draw_string(font, Vector2.ZERO, ch, HORIZONTAL_ALIGNMENT_LEFT, -1, 44, Color(col, 1.0 if pass_i == 0 else 0.55))
+				draw_string(font, Vector2.ZERO, ch, HORIZONTAL_ALIGNMENT_LEFT, -1, 40, Color(col, 1.0 if pass_i == 0 else 0.55))
 			x += w + 1.0
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-		_text("par Chachoue ♥", Vector2(352, 56), 20, CRAYONS[0], -0.03, "l")
+		_text("par Chachoue ♥", Vector2(70, 92), 20, CRAYONS[0], -0.03, "l")
 
 	# ── Roads ──
 
@@ -364,7 +369,7 @@ class _Sheet:
 
 	func _av_cuts() -> Array:
 		var out := []
-		for x in [FOUR_X, FIVE_X, SIX_X, SEVEN_X]:
+		for x in AVENUES:
 			out.append([x - AVE_W / 2.0, x + AVE_W / 2.0])
 		return out
 
@@ -373,28 +378,28 @@ class _Sheet:
 
 	func _roads() -> void:
 		# The surfaces first (scribbled grey), then the kerbs and the yellow dashes between the crossings.
-		for x in [FOUR_X, FIVE_X, SIX_X, SEVEN_X]:
+		for x in AVENUES:
 			var h := AVE_W / 2.0
-			CuteArt._shape(self, [Vector2(x - h, 64), Vector2(x + h, 64), Vector2(x + h, size.y + 8), Vector2(x - h, size.y + 8)], ROAD, true, _rng, false)
+			CuteArt._shape(self, [Vector2(x - h, -8), Vector2(x + h, -8), Vector2(x + h, size.y + 8), Vector2(x - h, size.y + 8)], ROAD, true, _rng, false)
 		for y in [HOLT_Y, DAND_Y]:
 			var h := ST_W / 2.0
-			CuteArt._shape(self, [Vector2(-8, y - h), Vector2(size.x + 8, y - h), Vector2(size.x + 8, y + h), Vector2(-8, y + h)], ROAD, true, _rng, false)
-		for x in [FOUR_X, FIVE_X, SIX_X, SEVEN_X]:
+			CuteArt._shape(self, [Vector2(SIDE, y - h), Vector2(size.x + 8, y - h), Vector2(size.x + 8, y + h), Vector2(SIDE, y + h)], ROAD, true, _rng, false)
+		for x in AVENUES:
 			for side in [-1.0, 1.0]:
-				for p in _pieces(64.0, size.y + 8.0, _st_cuts()):
-					CuteArt._stroke(self, [Vector2(x + side * AVE_W / 2.0, p[0]), Vector2(x + side * AVE_W / 2.0, p[1])], EDGE, 2.6, true, _rng)
-			_dashes(Vector2(x, 64), Vector2(x, size.y + 8), _st_cuts().map(func(c): return [c[0] - 6.0, c[1] + 6.0]))
+				for p in _pieces(-8.0, size.y + 8.0, _st_cuts()):
+					CuteArt._stroke(self, [Vector2(x + side * AVE_W / 2.0, p[0]), Vector2(x + side * AVE_W / 2.0, p[1])], EDGE, 2.2, true, _rng)
+			_dashes(Vector2(x, -8), Vector2(x, size.y + 8), _st_cuts().map(func(c): return [c[0] - 4.0, c[1] + 4.0]))
 		for y in [HOLT_Y, DAND_Y]:
 			for side in [-1.0, 1.0]:
-				for p in _pieces(-8.0, size.x + 8.0, _av_cuts()):
-					CuteArt._stroke(self, [Vector2(p[0], y + side * ST_W / 2.0), Vector2(p[1], y + side * ST_W / 2.0)], EDGE, 2.6, true, _rng)
-			_dashes(Vector2(-8, y), Vector2(size.x + 8, y), _av_cuts().map(func(c): return [c[0] - 6.0, c[1] + 6.0]))
+				for p in _pieces(SIDE, size.x + 8.0, _av_cuts()):
+					CuteArt._stroke(self, [Vector2(p[0], y + side * ST_W / 2.0), Vector2(p[1], y + side * ST_W / 2.0)], EDGE, 2.2, true, _rng)
+			_dashes(Vector2(SIDE, y), Vector2(size.x + 8, y), _av_cuts().map(func(c): return [c[0] - 4.0, c[1] + 4.0]))
 		# Zebra crossings round the block's four corners, the way she crosses.
 		for x in [FIVE_X, SIX_X]:
 			for y in [HOLT_Y, DAND_Y]:
-				for k in 5:
-					var off := -ST_W / 2.0 + 3.0 + k * (ST_W - 6.0) / 4.0
-					draw_line(Vector2(x + AVE_W / 2.0 + 1.0, y + off), Vector2(x + AVE_W / 2.0 + 8.0, y + off), Color("#FFFDF7", 0.9), 3.0)
+				for k in 4:
+					var off := -ST_W / 2.0 + 3.0 + k * (ST_W - 6.0) / 3.0
+					draw_line(Vector2(x + AVE_W / 2.0 + 1.0, y + off), Vector2(x + AVE_W / 2.0 + 7.0, y + off), Color("#FFFDF7", 0.9), 2.4)
 
 	func _dashes(a: Vector2, b: Vector2, cuts: Array) -> void:
 		var horizontal := absf(b.y - a.y) < 0.5
@@ -459,24 +464,26 @@ class _Sheet:
 
 	# The other blocks, faded: nothing she may go to alone, but they are there.
 	func _neighbours() -> void:
-		var north := HOLT_Y + ST_W / 2.0 + 6.0
-		var south := DAND_Y - ST_W / 2.0 - 4.0
+		var north := HOLT_Y + ST_W / 2.0 + 4.0
+		var south := DAND_Y - ST_W / 2.0 - 2.0
 		var below := DAND_Y + ST_W / 2.0 + 6.0
-		for x in [40.0, 140.0, 258.0, 722.0, 838.0, 950.0]:
+		for x in [FOUR_X + 30.0, FIVE_X - 30.0, SIX_X + 30.0, SEVEN_X - 30.0, SEVEN_X + 30.0, EIGHT_X - 30.0]:
 			_column(x, north, south, false)
 			_column(x, below, size.y - 14.0, false)
+		_column(FOUR_X - 26.0, north, south, false)
+		_column(FOUR_X - 26.0, below, size.y - 14.0, false)
 
 	func _school() -> void:
-		var x0 := LANE_X - 92.0
-		var x1 := LANE_X + 92.0
-		var y0 := DAND_Y + 76.0
-		var y1 := size.y - 18.0
+		var x0 := FIVE_X + AVE_W / 2.0 + 5.0
+		var x1 := SIX_X - AVE_W / 2.0 - 5.0
+		var y0 := DAND_Y + 56.0
+		var y1 := size.y - 22.0
 		CuteArt._shape(self, [Vector2(x0, y0), Vector2(x1, y0), Vector2(x1, y1), Vector2(x0, y1)], Color("#C9654A"), true, _rng)
 		CuteArt._shape(self, [Vector2(x0 - 6, y0), Vector2((x0 + x1) / 2.0, y0 - 30), Vector2(x1 + 6, y0)], Color("#7A5232"), true, _rng)
 		for row in 2:
-			for col in 6:
-				draw_rect(Rect2(x0 + 14 + col * 28, y0 + 8 + row * 42, 18, 26), Color("#BFE3F7"))
-				draw_rect(Rect2(x0 + 14 + col * 28, y0 + 8 + row * 42, 18, 26), Color("#5E6B80", 0.7), false, 1.5)
+			for col in 4:
+				draw_rect(Rect2(x0 + 12 + col * 28, y0 + 8 + row * 42, 18, 26), Color("#BFE3F7"))
+				draw_rect(Rect2(x0 + 12 + col * 28, y0 + 8 + row * 42, 18, 26), Color("#5E6B80", 0.7), false, 1.5)
 		draw_rect(Rect2((x0 + x1) / 2.0 - 13.0, y1 - 40.0, 26, 40), Color("#3D8BD9"))
 		draw_rect(Rect2((x0 + x1) / 2.0 - 13.0, y1 - 40.0, 26, 40), Color("#5E6B80", 0.8), false, 2.0)
 		# A flag on a pole, a round clock in the gable, and a zigzag fence round the yard.
@@ -484,7 +491,7 @@ class _Sheet:
 		CuteArt._stroke(self, [pole, pole + Vector2(0, -14)], Color("#5E6B80"), 2.4, true, _rng)
 		CuteArt._shape(self, [pole + Vector2(0, -14), pole + Vector2(18, -10), pole + Vector2(0, -4)], Color("#D9342B"), true, _rng)
 		var fence := []
-		for k in 24:
+		for k in 16:
 			fence.append(Vector2(x0 - 6.0 + k * 8.2, y1 + 3.0 + (5.0 if k % 2 == 0 else 0.0)))
 		CuteArt._crayon_line(self, fence, Color("#8A8176"), 2.0, _rng, 1)
 
@@ -492,10 +499,10 @@ class _Sheet:
 
 	func _lane(a: Vector2, b: Vector2, wall: Color) -> void:
 		var d := (b - a).normalized()
-		var n := d.orthogonal() * 7.0
+		var n := d.orthogonal() * 5.0
 		CuteArt._shape(self, [a + n, b + n, b - n, a - n], wall, true, _rng, false)
-		CuteArt._stroke(self, [a + n, b + n], wall.darkened(0.35), 2.0, true, _rng)
-		CuteArt._stroke(self, [a - n, b - n], wall.darkened(0.35), 2.0, true, _rng)
+		CuteArt._stroke(self, [a + n, b + n], wall.darkened(0.35), 1.6, true, _rng)
+		CuteArt._stroke(self, [a - n, b - n], wall.darkened(0.35), 1.6, true, _rng)
 
 	func _lanes() -> void:
 		var lane := Color("#D8C9AC")
@@ -508,52 +515,48 @@ class _Sheet:
 
 	# The houses along the avenues, the lanes cut gaps between them.
 	func _block_houses() -> void:
-		var north := HOLT_Y + ST_W / 2.0 + 4.0
+		var north := HOLT_Y + ST_W / 2.0 + 3.0
 		var south := DAND_Y - ST_W / 2.0 - 2.0
-		var lanes := [[LANE_T - 9.0, LANE_T + 9.0], [LANE_B - 9.0, LANE_B + 9.0]]
-		_column(FIVE_X + 38.0, north, south, true, lanes)
-		_column(SIX_X - 38.0, LANE_T + 10.0, LANE_B - 10.0, true, [[HOUSE_Y - 66.0, HOUSE_Y + 28.0]])
-		for t in [[FIVE_X + 76.0, 240.0], [FIVE_X + 76.0, 340.0], [SIX_X - 76.0, 200.0], [SIX_X - 76.0, 362.0]]:
-			_tree(Vector2(t[0], t[1]), 9.0)
+		var lanes := [[LANE_T - 7.0, LANE_T + 7.0], [LANE_B - 7.0, LANE_B + 7.0]]
+		_column(FIVE_X + AVE_W / 2.0 + 19.0, north, south, true, lanes)
+		_column(HOUSE_X, LANE_T + 8.0, LANE_B - 8.0, true, [[HOUSE_Y - 62.0, HOUSE_Y + 22.0]])
 
 	func _yards() -> void:
-		for t in [[435.0, 215.0], [430.0, 300.0], [440.0, 360.0], [535.0, 205.0], [525.0, 360.0]]:
-			_tree(Vector2(t[0], t[1]), 8.0)
+		for t in [[553.0, 170.0], [553.0, 225.0], [553.0, 300.0], [553.0, 375.0], [597.0, 175.0]]:
+			_tree(Vector2(t[0], t[1]), 6.0)
 		# Her swing in the yard behind her house.
-		var s := Vector2(HOUSE_X - 72.0, HOUSE_Y - 26.0)
-		CuteArt._stroke(self, [s + Vector2(-16, 22), s + Vector2(0, -2), s + Vector2(16, 22)], Color("#7A5232"), 2.6, true, _rng)
-		CuteArt._crayon_line(self, [s + Vector2(-9, 1), s + Vector2(-9, 16)], Color("#5E6B80"), 1.6, _rng, 1)
-		CuteArt._crayon_line(self, [s + Vector2(9, 1), s + Vector2(9, 16)], Color("#5E6B80"), 1.6, _rng, 1)
-		CuteArt._crayon_line(self, [s + Vector2(-11, 16), s + Vector2(11, 16)], CRAYONS[0], 3.0, _rng, 1)
+		var s := Vector2(HOUSE_X - 30.0, HOUSE_Y - 18.0)
+		CuteArt._stroke(self, [s + Vector2(-10, 14), s + Vector2(0, -2), s + Vector2(10, 14)], Color("#7A5232"), 2.0, true, _rng)
+		CuteArt._crayon_line(self, [s + Vector2(-6, 8), s + Vector2(6, 8)], CRAYONS[0], 2.2, _rng, 1)
 		# A stray cat in the lane.
-		CuteArt.cat_head(self, Vector2(LANE_X, 240), 8.0, Color("#6E6E7A"), true, _rng)
+		CuteArt.cat_head(self, Vector2(LANE_X, 350), 6.0, Color("#6E6E7A"), true, _rng)
 
 	# ── Her house, Xin-Xin and Oh Bon! ──
 
 	func _shops_and_home() -> void:
 		# Her house: bigger, yellow with a red roof, a heart over it and a flag.
 		var b := Vector2(HOUSE_X, HOUSE_Y)
-		CuteArt._shape(self, [b + Vector2(-27, -36), b + Vector2(27, -36), b + Vector2(27, 0), b + Vector2(-27, 0)], Color("#FFD23F"), true, _rng)
-		CuteArt._shape(self, [b + Vector2(-32, -36), b + Vector2(0, -62), b + Vector2(32, -36)], Color("#D9342B"), true, _rng)
-		draw_rect(Rect2(b + Vector2(-5, -20), Vector2(10, 20)), Color("#3D8BD9"))
-		draw_rect(Rect2(b + Vector2(10, -30), Vector2(12, 12)), Color("#BFE3F7"))
-		draw_rect(Rect2(b + Vector2(-22, -30), Vector2(12, 12)), Color("#BFE3F7"))
-		CuteArt.heart(self, b + Vector2(40, -52), 9.0, CRAYONS[0], true, _rng)
+		CuteArt._shape(self, [b + Vector2(-17, -24), b + Vector2(17, -24), b + Vector2(17, 0), b + Vector2(-17, 0)], Color("#FFD23F"), true, _rng)
+		CuteArt._shape(self, [b + Vector2(-20, -24), b + Vector2(0, -42), b + Vector2(20, -24)], Color("#D9342B"), true, _rng)
+		draw_rect(Rect2(b + Vector2(-3, -13), Vector2(7, 13)), Color("#3D8BD9"))
+		draw_rect(Rect2(b + Vector2(7, -20), Vector2(7, 8)), Color("#BFE3F7"))
+		draw_rect(Rect2(b + Vector2(-14, -20), Vector2(7, 8)), Color("#BFE3F7"))
+		CuteArt.heart(self, b + Vector2(0, -50), 6.0, CRAYONS[0], true, _rng)
 		# Oh Bon!: a red shop with a checkered awning, at the corner of Rue Holt.
-		var o := Vector2(SHOP_X, HOLT_Y + 58.0)
-		CuteArt._shape(self, [o + Vector2(-23, -34), o + Vector2(23, -34), o + Vector2(23, 0), o + Vector2(-23, 0)], Color("#D9342B"), true, _rng)
+		var o := Vector2(SHOP_X, LANE_T - 12.0)
+		CuteArt._shape(self, [o + Vector2(-19, -30), o + Vector2(19, -30), o + Vector2(19, 0), o + Vector2(-19, 0)], Color("#D9342B"), true, _rng)
 		for k in 8:
-			draw_rect(Rect2(o + Vector2(-23 + k * 5.75, -34), Vector2(5.75, 7)), Color("#FFFDF7") if k % 2 == 0 else Color("#8E1A20"))
-		draw_rect(Rect2(o + Vector2(-14, -22), Vector2(28, 22)), Color("#2B2B33"))
-		draw_rect(Rect2(o + Vector2(-14, -22), Vector2(28, 22)), Color("#FFFDF7"), false, 1.5)
+			draw_rect(Rect2(o + Vector2(-19 + k * 4.75, -30), Vector2(4.75, 6)), Color("#FFFDF7") if k % 2 == 0 else Color("#8E1A20"))
+		draw_rect(Rect2(o + Vector2(-11, -19), Vector2(22, 19)), Color("#2B2B33"))
+		draw_rect(Rect2(o + Vector2(-11, -19), Vector2(22, 19)), Color("#FFFDF7"), false, 1.5)
 		# Dépanneur Xin-Xin: a yellow shop with a striped awning, at the corner of Rue Dandurand.
-		var x := Vector2(SHOP_X, DAND_Y - 23.0)
-		CuteArt._shape(self, [x + Vector2(-25, -34), x + Vector2(25, -34), x + Vector2(25, 0), x + Vector2(-25, 0)], Color("#F2C230"), true, _rng)
+		var x := Vector2(SHOP_X, DAND_Y - ST_W / 2.0 - 4.0)
+		CuteArt._shape(self, [x + Vector2(-19, -30), x + Vector2(19, -30), x + Vector2(19, 0), x + Vector2(-19, 0)], Color("#F2C230"), true, _rng)
 		for k in 8:
-			draw_rect(Rect2(x + Vector2(-25 + k * 6.25, -34), Vector2(6.25, 9)), Color("#D9342B") if k % 2 == 0 else Color("#FFFDF7"))
-		draw_rect(Rect2(x + Vector2(-15, -22), Vector2(30, 22)), Color("#BFE3F7"))
-		draw_rect(Rect2(x + Vector2(-15, -22), Vector2(30, 22)), Color("#5E6B80"), false, 1.5)
-		CuteArt.star(self, x + Vector2(0, -12), 5.0, CRAYONS[4], false, _rng)
+			draw_rect(Rect2(x + Vector2(-19 + k * 4.75, -30), Vector2(4.75, 7)), Color("#D9342B") if k % 2 == 0 else Color("#FFFDF7"))
+		draw_rect(Rect2(x + Vector2(-12, -19), Vector2(24, 19)), Color("#BFE3F7"))
+		draw_rect(Rect2(x + Vector2(-12, -19), Vector2(24, 19)), Color("#5E6B80"), false, 1.5)
+		CuteArt.star(self, x + Vector2(0, -10), 4.0, CRAYONS[4], false, _rng)
 
 	# ── Where she may not go ──
 
@@ -565,18 +568,17 @@ class _Sheet:
 		var top := HOLT_Y - ST_W / 2.0
 		var bottom := DAND_Y + ST_W / 2.0
 		if GameState.age >= StreetScene.CROSS_AGE:
-			return Rect2(left - 66.0, top - 16.0, right - left + 132.0, size.y - top + 16.0)
+			return Rect2(left - 70.0, 0.0, right - left + 140.0, size.y)
 		return Rect2(left, top, right - left, bottom - top)
 
 	# Everything else coloured over in grey crayon, scribbled by hand, with a line round what stays hers. The names go on top, so
 	# they can still be read, and the title and the doodles too.
 	func _grey_out() -> void:
 		var open := _reachable()
-		var first := 66.0
 		var grey := Color("#8E8F96", 0.8)
 		var scribble := Color("#6E6F78", 0.5)
-		for r: Rect2 in [Rect2(0, first, size.x, open.position.y - first), Rect2(0, open.end.y, size.x, size.y - open.end.y),
-				Rect2(0, open.position.y, open.position.x, open.size.y), Rect2(open.end.x, open.position.y, size.x - open.end.x, open.size.y)]:
+		for r: Rect2 in [Rect2(SIDE, 0, size.x - SIDE, open.position.y), Rect2(SIDE, open.end.y, size.x - SIDE, size.y - open.end.y),
+				Rect2(SIDE, open.position.y, open.position.x - SIDE, open.size.y), Rect2(open.end.x, open.position.y, size.x - open.end.x, open.size.y)]:
 			draw_rect(r, grey)
 			var y := r.position.y + 5.0
 			while y < r.end.y - 5.0:
@@ -588,35 +590,36 @@ class _Sheet:
 
 	func _labels() -> void:
 		var ink := Color("#33415A")
-		_text("7e Avenue", Vector2(SEVEN_X + 5, 290), 16, ink, -PI / 2.0)
-		_text("6e Avenue", Vector2(SIX_X + 5, 290), 18, ink, -PI / 2.0)
-		_text("5e Avenue", Vector2(FIVE_X + 5, 290), 18, ink, -PI / 2.0)
-		_text("4e Avenue", Vector2(FOUR_X + 5, 290), 16, ink, -PI / 2.0)
-		_text("Rue Holt", Vector2(LANE_X, HOLT_Y + 6), 16, ink)
-		_text("Rue Dandurand", Vector2(LANE_X, DAND_Y + 6), 16, ink)
-		_text("Ma maison", Vector2(HOUSE_X - 6, HOUSE_Y + 18), 15, Color("#C2406E"), -0.03)
-		_text("Oh Bon!", Vector2(SHOP_X - 58, HOLT_Y + 42), 13, Color("#C0262C"), 0.02)
-		_text("Dépanneur\nXin-Xin", Vector2(SHOP_X - 62, DAND_Y - 46), 11, Color("#B5651D"), -0.02)
-		_text("ruelle", Vector2(LANE_X - 11, 340), 12, Color("#7A6B52"), -PI / 2.0)
-		_text("ruelle", Vector2(420, LANE_T + 17), 12, Color("#7A6B52"), 0.0)
-		_text("ruelle verte", Vector2(420, LANE_B + 17), 12, Color("#3E7A2C"), 0.0)
-		_text("ma cour", Vector2(HOUSE_X - 72, HOUSE_Y + 14), 11, Color("#3E7A2C"), -0.04)
-		_text("minou", Vector2(LANE_X + 26, 244), 11, Color("#6E6E7A"))
-		_text("École", Vector2(LANE_X, DAND_Y + 72), 17, Color("#FFF3D6"), -0.02)
+		_text("8e Avenue", Vector2(EIGHT_X + 5, 280), 14, ink, -PI / 2.0)
+		_text("7e Avenue", Vector2(SEVEN_X + 5, 280), 14, ink, -PI / 2.0)
+		_text("6e Avenue", Vector2(SIX_X + 5, 200), 15, ink, -PI / 2.0)
+		_text("5e Avenue", Vector2(FIVE_X + 5, 280), 15, ink, -PI / 2.0)
+		_text("4e Avenue", Vector2(FOUR_X + 5, 280), 14, ink, -PI / 2.0)
+		_text("Rue Holt", Vector2(LANE_X, HOLT_Y + 5), 15, ink)
+		_text("Rue Dandurand", Vector2(LANE_X, DAND_Y + 5), 15, ink)
+		_text("Ma maison", Vector2(HOUSE_X - 12, HOUSE_Y + 14), 12, Color("#C2406E"), -0.03)
+		_text("Oh Bon!", Vector2(SHOP_X - 46, LANE_T - 22), 12, Color("#C0262C"), 0.02)
+		_text("Dépanneur\nXin-Xin", Vector2(SHOP_X - 48, DAND_Y - 44), 9, Color("#B5651D"), -0.02)
+		_text("ruelle", Vector2(LANE_X - 9, 340), 11, Color("#7A6B52"), -PI / 2.0)
+		_text("ruelle", Vector2(535, LANE_T + 4), 10, Color("#5E5240"), 0.0)
+		_text("ruelle verte", Vector2(574, LANE_B + 4), 10, Color("#2E5E20"), 0.0)
+		_text("ma cour", Vector2(HOUSE_X - 30, HOUSE_Y - 24), 9, Color("#3E7A2C"), -0.04)
+		_text("minou", Vector2(LANE_X + 23, 354), 9, Color("#6E6E7A"))
+		_text("École", Vector2(LANE_X, DAND_Y + 50), 15, Color("#FFF3D6"), -0.02)
 
 	# ── Doodles ──
 
 	func _decor() -> void:
 		_title()
-		CuteArt.sun(self, Vector2(932, 44), 17.0, true, _rng)
+		CuteArt.sun(self, Vector2(250, 150), 17.0, true, _rng)
 		# Clouds and birds.
-		for c in [[Vector2(790, 34), 1.0], [Vector2(836, 52), 0.8]]:
+		for c in [[Vector2(70, 150), 1.0], [Vector2(125, 172), 0.8]]:
 			for k in [[-14, 4, 10], [0, -2, 13], [15, 4, 10]]:
 				CuteArt._shape(self, CuteArt._oval(c[0] + Vector2(k[0], k[1]) * c[1], Vector2(k[2], k[2] * 0.8) * c[1]), Color("#CFE3F5"), true, _rng)
-		for b in [Vector2(640, 38), Vector2(668, 28)]:
+		for b in [Vector2(170, 128), Vector2(198, 118)]:
 			CuteArt._crayon_line(self, [b + Vector2(-8, 2), b + Vector2(-3, -4), b, b + Vector2(3, -4), b + Vector2(8, 2)], Color("#5A5A6A"), 1.8, _rng)
 		# The compass: N, S, O (ouest), E.
-		var c := Vector2(948, 160)
+		var c := Vector2(150, 270)
 		var ink := Color("#33415A")
 		CuteArt._crayon_line(self, [c + Vector2(0, 26), c + Vector2(0, -26)], ink, 2.2, _rng)
 		CuteArt._crayon_line(self, [c + Vector2(-26, 0), c + Vector2(26, 0)], ink, 2.2, _rng)
@@ -626,18 +629,18 @@ class _Sheet:
 		_text("O", c + Vector2(-38, 5), 13, ink)
 		_text("E", c + Vector2(38, 5), 13, ink)
 		# Hearts and stars in the corners, a few flowers.
-		for p in [Vector2(40, 610), Vector2(960, 300), Vector2(930, 612)]:
+		for p in [Vector2(40, 620), Vector2(262, 250), Vector2(40, 240)]:
 			CuteArt.heart(self, p, 11.0, CRAYONS[0], true, _rng)
-		for p in [Vector2(120, 606), Vector2(780, 610), Vector2(30, 136)]:
+		for p in [Vector2(120, 612), Vector2(250, 620), Vector2(36, 330)]:
 			CuteArt.star(self, p, 11.0, CRAYONS[2], true, _rng)
-		for p in [Vector2(170, 598), Vector2(720, 300), Vector2(40, 400)]:
+		for p in [Vector2(185, 600), Vector2(262, 340), Vector2(40, 500)]:
 			CuteArt.flower(self, p, 11.0, CRAYONS[5], true, _rng)
 		# What the map is for.
-		_text("Mon coin du monde !", Vector2(210, 626), 18, CRAYONS[3], -0.02)
+		_text("Mon coin du monde !", Vector2(150, 650), 18, CRAYONS[3], -0.02)
 
 	# She is only seven: the world past the avenues is not hers yet.
 	func _stop_sign() -> void:
-		var c := Vector2(850, 530)
+		var c := Vector2(150, 420)
 		var pts := []
 		for k in 8:
 			pts.append(c + Vector2.from_angle(TAU * (k + 0.5) / 8.0) * 22.0)
