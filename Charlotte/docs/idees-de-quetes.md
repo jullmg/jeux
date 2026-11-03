@@ -13,6 +13,7 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 6. **Trouver le livre perdu d'un ami dans le croque-livre** (mission donnée par un ami)
 7. **Planifier une soirée cinéma avec des amis** : elle se fait d'abord donner de l'argent de poche pour aller acheter des trucs pour la soirée
 8. **La fête d'un ami** : elle va acheter un cadeau avec Maman
+9. **Jouer à la cachette avec les amis**
 
 ## Notes de départ (à préciser avec Julien avant de programmer)
 
