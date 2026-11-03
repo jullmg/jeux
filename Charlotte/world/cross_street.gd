@@ -17,6 +17,7 @@ enum Part { VISTA, GROUND, SIGNS, MOUTH }
 
 const FACADE_Y := 592.0
 const HORIZON_Y := 452.0
+static var _mountains := {}
 const SIDEWALK_TOP := 590.0
 const ROAD_BOTTOM := 676.0
 const VIEW_BOTTOM := 720.0
@@ -340,31 +341,83 @@ func _far_clouds() -> void:
 			draw_circle(c + p * (1.0 - k * 0.15), 22.0 * (1.0 - k * 0.15), white)
 
 
-# Mount Royal on the horizon: a long hazy hill in the season's colours, the cross on its summit.
+# Mount Royal on the horizon, its picture made once per season.
 func _mount_royal() -> void:
-	var vp := _vp()
-	var pts := PackedVector2Array()
-	for i in 25:
-		var t := i / 24.0
-		var x := lerpf(vp.x - 440.0, vp.x + 460.0, t)
-		var bump := pow(sin(t * PI), 0.8) * 150.0 + sin(t * 9.0) * 6.0 + sin(t * 23.0) * 2.5
-		pts.append(Vector2(x, HORIZON_Y - bump))
-	pts.append(Vector2(vp.x + 460.0, HORIZON_Y + 4.0))
-	pts.append(Vector2(vp.x - 440.0, HORIZON_Y + 4.0))
-	draw_colored_polygon(pts, Color("#7D7A92"))
-	# Autumn woods on its flanks, faded by the distance.
-	for i in 140:
-		var t := _rng.randf()
-		var ridge := HORIZON_Y - pow(sin(t * PI), 0.8) * 150.0
-		var c := Vector2(lerpf(vp.x - 420.0, vp.x + 440.0, t), lerpf(ridge + 10.0, HORIZON_Y, _rng.randf()))
-		draw_circle(c, _rng.randf_range(3.0, 6.0), Color(_foliage[i % _foliage.size()].lerp(Color("#8C8098"), 0.6), 0.45))
-	draw_colored_polygon(pts, Color(HAZE, 0.18))
-	# The cross, planted on the ridge itself (the same curve as the outline, where it stands).
-	var ct := 460.0 / 900.0
-	var ridge := pow(sin(ct * PI), 0.8) * 150.0 + sin(ct * 9.0) * 6.0 + sin(ct * 23.0) * 2.5
-	var top := Vector2(vp.x + 20.0, HORIZON_Y - ridge + 3.0)
-	draw_line(top, top + Vector2(0, -24), Color("#F2EEE6"), 2.5)
-	draw_line(top + Vector2(-6, -17), top + Vector2(6, -17), Color("#F2EEE6"), 2.5)
+	# The draws the old hill took, so the rest of the vista stays as it is.
+	for i in 420:
+		_rng.randf()
+	var picture := _mountain_picture()
+	draw_texture(picture, Vector2(_vp().x - picture.get_width() / 2.0, HORIZON_Y + 4.0 - picture.get_height()))
+
+
+# The mountain's height above the horizon, t 0..1 across it: the long ridge with its summit a little right of the middle, the
+# Westmount shoulder on the left.
+static func _mountain_ridge(t: float) -> float:
+	var hill := pow(sin(t * PI), 0.55)
+	return hill * (66.0 + 30.0 * exp(-pow((t - 0.52) / 0.1, 2.0)) + 14.0 * exp(-pow((t - 0.3) / 0.06, 2.0))) + sin(t * 41.0) * 1.5 * hill
+
+
+# Mount Royal far off: a paler ridge behind, then the woods in this season's colours, clumps of trees massed from the ridge down,
+# lit on the slopes facing the sun (left), bluer and lost in mist toward its foot; the cross and the tower on the summit.
+static func _mountain_picture() -> ImageTexture:
+	if _mountains.has(Season.current):
+		return _mountains[Season.current]
+	const W := 1300.0
+	const H := 150.0
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 91
+	var air := Color("#92A8C6")
+	var tones: Array[Color] = []
+	for palette in Season.tree_palettes():
+		for c: String in palette:
+			tones.append(Color(c))
+	if tones.is_empty():
+		# Winter: bare grey woods, snow showing through.
+		tones = [Color("#8D8C96"), Color("#A5A5AF"), Color("#D9DEE5"), Color("#77767F"), Color("#EEF1F4")]
+	var outline := func(scale: float, shift: float, color: Color) -> String:
+		var pts := ""
+		for i in 49:
+			var t := i / 48.0
+			pts += "%.1f,%.1f " % [lerpf(10.0, W - 10.0, t), H - _mountain_ridge(clampf(t + shift, 0.0, 1.0)) * scale]
+		return '<polygon points="%s %.1f,%.1f 10,%.1f" fill="#%s"/>' % [pts, W - 10.0, H, H, color.to_html(false)]
+	var s := '<defs><linearGradient id="mist" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#%s" stop-opacity="0"/><stop offset="1" stop-color="#%s" stop-opacity="0.85"/></linearGradient></defs>' % [air.to_html(false), air.lightened(0.15).to_html(false)]
+	s += outline.call(0.82, -0.07, air.lerp(Color.WHITE, 0.12))
+	var mean := Color(0, 0, 0)
+	for c in tones:
+		mean += c / float(tones.size())
+	s += outline.call(1.0, 0.0, Color(mean.r, mean.g, mean.b).lerp(air, 0.5).darkened(0.08))
+	# Row after row from the ridge down, so the nearer trees lie over the farther ones.
+	for row in 30:
+		var depth := row / 30.0
+		for i in 190:
+			var t := rng.randf()
+			var ridge := _mountain_ridge(t)
+			var x := lerpf(10.0, W - 10.0, t)
+			var y := H - ridge * (1.0 - depth) + rng.randf_range(-3.0, 3.0)
+			var tone: Color = tones[rng.randi_range(0, tones.size() - 1)]
+			var slope := _mountain_ridge(clampf(t + 0.02, 0.0, 1.0)) - _mountain_ridge(clampf(t - 0.02, 0.0, 1.0))
+			tone = tone.lightened(clampf(slope * 0.05, 0.0, 0.2)) if slope > 0.0 else tone.darkened(clampf(-slope * 0.05, 0.0, 0.25))
+			tone = tone.lerp(air, 0.6 + depth * 0.14)
+			if ridge > 2.0:
+				s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#%s"/>' % [x, y, rng.randf_range(2.0, 4.0), rng.randf_range(1.4, 2.8), tone.to_html(false)]
+	# The treetops along the ridge, so it has no clean edge.
+	for i in 700:
+		var t := rng.randf()
+		var tone: Color = tones[rng.randi_range(0, tones.size() - 1)].lerp(air, 0.62)
+		var ridge := _mountain_ridge(t)
+		if ridge > 2.0:
+			s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#%s"/>' % [lerpf(10.0, W - 10.0, t), H - ridge, rng.randf_range(1.6, 3.0), rng.randf_range(1.2, 2.4), tone.to_html(false)]
+	s += '<rect x="0" y="%.1f" width="%.1f" height="60" fill="url(#mist)"/>' % [H - 60.0, W]
+	# The cross on the summit, and the radio tower beside it.
+	var summit := 0.52
+	var foot := Vector2(lerpf(10.0, W - 10.0, summit), H - _mountain_ridge(summit) + 3.0)
+	var mast := foot + Vector2(26.0, 2.0)
+	s += '<path d="M%.1f %.1f V%.1f M%.1f %.1f H%.1f" stroke="#AEB6C2" stroke-width="1" fill="none"/>' % [mast.x, mast.y, mast.y - 22.0, mast.x - 2.0, mast.y - 15.0, mast.x + 2.0]
+	s += '<path d="M%.1f %.1f V%.1f M%.1f %.1f H%.1f" stroke="#F4F0E8" stroke-width="1.8" fill="none"/>' % [foot.x, foot.y, foot.y - 17.0, foot.x - 5.0, foot.y - 12.0, foot.x + 5.0]
+	var svg := '<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">%s</svg>' % [W, H, W, H, s]
+	var picture := PropArt.tex(svg)
+	_mountains[Season.current] = picture
+	return picture
 
 
 # Translucent haze over the street between two depths, thicker with distance.

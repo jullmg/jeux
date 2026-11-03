@@ -427,8 +427,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   teleports to any place (`DebugMenu.PLACES`: streets, corners, lanes, rooms of her flat, spots in the shop; **when you add a new
   place, add it to `PLACES`** — a scene missing from the list shows under "Autres lieux" anyway),
   and lists every quest with "Effacer" (not started, its flags in `QUEST_FLAGS` cleared) / "Activer" / "Finir" (done, reward paid) / "Tout effacer" to test them again.
-- Nothing stands behind Mount Royal: the cross-street vista paints open sky over the distant city first. Mount Royal shows
-  only when the street runs west (`CrossStreet.facing = "west"`, Montreal compass); other ways end in sky and clouds.
+- Nothing stands behind Mount Royal: the cross-street vista paints open sky over the distant city first. Mount Royal (`CrossStreet._mountain_picture`, cached per season: ridge, woods in clumps, mist at its foot, cross and tower) shows only when the street runs west (`CrossStreet.facing = "west"`, Montreal compass); other ways end in sky and clouds.
 
 ## Conventions
 

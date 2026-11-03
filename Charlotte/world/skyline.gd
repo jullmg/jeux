@@ -1,6 +1,6 @@
 class_name Skyline
 extends RefCounted
-## Distant parallax layers: hazy city with church steeples, back-street rooftops, backyard trees.
+## Distant parallax layers: hazy city with one church steeple, back-street rooftops, backyard trees.
 
 const HAZE := Color("#BCD0E4")
 const TREE_KINDS := 4
@@ -61,8 +61,8 @@ static func _far_city(layer: Parallax2D, span: float, rng: RandomNumberGenerator
 		var top := rng.randf_range(170, 240)
 		_poly(layer, [Vector2(x, top), Vector2(x + w, top), Vector2(x + w, 560), Vector2(x, 560)], col.lerp(HAZE, rng.randf_range(0.0, 0.3)))
 		x += w + rng.randf_range(-10, 30)
-	_steeple(layer, 520.0, col.darkened(0.04))
-	_steeple(layer, 1900.0, col.darkened(0.03))
+	# One church, seen only toward the far end of the long streets.
+	_steeple(layer, 1700.0, col.darkened(0.03))
 
 
 static func _steeple(layer: Node, x: float, col: Color) -> void:
