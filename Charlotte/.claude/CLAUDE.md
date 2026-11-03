@@ -335,7 +335,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   starts, `age`, optional `after` = quest it waits for, `reward` in $). Several quests can be on at once. State in
   `GameState.quests` (absent / "active" / "done"); `available`, `start`, `complete` (adds the reward), `stars`, `money_text`.
 - `ui/notebook.gd` is the `Notebook` autoload (CanvasLayer 75): button left of the mute button (N key), "Mon carnet" with
-  En cours (+ hint), Réussies (yellow stars), À découvrir (clues), Mes amis (`Notebook.FRIENDS`: name, note, story flag; **a new friend = one line there**); age and pocket money; crayon doodles, ribbon bookmark, elastic,
+  two pages behind coloured tabs on its edge (`Notebook.TABS`, click or ←/→): Missions (En cours + hint, Réussies with yellow stars, À découvrir with clues) and Mes amis (`Notebook.FRIENDS`: name, note, story flag; **a new friend = one line there**); age and pocket money; crayon doodles, ribbon bookmark, elastic,
   washi tape on the page; pauses the game while open. Hidden
   on the title and `tools/` scenes. `Notebook.announce()` (called by `Quests`) pops "Nouvelle quête" / "Quête réussie !".
 - `QuestMark.make(at, condition, scale)` (`world/quest_mark.gd`): a bobbing yellow "!" over a quest giver, or over where

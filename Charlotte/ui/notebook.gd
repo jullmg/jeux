@@ -9,6 +9,8 @@ const YELLOW := Color("#FFD23F")
 const CREAM := Color("#FBF6EA")
 const INK := Color("#3A3A48")
 const PAGE := Vector2(760, 600)
+## The coloured tabs on the page's edge: its name, its colour. Click one (or ←/→) to turn to that page.
+const TABS := [["Missions", Color("#3D8BD9")], ["Mes amis", Color("#E85FA0")]]
 ## Her friends, once she has met them (the story flag). A new friend = one more line here.
 const FRIENDS := [
 	{"name": "Alphée Turcotte", "note": "La jumelle aux cheveux détachés. On se voit dans la ruelle.", "flag": "met_twins"},
@@ -20,6 +22,10 @@ var _open := false
 var _page: Control
 var _list: VBoxContainer
 var _header: Label
+var _title: Label
+var _scroll: ScrollContainer
+var _tabs: Array[Button] = []
+var _tab := 0
 var _toasts: Array[Array] = []
 var _toasting := false
 var _wiggle := 0.0
@@ -68,6 +74,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.keycode == KEY_N and _button.visible or event.keycode == KEY_ESCAPE and _open:
 		get_viewport().set_input_as_handled()
 		toggle()
+	elif _open and (event.keycode == KEY_LEFT or event.keycode == KEY_RIGHT):
+		get_viewport().set_input_as_handled()
+		_turn_to((_tab + 1) % TABS.size())
 
 
 func toggle() -> void:
@@ -105,15 +114,18 @@ func _build_page() -> void:
 	paper.position = (_page.size - PAGE) / 2.0 + Vector2(0, 14)
 	paper.size = PAGE
 	_page.add_child(paper)
-	var title := _label("Mon carnet", 38, BLUE)
-	title.position = Vector2(92, 34)
-	paper.add_child(title)
+	for i in TABS.size():
+		_tabs.append(_make_tab(i, paper.position + Vector2(PAGE.x - 2.0, 112.0 + i * 66.0)))
+	_title = _label("", 38, BLUE)
+	_title.position = Vector2(92, 34)
+	paper.add_child(_title)
 	_header = _label("", 19, INK)
 	_header.position = Vector2(380, 40)
 	_header.size = Vector2(PAGE.x - 380 - 40, 60)
 	_header.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	paper.add_child(_header)
 	var scroll := ScrollContainer.new()
+	_scroll = scroll
 	scroll.position = Vector2(92, 108)
 	# The right margin (110 px) is for her doodles: the words stop before it.
 	scroll.size = Vector2(PAGE.x - 92 - 112, PAGE.y - 108 - 50)
@@ -128,17 +140,54 @@ func _build_page() -> void:
 	paper.add_child(close)
 
 
+# A strip of coloured tape standing out from the page's edge, named; the page it opens stands out further.
+func _make_tab(i: int, at: Vector2) -> Button:
+	var tab := Button.new()
+	tab.text = TABS[i][0]
+	tab.position = at
+	tab.focus_mode = Control.FOCUS_NONE
+	tab.add_theme_font_size_override("font_size", 17)
+	for color_name in ["font_color", "font_hover_color", "font_pressed_color"]:
+		tab.add_theme_color_override(color_name, Color.WHITE)
+	for state in ["normal", "hover", "pressed"]:
+		var box := StyleBoxFlat.new()
+		box.bg_color = TABS[i][1] if state == "normal" else (TABS[i][1] as Color).lightened(0.12)
+		box.corner_radius_top_right = 10
+		box.corner_radius_bottom_right = 10
+		box.shadow_color = Color(0, 0, 0, 0.2)
+		box.shadow_size = 3
+		tab.add_theme_stylebox_override(state, box)
+	tab.pressed.connect(_turn_to.bind(i))
+	_page.add_child(tab)
+	return tab
+
+
+func _turn_to(i: int) -> void:
+	if i == _tab:
+		return
+	_tab = i
+	_fill()
+	Sfx.play("page")
+
+
 func _fill() -> void:
 	_header.text = "Charlotte, %d ans\nArgent de poche : %s" % [GameState.age, Quests.money_text(GameState.money)]
+	_title.text = "Mon carnet" if _tab == 0 else "Mes amis"
+	for i in _tabs.size():
+		_tabs[i].custom_minimum_size = Vector2(118.0 if i == _tab else 98.0, 54.0)
+		_tabs[i].size = _tabs[i].custom_minimum_size
 	for child in _list.get_children():
 		child.queue_free()
+	_scroll.scroll_vertical = 0
+	if _tab == 1:
+		_friends()
+		return
 	var on := Quests.ORDER.filter(func(id: String) -> bool: return Quests.active(id))
 	var done := Quests.ORDER.filter(func(id: String) -> bool: return Quests.done(id))
 	var next := Quests.ORDER.filter(func(id: String) -> bool: return Quests.available(id))
 	var later := Quests.ORDER.size() - on.size() - done.size() - next.size()
 	_section("En cours", on, "active", "title", "hint")
 	_section("Réussies  ★ %d" % done.size(), done, "done", "title", "")
-	_friends()
 	_section("À découvrir", next, "unknown", "find", "")
 	if later > 0:
 		_list.add_child(_label("… et d'autres quand tu seras plus grande !", 17, Color(INK, 0.6)))
@@ -147,7 +196,6 @@ func _fill() -> void:
 
 
 func _friends() -> void:
-	_list.add_child(_label("Mes amis", 22, BLUE))
 	var met := FRIENDS.filter(func(friend: Dictionary) -> bool: return GameState.flags.get(friend.flag, false))
 	if met.is_empty():
 		_list.add_child(_label("Pas encore d'amis ici. Va jouer dehors, tu vas en rencontrer !", 17, Color(INK, 0.6)))
