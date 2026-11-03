@@ -6,7 +6,7 @@ extends Node2D
 ## Clicks go through `hit_test`, which remembers which of the two was clicked.
 
 const SPREAD := 130.0
-const HEAD := -470.0
+const HEAD := -440.0
 ## The meeting: who speaks (0 Alphée, 1 Constance, -1 Charlotte) and what she says.
 const MEETING := [
 	[0, "Allô ! On ne t'a jamais vue dans la ruelle !"],

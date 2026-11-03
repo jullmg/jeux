@@ -6,7 +6,7 @@ const HEAD_CANVAS := Vector2(240, 380)
 const HEAD_PIVOT := Vector2(118, 296)
 const RIGS := {
 	"child": {"leg": 110.0, "torso": 90.0, "arm": 76.0, "head": 1.0, "sx": 1.0},
-	"tween": {"leg": 178.0, "torso": 126.0, "arm": 104.0, "head": 0.95, "sx": 1.02},
+	"tween": {"leg": 160.0, "torso": 116.0, "arm": 98.0, "head": 0.96, "sx": 1.01},
 	"teen": {"leg": 162.0, "torso": 120.0, "arm": 100.0, "head": 0.84, "sx": 1.05},
 	"adult": {"leg": 210.0, "torso": 154.0, "arm": 128.0, "head": 0.72, "sx": 1.14},
 	"senior": {"leg": 196.0, "torso": 148.0, "arm": 124.0, "head": 0.74, "sx": 1.14},
