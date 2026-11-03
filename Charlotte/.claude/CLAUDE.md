@@ -309,13 +309,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - `ui/town_map.gd` is the `TownMap` autoload (CanvasLayer 76): button left of the notebook's, or the **C** or **M** key (Shift+M now mutes), opens "Mon quartier",
   a big sheet of drawing paper drawn like a child (wax crayon, `CuteArt._shape/_stroke/_crayon_line`, wobbly lettering): north up,
   Rue Holt (west) and Rue Dandurand (east), 6e Avenue above and 5e below, 7e and 4e faded, her block washed in yellow with the
-  houses in rows, the lanes as an H, her house (`HOUSE_X`), Oh Bon!, Xin-Xin, the school across Dandurand, Mount Royal with its cross to
-  the west, a compass (N, S, O, E), and a stop sign "Pas le droit d'aller plus loin toute seule !" while `GameState.age < StreetScene.CROSS_AGE`.
+  houses in rows, the lanes as an H, her house (`HOUSE_X`), Oh Bon!, Xin-Xin, the school across Dandurand, a compass (N, S, O, E), and a stop sign "Pas le droit d'aller plus loin toute seule !" while `GameState.age < StreetScene.CROSS_AGE`.
   A little Charlotte (`_You`) shows "Je suis ici !" where she is: `TownMap._here()` maps each scene (street scenes by how far along
   far along she is, lanes, the house, the shops) onto the sheet. The game pauses while it is open; Esc, C or a click outside closes it; the
   notebook (N) and the menu (Esc) ignore their keys while it is open. Geometry constants (`HOLT_X`, `DAND_X`, `SIX_Y`, lanes…) are at the
   top of the file: a new place on the block = a drawing in `_Sheet` + a case in `_here()`.
-- Whatever she can't reach is coloured over in grey crayon (`_Sheet._reachable`, `_grey_out`, names, title and doodles on top): before `CROSS_AGE` all but her block and the streets round it; from then on the corners across them and the school come back, and 7e, 4e and Mount Royal stay grey (no scene goes there). A new place she can reach = widen `_reachable`.
+- Whatever she can't reach is coloured over in grey crayon (`_Sheet._reachable`, `_grey_out`, names, title and doodles on top): before `CROSS_AGE` all but her block and the streets round it; from then on the corners across them and the school come back, and 7e, 4e and the houses farther west stay grey (no scene goes there). A new place she can reach = widen `_reachable`.
 - `--map` (a user arg, after `--`) opens it one second after the scene starts, for screenshots: `Godot --path . --screen 1 res://scenes/holt.tscn -- --screenshot=/path/map.png --wait=2.5 --map`.
 
 ## Quests and growing up

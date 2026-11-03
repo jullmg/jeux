@@ -1,8 +1,8 @@
 extends CanvasLayer
 ## Autoload "TownMap": Charlotte's map of the neighbourhood, drawn by a child. A button left of the notebook's (or the C key)
 ## opens a big sheet of drawing paper: her block between Rue Holt and Rue Dandurand, 6e and 5e Avenue, with the houses
-## in a row, the lanes (an H), her house, dépanneur Xin-Xin, Oh Bon!, the school across Rue Dandurand and Mount Royal at
-## the far left, all in wobbly wax crayon (CuteArt). A little Charlotte stands where she is ("Je suis ici !") and follows her
+## in a row, the lanes (an H), her house, dépanneur Xin-Xin, Oh Bon! and the school across Rue Dandurand,
+## all in wobbly wax crayon (CuteArt). A little Charlotte stands where she is ("Je suis ici !") and follows her
 ## as the scene changes. What she can't reach is greyed over (`_Sheet._reachable`, by her age); before 8 years old a stop sign
 ## says she may not go farther alone. The game pauses while it is open.
 ## `--map` (a user arg) opens it a second after the scene starts, for screenshots.
@@ -12,7 +12,7 @@ const INK := Color("#3A3A48")
 const SHEET := Vector2(1000, 640)
 const SCALE := 0.94
 const CRAYONS := [Color("#E85FA0"), Color("#3D8BD9"), Color("#F2C230"), Color("#4FA34A"), Color("#E8812E"), Color("#8E5FC4")]
-## The map's geometry, in sheet pixels (north is up, west left: Mount Royal is to the west).
+## The map's geometry, in sheet pixels (north is up, west left).
 const HOLT_X := 250.0
 const DAND_X := 720.0
 const SEVEN_Y := 100.0
@@ -256,7 +256,6 @@ class _Sheet:
 		_block_wash()
 		_roads()
 		_neighbours()
-		_mount_royal()
 		_school()
 		_lanes()
 		_block_houses()
@@ -454,32 +453,18 @@ class _Sheet:
 		# North of 6e (between 7e and 6e).
 		for base in [150.0, 202.0]:
 			_row(holt_e, dand_w, base, false)
-			_row(120.0, west, base, false)
+			_row(20.0, west, base, false)
 			_row(east + 6.0, 840.0, base, false)
 		# South of 5e (between 5e and 4e).
 		for base in [510.0, 560.0]:
 			_row(holt_e, dand_w, base, false)
-			_row(120.0, west, base, false)
+			_row(20.0, west, base, false)
 			if GameState.age >= StreetScene.CROSS_AGE or base < 520.0:
 				_row(east + 6.0, size.x - 20.0 if GameState.age >= StreetScene.CROSS_AGE else 830.0, base, false)
-		# Across Rue Holt, west of her block: a few houses between the street and Mount Royal.
-		_row(168.0, west, 305.0, false)
-		_row(168.0, west, 345.0, false)
-		_row(168.0, west, 425.0, false)
-
-	func _mount_royal() -> void:
-		var hill := [Vector2(-6, 440), Vector2(-6, 345), Vector2(20, 305), Vector2(46, 275), Vector2(78, 256), Vector2(110, 262), Vector2(136, 285), Vector2(156, 320), Vector2(168, 370), Vector2(176, 440)]
-		CuteArt._shape(self, hill, Color("#6DB35A"), true, _rng)
-		for t in [[34.0, 330.0], [70.0, 300.0], [112.0, 310.0], [60.0, 385.0], [128.0, 360.0], [96.0, 405.0]]:
-			_tree(Vector2(t[0], t[1]), 9.0)
-		# The lit cross on top.
-		var top := Vector2(90, 256)
-		CuteArt._stroke(self, [top, top + Vector2(0, -30)], Color("#FFFDF7"), 4.5, true, _rng)
-		CuteArt._stroke(self, [top + Vector2(-9, -21), top + Vector2(9, -21)], Color("#FFFDF7"), 4.5, true, _rng)
-		CuteArt._crayon_line(self, [top, top + Vector2(0, -30)], Color("#5E6B80"), 1.4, _rng, 1)
-		for k in 5:
-			var a := -PI / 2.0 + (k - 2) * 0.45
-			CuteArt._crayon_line(self, [top + Vector2(0, -21) + Vector2.from_angle(a) * 14.0, top + Vector2(0, -21) + Vector2.from_angle(a) * 22.0], Color("#F7D154"), 2.2, _rng, 1)
+		# Across Rue Holt, west of her block: more houses, to the edge of the sheet.
+		_row(20.0, west, 305.0, false)
+		_row(20.0, west, 345.0, false)
+		_row(20.0, west, 425.0, false)
 
 	func _school() -> void:
 		var x0 := 770.0
@@ -569,7 +554,7 @@ class _Sheet:
 	# ── Where she may not go ──
 
 	# What she can reach: her block and the streets round it; from 8 (she may cross), also the corners across them and the school.
-	# The rest (7e, 4e, Mount Royal) leads nowhere in the game yet.
+	# The rest (7e, 4e, west of the corners) leads nowhere in the game yet.
 	func _reachable() -> Rect2:
 		var top := SIX_Y - AVE_W / 2.0
 		var bottom := FIVE_Y + AVE_W / 2.0
@@ -612,7 +597,6 @@ class _Sheet:
 		_text("ma cour", Vector2(597, 322), 11, Color("#3E7A2C"), -0.04)
 		_text("minou", Vector2(606, 357), 11, Color("#6E6E7A"))
 		_text("École", Vector2(862, 281), 17, Color("#FFF3D6"), -0.02)
-		_text("Mont Royal", Vector2(84, 462), 15, Color("#2E6E32"), -0.04)
 
 	# ── Doodles ──
 
