@@ -143,13 +143,13 @@ const HOUSES := [
 	},
 	{
 		# Dépanneur Xin-Xin fronts Dandurand: from 6e Avenue we see its side
-		# (reference/coin_dandurand/coin_dépanneur_sur_6eme_coin_dandurant.jpg).
+		# (reference/coin_dandurand/coin_dépanneur_sur_6eme_coin_dandurand.jpg).
 		"name": "depanneur", "kind": "depanneur_side", "width": 640.0, "halloween": false,
 		"bricks": ["#6E3A2E", "#7A4234", "#5E3029", "#844A3A", "#4E2A28", "#8C5440"], "mortar": "#B9AEA2",
 		"cornice": "#3F4448", "cornice_dark": "#2A2E31", "basement": [], "metal": "#1F1F1F",
 	},
 	{
-		# Between the dépanneur and the green lane (reference/coin_dandurand/entre_entrée_ruelle_et_coin_dandurant.jpg).
+		# Between the dépanneur and the green lane (reference/coin_dandurand/entre_entrée_ruelle_et_coin_dandurand.jpg).
 		"name": "garages", "kind": "garages", "width": 780.0, "halloween": false,
 		"bricks": ["#6B3A2E", "#7A4636", "#5A3028", "#86503E", "#4A2A26", "#93604A"], "mortar": "#B5AA9E",
 		"trim": "#F2F0EA", "trim_dark": "#A9A398", "basement": [], "metal": "#1F1F1F",
@@ -171,9 +171,9 @@ const HOUSES := [
 		"door": "#7A2E2E", "door_dark": "#4E1C1C",
 	},
 	{"name": "ruelle", "kind": "ruelle", "width": 560.0},
-	# The green lane near the Dandurand corner (reference/ruelle/Entrée_ruelle_coin_dandurant.jpg).
+	# The green lane near the Dandurand corner (reference/ruelle/Entrée_ruelle_coin_dandurand.jpg).
 	{"name": "ruelle_verte", "kind": "ruelle_verte", "width": 640.0},
-	# Dépanneur Xin-Xin's real front, on Rue Dandurand (reference/coin_dandurand/dépanneur_on_dandurant.jpg).
+	# Dépanneur Xin-Xin's real front, on Rue Dandurand (reference/coin_dandurand/dépanneur_on_dandurand.jpg).
 	{
 		"name": "depanneur_front", "kind": "depanneur_front", "width": 780.0, "halloween": true,
 		"bricks": ["#6E3A2E", "#7A4234", "#5E3029", "#844A3A", "#4E2A28", "#8C5440"], "mortar": "#B9AEA2",
@@ -1213,7 +1213,7 @@ func _storefront() -> void:
 	_front_steps(cx)
 
 
-# A big red-brick school (from reference/coin_dandurand/School_on_dandurant.jpg): a long wing of tall paired windows
+# A big red-brick school (from reference/coin_dandurand/School_on_dandurand.jpg): a long wing of tall paired windows
 # and, near the corner, a tall pavilion with a diamond lattice in the brick. Stone sills and bands,
 # green copper cornices, a small cross on the parapet.
 func _school() -> void:
