@@ -22,13 +22,15 @@ const SIDE_LOTS := 1
 const NEAR_FENCE_TOP := 664.0
 const NEAR_FENCE_END := 280.0
 const LOT_W := 365.0
-const END_W := 320.0
 const JUNCTION_W := 300.0
+## Where the middle lane ends on a cross lane: how far that lane's middle is from the end of the world, and half its width.
+const TEE_END := 470.0
+const TEE_HALF := 150.0
 ## An avenue at the end of a cross lane: its gap at the facade line, and the corner plex's side wall beside it.
 const AVENUE_W := 560.0
 const WALL_W := 470.0
 ## Charlotte's yard, in the middle lane: hers is the 7th plex from the Dandurand end on 6e Avenue.
-const OWN_LOT := 8
+const OWN_LOT := 7
 const FENCE_Y := 600.0
 const FRONT_KINDS := ["boards", "boards", "cedar", "tole", "picket", "chainlink", "tole", "garage", "shed", "boards", "cedar", "garden"]
 const SCENES := {
@@ -49,6 +51,8 @@ var _own := -1
 var _lane_birds: WireBirds
 # The avenues at the ends of a cross lane.
 var _avenues: Array[CrossStreet] = []
+# The near part of the middle lane's Ts, added over the ground.
+var _tee_near: Array[Sprite2D] = []
 
 
 func _ready() -> void:
@@ -72,9 +76,19 @@ func _ready() -> void:
 	ground.hopscotch = (_lots[_own].x + _lots[_own].y) / 2.0 if _own >= 0 else -1.0
 	for cs in _avenues:
 		ground.open.append(Vector2(cs.x0 - 30.0, cs.x1 + 30.0))
+	for o in _openings:
+		if lane == "middle":
+			ground.mouths.append(Vector2(0.0, o.x + TEE_HALF) if o.left_end else Vector2(o.x - TEE_HALF, _street_width))
+		elif o.kind == "lane":
+			ground.mouths.append(Vector2(o.x - JUNCTION_W / 2.0, o.x + JUNCTION_W / 2.0))
+			ground.stems.append(o.x)
+	if lane == "middle":
+		ground.crack = Vector2(_openings[0].x, _openings[-1].x)
 	add_child(ground)
 	for cs in _avenues:
 		add_child(CrossStreet.make(CrossStreet.Part.MOUTH, cs))
+	for near: Sprite2D in _tee_near:
+		add_child(near)
 	var start_x := _start_x()
 	var x_arg := _arg("--x=")
 	if not x_arg.is_empty():
@@ -95,8 +109,7 @@ func _ready() -> void:
 	_charlotte = _spawn_charlotte(start_x)
 	_control.charlotte = _charlotte
 	_lane_birds.charlotte = _charlotte
-	_control.bounds = Vector2(maxf(90.0, _openings[0].x if lane != "middle" else 90.0),
-		minf(_street_width - 90.0, _openings[-1].x if lane != "middle" else _street_width - 90.0))
+	_control.bounds = _walk_segments()[0]
 	_control.walk_top = 360.0
 	add_child(_control)
 	_build_exits()
@@ -161,7 +174,7 @@ func _music() -> Array:
 # She walks between the avenues' sidewalks: the road is off limits.
 func _walk_segments() -> Array[Vector2]:
 	if lane == "middle":
-		return super()
+		return [Vector2(_openings[0].x - TEE_HALF + 10.0, _openings[-1].x + TEE_HALF - 10.0)]
 	return [Vector2(_openings[0].x, _openings[-1].x)]
 
 
@@ -186,7 +199,7 @@ func _plan() -> void:
 	var plan: Array = []
 	match lane:
 		"middle":
-			plan = ["end", to_lane.call("holt", "↑  Ruelle"), lots, to_lane.call("dandurand", "↑  Ruelle verte"), "end"]
+			plan = [to_lane.call("holt", "↑  Ruelle"), lots, to_lane.call("dandurand", "↑  Ruelle verte")]
 		"dandurand":
 			plan = [to_street.call("5e"), "wall", SIDE_LOTS, to_lane.call("middle", "↑  Ruelle"), SIDE_LOTS, "wall", to_street.call("6e")]
 		"holt":
@@ -200,14 +213,17 @@ func _plan() -> void:
 				part.x1 = x + AVENUE_W
 				part.x = _sidewalk_spot(part.x0, part.x1, part.left_end)
 				x += AVENUE_W
+			elif lane == "middle":
+				part.left_end = _openings.is_empty()
+				part.x = x + (TEE_END if part.left_end else TEE_HALF)
+				x += TEE_END + TEE_HALF
 			else:
 				part.x = x + JUNCTION_W / 2.0
 				x += JUNCTION_W
 			_openings.append(part)
 		elif part is String:
-			var w: float = WALL_W if part == "wall" else END_W
-			_lots.append(Vector2(x, x + w))
-			x += w
+			_lots.append(Vector2(x, x + WALL_W))
+			x += WALL_W
 		else:
 			for i in int(part):
 				_lots.append(Vector2(x, x + LOT_W))
@@ -222,7 +238,7 @@ func _plan() -> void:
 		_kinds.append(kind)
 	# The green lane has its planter boxes (and the middle lane's end near it).
 	if lane == "middle":
-		_kinds[_lots.size() - 2] = "garden"
+		_kinds[_lots.size() - 1] = "garden"
 	elif lane == "dandurand":
 		_kinds[1] = "garden"
 		_kinds[-2] = "garden"
@@ -280,6 +296,13 @@ func _build_avenues() -> void:
 
 
 func _build_backs() -> void:
+	# In the middle lane, the first and last lots are the backs of the plexes on either side of the cross lanes' mouths on 6e.
+	var main_script: String = SCENES["6e"].replace(".tscn", ".gd")
+	if lane == "middle":
+		for o in _openings:
+			var gap := "ruelle" if o.left_end else "ruelle_verte"
+			o.ours = _walls_along(main_script, gap, -1 if o.left_end else 1)[0]
+			o.theirs = _walls_along(main_script, gap, 1 if o.left_end else -1)[0]
 	for i in _lots.size():
 		var lot := _lots[i]
 		if _kinds[i] == "wall":
@@ -289,7 +312,12 @@ func _build_backs() -> void:
 			wall.position = Vector2(lot.x, FENCE_Y - LaneArt.H)
 			add_child(wall)
 			continue
-		var made := LaneArt.back(_rng, lot.y - lot.x, i == _own)
+		var corner: Variant = null
+		if lane == "middle" and (i == 0 or i == _lots.size() - 1):
+			corner = _openings[0] if i == 0 else _openings[-1]
+		var made := LaneArt.back(_rng, lot.y - lot.x, i == _own, "#" + corner.ours.color.to_html(false) if corner else "")
+		if corner:
+			corner.ours.top = made[2]
 		var sprite := _sprite(made[0], 1.0)
 		sprite.material = weathered(i, 0.1)
 		sprite.position = Vector2(lot.x, FENCE_Y - LaneArt.H)
@@ -297,11 +325,24 @@ func _build_backs() -> void:
 		if _rng.randf() < 0.35 or i == _own:
 			_pulleys.append(sprite.position + made[1])
 	for o in _openings:
-		if o.kind != "lane":
-			continue
-		var sprite := _sprite(LaneArt.junction(_rng, JUNCTION_W, lane == "middle"), 1.0)
-		sprite.position = Vector2(o.x - JUNCTION_W / 2.0, FENCE_Y - LaneArt.H)
-		add_child(sprite)
+		if lane == "middle":
+			_build_tee(o)
+		elif o.kind == "lane":
+			var sprite := _sprite(LaneArt.junction(_rng, JUNCTION_W), 1.0)
+			sprite.position = Vector2(o.x - JUNCTION_W / 2.0, FENCE_Y - LaneArt.H)
+			add_child(sprite)
+
+
+func _build_tee(o: Dictionary) -> void:
+	var s := 1.0 if o.left_end else -1.0
+	var x0: float = 0.0 if o.left_end else o.x - TEE_HALF - LaneArt.TEE_PAD
+	var made := LaneArt.tee(_rng, TEE_END + TEE_HALF, TEE_END if o.left_end else TEE_HALF, s, TEE_HALF, o.ours, o.theirs, not o.left_end)
+	var far := _sprite(made[0], 1.0)
+	far.position = Vector2(x0, FENCE_Y - LaneArt.H)
+	add_child(far)
+	var near := _sprite(made[1], 1.0)
+	near.position = far.position
+	_tee_near.append(near)
 
 
 # Big yard trees rising behind the fences (the crabapple in bloom in spring, red maples in autumn).
@@ -316,6 +357,11 @@ func _build_yard_trees() -> void:
 		var k: float = [0.45, 0.55, 0.65, 0.78][_rng.randi_range(0, 3)]
 		var tree := _sprite(PropArt.tree(_rng), k)
 		tree.position = Vector2(_rng.randf_range(lot.x - 60.0, lot.y - 170.0), FENCE_Y - 30.0 - 780.0 * k)
+		# Not out over a T at the middle lane's ends.
+		if lane == "middle" and i == 0:
+			tree.position.x = maxf(tree.position.x, lot.x)
+		elif lane == "middle" and i == _lots.size() - 1:
+			tree.position.x = minf(tree.position.x, lot.y - 760.0 * k)
 		tree.material = _sway(6.0, phase)
 		phase += 1.3
 		add_child(tree)
@@ -342,7 +388,7 @@ func _build_fronts() -> void:
 
 # Every lane has its croque-livre against a fence: take a book, leave a book. (Ready for a quest later.)
 func _build_croque_livre() -> void:
-	var lot := _lots[4 if lane == "middle" else 1]
+	var lot := _lots[3 if lane == "middle" else 1]
 	var box := _sprite(LaneArt.croque_livre(_rng), 0.75)
 	box.position = Vector2(lot.x + 70.0, FENCE_Y + 10.0 - 200.0 * 0.75)
 	add_child(box)
@@ -359,10 +405,13 @@ func _open_croque_livre() -> void:
 # Wooden poles along the far edge of the lane, wires from one to the next (no service drops: the galleries' own).
 func _build_poles() -> void:
 	if lane == "middle":
-		var x := 180.0
-		while x < _street_width - 100.0:
+		# From one T's corner to the other's.
+		var x: float = _openings[0].x + TEE_HALF + 24.0
+		var last: float = _openings[-1].x - TEE_HALF - 24.0
+		while x < last - 400.0:
 			_poles.append(x)
 			x += _rng.randf_range(820.0, 980.0)
+		_poles.append(last)
 	else:
 		# Between the windows of the two corner side walls, and at the corner of the middle lane.
 		_poles.append(float(_openings[0].x1) + WALL_W / 2.0)
@@ -451,6 +500,11 @@ class _Ground:
 	var hopscotch := -1.0
 	# Where an avenue crosses: no grass along a fence there.
 	var open: Array[Vector2] = []
+	# Where another lane opens: no edge and no grass across it either, the concrete runs on.
+	var mouths: Array[Vector2] = []
+	# Where that lane's crack and weeds come in to join ours, and how far ours runs.
+	var stems: Array[float] = []
+	var crack := Vector2(0.0, INF)
 	var _mesh: ArrayMesh
 
 	func _draw() -> void:
@@ -459,10 +513,15 @@ class _Ground:
 		var snow := Season.is_winter()
 		var concrete := Color("#E9EDF0") if snow else Color("#A9A59D")
 		draw_rect(Rect2(0, 596, width, 124), concrete)
-		draw_rect(Rect2(0, 596, width, 8), Color(0, 0, 0, 0.12))
+		var edge_from := 0.0
+		for mouth in mouths:
+			draw_rect(Rect2(edge_from, 596, maxf(mouth.x - edge_from, 0.0), 8), Color(0, 0, 0, 0.12))
+			edge_from = mouth.y
+		draw_rect(Rect2(edge_from, 596, width - edge_from, 8), Color(0, 0, 0, 0.12))
 		var x := 0.0
 		while x < width:
-			draw_line(Vector2(x, 600), Vector2(x - 40.0, 720), concrete.darkened(0.15), 2.0)
+			if not _in(mouths, x) and not _in(mouths, x - 40.0):
+				draw_line(Vector2(x, 600), Vector2(x - 40.0, 720), concrete.darkened(0.15), 2.0)
 			for i in 3:
 				var p := Vector2(x + rng.randf_range(20, 240), rng.randf_range(612, 712))
 				draw_line(p, p + Vector2(rng.randf_range(-30, 30), rng.randf_range(-8, 8)), concrete.darkened(0.12), 1.0)
@@ -472,9 +531,19 @@ class _Ground:
 		var pts := PackedVector2Array()
 		x = 0.0
 		while x <= width:
-			pts.append(Vector2(x, 660.0 + sin(x * 0.013) * 4.0 + rng.randf_range(-1.5, 1.5)))
+			var wobble := rng.randf_range(-1.5, 1.5)
+			if x >= crack.x and x <= crack.y:
+				pts.append(Vector2(x, 660.0 + sin(x * 0.013) * 4.0 + wobble))
 			x += 18.0
 		draw_polyline(pts, concrete.darkened(0.35), 2.0)
+		for stem in stems:
+			var up := PackedVector2Array()
+			var y := 600.0
+			while y <= 660.0 + sin(stem * 0.013) * 4.0:
+				up.append(Vector2(stem + rng.randf_range(-2.0, 2.0), y))
+				y += 12.0
+			draw_polyline(up, concrete.darkened(0.35), 2.0)
+			pts.append_array(up)
 		# Thousands of little shapes: one mesh (see Street._Batch).
 		var bits := Street._Batch.new()
 		var greens: Array[Color] = [weed, weed.lightened(0.18), weed.darkened(0.22)]
@@ -491,10 +560,7 @@ class _Ground:
 			var tall := rng.randf_range(12.0, 26.0)
 			var blades := rng.randi_range(6, 11)
 			var flower := rng.randf() < 0.1
-			var on_avenue := false
-			for gap in open:
-				on_avenue = on_avenue or (x >= gap.x and x <= gap.y)
-			if not on_avenue:
+			if not _in(open, x) and not _in(mouths, x):
 				_clump(bits, rng, at, blades, tall, greens, 1.0)
 				if flower and not snow:
 					bits.circle(Transform2D(0.0, at + Vector2(rng.randf_range(-6.0, 6.0), -tall)), 2.4, dots[rng.randi_range(0, dots.size() - 1)], 6)
@@ -511,11 +577,18 @@ class _Ground:
 		x = rng.randf_range(0.0, 200.0)
 		while x < width:
 			for i in int(26.0 * Season.litter_amount()):
-				leaf.call(Vector2(x + rng.randf_range(-60.0, 60.0), 605.0 + absf(rng.randfn(0.0, 7.0))), rng.randf_range(3.0, 6.5), colors[i % colors.size()])
+				if not _in(mouths, x):
+					leaf.call(Vector2(x + rng.randf_range(-60.0, 60.0), 605.0 + absf(rng.randfn(0.0, 7.0))), rng.randf_range(3.0, 6.5), colors[i % colors.size()])
 			x += rng.randf_range(180.0, 420.0)
 		_mesh = bits.draw(self)
 		if not snow and hopscotch >= 0.0:
 			_hopscotch(Vector2(hopscotch - 170.0, 676.0))
+
+	func _in(ranges: Array[Vector2], x: float) -> bool:
+		for r in ranges:
+			if x >= r.x and x <= r.y:
+				return true
+		return false
 
 	# A clump rooted at `at`: `count` blades (`flat` squashes them toward the ground, a rosette).
 	func _clump(bits: Street._Batch, rng: RandomNumberGenerator, at: Vector2, count: int, tall: float, greens: Array[Color], flat: float) -> void:

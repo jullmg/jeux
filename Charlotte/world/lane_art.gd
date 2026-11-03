@@ -7,6 +7,9 @@ extends RefCounted
 ## y 600, in world pixels.
 
 const H := 600.0
+## The near part of a T (`tee`): down to the bottom of the view.
+const H_NEAR := 720.0
+const TEE_PAD := 130.0
 const BRICKS := ["#A8473A", "#8A4A3A", "#B5603F", "#7E4436", "#C8A27A", "#9C5A44"]
 const SIDINGS := ["#E8E6DF", "#D9D4C7", "#C9D3D1", "#E9DDC4", "#BFC5C9", "#F2EEE4"]
 const WOODS := ["#9C9488", "#7A4A2E", "#3E6B48", "#EDEBE4", "#5E6B73", "#A0522D", "#8E8A80"]
@@ -59,15 +62,18 @@ static func vine_colors() -> Array:
 # ── The backs of the plexes ─────────────────────────────────
 
 ## The back of a plex: brick or siding, windows, back doors onto stacked wooden galleries with a roof on the top
-## one, posts down to the yard, zigzag stairs. Returns [texture, pulley] where pulley is the clothesline pulley on
-## the top gallery's post (canvas coordinates).
-static func back(rng: RandomNumberGenerator, w: float, own := false) -> Array:
+## one, posts down to the yard, zigzag stairs. Returns [texture, pulley, top] where pulley is the clothesline pulley on
+## the top gallery's post (canvas coordinates), top the roof's height. `brick`: this building's own brick (a corner's).
+static func back(rng: RandomNumberGenerator, w: float, own := false, brick := "") -> Array:
 	var floors := 2 if own else (3 if rng.randf() < 0.55 else 2)
 	var fh := 118.0
 	var ground := H - 30.0
 	var top := ground - floors * fh - 16.0
 	var siding := not own and rng.randf() < 0.4
 	var wall: String = "#8A4A3A" if own else (PropArt._pick(rng, SIDINGS) if siding else PropArt._pick(rng, BRICKS))
+	if brick != "":
+		siding = false
+		wall = brick
 	var wood: String = "#3E6B48" if own else PropArt._pick(rng, WOODS)
 	var s := _rect(0, top, w, H - top, wall)
 	var y := top + 14.0
@@ -128,7 +134,7 @@ static func back(rng: RandomNumberGenerator, w: float, own := false) -> Array:
 	# or zigzag wooden stairs.
 	if rng.randf() < 0.35:
 		s += _spiral(g1 + 24.0 if left else g0 - 24.0, ground - (floors - 1) * fh + 2.0, ground + 30.0, floors - 1)
-		return [_tex(w, s), pulley]
+		return [_tex(w, s), pulley, top]
 	for f in range(floors - 1, 0, -1):
 		var hi := ground - f * fh + 2.0
 		var lo := ground - (f - 1) * fh + 2.0
@@ -141,7 +147,7 @@ static func back(rng: RandomNumberGenerator, w: float, own := false) -> Array:
 			var p := Vector2(lerpf(sx, ex, t), lerpf(hi, lo, t))
 			s += _rect(p.x - 7, p.y - 2, 14, 3, _light(wood, 0.1))
 		s += _line(Vector2(sx, hi - 34), Vector2(ex, lo - 34), wood, 3.0)
-	return [_tex(w, s), pulley]
+	return [_tex(w, s), pulley, top]
 
 
 # A helix of steel treads round a central pole, one turn per floor, with its handrail.
@@ -799,12 +805,252 @@ static func near_fence(rng: RandomNumberGenerator, w: float, h: float) -> String
 	return s
 
 
+## Where a long lane ends on a cross lane, a T, for a sprite of its own either side of the ground. We stand in the long lane looking
+## toward the avenue; the cross lane comes past us and runs away, one-point perspective on CrossStreet's horizon at x `vx`, `half`
+## either side of it at the fence line (depth 0). `s` is the side the long lane leaves on (1: to the right). u > 0 is that side:
+## `ours`, the plex whose back is the long lane's first lot, then its yard fence; u < 0 the far side: the yards of the buildings
+## behind, seen along their backs, and `theirs` at the avenue. Close by is the avenue itself: the sidewalk, the road, the plexes
+## across. Returns [far part, for under the ground; near part, H_NEAR tall, over it: the far side's fence going off past us]: both
+## TEE_PAD wider than `w`, on the long lane's side (slabs and wires run on over its first lot).
+static func tee(rng: RandomNumberGenerator, w: float, vx: float, s: float, half: float, ours: Dictionary, theirs: Dictionary, lush: bool) -> Array:
+	const YARD := 0.55
+	const CURB := 1.2
+	const ROAD := 1.34
+	const FAR_ROAD := 1.95
+	const FACADES := 2.09
+	const NEAREST := -0.72
+	const FENCE := 175.0
+	var at := func(u: float, y: float, d: float) -> Vector2:
+		return Vector2(vx + s * u / (1.0 + d), CrossStreet.HORIZON_Y + (y - CrossStreet.HORIZON_Y) / (1.0 + d))
+	var plane := func(u: float, top: float, bottom: float, d0: float, d1: float, fill: String, extra := "") -> String:
+		return _poly([at.call(u, top, d0), at.call(u, top, d1), at.call(u, bottom, d1), at.call(u, bottom, d0)], fill, extra)
+	var facing := func(u0: float, u1: float, top: float, bottom: float, d: float, fill: String, extra := "") -> String:
+		return _poly([at.call(u0, top, d), at.call(u1, top, d), at.call(u1, bottom, d), at.call(u0, bottom, d)], fill, extra)
+	var flat := func(d0: float, d1: float, fill: String) -> String:
+		return _poly([at.call(-900.0, H, d0), at.call(900.0, H, d0), at.call(900.0, H, d1), at.call(-900.0, H, d1)], fill)
+	# Light from the upper left: what faces right, on the left of the view, is in the shade.
+	var shade := func(u: float, top: float, bottom: float, d0: float, d1: float) -> String:
+		return plane.call(u, top, bottom, d0, d1, "#000000", 'opacity="0.16"') if s * u < 0.0 else ""
+	var winter := Season.is_winter()
+	var concrete := "#E9EDF0" if winter else "#A9A59D"
+	var palettes := Season.tree_palettes()
+	var vines := vine_colors()
+	var shrubs := shrub_colors()
+	var street_tree := func(u: float, d: float, size: float) -> String:
+		var foot: Vector2 = at.call(u, H, d)
+		var crown: Vector2 = at.call(u, 210.0, d)
+		var pick := rng.randi()
+		var pal: Array = [] if palettes.is_empty() else palettes[pick % palettes.size()]
+		return _line(foot, crown, "#5E4A3C", maxf(16.0 / (1.0 + d), 1.5)) + _foliage(rng, crown, Vector2(size, size * 0.85) / (1.0 + d), pal, maxf(9.0 / (1.0 + d), 3.0), 170)
+	# The sky over the avenue, hiding the distant city from the T's side, fading in from above and out over the long lane.
+	var grad := Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.35, 0.62, 0.82, 1.0])
+	grad.colors = Season.sky()
+	var stops := ""
+	for k in 5:
+		var sky_y := lerpf(150.0, 520.0, k / 4.0)
+		stops += '<stop offset="%.2f" stop-color="#%s" stop-opacity="%.2f"/>' % [k / 4.0, grad.sample(sky_y / 720.0).to_html(false), clampf((sky_y - 150.0) / 180.0, 0.0, 1.0)]
+	var far := '<defs><linearGradient id="teesky" x1="0" y1="0" x2="0" y2="1">%s</linearGradient></defs>' % stops
+	var strip := 0.0
+	while strip < w:
+		var past: float = (strip - vx - half) if s > 0.0 else (vx - half - strip)
+		far += '<rect x="%.1f" y="150" width="12" height="370" fill="url(#teesky)" opacity="%.2f"/>' % [strip, clampf(1.0 - (past + 130.0) / 130.0, 0.0, 1.0)]
+		strip += 12.0
+	# Across the avenue: its plexes, then the sidewalks and the road, far to near.
+	var u0 := -900.0
+	var tops: Array[float] = [268.0, 300.0, 250.0, 284.0, 262.0, 296.0]
+	var bricks: Array[String] = ["#8E3A2F", "#B4513F", "#9C6B4E", "#A8473A", "#7E4436", "#B5603F"]
+	var n := 0
+	while u0 < 900.0:
+		var u1 := u0 + 300.0
+		var top: float = tops[n % tops.size()]
+		var brick: String = bricks[n % bricks.size()]
+		far += facing.call(u0, u1, top, H, FACADES, brick)
+		far += facing.call(u0 - 4.0, u1 + 4.0, top - 12.0, top + 6.0, FACADES, "#55585C")
+		for floor_i in 2:
+			var fy := H - 70.0 - floor_i * 118.0
+			for col in 3:
+				var cx := lerpf(u0 + 56.0, u1 - 56.0, col / 2.0)
+				if floor_i == 0 and col == 1:
+					far += facing.call(cx - 22.0, cx + 22.0, fy - 34.0, H - 30.0, FACADES, "#5E3B26")
+					far += facing.call(cx - 30.0, cx + 30.0, H - 30.0, H, FACADES, "#B9B2A4")
+					continue
+				far += facing.call(cx - 26.0, cx + 26.0, fy - 62.0, fy + 8.0, FACADES, "#EDE9DF")
+				far += facing.call(cx - 20.0, cx + 20.0, fy - 56.0, fy + 2.0, FACADES, "#7F97A8")
+		far += facing.call(u0 + 10.0, u1 - 10.0, H - 136.0, H - 124.0, FACADES, "#2A2622")
+		u0 = u1
+		n += 1
+	far += flat.call(FAR_ROAD, FACADES, "#F0F2F4" if winter else "#BDB7AC")
+	far += flat.call(ROAD, FAR_ROAD, "#D5DADF" if winter else "#4F5054")
+	far += flat.call(CURB, ROAD, "#F0F2F4" if winter else "#BDB7AC")
+	far += flat.call(ROAD, ROAD + 0.012, "#8E8A80")
+	var dash := -420.0
+	while dash < 420.0:
+		far += _poly([at.call(dash, H, 1.62), at.call(dash + 60.0, H, 1.62), at.call(dash + 60.0, H, 1.66), at.call(dash, H, 1.66)], "#F2C230")
+		dash += 130.0
+	far += street_tree.call(-half * 1.05, FAR_ROAD + 0.03, 150.0)
+	far += street_tree.call(half * 1.15, FAR_ROAD + 0.03, 130.0)
+	# The far side's yards: the backs of its buildings seen along them, with their galleries.
+	var back_u := -half - 170.0
+	var d := NEAREST
+	while d < YARD:
+		var d1 := minf(d + rng.randf_range(0.38, 0.6), YARD)
+		var top := H - rng.randf_range(250.0, 340.0)
+		var siding := rng.randf() < 0.35
+		var wall: String = PropArt._pick(rng, SIDINGS) if siding else PropArt._pick(rng, BRICKS)
+		var wood: String = PropArt._pick(rng, WOODS)
+		far += plane.call(back_u, top, H, d, d1, wall)
+		far += shade.call(back_u, top, H, d, d1)
+		far += plane.call(back_u, top - 8.0, top + 4.0, d, d1, "#55585C")
+		for floor_y: float in [top + 30.0, top + 148.0]:
+			var wd := d + 0.04
+			while wd + 0.09 < d1:
+				far += plane.call(back_u, floor_y - 3.0, floor_y + 73.0, wd - 0.006, wd + 0.096, "#F2F0EA")
+				far += plane.call(back_u, floor_y, floor_y + 70.0, wd, wd + 0.09, "#7F97A8")
+				wd += 0.2
+		for rail: float in [top + 104.0, top + 222.0]:
+			far += _line(at.call(back_u + 34.0, rail, d), at.call(back_u + 34.0, rail, d1), wood, maxf(6.0 / (1.0 + d), 1.0))
+			far += _line(at.call(back_u + 34.0, rail + 34.0, d), at.call(back_u + 34.0, rail + 34.0, d1), wood, maxf(6.0 / (1.0 + d), 1.0))
+		var post := d
+		while post < d1:
+			far += _line(at.call(back_u + 34.0, top + 70.0, post), at.call(back_u + 34.0, H, post), wood, maxf(5.0 / (1.0 + post), 1.0))
+			post += (d1 - d) / 3.0
+		d = d1
+	# The back of the building on the avenue, over its yard, then the two side walls down to the sidewalk.
+	var theirs_brick: String = "#" + (theirs.color as Color).to_html(false)
+	var ours_brick: String = "#" + (ours.color as Color).to_html(false)
+	far += facing.call(back_u, -half, float(theirs.top), H, YARD, theirs_brick)
+	far += facing.call(back_u, -half, float(theirs.top), H, YARD, "#000000", 'opacity="0.1"')
+	far += facing.call(back_u, -half, float(theirs.top) - 8.0, float(theirs.top) + 4.0, YARD, "#55585C")
+	var side := func(u: float, top: float, d0: float, d1: float, brick: String, windows: bool) -> String:
+		var out: String = plane.call(u, top, H, d0, d1, brick)
+		var course := top + 12.0
+		while course < H:
+			out += _line(at.call(u, course, d0), at.call(u, course, d1), _light(brick, 0.22), maxf(1.1 / (1.0 + d0), 0.4), 'opacity="0.45"')
+			course += 14.0
+		out += plane.call(u, top - 8.0, top + 4.0, d0, d1, "#55585C")
+		if windows:
+			for f in int(round((H - top - 40.0) / 118.0)):
+				var base := H - 62.0 - f * 118.0
+				var wd := d0 + 0.14
+				while wd + 0.1 < d1:
+					out += plane.call(u, base - 74.0, base - 67.0, wd - 0.012, wd + 0.112, "#C9C2B2")
+					out += plane.call(u, base - 67.0, base - 5.0, wd, wd + 0.1, "#EDE9DF")
+					out += plane.call(u, base - 62.0, base - 10.0, wd + 0.012, wd + 0.088, "#7F97A8")
+					out += plane.call(u, base - 5.0, base + 1.0, wd - 0.012, wd + 0.112, "#C9C2B2")
+					wd += 0.26
+		return out + shade.call(u, top, H, d0, d1)
+	far += side.call(-half, float(theirs.top), YARD, CURB, theirs_brick, theirs.kind != "garage")
+	far += side.call(half, float(ours.top), 0.0, CURB, ours_brick, ours.kind != "garage")
+	# A yard tree on the far side, over the fence.
+	far += street_tree.call(-half - 85.0, 0.08, 135.0)
+	# The concrete up to the sidewalk, the slab joints across it, the crack and its weeds down the middle.
+	far += _poly([at.call(-half, H, 0.0), at.call(half, H, 0.0), at.call(half, H, CURB), at.call(-half, H, CURB)], concrete)
+	var joint := 0.16
+	while joint < CURB:
+		far += _line(at.call(-half, H, joint), at.call(half, H, joint), _dark(concrete, 0.2), maxf(1.6 / (1.0 + joint), 0.5))
+		joint += 0.18 * (1.0 + joint)
+	far += _line(at.call(0.0, H, 0.0), at.call(0.0, H, CURB), _dark(concrete, 0.45), 1.6)
+	var weedy := func(d0: float, d1: float) -> String:
+		var out := ""
+		var at_d := d0
+		while at_d < d1:
+			var p: Vector2 = at.call(rng.randf_range(-12.0, 12.0), H, at_d)
+			var tuft := _grass(rng, p, rng.randf_range(10.0, 18.0) / (1.0 + at_d), 7)
+			if not winter:
+				out += tuft
+			at_d += 0.06 * (1.0 + at_d)
+		return out
+	far += weedy.call(0.0, CURB)
+	# Board fences along both yards, plank by plank; the far side's carries on past us, in the near part.
+	var planks := func(u: float, d0: float, d1: float) -> String:
+		var out := ""
+		var at_d := d0
+		var top := H - FENCE
+		var i := 0
+		while at_d < d1:
+			var next := minf(at_d + 0.042 * (1.0 + at_d), d1)
+			var tone: String = BOARDS[(i * 3 + int(absf(u))) % BOARDS.size()]
+			out += plane.call(u, top - (4.0 if i % 2 == 0 else 0.0), H, at_d, next, tone)
+			out += _line(at.call(u, top, next), at.call(u, H, next), _dark(tone, 0.34), maxf(1.4 / (1.0 + next), 0.5))
+			at_d = next
+			i += 1
+		out += plane.call(u, top + 18.0, top + 30.0, d0, d1, _dark(BOARDS[1], 0.18))
+		out += plane.call(u, H - 44.0, H - 32.0, d0, d1, _dark(BOARDS[1], 0.18))
+		out += plane.call(u, H - 22.0, H, d0, d1, "#2A2418", 'opacity="0.2"')
+		if winter:
+			out += plane.call(u, top - 5.0, top + 2.0, d0, d1, "#F4F6F8")
+		return out + shade.call(u, top - 4.0, H, d0, d1)
+	# Creeper along the top of a fence, in runs, and grass at its foot (close by, nothing bigger: a shrub there would fill the view).
+	var creeper := func(u: float, d0: float, d1: float, chance: float) -> String:
+		var out := ""
+		var md := d0
+		while md < d1:
+			var k := 1.0 + md
+			var patch := _foliage(rng, at.call(u, H - FENCE + 4.0, md), Vector2(34.0, 15.0) / k, vines, clampf(7.0 / k, 2.2, 12.0), 22)
+			var tall := _grass(rng, at.call(u - signf(u) * rng.randf_range(4.0, 24.0), H, md), 26.0 / k, 8)
+			if rng.randf() < chance:
+				out += patch
+			if rng.randf() < 0.5:
+				out += tall
+			md += 0.05 * k
+		return out
+	# Shrubs at the foot of a fence (a green lane has more of them), between depths d0 and d1.
+	var shrubbery := func(u: float, d0: float, d1: float, count: int) -> String:
+		var out := ""
+		for k in count:
+			var md := lerpf(d0, d1, (k + rng.randf()) / count)
+			var r := Vector2(rng.randf_range(40.0, 60.0), rng.randf_range(40.0, 64.0)) / (1.0 + md)
+			var foot: Vector2 = at.call(u - signf(u) * rng.randf_range(6.0, 26.0), H, md)
+			out += _foliage(rng, foot - Vector2(0, r.y * 0.8), r, shrubs, maxf(8.0 / (1.0 + md), 2.4), 80)
+		return out
+	far += planks.call(-half, 0.0, YARD)
+	far += planks.call(half, 0.0, YARD)
+	far += creeper.call(-half, 0.0, YARD, 0.7 if lush else 0.45)
+	far += creeper.call(half, 0.0, YARD, 0.7 if lush else 0.45)
+	far += shrubbery.call(-half, 0.14, YARD, 3 if lush else 1)
+	far += shrubbery.call(half, 0.14, YARD, 3 if lush else 1)
+	# The neighbours' bins against the far fence.
+	for bin: Array in [[0.3, "#2F6DB5", 8.0], [0.2, "#5B4A3A", 8.0]]:
+		far += facing.call(-half + bin[2], -half + bin[2] + 52.0, H - 82.0, H, bin[0], bin[1])
+		far += facing.call(-half + bin[2] - 3.0, -half + bin[2] + 55.0, H - 88.0, H - 78.0, bin[0], _dark(bin[1], 0.25))
+		far += facing.call(-half + bin[2], -half + bin[2] + 52.0, H - 16.0, H, bin[0], "#000000", 'opacity="0.2"')
+	# A pole at the lane's end on the far side, its wires going off over the corner.
+	var pole_top: Vector2 = at.call(-half + 10.0, 70.0, 0.9)
+	far += _line(at.call(-half + 10.0, H, 0.9), pole_top, "#6E5A48", 6.0)
+	far += _line(pole_top + Vector2(-18, 5), pole_top + Vector2(18, 5), "#5E4A3C", 3.0)
+	for off: float in [-15.0, 0.0, 15.0]:
+		var a := pole_top + Vector2(off, 4.0)
+		var b := Vector2(vx + s * (half + 24.0) + off, 100.0)
+		far += '<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="#2A2622" stroke-width="1.3" fill="none"/>' % [a.x, a.y, (a.x + b.x) / 2.0, (a.y + b.y) / 2.0 + 10.0, b.x, b.y]
+	# The near part: the slabs and the weeds coming toward us, then the far side's fence going off past us, bins against it.
+	var near := ""
+	for jd: float in [-0.09, -0.2, -0.31, -0.41]:
+		near += _line(at.call(-half, H, jd), at.call(half, H, jd), _dark(concrete, 0.16), 2.0)
+	near += _line(at.call(half, H, 0.0), at.call(half, H, -0.46), _dark(concrete, 0.2), 2.0)
+	near += _line(at.call(0.0, H, 0.0), at.call(0.0, H, -0.46), _dark(concrete, 0.45), 2.0)
+	near += weedy.call(-0.46, 0.0)
+	var litter := Season.litter()
+	for i in 70:
+		var ld := rng.randf_range(-0.5, 0.0)
+		var p: Vector2 = at.call(-half + rng.randf_range(2.0, 34.0), H, ld)
+		var size := rng.randf_range(5.0, 8.0) / (1.0 + ld)
+		var turn := rng.randf() * TAU
+		var pick := rng.randf()
+		if float(i % 10) / 10.0 < Season.litter_amount() and not litter.is_empty():
+			near += _leaf(p, size, turn, "#" + litter[mini(int(pick * litter.size()), litter.size() - 1)].to_html(false))
+	near += planks.call(-half, NEAREST, 0.0)
+	near += creeper.call(-half, -0.55, 0.0, 0.7 if lush else 0.4)
+	var pad := "" if s > 0.0 else '<g transform="translate(%.1f 0)">' % TEE_PAD
+	var end := "" if s > 0.0 else "</g>"
+	return [_tex(w + TEE_PAD, pad + far + end), PropArt.tex(PropArt._svg(w + TEE_PAD, H_NEAR, pad + near + end))]
+
+
 ## Another lane running away from us between the yards, as in the photos: one-point perspective on CrossStreet's horizon.
-## Far to near: sky down the gap, what closes it (`to_avenue`: the plexes across an avenue; else the far lane's fences under
-## its trees), the backs of the plexes either side with their galleries, trees arching over, the cracked concrete with its strip
+## Far to near: sky down the gap, the far lane's fences that close it, under its trees, the backs of the plexes either side with their galleries, trees arching over, the cracked concrete with its strip
 ## of weeds down the middle and leaves drifted along the edges, then fences, sheds and garages one after another, poles
 ## and wires, shrubs spilling onto the concrete and creeper over the fences.
-static func junction(rng: RandomNumberGenerator, w: float, to_avenue := false) -> ImageTexture:
+static func junction(rng: RandomNumberGenerator, w: float) -> ImageTexture:
 	const FAR_D := 14.0
 	var vp := Vector2(w / 2.0, CrossStreet.HORIZON_Y)
 	var at := func(p: Vector2, d: float) -> Vector2: return vp + (p - vp) / (1.0 + d)
@@ -831,19 +1077,10 @@ static func junction(rng: RandomNumberGenerator, w: float, to_avenue := false) -
 	while strip < w:
 		s += '<rect x="%.1f" y="120" width="12" height="350" fill="url(#gapsky)" opacity="%.2f"/>' % [strip, clampf(minf(strip, w - strip) / 80.0, 0.0, 1.0)]
 		strip += 12.0
-	# What closes the far end.
-	if to_avenue:
-		s += quad.call(-120.0, 190.0, H - 40.0, FAR_D, FAR_D, "#000000")
-		var a0: Vector2 = at.call(Vector2(-140.0, 200.0), FAR_D)
-		var a1: Vector2 = at.call(Vector2(w + 140.0, H - 30.0), FAR_D)
-		s += _rect(a0.x, a0.y, a1.x - a0.x, a1.y - a0.y, hazed.call("#C8A27A", FAR_D))
-		for i in 6:
-			s += _rect(a0.x + 3.0 + i * 8.0, a0.y + 4.0, 4, 6, "#E8EEF2", 'opacity="0.9"')
-			s += _rect(a0.x + 3.0 + i * 8.0, a0.y + 13.0, 4, 6, "#E8EEF2", 'opacity="0.9"')
-	else:
-		var f0: Vector2 = at.call(Vector2(-120.0, H - 175.0), FAR_D)
-		var f1: Vector2 = at.call(Vector2(w + 120.0, H), FAR_D)
-		s += _rect(f0.x, f0.y, f1.x - f0.x, f1.y - f0.y, hazed.call(BOARDS[0], FAR_D))
+	# What closes the far end: the far lane's fences.
+	var f0: Vector2 = at.call(Vector2(-120.0, H - 175.0), FAR_D)
+	var f1: Vector2 = at.call(Vector2(w + 120.0, H), FAR_D)
+	s += _rect(f0.x, f0.y, f1.x - f0.x, f1.y - f0.y, hazed.call(BOARDS[0], FAR_D))
 	# The backs of the plexes along the yards, either side, far to near.
 	var rows := []
 	for side: float in [-1.0, 1.0]:

@@ -15,12 +15,12 @@ const ALL := {
 	},
 	"cat2": {
 		"name": "Caramel", "coat": 0, "collar": "#D9342B", "collar_name": "rouge",
-		"found": "ruelle", "found_at": 3.5, "poster": "5e",
+		"found": "ruelle", "found_at": 2.5, "poster": "5e",
 		"home": "5e", "house": "plex_21", "address": "5679, 5e Avenue", "owner": "M. Tremblay",
 	},
 	"cat3": {
 		"name": "Bijou", "coat": 4, "collar": "#E85FA0", "collar_name": "rose",
-		"found": "ruelle", "found_at": 12.6, "poster": "holt",
+		"found": "ruelle", "found_at": 11.6, "poster": "holt",
 		"home": "holt", "house": "plex_15", "address": "2655, rue Holt", "owner": "Mme Nguyen", "e": "e",
 	},
 }
