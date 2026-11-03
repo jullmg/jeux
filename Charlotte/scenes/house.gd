@@ -1,6 +1,6 @@
 extends Interior
 # ══════════════════════════════════════════════════════════════
-# Inside Charlotte's flat, as a side-on cross-section (from reference/charlotte_house_inside):
+# Inside Charlotte's flat, as a side-on cross-section (from reference/maison_charlotte/interieur):
 # vestibule → oak glass doorway → salon (sofa, dining table) → hallway → kitchen at the back.
 # Her bedroom ("chacha" on the door) is a separate area further right, reached through its door.
 # Click the front door to go back out to the street. The generic parts live in Interior and RoomShell.

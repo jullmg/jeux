@@ -1,7 +1,7 @@
 class_name InteriorArt
 extends RefCounted
 ## Furniture and fixtures of Charlotte's flat, drawn as SVG at runtime (from the reference photos in
-## reference/charlotte_house_inside). Each function documents its canvas; "floor" is the bottom edge.
+## reference/maison_charlotte/interieur). Each function documents its canvas; "floor" is the bottom edge.
 
 const OAK := "#9A5E2C"
 const OAK_DARK := "#5E3517"

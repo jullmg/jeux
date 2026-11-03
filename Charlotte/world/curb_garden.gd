@@ -1,6 +1,6 @@
 class_name CurbGarden
 extends Node2D
-## The planted curb extension at a street corner (reference/terre_plein_01.png, 02.png): the sidewalk's curb bulges
+## The planted curb extension at a street corner (reference/rue/terre_plein_01.png, 02.png): the sidewalk's curb bulges
 ## out into the parking lane, round toward the corner, and holds a bed of perennials the neighbours keep (hostas,
 ## ornamental grasses, shrubs, coneflowers), with black and white striped flexible bollards at its tips. Snowy
 ## stalks in winter. Its position is the curb at the bed's start; it runs `width` px toward `corner` (+1 right,

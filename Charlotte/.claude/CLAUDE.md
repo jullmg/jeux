@@ -52,7 +52,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   Cross-street `facing` by Montreal's compass: from 6e they run west (Mount Royal), from Dandurand north, from 5e east,
   from Holt south. New corner/side walls in the generator: `holt_nord`, `holt_sud`, `cinq_holt_ouest`, `coin_5e_holt`,
   `coin_5e_dandurand`, `dandurand_sud` (`VARIANTS` is 36: plex_27 on Dandurand, plex_28 on Holt, plex_29–36 on 5e, counted from the Google map).
-- The 6e/Holt corner follows `reference/6eme_coin_holt.png`, `holt_coin_6eme.png` and `entree_ruelle_6eme_coin_holt.png`:
+- The 6e/Holt corner follows `reference/coin_holt/6eme_coin_holt.png`, `reference/coin_holt/holt_coin_6eme.png` and `reference/ruelle/entree_ruelle_6eme_coin_holt.png`:
   generator kinds `corner_holt` (`coin_holt`: long brown three-storey, stepped white lintels, diamonds, the beige
   corrugated annex with its shingle awning, the red corner window), `ohbon` (dépanneur Oh Bon! on Holt: red storefront,
   checkerboard under the white stairs, canopy with red fascia, light-box sign; "OH BON!" / "DÉPANNEUR" as labels and
@@ -134,7 +134,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     `wainscot_height` (panelled lower wall); shops use `tile_colors`.
   - `world/interior_art.gd` (`InteriorArt`): one SVG function per piece of furniture; `world/fairy_lights.gd` (`FairyLights`).
     Decor pieces for any bedroom/house: `moon_decal`, `mobile` (sways, tweened in the scene), `wall_clock`, `house_plant`; kitchen/entrance: `wall_calendar`, `kitchen_toppers` (things on the fridge and cabinet), `kitchen_curtain`, `kitchen_mat`, `umbrella_stand`. SVG `<pattern>` does not render in these textures: draw checks/stripes as plain shapes.
-- `scenes/house.gd` (extends `Interior`): Charlotte's flat, from the photos in `reference/charlotte_house_inside`:
+- `scenes/house.gd` (extends `Interior`): Charlotte's flat, from the photos in `reference/maison_charlotte/interieur`:
   vestibule (0–640) → oak glass doorway → salon (–2260) → hallway → kitchen (3400–3960); Charlotte's bedroom is a separate
   area (5000–6650) reached through the "chacha" door (fade, camera limits switch). Charlotte is at scale 0.5 inside.
 - `scenes/depanneur.gd` (extends `Interior`): inside dépanneur Xin-Xin, entered from its door on Rue Dandurand (bell). A
@@ -179,7 +179,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   "type", "wash", "drink", "fridge", "exercise", "watch", set in `_task_pose()`), props are drawn by `FamilyRoutine._Prop`; their click
   spot and "!" mark follow them, and `pause(secs, toward_x)` stops them when Charlotte talks to them. Shops have walking customers
   (`world/shop_customer.gd`, `ShopCustomer`, `Shop._add_customers`).
-- Charlotte's parents, from `reference/mere_charlotte.jpg` / `pere_charlotte.jpg`: `CharacterLook.mom()` (long wavy light-brown
+- Charlotte's parents, from `reference/personnages/mere_charlotte.jpg` / `pere_charlotte.jpg`: `CharacterLook.mom()` (long wavy light-brown
   hair, brown eyes, teal floral dress, tights, boots) in the kitchen, `CharacterLook.dad()` (short brown hair, no cap,
   clean-shaven, blue eyes, navy T-shirt with the "bike" top pattern) in the salon; both stand at 1.18× Charlotte's scale. Click them and they say a line (`MOM_LINES` / `DAD_LINES`
   in house.gd).
@@ -253,7 +253,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   streets): a `JumpRopeKid` (`world/jump_rope_kid.gd`, `StreetScene._build_kid`) and a `BallKid` (`world/ball_kid.gd`) in
   each lane, own RNG, clickable; few passersby on the streets (`passerby_ages`: 2 on the avenues, 1 on Dandurand/Holt), winter chimney smoke (`_build_life`).
 - Every corner has planted curb extensions (`world/curb_garden.gd`, `CurbGarden`, `StreetScene._build_curb_gardens`, from
-  `reference/terre_plein_01/02.png`): the curb bulges into the parking lane on both sides of each cross street, perennials
+  `reference/rue/terre_plein_01.png et 02`): the curb bulges into the parking lane on both sides of each cross street, perennials
   by season, striped flexible bollards; drawn in front of people.
 - Tree limbs (`PropArt.tree`, `LIMB_TIPS`): the trunk outline's two limb ends are flat cuts that random foliage may not hide, so both limbs go on as thinner rounded branches with a fork (also in winter, before `_bare_crown`), and in leaf seasons a small tuft (own RNG, seed 5, so the tree's draws don't change) sits at each tip. Never end a branch in a flat cut.
 - Seniors lean forward only 1.5° (`rig.lean`); 5° made the head hang well ahead of the feet.
@@ -279,7 +279,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - `shaders/`: `grade.gdshader` (full-screen colour grade on CanvasLayer 50), `sway.gdshader` (tree sway).
 - `art/decor/windows.json`: window panes per house, written by the generator, read by `WindowCats`. It is not a resource:
   an export preset needs `*.json` in its include filter.
-- Street doors and stairs follow `reference/portes.jpg` and `reference/escaliers.jpg`: generator `DOOR_STYLES` (double,
+- Street doors and stairs follow `reference/rue/portes.jpg` and `reference/rue/escaliers.jpg`: generator `DOOR_STYLES` (double,
   panel, oval, leaded stained glass, diamond, 1950s slots, slit, planks, slats, fan_top, grid, sunburst, porthole, grille,
   horizontal, arched_panels, double_leaded), optional stained-glass `sidelights`, and `door_surround` (lintel, cornice on brackets, pediment,
   arch with fanlight), door lights by `lamp_style` (lantern, globe, coach, cylinder, box, a single one hung over the
@@ -293,7 +293,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - `art/decor/*.svg`: house façades, **generated**. Edit `tools/generate_houses.gd` and regenerate instead of hand-editing:
   `Godot --headless --path . --script res://tools/generate_houses.gd`
 - `art/logo.png` is cut out of `art/logo.jpg` by `tools/cutout_logo.gd` (same headless invocation).
-- `reference/` holds real-world reference photos (Charlotte, her house, the neighbours, the Google Maps view). It is gitignored.
+- `reference/` holds real-world reference photos, sorted (see `reference/LISEZMOI.md`): `personnages/`, `maison_charlotte/` (with `interieur/`), `coin_dandurand/`, `coin_holt/`, `ruelle/`, `rue/` (doors, stairs, curb gardens, example houses), `cartes/`, `logo/`. It is gitignored; new pictures go in the matching folder.
 
 ## Interactions and scene changes
 
@@ -318,7 +318,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   houses in rows, the lanes as an H, her house (`HOUSE_X`), Oh Bon!, Xin-Xin, the school across Dandurand (below it), a compass (N, S, O, E), and a stop sign "Pas le droit d'aller plus loin toute seule !" while `GameState.age < StreetScene.CROSS_AGE`.
   A little Charlotte (`_You`) shows "Je suis ici !" where she is: `TownMap._here()` maps each scene (street scenes by how far along
   far along she is, lanes, the house, the shops) onto the sheet. The game pauses while it is open; Esc, C or a click outside closes it; the
-  notebook (N) and the menu (Esc) ignore their keys while it is open. The roads keep the real proportions measured on `reference/google_map_immediate_area.png`: a block is about 3× as long (Holt to Dandurand) as wide (5e to 6e), the lanes about 18 % in from each street; the title, compass and stop sign sit in the paper margin left of `SIDE`. Geometry constants (`HOLT_Y`, `DAND_Y`, `SIX_X`, lanes…) are at the
+  notebook (N) and the menu (Esc) ignore their keys while it is open. The roads keep the real proportions measured on `reference/cartes/google_map_immediate_area.png`: a block is about 3× as long (Holt to Dandurand) as wide (5e to 6e), the lanes about 18 % in from each street; the title, compass and stop sign sit in the paper margin left of `SIDE`. Geometry constants (`HOLT_Y`, `DAND_Y`, `SIX_X`, lanes…) are at the
   top of the file: a new place on the block = a drawing in `_Sheet` + a case in `_here()`.
 - Whatever she can't reach is coloured over in grey crayon (`_Sheet._reachable`, `_grey_out`, names, title and doodles on top): before `CROSS_AGE` all but her block and the streets round it; from then on the corners across them and the school come back, and 7e, 4e and the houses farther west stay grey (no scene goes there). A new place she can reach = widen `_reachable`.
 - `--map` (a user arg, after `--`) opens it one second after the scene starts, for screenshots: `Godot --path . --screen 1 res://scenes/holt.tscn -- --screenshot=/path/map.png --wait=2.5 --map`.
@@ -370,7 +370,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     against it), lifts the can with her hands on its handle (`Character.carry_lift`, `carry_grip`), tips it, and drops arc
     from the spout (`CAN_SPOUT`) onto the soil (`InteriorArt.plant_soil`)) and the watering can in the kitchen (`InteriorArt.watering_can`, carried with
     `Character.carry`, `flags.has_can`); `flags.watered`; the can goes back when all have drunk.
-- Alphée and Constance Turcotte, twins (spelling: **Alphée**), from `reference/alfée-et-constance-turcotte.jpg`, nearly identical, a little under a head taller than Charlotte (age `"tween"`, a rig in `CharacterArt.RIGS`, not in `CharacterLook.AGES` so no random passerby gets it), who will be her best friends and give her quests (which ones: not decided, Julien will say). `CharacterLook.alphee()` (hair down, teal T-shirt with a heart, `look.necklace`), `constance()` (ponytail, beige sweater with the `"birds"` pattern, `look.earring`); which is which was my guess from the photo. `world/twins.gd` (`Twins`): in the middle lane at `TWINS_LOT`; "!" until the first click, the meeting (`MEETING`, Charlotte hands off, `flags.met_twins`, cleared by the debug menu's "Tout effacer"); then the one clicked says one of her `LINES`. **Their quests go in `Twins.interact`.**
+- Alphée and Constance Turcotte, twins (spelling: **Alphée**), from `reference/personnages/alfée-et-constance-turcotte.jpg`, nearly identical, a little under a head taller than Charlotte (age `"tween"`, a rig in `CharacterArt.RIGS`, not in `CharacterLook.AGES` so no random passerby gets it), who will be her best friends and give her quests (which ones: not decided, Julien will say). `CharacterLook.alphee()` (hair down, teal T-shirt with a heart, `look.necklace`), `constance()` (ponytail, beige sweater with the `"birds"` pattern, `look.earring`); which is which was my guess from the photo. `world/twins.gd` (`Twins`): in the middle lane at `TWINS_LOT`; "!" until the first click, the meeting (`MEETING`, Charlotte hands off, `flags.met_twins`, cleared by the debug menu's "Tout effacer"); then the one clicked says one of her `LINES`. **Their quests go in `Twins.interact`.**
 - Julien's list of quest ideas for later is in `docs/idees-de-quetes.md` (pizza hidden by a squirrel, jogging with Dad,
   buying sour-cream-and-onion chips at the dépanneur…): read it before inventing new quests, and tick them off there.
 - The dépanneurs have real Montréal prices (2026), in `Shop.PRICES` (candy 1,25 $, lollipop 0,75 $, chips 2,99 $, sloche 2,75 $, hot chocolate 2,25 $, popsicle 1,75 $, juice 2,25 $, pint of milk 3,29 $, bread 3,99 $, coffee 2,00 $; the specials board and the "CAFÉ 2 $" poster use them). `Shop._buy(picture, text, price)` first opens `ui/buy_dialog.gd` (`BuyDialog`, CanvasLayer 62, group "modal": item, price, pocket money and what is left, "Acheter" / "Non merci"; when short, how much is missing and only "D'accord"), then pays from `GameState.money`. Start money is 5,00 $ and quest rewards are 1–3 $ so a snack costs one or two quests.

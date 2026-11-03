@@ -68,7 +68,7 @@ const STAIR_SHAPES := [
 	[Vector2(0, 336), Vector2(75, 380), Vector2(130, 520), Vector2(115, 696)],
 ]
 
-# Front doors seen along the avenues of Rosemont (reference/portes.jpg): raised panels, an oval of leaded glass,
+# Front doors seen along the avenues of Rosemont (reference/rue/portes.jpg): raised panels, an oval of leaded glass,
 # stained glass, stacked diamonds, a 1950s flat door with three little windows, a narrow glass slit, vertical planks
 # with a peephole window, slanted glass slats, a half-moon fanlight, small-paned glass, an art-deco sunburst, a round
 # porthole, a wrought-iron grille over the glass, horizontal panels, tall arched panels, glazed and stained-glass
@@ -143,18 +143,18 @@ const HOUSES := [
 	},
 	{
 		# Dépanneur Xin-Xin fronts Dandurand: from 6e Avenue we see its side
-		# (reference/coin_dépanneur_sur_6eme_coin_dandurand.jpg).
+		# (reference/coin_dandurand/coin_dépanneur_sur_6eme_coin_dandurant.jpg).
 		"name": "depanneur", "kind": "depanneur_side", "width": 640.0, "halloween": false,
 		"bricks": ["#6E3A2E", "#7A4234", "#5E3029", "#844A3A", "#4E2A28", "#8C5440"], "mortar": "#B9AEA2",
 		"cornice": "#3F4448", "cornice_dark": "#2A2E31", "basement": [], "metal": "#1F1F1F",
 	},
 	{
-		# Between the dépanneur and the green lane (reference/entre_entrée_ruelle_et_coin_dandurand.jpg).
+		# Between the dépanneur and the green lane (reference/coin_dandurand/entre_entrée_ruelle_et_coin_dandurant.jpg).
 		"name": "garages", "kind": "garages", "width": 780.0, "halloween": false,
 		"bricks": ["#6B3A2E", "#7A4636", "#5A3028", "#86503E", "#4A2A26", "#93604A"], "mortar": "#B5AA9E",
 		"trim": "#F2F0EA", "trim_dark": "#A9A398", "basement": [], "metal": "#1F1F1F",
 	},
-	# The corner of 6e and Holt seen from 6e (reference/6eme_coin_holt.png, entree_ruelle_6eme_coin_holt.png): a long
+	# The corner of 6e and Holt seen from 6e (reference/coin_holt/6eme_coin_holt.png, entree_ruelle_6eme_coin_holt.png): a long
 	# brown-brick three-storey with stepped white stone lintels, a beige corrugated-metal annex with a grey shingle
 	# awning on the left, and the red corner window of dépanneur Oh Bon! on the right.
 	{
@@ -162,7 +162,7 @@ const HOUSES := [
 		"bricks": ["#7E4234", "#8A4A3A", "#74392D", "#93503E", "#6E3A2E", "#85463A"], "mortar": "#A8988A",
 		"lintel": "#EDE8DC", "lintel_dark": "#B5AE9F", "lintel_style": "none", "basement": [],
 	},
-	# Dépanneur Oh Bon! on Rue Holt at the 6e corner (reference/holt_coin_6eme.png): red storefront, a red and white
+	# Dépanneur Oh Bon! on Rue Holt at the 6e corner (reference/coin_holt/holt_coin_6eme.png): red storefront, a red and white
 	# checkerboard, its sign; iron galleries above, white-railed stairs up to the first one.
 	{
 		"name": "ohbon", "kind": "ohbon", "width": 760.0, "floors": 3, "halloween": false,
@@ -171,9 +171,9 @@ const HOUSES := [
 		"door": "#7A2E2E", "door_dark": "#4E1C1C",
 	},
 	{"name": "ruelle", "kind": "ruelle", "width": 560.0},
-	# The green lane near the Dandurand corner (reference/Entrée_ruelle_coin_dandurand.jpg).
+	# The green lane near the Dandurand corner (reference/ruelle/Entrée_ruelle_coin_dandurant.jpg).
 	{"name": "ruelle_verte", "kind": "ruelle_verte", "width": 640.0},
-	# Dépanneur Xin-Xin's real front, on Rue Dandurand (reference/dépanneur_on_dandurant.jpg).
+	# Dépanneur Xin-Xin's real front, on Rue Dandurand (reference/coin_dandurand/dépanneur_on_dandurant.jpg).
 	{
 		"name": "depanneur_front", "kind": "depanneur_front", "width": 780.0, "halloween": true,
 		"bricks": ["#6E3A2E", "#7A4234", "#5E3029", "#844A3A", "#4E2A28", "#8C5440"], "mortar": "#B9AEA2",
@@ -311,7 +311,7 @@ func _variant(i: int) -> Dictionary:
 	cfg.stair = stair
 	if rng.randf() < 0.5:
 		_mirror(cfg)
-	# Drawn last, so the rest of each house stays as it was (reference/portes.jpg, reference/escaliers.jpg).
+	# Drawn last, so the rest of each house stays as it was (reference/rue/portes.jpg, reference/rue/escaliers.jpg).
 	cfg.door_style = DOOR_STYLES[rng.randi_range(0, DOOR_STYLES.size() - 1)]
 	cfg.door_surround = ["lintel", "cornice", "pediment", "arch", "cornice"][rng.randi_range(0, 4)]
 	cfg.ornate = rng.randf() < 0.5
@@ -1213,7 +1213,7 @@ func _storefront() -> void:
 	_front_steps(cx)
 
 
-# A big red-brick school (from reference/School_on_dandurand.jpg): a long wing of tall paired windows
+# A big red-brick school (from reference/coin_dandurand/School_on_dandurant.jpg): a long wing of tall paired windows
 # and, near the corner, a tall pavilion with a diamond lattice in the brick. Stone sills and bands,
 # green copper cornices, a small cross on the parapet.
 func _school() -> void:
@@ -1887,7 +1887,7 @@ func _limb(from: Vector2, angle: float, length: float, width: float, depth: int,
 		_limb(to, angle + rng.randf_range(-0.65, 0.65), length * rng.randf_range(0.58, 0.76), width * 0.62, depth - 1, twigs, limbs)
 
 
-# The lane entrance by the Holt corner (reference/entree_ruelle_6eme_coin_holt.png): on the right the corner
+# The lane entrance by the Holt corner (reference/ruelle/entree_ruelle_6eme_coin_holt.png): on the right the corner
 # building's tall brick side, black conduits running down it, tags, its concrete footing; on the left the next
 # building's side with an iron stair and wooden treads curling up to a gallery; at the far end a white garage door
 # in a red frame under a black railing; a one-way sign on its post, the post of the "enfants en liberté" sign
@@ -2082,7 +2082,7 @@ func _ohbon() -> void:
 		_balcony(X0, store1, _fb(f), [])
 	_rect(X0 - 8, _door_top(2) - 52, store1 - X0 + 16, 16, "#EDEBE5", _stroke("#B9B5AC", 1.5))
 	_rect(X0 - 4, _door_top(2) - 36, store1 - X0 + 8, 30, "url(#drop)")
-	# The storefront (reference/holt_coin_6eme.png), left to right: a narrow window (a beer neon goes in it), the
+	# The storefront (reference/coin_holt/holt_coin_6eme.png), left to right: a narrow window (a beer neon goes in it), the
 	# black-framed glass door, the big window (the "OH BON!" neon goes in it, holt.gd), the red and white checkerboard,
 	# a white board. Over it a sloping brown canopy edged with a red fascia, and the white light-box sign over the door
 	# and the big window; a red footing under it all, little black handrails at the step.

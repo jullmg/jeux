@@ -12,7 +12,7 @@ const INK := Color("#3A3A48")
 const SHEET := Vector2(1000, 680)
 const SCALE := 1.0
 const CRAYONS := [Color("#E85FA0"), Color("#3D8BD9"), Color("#F2C230"), Color("#4FA34A"), Color("#E8812E"), Color("#8E5FC4")]
-## The map's geometry, in sheet pixels, in the real proportions (reference/google_map_immediate_area.png): a block is about three
+## The map's geometry, in sheet pixels, in the real proportions (reference/cartes/google_map_immediate_area.png): a block is about three
 ## times as long, Holt to Dandurand, as it is wide, 5e to 6e; the lanes run about 18 % of the way in from each street. North is up,
 ## west left: Rue Holt on top, the avenues run down the sheet. Left of SIDE is the paper's margin: the title, the compass, the stop sign.
 const SIDE := 300.0

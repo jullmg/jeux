@@ -88,7 +88,7 @@ static func dress_charlotte(look: CharacterLook) -> void:
 	ResourceSaver.save(_outfit, outfit_path())
 
 
-## Charlotte's mother (from reference/mere_charlotte.jpg): long wavy light-brown hair with blond lights, fair skin,
+## Charlotte's mother (from reference/personnages/mere_charlotte.jpg): long wavy light-brown hair with blond lights, fair skin,
 ## brown eyes; in the game a pretty floral dress rather than the photo's black sweater.
 static func mom() -> CharacterLook:
 	var look := CharacterLook.new()
@@ -112,7 +112,7 @@ static func mom() -> CharacterLook:
 	return look
 
 
-## Charlotte's father (from reference/pere_charlotte.jpg): short brown hair (no cap), clean-shaven, blue eyes,
+## Charlotte's father (from reference/personnages/pere_charlotte.jpg): short brown hair (no cap), clean-shaven, blue eyes,
 ## fair skin, a navy T-shirt with a bicycle on it.
 static func dad() -> CharacterLook:  # navy bike T-shirt, dark jeans, white sneakers
 	var look := CharacterLook.new()
@@ -135,7 +135,7 @@ static func dad() -> CharacterLook:  # navy bike T-shirt, dark jeans, white snea
 	return look
 
 
-## The twins Alphée and Constance Turcotte (reference/alfée-et-constance-turcotte.jpg): the same face and honey hair, a head
+## The twins Alphée and Constance Turcotte (reference/personnages/alfée-et-constance-turcotte.jpg): the same face and honey hair, a head
 ## taller than Charlotte ("tween"). What tells them apart: their hair and their clothes.
 static func _twin() -> CharacterLook:
 	var look := CharacterLook.new()

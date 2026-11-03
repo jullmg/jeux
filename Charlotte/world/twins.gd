@@ -1,6 +1,6 @@
 class_name Twins
 extends Node2D
-## Alphée and Constance Turcotte, twins, nearly identical and under a head taller than Charlotte (reference/alfée-et-constance-turcotte.jpg);
+## Alphée and Constance Turcotte, twins, nearly identical and under a head taller than Charlotte (reference/personnages/alfée-et-constance-turcotte.jpg);
 ## they will be her best friends and give her quests (not decided yet). They hang out in the middle lane: the first click is the
 ## meeting, a little conversation (`flags.met_twins`); after that, the one clicked says one of her lines. Quests go in `interact`.
 ## Clicks go through `hit_test`, which remembers which of the two was clicked.

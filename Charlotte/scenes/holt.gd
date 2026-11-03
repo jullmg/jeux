@@ -6,7 +6,7 @@ extends StreetScene
 
 func _init() -> void:
 	street_key = "holt"
-	# Dépanneur Oh Bon! on the 6e corner (reference/holt_coin_6eme.png), then the plexes.
+	# Dépanneur Oh Bon! on the 6e corner (reference/coin_holt/holt_coin_6eme.png), then the plexes.
 	layout = ["holt_nord", "rue_6e", "ohbon", "plex_14", "plex_15", "plex_16", "plex_28", "rue_5e", "holt_sud"]
 	cross_streets = {"rue_6e": 560.0, "rue_5e": 540.0}
 	trees_after = [2, 4]
@@ -52,7 +52,7 @@ func _build_cross_streets() -> void:
 	]
 
 
-# Dépanneur Oh Bon! (reference/holt_coin_6eme.png): the words on its light-box sign, "OH BON!" in red neon in the big
+# Dépanneur Oh Bon! (reference/coin_holt/holt_coin_6eme.png): the words on its light-box sign, "OH BON!" in red neon in the big
 # window right of the door, a beer neon in the narrow window (plain text, no logos). SVG coordinates: the shop's
 # first gallery floor at y 600, the light box at x 116-366, y 660-692.
 func _decorate_house(i: int, house: Sprite2D) -> void:
