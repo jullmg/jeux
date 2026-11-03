@@ -845,6 +845,56 @@ static func near_fence(rng: RandomNumberGenerator, w: float, h: float) -> String
 	return '<g transform="translate(0 %.1f)">%s</g>' % [NEAR_FENCE_ROOM, s]
 
 
+## The lane carrying on past an avenue, from depth `start` to the vanishing point: its yards, then the next avenue and the next
+## block's lane entrance, far to near, hazier with distance. `at`: (u, y, depth) -> where it is in the view. Own random numbers.
+static func _lanes_beyond(at: Callable, half: float, start: float) -> String:
+	const BLOCK := 3.6
+	const AVENUE := 0.9
+	const BLOCKS := 3
+	const CORNER := 0.6
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 77
+	var winter := Season.is_winter()
+	var palettes := Season.tree_palettes()
+	var hazed := func(c: String, amount: float) -> String: return "#" + Color(c).lerp(Color("#CFD6DC"), clampf(amount, 0.0, 0.8)).to_html(false)
+	var plane := func(u: float, top: float, d0: float, d1: float, fill: String) -> String:
+		return _poly([at.call(u, top, d0), at.call(u, top, d1), at.call(u, H, d1), at.call(u, H, d0)], fill)
+	var facing := func(u0: float, u1: float, top: float, bottom: float, d: float, fill: String) -> String:
+		return _poly([at.call(u0, top, d), at.call(u1, top, d), at.call(u1, bottom, d), at.call(u0, bottom, d)], fill)
+	var ground := func(u0: float, u1: float, d0: float, d1: float, fill: String) -> String:
+		return _poly([at.call(u0, H, d0), at.call(u1, H, d0), at.call(u1, H, d1), at.call(u0, H, d1)], fill)
+	var concrete := "#E9EDF0" if winter else "#A9A59D"
+	var s: String = ground.call(-half, half, start + BLOCKS * (BLOCK + AVENUE) - AVENUE, 900.0, hazed.call(concrete, 0.7))
+	for b in range(BLOCKS - 1, -1, -1):
+		var d0 := start + b * (BLOCK + AVENUE)
+		var d1 := d0 + BLOCK
+		var mist := 0.12 + b * 0.2
+		if b < BLOCKS - 1:
+			s += ground.call(-1800.0, 1800.0, d1, d1 + AVENUE, hazed.call("#F0F2F4" if winter else "#BDB7AC", mist))
+			s += ground.call(-1800.0, 1800.0, d1 + 0.14, d1 + AVENUE - 0.14, hazed.call("#D5DADF" if winter else "#4F5054", mist))
+		s += ground.call(-half, half, d0, d1, hazed.call(concrete, mist))
+		for u: float in [-half, half]:
+			var brick: String = hazed.call(PropArt._pick(rng, BRICKS), mist)
+			s += plane.call(u * 2.4, 300.0, d0 + CORNER, d1, brick)
+			for n in 3:
+				var d := lerpf(d1, d0 + CORNER, (n + 0.5) / 3.0)
+				var pick := rng.randi()
+				var pal: Array = [] if palettes.is_empty() else palettes[pick % palettes.size()]
+				s += _distant_tree(rng, at.call(u * 1.5, H, d), at.call(u * 1.5, 200.0, d), 210.0 / (1.0 + d), pal, "#5E4A3C")
+			s += plane.call(u, H - 175.0, d0 + CORNER, d1, hazed.call(BOARDS[0], mist))
+			var top := rng.randf_range(255.0, 295.0)
+			s += plane.call(u, top, d0, d0 + CORNER, brick)
+			if b > 0:
+				var out := u * 7.0
+				s += facing.call(u, out, top, H, d0, brick)
+				for row in 2:
+					for col in 7:
+						var cx := lerpf(u, out, (col + 0.5) / 7.0)
+						var wy := H - 110.0 - row * 118.0
+						s += facing.call(cx - 26.0, cx + 26.0, wy - 60.0, wy, d0, hazed.call("#9FB2BE", mist))
+	return s
+
+
 ## Where a long lane ends on a cross lane, a T, for a sprite of its own either side of the ground. We stand in the long lane looking
 ## toward the avenue; the cross lane comes past us and runs away, one-point perspective on CrossStreet's horizon at x `vx`, `half`
 ## either side of it at the fence line (depth 0). `s` is the side the long lane leaves on (1: to the right). u > 0 is that side:
@@ -896,12 +946,13 @@ static func tee(rng: RandomNumberGenerator, w: float, vx: float, s: float, half:
 		var past: float = (strip - vx - half) if s > 0.0 else (vx - half - strip)
 		far += '<rect x="%.1f" y="150" width="12" height="370" fill="url(#teesky)" opacity="%.2f"/>' % [strip, clampf(1.0 - (past + 130.0) / 130.0, 0.0, 1.0)]
 		strip += 12.0
-	# Across the avenue: its plexes, then the sidewalks and the road, far to near.
-	var u0 := -900.0
+	# The lanes of all the blocks are in line: over the avenue this one carries on, and so on to the vanishing point.
+	far += _lanes_beyond(at, half, FACADES)
+	# Across the avenue: its plexes either side of that lane's entrance, then the sidewalks and the road, far to near.
 	var tops: Array[float] = [268.0, 300.0, 250.0, 284.0, 262.0, 296.0]
 	var bricks: Array[String] = ["#8E3A2F", "#B4513F", "#9C6B4E", "#A8473A", "#7E4436", "#B5603F"]
-	var n := 0
-	while u0 < 900.0:
+	for n in 6:
+		var u0: float = half + (n / 2) * 300.0 if n % 2 == 0 else -half - (n / 2 + 1) * 300.0
 		var u1 := u0 + 300.0
 		var top: float = tops[n % tops.size()]
 		var brick: String = bricks[n % bricks.size()]
@@ -918,8 +969,6 @@ static func tee(rng: RandomNumberGenerator, w: float, vx: float, s: float, half:
 				far += facing.call(cx - 26.0, cx + 26.0, fy - 62.0, fy + 8.0, FACADES, "#EDE9DF")
 				far += facing.call(cx - 20.0, cx + 20.0, fy - 56.0, fy + 2.0, FACADES, "#7F97A8")
 		far += facing.call(u0 + 10.0, u1 - 10.0, H - 136.0, H - 124.0, FACADES, "#2A2622")
-		u0 = u1
-		n += 1
 	far += flat.call(FAR_ROAD, FACADES, "#F0F2F4" if winter else "#BDB7AC")
 	far += flat.call(ROAD, FAR_ROAD, "#D5DADF" if winter else "#4F5054")
 	far += flat.call(CURB, ROAD, "#F0F2F4" if winter else "#BDB7AC")
@@ -928,8 +977,8 @@ static func tee(rng: RandomNumberGenerator, w: float, vx: float, s: float, half:
 	while dash < 420.0:
 		far += _poly([at.call(dash, H, 1.62), at.call(dash + 60.0, H, 1.62), at.call(dash + 60.0, H, 1.66), at.call(dash, H, 1.66)], "#F2C230")
 		dash += 130.0
-	far += street_tree.call(-half * 1.05, FAR_ROAD + 0.03, 150.0)
-	far += street_tree.call(half * 1.15, FAR_ROAD + 0.03, 130.0)
+	far += street_tree.call(-half * 1.5, FAR_ROAD + 0.03, 150.0)
+	far += street_tree.call(half * 1.6, FAR_ROAD + 0.03, 130.0)
 	# The far side's yards: the backs of its buildings seen along them, with their galleries.
 	var back_u := -half - 170.0
 	var d := NEAREST
