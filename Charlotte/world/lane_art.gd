@@ -521,6 +521,41 @@ static func _foliage(rng: RandomNumberGenerator, c: Vector2, r: Vector2, colors:
 	return s
 
 
+## A tree seen from afar, not a ball on a stick: the trunk forks into limbs that each carry a clump of leaves, the clumps fanned out
+## wider than tall with sky between them, the ones on the upper left in the light and those on the lower right in the shade.
+## `size`: the crown's half-width round `crown`. Bare limbs (and `_foliage`'s twigs) when there are no `colors`.
+static func _distant_tree(rng: RandomNumberGenerator, foot: Vector2, crown: Vector2, size: float, colors: Array, bark: String) -> String:
+	var thick := maxf(size * 0.1, 1.2)
+	var s := _line(foot, foot.lerp(crown, 0.5), bark, thick)
+	s += _line(foot.lerp(crown, 0.5), foot.lerp(crown, 0.88), bark, thick * 0.6)
+	var count := clampi(int(size / 16.0) + 3, 3, 8)
+	var clumps := []
+	for k in count:
+		var a := lerpf(-PI - 0.15, 0.15, (k + rng.randf_range(0.2, 0.8)) / count)
+		var reach := rng.randf_range(0.5, 0.92)
+		clumps.append([crown + Vector2(cos(a) * reach * size, sin(a) * reach * size * 0.68 + size * 0.1), size * rng.randf_range(0.3, 0.46)])
+	clumps.append([crown + Vector2(rng.randf_range(-0.2, 0.2) * size, -0.1 * size), size * 0.4])
+	# Each limb leaves the trunk at its own height, goes out and then up.
+	for clump: Array in clumps:
+		var c: Vector2 = clump[0]
+		var from := foot.lerp(crown, rng.randf_range(0.42, 0.86))
+		var bend := Vector2(lerpf(from.x, c.x, 0.72), lerpf(from.y, c.y, 0.28))
+		s += '<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="%s" stroke-width="%.1f" fill="none" stroke-linecap="round"/>' % [from.x, from.y, bend.x, bend.y, c.x, c.y, bark, maxf(thick * 0.42, 0.8)]
+	# Shaded clumps first, so the lit ones lie over them.
+	var light := func(clump: Array) -> float:
+		return -((clump[0] as Vector2).x - crown.x) - ((clump[0] as Vector2).y - crown.y)
+	clumps.sort_custom(func(p, q): return light.call(p) < light.call(q))
+	var leaf := clampf(size * 0.085, 2.2, 8.0)
+	for clump: Array in clumps:
+		var lit: float = clampf(light.call(clump) / size, -1.0, 1.0)
+		var tones := []
+		for tone: String in colors:
+			tones.append(_light(tone, lit * 0.16) if lit > 0.0 else _dark(tone, -lit * 0.2))
+		var r: float = clump[1]
+		s += _foliage(rng, clump[0], Vector2(r * 1.08, r * 0.82), tones, leaf, 24)
+	return s
+
+
 ## Bare branches rising from `foot`: stems forking twice, a few red berries (from their own random numbers).
 static func _twigs(seed_value: int, foot: Vector2, r: Vector2) -> String:
 	var rng := RandomNumberGenerator.new()
@@ -841,7 +876,7 @@ static func tee(rng: RandomNumberGenerator, w: float, vx: float, s: float, half:
 		var crown: Vector2 = at.call(u, 210.0, d)
 		var pick := rng.randi()
 		var pal: Array = [] if palettes.is_empty() else palettes[pick % palettes.size()]
-		return _line(foot, crown, "#5E4A3C", maxf(16.0 / (1.0 + d), 1.5)) + _foliage(rng, crown, Vector2(size, size * 0.85) / (1.0 + d), pal, maxf(9.0 / (1.0 + d), 3.0), 170)
+		return _distant_tree(rng, foot, crown, size / (1.0 + d), pal, "#5E4A3C")
 	# The sky over the avenue, hiding the distant city from the T's side, fading in from above and out over the long lane.
 	var grad := Gradient.new()
 	grad.offsets = PackedFloat32Array([0.0, 0.35, 0.62, 0.82, 1.0])
@@ -1122,9 +1157,8 @@ static func junction(rng: RandomNumberGenerator, w: float) -> ImageTexture:
 			var crown: Vector2 = at.call(Vector2(x - side * rng.randf_range(30.0, 70.0), rng.randf_range(170.0, 250.0)), d)
 			var size := rng.randf_range(120.0, 170.0) / (1.0 + d)
 			var pal_i := rng.randi()
-			var tree := _line(foot, crown, hazed.call("#5E4A3C", d), maxf(16.0 / (1.0 + d), 1.2))
 			var pal: Array = [] if palettes.is_empty() else hazy_all.call(palettes[pal_i % palettes.size()], d)
-			tree += _foliage(rng, crown, Vector2(size, size * 0.85), pal, maxf(18.0 / (1.0 + d), 2.6), int(clampf(150.0 / (1.0 + d), 26.0, 70.0)))
+			var tree := _distant_tree(rng, foot, crown, size, pal, hazed.call("#5E4A3C", d))
 			trees.append([d, tree])
 	trees.sort_custom(func(p, q): return p[0] > q[0])
 	for tree in trees:
