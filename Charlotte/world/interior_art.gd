@@ -542,8 +542,8 @@ static func desk() -> ImageTexture:
 	s += '<rect x="66" y="116" width="10" height="144" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="2"/>'
 	for y in [130.0, 176.0, 222.0]:
 		s += '<rect x="258" y="%s" width="80" height="38" fill="none" stroke="#D9D2C4" stroke-width="2"/>' % y
-	s += '<path d="M200 100 q10 -40 60 -36 q40 4 40 36 z" fill="#8FB5A0" stroke="#5E8A72" stroke-width="2"/>'
-	s += '<path d="M250 100 q20 -30 60 -20 q30 10 30 20 z" fill="#F2B6CF" stroke="#B5647F" stroke-width="2"/>'
+	s += '<path d="M130 100 q10 -40 60 -36 q40 4 40 36 z" fill="#8FB5A0" stroke="#5E8A72" stroke-width="2"/>'
+	s += '<path d="M160 100 q20 -30 60 -20 q30 10 30 20 z" fill="#F2B6CF" stroke="#B5647F" stroke-width="2"/>'
 	s += '<path d="M120 100 q10 -30 40 -26 l20 26 z" fill="#F2D9A0" stroke="#B5A270" stroke-width="2"/>'
 	# Red office chair with a white sweater over the back.
 	s += '<path d="M40 40 Q40 20 70 20 H120 Q140 20 140 40 V130 H40 Z" fill="#D9343F" stroke="#8E1A24" stroke-width="3"/>'
@@ -1140,20 +1140,6 @@ static func mobile() -> ImageTexture:
 			_:
 				s += '<path d="M%d %d c-12 -10 -16 6 0 16 c16 -10 12 -26 0 -16 z" fill="%s" stroke="#C2406E" stroke-width="1.5"/>' % [k[0], k[1] - 6, k[2]]
 	return tex(90, 230, s)
-
-
-## Canvas 70x280: a growth chart on the wall: a painted ruler with a mark and a date at each height, a few heights in
-## coloured pencil, Charlotte's the latest.
-static func growth_chart() -> ImageTexture:
-	var s := '<rect x="14" y="2" width="42" height="276" rx="4" fill="#F7EFD8" stroke="#B59A66" stroke-width="2.5"/>'
-	for k in 28:
-		var y := 270.0 - k * 9.5
-		var long := k % 5 == 0
-		s += '<path d="M14 %.1f H%d" stroke="#8A6E3A" stroke-width="%s"/>' % [y, 38 if long else 28, "2" if long else "1.2"]
-	for m in [[200, "#E8505B", "S"], [160, "#4FA3E0", "L"], [120, "#7CCB5A", "C"]]:
-		s += '<path d="M14 %d H56" stroke="%s" stroke-width="3.2" stroke-linecap="round"/><circle cx="62" cy="%d" r="3.5" fill="%s"/>' % [m[0], m[1], m[0], m[1]]
-	s += '<path d="M10 120 l-6 -4 v8 z" fill="#E8505B"/>'
-	return tex(70, 280, s)
 
 
 ## Canvas 80x80: a round wall clock with a pastel rim and fat hands, ticking at the time it was painted (10 past 10).

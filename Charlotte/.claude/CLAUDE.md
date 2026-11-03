@@ -133,7 +133,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     options: `pattern` ("stars", "dots", "stripes", "diamonds"), `pattern_color`, `pattern_alpha`, `wainscot` (Color) +
     `wainscot_height` (panelled lower wall); shops use `tile_colors`.
   - `world/interior_art.gd` (`InteriorArt`): one SVG function per piece of furniture; `world/fairy_lights.gd` (`FairyLights`).
-    Decor pieces for any bedroom/house: `moon_decal`, `mobile` (sways, tweened in the scene), `growth_chart`, `wall_clock`, `house_plant`; kitchen/entrance: `wall_calendar`, `kitchen_toppers` (things on the fridge and cabinet), `kitchen_curtain`, `kitchen_mat`, `umbrella_stand`. SVG `<pattern>` does not render in these textures: draw checks/stripes as plain shapes.
+    Decor pieces for any bedroom/house: `moon_decal`, `mobile` (sways, tweened in the scene), `wall_clock`, `house_plant`; kitchen/entrance: `wall_calendar`, `kitchen_toppers` (things on the fridge and cabinet), `kitchen_curtain`, `kitchen_mat`, `umbrella_stand`. SVG `<pattern>` does not render in these textures: draw checks/stripes as plain shapes.
 - `scenes/house.gd` (extends `Interior`): Charlotte's flat, from the photos in `reference/charlotte_house_inside`:
   vestibule (0–640) → oak glass doorway → salon (–2260) → hallway → kitchen (3400–3960); Charlotte's bedroom is a separate
   area (5000–6650) reached through the "chacha" door (fade, camera limits switch). Charlotte is at scale 0.5 inside.
@@ -183,6 +183,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   hair, brown eyes, teal floral dress, tights, boots) in the kitchen, `CharacterLook.dad()` (short brown hair, no cap,
   clean-shaven, blue eyes, navy T-shirt with the "bike" top pattern) in the salon; both stand at 1.18× Charlotte's scale. Click them and they say a line (`MOM_LINES` / `DAD_LINES`
   in house.gd).
+- By her bedroom door, her height in pencil straight on the wall (`world/growth_marks.gd`, `GrowthMarks`): a line and "N ans" from 3 up to `GameState.age`.
 - Charlotte's hamster (`world/hamster.gd`, `Hamster`) lives in the terrarium on her bedroom dresser. The terrarium art is two
   layers, `InteriorArt.terrarium(false)` behind and `terrarium(true)` in front (glass glare, things on the dresser); the
   hamster node shares its position/scale and works in its canvas units. It wanders, grooms, runs its wheel, naps in the
@@ -245,6 +246,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Cyclists ride by in the traffic lane now and then (`world/cyclist.gd`, `Cyclist.random`: the bike is drawn, the rider is
   a `Character` with `riding = true`: each leg split at the knee (`_pedal_legs`, two-bone IK, foot on the turning pedal); `StreetScene._spawn_cyclists`,
   `_traffic`, own RNG, rarer in winter, sometimes ringing).
+- Squirrels in the lanes (`ruelle.gd` `_build_lane_squirrels`, `SQUIRRELS_MIDDLE` 6, `SQUIRRELS_CROSS` 2, own RNG): along the foot of the fences (`SQUIRREL_Y`), up the poles and the yard trees. They are drawn over the lane's ground, in front of the trees, so `Squirrel.slips_behind` moves one just behind the tree it climbs (`_home_index`) and back when it lands.
 - Background life: `WireBirds` (`world/wire_birds.gd`: pigeons and sparrows on the poles' cable, fly off when
   Charlotte comes close or runs, others land later; streets and lanes), children playing in the lanes (not on the
   streets): a `JumpRopeKid` (`world/jump_rope_kid.gd`, `StreetScene._build_kid`) and a `BallKid` (`world/ball_kid.gd`) in

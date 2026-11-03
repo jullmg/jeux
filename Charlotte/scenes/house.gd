@@ -734,7 +734,9 @@ func _build_bedroom() -> void:
 	_put(InteriorArt.terrarium(true), x + 30.0, 606.0, 0.85)
 	_put(InteriorArt.flower_painting(), x + 470.0, 330.0, 0.8, "wall")
 	_put(InteriorArt.moon_decal(), x + 340.0, 330.0, 0.85, "wall")
-	_put(InteriorArt.growth_chart(), x + 1365.0, 500.0, 0.85, "wall")
+	var marks := GrowthMarks.new()
+	marks.position = Vector2(x + 1364.0, WALL_BASE)
+	add_child(marks)
 	_put(InteriorArt.wall_clock(), x + 1300.0, 260.0, 0.8, "wall")
 	# A baby mobile over the bed, turning gently; stars on the ceiling that glow a little.
 	var mobile := _put(InteriorArt.mobile(), x + 540.0, 270.0, 0.8)
