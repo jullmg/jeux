@@ -179,6 +179,16 @@ static func constance() -> CharacterLook:
 
 
 ## Her usual look: the yellow polka-dot dress.
+## A copy of her look dressed to go out in winter (her saved outfit stays as it is). Unless she chose a hat, her tuque is red.
+static func charlotte_for_winter(look: CharacterLook) -> CharacterLook:
+	var dressed := look.duplicate(true) as CharacterLook
+	var bare_headed := dressed.hat == ""
+	Season.dress_for_weather(dressed)
+	if bare_headed:
+		dressed.hat_color = Color("#D9342B")
+	return dressed
+
+
 static func usual() -> CharacterLook:
 	var look := CharacterLook.new()
 	look.mouth = "smile"

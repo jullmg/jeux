@@ -1061,8 +1061,7 @@ func _spawn_charlotte(x: float) -> Character:
 	charlotte.look = CharacterLook.charlotte()
 	# Outdoors in winter she has her coat, boots, tuque and scarf on (a copy: her chosen outfit stays as it is).
 	if Season.is_winter():
-		charlotte.look = charlotte.look.duplicate(true)
-		Season.dress_for_weather(charlotte.look)
+		charlotte.look = CharacterLook.charlotte_for_winter(charlotte.look)
 	charlotte.fidgets = true
 	charlotte.step_sound = Sfx.step_for(true)
 	charlotte.position = Vector2(x, CHARLOTTE_Y)

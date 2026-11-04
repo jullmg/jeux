@@ -282,8 +282,7 @@ func _build_charlotte() -> void:
 	_charlotte.look = CharacterLook.charlotte()
 	# Outdoors in winter: coat, boots, tuque and scarf (a copy; her chosen outfit stays as it is).
 	if Season.is_winter():
-		_charlotte.look = _charlotte.look.duplicate(true)
-		Season.dress_for_weather(_charlotte.look)
+		_charlotte.look = CharacterLook.charlotte_for_winter(_charlotte.look)
 	_charlotte.position = Vector2(x, CHARLOTTE_Y)
 	_charlotte.scale = Vector2.ONE * CHAR_SCALE
 	_charlotte.facing = -1  # faces left / camera
