@@ -108,7 +108,7 @@ const HOUSES := [
 		"stair": [Vector2(448, 336), Vector2(510, 456), Vector2(570, 576), Vector2(628, 696)],
 		"tread": "#D8D3C8", "tread_dark": "#8A857A", "stair_beam": true,
 		"steps_side": "left", "mailbox": true,
-		"fence": "black", "fence_style": "wide", "bare_garden": true, "basement": [455.0],
+		"fence": "black", "fence_style": "wide", "bare_garden": true, "basement": [120.0, 455.0],
 	},
 	{
 		"name": "duplex_voisin_droite",
@@ -485,6 +485,7 @@ func _plex_front() -> void:
 			_iron_balcony(b[0], b[1], k.rail_up[0], k.rail_up[1], _fb(f), slab_h, [], cx, -1.0)
 			for px: float in k.get("iron_posts", []):
 				_iron_post(px, _fb(f) + slab_h + 8.0, _fb(f - 1))
+				_rect(px + 10.0, _fb(0) + slab_h, 5, ground_y - _fb(0) - slab_h - 30.0, "#9AA0A6", _stroke("#6E7277", 1))
 		else:
 			_balcony(b[0], b[1], _fb(f), [])
 	var p: Array = k.porch
@@ -523,7 +524,7 @@ func _plex_front() -> void:
 		_stairs(p0, s[1] + Vector2(0, oy), s[2] + Vector2(0, oy), p3)
 	var gaps := [[cx - 66, cx + 66], [p3.x - 42, p3.x + 42]]
 	if k.get("steps_side", "") == "left":
-		gaps = [[p[0] - 120.0, p[0] - 20.0], [p3.x - 42, p3.x + 42]]
+		gaps = [[p[0] - 90.0, p[0] + 5.0], [p3.x - 42, p3.x + 42]]
 	gaps.sort_custom(func(a, c): return a[0] < c[0])
 	_garden(gaps)
 	_fence(gaps)
@@ -537,15 +538,22 @@ func _side_steps(right: float) -> void:
 	var sh := (ground_y - top) / count
 	for i in count:
 		var x := right - run * float(i + 1) / count
-		_rect(x, top + i * sh, run / count + 6.0, sh, k.step, _stroke(k.step_dark, 1.5))
-		_rect(x, top + i * sh, run / count + 6.0, 3, "#FFFFFF", 'opacity="0.25"')
-	var a := Vector2(right - 6.0, _fb(0) - RAIL_H)
-	var b := Vector2(right - run - 6.0, ground_y - RAIL_H)
-	_line("M%s %s Q%s %s %s %s" % [_n(a.x), _n(a.y), _n((a.x + b.x) / 2.0), _n(a.y + (b.y - a.y) * 0.3), _n(b.x), _n(b.y)], 4.5)
-	for i in 5:
-		var p := a.lerp(b, (i + 1) / 6.0)
-		_rect(p.x - 1.25, p.y + (i * 2.0), 2.5, RAIL_H - i * 2.0, k.metal, _metal_stroke())
-	_path("M%s %s c-10 0 -12 14 -4 16 c6 1 6 -7 1 -6" % [_n(b.x), _n(b.y)], "none", _stroke(k.metal, 3.5))
+		_rect(x, top + i * sh, right - x + 6.0, sh, k.step, _stroke(k.step_dark, 1.5))
+		_rect(x, top + i * sh, right - x + 6.0, 3, "#FFFFFF", 'opacity="0.25"')
+	# The two curved rails, one each side of the steps, their bars following the curve, a heart on each, a curl at the foot.
+	for rail in [[Vector2(right - 12.0, _fb(0) - 62.0), Vector2(right - run - 14.0, ground_y - 54.0)], [Vector2(right + 30.0, _fb(0) - 62.0), Vector2(right - run + 44.0, ground_y - 54.0)]]:
+		var a: Vector2 = rail[0]
+		var c: Vector2 = rail[1]
+		var bend := Vector2(lerpf(a.x, c.x, 0.72), lerpf(a.y, c.y, 0.2))
+		var pts: Array[Vector2] = []
+		for i in 13:
+			var t := i / 12.0
+			pts.append(a.lerp(bend, t).lerp(bend.lerp(c, t), t))
+		_line(_polyline(pts, Vector2.ZERO), 4.0)
+		for i in range(1, 12, 2):
+			_rect(pts[i].x - 1, pts[i].y, 2, minf(ground_y - pts[i].y - 2.0, 54.0), k.metal)
+		_iron_heart(pts[5].x, pts[5].y + 24.0, 8.0)
+		_path("M%s %s c-10 0 -12 14 -4 16 c6 1 6 -7 1 -6" % [_n(c.x), _n(c.y)], "none", _stroke(k.metal, 3))
 
 
 func _bricks(y0: float, y1: float) -> void:
@@ -744,12 +752,22 @@ func _iron_balcony(sx0: float, sx1: float, x0: float, x1: float, floor_y: float,
 	if crest_x >= 0.0:
 		for side in [-1.0, 1.0]:
 			_path("M%s %s c%s -1 %s -4 %s -10 c%s -5 %s -6 %s -2 c%s 2 %s 4 %s 2" % [_n(crest_x), _n(top - 1), _n(side * 8), _n(side * 16), _n(side * 20), _n(side * 2), _n(side * -7), _n(side * -7), _n(side * 1), _n(side * 4), _n(side * 4)], "none", _stroke(k.metal, 2) + ' stroke-linecap="round"')
+	# Hearts low on the railing, one each side of the door, downstairs.
+	if dense > 0.0:
+		for side in [-1.0, 1.0]:
+			_iron_heart(crest_x + side * 34.0, floor_y - 21.0, 9.0)
 	_rect(sx0 - 6, floor_y, sx1 - sx0 + 12, slab_h, k.slab, _stroke(k.slab_dark, 1.5))
 	_rect(sx0 - 6, floor_y, sx1 - sx0 + 12, 5, "#B9B5AC")
 	_rect(sx0 - 6, floor_y + slab_h - 4, sx1 - sx0 + 12, 4, k.slab_dark)
 	_rect(sx0 + 4, floor_y + slab_h, sx1 - sx0 - 8, 8, "#D9D2C2")
 	_rect(sx0 + 4, floor_y + slab_h + 8, sx1 - sx0 - 8, 22, "url(#drop)")
 	_snow(sx0 - 6, sx1 - sx0 + 12, floor_y - 2)
+
+
+# A wrought-iron heart: two scrolls rising from one point and curling in at the top.
+func _iron_heart(cx: float, cy: float, r: float, width := 2.0) -> void:
+	for side in [-1.0, 1.0]:
+		_path("M%s %s C%s %s %s %s %s %s C%s %s %s %s %s %s" % [_n(cx), _n(cy + r), _n(cx + side * r * 1.5), _n(cy), _n(cx + side * r * 1.25), _n(cy - r * 1.15), _n(cx + side * r * 0.5), _n(cy - r * 0.95), _n(cx + side * r * 0.1), _n(cy - r * 0.85), _n(cx + side * r * 0.2), _n(cy - r * 0.3), _n(cx + side * r * 0.5), _n(cy - r * 0.45)], "none", _stroke(k.metal, width) + ' stroke-linecap="round"')
 
 
 # Twin thin uprights holding up the balcony, iron scrolls between them at the top and the foot.
@@ -1289,7 +1307,7 @@ func _garden(gaps: Array) -> void:
 	if k.get("bare_garden", false):
 		# Dark soil behind the fence, a few fallen leaves on it, as on the photos.
 		for seg in _segments(X0, X1, gaps):
-			_rect(seg[0], ground_y - 40, seg[1] - seg[0], 40, "#2E2620")
+			_rect(seg[0], ground_y - 40, seg[1] - seg[0], 40, "#6B5646")
 			var lx: float = seg[0] + 4.0
 			while lx < seg[1] - 4.0:
 				_leaf(lx, ground_y - rng.randf_range(1.0, 26.0), rng.randf_range(0.0, TAU))
@@ -1341,6 +1359,11 @@ func _fence(gaps: Array) -> void:
 			_rect(seg[0], top + 10, seg[1] - seg[0], 3, col)
 			_rect(seg[0], ground_y - 11, seg[1] - seg[0], 3, col)
 			_snow(seg[0], seg[1] - seg[0], top + 10)
+			# Iron hearts along it, one every few bars.
+			var heart: float = seg[0] + 34.5
+			while heart < seg[1] - 18.0:
+				_iron_heart(heart, ground_y - 31.0, 11.0, 2.4)
+				heart += 60.0
 			for px in [seg[0], seg[1] - 6.0]:
 				_rect(px, top - 2, 6, ground_y - top + 2, col)
 				_circle(px + 3, top - 3, 4, col)
