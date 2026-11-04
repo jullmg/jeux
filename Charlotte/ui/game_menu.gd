@@ -200,6 +200,7 @@ func _decorate() -> void:
 	CuteArt.cat_head(_card, Vector2(54, 0 + bob.call(0.0, 2.5)), 26, Color("#E8954A"))
 	CuteArt.dog_head(_card, Vector2(w - 56, 2 + bob.call(1.7, 2.5)), 26, Color("#C9A27A"), Color("#7A5232"))
 	CuteArt.hamster_head(_card, Vector2(w / 2.0 + 110.0, h + 3 + bob.call(3.1, 3.0)), 20)
+	CuteArt.capybara_head(_card, Vector2(w / 2.0 - 100.0, h + 5 + bob.call(4.4, 3.0)), 24)
 	for f in [[Vector2(8, h - 8), Color("#F2A7C9")], [Vector2(26, h + 4), Color("#FFFFFF")], [Vector2(w - 10, h - 6), Color("#9B59B6")],
 			[Vector2(w - 30, h + 6), Color("#F7C6D9")], [Vector2(-6, 60), Color("#FFD23F")], [Vector2(w + 6, 70), Color("#F2A7C9")]]:
 		CuteArt.flower(_card, f[0], 12, f[1])
@@ -488,7 +489,8 @@ class _Doodles:
 			["sun", Vector2(170, 130), 30.0, 0.0], ["heart", Vector2(300, 520), 17.0, 1.1], ["star", Vector2(215, 330), 16.0, 2.0],
 			["flower", Vector2(120, 560), 18.0, 0.6], ["star", Vector2(1010, 150), 15.0, 1.5], ["heart", Vector2(1120, 360), 19.0, 2.6],
 			["flower", Vector2(1040, 560), 18.0, 3.2], ["star", Vector2(930, 640), 14.0, 0.3], ["heart", Vector2(240, 90), 12.0, 2.2],
-			["flower", Vector2(1150, 120), 14.0, 1.9]]
+			["flower", Vector2(1150, 120), 14.0, 1.9],
+			["capy", Vector2(160, 430), 34.0, 0.9], ["capy", Vector2(1110, 560), 30.0, 2.4], ["capy", Vector2(1120, 230), 20.0, 3.7]]
 		for it in items:
 			var c: Vector2 = it[1] + Vector2(sin(t * 0.9 + it[3]) * 4.0, sin(t * 1.3 + it[3] * 1.7) * 6.0)
 			var r: float = it[2]
@@ -499,5 +501,7 @@ class _Doodles:
 					CuteArt.heart(self, c, r, CRAYONS[0], true, rng)
 				"star":
 					CuteArt.star(self, c, r, CRAYONS[2], true, rng)
+				"capy":
+					CuteArt.capybara(self, c, r, true, rng)
 				_:
 					CuteArt.flower(self, c, r, CRAYONS[5], true, rng)

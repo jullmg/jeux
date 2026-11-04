@@ -633,7 +633,10 @@ class _Sheet:
 			CuteArt.heart(self, p, 11.0, CRAYONS[0], true, _rng)
 		for p in [Vector2(120, 612), Vector2(250, 620), Vector2(36, 330)]:
 			CuteArt.star(self, p, 11.0, CRAYONS[2], true, _rng)
-		for p in [Vector2(185, 600), Vector2(262, 340), Vector2(40, 500)]:
+		# Capybaras: a big one in the margin, a little one in her yard by the swing.
+		CuteArt.capybara(self, Vector2(180, 560), 30.0, true, _rng)
+		CuteArt.capybara(self, Vector2(HOUSE_X - 52.0, HOUSE_Y + 14.0), 8.0, true, _rng)
+		for p in [Vector2(100, 565), Vector2(262, 340), Vector2(40, 500)]:
 			CuteArt.flower(self, p, 11.0, CRAYONS[5], true, _rng)
 		# What the map is for.
 		_text("Mon coin du monde !", Vector2(150, 650), 18, CRAYONS[3], -0.02)

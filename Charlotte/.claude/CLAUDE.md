@@ -398,7 +398,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   licences): `Sfx.play(name, world_position = Vector2.INF, volume_db, pitch)`; names include steps (`Sfx.step_for(outside)`
   picks wood / street / leaves / snow by season), door, click, tv, fridge, miam, meow, purr, bark, squeak, nibble, page,
   swoosh, pop, chime, goodnight, bird, wind. `Sfx.ambience(scene)` adds birdsong outdoors (not in winter).
-- `ui/cute_art.gd` (`CuteArt`): little drawings on any CanvasItem (cat, dog, hamster heads, flower, heart, star, sun,
+- `ui/cute_art.gd` (`CuteArt`): little drawings on any CanvasItem (cat, dog, hamster heads, `capybara` / `capybara_head` with an orange on its head: Julien wants some in the children's doodles on the menu, the map and the notebook, flower, heart, star, sun,
   house, Charlotte's self-portrait), clean or `crayon` (hatched fill clipped to the shape, wobbly double outline). The
   notebook's doodles use the crayon style, the menu card the clean one.
 - `ui/game_menu.gd` (`GameMenu` autoload, CanvasLayer 78): ☰ button top-left or Escape (unless the notebook is open)

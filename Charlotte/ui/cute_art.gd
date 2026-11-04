@@ -1,6 +1,6 @@
 class_name CuteArt
 extends RefCounted
-## Little drawings for the UI, drawn on any CanvasItem: a cat's, a dog's and a hamster's head, flowers, hearts, stars,
+## Little drawings for the UI, drawn on any CanvasItem: a cat's, a dog's and a hamster's head, a capybara (with an orange on its head), flowers, hearts, stars,
 ## a smiling sun, a house, Charlotte's self-portrait. Two styles: clean (outlined, for the menu) or `crayon` (a
 ## child's wax-crayon drawing for her notebook: hatched fill that stays inside the shape, a wobbly outline gone over
 ## twice). Sizes in px; `rng` makes the crayon wobble repeatable.
@@ -50,6 +50,50 @@ static func hamster_head(ci: CanvasItem, c: Vector2, r: float, crayon := false, 
 	_face(ci, c + Vector2(0, -0.12) * r, r * 0.9, crayon, rng)
 	_nose(ci, c + Vector2(0, 0.1) * r, r * 0.1)
 	ci.draw_rect(Rect2(c + Vector2(-0.08, 0.26) * r, Vector2(0.16, 0.16) * r), Color.WHITE)
+
+
+const CAPY := Color("#A97C50")
+
+
+# A capybara seen from the side, as a child draws it: a barrel of a body, a big blunt snout, tiny ears, stubby legs, and a
+# little orange on its head. `c`: the middle of its body; `r`: half its length.
+static func capybara(ci: CanvasItem, c: Vector2, r: float, crayon := false, rng: RandomNumberGenerator = null) -> void:
+	for x in [-0.58, -0.3, 0.28, 0.56]:
+		_shape(ci, _oval(c + Vector2(x, 0.66) * r, Vector2(r * 0.12, r * 0.26)), CAPY.darkened(0.2), crayon, rng)
+	_shape(ci, _oval(c, Vector2(r, r * 0.6)), CAPY, crayon, rng)
+	_shape(ci, _oval(c + Vector2(0, 0.28) * r, Vector2(r * 0.78, r * 0.26)), CAPY.lightened(0.28), crayon, rng, false)
+	# The head, the snout, the nostril, the ear, the eye, the cheek and the smile.
+	_shape(ci, _oval(c + Vector2(0.95, -0.14) * r, Vector2(r * 0.52, r * 0.42)), CAPY.lightened(0.06), crayon, rng)
+	_shape(ci, _oval(c + Vector2(1.34, -0.04) * r, Vector2(r * 0.22, r * 0.3)), CAPY.darkened(0.28), crayon, rng)
+	ci.draw_circle(c + Vector2(1.42, -0.12) * r, maxf(r * 0.045, 1.0), Color("#2B2B33"))
+	_shape(ci, _oval(c + Vector2(0.78, -0.55) * r, Vector2(r * 0.1, r * 0.13)), CAPY.darkened(0.15), crayon, rng)
+	ci.draw_circle(c + Vector2(1.12, -0.26) * r, maxf(r * 0.065, 1.2), Color("#2B2B33"))
+	ci.draw_circle(c + Vector2(1.1, -0.29) * r, maxf(r * 0.025, 0.6), Color.WHITE)
+	ci.draw_circle(c + Vector2(1.0, 0.0) * r, r * 0.09, Color(PINK, 0.7))
+	_stroke(ci, [c + Vector2(1.22, 0.08) * r, c + Vector2(1.3, 0.14) * r, c + Vector2(1.4, 0.1) * r], LINE, maxf(1.4, r * 0.05), crayon, rng)
+	# The orange.
+	var top := c + Vector2(0.9, -0.62) * r
+	_shape(ci, _oval(top, Vector2(r * 0.2, r * 0.18)), Color("#F29B30"), crayon, rng)
+	_shape(ci, _oval(top + Vector2(0.06, -0.2) * r, Vector2(r * 0.09, r * 0.05)), Color("#5FAE4F"), crayon, rng, false)
+
+
+# A capybara looking at us, for peeking over an edge: a wide blunt face, tiny ears, the orange on top.
+static func capybara_head(ci: CanvasItem, c: Vector2, r: float, crayon := false, rng: RandomNumberGenerator = null) -> void:
+	for side in [-1.0, 1.0]:
+		_shape(ci, _oval(c + Vector2(side * 0.72, -0.62) * r, Vector2(r * 0.14, r * 0.17)), CAPY.darkened(0.15), crayon, rng)
+	_shape(ci, _oval(c, Vector2(r * 0.98, r * 0.84)), CAPY, crayon, rng)
+	_shape(ci, _oval(c + Vector2(0, 0.36) * r, Vector2(r * 0.58, r * 0.4)), CAPY.lightened(0.25), crayon, rng, false)
+	_shape(ci, _oval(c + Vector2(0, 0.14) * r, Vector2(r * 0.3, r * 0.17)), CAPY.darkened(0.3), crayon, rng)
+	for side in [-1.0, 1.0]:
+		ci.draw_circle(c + Vector2(side * 0.1, 0.12) * r, maxf(r * 0.035, 0.8), Color("#2B2B33"))
+		var e := c + Vector2(side * 0.46, -0.2) * r
+		ci.draw_circle(e, maxf(r * 0.08, 1.4), Color("#2B2B33"))
+		ci.draw_circle(e + Vector2(-0.03, -0.03) * r, maxf(r * 0.03, 0.7), Color.WHITE)
+		ci.draw_circle(c + Vector2(side * 0.66, 0.2) * r, r * 0.1, Color(PINK, 0.7))
+	_stroke(ci, [c + Vector2(-0.14, 0.4) * r, c + Vector2(0, 0.46) * r, c + Vector2(0.14, 0.4) * r], LINE, maxf(1.4, r * 0.05), crayon, rng)
+	var top := c + Vector2(0, -0.92) * r
+	_shape(ci, _oval(top, Vector2(r * 0.3, r * 0.24)), Color("#F29B30"), crayon, rng)
+	_shape(ci, _oval(top + Vector2(0.08, -0.26) * r, Vector2(r * 0.11, r * 0.06)), Color("#5FAE4F"), crayon, rng, false)
 
 
 static func flower(ci: CanvasItem, c: Vector2, r: float, petal: Color, crayon := false, rng: RandomNumberGenerator = null) -> void:

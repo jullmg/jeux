@@ -364,8 +364,9 @@ class _Paper:
 			CuteArt._shape(self, CuteArt._oval(Vector2(362 + k[0], 84 + k[1]), Vector2(k[2], k[2] * 0.8)), Color("#BFD3EA"), true, _rng)
 		for at in [Vector2(37, 150), Vector2(37, 330), Vector2(37, 500)]:
 			CuteArt.heart(self, at, 11, pink, true, _rng)
-		for at in [Vector2(37, 240), Vector2(37, 420), Vector2(size.x - 44, 340)]:
+		for at in [Vector2(37, 240), Vector2(37, 420)]:
 			CuteArt.star(self, at, 11, yellow, true, _rng)
+		CuteArt.capybara(self, Vector2(size.x - 62, 336), 21, true, _rng)
 		CuteArt.hamster_head(self, Vector2(37, size.y - 28), 17, true, _rng)
 		var cat := Vector2(size.x - 98, size.y - 66)
 		CuteArt.cat_head(self, cat, 20, Color("#8E8E96"), true, _rng)
