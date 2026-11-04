@@ -17,7 +17,8 @@ func setup(houses: Array) -> void:
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://art/decor/windows.json"))
 	for h in houses:
 		for w in data.get(h.art, []):
-			if w.flower_box:
+			# (Charlotte's own windows downstairs have no cat at home.)
+			if w.flower_box or w.get("no_cat", false):
 				continue
 			var p: Array = w.pane
 			var s: float = h.scale

@@ -88,14 +88,6 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 		_label("RUELLE\nVERTE", house.position + Vector2(_tex("ruelle_verte").get_width() / 2.0 + 90.0, 416.0) * HOUSE_SCALE, Vector2(72, 36), 12, Color.WHITE, Color("#1E5E30"))
 
 
-# The neighbours' cat on its railing.
-func _build_landmarks() -> void:
-	var cat := Cat.new()
-	cat.position = _house_origin(layout.find("duplex_voisin_gauche")) + Vector2(300, 552) * HOUSE_SCALE
-	cat.scale = Vector2.ONE * 0.7
-	add_child(cat)
-
-
 # Charlotte's own front door (ground floor of her duplex): click it to go inside. Click Rue Dandurand or Rue Holt
 # to turn the corner, the lane entrances to go into the lane.
 func _build_doors() -> void:

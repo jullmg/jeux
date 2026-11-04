@@ -1,7 +1,7 @@
 extends Node2D
 # ══════════════════════════════════════════════════════════════
 # Intro screen – full living street scene + the art/logo.png title.
-# Uses real game components: SkyBackdrop, Skyline, Cloud, Street, Squirrel, Cat,
+# Uses real game components: SkyBackdrop, Skyline, Cloud, Street, Squirrel,
 # StrayCat, Dog, WindowCats, Birds, Character (Charlotte), PropArt, Foreground, Wind.
 # "Continuer" picks up the last game played, "Mes parties" lists the saved games (play, erase, or start a new one
 # in a free slot); with none saved, "Nouvelle partie". Enter/Space = the first button.
@@ -61,7 +61,6 @@ func _ready() -> void:
 	add_child(Birds.new())
 	_build_houses()
 	_build_window_cats()
-	_build_cat()
 	_build_street()
 	_build_tree_shadows()
 	_build_passersby()
@@ -183,20 +182,6 @@ func _build_window_cats() -> void:
 	_window_cats = WindowCats.new()
 	_window_cats.setup(houses)
 	add_child(_window_cats)
-
-
-# ─────────────────────────────────────────────────────────────
-# Cat on the left-neighbour's railing
-# ─────────────────────────────────────────────────────────────
-
-func _build_cat() -> void:
-	var idx := LAYOUT.find("duplex_voisin_gauche")
-	if idx < 0:
-		return
-	var cat := Cat.new()
-	cat.position = _house_origin(idx) + Vector2(300, 552) * HOUSE_SCALE
-	cat.scale = Vector2.ONE * 0.7
-	add_child(cat)
 
 
 # ─────────────────────────────────────────────────────────────

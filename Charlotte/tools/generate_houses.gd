@@ -729,7 +729,7 @@ func _hung_window(x: float, y: float, w: float, h: float) -> void:
 	if season == "autumn":
 		if not windows.has(k.name):
 			windows[k.name] = []
-		windows[k.name].append({"pane": [x + 8, y + 8, w - 16, h - 16], "bar_y": rail_y, "trim": FRAME, "lit": lit, "flower_box": false})
+		windows[k.name].append({"pane": [x + 8, y + 8, w - 16, h - 16], "bar_y": rail_y, "trim": FRAME, "lit": lit, "flower_box": false, "no_cat": y > _fb(1)})
 	_rect(x - 14, y + h + 2, w + 28, 15, k.lintel, _stroke(k.lintel_dark, 1.5))
 	_rect(x - 14, y + h + 2, w + 28, 3, "#FFFFFF", 'opacity="0.25"')
 	_rect(x - 10, y + h + 17, w + 20, 5, "#000000", 'opacity="0.16"')

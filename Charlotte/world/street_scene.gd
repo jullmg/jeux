@@ -223,7 +223,7 @@ func _decorate_house(_i: int, _house: Sprite2D) -> void:
 	pass
 
 
-## One-off characters or details on the facades (e.g. a cat on a railing).
+## One-off characters or details on the facades.
 func _build_landmarks() -> void:
 	pass
 
