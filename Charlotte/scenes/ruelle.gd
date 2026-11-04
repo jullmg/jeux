@@ -31,6 +31,8 @@ const AVENUE_W := 560.0
 const WALL_W := 470.0
 ## Where Alphée and Constance hang out, in the middle lane: this lot, just short of Charlotte's yard.
 const TWINS_LOT := 5
+## How many lots away from where they play the twins go to hide.
+const HIDE_FROM := 3
 ## Squirrels in a lane, along the foot of the fences.
 const SQUIRRELS_MIDDLE := 6
 const SQUIRRELS_CROSS := 2
@@ -50,6 +52,7 @@ const SCENES := {
 # Lots left to right (x from, x to; their kind), the openings (to an avenue or another lane), clothesline pulleys.
 var _lots: Array[Vector2] = []
 var _kinds: Array[String] = []
+var _front_sprites := {}
 var _openings: Array[Dictionary] = []
 var _pulleys: Array[Vector2] = []
 var _poles: Array[float] = []
@@ -390,6 +393,7 @@ func _build_fronts() -> void:
 		sprite.material = weathered(i + 50, 0.25)
 		sprite.position = Vector2(lot.x, FENCE_Y - LaneArt.H)
 		add_child(sprite)
+		_front_sprites[i] = sprite
 	# Dad's bike leaning on Charlotte's fence.
 	if _own >= 0:
 		var own := _lots[_own]
@@ -482,12 +486,49 @@ func _build_lane_squirrels() -> Array[Squirrel]:
 	return out
 
 
+# Where the twins hide for hide and seek: behind a solid fence, one each side of where they play and well away from it.
+func _hide_spots() -> Array:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + 73
+	var sides: Array = [[], []]
+	for i: int in _front_sprites:
+		if _kinds[i] in ["boards", "cedar"] and i != _own and absi(i - TWINS_LOT) >= HIDE_FROM:
+			sides[0 if i < TWINS_LOT else 1].append(i)
+	var picks: Array = []
+	for side: Array in sides:
+		if not side.is_empty():
+			picks.append(side[rng.randi_range(0, side.size() - 1)])
+	# Both on one side if the other has no fence to hide behind.
+	for side: Array in sides:
+		for i: int in side:
+			if picks.size() < 2 and not picks.has(i):
+				picks.append(i)
+	var spots := []
+	for i: int in picks:
+		var sprite: Sprite2D = _front_sprites[i]
+		var x := rng.randf_range(0.3, 0.7) * (_lots[i].y - _lots[i].x)
+		spots.append({"x": _lots[i].x + x, "top": sprite.position.y + _opaque_top(sprite, x), "front": sprite})
+	return spots
+
+
+# The highest solid pixel of a sprite at x, in its own (unscaled) space.
+func _opaque_top(sprite: Sprite2D, x: float) -> float:
+	var image := sprite.texture.get_image()
+	var k := float(image.get_width()) / sprite.texture.get_width()
+	for y in image.get_height():
+		if image.get_pixel(int(x * k), y).a > 0.8:
+			return y / k
+	return float(LaneArt.H)
+
+
 func _build_twins() -> void:
 	var twins := Twins.new()
 	twins.position = Vector2((_lots[TWINS_LOT].x + _lots[TWINS_LOT].y) / 2.0, NEIGHBOUR_Y + 10.0)
 	twins.scale = Vector2.ONE * CHAR_SCALE
 	twins.control = _control
+	twins.hide_spots = _hide_spots()
 	add_child(twins)
+	twins.spawn_hidden()
 	add_child(QuestMark.make(twins.position + Vector2(0, -190), twins.waiting))
 
 

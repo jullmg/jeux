@@ -350,6 +350,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     `Carry.restore` as they open, so it follows her through doors and saves (old saves are migrated). A NEW thing to carry =
     one more case in `Carry._build()`, then `Carry.take` / `Carry.put_down` in the quest: nothing else to remember;
   - amies: Mom gives it, the very first one she gives: go and make friends in the middle lane, where the twins Turcotte play; meeting them (`Twins._meet`, flag `met_twins`) completes it, and if she met them first Mom just congratulates her; the notebook's friends page lists them from that flag;
+  - cachette: the twins' first quest, after "amies" (`Twins._play_hide_and_seek`): they ask, Charlotte counts with her eyes shut, then each sister (`Twins._Hider`) peeks over a solid fence (`ruelle.gd` `_hide_spots`: boards or cedar, `HIDE_FROM` lots or more away, drawn just behind that fence's sprite, one each side when it can), giggles when Charlotte comes close, and a click finds her; `flags.cachette_found` keeps who has been found across scenes; both found completes it;
   - hamster: Dad gives it; feeding sets `flags.hamster_fed` (cleared at bedtime); going to bed unfed is refused, fed completes it;
   - lost cats, `world/lost_cats.gd` (`LostCats.ALL`, ids = quest ids cat, cat2, cat3, chained by `after`): Pistache
     (found on Dandurand, home 5684 6e Av.), Caramel (in the lane, home 5679 5e Av.), Bijou (in the lane, home 2655 rue
