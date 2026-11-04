@@ -29,6 +29,10 @@ var layout: Array[String] = []
 var cross_streets := {}
 ## A street tree at the start of the building after each of these layout indices.
 var trees_after: Array[int] = []
+## Moves one of those trees along the sidewalk: {layout index in `trees_after`: px}.
+var tree_shift := {}
+## Gives one of those trees its size: {layout index in `trees_after`: scale}.
+var tree_size := {}
 var lamps_after: Array[int] = []
 ## Fractional layout positions (index + fraction across that building).
 var hydrants_at: Array[float] = []
@@ -384,15 +388,15 @@ func _separate_props() -> void:
 	var fixed: Array[Vector2] = []
 	for cs in _cross_streets:
 		fixed.append(Vector2(cs.x0 - 30.0, cs.x1 + 30.0))
-	for after in trees_after:
-		var x := _starts[after + 1]
+	for i in trees_after.size():
+		var x := _tree_x(i)
 		fixed.append(Vector2(x - TRUNK_CLEAR, x + TRUNK_CLEAR))
 	_lamp_x.clear()
 	# A lamp is tall: it also keeps its head clear of the canopies.
 	var lamp_fixed := fixed.duplicate()
 	for i in trees_after.size():
 		var reach := 130.0 * _tree_scales[i] + 15.0
-		lamp_fixed.append(Vector2(_starts[trees_after[i] + 1] - reach, _starts[trees_after[i] + 1] + reach))
+		lamp_fixed.append(Vector2(_tree_x(i) - reach, _tree_x(i) + reach))
 	for after in lamps_after:
 		var x := _free_x(_starts[after + 1], LAMP_LEFT, LAMP_RIGHT, lamp_fixed)
 		lamp_fixed.append(Vector2(x - LAMP_LEFT - 20.0, x + LAMP_RIGHT + 20.0))
@@ -711,7 +715,7 @@ func _build_utility_poles() -> void:
 	# A pole is tall, so it keeps clear of a tree's whole canopy, not only its pit.
 	for i in trees_after.size():
 		var reach := 130.0 * _tree_scales[i] + 35.0
-		blocked.append(Vector2(_starts[trees_after[i] + 1] - reach, _starts[trees_after[i] + 1] + reach))
+		blocked.append(Vector2(_tree_x(i) - reach, _tree_x(i) + reach))
 	for lx in _lamp_x:
 		blocked.append(Vector2(lx - LAMP_LEFT - 25.0, lx + LAMP_RIGHT + 25.0))
 	for at in hydrants_at:
@@ -835,13 +839,18 @@ func _tree_textures() -> Array[Texture2D]:
 	sizes.seed = seed_value + 5
 	_tree_scales.clear()
 	for i in trees_after.size():
-		_tree_scales.append(TREE_SIZES[sizes.randi_range(0, TREE_SIZES.size() - 1)])
+		var drawn: float = TREE_SIZES[sizes.randi_range(0, TREE_SIZES.size() - 1)]
+		_tree_scales.append(float(tree_size.get(trees_after[i], drawn)))
 	return trees
+
+
+func _tree_x(i: int) -> float:
+	return _starts[trees_after[i] + 1] + float(tree_shift.get(trees_after[i], 0.0))
 
 
 func _tree_origin(i: int) -> Vector2:
 	var k := _tree_scales[i]
-	return Vector2(_starts[trees_after[i] + 1] - 190.0 * k, CURB_Y - 780.0 * k)
+	return Vector2(_tree_x(i) - 190.0 * k, CURB_Y - 780.0 * k)
 
 
 func _sway(strength: float, phase: float) -> ShaderMaterial:
@@ -866,7 +875,7 @@ func _build_tree_shadows(trees: Array[Texture2D]) -> void:
 		# Sheared away from the sun: the trunk's shadow starts at the foot of the tree and leans right as it climbs the wall,
 		# the canopy's far from the trunk (a plain offset copy left the shadow floating beside the tree).
 		var k := _tree_scales[i]
-		var foot := Vector2(_starts[trees_after[i] + 1], CURB_Y)
+		var foot := Vector2(_tree_x(i), CURB_Y)
 		var x_axis := Vector2(k, 0.0)
 		var y_axis := Vector2(-TREE_SHADOW_LEAN * k, k)
 		shadow.transform = Transform2D(x_axis, y_axis, foot - 190.0 * x_axis - 780.0 * y_axis)
@@ -898,7 +907,7 @@ func _build_trees(trees: Array[Texture2D]) -> void:
 	for i in trees.size():
 		# The square of grass or of the neighbours' flowers round the trunk, cut into the sidewalk by the curb.
 		var pit := TreePit.new()
-		pit.position = Vector2(_starts[trees_after[i] + 1], CURB_Y)
+		pit.position = Vector2(_tree_x(i), CURB_Y)
 		pit.seed_value = seed_value * 31 + i
 		add_child(pit)
 		var tree := _sprite(trees[i], _tree_scales[i])
@@ -981,8 +990,8 @@ func _build_trash_bag() -> void:
 	var blocked: Array[Vector2] = []
 	for cs in _cross_streets:
 		blocked.append(Vector2(cs.x0 - 120.0, cs.x1 + 120.0))
-	for after in trees_after:
-		blocked.append(Vector2(_starts[after + 1] - TRUNK_CLEAR - 40.0, _starts[after + 1] + TRUNK_CLEAR + 40.0))
+	for i in trees_after.size():
+		blocked.append(Vector2(_tree_x(i) - TRUNK_CLEAR - 40.0, _tree_x(i) + TRUNK_CLEAR + 40.0))
 	for lx in _lamp_x:
 		blocked.append(Vector2(lx - LAMP_LEFT - 60.0, lx + LAMP_RIGHT + 60.0))
 	for at in hydrants_at:

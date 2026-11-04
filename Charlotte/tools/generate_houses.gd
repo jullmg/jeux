@@ -90,18 +90,17 @@ const HOUSES := [
 	{
 		"name": "duplex_charlotte",
 		# From reference/maison_charlotte/: dark red-brown brick with pale mortar, tall white-framed windows under stone lintels,
-		# a varnished wood door with glass and iron scrollwork, a white concrete balcony under a dark metal awning, a straight
-		# black stair down to the right, the porch on posts with its steps at the LEFT, a black mailbox, two bikes at the fence.
+		# varnished wood doors with frosted glass and a dark transom, a white concrete balcony under a dark metal awning, a straight
+		# black stair down to the right, the porch on posts with its steps at the LEFT, a black mailbox.
 		"bricks": ["#7F3A2D", "#8A4132", "#6E3328", "#94483A", "#783527"], "mortar": "#BDB5AC",
 		"lintel": "#C9C3B6", "lintel_dark": "#8F897D", "lintel_style": "fleur",
-		"top": 40.0, "parapet": "flat", "crest": true, "number": "5672", "number_dx": -78.0,
-		"door": "#B26A2E", "door_dark": "#6E3F1B", "door_style": "grille", "sidelights": true, "door_surround": "lintel",
-		"lamp_style": "cylinder", "awning": "#4B5156", "columns": true, "downspout": 52.0,
+		"top": 40.0, "parapet": "flat", "crest": true, "number": "5672", "number_up": "5674", "number_dx": -74.0,
+		"door": "#A8652F", "door_dark": "#5E3718", "door_style": "wood_glass",
+		"awning": "#4B5156", "columns": true, "downspout": 52.0,
 		"windows": [[165.0, 85.0], [478.0, 85.0]], "door_cx": 348.0,
 		"balcony": [205.0, 460.0], "porch": [205.0, 460.0],
 		"stair": [Vector2(452, 336), Vector2(514, 456), Vector2(575, 576), Vector2(637, 696)],
-		"steps_side": "left", "mailbox": true, "bamboo": true,
-		"bikes": [[262.0, "#B8C0C8"], [470.0, "#D9342B"]],
+		"steps_side": "left", "mailbox": true,
 		"fence": "black", "basement": [455.0],
 	},
 	{
@@ -455,16 +454,19 @@ func _plex_front() -> void:
 		_door(cx, _door_top(f), _fb(f))
 	var number_dx: float = k.get("number_dx", 0.0)
 	if k.number != "":
-		_plaque(cx + number_dx, _door_top(0) + (14.0 if number_dx == 0.0 else 40.0), k.number)
-		if number_dx != 0.0:
-			# The upper flat's number too, beside its door.
-			_plaque(cx + number_dx, _door_top(floors - 1) + 40.0, "5674")
+		if number_dx == 0.0:
+			_plaque(cx, _door_top(0) + 14.0, k.number)
+		else:
+			# Small plates beside the doors: the ground floor's on the left under its lamp, the upper flat's on both sides.
+			_small_plaque(cx + number_dx, _door_top(0) + 52.0, k.number, 0.6)
+			_small_plaque(cx + number_dx + 8.0, _door_top(floors - 1) + 70.0, k.number_up, 0.7)
+			_small_plaque(cx + 60.0, _door_top(floors - 1) + 52.0, k.number_up, 0.5)
 	if k.get("mailbox", false):
-		var mx: float = cx + number_dx - 12.0
+		var mx: float = cx + number_dx - 15.0
 		var my := _door_top(0) + 106.0
-		_rect(mx, my, 34, 18, "#1A1A1A", 'rx="2" ' + _stroke("#444444", 1))
-		_rect(mx + 6, my + 6, 22, 3, "#555555")
-		_rect(mx + 15, my + 18, 4, 16, "#1A1A1A")
+		_rect(mx, my, 30, 18, "#1A1A1A", 'rx="2" ' + _stroke("#444444", 1))
+		_rect(mx + 5, my + 6, 20, 3, "#555555")
+		_rect(mx + 13, my + 18, 4, 16, "#1A1A1A")
 	var b: Array = k.balcony
 	if k.awning != "":
 		_awning(b[0], b[1], _door_top(floors - 1) - 26.0, _fb(floors - 1) - RAIL_H)
@@ -474,13 +476,6 @@ func _plex_front() -> void:
 			_column(b[0] + 4, 1.0, _fb(f) + 16, _fb(f - 1))
 			_column(b[1] - 11, -1.0, _fb(f) + 16, _fb(f - 1))
 		_balcony(b[0], b[1], _fb(f), [])
-	if k.get("bamboo", false):
-		# A roll-up bamboo shade hanging at the left of the balcony, edged in green.
-		var bx0: float = b[0] - 16.0
-		var by0 := _door_top(floors - 1) - 6.0
-		_rect(bx0, by0, 40, _fb(floors - 1) - RAIL_H - by0 + 40.0, "#B8AC84", _stroke("#4F7A4F", 2.5))
-		for ly in range(int(by0) + 10, int(_fb(floors - 1) - RAIL_H + 36.0), 12):
-			_path("M%s %s H%s" % [_n(bx0 + 2), _n(ly), _n(bx0 + 38)], "none", _stroke("#9A8E68", 1))
 	var p: Array = k.porch
 	if k.halloween:
 		_cobweb(p[0] + 4.0, _fb(1) + 16.0, 1.0)
@@ -521,26 +516,6 @@ func _plex_front() -> void:
 	gaps.sort_custom(func(a, c): return a[0] < c[0])
 	_garden(gaps)
 	_fence(gaps)
-	for bike: Array in k.get("bikes", []):
-		_bike(bike[0], bike[1])
-
-
-# A bike seen from the side, leaning on the fence.
-func _bike(x: float, color: String) -> void:
-	var y := ground_y - 6.0
-	var rear := Vector2(x - 46.0, y - 30.0)
-	var front := Vector2(x + 46.0, y - 30.0)
-	for w in [rear, front]:
-		_circle(w.x, w.y, 30, "none", _stroke("#1A1A1A", 4.5))
-		_circle(w.x, w.y, 30, "none", _stroke("#8E8E8E", 1) + ' opacity="0.6"')
-		_circle(w.x, w.y, 3, "#444444")
-	var seat := Vector2(x - 28.0, y - 76.0)
-	var bar := Vector2(x + 32.0, y - 78.0)
-	var crank := Vector2(x - 2.0, y - 28.0)
-	for seg in [[rear, seat], [seat, crank], [crank, rear], [seat, bar], [crank, bar], [bar, front]]:
-		_path("M%s %s L%s %s" % [_n(seg[0].x), _n(seg[0].y), _n(seg[1].x), _n(seg[1].y)], "none", _stroke(color, 4.5) + ' stroke-linecap="round"')
-	_rect(seat.x - 12, seat.y - 6, 24, 6, "#1A1A1A", 'rx="3"')
-	_path("M%s %s L%s %s M%s %s h14" % [_n(bar.x), _n(bar.y), _n(bar.x - 4), _n(bar.y - 12), _n(bar.x - 4), _n(bar.y - 12)], "none", _stroke("#1A1A1A", 4) + ' stroke-linecap="round"')
 
 
 # Steps down at the left end of a raised porch: treads, with a curled wrought-iron rail on the outer side.
@@ -770,6 +745,12 @@ func _rosette(cx: float, cy: float) -> void:
 	_circle(cx, cy, 2, k.lintel_dark)
 
 
+func _small_plaque(cx: float, cy: float, text: String, scale: float) -> void:
+	out.append('<g transform="translate(%s %s) scale(%s) translate(%s %s)">' % [_n(cx), _n(cy), _n(scale), _n(-cx), _n(-cy)])
+	_plaque(cx, cy, text)
+	out.append('</g>')
+
+
 func _plaque(cx: float, cy: float, text: String) -> void:
 	var gw := 7.0
 	var gh := 11.0
@@ -788,6 +769,9 @@ func _plaque(cx: float, cy: float, text: String) -> void:
 
 
 func _door(cx: float, top: float, bottom: float) -> void:
+	if k.get("door_style", "") == "wood_glass":
+		_wood_door(cx, top, bottom, is_equal_approx(bottom, _fb(0)))
+		return
 	var w := 96.0
 	var x := cx - w / 2
 	var style: String = k.get("door_style", "double")
@@ -831,6 +815,50 @@ func _door(cx: float, top: float, bottom: float) -> void:
 	_door_lamps(cx, top, w)
 	if season == "winter":
 		_wreath(cx, top + 60)
+
+
+# Charlotte's doors (reference/maison_charlotte/): all varnished wood under a plain stone lintel, a dark transom across the top,
+# a tall pane of frosted glass in the leaf over a small panel. Downstairs it is wide, a narrow frosted light each side of the
+# door and a lamp each side; upstairs a single narrow door with a lamp on its right.
+func _wood_door(cx: float, top: float, bottom: float, ground: bool) -> void:
+	var w := 118.0 if ground else 74.0
+	var x := cx - w / 2.0
+	var dark: String = k.door_dark
+	var over := 10.0 if ground else 16.0
+	_rect(x - over, top - 28, w + over * 2.0, 26, k.lintel, _stroke(k.lintel_dark, 1.5))
+	_rect(x - over, top - 28, w + over * 2.0, 3, "#FFFFFF", 'opacity="0.3"')
+	_rect(x - 3, top - 2, w + 6, bottom - top + 2, dark)
+	_rect(x, top, w, bottom - top, k.door)
+	# The transom: dark glass, split over the sidelights.
+	_rect(x + 6, top + 6, w - 12, 22, "#2F3D3C", _stroke(dark, 1.5))
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(x + w * 0.3), _n(top + 6), _n(x + w * 0.5), _n(top + 6), _n(x + w * 0.38), _n(top + 28), _n(x + w * 0.18), _n(top + 28)], "#FFFFFF", 'opacity="0.14"')
+	var leaf := Rect2(x + 6, top + 34, w - 12, bottom - top - 38)
+	if ground:
+		for sx in [x + 6.0, x + w - 24.0]:
+			_rect(sx, top + 34, 18, bottom - top - 66, "#C9D2D4", _stroke(dark, 1.5))
+			_rect(sx + 3, top + 38, 3, bottom - top - 74, "#FFFFFF", 'opacity="0.45"')
+			_rect(sx, bottom - 32, 18, 28, k.door, _stroke(dark, 1.5))
+			_path("M%s %s V%s" % [_n(sx + 9), _n(bottom - 30), _n(bottom - 6)], "none", _stroke(dark, 1) + ' opacity="0.4"')
+		leaf = Rect2(x + 28, top + 34, w - 56, bottom - top - 38)
+		for sx in [x + 25.0, x + w - 28.0]:
+			_rect(sx, top + 28, 3, bottom - top - 32, dark)
+	_rect(leaf.position.x, leaf.position.y, leaf.size.x, leaf.size.y, k.door, _stroke(dark, 2))
+	# The frosted pane, a soft shine down it; the panel under it; the wood's grain; the black handle.
+	var pane := Rect2(leaf.position.x + 8, leaf.position.y + 8, leaf.size.x - 16, leaf.size.y * 0.66)
+	_rect(pane.position.x, pane.position.y, pane.size.x, pane.size.y, "#D3DADB", _stroke(dark, 2))
+	_rect(pane.position.x + 3, pane.position.y + 3, pane.size.x - 6, pane.size.y - 6, "url(#glass)", 'opacity="0.28"')
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(pane.position.x + pane.size.x * 0.5), _n(pane.position.y), _n(pane.position.x + pane.size.x * 0.82), _n(pane.position.y), _n(pane.position.x + pane.size.x * 0.32), _n(pane.end.y), _n(pane.position.x), _n(pane.end.y)], "#FFFFFF", 'opacity="0.22"')
+	_raised(leaf.position.x + 9, pane.end.y + 10, leaf.size.x - 18, leaf.end.y - pane.end.y - 18)
+	for gx in [0.18, 0.5, 0.82]:
+		_path("M%s %s V%s" % [_n(x + w * gx), _n(top + 1), _n(top + 5)], "none", _stroke(dark, 1) + ' opacity="0.4"')
+	_rect(leaf.position.x + 3, leaf.position.y + leaf.size.y * 0.62, 3, 24, "#1E1E1E", 'rx="1"')
+	if ground:
+		_lamp("cylinder", cx - (w / 2.0 + 15.0), top + 8.0)
+		_lamp("cylinder", cx + (w / 2.0 + 22.0), top + 8.0)
+	else:
+		_lamp("cylinder", cx + w / 2.0 + 23.0, top + 8.0)
+	if season == "winter":
+		_wreath(cx, top + 70)
 
 
 # What tops the doorway: a plain lintel, a cornice on two scrolled brackets, a little pediment, or an arch.

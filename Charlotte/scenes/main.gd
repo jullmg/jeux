@@ -20,6 +20,10 @@ func _init() -> void:
 	]
 	cross_streets = {"rue_dandurand": 560.0, "rue_holt": 520.0}
 	trees_after = [6, 8, 10, 13, 15, 17]
+	# The tree in front of Charlotte's house stands before its left window, big, its crown over the upper floor
+	# (reference/maison_charlotte/), which leaves her front door in view.
+	tree_shift = {10: 80.0}
+	tree_size = {10: 0.72}
 	lamps_after = [4, 9, 14, 18]
 	hydrants_at = [7.5, 16.3]
 	racks_at = [2.5, 12.55, 15.6]
@@ -101,8 +105,7 @@ func _build_doors() -> void:
 	_add_lane("ruelle_verte")
 	_add_lane("ruelle")
 	var origin := _house_origin(layout.find("duplex_charlotte"))
-	var door_cx := _door_x("duplex_charlotte") - origin.x - 0.0
-	var area := Rect2(Vector2(origin.x + door_cx - 48.0 * HOUSE_SCALE, origin.y + 392.0 * HOUSE_SCALE), Vector2(96.0, 208.0) * HOUSE_SCALE)
+	var area := Rect2(Vector2(_door_x("duplex_charlotte") - 48.0 * HOUSE_SCALE, origin.y + 392.0 * HOUSE_SCALE), Vector2(96.0, 208.0) * HOUSE_SCALE)
 	add_child(DoorSpot.make(area, func():
 		_control.enabled = false
 		Transition.street_x = area.get_center().x
