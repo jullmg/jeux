@@ -18,6 +18,10 @@ var _main: VBoxContainer
 var _options: VBoxContainer
 var _to_title: Button
 var _open := false
+var _t := 0.0
+var _under: Control
+var _doodles: Control
+var _info: Label
 
 
 func _ready() -> void:
@@ -44,9 +48,14 @@ func _ready() -> void:
 	_apply_settings()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	var scene := get_tree().current_scene
 	_button.visible = scene != null and not scene.scene_file_path.contains("/tools/")
+	if _open:
+		# The pets on the card and the doodles round it bob a little.
+		_t += delta
+		_card.queue_redraw()
+		_doodles.queue_redraw()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -64,14 +73,21 @@ func _unhandled_input(event: InputEvent) -> void:
 func toggle() -> void:
 	_open = not _open
 	_page.visible = _open
+	if _open:
+		var seasons := {"autumn": "Automne", "winter": "Hiver", "spring": "Printemps", "summer": "Été"}
+		_info.text = "Charlotte, %d ans  ·  %s  ·  %s" % [GameState.age, Quests.money_text(GameState.money), seasons.get(Season.current, "")]
 	_show(_main)
 	if _open:
 		# The card pops up, a little bouncy.
 		_card.scale = Vector2.ONE * 0.9
 		_card.modulate.a = 0.0
+		_under.scale = Vector2.ONE * 0.9
+		_under.modulate.a = 0.0
 		var pop := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_parallel()
 		pop.tween_property(_card, "scale", Vector2.ONE, 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		pop.tween_property(_card, "modulate:a", 1.0, 0.12)
+		pop.tween_property(_under, "scale", Vector2.ONE, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		pop.tween_property(_under, "modulate:a", 1.0, 0.18)
 	var scene := get_tree().current_scene
 	_to_title.visible = scene != null and not scene.scene_file_path.ends_with("intro.tscn")
 	get_tree().paused = _open
@@ -92,6 +108,15 @@ func _build_page() -> void:
 		if event is InputEventMouseButton and event.pressed:
 			toggle())
 	_page.add_child(dim)
+	_doodles = _Doodles.new()
+	_doodles.size = _page.size
+	_doodles.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_doodles.menu = self
+	_page.add_child(_doodles)
+	# The pages underneath, a little crooked, like a notebook's.
+	_under = _Pages.new()
+	_under.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_page.add_child(_under)
 	_card = PanelContainer.new()
 	_card.draw.connect(_decorate)
 	_card.custom_minimum_size.x = 460
@@ -114,11 +139,22 @@ func _build_page() -> void:
 	_main.add_theme_constant_override("separation", 14)
 	both.add_child(_main)
 	_main.add_child(_title("Menu"))
+	_info = Label.new()
+	_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_info.add_theme_font_size_override("font_size", 17)
+	_info.add_theme_color_override("font_color", Color(INK, 0.7))
+	_main.add_child(_info)
 	_main.add_child(_big_button("Reprendre", toggle, Color("#9ADB7E"), "star"))
 	_main.add_child(_big_button("Options", func(): _show(_options), Color("#8FCBF2"), "flower"))
 	_to_title = _big_button("Écran titre", _go_to_title, Color("#FFD866"), "house")
 	_main.add_child(_to_title)
 	_main.add_child(_big_button("Quitter le jeu", _quit, Color("#F7A3B5"), "heart"))
+	var hint := Label.new()
+	hint.text = "Échap pour reprendre"
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.add_theme_font_size_override("font_size", 14)
+	hint.add_theme_color_override("font_color", Color(INK, 0.45))
+	_main.add_child(hint)
 	_options = VBoxContainer.new()
 	_options.add_theme_constant_override("separation", 16)
 	both.add_child(_options)
@@ -160,9 +196,10 @@ func _decorate() -> void:
 		_card.draw_line(Vector2(10, y), Vector2(w - 10, y), Color("#BFD3EA", 0.55), 1.5)
 		y += 30.0
 	_card.draw_line(Vector2(34, 8), Vector2(34, h - 8), Color("#E59A9A", 0.45), 1.5)
-	CuteArt.cat_head(_card, Vector2(54, 0), 26, Color("#E8954A"))
-	CuteArt.dog_head(_card, Vector2(w - 56, 2), 26, Color("#C9A27A"), Color("#7A5232"))
-	CuteArt.hamster_head(_card, Vector2(w / 2.0 + 110.0, h), 20)
+	var bob := func(phase: float, amount: float) -> float: return sin(_t * 2.0 + phase) * amount
+	CuteArt.cat_head(_card, Vector2(54, 0 + bob.call(0.0, 2.5)), 26, Color("#E8954A"))
+	CuteArt.dog_head(_card, Vector2(w - 56, 2 + bob.call(1.7, 2.5)), 26, Color("#C9A27A"), Color("#7A5232"))
+	CuteArt.hamster_head(_card, Vector2(w / 2.0 + 110.0, h + 3 + bob.call(3.1, 3.0)), 20)
 	for f in [[Vector2(8, h - 8), Color("#F2A7C9")], [Vector2(26, h + 4), Color("#FFFFFF")], [Vector2(w - 10, h - 6), Color("#9B59B6")],
 			[Vector2(w - 30, h + 6), Color("#F7C6D9")], [Vector2(-6, 60), Color("#FFD23F")], [Vector2(w + 6, 70), Color("#F2A7C9")]]:
 		CuteArt.flower(_card, f[0], 12, f[1])
@@ -190,6 +227,10 @@ func _show(which: VBoxContainer) -> void:
 	_card.reset_size()
 	_card.position = (Vector2(1280, 720) - _card.size) / 2.0
 	_card.pivot_offset = _card.size / 2.0
+	_under.position = _card.position
+	_under.size = _card.size
+	_under.pivot_offset = _card.size / 2.0
+	_under.queue_redraw()
 
 
 func _title(text: String) -> Control:
@@ -219,7 +260,14 @@ func _big_button(text: String, action: Callable, color: Color, icon: String) -> 
 	button.pressed.connect(func():
 		Sfx.play("click")
 		action.call())
-	button.draw.connect(func() -> void: _button_icon(button, icon))
+	button.resized.connect(func() -> void: button.pivot_offset = button.size / 2.0)
+	for hover in [[true, 1.04], [false, 1.0]]:
+		button.connect("mouse_entered" if hover[0] else "mouse_exited", func() -> void:
+			create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).tween_property(button, "scale", Vector2.ONE * hover[1], 0.1))
+	button.draw.connect(func() -> void:
+		# A soft shine along the top edge, then the little drawing.
+		button.draw_line(Vector2(20, 8), Vector2(button.size.x - 20, 8), Color(1, 1, 1, 0.4), 4.0, true)
+		_button_icon(button, icon))
 	return button
 
 
@@ -410,3 +458,46 @@ class _CrayonTitle:
 				draw_string(font, Vector2.ZERO, ch, HORIZONTAL_ALIGNMENT_LEFT, -1, 46, Color(col, 1.0 if pass_i == 0 else 0.55))
 			x += w + 1.0
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+# Sheets of paper under the card, a little crooked.
+class _Pages:
+	extends Control
+
+	func _draw() -> void:
+		for k in [[2, -0.028, Vector2(-8, 10)], [1, 0.02, Vector2(6, 6)]]:
+			var tint := CREAM.darkened(0.05 * k[0])
+			draw_set_transform(size / 2.0 + k[2], k[1], Vector2.ONE)
+			var r := Rect2(-size / 2.0, size)
+			draw_rect(Rect2(r.position + Vector2(4, 6), r.size), Color(0, 0, 0, 0.18))
+			draw_rect(r, tint)
+			draw_rect(r, PAPER_EDGE, false, 2.0)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+# Crayon drawings scattered round the card: a sun, clouds, hearts, stars, flowers, drifting a little.
+class _Doodles:
+	extends Control
+	var menu
+
+	func _draw() -> void:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 5
+		var t: float = menu._t
+		var items := [
+			["sun", Vector2(170, 130), 30.0, 0.0], ["heart", Vector2(300, 520), 17.0, 1.1], ["star", Vector2(215, 330), 16.0, 2.0],
+			["flower", Vector2(120, 560), 18.0, 0.6], ["star", Vector2(1010, 150), 15.0, 1.5], ["heart", Vector2(1120, 360), 19.0, 2.6],
+			["flower", Vector2(1040, 560), 18.0, 3.2], ["star", Vector2(930, 640), 14.0, 0.3], ["heart", Vector2(240, 90), 12.0, 2.2],
+			["flower", Vector2(1150, 120), 14.0, 1.9]]
+		for it in items:
+			var c: Vector2 = it[1] + Vector2(sin(t * 0.9 + it[3]) * 4.0, sin(t * 1.3 + it[3] * 1.7) * 6.0)
+			var r: float = it[2]
+			match it[0]:
+				"sun":
+					CuteArt.sun(self, c, r, true, rng)
+				"heart":
+					CuteArt.heart(self, c, r, CRAYONS[0], true, rng)
+				"star":
+					CuteArt.star(self, c, r, CRAYONS[2], true, rng)
+				_:
+					CuteArt.flower(self, c, r, CRAYONS[5], true, rng)
