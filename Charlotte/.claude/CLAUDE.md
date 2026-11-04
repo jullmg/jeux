@@ -349,6 +349,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     false when her hands are full (say `Carry.FULL_HANDS`); `put_down`, `has(kind)`, `busy()`, `cat_id()`; scenes call
     `Carry.restore` as they open, so it follows her through doors and saves (old saves are migrated). A NEW thing to carry =
     one more case in `Carry._build()`, then `Carry.take` / `Carry.put_down` in the quest: nothing else to remember;
+  - amies: Mom gives it (after the milk): go and make friends in the middle lane, where the twins Turcotte play; meeting them (`Twins._meet`, flag `met_twins`) completes it, and if she met them first Mom just congratulates her; the notebook's friends page lists them from that flag;
   - hamster: Dad gives it; feeding sets `flags.hamster_fed` (cleared at bedtime); going to bed unfed is refused, fed completes it;
   - lost cats, `world/lost_cats.gd` (`LostCats.ALL`, ids = quest ids cat, cat2, cat3, chained by `after`): Pistache
     (found on Dandurand, home 5684 6e Av.), Caramel (in the lane, home 5679 5e Av.), Bijou (in the lane, home 2655 rue

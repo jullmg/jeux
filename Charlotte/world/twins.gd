@@ -1,7 +1,7 @@
 class_name Twins
 extends Node2D
 ## Alphée and Constance Turcotte, twins, nearly identical and under a head taller than Charlotte (reference/personnages/alfée-et-constance-turcotte.jpg);
-## they will be her best friends and give her quests (not decided yet). They hang out in the middle lane: the first click is the
+## they will be her best friends and give her quests (not decided yet; Mom's "amies" quest sends her to them and ends with the meeting). They hang out in the middle lane: the first click is the
 ## meeting, a little conversation (`flags.met_twins`); after that, the one clicked says one of her lines. Quests go in `interact`.
 ## Clicks go through `hit_test`, which remembers which of the two was clicked.
 
@@ -108,6 +108,7 @@ func _meet() -> void:
 		steps.tween_interval(LINE_SECONDS)
 	steps.tween_callback(func() -> void:
 		GameState.flags["met_twins"] = true
+		Quests.complete("amies")
 		_talking = false
 		if control:
 			control.hands_off = false

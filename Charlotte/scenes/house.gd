@@ -155,7 +155,7 @@ func _build_family() -> void:
 	_mom = _family_member(CharacterLook.mom(), KITCHEN_START + 300.0, -1)
 	_dad = _family_member(CharacterLook.dad(), 1720.0, -1)
 	_mom_routine = _routine(_mom, MOM_TASKS, _talk_to_mom, Vector2(0, -350), func() -> bool:
-		return Quests.available("milk") or Quests.available("menage") or Quests.active("milk") and Carry.has("milk"))
+		return Quests.available("milk") or Quests.available("menage") or Quests.available("amies") or Quests.active("milk") and Carry.has("milk"))
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
 		return Quests.available("hamster") or Quests.available("plants"))
 
@@ -188,8 +188,17 @@ func _talk_to_mom() -> void:
 		_say(_mom, "Le dépanneur est au coin\nde la rue Dandurand !", 380.0)
 	elif Quests.start("menage"):
 		_say(_mom, "Ta chambre est en désordre,\nva la ranger, ma chouette !", 380.0, 3.5)
+	elif Quests.start("amies"):
+		if Twins.met():
+			# She has already met them on her own.
+			_say(_mom, "Tu as rencontré les jumelles Turcotte ?\nQuelle belle surprise, bravo !", 400.0, 3.5)
+			Quests.complete("amies")
+		else:
+			_say(_mom, "Va jouer dans la ruelle, ma chouette !\nTu t'y feras peut-être des amies.", 400.0, 3.5)
 	elif Quests.active("menage"):
 		_say(_mom, "As-tu fini de ranger\nta chambre ?", 380.0)
+	elif Quests.active("amies"):
+		_say(_mom, "Les enfants jouent dans la ruelle du milieu,\nderrière chez nous !", 400.0)
 	else:
 		_say(_mom, MOM_LINES[_mom_line % MOM_LINES.size()], 350.0)
 		_mom_line += 1
