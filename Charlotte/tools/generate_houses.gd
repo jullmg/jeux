@@ -483,6 +483,8 @@ func _plex_front() -> void:
 			_column(b[1] - 11, -1.0, _fb(f) + 16, _fb(f - 1))
 		if k.get("iron_rail", false):
 			_iron_balcony(b[0], b[1], k.rail_up[0], k.rail_up[1], _fb(f), slab_h, [], cx, -1.0)
+			if season == "winter":
+				_vintage_lights(k.rail_up[0], k.rail_up[1], _fb(f) - 62.0)
 			for px: float in k.get("iron_posts", []):
 				_iron_post(px, _fb(f) + slab_h + 8.0, _fb(f - 1))
 				_rect(px + 10.0, _fb(0) + slab_h, 5, ground_y - _fb(0) - slab_h - 30.0, "#9AA0A6", _stroke("#6E7277", 1))
@@ -762,6 +764,34 @@ func _iron_balcony(sx0: float, sx1: float, x0: float, x1: float, floor_y: float,
 	_rect(sx0 + 4, floor_y + slab_h, sx1 - sx0 - 8, 8, "#D9D2C2")
 	_rect(sx0 + 4, floor_y + slab_h + 8, sx1 - sx0 - 8, 22, "url(#drop)")
 	_snow(sx0 - 6, sx1 - sx0 + 12, floor_y - 2)
+
+
+# Winter on Charlotte's balcony: an old string of big painted bulbs, a dark green wire in swags along the hand rail, the bulbs
+# hanging from it in turn red, green, blue, orange and white, each with its socket, a shine and a soft glow.
+func _vintage_lights(x0: float, x1: float, rail_y: float) -> void:
+	const SWAG := 44.0
+	const BULBS := ["#D9342B", "#2E9E4F", "#2F6DB5", "#F08A24", "#F4EFE0"]
+	var n := int((x1 - x0) / SWAG)
+	var step := (x1 - x0) / n
+	var wire := ""
+	for i in n:
+		var a := x0 + i * step
+		wire += "%s%s %s Q%s %s %s %s " % ["M" if i == 0 else "", _n(a), _n(rail_y + 1), _n(a + step / 2.0), _n(rail_y + 20), _n(a + step), _n(rail_y + 1)]
+	_path(wire, "none", _stroke("#1F3A26", 2))
+	var count := 0
+	for i in n:
+		for t in [0.25, 0.75]:
+			var a := x0 + i * step
+			var u: float = t
+			# On the curve of the swag.
+			var px := a + step * u
+			var py := rail_y + 1.0 + 38.0 * u * (1.0 - u)
+			var color: String = BULBS[count % BULBS.size()]
+			count += 1
+			_circle(px, py + 11, 10, color, 'opacity="0.28"')
+			_rect(px - 2.5, py, 5, 4, "#1F3A26")
+			_path("M%s %s c-5 4 -5 9 0 13 c5 -4 5 -9 0 -13 z" % [_n(px), _n(py + 3)], color, _stroke("#00000055", 0.8))
+			_circle(px - 1.3, py + 7, 1.1, "#FFFFFF", 'opacity="0.75"')
 
 
 # A wrought-iron heart: two scrolls rising from one point and curling in at the top.
