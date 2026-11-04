@@ -483,8 +483,6 @@ func _plex_front() -> void:
 			_column(b[1] - 11, -1.0, _fb(f) + 16, _fb(f - 1))
 		if k.get("iron_rail", false):
 			_iron_balcony(b[0], b[1], k.rail_up[0], k.rail_up[1], _fb(f), slab_h, [], cx, -1.0)
-			if season == "winter":
-				_vintage_lights(k.rail_up[0], k.rail_up[1], _fb(f) - 62.0)
 			for px: float in k.get("iron_posts", []):
 				_iron_post(px, _fb(f) + slab_h + 8.0, _fb(f - 1))
 				_rect(px + 10.0, _fb(0) + slab_h, 5, ground_y - _fb(0) - slab_h - 30.0, "#9AA0A6", _stroke("#6E7277", 1))
@@ -501,6 +499,12 @@ func _plex_front() -> void:
 	if k.get("steps_side", "") == "left":
 		# The porch is up on posts and its steps go down at the left end, between curled iron rails.
 		_iron_balcony(p[0], p[1], k.rail_down[0], k.rail_down[1], _fb(0), slab_h, [[p[0] - 6.0, p[0] + 34.0]], cx, 1.0)
+		if season == "winter":
+			_vintage_lights(p[0] + 34.0, k.rail_down[1], _fb(0) - 62.0)
+			var first := 0
+			for px: float in k.get("iron_posts", []):
+				_vintage_post(px, _fb(1) + slab_h + 10.0, _fb(0) - 62.0, first)
+				first += 2
 		_side_steps(p[0] + 8.0)
 	else:
 		_balcony(p[0], p[1], _fb(0), [[cx - 54, cx + 54]])
@@ -766,11 +770,11 @@ func _iron_balcony(sx0: float, sx1: float, x0: float, x1: float, floor_y: float,
 	_snow(sx0 - 6, sx1 - sx0 + 12, floor_y - 2)
 
 
-# Winter on Charlotte's balcony: an old string of big painted bulbs, a dark green wire in swags along the hand rail, the bulbs
-# hanging from it in turn red, green, blue, orange and white, each with its socket, a shine and a soft glow.
+# Winter on Charlotte's porch (5672): an old string of big painted bulbs, a dark green wire in swags along the hand rail, the bulbs
+# hanging from it in turn red, green, blue, orange and white, each with its socket, a shine and a soft glow; it also climbs the
+# two posts that hold up the balcony (`_vintage_post`).
 func _vintage_lights(x0: float, x1: float, rail_y: float) -> void:
 	const SWAG := 44.0
-	const BULBS := ["#D9342B", "#2E9E4F", "#2F6DB5", "#F08A24", "#F4EFE0"]
 	var n := int((x1 - x0) / SWAG)
 	var step := (x1 - x0) / n
 	var wire := ""
@@ -781,17 +785,42 @@ func _vintage_lights(x0: float, x1: float, rail_y: float) -> void:
 	var count := 0
 	for i in n:
 		for t in [0.25, 0.75]:
-			var a := x0 + i * step
 			var u: float = t
 			# On the curve of the swag.
-			var px := a + step * u
-			var py := rail_y + 1.0 + 38.0 * u * (1.0 - u)
-			var color: String = BULBS[count % BULBS.size()]
+			_vintage_bulb(x0 + i * step + step * u, rail_y + 1.0 + 38.0 * u * (1.0 - u), count)
 			count += 1
-			_circle(px, py + 11, 10, color, 'opacity="0.28"')
-			_rect(px - 2.5, py, 5, 4, "#1F3A26")
-			_path("M%s %s c-5 4 -5 9 0 13 c5 -4 5 -9 0 -13 z" % [_n(px), _n(py + 3)], color, _stroke("#00000055", 0.8))
-			_circle(px - 1.3, py + 7, 1.1, "#FFFFFF", 'opacity="0.75"')
+
+
+# The same string climbing one of the balcony's twin posts, winding from one upright to the other.
+func _vintage_post(x: float, y0: float, y1: float, first: int) -> void:
+	const TURN := 32.0
+	const WIDE := 20.0
+	var wire := "M%s %s" % [_n(x + 1.0), _n(y1)]
+	var y := y1
+	var left := true
+	var count := first
+	while y - TURN > y0:
+		y -= TURN
+		left = not left
+		var px := x + (1.0 if left else WIDE + 1.0)
+		wire += " Q%s %s %s %s" % [_n(x + WIDE / 2.0), _n(y + TURN * 0.35), _n(px), _n(y)]
+	_path(wire, "none", _stroke("#1F3A26", 2))
+	y = y1
+	left = true
+	while y - TURN > y0:
+		y -= TURN
+		left = not left
+		_vintage_bulb(x + (1.0 if left else WIDE + 1.0), y, count)
+		count += 1
+
+
+func _vintage_bulb(px: float, py: float, count: int) -> void:
+	const BULBS := ["#D9342B", "#2E9E4F", "#2F6DB5", "#F08A24", "#F4EFE0"]
+	var color: String = BULBS[count % BULBS.size()]
+	_circle(px, py + 11, 10, color, 'opacity="0.28"')
+	_rect(px - 2.5, py, 5, 4, "#1F3A26")
+	_path("M%s %s c-5 4 -5 9 0 13 c5 -4 5 -9 0 -13 z" % [_n(px), _n(py + 3)], color, _stroke("#00000055", 0.8))
+	_circle(px - 1.3, py + 7, 1.1, "#FFFFFF", 'opacity="0.75"')
 
 
 # A wrought-iron heart: two scrolls rising from one point and curling in at the top.
