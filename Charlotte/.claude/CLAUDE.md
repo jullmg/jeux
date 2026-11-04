@@ -425,7 +425,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Elements read the season when they're built; switching reloads the scene. Seasonal code must keep **the same random draws
   in the same order** in every season (only colours/visibility change), so the street stays the same people and places.
 - Facades: the generator writes autumn to `art/decor/*.svg` and the other seasons to `art/decor/<season>/*.svg` (snow on
-  ledges, wreaths, Christmas lights in winter; tulips/geraniums instead of pumpkins; ghosts/cobwebs/bats autumn only).
+  ledges, wreaths on 17 % of the doors (`WREATH_PERCENT`), Christmas lights in winter; tulips/geraniums instead of pumpkins; ghosts/cobwebs/bats autumn only).
 - `ui/debug_menu.gd` is the `DebugMenu` autoload: reads `--season=`, and in debug builds F1 opens a "Saisons" menu that
   switches season while playing (reloads the scene; Charlotte keeps her x via `Transition.street_x` / `Transition.inside_x`),
   teleports to any place (`DebugMenu.PLACES`: streets, corners, lanes, rooms of her flat, spots in the shop; **when you add a new

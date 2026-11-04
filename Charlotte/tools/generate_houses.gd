@@ -12,6 +12,8 @@ const BASE := 614.0
 const GROUND := 700.0
 const RAIL_H := 48.0
 const VARIANTS := 36
+## How many doors have a wreath in winter.
+const WREATH_PERCENT := 17
 
 const DEFAULTS := {
 	"kind": "plex", "floors": 2, "width": 700.0,
@@ -899,8 +901,7 @@ func _door(cx: float, top: float, bottom: float) -> void:
 			else:
 				_door_leaf(style, Rect2(x + 4, dy, w - 8, dh))
 	_door_lamps(cx, top, w)
-	if season == "winter":
-		_wreath(cx, top + 60)
+	_door_wreath(cx, top, top + 60)
 
 
 # Charlotte's doors (reference/maison_charlotte/): varnished wood under a stone lintel with a carved rosette, a dark transom, a tall
@@ -941,8 +942,7 @@ func _wood_door(cx: float, top: float, bottom: float, ground: bool) -> void:
 		_small_plaque(x + w + 15.0, top + 48.0, k.number_up, 0.5, "#1F3A6E")
 		_small_plaque(x - 29.0, top + 74.0, k.number_up, 0.6, "#141414")
 		_rect(x - 49.0, top + 71.0, 5, 5, "#F2F2F2")
-	if season == "winter":
-		_wreath(cx, top + 70)
+	_door_wreath(cx, top, top + 70)
 
 
 # A little black wall lantern with a frosted glass.
@@ -2540,6 +2540,12 @@ func _snow(x: float, w: float, y: float) -> void:
 		i += 1
 	parts.append("L%s %s L%s %s Z" % [_n(x + w), _n(y + 2), _n(x), _n(y + 2)])
 	_path(" ".join(parts), "#F7F9FB", _stroke("#D3DCE4", 1))
+
+
+# Winter: only some doors have a wreath, always the same ones (from the house and the floor, no random numbers drawn).
+func _door_wreath(cx: float, top: float, cy: float) -> void:
+	if season == "winter" and absi(hash("%s:%d" % [k.name, int(top)])) % 100 < WREATH_PERCENT:
+		_wreath(cx, cy)
 
 
 # Winter: a wreath with a red bow on the door.
