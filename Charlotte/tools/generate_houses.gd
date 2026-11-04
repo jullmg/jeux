@@ -89,8 +89,8 @@ const HOUSES := [
 	},
 	{
 		"name": "duplex_charlotte",
-		# From reference/maison_charlotte/: red-brown brick mixed with dark headers, grey mortar; double-hung windows, pale frames,
-		# dark glass, one meeting rail; stone lintels and thick sills; varnished wood doors with smoky glass and a dark transom;
+		# From reference/maison_charlotte/: red-brown brick mixed with dark headers, grey mortar; double-hung windows, black frames,
+		# one meeting rail, glass like the other houses'; stone lintels and thick sills; varnished wood doors with smoky glass and a dark transom;
 		# small blue number plates under little lanterns; a thick white balcony slab on twin iron posts with scrolls, under a
 		# dark metal awning; thin widely spaced iron railings with a scroll over each door; a straight stair, pale treads on a
 		# black beam; the porch's steps at the LEFT; a black mailbox; a low fence of widely spaced thin bars. No decorations.
@@ -385,7 +385,6 @@ func _svg() -> void:
 		+ '<linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4E0EC"/><stop offset="1" stop-color="#557A90"/></linearGradient>'
 		+ '<linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.1"/><stop offset="1" stop-color="#000000" stop-opacity="0.16"/></linearGradient>'
 		+ '<radialGradient id="glow"><stop offset="0" stop-color="#FFE9A8" stop-opacity="0.75"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient>'
-		+ ('<linearGradient id="nightglass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A4C86"/><stop offset="1" stop-color="#141A33"/></linearGradient>' if k.get("window_style", "") == "hung" else "")
 		+ '<linearGradient id="warm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7B5"/><stop offset="1" stop-color="#D98E4A"/></linearGradient>'
 		+ '<linearGradient id="drop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1408" stop-opacity="0.3"/><stop offset="1" stop-color="#2A1408" stop-opacity="0"/></linearGradient>'
 		+ '<linearGradient id="sun" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE6B8" stop-opacity="0.14"/><stop offset="0.5" stop-color="#FFE6B8" stop-opacity="0"/><stop offset="1" stop-color="#1A0C14" stop-opacity="0.12"/></linearGradient>'
@@ -588,8 +587,8 @@ func _foundation() -> void:
 	for x in k.basement:
 		_rect(x, base_y + 22, 96, 44, k.trim, _stroke(k.trim_dark, 2))
 		if k.get("window_style", "") == "hung":
-			_rect(x, base_y + 22, 96, 44, "#EFEDE6", _stroke("#B9B5AC", 2))
-			_rect(x + 6, base_y + 28, 84, 32, "#1B2030")
+			_rect(x, base_y + 22, 96, 44, "#1E1A18", _stroke("#0F0C0A", 2))
+			_rect(x + 6, base_y + 28, 84, 32, "url(#glass)")
 			continue
 		_rect(x + 6, base_y + 28, 84, 32, "url(#glass)")
 		_rect(x + 46, base_y + 28, 4, 32, k.trim)
@@ -694,29 +693,27 @@ func _window(x: float, y: float, w: float, h: float) -> void:
 	_snow(x - 10, w + 20, y + h + 3)
 
 
-# A double-hung window (reference/maison_charlotte/): a pale frame, a thin grey sash with one meeting rail and no upright, dark
-# glass with the street's bare branches in it, a thick stone sill.
+# A double-hung window (reference/maison_charlotte/): a black frame, one meeting rail and no upright, the same glass as the other
+# houses', a thick stone sill.
 func _hung_window(x: float, y: float, w: float, h: float) -> void:
-	_rect(x - 2, y - 2, w + 4, h + 4, "#B9B5AC")
-	_rect(x, y, w, h, "#EFEDE6")
-	_rect(x + 7, y + 7, w - 14, h - 14, "#8E939A")
-	var pane_h := (h - 20.0) * 0.47
-	var rail_y := y + 10.0 + pane_h
+	const FRAME := "#1E1A18"
+	_rect(x - 2, y - 2, w + 4, h + 4, "#0F0C0A")
+	_rect(x, y, w, h, FRAME)
+	var pane_h := (h - 16.0) * 0.47
+	var rail_y := y + 8.0 + pane_h
 	var lower_y := rail_y + 6.0
-	var lower_h := y + h - 10.0 - lower_y
-	_rect(x + 10, y + 10, w - 20, pane_h, "url(#nightglass)")
-	_rect(x + 10, lower_y, w - 20, lower_h, "url(#nightglass)")
-	_rect(x + 7, rail_y, w - 14, 6, "#A9ADB2")
-	# Branches reflected in the glass.
-	for i in 4:
-		var bx := x + 10.0 + rng.randf_range(0.1, 0.9) * (w - 20.0)
-		var by := y + h - 12.0
-		_path("M%s %s q%s %s %s %s" % [_n(bx), _n(by), _n(rng.randf_range(-12.0, 12.0)), _n(-(h - 30.0) * 0.4), _n(rng.randf_range(-16.0, 16.0)), _n(-(h - 30.0) * rng.randf_range(0.6, 0.85))], "none", _stroke("#0C1020", 1.4) + ' opacity="0.7"')
-	_rect(x + 10, y + 10, w - 20, 8, "url(#drop)")
+	var lower_h := y + h - 8.0 - lower_y
+	var lit := rng.randf() < 0.22
+	var glass := "url(#warm)" if lit else "url(#glass)"
+	_rect(x + 8, y + 8, w - 16, pane_h, glass)
+	_rect(x + 8, lower_y, w - 16, lower_h, glass)
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(x + w * 0.55), _n(y + 8), _n(x + w * 0.55 + 16), _n(y + 8), _n(x + 24), _n(y + 8 + pane_h), _n(x + 8), _n(y + 8 + pane_h)], "#FFFFFF", 'opacity="0.22"')
+	_rect(x + 8, y + 8, w - 16, 10, "url(#drop)")
+	_rect(x + 8, y + 8, 7, h - 16, "#000000", 'opacity="0.14"')
 	if season == "autumn":
 		if not windows.has(k.name):
 			windows[k.name] = []
-		windows[k.name].append({"pane": [x + 10, y + 10, w - 20, h - 20], "bar_y": rail_y, "trim": "#EFEDE6", "lit": false, "flower_box": false})
+		windows[k.name].append({"pane": [x + 8, y + 8, w - 16, h - 16], "bar_y": rail_y, "trim": FRAME, "lit": lit, "flower_box": false})
 	_rect(x - 14, y + h + 2, w + 28, 15, k.lintel, _stroke(k.lintel_dark, 1.5))
 	_rect(x - 14, y + h + 2, w + 28, 3, "#FFFFFF", 'opacity="0.25"')
 	_rect(x - 10, y + h + 17, w + 20, 5, "#000000", 'opacity="0.16"')
