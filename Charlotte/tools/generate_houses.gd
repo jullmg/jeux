@@ -89,19 +89,24 @@ const HOUSES := [
 	},
 	{
 		"name": "duplex_charlotte",
-		# From reference/maison_charlotte/: dark red-brown brick with pale mortar, tall white-framed windows under stone lintels,
-		# varnished wood doors with frosted glass and a dark transom, a white concrete balcony under a dark metal awning, a straight
-		# black stair down to the right, the porch on posts with its steps at the LEFT, a black mailbox.
-		"bricks": ["#7F3A2D", "#8A4132", "#6E3328", "#94483A", "#783527"], "mortar": "#BDB5AC",
-		"lintel": "#C9C3B6", "lintel_dark": "#8F897D", "lintel_style": "fleur",
-		"top": 40.0, "parapet": "flat", "crest": true, "number": "5672", "number_up": "5674", "number_dx": -74.0,
-		"door": "#A8652F", "door_dark": "#5E3718", "door_style": "wood_glass",
-		"awning": "#4B5156", "columns": true, "downspout": 52.0,
-		"windows": [[165.0, 85.0], [478.0, 85.0]], "door_cx": 348.0,
-		"balcony": [205.0, 460.0], "porch": [205.0, 460.0],
-		"stair": [Vector2(452, 336), Vector2(514, 456), Vector2(575, 576), Vector2(637, 696)],
+		# From reference/maison_charlotte/: red-brown brick mixed with dark headers, grey mortar; double-hung windows, pale frames,
+		# dark glass, one meeting rail; stone lintels and thick sills; varnished wood doors with smoky glass and a dark transom;
+		# small blue number plates under little lanterns; a thick white balcony slab on twin iron posts with scrolls, under a
+		# dark metal awning; thin widely spaced iron railings with a scroll over each door; a straight stair, pale treads on a
+		# black beam; the porch's steps at the LEFT; a black mailbox; a low fence of widely spaced thin bars. No decorations.
+		"bricks": ["#7F3A2D", "#8A4132", "#6E3328", "#94483A", "#3F2C27", "#783527", "#54352C"], "mortar": "#A89C90",
+		"lintel": "#C9C3B6", "lintel_dark": "#8F897D", "lintel_style": "fleur", "window_style": "hung",
+		"top": 40.0, "parapet": "flat", "crest": true, "number": "5672", "number_up": "5674",
+		"door": "#9A5A26", "door_dark": "#553114", "door_style": "wood_glass",
+		"awning": "#3F4347", "awning_posts": [313.0, 397.0], "iron_posts": [208.0, 400.0], "columns": false,
+		"downspout": 50.0, "downspout2": 64.0, "halloween": false,
+		"windows": [[165.0, 80.0], [478.0, 85.0]], "door_cx": 348.0,
+		"balcony": [205.0, 460.0], "porch": [205.0, 460.0], "slab_h": 32.0, "iron_rail": true,
+		"rail_up": [216.0, 429.0], "rail_down": [205.0, 448.0],
+		"stair": [Vector2(448, 336), Vector2(510, 456), Vector2(570, 576), Vector2(628, 696)],
+		"tread": "#D8D3C8", "tread_dark": "#8A857A", "stair_beam": true,
 		"steps_side": "left", "mailbox": true,
-		"fence": "black", "basement": [455.0],
+		"fence": "black", "fence_style": "wide", "bare_garden": true, "basement": [455.0],
 	},
 	{
 		"name": "duplex_voisin_droite",
@@ -380,6 +385,7 @@ func _svg() -> void:
 		+ '<linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4E0EC"/><stop offset="1" stop-color="#557A90"/></linearGradient>'
 		+ '<linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.1"/><stop offset="1" stop-color="#000000" stop-opacity="0.16"/></linearGradient>'
 		+ '<radialGradient id="glow"><stop offset="0" stop-color="#FFE9A8" stop-opacity="0.75"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient>'
+		+ ('<linearGradient id="nightglass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A4C86"/><stop offset="1" stop-color="#141A33"/></linearGradient>' if k.get("window_style", "") == "hung" else "")
 		+ '<linearGradient id="warm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7B5"/><stop offset="1" stop-color="#D98E4A"/></linearGradient>'
 		+ '<linearGradient id="drop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1408" stop-opacity="0.3"/><stop offset="1" stop-color="#2A1408" stop-opacity="0"/></linearGradient>'
 		+ '<linearGradient id="sun" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE6B8" stop-opacity="0.14"/><stop offset="0.5" stop-color="#FFE6B8" stop-opacity="0"/><stop offset="1" stop-color="#1A0C14" stop-opacity="0.12"/></linearGradient>'
@@ -422,6 +428,8 @@ func _building() -> void:
 	_foundation()
 	if k.downspout >= 0.0:
 		_downspout(k.downspout, top)
+	if k.get("downspout2", -1.0) >= 0.0:
+		_downspout(k.downspout2, top)
 	if k.parapet == "flat":
 		_flat_parapet(top)
 	else:
@@ -452,30 +460,32 @@ func _plex_front() -> void:
 	var cx: float = k.door_cx
 	for f in floors:
 		_door(cx, _door_top(f), _fb(f))
-	var number_dx: float = k.get("number_dx", 0.0)
-	if k.number != "":
-		if number_dx == 0.0:
-			_plaque(cx, _door_top(0) + 14.0, k.number)
-		else:
-			# Small plates beside the doors: the ground floor's on the left under its lamp, the upper flat's on both sides.
-			_small_plaque(cx + number_dx, _door_top(0) + 52.0, k.number, 0.6)
-			_small_plaque(cx + number_dx + 8.0, _door_top(floors - 1) + 70.0, k.number_up, 0.7)
-			_small_plaque(cx + 60.0, _door_top(floors - 1) + 52.0, k.number_up, 0.5)
+	# (Charlotte's doors carry their own little plates: see _wood_door.)
+	if k.number != "" and k.get("door_style", "") != "wood_glass":
+		_plaque(cx, _door_top(0) + 14.0, k.number)
 	if k.get("mailbox", false):
-		var mx: float = cx + number_dx - 15.0
-		var my := _door_top(0) + 106.0
-		_rect(mx, my, 30, 18, "#1A1A1A", 'rx="2" ' + _stroke("#444444", 1))
-		_rect(mx + 5, my + 6, 20, 3, "#555555")
-		_rect(mx + 13, my + 18, 4, 16, "#1A1A1A")
+		var mx: float = cx - 78.0
+		var my := _door_top(0) + 92.0
+		_rect(mx - 17, my, 34, 21, "#1B2233", 'rx="2" ' + _stroke("#0E1220", 1))
+		_rect(mx + 4, my + 7, 6, 6, "#F2F2F2")
+		_rect(mx + 6, my + 9, 2, 2, "#D9342B")
+		for lx in [mx - 8.0, mx + 8.0]:
+			_rect(lx, my + 21, 2.5, 9, "#1B2233")
 	var b: Array = k.balcony
 	if k.awning != "":
 		_awning(b[0], b[1], _door_top(floors - 1) - 26.0, _fb(floors - 1) - RAIL_H)
+	var slab_h: float = k.get("slab_h", 16.0)
 	for f in range(floors - 1, 0, -1):
 		_rect(b[0], _fb(f) + 16, b[1] - b[0], 14, "#000000", 'opacity="0.15"')
 		if k.columns:
 			_column(b[0] + 4, 1.0, _fb(f) + 16, _fb(f - 1))
 			_column(b[1] - 11, -1.0, _fb(f) + 16, _fb(f - 1))
-		_balcony(b[0], b[1], _fb(f), [])
+		if k.get("iron_rail", false):
+			_iron_balcony(b[0], b[1], k.rail_up[0], k.rail_up[1], _fb(f), slab_h, [], cx, -1.0)
+			for px: float in k.get("iron_posts", []):
+				_iron_post(px, _fb(f) + slab_h + 8.0, _fb(f - 1))
+		else:
+			_balcony(b[0], b[1], _fb(f), [])
 	var p: Array = k.porch
 	if k.halloween:
 		_cobweb(p[0] + 4.0, _fb(1) + 16.0, 1.0)
@@ -486,7 +496,7 @@ func _plex_front() -> void:
 		_string_lights(b[0], b[1], _fb(1) - RAIL_H)
 	if k.get("steps_side", "") == "left":
 		# The porch is up on posts and its steps go down at the left end, between curled iron rails.
-		_balcony(p[0], p[1], _fb(0), [[p[0] - 6.0, p[0] + 50.0]])
+		_iron_balcony(p[0], p[1], k.rail_down[0], k.rail_down[1], _fb(0), slab_h, [[p[0] - 6.0, p[0] + 34.0]], cx, 1.0)
 		_side_steps(p[0] + 8.0)
 	else:
 		_balcony(p[0], p[1], _fb(0), [[cx - 54, cx + 54]])
@@ -577,6 +587,10 @@ func _foundation() -> void:
 		_rect(X0, y, X1 - X0, 1.5, "#000000", 'opacity="0.08"')
 	for x in k.basement:
 		_rect(x, base_y + 22, 96, 44, k.trim, _stroke(k.trim_dark, 2))
+		if k.get("window_style", "") == "hung":
+			_rect(x, base_y + 22, 96, 44, "#EFEDE6", _stroke("#B9B5AC", 2))
+			_rect(x + 6, base_y + 28, 84, 32, "#1B2030")
+			continue
 		_rect(x + 6, base_y + 28, 84, 32, "url(#glass)")
 		_rect(x + 46, base_y + 28, 4, 32, k.trim)
 
@@ -635,6 +649,9 @@ func _window(x: float, y: float, w: float, h: float) -> void:
 	if k.keystone:
 		var ky := y - 38.0 if k.lintel_style == "arch" else y - 24.0
 		_path("M%s %s h20 l-3 26 h-14 z" % [_n(x + w / 2 - 10), _n(ky)], k.lintel, _stroke(k.lintel_dark, 1.5))
+	if k.get("window_style", "") == "hung":
+		_hung_window(x, y, w, h)
+		return
 	_rect(x - 3, y - 3, w + 6, h + 6, k.trim_dark)
 	_rect(x, y, w, h, k.trim)
 	var lit := rng.randf() < 0.22
@@ -675,6 +692,78 @@ func _window(x: float, y: float, w: float, h: float) -> void:
 			fx += 13.0
 		_rect(x + 4, y + h - 12, w - 8, 15, "#7A5236", _stroke("#5A3B26", 1.5))
 	_snow(x - 10, w + 20, y + h + 3)
+
+
+# A double-hung window (reference/maison_charlotte/): a pale frame, a thin grey sash with one meeting rail and no upright, dark
+# glass with the street's bare branches in it, a thick stone sill.
+func _hung_window(x: float, y: float, w: float, h: float) -> void:
+	_rect(x - 2, y - 2, w + 4, h + 4, "#B9B5AC")
+	_rect(x, y, w, h, "#EFEDE6")
+	_rect(x + 7, y + 7, w - 14, h - 14, "#8E939A")
+	var pane_h := (h - 20.0) * 0.47
+	var rail_y := y + 10.0 + pane_h
+	var lower_y := rail_y + 6.0
+	var lower_h := y + h - 10.0 - lower_y
+	_rect(x + 10, y + 10, w - 20, pane_h, "url(#nightglass)")
+	_rect(x + 10, lower_y, w - 20, lower_h, "url(#nightglass)")
+	_rect(x + 7, rail_y, w - 14, 6, "#A9ADB2")
+	# Branches reflected in the glass.
+	for i in 4:
+		var bx := x + 10.0 + rng.randf_range(0.1, 0.9) * (w - 20.0)
+		var by := y + h - 12.0
+		_path("M%s %s q%s %s %s %s" % [_n(bx), _n(by), _n(rng.randf_range(-12.0, 12.0)), _n(-(h - 30.0) * 0.4), _n(rng.randf_range(-16.0, 16.0)), _n(-(h - 30.0) * rng.randf_range(0.6, 0.85))], "none", _stroke("#0C1020", 1.4) + ' opacity="0.7"')
+	_rect(x + 10, y + 10, w - 20, 8, "url(#drop)")
+	if season == "autumn":
+		if not windows.has(k.name):
+			windows[k.name] = []
+		windows[k.name].append({"pane": [x + 10, y + 10, w - 20, h - 20], "bar_y": rail_y, "trim": "#EFEDE6", "lit": false, "flower_box": false})
+	_rect(x - 14, y + h + 2, w + 28, 15, k.lintel, _stroke(k.lintel_dark, 1.5))
+	_rect(x - 14, y + h + 2, w + 28, 3, "#FFFFFF", 'opacity="0.25"')
+	_rect(x - 10, y + h + 17, w + 20, 5, "#000000", 'opacity="0.16"')
+	_snow(x - 14, w + 28, y + h + 2)
+
+
+# The railing on the photos: thin bars wide apart, a hand rail with a second one just under it, a low rail above the slab, a pair of
+# iron scrolls standing on the rail over the door, close-set bars where it turns back to the wall (`dense`: its side, -1 or 1).
+# Under it the thick white slab with a stone top and a cream soffit.
+func _iron_balcony(sx0: float, sx1: float, x0: float, x1: float, floor_y: float, slab_h: float, gaps: Array, crest_x: float, dense: float) -> void:
+	var top := floor_y - 62.0
+	for seg in _segments(x0, x1, gaps):
+		var a: float = seg[0]
+		var b: float = seg[1]
+		var x := a + 6.0
+		while x < b - 4.0:
+			_rect(x, top, 2, floor_y - 8.0 - top, k.metal)
+			var close: bool = (dense > 0.0 and x > x1 - 30.0) or (dense < 0.0 and x < x0 + 30.0)
+			x += 5.0 if close else 12.0
+		_rect(a, top - 1, b - a, 3.5, k.metal)
+		_rect(a, top + 8, b - a, 2, k.metal)
+		_rect(a, floor_y - 10, b - a, 2.5, k.metal)
+		for px in [a, b - 3.5]:
+			_rect(px, top - 3, 3.5, floor_y - top + 3, k.metal)
+		_snow(a, b - a, top - 1)
+	if crest_x >= 0.0:
+		for side in [-1.0, 1.0]:
+			_path("M%s %s c%s -1 %s -4 %s -10 c%s -5 %s -6 %s -2 c%s 2 %s 4 %s 2" % [_n(crest_x), _n(top - 1), _n(side * 8), _n(side * 16), _n(side * 20), _n(side * 2), _n(side * -7), _n(side * -7), _n(side * 1), _n(side * 4), _n(side * 4)], "none", _stroke(k.metal, 2) + ' stroke-linecap="round"')
+	_rect(sx0 - 6, floor_y, sx1 - sx0 + 12, slab_h, k.slab, _stroke(k.slab_dark, 1.5))
+	_rect(sx0 - 6, floor_y, sx1 - sx0 + 12, 5, "#B9B5AC")
+	_rect(sx0 - 6, floor_y + slab_h - 4, sx1 - sx0 + 12, 4, k.slab_dark)
+	_rect(sx0 + 4, floor_y + slab_h, sx1 - sx0 - 8, 8, "#D9D2C2")
+	_rect(sx0 + 4, floor_y + slab_h + 8, sx1 - sx0 - 8, 22, "url(#drop)")
+	_snow(sx0 - 6, sx1 - sx0 + 12, floor_y - 2)
+
+
+# Twin thin uprights holding up the balcony, iron scrolls between them at the top and the foot.
+func _iron_post(x: float, y0: float, y1: float) -> void:
+	const GAP := 20.0
+	for px in [x, x + GAP]:
+		_rect(px, y0, 2.5, y1 - y0, k.metal)
+	for y: float in [y0 + 12.0, y1 - 46.0]:
+		_rect(x, y - 4, GAP + 2.5, 2, k.metal)
+		_rect(x, y + 36, GAP + 2.5, 2, k.metal)
+		for k2 in 2:
+			var cy := y + 8.0 + k2 * 18.0
+			_path("M%s %s c5 -7 15 -7 16 0 c0 5 -8 5 -7 0" % [_n(x + 3), _n(cy)], "none", _stroke(k.metal, 1.6) + ' stroke-linecap="round"')
 
 
 # Stone band with a carved fleur-de-lis block in the middle, between two recessed panels.
@@ -745,18 +834,18 @@ func _rosette(cx: float, cy: float) -> void:
 	_circle(cx, cy, 2, k.lintel_dark)
 
 
-func _small_plaque(cx: float, cy: float, text: String, scale: float) -> void:
+func _small_plaque(cx: float, cy: float, text: String, scale: float, fill: String) -> void:
 	out.append('<g transform="translate(%s %s) scale(%s) translate(%s %s)">' % [_n(cx), _n(cy), _n(scale), _n(-cx), _n(-cy)])
-	_plaque(cx, cy, text)
+	_plaque(cx, cy, text, fill)
 	out.append('</g>')
 
 
-func _plaque(cx: float, cy: float, text: String) -> void:
+func _plaque(cx: float, cy: float, text: String, fill := "#1E1E1E") -> void:
 	var gw := 7.0
 	var gh := 11.0
 	var gap := 4.0
 	var w := text.length() * gw + (text.length() - 1) * gap + 14.0
-	_rect(cx - w / 2, cy - 11, w, 22, "#1E1E1E", 'rx="3" ' + _stroke("#555555", 1))
+	_rect(cx - w / 2, cy - 11, w, 22, fill, 'rx="3" ' + _stroke("#555555", 1))
 	var gx := cx - w / 2 + 7.0
 	for ch in text:
 		if GLYPHS.has(ch):
@@ -817,48 +906,55 @@ func _door(cx: float, top: float, bottom: float) -> void:
 		_wreath(cx, top + 60)
 
 
-# Charlotte's doors (reference/maison_charlotte/): all varnished wood under a plain stone lintel, a dark transom across the top,
-# a tall pane of frosted glass in the leaf over a small panel. Downstairs it is wide, a narrow frosted light each side of the
-# door and a lamp each side; upstairs a single narrow door with a lamp on its right.
+# Charlotte's doors (reference/maison_charlotte/): varnished wood under a stone lintel with a carved rosette, a dark transom, a tall
+# pane of smoky glass over a panel, a black lock plate. Downstairs it is wide with a narrow smoky light each side, a little lantern
+# each side and the blue number plate under the left one; upstairs a single door, a lantern and blue plate on the right, a black
+# plate with its sticker on the left.
 func _wood_door(cx: float, top: float, bottom: float, ground: bool) -> void:
 	var w := 118.0 if ground else 74.0
 	var x := cx - w / 2.0
 	var dark: String = k.door_dark
-	var over := 10.0 if ground else 16.0
+	var over := 12.0 if ground else 16.0
 	_rect(x - over, top - 28, w + over * 2.0, 26, k.lintel, _stroke(k.lintel_dark, 1.5))
 	_rect(x - over, top - 28, w + over * 2.0, 3, "#FFFFFF", 'opacity="0.3"')
+	_rosette(cx, top - 15)
 	_rect(x - 3, top - 2, w + 6, bottom - top + 2, dark)
 	_rect(x, top, w, bottom - top, k.door)
-	# The transom: dark glass, split over the sidelights.
-	_rect(x + 6, top + 6, w - 12, 22, "#2F3D3C", _stroke(dark, 1.5))
-	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(x + w * 0.3), _n(top + 6), _n(x + w * 0.5), _n(top + 6), _n(x + w * 0.38), _n(top + 28), _n(x + w * 0.18), _n(top + 28)], "#FFFFFF", 'opacity="0.14"')
-	var leaf := Rect2(x + 6, top + 34, w - 12, bottom - top - 38)
+	_rect(x + 7, top + 6, w - 14, 17, "#2A3433", _stroke(dark, 1.5))
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(x + w * 0.42), _n(top + 6), _n(x + w * 0.56), _n(top + 6), _n(x + w * 0.48), _n(top + 23), _n(x + w * 0.34), _n(top + 23)], "#FFFFFF", 'opacity="0.16"')
+	var leaf := Rect2(x + 6, top + 29, w - 12, bottom - top - 33)
 	if ground:
-		for sx in [x + 6.0, x + w - 24.0]:
-			_rect(sx, top + 34, 18, bottom - top - 66, "#C9D2D4", _stroke(dark, 1.5))
-			_rect(sx + 3, top + 38, 3, bottom - top - 74, "#FFFFFF", 'opacity="0.45"')
-			_rect(sx, bottom - 32, 18, 28, k.door, _stroke(dark, 1.5))
-			_path("M%s %s V%s" % [_n(sx + 9), _n(bottom - 30), _n(bottom - 6)], "none", _stroke(dark, 1) + ' opacity="0.4"')
-		leaf = Rect2(x + 28, top + 34, w - 56, bottom - top - 38)
-		for sx in [x + 25.0, x + w - 28.0]:
-			_rect(sx, top + 28, 3, bottom - top - 32, dark)
+		for sx in [x + 7.0, x + w - 23.0]:
+			_rect(sx, top + 29, 16, bottom - top - 36, "#4F5856", _stroke(dark, 1.5))
+			_rect(sx + 5, top + 34, 3, bottom - top - 46, "#CFD6D4", 'opacity="0.35"')
+		leaf = Rect2(x + 28, top + 29, w - 56, bottom - top - 33)
 	_rect(leaf.position.x, leaf.position.y, leaf.size.x, leaf.size.y, k.door, _stroke(dark, 2))
-	# The frosted pane, a soft shine down it; the panel under it; the wood's grain; the black handle.
-	var pane := Rect2(leaf.position.x + 8, leaf.position.y + 8, leaf.size.x - 16, leaf.size.y * 0.66)
-	_rect(pane.position.x, pane.position.y, pane.size.x, pane.size.y, "#D3DADB", _stroke(dark, 2))
-	_rect(pane.position.x + 3, pane.position.y + 3, pane.size.x - 6, pane.size.y - 6, "url(#glass)", 'opacity="0.28"')
-	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(pane.position.x + pane.size.x * 0.5), _n(pane.position.y), _n(pane.position.x + pane.size.x * 0.82), _n(pane.position.y), _n(pane.position.x + pane.size.x * 0.32), _n(pane.end.y), _n(pane.position.x), _n(pane.end.y)], "#FFFFFF", 'opacity="0.22"')
-	_raised(leaf.position.x + 9, pane.end.y + 10, leaf.size.x - 18, leaf.end.y - pane.end.y - 18)
-	for gx in [0.18, 0.5, 0.82]:
-		_path("M%s %s V%s" % [_n(x + w * gx), _n(top + 1), _n(top + 5)], "none", _stroke(dark, 1) + ' opacity="0.4"')
-	_rect(leaf.position.x + 3, leaf.position.y + leaf.size.y * 0.62, 3, 24, "#1E1E1E", 'rx="1"')
+	var pane := Rect2(leaf.position.x + 10, leaf.position.y + 13, leaf.size.x - 20, leaf.size.y * 0.56)
+	_rect(pane.position.x - 2, pane.position.y - 2, pane.size.x + 4, pane.size.y + 4, dark)
+	_rect(pane.position.x, pane.position.y, pane.size.x, pane.size.y, "#4F5856")
+	_path("M%s %s q-5 %s 3 %s q5 %s -3 %s h9 q6 %s -2 %s q-6 %s 2 %s z" % [_n(pane.get_center().x + 4), _n(pane.position.y), _n(pane.size.y * 0.25), _n(pane.size.y * 0.5), _n(pane.size.y * 0.25), _n(pane.size.y * 0.5), _n(-pane.size.y * 0.25), _n(-pane.size.y * 0.5), _n(-pane.size.y * 0.25), _n(-pane.size.y * 0.5)], "#CFD6D4", 'opacity="0.4"')
+	_raised(leaf.position.x + 10, pane.end.y + 10, leaf.size.x - 20, leaf.end.y - pane.end.y - 18)
+	_rect(leaf.position.x + 3, pane.end.y - 30, 5, 32, "#161616", 'rx="1"')
 	if ground:
-		_lamp("cylinder", cx - (w / 2.0 + 15.0), top + 8.0)
-		_lamp("cylinder", cx + (w / 2.0 + 22.0), top + 8.0)
+		_wall_lantern(x - 19.0, top + 26.0)
+		_wall_lantern(x + w + 19.0, top + 26.0)
+		_small_plaque(x - 19.0, top + 50.0, k.number, 0.5, "#1F3A6E")
 	else:
-		_lamp("cylinder", cx + w / 2.0 + 23.0, top + 8.0)
+		_wall_lantern(x + w + 15.0, top + 24.0)
+		_small_plaque(x + w + 15.0, top + 48.0, k.number_up, 0.5, "#1F3A6E")
+		_small_plaque(x - 29.0, top + 74.0, k.number_up, 0.6, "#141414")
+		_rect(x - 49.0, top + 71.0, 5, 5, "#F2F2F2")
 	if season == "winter":
 		_wreath(cx, top + 70)
+
+
+# A little black wall lantern with a frosted glass.
+func _wall_lantern(x: float, y: float) -> void:
+	_circle(x, y + 4, 15, "url(#glow)")
+	_rect(x - 1.5, y - 12, 3, 5, "#1A1A1A")
+	_path("M%s %s h14 l-3 -6 h-8 z" % [_n(x - 7), _n(y - 2)], "#1A1A1A")
+	_rect(x - 5, y - 2, 10, 13, "#ECE7DA", _stroke("#1A1A1A", 1.5))
+	_rect(x - 6, y + 11, 12, 2.5, "#1A1A1A")
 
 
 # What tops the doorway: a plain lintel, a cornice on two scrolled brackets, a little pediment, or an arch.
@@ -1068,8 +1164,15 @@ func _lantern(x: float, y: float) -> void:
 func _awning(x0: float, x1: float, y: float, post_bottom: float) -> void:
 	var dark := "#" + Color(k.awning).darkened(0.3).to_html(false)
 	_rect(x0 - 16, y + 22, x1 - x0 + 32, 12, "#000000", 'opacity="0.15"')
-	for px in [x0 + 2, x1 - 9]:
-		_rect(px, y + 20, 7, post_bottom - y - 20, k.metal, _metal_stroke())
+	var thin: Array = k.get("awning_posts", [])
+	if thin.is_empty():
+		for px in [x0 + 2, x1 - 9]:
+			_rect(px, y + 20, 7, post_bottom - y - 20, k.metal, _metal_stroke())
+	else:
+		# Thin iron bars from the balcony rail, a brace back up to the wall from each.
+		for px: float in thin:
+			_rect(px, y + 20, 3, post_bottom - y - 20, k.metal)
+			_path("M%s %s L%s %s" % [_n(px + 1.5), _n(y + 58), _n(px + 34), _n(y + 22)], "none", _stroke(k.metal, 2))
 	_path("M%s %s H%s L%s %s H%s Z" % [_n(x0 - 10), _n(y), _n(x1 + 10), _n(x1 + 18), _n(y + 20), _n(x0 - 18)], k.awning, _stroke(dark, 2))
 	var x := x0 - 8.0
 	while x < x1 + 10:
@@ -1154,6 +1257,9 @@ func _stairs(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) -> void:
 	var pts: Array[Vector2] = []
 	for i in steps + 1:
 		pts.append(p0.bezier_interpolate(p1, p2, p3, float(i) / steps))
+	if k.get("stair_beam", false):
+		# The black steel beam the treads sit on.
+		_path(_polyline(pts, Vector2(0, 12)), "none", _stroke(k.metal, 20))
 	for side in [-1.0, 1.0]:
 		if side > 0.0:
 			for i in range(1, steps + 1):
@@ -1183,6 +1289,17 @@ func _stairs(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) -> void:
 
 
 func _garden(gaps: Array) -> void:
+	if k.get("bare_garden", false):
+		# Dark soil behind the fence, a few fallen leaves on it, as on the photos.
+		for seg in _segments(X0, X1, gaps):
+			_rect(seg[0], ground_y - 40, seg[1] - seg[0], 40, "#2E2620")
+			var lx: float = seg[0] + 4.0
+			while lx < seg[1] - 4.0:
+				_leaf(lx, ground_y - rng.randf_range(1.0, 26.0), rng.randf_range(0.0, TAU))
+				lx += rng.randf_range(14.0, 30.0)
+			if season == "winter":
+				_rect(seg[0], ground_y - 14, seg[1] - seg[0], 14, "#F2F5F8")
+		return
 	for seg in _segments(X0, X1, gaps):
 		var x: float = seg[0] + 14.0
 		while x < seg[1] - 14.0:
@@ -1216,6 +1333,21 @@ func _fence(gaps: Array) -> void:
 	var pitch := 13.0 if light else 9.0
 	var pw := 5.0 if light else 2.5
 	var top := ground_y - 50.0
+	if k.get("fence_style", "") == "wide":
+		# Thin bars wide apart standing a little over the top rail, a thicker post with a round cap at each end.
+		top = ground_y - 58.0
+		for seg in _segments(X0, X1, gaps):
+			var bar: float = seg[0] + 12.0
+			while bar < seg[1] - 8.0:
+				_rect(bar, top, 2, ground_y - top - 3, col)
+				bar += 15.0
+			_rect(seg[0], top + 10, seg[1] - seg[0], 3, col)
+			_rect(seg[0], ground_y - 11, seg[1] - seg[0], 3, col)
+			_snow(seg[0], seg[1] - seg[0], top + 10)
+			for px in [seg[0], seg[1] - 6.0]:
+				_rect(px, top - 2, 6, ground_y - top + 2, col)
+				_circle(px + 3, top - 3, 4, col)
+		return
 	for seg in _segments(X0, X1, gaps):
 		var a: float = seg[0]
 		var b: float = seg[1]
