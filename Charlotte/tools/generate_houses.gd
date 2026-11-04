@@ -1303,11 +1303,36 @@ func _stairs(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) -> void:
 				_pumpkin(pts[i].x + rng.randf_range(-10.0, 10.0), pts[i].y - 3.0, rng.randf_range(0.55, 0.75), rng.randf() < 0.4)
 
 
+# Leafy plants on the soil in summer and autumn (a few turning yellow in autumn): clumps of small leaves over a dark shade,
+# some taller, lit from the upper left. The same random draws in every season; in the others only the soil shows.
+func _greenery(x0: float, x1: float) -> void:
+	var tones: Array = ["#3E8E3A", "#4FA34A", "#2F7A30", "#5DB55A", "#367F33"] if season == "summer" else ["#5F8F3A", "#7FA34A", "#4E7A30", "#8FA84A", "#C9A23A"]
+	var show := season == "summer" or season == "autumn"
+	var x := x0 + 8.0
+	while x < x1 - 6.0:
+		var r := rng.randf_range(18.0, 32.0)
+		var cy := ground_y - r * 0.8
+		if show:
+			_circle(x + 2, cy + 3, r, "#22381F", 'opacity="0.75"')
+		for i in 34:
+			var a := rng.randf_range(0.0, TAU)
+			var d := sqrt(rng.randf()) * r
+			var p := Vector2(x + cos(a) * d, cy + sin(a) * d * 0.9)
+			var tone: String = tones[rng.randi_range(0, tones.size() - 1)]
+			var turn := rng.randf_range(0.0, 180.0)
+			var lit := (x - p.x + cy - p.y) / (r * 2.0)
+			if show and p.y < ground_y:
+				var c := Color(tone).lightened(lit * 0.3) if lit > 0.0 else Color(tone).darkened(-lit * 0.3)
+				out.append('<ellipse cx="%s" cy="%s" rx="6" ry="3" fill="#%s" transform="rotate(%s %s %s)"/>' % [_n(p.x), _n(p.y), c.to_html(false), _n(turn), _n(p.x), _n(p.y)])
+		x += r * rng.randf_range(1.0, 1.5)
+
+
 func _garden(gaps: Array) -> void:
 	if k.get("bare_garden", false):
 		# Dark soil behind the fence, a few fallen leaves on it, as on the photos.
 		for seg in _segments(X0, X1, gaps):
 			_rect(seg[0], ground_y - 40, seg[1] - seg[0], 40, "#6B5646")
+			_greenery(seg[0], seg[1])
 			var lx: float = seg[0] + 4.0
 			while lx < seg[1] - 4.0:
 				_leaf(lx, ground_y - rng.randf_range(1.0, 26.0), rng.randf_range(0.0, TAU))
