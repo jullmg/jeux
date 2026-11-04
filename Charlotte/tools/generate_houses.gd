@@ -1363,7 +1363,7 @@ func _fence(gaps: Array) -> void:
 			var heart: float = seg[0] + 34.5
 			while heart < seg[1] - 18.0:
 				_iron_heart(heart, ground_y - 31.0, 11.0, 2.4)
-				heart += 60.0
+				heart += 120.0
 			for px in [seg[0], seg[1] - 6.0]:
 				_rect(px, top - 2, 6, ground_y - top + 2, col)
 				_circle(px + 3, top - 3, 4, col)
