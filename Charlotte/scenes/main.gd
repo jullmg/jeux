@@ -101,7 +101,8 @@ func _build_doors() -> void:
 	_add_lane("ruelle_verte")
 	_add_lane("ruelle")
 	var origin := _house_origin(layout.find("duplex_charlotte"))
-	var area := Rect2(origin + Vector2(278.0 - 48.0, 392.0) * HOUSE_SCALE, Vector2(96.0, 208.0) * HOUSE_SCALE)
+	var door_cx := _door_x("duplex_charlotte") - origin.x - 0.0
+	var area := Rect2(Vector2(origin.x + door_cx - 48.0 * HOUSE_SCALE, origin.y + 392.0 * HOUSE_SCALE), Vector2(96.0, 208.0) * HOUSE_SCALE)
 	add_child(DoorSpot.make(area, func():
 		_control.enabled = false
 		Transition.street_x = area.get_center().x

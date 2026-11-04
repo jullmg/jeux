@@ -89,14 +89,20 @@ const HOUSES := [
 	},
 	{
 		"name": "duplex_charlotte",
-		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
-		"lintel": "#BEB8AC", "lintel_dark": "#8A8478", "lintel_style": "fleur",
-		"top": 40.0, "parapet": "flat", "crest": true, "number": "5672",
-		"door": "#C0702F", "door_dark": "#7E4520", "awning": "#7C8186", "columns": true,
-		"windows": [[70.0, 110.0], [470.0, 110.0]], "door_cx": 278.0,
-		"balcony": [135.0, 420.0], "porch": [135.0, 420.0],
-		"stair": [Vector2(452, 336), Vector2(600, 380), Vector2(690, 520), Vector2(620, 696)],
-		"fence": "black", "basement": [480.0],
+		# From reference/maison_charlotte/: dark red-brown brick with pale mortar, tall white-framed windows under stone lintels,
+		# a varnished wood door with glass and iron scrollwork, a white concrete balcony under a dark metal awning, a straight
+		# black stair down to the right, the porch on posts with its steps at the LEFT, a black mailbox, two bikes at the fence.
+		"bricks": ["#7F3A2D", "#8A4132", "#6E3328", "#94483A", "#783527"], "mortar": "#BDB5AC",
+		"lintel": "#C9C3B6", "lintel_dark": "#8F897D", "lintel_style": "fleur",
+		"top": 40.0, "parapet": "flat", "crest": true, "number": "5672", "number_dx": -78.0,
+		"door": "#B26A2E", "door_dark": "#6E3F1B", "door_style": "grille", "sidelights": true, "door_surround": "lintel",
+		"lamp_style": "cylinder", "awning": "#4B5156", "columns": true, "downspout": 52.0,
+		"windows": [[165.0, 85.0], [478.0, 85.0]], "door_cx": 348.0,
+		"balcony": [205.0, 460.0], "porch": [205.0, 460.0],
+		"stair": [Vector2(452, 336), Vector2(514, 456), Vector2(575, 576), Vector2(637, 696)],
+		"steps_side": "left", "mailbox": true, "bamboo": true,
+		"bikes": [[262.0, "#B8C0C8"], [470.0, "#D9342B"]],
+		"fence": "black", "basement": [455.0],
 	},
 	{
 		"name": "duplex_voisin_droite",
@@ -447,8 +453,18 @@ func _plex_front() -> void:
 	var cx: float = k.door_cx
 	for f in floors:
 		_door(cx, _door_top(f), _fb(f))
+	var number_dx: float = k.get("number_dx", 0.0)
 	if k.number != "":
-		_plaque(cx, _door_top(0) + 14.0, k.number)
+		_plaque(cx + number_dx, _door_top(0) + (14.0 if number_dx == 0.0 else 40.0), k.number)
+		if number_dx != 0.0:
+			# The upper flat's number too, beside its door.
+			_plaque(cx + number_dx, _door_top(floors - 1) + 40.0, "5674")
+	if k.get("mailbox", false):
+		var mx: float = cx + number_dx - 12.0
+		var my := _door_top(0) + 106.0
+		_rect(mx, my, 34, 18, "#1A1A1A", 'rx="2" ' + _stroke("#444444", 1))
+		_rect(mx + 6, my + 6, 22, 3, "#555555")
+		_rect(mx + 15, my + 18, 4, 16, "#1A1A1A")
 	var b: Array = k.balcony
 	if k.awning != "":
 		_awning(b[0], b[1], _door_top(floors - 1) - 26.0, _fb(floors - 1) - RAIL_H)
@@ -458,6 +474,13 @@ func _plex_front() -> void:
 			_column(b[0] + 4, 1.0, _fb(f) + 16, _fb(f - 1))
 			_column(b[1] - 11, -1.0, _fb(f) + 16, _fb(f - 1))
 		_balcony(b[0], b[1], _fb(f), [])
+	if k.get("bamboo", false):
+		# A roll-up bamboo shade hanging at the left of the balcony, edged in green.
+		var bx0: float = b[0] - 16.0
+		var by0 := _door_top(floors - 1) - 6.0
+		_rect(bx0, by0, 40, _fb(floors - 1) - RAIL_H - by0 + 40.0, "#B8AC84", _stroke("#4F7A4F", 2.5))
+		for ly in range(int(by0) + 10, int(_fb(floors - 1) - RAIL_H + 36.0), 12):
+			_path("M%s %s H%s" % [_n(bx0 + 2), _n(ly), _n(bx0 + 38)], "none", _stroke("#9A8E68", 1))
 	var p: Array = k.porch
 	if k.halloween:
 		_cobweb(p[0] + 4.0, _fb(1) + 16.0, 1.0)
@@ -466,8 +489,13 @@ func _plex_front() -> void:
 			if rng.randf() < 0.6:
 				_ghost(gx, _fb(1) + 30.0)
 		_string_lights(b[0], b[1], _fb(1) - RAIL_H)
-	_balcony(p[0], p[1], _fb(0), [[cx - 54, cx + 54]])
-	_front_steps(cx)
+	if k.get("steps_side", "") == "left":
+		# The porch is up on posts and its steps go down at the left end, between curled iron rails.
+		_balcony(p[0], p[1], _fb(0), [[p[0] - 6.0, p[0] + 50.0]])
+		_side_steps(p[0] + 8.0)
+	else:
+		_balcony(p[0], p[1], _fb(0), [[cx - 54, cx + 54]])
+		_front_steps(cx)
 	if k.halloween:
 		_pumpkin(cx - 76, base_y + 2.0, 1.0, true)
 		_pumpkin(cx + 78, base_y + 2.0, 0.75, rng.randf() < 0.5)
@@ -488,9 +516,50 @@ func _plex_front() -> void:
 	else:
 		_stairs(p0, s[1] + Vector2(0, oy), s[2] + Vector2(0, oy), p3)
 	var gaps := [[cx - 66, cx + 66], [p3.x - 42, p3.x + 42]]
+	if k.get("steps_side", "") == "left":
+		gaps = [[p[0] - 120.0, p[0] - 20.0], [p3.x - 42, p3.x + 42]]
 	gaps.sort_custom(func(a, c): return a[0] < c[0])
 	_garden(gaps)
 	_fence(gaps)
+	for bike: Array in k.get("bikes", []):
+		_bike(bike[0], bike[1])
+
+
+# A bike seen from the side, leaning on the fence.
+func _bike(x: float, color: String) -> void:
+	var y := ground_y - 6.0
+	var rear := Vector2(x - 46.0, y - 30.0)
+	var front := Vector2(x + 46.0, y - 30.0)
+	for w in [rear, front]:
+		_circle(w.x, w.y, 30, "none", _stroke("#1A1A1A", 4.5))
+		_circle(w.x, w.y, 30, "none", _stroke("#8E8E8E", 1) + ' opacity="0.6"')
+		_circle(w.x, w.y, 3, "#444444")
+	var seat := Vector2(x - 28.0, y - 76.0)
+	var bar := Vector2(x + 32.0, y - 78.0)
+	var crank := Vector2(x - 2.0, y - 28.0)
+	for seg in [[rear, seat], [seat, crank], [crank, rear], [seat, bar], [crank, bar], [bar, front]]:
+		_path("M%s %s L%s %s" % [_n(seg[0].x), _n(seg[0].y), _n(seg[1].x), _n(seg[1].y)], "none", _stroke(color, 4.5) + ' stroke-linecap="round"')
+	_rect(seat.x - 12, seat.y - 6, 24, 6, "#1A1A1A", 'rx="3"')
+	_path("M%s %s L%s %s M%s %s h14" % [_n(bar.x), _n(bar.y), _n(bar.x - 4), _n(bar.y - 12), _n(bar.x - 4), _n(bar.y - 12)], "none", _stroke("#1A1A1A", 4) + ' stroke-linecap="round"')
+
+
+# Steps down at the left end of a raised porch: treads, with a curled wrought-iron rail on the outer side.
+func _side_steps(right: float) -> void:
+	var count := 4
+	var top := _fb(0) + 16.0
+	var run := 108.0
+	var sh := (ground_y - top) / count
+	for i in count:
+		var x := right - run * float(i + 1) / count
+		_rect(x, top + i * sh, run / count + 6.0, sh, k.step, _stroke(k.step_dark, 1.5))
+		_rect(x, top + i * sh, run / count + 6.0, 3, "#FFFFFF", 'opacity="0.25"')
+	var a := Vector2(right - 6.0, _fb(0) - RAIL_H)
+	var b := Vector2(right - run - 6.0, ground_y - RAIL_H)
+	_line("M%s %s Q%s %s %s %s" % [_n(a.x), _n(a.y), _n((a.x + b.x) / 2.0), _n(a.y + (b.y - a.y) * 0.3), _n(b.x), _n(b.y)], 4.5)
+	for i in 5:
+		var p := a.lerp(b, (i + 1) / 6.0)
+		_rect(p.x - 1.25, p.y + (i * 2.0), 2.5, RAIL_H - i * 2.0, k.metal, _metal_stroke())
+	_path("M%s %s c-10 0 -12 14 -4 16 c6 1 6 -7 1 -6" % [_n(b.x), _n(b.y)], "none", _stroke(k.metal, 3.5))
 
 
 func _bricks(y0: float, y1: float) -> void:
