@@ -400,7 +400,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   notebook's doodles use the crayon style, the menu card the clean one.
 - `ui/game_menu.gd` (`GameMenu` autoload, CanvasLayer 78): ☰ button top-left or Escape (unless the notebook is open)
   pauses and opens Reprendre / Options (Musique and Effets sonores volume sliders on those buses, Plein écran) /
-  Écran titre / Quitter le jeu (both save through the scene's `Saver` first). Options in `user://settings.cfg` [options].
+  Écran titre / Quitter le jeu (both save through the scene's `Saver` first). Options in `user://settings.cfg` [options]. The card is notebook paper like the notebook and the map (grain, ruled lines, washi tape, the pets peeking): crayon-lettered titles (`_CrayonTitle`), sticker-style coloured buttons with a little drawing (`_big_button(text, action, colour, icon)`), coloured sliders with a round handle and a percentage, a drawn check box; the card pops up when opened.
 - `ui/mute_button.gd` (`MuteButton` autoload): speaker button top-right on every screen, or Shift+M, mutes the Master bus;
   remembered in `user://settings.cfg`.
 - Buses "Effets" (effects) and "Musique". Music is the user's own tracks (made with Suno), never generated in code:
