@@ -32,7 +32,7 @@ const PLACES := [
 	{"name": "Rue Holt : coin 5e", "scene": "holt", "arrive": "holt_from_5e"},
 	{"group": "Ruelles"},
 	{"name": "Ruelle du milieu (cour de Charlotte)", "scene": "ruelle"},
-	{"name": "Ruelle du milieu : Alphée et Constance", "scene": "ruelle", "x": 2400.0},
+	{"name": "Ruelle du milieu (les jumelles y sont si la quête « amies » est lancée)", "scene": "ruelle", "x": 2400.0},
 	{"name": "Ruelle verte (parallèle à Dandurand)", "scene": "ruelle_dandurand"},
 	{"name": "Ruelle près de Holt", "scene": "ruelle_holt"},
 	{"group": "Chez Charlotte"},

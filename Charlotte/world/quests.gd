@@ -5,7 +5,7 @@ extends RefCounted
 ## not there = still to discover, "active" = in her notebook, "done" = a star. The Notebook autoload shows
 ## them, and announces each new and finished one.
 
-const ORDER := ["milk", "hamster", "menage", "amies", "plants", "cat", "cat2", "cat3"]
+const ORDER := ["amies", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3"]
 const ALL := {
 	"milk": {
 		"title": "Maman a besoin de lait : va au dépanneur",
@@ -29,7 +29,7 @@ const ALL := {
 		"title": "Va te faire des amies dans la ruelle",
 		"hint": "Des enfants de ton âge jouent dans la ruelle du milieu, derrière les maisons de la 6e Avenue. Va leur dire bonjour !",
 		"find": "Maman trouve que tu devrais jouer avec d'autres enfants…",
-		"age": 7, "after": "milk", "reward": 2.0,
+		"age": 7, "reward": 2.0,
 	},
 	"plants": {
 		"title": "Arrose les plantes",

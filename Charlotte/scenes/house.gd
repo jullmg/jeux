@@ -182,12 +182,6 @@ func _talk_to_mom() -> void:
 		Carry.put_down(_charlotte)
 		_say(_mom, "Du lait ! Merci, Chachoue !", 350.0)
 		Quests.complete("milk")
-	elif Quests.start("milk"):
-		_say(_mom, "Chachoue, peux-tu aller me chercher\ndu lait au dépanneur ?", 380.0, 3.5)
-	elif Quests.active("milk"):
-		_say(_mom, "Le dépanneur est au coin\nde la rue Dandurand !", 380.0)
-	elif Quests.start("menage"):
-		_say(_mom, "Ta chambre est en désordre,\nva la ranger, ma chouette !", 380.0, 3.5)
 	elif Quests.start("amies"):
 		if Twins.met():
 			# She has already met them on her own.
@@ -195,6 +189,12 @@ func _talk_to_mom() -> void:
 			Quests.complete("amies")
 		else:
 			_say(_mom, "Va jouer dans la ruelle, ma chouette !\nTu t'y feras peut-être des amies.", 400.0, 3.5)
+	elif Quests.start("milk"):
+		_say(_mom, "Chachoue, peux-tu aller me chercher\ndu lait au dépanneur ?", 380.0, 3.5)
+	elif Quests.active("milk"):
+		_say(_mom, "Le dépanneur est au coin\nde la rue Dandurand !", 380.0)
+	elif Quests.start("menage"):
+		_say(_mom, "Ta chambre est en désordre,\nva la ranger, ma chouette !", 380.0, 3.5)
 	elif Quests.active("menage"):
 		_say(_mom, "As-tu fini de ranger\nta chambre ?", 380.0)
 	elif Quests.active("amies"):

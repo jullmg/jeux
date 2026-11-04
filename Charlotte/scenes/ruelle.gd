@@ -112,7 +112,8 @@ func _ready() -> void:
 	ball.position = Vector2(bx, NEIGHBOUR_Y + 10.0)
 	ball.scale = Vector2.ONE * CHAR_SCALE
 	add_child(ball)
-	if lane == "middle":
+	# They are only there once Mom has sent her to find friends (and stay once she has met them).
+	if lane == "middle" and (Quests.active("amies") or Quests.done("amies") or Twins.met()):
 		_build_twins()
 	var squirrels := _build_lane_squirrels()
 	_charlotte = _spawn_charlotte(start_x)
