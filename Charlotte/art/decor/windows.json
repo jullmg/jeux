@@ -593,6 +593,56 @@
 			"trim": "#F4F1EA"
 		}
 	],
+	"duplex_jumelles": [
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				158.0,
+				418.0,
+				64.0,
+				144.0
+			],
+			"trim": "#26201C"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				493.0,
+				418.0,
+				69.0,
+				144.0
+			],
+			"trim": "#26201C"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				158.0,
+				143.0,
+				64.0,
+				144.0
+			],
+			"trim": "#26201C"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				493.0,
+				143.0,
+				69.0,
+				144.0
+			],
+			"trim": "#26201C"
+		}
+	],
 	"duplex_voisin_droite": [
 		{
 			"bar_y": 464.4,

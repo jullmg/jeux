@@ -112,6 +112,21 @@ const HOUSES := [
 		"fence": "white", "basement": [110.0], "curtains": true,
 	},
 	{
+		# The twins Turcotte's house, 5716 6e Avenue (reference/maison_jumelles/): warm brown brick with dark mortar, black-framed
+		# windows under brick arches, a glass door under a white concrete balcony with a curved wrought-iron railing, an open-tread
+		# black stair curving down to the right, a low black fence; Halloween decorations as on the photos.
+		"name": "duplex_jumelles", "number": "5716",
+		"bricks": ["#9A4E36", "#A85A3E", "#8A4430", "#B0603F", "#94503A"], "mortar": "#8C7C6E",
+		"trim": "#26201C", "trim_dark": "#0F0C0A",
+		"lintel": "#B9704F", "lintel_dark": "#7A4430", "lintel_style": "arch",
+		"door": "#2A2622", "door_dark": "#100D0B", "door_style": "glass", "door_surround": "lintel",
+		"parapet": "flat", "downspout": 652.0,
+		"windows": [[150.0, 80.0], [485.0, 85.0]], "door_cx": 345.0,
+		"balcony": [225.0, 530.0], "porch": [225.0, 535.0],
+		"stair": [Vector2(530, 336), Vector2(618, 380), Vector2(672, 520), Vector2(628, 696)],
+		"fence": "black", "basement": [],
+	},
+	{
 		"name": "triplex_exemple_2", "floors": 3,
 		"bricks": ["#D9B88F", "#CFAE84", "#E2C39C", "#C4A079", "#DDBE96"], "mortar": "#EFE6D8",
 		"lintel": "#E4D6BE", "lintel_dark": "#B3A48A", "lintel_style": "arch", "keystone": true,
@@ -838,6 +853,12 @@ func _door_leaf(style: String, r: Rect2) -> void:
 			for row in [1, 2, 3]:
 				_path("M%s %s H%s" % [_n(g.position.x), _n(g.position.y + g.size.y * row / 4.0), _n(g.end.x)], "none", _stroke(dark, 1.5))
 			_raised(x + 10, y + h * 0.62, w - 20, h * 0.32)
+		"glass":
+			# One big pane in a thin black frame, a plain panel under it.
+			var pane := Rect2(x + 7, y + 7, w - 14, h * 0.74)
+			_rect(pane.position.x, pane.position.y, pane.size.x, pane.size.y, "url(#glass)", _stroke(dark, 2.5))
+			_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(pane.position.x + pane.size.x * 0.55), _n(pane.position.y), _n(pane.position.x + pane.size.x * 0.8), _n(pane.position.y), _n(pane.position.x + pane.size.x * 0.25), _n(pane.end.y), _n(pane.position.x), _n(pane.end.y)], "#FFFFFF", 'opacity="0.16"')
+			_raised(x + 8, y + h * 0.8, w - 16, h * 0.15)
 		"sunburst":
 			var base := Vector2(x + w / 2, y + h * 0.46)
 			for k2 in 5:

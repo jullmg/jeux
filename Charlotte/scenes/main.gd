@@ -14,7 +14,7 @@ func _init() -> void:
 		"depanneur", "garages", "ruelle_verte",
 		"triplex_exemple_2", "plex_02", "plex_03", "moderne", "plex_04",
 		"duplex_voisin_gauche", "duplex_charlotte", "duplex_voisin_droite",
-		"plex_05", "triplex_exemple_3", "plex_06", "plex_07", "plex_08", "plex_09",
+		"plex_05", "triplex_exemple_3", "plex_06", "plex_07", "duplex_jumelles", "plex_09",
 		"ruelle", "coin_holt",
 		"rue_holt", "coin_holt_est",
 	]
