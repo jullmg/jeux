@@ -26,7 +26,7 @@ func _init() -> void:
 	tree_size = {10: 0.72}
 	lamps_after = [4, 9, 14, 18]
 	hydrants_at = [7.5, 16.3]
-	racks_at = [2.5, 12.55, 15.6]
+	racks_at = [2.5, 11.55, 15.6]
 	squirrels_at = [4.2, 9.5, 14.6, 18.4]
 
 
