@@ -922,7 +922,7 @@ func _door(cx: float, top: float, bottom: float) -> void:
 	_door_wreath(cx, top, top + 60)
 
 
-# Charlotte's doors (reference/maison_charlotte/): varnished wood under a stone lintel with a carved rosette, a dark transom, a tall
+# Charlotte's doors (reference/maison_charlotte/): varnished wood under a stone lintel with a carved fleur-de-lis, a dark transom, a tall
 # pane of smoky glass over a panel, a black lock plate. Downstairs it is wide with a narrow smoky light each side, a little lantern
 # each side and the blue number plate under the left one; upstairs a single door, a lantern and blue plate on the right, a black
 # plate with its sticker on the left.
@@ -933,7 +933,7 @@ func _wood_door(cx: float, top: float, bottom: float, ground: bool) -> void:
 	var over := 12.0 if ground else 16.0
 	_rect(x - over, top - 28, w + over * 2.0, 26, k.lintel, _stroke(k.lintel_dark, 1.5))
 	_rect(x - over, top - 28, w + over * 2.0, 3, "#FFFFFF", 'opacity="0.3"')
-	_rosette(cx, top - 15)
+	_fleur(cx, top - 15, 0.85, k.lintel_dark)
 	_rect(x - 3, top - 2, w + 6, bottom - top + 2, dark)
 	_rect(x, top, w, bottom - top, k.door)
 	_rect(x + 7, top + 6, w - 14, 17, "#2A3433", _stroke(dark, 1.5))
