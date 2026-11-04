@@ -20,9 +20,9 @@ func _init() -> void:
 	]
 	cross_streets = {"rue_dandurand": 560.0, "rue_holt": 520.0}
 	trees_after = [6, 8, 10, 13, 15, 17]
-	# The tree in front of Charlotte's house stands before the window to the right of her door, big, its crown over the upper
-	# floor, which leaves her front door in view.
-	tree_shift = {10: 279.0}
+	# The tree in front of Charlotte's house stands toward its Holt end, past the window to the right of her door, big, its crown
+	# high up, which leaves her doors in view.
+	tree_shift = {10: 340.0}
 	tree_size = {10: 0.72}
 	lamps_after = [4, 9, 14, 18]
 	hydrants_at = [7.5, 16.3]
