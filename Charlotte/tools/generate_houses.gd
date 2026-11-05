@@ -1981,6 +1981,7 @@ func _ruelle_verte() -> void:
 	poly.call([gl, gr, at.call(gr, far), at.call(gl, far)], "#A8A49C")
 	poly.call([gl, gr, at.call(gr, 0.25), at.call(gl, 0.25)], "#9A968E")
 	_path("M%s %s L%s %s" % [_n(at.call(gl, 0.25).x), _n(at.call(gl, 0.25).y), _n(at.call(gr, 0.25).x), _n(at.call(gr, 0.25).y)], "none", _stroke("#7E7A72", 2))
+	_lane_ground_detail(vp, far)
 	var mh: Vector2 = at.call(Vector2(vp.x, ground_y), 0.45)
 	out.append('<ellipse cx="%s" cy="%s" rx="16" ry="5" fill="#6E6A62" stroke="#55524C" stroke-width="1.5"/>' % [_n(mh.x), _n(mh.y)])
 	# Side walls.
@@ -1990,6 +1991,7 @@ func _ruelle_verte() -> void:
 			var y := lerpf(side[0].y, side[1].y, t)
 			var a := Vector2(side[0].x, y)
 			_path("M%s %s L%s %s" % [_n(a.x), _n(a.y), _n(at.call(a, far).x), _n(at.call(a, far).y)], "none", _stroke(side[3], 1.5))
+	_lane_wall_detail(vp, far, 0.1, 0.06)
 	# Left wall: white conduits, a meter box, a yellow box with a plant, a blue tag.
 	for y in [372.0, 388.0]:
 		var a := Vector2(X0, y)
@@ -2061,6 +2063,7 @@ func _ruelle_verte() -> void:
 	_circle(trike.x + 12, trike.y - 8, 8, "none", _stroke("#2B2B2B", 2.5))
 	_path("M%s %s l12 -16 l12 16 M%s %s v-10 h8" % [_n(trike.x - 12), _n(trike.y - 8), _n(trike.x), _n(trike.y - 24)], "none", _stroke("#D9342B", 4) + ' stroke-linecap="round"')
 	# The lane tree from the photo: rising on the right and arching right over the entrance. Own seed, so the entrance's width doesn't change it.
+	_lane_air_detail(vp, far)
 	rng.seed = TREE_SEED
 	_fine_tree(Vector2(X1 - 54, ground_y - 46), 400.0, -PI * 0.78, 1.05, ["#E3A33A", "#D9682B", "#C9562E", "#B5442E", "#E8B54A"])
 
@@ -2261,6 +2264,7 @@ func _ruelle() -> void:
 	for d in [0.25, 0.5]:
 		_path("M%s %s L%s %s" % [_n(at.call(gl, d).x), _n(at.call(gl, d).y), _n(at.call(gr, d).x), _n(at.call(gr, d).y)], "none", _stroke("#8E8A82", 1.5))
 	_path("M%s %s L%s %s" % [_n(cx), _n(ground_y), _n(at.call(Vector2(cx, ground_y), far).x), _n(at.call(Vector2(cx, ground_y), far).y)], "none", _stroke(_bush("#7E8F3A"), 2.5))
+	_lane_ground_detail(vp, far)
 	# Left: the neighbour's brick side, and its stair: wooden treads between two curling black stringers.
 	var lw := ["#8E4E3C", "#A85A44"]
 	poly.call([Vector2(X0, 140), at.call(Vector2(X0, 140), far), at.call(gl, far), gl], lw[0])
@@ -2268,6 +2272,7 @@ func _ruelle() -> void:
 	while y < ground_y - 6.0:
 		_path("M%s %s L%s %s" % [_n(X0), _n(y), _n(at.call(Vector2(X0, y), far).x), _n(at.call(Vector2(X0, y), far).y)], "none", _stroke(lw[1], 0.8) + ' opacity="0.6"')
 		y += 10.0
+	_lane_wall_detail(vp, far, 0.1, 0.22)
 	# The white garage door in its red frame, in the wall further along, a black railing above.
 	var door := func(y: float, d: float) -> Vector2: return at.call(Vector2(X0, y), d)
 	poly.call([door.call(ground_y - 236, 0.5), door.call(ground_y - 236, 0.66), door.call(ground_y, 0.66), door.call(ground_y, 0.5)], "#B5302A")
@@ -2314,6 +2319,7 @@ func _ruelle() -> void:
 	_path("M%s 431 h46 m-12 -8 l12 8 l-12 8" % _n(X0 + 12), "none", _stroke("#FFFFFF", 4) + ' stroke-linecap="round" stroke-linejoin="round"')
 	_rect(X1 - 39, 360, 6, ground_y - 360, "#8E9399")
 	# The tree reaching over from the left.
+	_lane_air_detail(vp, far)
 	_fine_tree(Vector2(X0 - 30, 420), 300.0, -PI * 0.38, 0.75, ["#E3A33A", "#D9682B", "#C9B03A", "#B5442E"])
 
 
@@ -2743,3 +2749,142 @@ func _circle(x: float, y: float, r: float, fill: String, extra := "") -> void:
 
 func _path(d: String, fill: String, extra := "") -> void:
 	out.append('<path d="%s" fill="%s" %s/>' % [d, fill, extra])
+
+
+# ── What every lane entrance seen from the street gets ───────────────────────
+# Three layers over the entrance's own art, so both lanes (`_ruelle_verte`, `_ruelle`) read as a real lane: the ground
+# (its crack of weeds, patches, a puddle, tyre tracks), the walls (windows, creeper, the sun on the left wall and the
+# shade on the right) and the air (wires and a clothesline across the gap). Their own RNG, and the same draws in every
+# season, so adding them doesn't move anything else.
+
+func _lane_at(vp: Vector2, p: Vector2, d: float) -> Vector2:
+	return vp + (p - vp) * (1.0 - d)
+
+
+# Weeds, patches, a puddle and tyre tracks on the concrete; snow instead in winter. Drawn right after the ground.
+func _lane_ground_detail(vp: Vector2, far: float) -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = 9241
+	var snowy := season == "winter"
+	# Two tyre tracks worn down the lane.
+	for side in [-1.0, 1.0]:
+		var pts := PackedStringArray()
+		for i in 9:
+			var d := far * i / 8.0
+			var p := _lane_at(vp, Vector2(vp.x + side * (X1 - X0) * 0.19, ground_y), d)
+			pts.append("%s%s %s" % ["M" if i == 0 else "L", _n(p.x), _n(p.y)])
+		_path(" ".join(pts), "none", _stroke("#E6E9EC" if snowy else "#9A968E", 7) + ' opacity="0.45" stroke-linecap="round"')
+	# The crack down the middle, wandering, with its seam of weeds.
+	var crack := PackedStringArray()
+	var weeds: Array[Vector2] = []
+	for i in 11:
+		var d := far * i / 10.0
+		var p := _lane_at(vp, Vector2(vp.x + r.randf_range(-26.0, 26.0) * (1.0 - d), ground_y), d)
+		crack.append("%s%s %s" % ["M" if i == 0 else "L", _n(p.x), _n(p.y)])
+		if i % 2 == 1:
+			weeds.append(p)
+	_path(" ".join(crack), "none", _stroke("#7E7A72", 2.2) + ' opacity="0.8"')
+	if not snowy:
+		for w in weeds:
+			var h: float = r.randf_range(8.0, 16.0) * (1.0 - (w.y - vp.y) / maxf(ground_y - vp.y, 1.0) * 0.0 + 0.0)
+			var scale: float = clampf((w.y - vp.y) / maxf(ground_y - vp.y, 1.0), 0.2, 1.0)
+			for b in 5:
+				var a := lerpf(-2.5, -0.6, b / 4.0) + r.randf_range(-0.2, 0.2)
+				_path("M%s %s q%s %s %s %s" % [_n(w.x), _n(w.y), _n(cos(a) * h * 0.3 * scale), _n(sin(a) * h * scale), _n(cos(a) * h * 0.8 * scale), _n(sin(a) * h * 0.8 * scale)],
+					"none", _stroke(_bush("#6E8A3A"), maxf(1.8 * scale, 0.7)) + ' stroke-linecap="round"')
+	# Worn patches of old asphalt and, near the mouth, a puddle with the sky in it.
+	for i in 5:
+		var d := r.randf_range(0.05, far * 0.9)
+		var p := _lane_at(vp, Vector2(lerpf(X0 + 20.0, X1 - 20.0, r.randf()), ground_y), d)
+		var rx: float = r.randf_range(22.0, 48.0) * (1.0 - d)
+		out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="%s" opacity="0.5"/>' % [_n(p.x), _n(p.y), _n(rx), _n(rx * 0.26), "#EFF2F4" if snowy else "#9C978D"])
+	var pud := _lane_at(vp, Vector2(lerpf(X0, X1, 0.36), ground_y - 6.0), 0.12)
+	out.append('<ellipse cx="%s" cy="%s" rx="34" ry="8" fill="%s" opacity="0.75"/>' % [_n(pud.x), _n(pud.y), "#E8EDF0" if snowy else "#8FA6B4"])
+	if not snowy:
+		out.append('<ellipse cx="%s" cy="%s" rx="22" ry="4" fill="#C7DCE8" opacity="0.7"/>' % [_n(pud.x - 4), _n(pud.y - 1)])
+
+
+# Windows up the side walls, creeper over them, and the light: the left wall catches the low sun, the right one is in shade
+# and throws it across the lane. `free_left` / `free_right`: the nearest depth where a window may go on that wall.
+func _lane_wall_detail(vp: Vector2, far: float, free_left := 0.08, free_right := 0.08) -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = 4517
+	var quad := func(a: Vector2, b: Vector2, c: Vector2, d: Vector2, fill: String, extra := "") -> void:
+		_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(a.x), _n(a.y), _n(b.x), _n(b.y), _n(c.x), _n(c.y), _n(d.x), _n(d.y)], fill, extra)
+	for side in [[X0, free_left], [X1, free_right]]:
+		var x: float = side[0]
+		var d0: float = side[1]
+		for i in 3:
+			var near: float = d0 + i * 0.145
+			var deep: float = near + 0.085
+			if deep > far - 0.04:
+				break
+			for row in 2:
+				var top := 168.0 + row * 152.0
+				var bot := top + 104.0
+				var a := _lane_at(vp, Vector2(x, top), near)
+				var b := _lane_at(vp, Vector2(x, top), deep)
+				var c := _lane_at(vp, Vector2(x, bot), deep)
+				var e := _lane_at(vp, Vector2(x, bot), near)
+				quad.call(a, b, c, e, "#2E2A26")
+				var inset := 0.1
+				quad.call(a.lerp(c, inset), b.lerp(e, inset), c.lerp(a, inset), e.lerp(b, inset),
+					"#C3D2D8" if r.randf() < 0.6 else "#F2D79A")
+				# A pale sill under it.
+				var s0 := _lane_at(vp, Vector2(x, bot + 6.0), near)
+				var s1 := _lane_at(vp, Vector2(x, bot + 6.0), deep)
+				_path("M%s %s L%s %s" % [_n(s0.x), _n(s0.y), _n(s1.x), _n(s1.y)], "none", _stroke("#D9D4C8", 4) + ' opacity="0.9"')
+	# Virginia creeper spilling down the right wall, bare stems in winter.
+	var colors := {"spring": ["#8FBF5A", "#A8CE6E", "#6E9E44"], "summer": ["#3E8E3A", "#4FA34A", "#2F7A30"],
+		"autumn": ["#C8402E", "#D9682B", "#9E2F26"], "winter": []}[season] as Array
+	for i in 26:
+		var d: float = r.randf_range(0.04, minf(far - 0.06, 0.5))
+		var y: float = r.randf_range(150.0, 470.0)
+		var p := _lane_at(vp, Vector2(X1, y), d)
+		var s: float = 1.0 - d
+		_path("M%s %s q%s %s %s %s" % [_n(p.x), _n(p.y), _n(-6.0 * s), _n(16.0 * s), _n(-2.0 * s), _n(34.0 * s)], "none", _stroke("#6E5A3A", maxf(1.6 * s, 0.6)))
+		if colors.is_empty():
+			continue
+		for n in 4:
+			var lp := p + Vector2(r.randf_range(-10.0, 4.0), r.randf_range(0.0, 32.0)) * s
+			_circle(lp.x, lp.y, maxf(r.randf_range(4.0, 7.5) * s, 1.0), colors[n % colors.size()])
+	# The sun down the left wall, the shade on the right one and on the ground under it.
+	var lit := [_lane_at(vp, Vector2(X0, 60.0), 0.0), _lane_at(vp, Vector2(X0, 60.0), far), _lane_at(vp, Vector2(X0, ground_y), far), _lane_at(vp, Vector2(X0, ground_y), 0.0)]
+	quad.call(lit[0], lit[1], lit[2], lit[3], "#FFF2CE", 'opacity="0.14"')
+	var shade := [_lane_at(vp, Vector2(X1, 0.0), 0.0), _lane_at(vp, Vector2(X1, 0.0), far), _lane_at(vp, Vector2(X1, ground_y), far), _lane_at(vp, Vector2(X1, ground_y), 0.0)]
+	quad.call(shade[0], shade[1], shade[2], shade[3], "#2A2630", 'opacity="0.16"')
+	var g0 := _lane_at(vp, Vector2(X1, ground_y), 0.0)
+	var g1 := _lane_at(vp, Vector2(X1, ground_y), far)
+	var g2 := _lane_at(vp, Vector2(lerpf(X0, X1, 0.52), ground_y), far)
+	var g3 := _lane_at(vp, Vector2(lerpf(X0, X1, 0.3), ground_y), 0.0)
+	quad.call(g0, g1, g2, g3, "#3A3340", 'opacity="0.13"')
+
+
+# Wires from wall to wall, and the neighbours' clothesline with its washing. Drawn last, over everything but the tree.
+func _lane_air_detail(vp: Vector2, far: float) -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = 6803
+	for d in [0.12, 0.34, 0.54]:
+		if d > far - 0.05:
+			continue
+		var a := _lane_at(vp, Vector2(X0, 150.0 + r.randf_range(-20.0, 20.0)), d)
+		var b := _lane_at(vp, Vector2(X1, 160.0 + r.randf_range(-20.0, 20.0)), d)
+		var sag: float = 26.0 * (1.0 - d)
+		_path("M%s %s Q%s %s %s %s" % [_n(a.x), _n(a.y), _n((a.x + b.x) / 2.0), _n((a.y + b.y) / 2.0 + sag), _n(b.x), _n(b.y)], "none", _stroke("#2B2B2B", maxf(2.2 * (1.0 - d), 0.8)))
+	# The clothesline: a line on its pulleys with a few things pegged to it, nearer the camera.
+	var d := 0.23
+	var la := _lane_at(vp, Vector2(X0 + 10.0, 300.0), d)
+	var lb := _lane_at(vp, Vector2(X1 - 10.0, 316.0), d)
+	var sag := 18.0 * (1.0 - d)
+	_path("M%s %s Q%s %s %s %s" % [_n(la.x), _n(la.y), _n((la.x + lb.x) / 2.0), _n((la.y + lb.y) / 2.0 + sag), _n(lb.x), _n(lb.y)], "none", _stroke("#D9D4C8", maxf(1.8 * (1.0 - d), 0.7)))
+	# Nobody hangs the washing out in January: the line stays bare (the same random draws all the same).
+	var wash := ["#E8E4DA", "#7FB4D9", "#E07A9A", "#F2D79A", "#9BD16A"]
+	for i in 5:
+		var t := 0.18 + i * 0.16
+		var on := la.lerp(lb, t) + Vector2(0.0, sag * 2.0 * t * (1.0 - t) * 2.0)
+		var w: float = r.randf_range(13.0, 20.0) * (1.0 - d)
+		var h: float = r.randf_range(20.0, 32.0) * (1.0 - d)
+		if season == "winter":
+			continue
+		_path("M%s %s h%s l%s %s q%s %s %s 0 l%s %s z" % [_n(on.x - w / 2.0), _n(on.y), _n(w), _n(w * 0.12), _n(h), _n(-w * 0.6), _n(5.0 * (1.0 - d)), _n(-w * 1.24), _n(w * 0.12), _n(-h)],
+			wash[i % wash.size()], _stroke("#B9B4AA", 1) + ' opacity="0.95"')
