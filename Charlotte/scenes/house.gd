@@ -55,6 +55,9 @@ const SNACKS := [["apple", "Une pomme !"], ["yogurt", "Un yogourt !"], ["cheese"
 # Lights that the switches and the floor lamp turn on and off.
 var _vestibule_light: Sprite2D
 var _salon_pendant: Sprite2D
+# The front of the sofa drawn over whoever sits in it (only shown while someone does).
+var _sofa_front: Sprite2D
+var _sofa_seat: Seat
 var _floor_lamp: Array = []
 var _hall_lights: Array = []
 var _bedroom_lights: FairyLights
@@ -670,6 +673,16 @@ func _build_vestibule() -> void:
 	_put(InteriorArt.oak_glass_door(), VESTIBULE_END + 230.0, WALL_BASE, 1.0, "wall")
 
 
+func _process(delta: float) -> void:
+	super(delta)
+	if _sofa_front:
+		var taken := false
+		for who: Character in [_charlotte, _mom, _dad]:
+			if who and who.is_seated() and who.seat_floor == _sofa_seat.floor_y and who.position.x >= _sofa_seat.span.x - 60.0 and who.position.x <= _sofa_seat.span.y + 60.0:
+				taken = true
+		_sofa_front.visible = taken
+
+
 func _build_salon() -> void:
 	_put(InteriorArt.rug(), 900.0, 694.0, 0.9)
 	_plate(1700.0, 560.0, true)
@@ -692,7 +705,10 @@ func _build_salon() -> void:
 	front.scale = Vector2.ONE * 0.85
 	front.position = Vector2(960.0, 606.0 - 48.0 * 0.85)
 	front.z_index = 3
+	front.visible = false
 	add_child(front)
+	_sofa_front = front
+	_sofa_seat = sofa_seat
 	add_child(sofa_seat)
 	_put(InteriorArt.side_table(), 1390.0, 610.0, 0.8, "floor")
 	_put(InteriorArt.window(170.0, 300.0), 1580.0, 470.0, 1.0, "wall")

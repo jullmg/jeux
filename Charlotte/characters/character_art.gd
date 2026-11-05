@@ -862,7 +862,6 @@ func _finger(x: float, y: float, w: float, l1: float, l2: float, a1: float, a2: 
 	s += _f('<rect x="%s" y="0" width="%s" height="%s" rx="%s" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>' % [-rx, w, l1, rx])
 	s += '<g transform="translate(0 %s) rotate(%s)">' % [l1 - 1.0, a2]
 	s += _f('<rect x="%s" y="0" width="%s" height="%s" rx="%s" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>' % [-rx * 0.96, w * 0.96, l2, rx * 0.96])
-	s += _f('<ellipse cx="0" cy="%s" rx="%s" ry="1.6" fill="{skin_shade}" opacity="0.55"/>' % [l2 - 2.5, rx * 0.55])
 	s += '</g></g>'
 	return s
 
@@ -879,7 +878,6 @@ func _hand_svg(mode: String, scale: float) -> String:
 			for f in [[16.8, 3.8, 7.5, 5.0, -2.0, -20.0], [20.8, 4.2, 9.5, 6.0, -4.0, -22.0], [24.8, 4.2, 10.0, 6.5, -6.0, -24.0], [28.6, 4.0, 9.0, 6.0, -9.0, -26.0]]:
 				s += _finger(f[0], 14.0, f[1], f[2], f[3], f[4], f[5])
 			s += _f('<rect x="14.2" y="4" width="15.6" height="16.5" rx="6.2" fill="{skin}" stroke="{skin_line}" stroke-width="1.7"/>')
-			s += _f('<path d="M16 17.5 Q22 19.8 28.4 17.5" stroke="{skin_shade}" stroke-width="1.4" fill="none" opacity="0.6"/>')
 			s += '<g transform="translate(29.2 8.5) rotate(-36)">'
 			s += _f('<rect x="-2.7" y="0" width="5.4" height="8.2" rx="2.7" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
 			s += '<g transform="translate(0 7) rotate(-16)">'
@@ -903,21 +901,13 @@ func _hand_svg(mode: String, scale: float) -> String:
 				var y := 8.5 + i * 4.3
 				var len := 13.0 - absf(i - 1.5) * 1.0
 				s += _f('<rect x="20" y="%s" width="%s" height="4.6" rx="2.3" fill="{skin}" stroke="{skin_line}" stroke-width="1.4"/>' % [y, len])
-			s += _f('<path d="M20.5 8.2 H31 M20.5 12.5 H31.6 M20.5 16.8 H31.4" stroke="{skin_shade}" stroke-width="1" opacity="0.55"/>')
 			s += '<g transform="translate(26 6.5) rotate(-72)">'
 			s += _f('<rect x="-2.7" y="-1" width="5.4" height="10" rx="2.7" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
 	# One clean silhouette: every part drawn once with a thick outline, then once more filled so the lines where the fingers
-	# overlap vanish; then the soft separations between the fingers, the knuckles and a little light on the palm.
+	# overlap vanish; then a little light on the palm (no lines on the back of the hand).
 	var outlined := s.replace('stroke-width="1.5"', 'stroke-width="3.2"').replace('stroke-width="1.7"', 'stroke-width="3.4"')
 	var filled := s.replace('stroke="{skin_line}"', 'stroke="{skin}"')
 	s = _f(outlined) + _f(filled)
-	match mode:
-		"relaxed":
-			s += _f('<path d="M18.8 11 V16.5 M22.8 10 V16.5 M26.8 10 V16.5" stroke="{skin_line}" stroke-width="1.1" fill="none" stroke-linecap="round" opacity="0.55"/>')
-		"open":
-			s += _f('<path d="M18.9 12 V17 M22.9 11 V17 M26.9 11 V17" stroke="{skin_line}" stroke-width="1.1" fill="none" stroke-linecap="round" opacity="0.5"/>')
-		"flat":
-			s += _f('<path d="M19.3 10 V16 M23.3 10 V16 M27.1 10 V16" stroke="{skin_line}" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.5"/>')
 	s += _f('<ellipse cx="19.5" cy="11.5" rx="3.2" ry="4.5" fill="#FFFFFF" opacity="0.2"/>')
 	s += _f(palm_top)
 	var w := ceili(44.0 * scale)
