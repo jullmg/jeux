@@ -1,8 +1,9 @@
 extends Node
 ## Autoload "Music": the soundtrack (the user's tracks, made with Suno), from audio/music/<name>.mp3 / .ogg / .wav,
 ## on the "Musique" bus, looping, crossfading from one track to the next. Scenes ask for a track with fallbacks:
-## Music.play(["street_winter", "street"]) plays the first that exists; if none exists, whatever is playing
-## carries on (so the title theme keeps going until a street theme is added).
+## Music.play(["street_winter", "street"]) plays the first that exists; if none exists, the title theme plays (so the title
+## theme goes on in the streets until a street theme is added, and a shop's or the flat's music never leaks into them).
+const DEFAULT_TRACK := "title"
 
 const FOLDER := "res://audio/music/"
 const VOLUME_DB := -6.0
@@ -23,9 +24,13 @@ func _ready() -> void:
 		_players.append(p)
 
 
-## Plays the first of `names` that has a file, crossfading from the current track (nothing if it's already playing).
-func play(names: Array) -> void:
-	for track_name in names:
+## Plays the first of `names` that has a file, crossfading from the current track (nothing if it's already playing). With none
+## found: the title theme, or, with `keep_if_missing`, whatever is playing.
+func play(names: Array, keep_if_missing := false) -> void:
+	var tracks := names.duplicate()
+	if not keep_if_missing:
+		tracks.append(DEFAULT_TRACK)
+	for track_name in tracks:
 		var stream := _load(track_name)
 		if stream == null:
 			continue

@@ -541,7 +541,7 @@ func _go_to_sleep() -> void:
 		Quests.complete("hamster")
 	_control.enabled = false
 	Sfx.play("goodnight")
-	Music.play(["night"])
+	Music.play(["night"], true)
 	var night := CanvasLayer.new()
 	night.layer = 55
 	add_child(night)

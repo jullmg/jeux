@@ -409,7 +409,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   remembered in `user://settings.cfg`.
 - Buses "Effets" (effects) and "Musique". Music is the user's own tracks (made with Suno), never generated in code:
   `audio/music/<name>.mp3|.ogg|.wav`, played by the `Music` autoload (`audio/music.gd`): looping, crossfading.
-  `Music.play([names…])` plays the first that exists, else leaves the current track playing. Names: `title` (intro;
+  `Music.play([names…])` plays the first that exists, else the `title` theme (never a shop's or the flat's music left over in the street); `keep_if_missing` leaves the current track instead (bedtime). Names: `title` (intro;
   present), `street` / `street_<season>` (streets, `StreetScene._music()`), `maison-charlotte` (her flat; present), `house`
   (other interiors, `Interior._music()`), `depanneur` (present),
   `night` (bedtime). Missing tracks are fine: the previous music carries on.
