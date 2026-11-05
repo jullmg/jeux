@@ -153,6 +153,11 @@ static func add_weather(parent: Node) -> void:
 
 ## Adjusts a passerby's random look to the weather, without touching any random generator (so the street
 ## keeps the same people in every season).
+## Winter tuque colours: bright, with a dark one or two among them.
+const TUQUES: Array[String] = ["#E04F5F", "#4A6FA5", "#FFD23F", "#3E8E5A", "#FF8A3D", "#7E57C2", "#1FB5C4", "#C2185B",
+	"#F4F1EA", "#2E3440", "#5C6BC0", "#FFB3C7", "#8D6E63", "#A5D6A7"]
+
+
 static func dress_for_weather(look: CharacterLook) -> void:
 	match current:
 		"winter":
@@ -164,6 +169,10 @@ static func dress_for_weather(look: CharacterLook) -> void:
 				look.legwear_color = Color("#2F3E5C")
 			look.shoes = "boot"
 			if look.hat == "" or look.hat in ["cap", "witch", "cat_ears"]:
+				# A caps's colour stays; the others get a tuque colour of their own (not all black), picked from their look so the
+				# same person always wears the same one and no random numbers are drawn.
+				if look.hat != "cap":
+					look.hat_color = Color(TUQUES[absi(hash("%s%s%s" % [look.outfit_color.to_html(), look.hair_color.to_html(), look.skin.to_html()])) % TUQUES.size()])
 				look.hat = "tuque"
 			if look.scarf == "":
 				look.scarf = "#E04F5F" if look.outfit_color.v > 0.5 else "#FFD23F"

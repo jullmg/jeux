@@ -194,7 +194,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   which keeps the look for every scene and saves it in the game's slot folder; `CharacterLook.charlotte()` returns it
   (else `usual()`, the yellow dress). Delete that file after tests that press "C'est parfait !". Picking a clothing colour drops
   Charlotte's exact-colour `overrides` for clothes (`cloth_*`, `accent_*`, `shoe_*`). Design sheets use `CharacterLook.usual()`.
-- Outdoors in winter Charlotte wears a copy of her look dressed by `CharacterLook.charlotte_for_winter` (`Season.dress_for_weather`: coat, boots, tuque, scarf; a red tuque unless she chose a hat):
+- Outdoors in winter Charlotte wears a copy of her look dressed by `CharacterLook.charlotte_for_winter` (`Season.dress_for_weather`: coat, boots, tuque, scarf; a red tuque unless she chose a hat; everyone else gets a tuque colour from `Season.TUQUES` picked from their look, so not all black):
   `StreetScene._spawn_charlotte` and the title screen; her saved outfit is unchanged.
 - Arms have an elbow and hands with fingers: each arm is three sprites, upper arm (shoulder pivot; `_arm_front`/`_arm_back`, whose
   `rotation` is the shoulder angle), forearm (child, `rotation = -elbow flex`) and hand (child of the forearm, one of four pictures
