@@ -87,7 +87,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   and the middle lane opening half way ("↑ Ruelle", `LaneArt.junction`); the middle lane ends on the two cross lanes in a T (`LaneArt.tee`, see below). `_plan()` lays out lots and `_openings` ({kind, scene, arrive, label, here}); `Transition.arrive` keys are
   "<street_key>_from_<where>" (street_key "ruelle", "ruelle_dandurand", "ruelle_holt"; streets come in with
   `_add_lane(art)` and go back out to "<street>_from_<art>", `StreetScene._from_lane()`).
-  Lots of `LOT_W` 365: backs (siding/brick, wooden galleries, zigzag or spiral stairs, clothesline pulleys) and fronts
+  Lots of `LOT_W` 365: backs (siding/brick with staggered joints and bricks of their own tone, a downpipe with its brackets, a meter box and a vent cap, wooden galleries, zigzag or spiral stairs, clothesline pulleys) and fronts
   along the lane (board, cedar, picket, chain-link fences, tôle garages, roll-up garages, sheds, planters and bench),
   Virginia creeper by season, poles and wires (no recycling or compost bins, Julien took them out), clotheslines across the lane (`_Clotheslines`), the black cat, yard
   trees, a croque-livre in each lane (`LaneArt.croque_livre`, `_open_croque_livre`: ready for a quest). Charlotte's

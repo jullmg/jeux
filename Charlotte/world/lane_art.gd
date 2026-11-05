@@ -83,6 +83,36 @@ static func back(rng: RandomNumberGenerator, w: float, own := false, brick := ""
 	while y < H:
 		s += _line(Vector2(0, y), Vector2(w, y), _dark(wall, 0.12) if siding else _light(wall, 0.25), 1.0, 'opacity="0.5"')
 		y += 9.0 if siding else 7.0
+	# Staggered joints, so a brick wall is bricks and not stripes (its own random numbers: the lane is unmoved).
+	if not siding:
+		var jr := RandomNumberGenerator.new()
+		jr.seed = int(w) * 17 + floors * 101
+		var joint := _dark(wall, 0.22)
+		var course := 0
+		y = top + 14.0
+		while y < H:
+			var jx: float = -12.0 + (12.0 if course % 2 == 0 else 0.0)
+			while jx < w:
+				s += _line(Vector2(jx, y), Vector2(jx, y + 7.0), joint, 1.0, 'opacity="0.4"')
+				# Here and there a brick of its own tone: what makes a wall read as brick and not as stripes.
+				if jr.randf() < 0.22:
+					var tint: String = _light(wall, jr.randf_range(0.06, 0.16)) if jr.randf() < 0.5 else _dark(wall, jr.randf_range(0.06, 0.14))
+					s += _rect(jx + 1.0, y + 0.5, 22.0, 6.0, tint, 'opacity="0.8"')
+				jx += 24.0
+			course += 1
+			y += 14.0
+	# A downpipe from the roof to the ground, on the shaded edge, with its brackets and the damp stain under it.
+	var pipe := w - 22.0
+	s += _rect(pipe, top - 4, 7, H - top + 4, _dark(wall, 0.45))
+	s += _rect(pipe + 1, top - 4, 2.5, H - top + 4, "#FFFFFF", 'opacity="0.25"')
+	for by in [top + 40.0, top + 150.0, H - 70.0]:
+		s += _rect(pipe - 2, by, 11, 4, _dark(wall, 0.55))
+	s += _rect(pipe - 8, H - 34, 24, 10, "#000000", 'opacity="0.12"')
+	# A meter box and a vent cap on the wall.
+	s += _rect(10, H - 108, 20, 26, "#C9C5BC", 'stroke="#8E8A82" stroke-width="1.5"')
+	s += _rect(13, H - 102, 14, 10, "#8FA7B8")
+	s += '<ellipse cx="%.1f" cy="%.1f" rx="9" ry="7" fill="%s"/>' % [w * 0.5, top + 46.0, _dark(wall, 0.5)]
+	s += '<ellipse cx="%.1f" cy="%.1f" rx="6" ry="4.5" fill="#55585C"/>' % [w * 0.5, top + 46.0]
 	# Sunlit left edge, shaded right edge, the roof's flashing.
 	s += _rect(0, top, 10, H - top, "#FFFFFF", 'opacity="0.12"')
 	s += _rect(w - 14, top, 14, H - top, "#000000", 'opacity="0.12"')
