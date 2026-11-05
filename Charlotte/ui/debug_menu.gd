@@ -8,8 +8,8 @@ extends CanvasLayer
 const ALIASES := {"printemps": "spring", "ete": "summer", "été": "summer", "automne": "autumn", "hiver": "winter"}
 ## The story flags each quest leaves behind, cleared with it.
 ## Story flags that belong to no quest, cleared by "Tout effacer".
-const OTHER_FLAGS := ["met_twins"]
-const QUEST_FLAGS := {"amies": ["met_twins"], "cachette": ["cachette_found"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"]}
+const OTHER_FLAGS := ["met_twins", "met_billie_auguste"]
+const QUEST_FLAGS := {"amies": ["met_twins", "met_billie_auguste"], "cachette": ["cachette_found"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"]}
 ## What a quest puts in her arms (a lost cat's quest id is the cat's id, handled by `Carry.cat_id()`).
 const QUEST_CARRIES := {"milk": "milk", "plants": "can", "menage": "toy"}
 

@@ -6,6 +6,9 @@ const HEAD_CANVAS := Vector2(240, 380)
 const HEAD_PIVOT := Vector2(118, 296)
 const RIGS := {
 	"child": {"leg": 110.0, "torso": 90.0, "arm": 76.0, "head": 1.0, "sx": 1.0},
+	# Billie (7) and Auguste (5), smaller than Charlotte; little ones have bigger heads for their bodies.
+	"kid7": {"leg": 100.0, "torso": 82.0, "arm": 70.0, "head": 0.99, "sx": 0.98},
+	"kid5": {"leg": 80.0, "torso": 67.0, "arm": 57.0, "head": 1.0, "sx": 0.95},
 	"tween": {"leg": 148.0, "torso": 110.0, "arm": 94.0, "head": 0.95, "sx": 1.0},
 	"teen": {"leg": 162.0, "torso": 120.0, "arm": 100.0, "head": 0.84, "sx": 1.05},
 	"adult": {"leg": 210.0, "torso": 154.0, "arm": 128.0, "head": 0.72, "sx": 1.14},
@@ -21,7 +24,7 @@ const CLOTH_DEFS := ('<defs><linearGradient id="cs" x1="0" y1="0" x2="1" y2="0.5
 	+ '<stop offset="1" stop-color="#000000" stop-opacity="0.07"/></linearGradient></defs>')
 ## The shin's picture reaches this far above the knee (the round cap of the joint).
 const SHIN_PAD := 14.0
-const HAND_SCALE := {"child": 1.0, "tween": 1.05, "teen": 1.1, "adult": 1.22, "senior": 1.18}
+const HAND_SCALE := {"child": 1.0, "kid7": 0.96, "kid5": 0.9, "tween": 1.05, "teen": 1.1, "adult": 1.22, "senior": 1.18}
 
 var look: CharacterLook
 var p := {}

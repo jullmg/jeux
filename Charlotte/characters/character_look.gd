@@ -152,6 +152,53 @@ static func _twin() -> CharacterLook:
 	return look
 
 
+## Billie, 7 (reference/personnages/billie_et_auguste.jpg, on the left): light brown wavy hair with a little pink-tied tuft, grey-blue
+## eyes, a pale blue sleeveless dress with flowers and little birds, black sandals. A bit smaller than Charlotte.
+static func billie() -> CharacterLook:
+	var look := CharacterLook.new()
+	look.age = "kid7"
+	look.skin = Color("#F6D9C5")
+	look.hair_style = "long_wavy"
+	look.hair_color = Color("#B8946A")
+	look.eye_color = Color("#7F9BB5")
+	look.lashes = true
+	look.mouth = "smile"
+	look.outfit = "dress"
+	look.outfit_color = Color("#BFD6EA")
+	look.accent_color = Color("#F2A7C9")
+	look.pattern = "flowers"
+	look.sleeve = "short"
+	look.legwear = "socks"
+	look.legwear_color = Color.WHITE
+	look.shoes = "mary_jane"
+	look.shoe_color = Color("#2B2B2B")
+	return look
+
+
+## Auguste, 5 (on the right): ginger hair in a chin-length bob with a fringe, freckles, a big grin, a red basketball jersey.
+## Smaller than Billie.
+static func auguste() -> CharacterLook:
+	var look := CharacterLook.new()
+	look.age = "kid5"
+	look.skin = Color("#F6D9C5")
+	look.hair_style = "bob"
+	look.hair_color = Color("#D08A45")
+	look.eye_color = Color("#7A5A3A")
+	look.lashes = false
+	look.freckles = true
+	look.mouth = "open_smile"
+	look.outfit = "tshirt"
+	look.outfit_color = Color("#D9342B")
+	look.accent_color = Color("#F4F1EA")
+	look.pattern = "none"
+	look.sleeve = "short"
+	look.legwear = "pants"
+	look.legwear_color = Color("#2B2B2B")
+	look.shoes = "sneaker"
+	look.shoe_color = Color("#2B2B2B")
+	return look
+
+
 ## Alphée: her hair down, a pale teal T-shirt with a pink heart, a stone on a cord.
 static func alphee() -> CharacterLook:
 	var look := _twin()

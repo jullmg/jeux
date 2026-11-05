@@ -31,6 +31,8 @@ const AVENUE_W := 560.0
 const WALL_W := 470.0
 ## Where Alphée and Constance hang out, in the middle lane: this lot, just short of Charlotte's yard.
 const TWINS_LOT := 5
+## Billie and Auguste live three houses on from Charlotte's, toward Dandurand.
+const KIDS_LOT := OWN_LOT + 3
 ## How many lots away from where they play the twins go to hide.
 const HIDE_FROM := 3
 ## Squirrels in a lane, along the foot of the fences.
@@ -107,6 +109,7 @@ func _ready() -> void:
 	# They are only there once Mom has sent her to find friends (and stay once she has met them).
 	if lane == "middle" and (Quests.active("amies") or Quests.done("amies") or Twins.met()):
 		_build_twins()
+		_build_little_neighbours()
 	var squirrels := _build_lane_squirrels()
 	_charlotte = _spawn_charlotte(start_x)
 	for squirrel in squirrels:
@@ -481,7 +484,7 @@ func _hide_spots() -> Array:
 	rng.seed = seed_value + 73
 	var sides: Array = [[], []]
 	for i: int in _front_sprites:
-		if _kinds[i] in ["boards", "cedar"] and i != _own and absi(i - TWINS_LOT) >= HIDE_FROM:
+		if _kinds[i] in ["boards", "cedar"] and i != _own and absi(i - TWINS_LOT) >= HIDE_FROM and i != KIDS_LOT:
 			sides[0 if i < TWINS_LOT else 1].append(i)
 	var picks: Array = []
 	for side: Array in sides:
@@ -519,6 +522,15 @@ func _build_twins() -> void:
 	add_child(twins)
 	twins.spawn_hidden()
 	add_child(QuestMark.make(twins.position + Vector2(0, -190), twins.waiting))
+
+
+func _build_little_neighbours() -> void:
+	var kids := BillieAuguste.new()
+	kids.position = Vector2((_lots[KIDS_LOT].x + _lots[KIDS_LOT].y) / 2.0, NEIGHBOUR_Y + 10.0)
+	kids.scale = Vector2.ONE * CHAR_SCALE
+	kids.control = _control
+	add_child(kids)
+	add_child(QuestMark.make(kids.position + Vector2(0, -160), kids.waiting))
 
 
 # Each opening: click it to go through. The avenues get their blue street plate (click the vista, or ↑ on the sidewalk),
