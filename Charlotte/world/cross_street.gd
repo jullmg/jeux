@@ -715,7 +715,8 @@ func _draw_ground() -> void:
 		var b := lerpf(l, r, (i + 0.75) / n)
 		draw_colored_polygon(PackedVector2Array([Vector2(_fan(a, 606.0), 606.0), Vector2(_fan(b, 606.0), 606.0),
 			Vector2(_fan(b, 654.0), 654.0), Vector2(_fan(a, 654.0), 654.0)]), bar)
-	# A few cracks and leaves blown onto the road.
+	# Leaves blown over the intersection, and above all the street's line of them along the gutter, which has to carry on
+	# across the gap instead of stopping dead at the corner: thinner in the middle, where the cars sweep it.
 	for i in 22:
 		var y := _rng.randf_range(y0 + 4.0, y1 - 4.0)
 		var x := _rng.randf_range(_fan(l, y), _fan(r, y))
@@ -724,6 +725,19 @@ func _draw_ground() -> void:
 		var lc: Color = _litter[_rng.randi_range(0, 4) % _litter.size()]
 		if float(i % 10) / 10.0 < Season.litter_amount():
 			draw_circle(Vector2.ZERO, size, lc)
+	var gutter := int((r - l) / 4.0)
+	for i in gutter:
+		var t := (i + 0.5) / float(gutter)
+		var y := _rng.randf_range(Street.ROAD - 8.0, Street.ROAD + 8.0)
+		var x := lerpf(_fan(l, y), _fan(r, y), t)
+		var keep := lerpf(1.0, 0.35, sin(t * PI))
+		var size := _rng.randf_range(3.0, 5.5)
+		var lc: Color = _litter[_rng.randi_range(0, 4) % _litter.size()]
+		if _rng.randf() > keep or float((i * 7919) % 1000) / 1000.0 >= Season.litter_amount():
+			continue
+		draw_set_transform(Vector2(x + _rng.randf_range(-3.0, 3.0), y), _rng.randf_range(0.0, PI), Vector2(1.0, 0.5))
+		draw_circle(Vector2.ZERO, size, lc)
+		draw_line(Vector2(-4, 0), Vector2(4, 0), lc.darkened(0.3), 0.8)
 	draw_set_transform(Vector2.ZERO)
 
 

@@ -118,7 +118,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   every detail as close to the pictures as possible). The cross-street vistas run to the horizon with Mount Royal at the end. Entries in `cross_streets` are gaps (width in px), not SVGs: `CrossStreet`
   (`world/cross_street.gd`) draws them in one-point perspective as three nodes in the draw order: `VISTA` (before the houses:
   receding street, walls along it from `left_walls`/`right_walls`, street trees), `GROUND` (after `Street`: asphalt through the
-  sidewalk, curb ramps, crosswalk, yellow in the school zone) and `SIGNS` (with the props: plates, stop/school sign). Charlotte's bounds stop at the curbs (`CrossStreet.road_x`). Passersby already walk across on the crosswalks. `reference/` has photos of the Dandurand corner and `google_map_immediate_area.png`.
+  sidewalk, curb ramps, crosswalk, yellow in the school zone, and the gutter's line of dead leaves carried on across the gap — thinner
+  in the middle where the cars sweep it — so it is not cut dead at the corner) and `SIGNS` (with the props: plates, stop/school sign). Charlotte's bounds stop at the curbs (`CrossStreet.road_x`). Passersby already walk across on the crosswalks. `reference/` has photos of the Dandurand corner and `google_map_immediate_area.png`.
 - `scenes/intro.gd` builds a shorter copy of the same street (5 houses around Charlotte's duplex), plus the logo and start button.
   Its geometry helpers mirror `main.gd`, so a layout/geometry change in one may need the same change in the other.
 - Interiors are built from reusable parts, meant for future house insides too:
