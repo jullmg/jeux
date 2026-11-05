@@ -602,6 +602,9 @@ static func back_shelves() -> ImageTexture:
 	s += '<rect x="0" y="0" width="640" height="300" fill="url(#shade)" opacity="0.18"/>'
 	for row in 4:
 		var y := 12.0 + row * 72.0
+		# The shelf is a recess: dark at the back and under the shelf above, so the goods stand out instead of reading as bars.
+		s += '<rect x="4" y="%.1f" width="632" height="56" fill="#5E5244" opacity="0.5"/>' % y
+		s += '<rect x="4" y="%.1f" width="632" height="12" fill="#2E2A24" opacity="0.4"/>' % y
 		var x := 10.0
 		while x < 612.0:
 			var kind := rng.randi_range(0, 6)
@@ -1161,18 +1164,23 @@ static func tidy_back_shelves() -> ImageTexture:
 	for row in 2:
 		var y := 10.0 + row * 90.0
 		s += '<rect x="0" y="%.1f" width="640" height="4" fill="#FFFFFF" opacity="0.9"/>' % y
+		# The back of the shelf in shadow, deepest right under the shelf above.
+		s += '<rect x="0" y="%.1f" width="640" height="74" fill="#B9B2A2" opacity="0.45"/>' % (y + 4)
+		s += '<rect x="0" y="%.1f" width="640" height="14" fill="#6E6454" opacity="0.35"/>' % (y + 4)
 		var blocks := [["#D9342B", "can"], ["#F4F1EA", "box"], ["#FFD23F", "bottle"], ["#4FA3E0", "can"], ["#4E9A52", "box"], ["#F08A24", "bottle"], ["#C084FC", "can"], ["#1FB5C4", "box"]]
 		var x := 14.0
 		for b in blocks:
 			var n := 5 if row == 0 else 4
 			for k in n:
+				# Not a row of identical bars: each one stands a little higher or lower than its neighbour.
+				var lift: float = [0.0, 3.0, -2.0, 4.0, 1.0][k % 5]
 				match str(b[1]):
 					"can":
-						s += _can(x + k * 15, y + 36, 13, 42, str(b[0]))
+						s += _can(x + k * 15, y + 36 + lift, 13, 42 - lift, str(b[0]))
 					"box":
-						s += _box(x + k * 17, y + 28, 15, 50, str(b[0]))
+						s += _box(x + k * 17, y + 28 + lift, 15, 50 - lift, str(b[0]))
 					_:
-						s += _bottle(x + k * 15, y + 28, 13, 50, str(b[0]), "#FFFFFF")
+						s += _bottle(x + k * 15, y + 28 + lift, 13, 50 - lift, str(b[0]), "#FFFFFF")
 			x += n * (17.0 if str(b[1]) == "box" else 15.0) + 14.0
 		s += '<rect x="0" y="%.1f" width="640" height="8" fill="#FFFFFF" stroke="#C9C4B8" stroke-width="1.5"/><rect x="0" y="%.1f" width="640" height="10" fill="url(#shade)" opacity="0.4"/>' % [y + 78, y + 86]
 		for t in 8:
