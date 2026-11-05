@@ -169,6 +169,10 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   (`_build_clutter`: boxes on top of the fridges, a pallet, a hand truck, a ladder, a cart, a mop, a full bin, crooked price cards; the floor
   is kept clear of small items; the crowding also shows in a long row of blurred foreground shelves, `Interior._build_foreground` kind
   "shelves" [x, "shelves", seed], one every ~340 px) so the two feel different.
+- A dépanneur's window seen from the street is never a dark pane (generator `_shop_glass_glow`, `_shop_glass_goods`, `_shop_glass_shine`,
+  own RNG): the shop's warm light behind the glass, shelves of tins, bottles and boxes against it, a poster taped up, and the street
+  reflected in broad diagonal streaks. Used by Xin-Xin's front (`_depanneur_front`, its fridge dropped lower so the shelves show) and
+  by Oh Bon! (`_ohbon`).
 - Shop walls get advertising posters, never house picture frames: `ShopArt.ad_poster(kind)` (`AD_POSTERS`: coffee, ice cream, slush, hot dogs, cold drinks), hung with `Shop._ad(kind, x, bottom, scale)` (title label over the strip).
 - `tools/shop_objects.tscn` is the catalogue of every `ShopArt` object, twelve to a page, to judge their drawing: `Godot --path . --screen 1 res://tools/shop_objects.tscn -- --screenshot=/path/p.png --page=0` (pages 0–5; wait for `RenderingServer.frame_post_draw` before capturing in a tool scene, or the shot comes out transparent).
 - More shop objects in `ShopArt` (shopping cart, old cash register, spinner rack, produce crates, flower buckets, gumball machine,

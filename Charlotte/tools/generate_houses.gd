@@ -1809,23 +1809,28 @@ func _depanneur_front() -> void:
 	for win in [[X0 + 36, 250.0], [X1 - 286, 250.0]]:
 		_rect(win[0] - 6, wy - 6, win[1] + 12, wb - wy + 12, "#F2F0EA", _stroke("#B9B5AC", 2))
 		_rect(win[0], wy, win[1], wb - wy, "#3E4A52")
+		_shop_glass_glow(win[0], wy, win[1], wb - wy, int(win[0]) * 31 + 7)
 		var gx: float = win[0] + 10.0
 		while gx < win[0] + win[1] - 6:
 			_rect(gx, wy + 4, 2, wb - wy - 8, "#E9EEF2", 'opacity="0.5"')
 			gx += 22.0
+	# The drinks fridge in the left window, lower now so the shelves of goods show above it.
 	var lx: float = X0 + 56.0
-	_rect(lx, wy + 30, 200, wb - wy - 46, "#2E7D4F", _stroke("#1E5A38", 2))
+	_rect(lx, wy + 104, 200, wb - wy - 120, "#2E7D4F", _stroke("#1E5A38", 2))
 	for bx in [lx + 40.0, lx + 70.0]:
-		_rect(bx, wy + 60, 18, 70, "#3E9A5E", 'rx="6"')
-		_rect(bx + 5, wy + 44, 8, 20, "#3E9A5E")
+		_rect(bx, wy + 126, 18, 62, "#3E9A5E", 'rx="6"')
+		_rect(bx + 5, wy + 112, 8, 18, "#3E9A5E")
 	for i in 3:
-		_rect(lx + 110, wy + 60 + i * 16, 70, 6, "#F4F2EC")
+		_rect(lx + 110, wy + 126 + i * 16, 70, 6, "#F4F2EC")
 	var rxw: float = X1 - 266.0
-	_rect(rxw, wy + 20, 210, wb - wy - 40, "#F4F2EC", _stroke("#C9C2B4", 2))
-	_rect(rxw + 10, wy + 30, 190, 30, "#C8202A")
-	_rect(rxw + 20, wy + 80, 40, 80, "#E04F5F", 'rx="6"')
-	_rect(rxw + 80, wy + 90, 70, 40, "#FFFFFF", _stroke("#2B2B2B", 1.5))
-	_rect(rxw + 150, wy + 130, 50, 30, "#25408F")
+	_rect(rxw, wy + 96, 210, wb - wy - 116, "#F4F2EC", _stroke("#C9C2B4", 2))
+	_rect(rxw + 10, wy + 104, 190, 26, "#C8202A")
+	_rect(rxw + 20, wy + 140, 40, 56, "#E04F5F", 'rx="6"')
+	_rect(rxw + 80, wy + 146, 70, 36, "#FFFFFF", _stroke("#2B2B2B", 1.5))
+	_rect(rxw + 150, wy + 170, 50, 26, "#25408F")
+	for win in [[X0 + 36, 250.0], [X1 - 286, 250.0]]:
+		_shop_glass_goods(win[0], wy + 2, win[1], 104.0, int(win[0]) * 31 + 7, 2)
+		_shop_glass_shine(win[0], wy, win[1], wb - wy)
 	# Air conditioners over the door, the door behind its grille, the civic number.
 	var dx := 390.0
 	for ax in [dx - 74.0, dx + 6.0]:
@@ -2455,9 +2460,12 @@ func _ohbon() -> void:
 	var wb := base_y - 62.0
 	# Narrow left window: posters, lottery stickers.
 	_rect(X0 + 6, wy, 92, wb - wy, "#2E3A44", _stroke("#1A1A1A", 3))
+	_shop_glass_glow(X0 + 6, wy, 92, wb - wy, 113)
+	_shop_glass_goods(X0 + 6, wy, 92, wb - wy, 113, 2)
 	_rect(X0 + 6, wy, 92, wb - wy, "url(#glass)", 'opacity="0.45"')
 	_rect(X0 + 16, wb - 60, 30, 40, "#F2C230", 'opacity="0.8"')
 	_rect(X0 + 54, wb - 46, 34, 26, "#4E8A5A", 'opacity="0.8"')
+	_shop_glass_shine(X0 + 6, wy, 92, wb - wy)
 	# The door: black frame, glass, its number on the glass, a push bar.
 	_rect(X0 + 104, wy - 6, 74, base_y - wy + 6, "#1F1F1F")
 	_rect(X0 + 111, wy + 2, 60, base_y - wy - 12, "url(#glass)")
@@ -2466,9 +2474,12 @@ func _ohbon() -> void:
 	_rect(X0 + 114, wy + 120, 54, 5, "#B9B9B9")
 	# The big window: dark glass, posters along the bottom.
 	_rect(X0 + 184, wy, 150, wb - wy, "#2E3A44", _stroke("#1A1A1A", 3))
+	_shop_glass_glow(X0 + 184, wy, 150, wb - wy, 271)
+	_shop_glass_goods(X0 + 184, wy, 150, wb - wy, 271, 3)
 	_rect(X0 + 184, wy, 150, wb - wy, "url(#glass)", 'opacity="0.4"')
 	for pst in [[X0 + 192, "#4E8A5A"], [X0 + 226, "#F2C230"], [X0 + 262, "#3D7FD0"], [X0 + 296, "#F4F1EA"]]:
 		_rect(pst[0], wb - 34, 30, 28, pst[1], 'opacity="0.85"')
+	_shop_glass_shine(X0 + 184, wy, 150, wb - wy)
 	# The light-box sign over the door and the big window (its words are labels in holt.gd).
 	_rect(X0 + 86, st + 52, 250, 32, "#F4F1EA", _stroke("#9A968E", 2))
 	_rect(X0 + 96, st + 60, 18, 14, "#D9342B")
@@ -2888,3 +2899,72 @@ func _lane_air_detail(vp: Vector2, far: float) -> void:
 			continue
 		_path("M%s %s h%s l%s %s q%s %s %s 0 l%s %s z" % [_n(on.x - w / 2.0), _n(on.y), _n(w), _n(w * 0.12), _n(h), _n(-w * 0.6), _n(5.0 * (1.0 - d)), _n(-w * 1.24), _n(w * 0.12), _n(-h)],
 			wash[i % wash.size()], _stroke("#B9B4AA", 1) + ' opacity="0.95"')
+
+
+# ── Shop windows: what you see through the glass ────────────────────────────
+# A dépanneur's window is never a dark pane: the shop is lit inside, there are shelves of tins and bottles against the glass,
+# a poster or two taped up, and the street reflected over the lot. `_shop_glass_inside` goes on right after the pane is drawn,
+# `_shop_glass_shine` last of all, over whatever the storefront put in the window. Own RNG: the rest of the street is unmoved.
+
+const SHOP_GOODS := ["#E8542F", "#F2C230", "#3D7FD0", "#4E8A5A", "#E07A9A", "#F4F1EA", "#9C6CC4", "#E8812E"]
+
+
+# The shop's own light behind the glass, warm, strongest low down where the lamps are.
+func _shop_glass_glow(x: float, y: float, w: float, h: float, seed_value: int) -> void:
+	var gid := "shoplit%d" % seed_value
+	out.append('<defs><linearGradient id="%s" x1="0" y1="0" x2="0" y2="1">' % gid
+		+ '<stop offset="0" stop-color="#FFE7B4" stop-opacity="0.12"/><stop offset="0.55" stop-color="#FFD98E" stop-opacity="0.3"/>'
+		+ '<stop offset="1" stop-color="#FFC66A" stop-opacity="0.5"/></linearGradient></defs>')
+	_rect(x, y, w, h, "url(#%s)" % gid)
+
+
+# Shelves of tins, bottles and boxes against the glass, and a poster taped up, inside the given part of the pane.
+func _shop_glass_goods(x: float, y: float, w: float, h: float, seed_value: int, rows := 0) -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = seed_value
+	if rows <= 0:
+		rows = 3 if h > 120.0 else 2
+	for row in rows:
+		var sy: float = y + h * (0.3 + row * 0.26)
+		if sy > y + h - 14.0:
+			break
+		var dim: float = 0.9 - row * 0.12
+		var gx: float = x + 6.0
+		while gx < x + w - 12.0:
+			var kind := r.randi() % 3
+			var col: String = SHOP_GOODS[r.randi() % SHOP_GOODS.size()]
+			match kind:
+				0:
+					# A tin, with its band.
+					_rect(gx, sy - 13, 8, 13, col, 'opacity="%s" rx="1.5"' % _n(dim))
+					_rect(gx, sy - 9, 8, 4, "#F4F1EA", 'opacity="%s"' % _n(dim * 0.8))
+					gx += 10.0
+				1:
+					# A bottle: a body and a neck.
+					_rect(gx + 1, sy - 15, 7, 15, col, 'opacity="%s" rx="2"' % _n(dim))
+					_rect(gx + 3, sy - 20, 3, 6, col, 'opacity="%s"' % _n(dim * 0.9))
+					gx += 10.0
+				_:
+					# A box.
+					_rect(gx, sy - 11, 13, 11, col, 'opacity="%s"' % _n(dim))
+					_rect(gx + 2, sy - 8, 9, 3, "#F4F1EA", 'opacity="%s"' % _n(dim * 0.7))
+					gx += 15.0
+		_rect(x + 3, sy, w - 6, 2.5, "#8E8278", 'opacity="%s"' % _n(dim * 0.8))
+	# A poster taped to the inside of the glass, its corner turned.
+	var pw: float = minf(w * 0.42, 54.0)
+	var px: float = x + r.randf_range(6.0, maxf(w - pw - 6.0, 7.0))
+	var py: float = y + h * 0.1
+	_rect(px, py, pw, pw * 0.8, "#F7F3E8", _stroke("#C9C3B8", 1) + ' opacity="0.92"')
+	_rect(px + 4, py + 5, pw - 8, pw * 0.22, SHOP_GOODS[r.randi() % SHOP_GOODS.size()], 'opacity="0.9"')
+	for i in 2:
+		_rect(px + 6, py + pw * 0.4 + i * 7.0, pw - 16, 3, "#B9B2A4", 'opacity="0.8"')
+
+
+func _shop_glass_shine(x: float, y: float, w: float, h: float) -> void:
+	# The street in the glass: two broad diagonal streaks, and the sky caught along the top.
+	var d := minf(w, h)
+	_path("M%s %s l%s %s l%s 0 l%s %s Z" % [_n(x + w * 0.1), _n(y + h), _n(d * 0.75), _n(-h), _n(d * 0.3), _n(-d * 0.75), _n(h)],
+		"#FFFFFF", 'opacity="0.12"')
+	_path("M%s %s l%s %s l%s 0 l%s %s Z" % [_n(x + w * 0.56), _n(y + h), _n(d * 0.75), _n(-h), _n(d * 0.14), _n(-d * 0.75), _n(h)],
+		"#FFFFFF", 'opacity="0.08"')
+	_rect(x, y, w, h * 0.18, "#CFE0EC", 'opacity="0.18"')
