@@ -22,6 +22,7 @@ var _t := 0.0
 var _under: Control
 var _doodles: Control
 var _info: Label
+var _hover := false
 
 
 func _ready() -> void:
@@ -32,20 +33,49 @@ func _ready() -> void:
 	_button.position = Vector2(14, 14)
 	_button.focus_mode = Control.FOCUS_NONE
 	_button.tooltip_text = "Menu (Échap)"
+	_button.mouse_entered.connect(func() -> void:
+		_hover = true
+		_button.queue_redraw())
+	_button.mouse_exited.connect(func() -> void:
+		_hover = false
+		_button.queue_redraw())
 	for state in ["normal", "hover", "pressed"]:
-		var box := StyleBoxFlat.new()
-		box.bg_color = Color(1, 1, 1, 0.85 if state == "normal" else 1.0)
-		box.border_color = BLUE
-		box.set_border_width_all(3 if state != "normal" else 2)
-		box.set_corner_radius_all(26)
-		_button.add_theme_stylebox_override(state, box)
+		_button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
 	_button.pressed.connect(toggle)
-	_button.draw.connect(func():
-		for i in 3:
-			_button.draw_rect(Rect2(15, 16 + i * 8, 22, 4), BLUE))
+	_button.draw.connect(_draw_menu_icon)
 	add_child(_button)
 	_build_page()
 	_apply_settings()
+
+
+# The ☰ button, drawn like the rest of the game: a sheet of cream paper under a blue ring, and three crayon strokes
+# (blue, yellow, pink) that spread a little when the mouse is on it.
+func _draw_menu_icon() -> void:
+	var c := _button.size / 2.0
+	var grow := 1.06 if _hover else 1.0
+	var r: float = 24.0 * grow
+	_button.draw_circle(c + Vector2(1.5, 2.5), r, Color(0.16, 0.12, 0.08, 0.22))
+	_button.draw_circle(c, r, CREAM)
+	# A warm shade low down and a highlight at the upper left, so the paper reads as round.
+	_button.draw_arc(c, r - 3.0, 0.35, 2.6, 20, Color(0.84, 0.78, 0.66, 0.5), 4.0, true)
+	_button.draw_arc(c, r - 4.5, 3.5, 5.6, 20, Color(1, 1, 1, 0.75), 3.5, true)
+	_button.draw_arc(c, r, 0.0, TAU, 32, BLUE, 3.0 if _hover else 2.5, true)
+	var crayons := [BLUE, YELLOW, Color("#E85FA0")]
+	for i in 3:
+		var y: float = c.y + (i - 1) * (8.0 * grow + (1.0 if _hover else 0.0))
+		var tilt: float = [-0.05, 0.03, -0.02][i]
+		var half: float = (11.0 - absf(i - 1) * 0.5) * grow
+		var a := c + Vector2(-half, y - c.y - half * tilt)
+		var b := c + Vector2(half, y - c.y + half * tilt)
+		# Two passes, like a wax crayon: a soft wide one, then the line itself, wobbling in the middle.
+		var mid: Vector2 = (a + b) / 2.0 + Vector2(0.0, [0.9, -0.9, 0.7][i])
+		for pass_i in 2:
+			var col: Color = Color(crayons[i], 0.22 if pass_i == 0 else 1.0)
+			var w: float = 5.6 if pass_i == 0 else 3.6
+			var pts := PackedVector2Array([a, mid, b])
+			_button.draw_polyline(pts, col, w, true)
+		_button.draw_circle(a, 1.8, crayons[i])
+		_button.draw_circle(b, 1.8, crayons[i])
 
 
 func _process(delta: float) -> void:
