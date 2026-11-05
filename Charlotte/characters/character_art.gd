@@ -24,7 +24,7 @@ const CLOTH_DEFS := ('<defs><linearGradient id="cs" x1="0" y1="0" x2="1" y2="0.5
 	+ '<stop offset="1" stop-color="#000000" stop-opacity="0.07"/></linearGradient></defs>')
 ## The shin's picture reaches this far above the knee (the round cap of the joint).
 const SHIN_PAD := 14.0
-const HAND_SCALE := {"child": 1.0, "kid7": 0.96, "kid5": 0.9, "tween": 1.05, "teen": 1.1, "adult": 1.22, "senior": 1.18}
+const HAND_SCALE := {"child": 1.16, "kid7": 1.1, "kid5": 1.04, "tween": 1.22, "teen": 1.28, "adult": 1.42, "senior": 1.38}
 
 var look: CharacterLook
 var p := {}
@@ -906,6 +906,19 @@ func _hand_svg(mode: String, scale: float) -> String:
 			s += _f('<path d="M20.5 8.2 H31 M20.5 12.5 H31.6 M20.5 16.8 H31.4" stroke="{skin_shade}" stroke-width="1" opacity="0.55"/>')
 			s += '<g transform="translate(26 6.5) rotate(-72)">'
 			s += _f('<rect x="-2.7" y="-1" width="5.4" height="10" rx="2.7" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
+	# One clean silhouette: every part drawn once with a thick outline, then once more filled so the lines where the fingers
+	# overlap vanish; then the soft separations between the fingers, the knuckles and a little light on the palm.
+	var outlined := s.replace('stroke-width="1.5"', 'stroke-width="3.2"').replace('stroke-width="1.7"', 'stroke-width="3.4"')
+	var filled := s.replace('stroke="{skin_line}"', 'stroke="{skin}"')
+	s = _f(outlined) + _f(filled)
+	match mode:
+		"relaxed":
+			s += _f('<path d="M18.8 11 V16.5 M22.8 10 V16.5 M26.8 10 V16.5" stroke="{skin_line}" stroke-width="1.1" fill="none" stroke-linecap="round" opacity="0.55"/>')
+		"open":
+			s += _f('<path d="M18.9 12 V17 M22.9 11 V17 M26.9 11 V17" stroke="{skin_line}" stroke-width="1.1" fill="none" stroke-linecap="round" opacity="0.5"/>')
+		"flat":
+			s += _f('<path d="M19.3 10 V16 M23.3 10 V16 M27.1 10 V16" stroke="{skin_line}" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.5"/>')
+	s += _f('<ellipse cx="19.5" cy="11.5" rx="3.2" ry="4.5" fill="#FFFFFF" opacity="0.2"/>')
 	s += _f(palm_top)
 	var w := ceili(44.0 * scale)
 	var h := ceili(50.0 * scale)

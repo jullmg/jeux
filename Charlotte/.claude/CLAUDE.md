@@ -199,7 +199,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Arms have an elbow and hands with fingers: each arm is three sprites, upper arm (shoulder pivot; `_arm_front`/`_arm_back`, whose
   `rotation` is the shoulder angle), forearm (child, `rotation = -elbow flex`) and hand (child of the forearm, one of four pictures
   `relaxed` / `open` / `flat` / `grip`, chosen by `_hand_goal`). `CharacterArt._upper_arm_svg/_forearm_svg/_hand_svg` draw them (long sleeves
-  carry on over the elbow; hand size by age, `HAND_SCALE`); the rig has `upper_len`, `fore_len`, `hand_center`, `arm_len` (shoulder to the middle of
+  carry on over the elbow; hand size by age, `HAND_SCALE`, bigger since the hand redraw; the hand is one clean outlined silhouette with the fingers only suggested by separation lines and a thumb highlight); the rig has `upper_len`, `fore_len`, `hand_center`, `arm_len` (shoulder to the middle of
   the palm, as before: `hand_position()` is that point). Poses set shoulder angles and elbow goals in `Character._apply_pose`: `_arms_rest` (swing),
   `_ik`/`_reach_blend` (two-bone reach: carrying, pouring, handlebars), `_aim(i, old_degrees, reach)` (chores: a hand where a straight arm at that angle
   would put it, the elbow slightly bent), `_finish_arms` (eases the elbow, picks the hand). Carried things may set meta `hands` (the hand shape; a cat:
