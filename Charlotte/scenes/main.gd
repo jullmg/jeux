@@ -103,10 +103,3 @@ func _build_doors() -> void:
 		Transition.street_x = area.get_center().x
 		Sfx.play("door", area.get_center())
 		Transition.change_scene(self, "res://scenes/house.tscn")))
-
-
-# The dépanneur's sandwich board, out on the corner.
-func _build_extra_props() -> void:
-	var board := _sprite(PropArt.sandwich_board(), 0.62)
-	board.position = Vector2(_starts[layout.find("depanneur")] + 70.0, CURB_Y - 14.0 - 120.0 * 0.62)
-	add_child(board)

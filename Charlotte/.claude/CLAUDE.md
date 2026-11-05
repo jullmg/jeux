@@ -14,7 +14,7 @@ Click the bookshelf in her bedroom to read (`ui/book_reader.gd`, `BookReader`: f
 picture and text per page). Click her bed to sleep: night falls, "Bonne nuit, Chachoue…", then "Le lendemain matin…" (no day count shown or kept for now; `Season.day` stays 1).
 Click the fridge: it opens (`InteriorArt.fridge_open()`) and she takes a random snack (`InteriorArt.snack(kind)`), "Miam !".
 Click the hallway TV to turn it on and change channels, then off. `world/tv_shows.gd` (`TvShows`) is the
-catalogue of channels, all original (no copyrighted shows or characters): news, animals, cartoon, hockey, weather, the
+catalogue of channels, all original (no copyrighted shows or characters): news, animals, cartoon, hockey (the Canadiens in red with the CH at centre ice, against a team in white; real team, Julien's wish), weather, the
 sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas, t, on_for)`. `world/tv_screen.gd`
 (`TvScreen`, a `Control`) is one TV for any house: set its `channels` (TvShows ids) to give it its own lineup. Small quests in a notebook (see Quests).
 

@@ -133,26 +133,35 @@ static func _cartoon(c: CanvasItem, t: float, on_for: float) -> void:
 	_text(c, "DESSINS ANIMÉS", Vector2(6, 102), 10, Color("#1D4F91"))
 
 
+# The Canadiens (red jerseys with a white and blue stripe, the CH at centre ice) against a team in white.
 static func _hockey(c: CanvasItem, t: float, on_for: float) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, SIZE), Color("#EEF4F8"))
 	c.draw_rect(Rect2(0, 0, SIZE.x, 16), Color("#3A3F48"))
 	for i in 6:
-		c.draw_rect(Rect2(4 + i * 32, 4, 28, 8), [Color("#C8202A"), Color("#1D4F91"), Color("#FFD23F")][i % 3])
+		c.draw_rect(Rect2(4 + i * 32, 4, 28, 8), [Color("#C8202A"), Color("#1D4F91"), Color("#FFFFFF")][i % 3])
 	c.draw_rect(Rect2(0, 16, SIZE.x, 3), Color("#F4F1EA"))
 	c.draw_rect(Rect2(97, 19, 3, 89), Color("#C8202A", 0.8))
 	c.draw_rect(Rect2(60, 19, 3, 89), Color("#1D4F91", 0.7))
 	c.draw_rect(Rect2(134, 19, 3, 89), Color("#1D4F91", 0.7))
 	c.draw_arc(Vector2(98, 64), 16, 0, TAU, 24, Color("#1D4F91", 0.6), 1.5)
+	# The CH on the ice: a red C round a red H.
+	c.draw_arc(Vector2(98, 64), 8.0, 0.55, TAU - 0.55, 20, Color("#C8202A", 0.85), 3.2)
+	c.draw_line(Vector2(95, 59), Vector2(95, 69), Color("#C8202A", 0.85), 1.8)
+	c.draw_line(Vector2(101, 59), Vector2(101, 69), Color("#C8202A", 0.85), 1.8)
+	c.draw_line(Vector2(95, 64), Vector2(101, 64), Color("#C8202A", 0.85), 1.8)
 	var puck := Vector2(98 + sin(t * 1.3) * 70.0, 64 + sin(t * 2.1) * 26.0)
 	for i in 6:
-		var team := Color("#C8202A") if i < 3 else Color("#1D4F91")
+		var home := i < 3
 		var chase := puck + Vector2(cos(t * 1.7 + i * 1.3) * (14 + i * 4), sin(t * 2.3 + i) * 12.0)
 		c.draw_circle(chase + Vector2(0, -8), 3.0, Color("#2B2B2B"))
-		c.draw_rect(Rect2(chase.x - 4, chase.y - 5, 8, 9), team)
+		c.draw_rect(Rect2(chase.x - 4, chase.y - 5, 8, 9), Color("#C8202A") if home else Color("#F4F1EA"))
+		# The Canadiens' white and blue stripe round the red jersey; the visitors' blue one.
+		c.draw_rect(Rect2(chase.x - 4, chase.y - 1, 8, 1.5), Color("#F4F1EA") if home else Color("#1D4F91"))
+		c.draw_rect(Rect2(chase.x - 4, chase.y + 0.5, 8, 1.5), Color("#1D4F91"))
 		c.draw_line(chase + Vector2(3, 3), chase + Vector2(9, 8), Color("#8D6E63"), 1.5)
 	c.draw_circle(puck, 2.2, Color.BLACK)
-	c.draw_rect(Rect2(4, 92, 96, 13), Color("#2E3440"))
-	_text(c, "ROUGES 2  BLEUS 1", Vector2(8, 102), 9, Color.WHITE)
+	c.draw_rect(Rect2(4, 92, 128, 13), Color("#2E3440"))
+	_text(c, "CANADIENS 2  VISITEURS 1", Vector2(8, 102), 9, Color.WHITE)
 
 
 static func _weather(c: CanvasItem, t: float, on_for: float) -> void:
