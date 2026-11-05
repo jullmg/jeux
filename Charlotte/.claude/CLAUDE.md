@@ -408,10 +408,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   remembered in `user://settings.cfg`.
 - Buses "Effets" (effects) and "Musique". Music is the user's own tracks (made with Suno), never generated in code:
   `audio/music/<name>.mp3|.ogg|.wav`, played by the `Music` autoload (`audio/music.gd`): looping, crossfading.
-  `Music.play([names…])` plays the first that exists, else the `title` theme (never a shop's or the flat's music left over in the street); `keep_if_missing` leaves the current track instead (bedtime). Names: `title` (intro;
-  present), `street` / `street_<season>` (streets, `StreetScene._music()`), `maison-charlotte` (her flat; present), `house`
+  `Music.play([names…])` plays the first that exists, else the `title` theme (never a shop's or the flat's music left over in the street); `keep_if_missing` leaves the current track instead (bedtime). Names: `title` (intro, followed by `title-02`, the two loop as a set: `Music.PLAYLISTS`, the next fades in under the end of the first; present), `street` / `street_<season>` (streets, `StreetScene._music()`), `maison-charlotte` (her flat; present), `house`
   (other interiors, `Interior._music()`), `depanneur` (present),
-  `night` (bedtime). Missing tracks are fine: the previous music carries on.
+  `night` (bedtime). Missing tracks are fine: the title theme plays instead.
 - `Character.step_sound` (empty for passersby) plays footsteps; scripts run with `--check-only` report "Sfx not found"
   because autoloads aren't loaded there; run the scene instead to check.
 
