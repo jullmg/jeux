@@ -17,11 +17,11 @@ const EXPRESSIONS := {
 	"yawn": ["closed", "raised_small", "yawn"], "talk": ["normal", "normal", "talk"], "sip": ["normal", "normal", "pursed"],
 	"blank": ["normal", "normal", "flat"],
 }
-## What the face does while a chore goes on.
 const SIT_THIGH := -88.0
 ## Half the thickness of a thigh, the bit of her that is below the hip when she sits.
 const SIT_THICK := 7.0
-const TASK_FACES := {"stir": "happy", "read": "focus", "phone": "talk", "type": "focus", "wash": "focus", "drink": "normal", "fridge": "wonder",
+## What the face does while a chore goes on.
+const TASK_FACES := {"piano": "happy", "pottery": "focus", "bike": "focus", "jog": "effort", "stir": "happy", "read": "focus", "phone": "talk", "type": "focus", "wash": "focus", "drink": "normal", "fridge": "wonder",
 	"exercise": "effort", "watch": "happy", "daydream": "blank"}
 
 var look: CharacterLook
@@ -89,6 +89,9 @@ var hand_mode := ""
 ## A chore she is doing in place (a family member's routine): "stir", "read", "phone", "type", "wash", "drink", "fridge",
 ## "exercise", "watch" or "daydream" (Dad gazing at nothing); "" = none. Poses the arms and head; the routine adds the prop in her hand.
 var task := ""
+## Where the hands work, in world coordinates (front hand first, back hand second): the bowl on the table, the keys, the clay. Set by
+## a family routine; a task with no points uses the old fixed arm angles.
+var work: Array[Vector2] = []
 ## Sitting down (a sofa, a bench, a stool): the thighs go forward, the lower legs hang, the hips rest `seat_h` world px above the floor
 ## (0 = the feet stay on the floor, a chair her size; a taller seat leaves her feet dangling). Eased in and out through `_sit`.
 var sitting := false
@@ -538,6 +541,11 @@ func is_seated() -> bool:
 	return _sit > 0.35
 
 
+## 0 standing, 1 fully settled in the seat: what is drawn in front of the seat waits for 1 so it never cuts across her on the way in.
+func seated_amount() -> float:
+	return _sit
+
+
 # Seated: the thighs forward (horizontal), the lower legs hanging, swinging a little when the seat is high.
 func _sit_legs() -> void:
 	if _sit <= 0.0:
@@ -616,6 +624,18 @@ func _finish_arms() -> void:
 			_hands[i].texture = tex
 
 
+# Arm `i` reaching a point of the world (`work`), plus `wobble` body units of motion; out of reach it just stretches at it.
+func _reach_to(i: int, point: Vector2, wobble := Vector2.ZERO) -> void:
+	var r := _ik(_arms[i], _body.to_local(point) + wobble)
+	_arms[i].rotation = r.x
+	_elbow_goal[i] = r.y
+	_snap[i] = true
+
+
+func _has_work(n := 1) -> bool:
+	return work.size() >= n
+
+
 # Arm `i` (0 back, 1 front) reaching where a straight arm at `degrees` (the old way of aiming it) would, `reach` of the way out, so
 # the elbow is bent a little (the less reach, the more), plus `wobble` px for the motion of the work. The elbow follows at once.
 func _aim(i: int, degrees: float, reach := 0.93, wobble := Vector2.ZERO) -> void:
@@ -634,11 +654,40 @@ func _task_pose() -> void:
 	var f := float(facing)
 	match task:
 		"stir":
-			_aim(1, -62.0, 0.9, Vector2(cos(t * 5.0), sin(t * 5.0)) * 7.0)
-			_aim(0, -52.0, 0.9)
-			_hand_goal = ["grip", "grip"]
 			_body.rotation += 0.05 * f
 			_head.rotation += 0.1 * f
+			if _has_work(2):
+				_reach_to(1, work[0], Vector2(cos(t * 5.0), sin(t * 5.0)) * 7.0)
+				_reach_to(0, work[1])
+			else:
+				_aim(1, -62.0, 0.9, Vector2(cos(t * 5.0), sin(t * 5.0)) * 7.0)
+				_aim(0, -52.0, 0.9)
+			_hand_goal = ["grip", "grip"]
+		"piano":
+			# Sitting up straight, swaying with the music, the hands sliding along the keys and pressing them one after the other.
+			var beat := sin(t * 3.1)
+			_body.rotation += 0.03 * beat * f
+			_head.rotation += (0.05 + 0.05 * beat) * f
+			if _has_work(2):
+				_reach_to(1, work[0] + Vector2(sin(t * 1.7) * 20.0, 0.0), Vector2(0.0, -maxf(sin(t * 9.0), 0.0) * 4.0))
+				_reach_to(0, work[1] + Vector2(sin(t * 1.3 + 1.0) * 16.0, 0.0), Vector2(0.0, -maxf(sin(t * 7.0 + 2.0), 0.0) * 4.0))
+			_hand_goal = ["flat", "flat"]
+		"pottery":
+			# Bent over the wheel, both hands cupped round the spinning clay.
+			_body.rotation += 0.08 * f
+			_head.rotation += 0.16 * f
+			if _has_work(2):
+				_reach_to(1, work[0], Vector2(0.0, sin(t * 1.6) * 3.0))
+				_reach_to(0, work[1], Vector2(0.0, -sin(t * 1.6) * 3.0))
+			_hand_goal = ["open", "open"]
+		"bike":
+			# Polishing the frame with a rag: the front hand rubbing to and fro, the other steadying the bike.
+			_body.rotation += 0.04 * f
+			_head.rotation += 0.12 * f - 0.1
+			if _has_work(2):
+				_reach_to(1, work[0], Vector2(sin(t * 7.0) * 12.0, sin(t * 3.5) * 3.0))
+				_reach_to(0, work[1])
+			_hand_goal = ["flat", "grip"]
 		"read":
 			_aim(1, -64.0, 0.88)
 			_aim(0, -70.0, 0.88)
@@ -680,6 +729,11 @@ func _task_pose() -> void:
 			_body.position.y -= absf(s) * 7.0
 			_shin_front.rotation += absf(s) * 0.5
 			_shin_back.rotation += absf(s) * 0.5
+		"jog":
+			# Jogging on the spot: the arms pumping at the elbows, fists closed (the legs are the run cycle).
+			_elbow_goal[1] = deg_to_rad(76.0)
+			_elbow_goal[0] = deg_to_rad(76.0)
+			_hand_goal = ["grip", "grip"]
 		"watch":
 			_aim(1, -10.0, 0.96)
 			_aim(0, -10.0, 0.96)

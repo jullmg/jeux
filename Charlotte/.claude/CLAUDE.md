@@ -175,9 +175,15 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   box stacks, pallet of cases, hand truck, mop and bucket, broom, step ladder, A-frame sign, open sign, bin, newspapers, vending
   machine, egg tray, water cooler, toy rack, salt bag, tin pyramid, CCTV monitor, `floor_junk`): pick from these
   when a new shop or street scene needs props.
-- The parents go about chores: `world/family_routine.gd` (`FamilyRoutine`) walks one character between tasks
-  (`MOM_TASKS` / `DAD_TASKS` in house.gd: dicts {x, facing, task, prop, secs, say}); `Character.task` poses ("stir", "read", "phone",
-  "type", "wash", "drink", "fridge", "exercise", "watch", "daydream" (Dad in the clouds, sometimes: a blank stare (the "blank" expression), head up, a little crescent moon floating before his eyes, the `moon` prop), set in `_task_pose()`), props are drawn by `FamilyRoutine._Prop`; their click
+- The parents go about chores and their own passions (Julien: Papa cycles, plays the piano and jogs; Maman throws pots, cooks and
+  drinks coffee): `world/family_routine.gd` (`FamilyRoutine`) walks one character between tasks
+  (`MOM_TASKS` / `DAD_TASKS` in house.gd: dicts {x, facing, task, prop, secs, say} plus `work` ([front hand, back hand] points,
+  x from where they stand, + to the right, y in the world, so the hands really land on the keys, the pot, the bike),
+  `prop_at` (a prop that stays put instead of in the hand), `sit` + `floor` (they sit down, see `Seat`), `jog` (the run cycle on
+  the spot) and `done_say` (a word as they finish: Papa coming out of the clouds says "Oups ! J'étais encore dans la lune !");
+  props are bigger now (`HELD_SCALE`) and include the clay on the wheel, music notes, his bike, a rag and drops of sweat.
+  `InteriorArt.piano` / `piano_bench` / `pottery_station` stand against the corridor wall (`PIANO_X`, `POTTERY_X`); `Character.task` poses ("stir", "read", "phone",
+  "type", "wash", "drink", "fridge", "exercise", "piano", "pottery", "bike", "jog", "watch", "daydream" (Dad in the clouds, sometimes: a blank stare (the "blank" expression), head up, a little crescent moon floating before his eyes, the `moon` prop), set in `_task_pose()`), props are drawn by `FamilyRoutine._Prop`; their click
   spot and "!" mark follow them, and `pause(secs, toward_x)` stops them when Charlotte talks to them. Shops have walking customers
   (`world/shop_customer.gd`, `ShopCustomer`, `Shop._add_customers`).
 - Charlotte's parents, from `reference/personnages/mere_charlotte.jpg` / `pere_charlotte.jpg`: `CharacterLook.mom()` (long wavy light-brown

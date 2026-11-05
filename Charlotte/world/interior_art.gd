@@ -1238,3 +1238,71 @@ static func umbrella_stand() -> ImageTexture:
 	s += '<path d="M20 112 Q26 118 32 112 Q38 118 44 112" stroke="#F2C94C" stroke-width="2" fill="none"/>'
 	s += '<ellipse cx="35" cy="148" rx="22" ry="3" fill="#000000" opacity="0.18"/>'
 	return tex(70, 150, s)
+
+
+# ── Passions of the family: the piano, the kitchen table, the pottery wheel ───
+
+## Canvas 310x270: an upright piano seen from the front, dark walnut, music on the desk, the keys at y 126-152 (100 px above the
+## floor at scale 0.75), pedals under it. Floor at y 270.
+static func piano() -> ImageTexture:
+	var s := '<rect x="14" y="246" width="30" height="24" rx="4" fill="#2E180B"/><rect x="266" y="246" width="30" height="24" rx="4" fill="#2E180B"/>'
+	s += '<rect x="10" y="22" width="290" height="226" rx="8" fill="#5B3421" stroke="#2E180B" stroke-width="3"/>'
+	s += '<rect x="4" y="12" width="302" height="16" rx="5" fill="#7A4A2E" stroke="#2E180B" stroke-width="3"/>'
+	s += '<rect x="24" y="38" width="262" height="76" rx="4" fill="#4E2B1A" stroke="#2E180B" stroke-width="2"/>'
+	s += '<rect x="36" y="48" width="238" height="56" rx="3" fill="#5F3624" stroke="#3A2012" stroke-width="1.5"/>'
+	# The music on the desk: a sheet with staves and a few notes.
+	s += '<rect x="108" y="46" width="94" height="58" fill="#F6F1E4" stroke="#9A9486" stroke-width="1.5"/>'
+	for y in [58.0, 70.0, 82.0, 94.0]:
+		s += '<path d="M114 %s H196" stroke="#777" stroke-width="1"/>' % y
+	for p in [[124.0, 76.0], [140.0, 70.0], [158.0, 82.0], [176.0, 64.0]]:
+		s += '<ellipse cx="%s" cy="%s" rx="3.4" ry="2.6" fill="#2B2B33"/><path d="M%s %s V%s" stroke="#2B2B33" stroke-width="1.2"/>' % [p[0], p[1], p[0] + 3.2, p[1], p[1] - 12.0]
+	s += '<rect x="18" y="114" width="274" height="12" fill="#3B2113" stroke="#2E180B" stroke-width="1.5"/>'
+	# The keys: white ones with their joints, and the black ones in their twos and threes.
+	s += '<rect x="28" y="126" width="254" height="26" fill="#F7F3EA" stroke="#444" stroke-width="1"/>'
+	for i in range(1, 23):
+		s += '<path d="M%.1f 126 V152" stroke="#9A968E" stroke-width="1"/>' % (28.0 + i * 254.0 / 23.0)
+	for i in 22:
+		if [0, 1, 3, 4, 5].has(i % 7):
+			s += '<rect x="%.1f" y="126" width="6" height="16" fill="#1B1B1B"/>' % (28.0 + (i + 1) * 254.0 / 23.0 - 3.0)
+	s += '<rect x="18" y="126" width="10" height="26" fill="#4A2817"/><rect x="282" y="126" width="10" height="26" fill="#4A2817"/>'
+	s += '<rect x="24" y="158" width="262" height="64" rx="4" fill="#4E2B1A" stroke="#2E180B" stroke-width="2"/>'
+	s += '<rect x="40" y="168" width="230" height="44" rx="3" fill="#5F3624" stroke="#3A2012" stroke-width="1.5"/>'
+	for x in [136.0, 156.0, 176.0]:
+		s += '<rect x="%s" y="232" width="12" height="10" rx="3" fill="#E1B64A" stroke="#8A6A1C" stroke-width="1.5"/>' % x
+	s += '<rect x="10" y="22" width="7" height="226" fill="#FFFFFF" opacity="0.08"/>'
+	return tex(310, 270, s)
+
+
+## Canvas 80x52: the piano bench, a padded seat on four legs. Floor at y 52, the seat's top at y 6.
+static func piano_bench() -> ImageTexture:
+	var s := '<rect x="10" y="26" width="7" height="26" fill="#3E2314"/><rect x="63" y="26" width="7" height="26" fill="#3E2314"/>'
+	s += '<rect x="4" y="16" width="72" height="12" rx="3" fill="#5B3421" stroke="#2E180B" stroke-width="2"/>'
+	s += '<rect x="2" y="6" width="76" height="14" rx="6" fill="#8C3A3A" stroke="#4E1E1E" stroke-width="2"/>'
+	s += '<path d="M10 10 H44" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" opacity="0.3"/>'
+	return tex(80, 52, s)
+
+
+## Canvas 230x150: Maman's corner: a low stool (x 22) and her potter's wheel (centre x 118, the wheel head 118 px above the floor),
+## with her finished pots on a crate at the right. Floor at y 150.
+static func pottery_station() -> ImageTexture:
+	var s := ""
+	# The wheel: a steel frame, the splash pan, the wheel head turning on it.
+	s += '<rect x="76" y="56" width="10" height="94" fill="#6B6F76"/><rect x="152" y="56" width="10" height="94" fill="#6B6F76"/>'
+	s += '<rect x="76" y="112" width="86" height="7" fill="#80848B"/>'
+	s += '<path d="M66 30 H172 L162 58 H76 Z" fill="#D8D4C8" stroke="#8D897C" stroke-width="2.5"/>'
+	s += '<ellipse cx="119" cy="30" rx="53" ry="9" fill="#C6C1B3" stroke="#8D897C" stroke-width="2"/>'
+	s += '<ellipse cx="119" cy="24" rx="31" ry="6" fill="#A8ACB3" stroke="#6E727A" stroke-width="2"/>'
+	s += '<ellipse cx="119" cy="22" rx="24" ry="4" fill="#C2C6CC"/>'
+	s += '<rect x="116" y="26" width="7" height="34" fill="#80848B"/>'
+	# A splash of slip down the pan and the foot pedal.
+	s += '<path d="M90 36 q6 14 2 20" stroke="#B9A48C" stroke-width="3" fill="none" opacity="0.8"/>'
+	s += '<path d="M86 132 h44 l-4 10 h-40 z" fill="#8D919A" stroke="#5E626A" stroke-width="2"/>'
+	# Her stool: round seat (top at y 60), three splayed legs.
+	s += '<path d="M10 62 L4 150 M22 64 V150 M34 62 L42 150" stroke="#7A4E24" stroke-width="5" stroke-linecap="round"/>'
+	s += '<ellipse cx="22" cy="60" rx="24" ry="7" fill="#B4763E" stroke="#6E4520" stroke-width="2"/>'
+	s += '<ellipse cx="18" cy="58" rx="12" ry="3" fill="#D9A164" opacity="0.7"/>'
+	# The crate of finished pots, a bowl drying on top.
+	s += '<rect x="182" y="110" width="44" height="40" rx="2" fill="#B58B52" stroke="#6E4E22" stroke-width="2"/><path d="M182 124 H226" stroke="#6E4E22" stroke-width="1.5"/>'
+	s += '<path d="M186 110 Q182 84 196 82 Q210 84 206 110 Z" fill="#C9885A" stroke="#7A4527" stroke-width="2"/><path d="M190 92 Q196 96 202 92" stroke="#7A4527" stroke-width="1.4" fill="none" opacity="0.6"/>'
+	s += '<path d="M206 110 Q208 94 216 94 Q224 96 222 110 Z" fill="#9C6C8A" stroke="#5E3A55" stroke-width="2"/>'
+	return tex(230, 150, s)

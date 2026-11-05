@@ -13,6 +13,9 @@ const VESTIBULE_END := 640.0
 const SALON_END := 2260.0
 const KITCHEN_START := 3400.0
 const CHACHA_DOOR_X := 3120.0
+## Papa's upright piano and Maman's potter's wheel, against the corridor wall.
+const PIANO_X := 2300.0
+const POTTERY_X := 2520.0
 const BEDROOM_DOOR_X := 6440.0
 const MOM_LINES := ["Bonjour ma chouette !", "As-tu faim ? Il y a des fruits.", "N'oublie pas de nourrir le hamster !", "Je t'aime, Chachoue !"]
 const DAD_LINES := ["Salut Chachoue !", "On va au parc tantôt ?", "As-tu fait un beau dessin ?", "Tu veux jouer avec moi ?"]
@@ -136,23 +139,33 @@ func _build_shell() -> void:
 
 # Mom starts in the kitchen by the stove, Dad in the salon by the dining table, and each goes about their own chores (a
 # FamilyRoutine). Click them for a word: they stop and turn to Charlotte.
+# Maman's days turn round her passions: her pottery wheel, cooking, and a good coffee. Papa's: his bike, the piano, and jogging.
+# `work` says where their hands go (x from where they stand, y in the world), `sit` seats them, `jog` runs on the spot.
 const MOM_TASKS := [
-	{"x": KITCHEN_START + 200.0, "facing": 1, "task": "stir", "prop": "bowl", "secs": 9.0, "say": ["Mmm, ça sent bon !", "Un petit gâteau !"]},
+	{"x": POTTERY_X + 18.0, "facing": 1, "task": "pottery", "prop": "clay", "prop_at": Vector2(82.0, 505.0), "work": [Vector2(70.0, 512.0), Vector2(92.0, 516.0)], "sit": 92.0, "floor": 654.0,
+		"secs": 16.0, "say": ["Mon beau pot !", "Ça tourne, ça tourne…"], "done_say": ["Y est pas pire, han ?"]},
+	{"x": KITCHEN_START + 200.0, "facing": 1, "task": "stir", "prop": "bowl", "prop_at": Vector2(44.0, 548.0), "work": [Vector2(44.0, 534.0), Vector2(22.0, 552.0)],
+		"secs": 12.0, "say": ["Mmm, ça sent bon !", "Un p'tit gâteau !"], "done_say": ["C'est au four !"]},
 	{"x": KITCHEN_START + 138.0, "facing": -1, "task": "fridge", "prop": "", "secs": 5.0, "say": ["Qu'est-ce qu'on mange ?", "Il manque du lait…"]},
 	{"x": KITCHEN_START + 300.0, "facing": 1, "task": "wash", "prop": "plate", "secs": 8.0, "say": ["J'essuie la vaisselle."]},
-	{"x": KITCHEN_START + 340.0, "facing": -1, "task": "drink", "prop": "mug", "secs": 8.0, "say": ["Un petit café…"]},
+	{"x": KITCHEN_START + 340.0, "facing": -1, "task": "drink", "prop": "mug", "secs": 9.0, "say": ["Un bon café…", "Chu pas réveillée sans mon café !"]},
 	{"x": KITCHEN_START + 250.0, "facing": 1, "task": "phone", "prop": "phone", "secs": 7.0, "say": ["Ah, un message de mamie !"]},
 	{"x": KITCHEN_START - 140.0, "facing": 1, "task": "watch", "prop": "", "secs": 5.0, "say": []},
 ]
 const DAD_TASKS := [
+	{"x": PIANO_X + 236.0, "facing": -1, "task": "piano", "prop": "notes", "prop_at": Vector2(-120.0, 430.0),
+		"work": [Vector2(-66.0, 516.0), Vector2(-40.0, 516.0)], "sit": 86.0, "floor": 650.0,
+		"secs": 18.0, "say": ["Pom pom pom…", "Écoute ben ça !"], "done_say": ["Faut que je pratique plus, tsé."]},
+	{"x": 1150.0, "facing": 1, "task": "bike", "prop": "bike", "prop_at": Vector2(86.0, 644.0), "work": [Vector2(64.0, 556.0), Vector2(40.0, 580.0)],
+		"secs": 14.0, "say": ["Mon vélo brille !", "Une p'tite ride demain…"], "done_say": ["Astheure il roule comme neuf !"]},
+	{"x": 2010.0, "facing": 1, "task": "jog", "prop": "sweat", "secs": 11.0, "say": ["Un, deux, un, deux !", "Chu en forme !"], "done_say": ["Ouf ! Ça fait du bien."]},
 	{"x": 1880.0, "facing": 1, "task": "type", "prop": "laptop", "secs": 10.0, "say": ["Encore des courriels…"]},
 	{"x": 1650.0, "facing": -1, "task": "drink", "prop": "mug", "secs": 8.0, "say": ["Quel beau temps !"]},
 	{"x": 2150.0, "facing": 1, "task": "read", "prop": "book", "secs": 10.0, "say": ["Passionnant, ce livre."]},
-	{"x": 1150.0, "facing": 1, "task": "phone", "prop": "phone", "secs": 7.0, "say": ["Tiens, le match !"]},
-	{"x": 930.0, "facing": 1, "task": "exercise", "prop": "", "secs": 8.0, "say": ["Un, deux, un, deux !"]},
+	{"x": 930.0, "facing": 1, "task": "phone", "prop": "phone", "secs": 7.0, "say": ["Tiens, le match !"]},
 	{"x": 2530.0, "facing": 1, "task": "watch", "prop": "", "secs": 8.0, "say": ["Bonne émission."]},
 	# Sometimes he drifts off, staring at nothing, a little moon floating before his empty gaze.
-	{"x": 1380.0, "facing": 1, "task": "daydream", "prop": "moon", "secs": 8.0, "say": []},
+	{"x": 1380.0, "facing": 1, "task": "daydream", "prop": "moon", "secs": 8.0, "say": [], "done_say": ["Oups ! J'étais encore dans la lune !"]},
 ]
 
 
@@ -678,7 +691,7 @@ func _process(delta: float) -> void:
 	if _sofa_front:
 		var taken := false
 		for who: Character in [_charlotte, _mom, _dad]:
-			if who and who.is_seated() and who.seat_floor == _sofa_seat.floor_y and who.position.x >= _sofa_seat.span.x - 60.0 and who.position.x <= _sofa_seat.span.y + 60.0:
+			if who and who.seated_amount() > 0.985 and who.sitting and who.seat_floor == _sofa_seat.floor_y and who.position.x >= _sofa_seat.span.x - 60.0 and who.position.x <= _sofa_seat.span.y + 60.0:
 				taken = true
 		_sofa_front.visible = taken
 
@@ -723,7 +736,11 @@ func _build_salon() -> void:
 func _build_hallway() -> void:
 	_hall_lights = [_ceiling_light(2600.0), _ceiling_light(3200.0)]
 	_put(InteriorArt.runner(980.0), 2320.0, 690.0)
-	_put(InteriorArt.black_coats(), 2330.0, 470.0, 0.8, "wall")
+	_put(InteriorArt.black_coats(), 2985.0, 470.0, 0.8, "wall")
+	# Papa's piano and Maman's potter's wheel: the two passions of the house.
+	_put(InteriorArt.piano(), PIANO_X, 606.0, 0.62, "floor")
+	_put(InteriorArt.piano_bench(), PIANO_X + 196.0, 636.0, 0.9, "floor")
+	_put(InteriorArt.pottery_station(), POTTERY_X, 606.0, 0.85, "floor")
 	_put(InteriorArt.photo_row(), 2520.0, 260.0, 0.8, "wall")
 	_put(InteriorArt.tv(), 2560.0, 400.0, 0.8, "wall")
 	_build_tv(Vector2(2560.0, 400.0 - 140.0 * 0.8), 0.8)
@@ -733,7 +750,7 @@ func _build_hallway() -> void:
 	_put(InteriorArt.panel_door(), CHACHA_DOOR_X, WALL_BASE)
 	_chacha_sign(Vector2(CHACHA_DOOR_X + 75.0, 330.0))
 	_plant("corridor", "fiddle", 3283.0, 606.0, 0.55)
-	_plant("fougere", "fern", 2585.0, 606.0, 0.5)
+	_plant("fougere", "fern", 2690.0, 606.0, 0.5)
 	_put(InteriorArt.kitchen(), KITCHEN_START, WALL_BASE)
 	_dress_kitchen()
 	_fridge_art = Node2D.new()
