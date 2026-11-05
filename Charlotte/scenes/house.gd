@@ -679,6 +679,21 @@ func _build_salon() -> void:
 	_put(InteriorArt.floor_lamp(), 1470.0, 604.0, 0.9, "floor")
 	_floor_lamp = [_glow(Vector2(1524.0, 360.0), 200.0, Color(1.0, 0.82, 0.5, 0.4)), _glow(Vector2(1524.0, 300.0), 46.0, Color(1.0, 0.95, 0.75, 0.55))]
 	_put(InteriorArt.sofa(), 960.0, 606.0, 0.85, "floor")
+	# The sofa's seat: she sits anywhere along it, facing the window, her feet dangling.
+	var sofa_seat := Seat.make(Rect2(1030.0, 470.0, 370.0, 136.0), Vector2(1090.0, 1340.0), 80.0)
+	sofa_seat.floor_y = 622.0
+	# The front of the sofa again, over whoever sits, so she sits in it and not before it.
+	var sofa_tex := InteriorArt.sofa()
+	var front := Sprite2D.new()
+	front.texture = sofa_tex
+	front.region_enabled = true
+	front.region_rect = Rect2(0, 182, 505, 48)
+	front.centered = false
+	front.scale = Vector2.ONE * 0.85
+	front.position = Vector2(960.0, 606.0 - 48.0 * 0.85)
+	front.z_index = 3
+	add_child(front)
+	add_child(sofa_seat)
 	_put(InteriorArt.side_table(), 1390.0, 610.0, 0.8, "floor")
 	_put(InteriorArt.window(170.0, 300.0), 1580.0, 470.0, 1.0, "wall")
 	_daylight(Vector2(1580.0, 170.0), 170.0, 0.12)

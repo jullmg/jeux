@@ -62,6 +62,11 @@ func _process(delta: float) -> void:
 			_arrive()
 		else:
 			dir = signf(dx)
+	# Sitting: an arrow gets her up, and she waits until she is on her feet before she walks off.
+	if dir != 0.0 and charlotte.sitting:
+		charlotte.sitting = false
+	if charlotte.is_seated():
+		dir = 0.0
 	if dir == 0.0:
 		charlotte.running = false
 	if charlotte.is_petting() and dir == 0.0:
@@ -86,7 +91,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	var now := Time.get_ticks_msec() / 1000.0
 	var key_dir := 1 if event.is_action_pressed("ui_right") else -1 if event.is_action_pressed("ui_left") else 0
-	if event.is_action_pressed("ui_up"):
+	if event.is_action_pressed("ui_up") and charlotte.sitting:
+		charlotte.sitting = false
+	elif event.is_action_pressed("ui_up"):
 		# ↑ in front of a door (or any spot): go through it, as if it had been clicked.
 		var door := _door_ahead()
 		if door:
@@ -107,6 +114,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		_last_click_at = now
 		var at := _to_world(event.position)
 		var target := _interactable_at(at)
+		# Clicking anywhere but the seat she is on gets her up first.
+		if charlotte.sitting and not (target is Seat and (target as Seat).who == charlotte):
+			charlotte.sitting = false
 		_set_goal_target(target)
 		if target:
 			_goal_x = clampf(target.approach_x(charlotte.position.x), bounds.x, bounds.y)

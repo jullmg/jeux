@@ -18,6 +18,9 @@ const EXPRESSIONS := {
 	"blank": ["normal", "normal", "flat"],
 }
 ## What the face does while a chore goes on.
+const SIT_THIGH := -88.0
+## Half the thickness of a thigh, the bit of her that is below the hip when she sits.
+const SIT_THICK := 7.0
 const TASK_FACES := {"stir": "happy", "read": "focus", "phone": "talk", "type": "focus", "wash": "focus", "drink": "normal", "fridge": "wonder",
 	"exercise": "effort", "watch": "happy", "daydream": "blank"}
 
@@ -86,6 +89,14 @@ var hand_mode := ""
 ## A chore she is doing in place (a family member's routine): "stir", "read", "phone", "type", "wash", "drink", "fridge",
 ## "exercise", "watch" or "daydream" (Dad gazing at nothing); "" = none. Poses the arms and head; the routine adds the prop in her hand.
 var task := ""
+## Sitting down (a sofa, a bench, a stool): the thighs go forward, the lower legs hang, the hips rest `seat_h` world px above the floor
+## (0 = the feet stay on the floor, a chair her size; a taller seat leaves her feet dangling). Eased in and out through `_sit`.
+var sitting := false
+var seat_h := 0.0
+var _sit := 0.0
+## The floor under the seat (world y), when the seat is further back than where she walks: she steps back to it as she sits.
+var seat_floor := NAN
+var _stand_y := NAN
 ## Which idle gestures she may do (a shopkeeper just looks round and stretches).
 var fidget_moves: Array[String] = ["wave", "hop", "stretch", "look", "look"]
 ## The face: `expression` forces one ("" = whatever she is doing, see `_auto_expression`); `express(name, seconds)` shows one for a moment
@@ -353,9 +364,17 @@ func speed() -> float:
 
 func _process(delta: float) -> void:
 	if not animate:
+		_sit = 1.0 if sitting else 0.0
 		_apply_pose()
 		return
 	_time += delta
+	_sit = move_toward(_sit, 1.0 if sitting else 0.0, delta * 3.5)
+	if sitting and is_nan(_stand_y):
+		_stand_y = position.y
+	if not is_nan(_stand_y) and not is_nan(seat_floor):
+		position.y = lerpf(_stand_y, seat_floor, _sit)
+		if _sit <= 0.0 and not sitting:
+			_stand_y = NAN
 	_dt = delta
 	_express_left = maxf(_express_left - delta, 0.0)
 	_pet_time = maxf(_pet_time - delta, 0.0)
@@ -391,6 +410,7 @@ func _apply_pose() -> void:
 	_leg_front.rotation = stride * swing - lunge
 	_leg_back.rotation = -stride * swing + lunge
 	_knees(swing, lunge)
+	_sit_legs()
 	# Shoulders at their usual places and arms their usual length (riding moves and stretches them below).
 	_arm_back.position = Vector2(_rig.arm_x, _rig.shoulder_y)
 	_arm_front.position = Vector2(-(_rig.arm_x as float), _rig.shoulder_y)
@@ -427,7 +447,7 @@ func _apply_pose() -> void:
 			_hand_goal[1] = "grip"
 	var bounce := sin(walk_phase * TAU * 2.0)
 	# Running: a little hop at each push-off instead of the walk's dip.
-	_body.position.y = _stance_drop() * (1.0 - _run) - absf(bounce) * 6.0 * _run
+	_body.position.y = _stance_drop() * (1.0 - _run) - absf(bounce) * 6.0 * _run - _sit_lift() * _sit
 	_body.rotation = ((_rig.lean as float) + deg_to_rad(10.0) * _pet + deg_to_rad(9.0) * _run) * facing
 	var tilt := bounce if is_walking else sin(_time * 2.2) * 0.6
 	_head.rotation = deg_to_rad(2.0) * tilt + deg_to_rad(10.0) * _pet - deg_to_rad(4.0) * _run
@@ -511,6 +531,29 @@ func _knees(swing: float, _lunge: float) -> void:
 	var base := deg_to_rad(3.0)
 	_shin_front.rotation = base + walk_flex * fwd_front
 	_shin_back.rotation = base + walk_flex * fwd_back
+
+
+## True while she is sitting or still getting up (she should not walk yet).
+func is_seated() -> bool:
+	return _sit > 0.35
+
+
+# Seated: the thighs forward (horizontal), the lower legs hanging, swinging a little when the seat is high.
+func _sit_legs() -> void:
+	if _sit <= 0.0:
+		return
+	var dangle := minf(_sit_lift() / 40.0, 1.0)
+	var swing := sin(_time * 2.4) * deg_to_rad(9.0) * dangle
+	_leg_front.rotation = lerpf(_leg_front.rotation, deg_to_rad(SIT_THIGH), _sit)
+	_leg_back.rotation = lerpf(_leg_back.rotation, deg_to_rad(SIT_THIGH + 4.0), _sit)
+	_shin_front.rotation = lerpf(_shin_front.rotation, deg_to_rad(SIT_THIGH * -1.0 - 4.0) + swing, _sit)
+	_shin_back.rotation = lerpf(_shin_back.rotation, deg_to_rad(SIT_THIGH * -1.0 + 2.0) - swing, _sit)
+
+
+# How far (character units) the hips are held above where the feet reach the floor: the seat's height less the lower leg.
+func _sit_lift() -> float:
+	var shin := (_rig.leg_len as float) + 5.0 - (_rig.knee_y as float)
+	return maxf(seat_h / absf(scale.y) + SIT_THICK - shin, 0.0)
 
 
 # How far the hips sit below standing height so that the lower foot stays on the ground (a lunge, a bent knee).
