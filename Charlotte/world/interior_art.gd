@@ -421,6 +421,16 @@ static func bed() -> ImageTexture:
 	s += '<path d="M60 206 Q300 228 546 206 L548 240 Q300 262 58 240 Z" fill="#EE97AD" stroke="#C26A84" stroke-width="2.5"/>'
 	s += '<path d="M80 168 Q200 146 330 152 Q430 146 530 154" stroke="#FBD3DE" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.8"/>'
 	s += '<path d="M62 238 Q300 258 546 238" stroke="#B85A76" stroke-width="5" fill="none" opacity="0.35"/>'
+	# A quilt, not a slab: the sheet turned down at the top, stitched diamonds over the duvet, and the shade it casts on the base.
+	s += '<path d="M60 170 Q200 150 340 156 Q440 150 538 158 L540 180 Q430 170 338 177 Q200 172 62 190 Z" fill="#FBF6EE" stroke="#D6CCC0" stroke-width="2"/>'
+	s += '<path d="M66 186 Q200 168 340 174 Q440 168 536 176" stroke="#E4D9CC" stroke-width="2" fill="none" opacity="0.8"/>'
+	# Quilting: two rows of stitches, dashed like a sewing machine's.
+	s += '<path d="M80 200 Q300 216 536 200" stroke="#D98AA2" stroke-width="1.8" fill="none" stroke-dasharray="5 6" opacity="0.5"/>'
+	s += '<path d="M80 224 Q300 242 536 224" stroke="#D98AA2" stroke-width="1.8" fill="none" stroke-dasharray="5 6" opacity="0.4"/>'
+	s += '<path d="M60 214 Q300 236 546 214 L546 222 Q300 244 60 222 Z" fill="#B85A76" opacity="0.18"/>'
+	# A second little cushion against the big pillow.
+	s += '<path d="M196 142 Q192 120 216 118 H286 Q308 120 306 144 Q306 166 286 168 H216 Q196 166 196 142 Z" fill="#F7D8E4" stroke="#C26A84" stroke-width="2.5"/>'
+	s += '<path d="M210 136 Q240 124 284 128" stroke="#FFFFFF" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.7"/>'
 	s += '<path d="M70 128 Q120 112 190 116" stroke="#F0E6F6" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.8"/>'
 	s += '<path d="M440 150 V300 M540 140 V300" stroke="#F4F2EC" stroke-width="8"/><path d="M440 150 V300 M540 140 V300" stroke="#C9C2B4" stroke-width="1.5"/>'
 	for x in [460.0, 480.0, 500.0, 520.0]:
