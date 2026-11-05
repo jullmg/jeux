@@ -441,8 +441,9 @@ static func _planters(rng: RandomNumberGenerator, w: float) -> String:
 # upper left. Everything here draws the same random numbers in every season; only what gets written changes.
 
 ## A leaf's outline, pointing up from its stalk at the origin: broad, with a point (they read as a mass, not as stars).
-const LEAF_SHAPE := [Vector2(0, 0.12), Vector2(-0.46, -0.08), Vector2(-0.66, -0.42), Vector2(-0.46, -0.78), Vector2(0, -1.14), Vector2(0.46, -0.78), Vector2(0.66, -0.42), Vector2(0.46, -0.08)]
-const SMALL_LEAF := [Vector2(0, 0.12), Vector2(-0.58, -0.42), Vector2(0, -1.14), Vector2(0.58, -0.42)]
+# A real leaf: a narrow base, its widest point low down, and a drawn-out tip (the old rounded octagon read as confetti).
+const LEAF_SHAPE := [Vector2(0, 0.16), Vector2(-0.28, -0.02), Vector2(-0.52, -0.38), Vector2(-0.40, -0.76), Vector2(-0.14, -1.08), Vector2(0, -1.3), Vector2(0.16, -1.06), Vector2(0.41, -0.74), Vector2(0.52, -0.37), Vector2(0.29, -0.02)]
+const SMALL_LEAF := [Vector2(0, 0.14), Vector2(-0.5, -0.4), Vector2(0, -1.22), Vector2(0.5, -0.4)]
 
 
 ## This season's shrubs (empty in winter: bare twigs).

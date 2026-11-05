@@ -130,11 +130,11 @@ static func _tree_leaves(blobs: Array, pal: Array, seed_value: int) -> String:
 	rng.seed = seed_value
 	var shades := {}
 	var s := ""
-	for i in 1000:
+	for i in 1400:
 		var a := rng.randf() * TAU
 		var d := sqrt(rng.randf())
 		var p := Vector2(190.0 + cos(a) * d * 200.0, 250.0 + sin(a) * d * 215.0)
-		var size := rng.randf_range(11.5, 17.5)
+		var size := rng.randf_range(9.5, 15.5)
 		var other := rng.randf()
 		var other_tone: String = pal[rng.randi() % pal.size()]
 		var jitter := rng.randf_range(-0.7, 0.7)
