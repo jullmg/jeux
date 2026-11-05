@@ -1,6 +1,6 @@
 class_name BillieAuguste
 extends Node2D
-## Billie (7) and Auguste (5), two little neighbours, smaller than Charlotte (reference/personnages/billie_et_auguste.jpg).
+## Billie (7) and Auguste (5), sister and brother, two little neighbours, smaller than Charlotte (reference/personnages/billie_et_auguste.jpg).
 ## They live in the lane, a few houses toward Dandurand, and are there once Mom's "amies" quest has started (like the twins).
 ## The first click is the meeting (`flags.met_billie_auguste`); after that the one clicked says a line. Quests go in `interact`.
 
@@ -11,16 +11,16 @@ const FLAG := "met_billie_auguste"
 const MEETING := [
 	[0, "Allô ! T'es la fille du 5672 !"],
 	[-1, "Oui ! Moi, c'est Charlotte. Et vous ?"],
-	[0, "Moi, c'est Billie, j'ai sept ans. Lui, c'est Auguste."],
-	[1, "Moi, j'ai CINQ ans ! Pis je suis grand !"],
+	[0, "Moi, c'est Billie, j'ai sept ans. Lui, c'est mon petit frère Auguste."],
+	[1, "Moi, j'ai CINQ ans ! Pis chu grand, hein ?"],
 	[-1, "Mes amis m'appellent Chachoue."],
 	[1, "Cha-choue ! Cha-choue !"],
 	[0, "On est amis, astheure ! Reviens nous voir !"],
 ]
 const LINE_SECONDS := 2.3
 const LINES := [
-	["Salut, Chachoue !", "J'ai mangé une crème glacée au dépanneur !", "Auguste court plus vite que moi, mais pas longtemps !"],
-	["Regarde mon chandail ! C'est un vrai !", "Je peux compter jusqu'à vingt !", "Chachoue ! Chachoue !"],
+	["Salut, Chachoue !", "J'ai mangé une crème glacée, c'tait ben bon !", "Mon p'tit frère court plus vite que moi, mais pas longtemps !"],
+	["Regarde mon chandail ! C'est un vrai !", "Chu capable de compter jusqu'à vingt, tsé !", "Ma sœur est ben fine, mais a me gosse des fois !"],
 ]
 
 ## The scene's PlayerControl: Charlotte stays put during the meeting.
