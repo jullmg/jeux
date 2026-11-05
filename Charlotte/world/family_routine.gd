@@ -120,7 +120,12 @@ func _drop_prop() -> void:
 func _follow_hand() -> void:
 	if not is_instance_valid(_prop):
 		return
-	if _prop.kind == "laptop":
+	if _prop.kind == "moon":
+		# In front of his blank gaze, a little above it, drifting.
+		var eyes: Vector2 = who.get_parent().to_local(who._head.global_position)
+		_prop.position = eyes + Vector2(who.facing * 105.0, -22.0)
+		_prop.scale = Vector2(float(who.facing), 1.0) * 2.1
+	elif _prop.kind == "laptop":
 		_prop.position = Vector2(who.hand_position().x, 482.0)
 		_prop.scale.x = float(who.facing)
 	else:
@@ -167,7 +172,33 @@ class _Prop:
 				draw_circle(Vector2(0, -8), 8.0, Color("#FFFFFF"))
 				draw_arc(Vector2(0, -8), 8.0, 0, TAU, 14, Color("#C9C2B4"), 1.2)
 				draw_circle(Vector2(1, -9), 3.0, Color("#E8A62A"))
+			"moon":
+				_draw_moon()
 			"laptop":
 				draw_rect(Rect2(-16, -20, 30, 20), Color("#2E343C"))
 				draw_rect(Rect2(-14, -18, 26, 16), Color("#9FE0F5") if fmod(_t, 6.0) < 5.5 else Color("#E8F6C8"))
 				draw_rect(Rect2(-20, 0, 38, 3), Color("#B9BEC6"))
+
+	# A little crescent moon that pops up, bobs, glows softly, with two stars twinkling by it.
+	func _draw_moon() -> void:
+		var grow := smoothstep(0.0, 0.7, _t)
+		var bob := Vector2(sin(_t * 1.3) * 3.0, sin(_t * 2.1) * 4.0)
+		draw_set_transform(bob, sin(_t * 0.9) * 0.12, Vector2.ONE * (grow * (1.0 + 0.12 * sin(_t * 6.0) * (1.0 - grow))))
+		draw_circle(Vector2.ZERO, 24.0, Color(1.0, 0.95, 0.7, 0.16))
+		draw_circle(Vector2.ZERO, 17.0, Color(1.0, 0.95, 0.7, 0.2))
+		var outer := PackedVector2Array()
+		var inner := PackedVector2Array()
+		for i in 36:
+			var a := TAU * i / 36.0
+			outer.append(Vector2.from_angle(a) * 13.0)
+			inner.append(Vector2(7.0, -3.0) + Vector2.from_angle(a) * 11.0)
+		for piece: PackedVector2Array in Geometry2D.clip_polygons(outer, inner):
+			draw_colored_polygon(piece, Color("#FFD84D"))
+			draw_polyline(piece + PackedVector2Array([piece[0]]), Color("#B8892A"), 2.2, true)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		for k in 2:
+			var tw := 0.5 + 0.5 * sin(_t * 3.0 + k * 2.4)
+			var at := bob + (Vector2(22.0, -14.0) if k == 0 else Vector2(-16.0, 15.0)) * grow
+			draw_line(at - Vector2(3.5, 0) * tw, at + Vector2(3.5, 0) * tw, Color("#FFF3C4"), 1.4)
+			draw_line(at - Vector2(0, 3.5) * tw, at + Vector2(0, 3.5) * tw, Color("#FFF3C4"), 1.4)
+

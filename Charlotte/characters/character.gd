@@ -15,10 +15,11 @@ const EXPRESSIONS := {
 	"effort": ["squint", "furrow", "grin"], "surprised": ["wide", "raised", "open"], "wonder": ["wide", "raised_small", "pursed"],
 	"sad": ["sad", "sad", "sad"], "worry": ["normal", "sad", "worry"], "sleep": ["closed", "normal", "sleep"],
 	"yawn": ["closed", "raised_small", "yawn"], "talk": ["normal", "normal", "talk"], "sip": ["normal", "normal", "pursed"],
+	"blank": ["normal", "normal", "flat"],
 }
 ## What the face does while a chore goes on.
 const TASK_FACES := {"stir": "happy", "read": "focus", "phone": "talk", "type": "focus", "wash": "focus", "drink": "normal", "fridge": "wonder",
-	"exercise": "effort", "watch": "happy"}
+	"exercise": "effort", "watch": "happy", "daydream": "blank"}
 
 var look: CharacterLook
 var walk_speed := 200.0
@@ -83,7 +84,7 @@ var fidgets := false
 ## The front hand's shape when it has nothing special to do ("grip" for a passerby holding a leash, say); "" = relaxed.
 var hand_mode := ""
 ## A chore she is doing in place (a family member's routine): "stir", "read", "phone", "type", "wash", "drink", "fridge",
-## "exercise" or "watch"; "" = none. Poses the arms and head; the routine adds the prop in her hand.
+## "exercise", "watch" or "daydream" (Dad gazing at nothing); "" = none. Poses the arms and head; the routine adds the prop in her hand.
 var task := ""
 ## Which idle gestures she may do (a shopkeeper just looks round and stretches).
 var fidget_moves: Array[String] = ["wave", "hop", "stretch", "look", "look"]
@@ -639,6 +640,11 @@ func _task_pose() -> void:
 			_aim(1, -10.0, 0.96)
 			_aim(0, -10.0, 0.96)
 			_head.rotation -= 0.05 * f
+		"daydream":
+			# Somewhere else: arms hanging a little loose, the head up and drifting, the eyes on nothing.
+			_aim(1, -5.0 + sin(t * 0.7) * 3.0, 0.97)
+			_aim(0, -4.0 - sin(t * 0.7 + 1.0) * 3.0, 0.97)
+			_head.rotation += (-0.07 + sin(t * 0.5) * 0.025) * f
 
 
 ## The hair behind the head moves with it: wherever the head is this frame (breathing, a gesture, petting, riding), and tilted

@@ -148,6 +148,8 @@ const DAD_TASKS := [
 	{"x": 1150.0, "facing": 1, "task": "phone", "prop": "phone", "secs": 7.0, "say": ["Tiens, le match !"]},
 	{"x": 930.0, "facing": 1, "task": "exercise", "prop": "", "secs": 8.0, "say": ["Un, deux, un, deux !"]},
 	{"x": 2530.0, "facing": 1, "task": "watch", "prop": "", "secs": 8.0, "say": ["Bonne émission."]},
+	# Sometimes he drifts off, staring at nothing, a little moon floating before his empty gaze.
+	{"x": 1380.0, "facing": 1, "task": "daydream", "prop": "moon", "secs": 8.0, "say": []},
 ]
 
 

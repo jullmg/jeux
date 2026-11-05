@@ -176,7 +176,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   when a new shop or street scene needs props.
 - The parents go about chores: `world/family_routine.gd` (`FamilyRoutine`) walks one character between tasks
   (`MOM_TASKS` / `DAD_TASKS` in house.gd: dicts {x, facing, task, prop, secs, say}); `Character.task` poses ("stir", "read", "phone",
-  "type", "wash", "drink", "fridge", "exercise", "watch", set in `_task_pose()`), props are drawn by `FamilyRoutine._Prop`; their click
+  "type", "wash", "drink", "fridge", "exercise", "watch", "daydream" (Dad in the clouds, sometimes: a blank stare (the "blank" expression), head up, a little crescent moon floating before his eyes, the `moon` prop), set in `_task_pose()`), props are drawn by `FamilyRoutine._Prop`; their click
   spot and "!" mark follow them, and `pause(secs, toward_x)` stops them when Charlotte talks to them. Shops have walking customers
   (`world/shop_customer.gd`, `ShopCustomer`, `Shop._add_customers`).
 - Charlotte's parents, from `reference/personnages/mere_charlotte.jpg` / `pere_charlotte.jpg`: `CharacterLook.mom()` (long wavy light-brown
