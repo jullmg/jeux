@@ -182,12 +182,18 @@ func _follow_hand() -> void:
 	else:
 		_prop.position = who.hand_position()
 		_prop.scale = Vector2(float(who.facing), 1.0) * HELD_SCALE
+		if _prop.kind == "mug":
+			# The cup tips toward the lips as they drink (the rotation is in the parent's space, so it is turned by hand).
+			_prop.sip = who.sip_amount()
+			_prop.rotation = _prop.sip * 0.5 * who.facing
 
 
 # What is in their hand (or on the table), drawn small: a wooden spoon, a book, a mug with steam, a phone, a laptop, a plate.
 class _Prop:
 	extends Node2D
 	var kind := ""
+	## For the mug: 0 down by their side, 1 at their lips.
+	var sip := 0.0
 	var _t := 0.0
 
 	func _process(delta: float) -> void:
@@ -227,12 +233,7 @@ class _Prop:
 				draw_line(Vector2(3, -19), Vector2(8, -19), Color("#7A7A7A"), 1.0)
 				draw_line(Vector2(12, -19), Vector2(17, -19), Color("#7A7A7A"), 1.0)
 			"mug":
-				draw_rect(Rect2(-5, -16, 11, 12), Color("#F4F2EC"))
-				draw_rect(Rect2(-5, -16, 11, 3), Color("#7A4A2A"))
-				draw_arc(Vector2(6, -10), 4.0, -PI / 2.0, PI / 2.0, 8, Color("#F4F2EC"), 2.0)
-				for k in 2:
-					var ph := _t * 1.6 + k * 1.7
-					draw_line(Vector2(-2 + k * 5, -20), Vector2(-2 + k * 5 + sin(ph) * 2.0, -30 - fmod(ph, 1.0) * 5.0), Color(1, 1, 1, 0.35), 1.6)
+				_draw_mug()
 			"phone":
 				draw_rect(Rect2(-4, -22, 9, 15), Color("#2B2B33"))
 				draw_rect(Rect2(-3, -21, 7, 12), Color("#9FE0F5"))
@@ -246,6 +247,27 @@ class _Prop:
 				draw_rect(Rect2(-16, -20, 30, 20), Color("#2E343C"))
 				draw_rect(Rect2(-14, -18, 26, 16), Color("#9FE0F5") if fmod(_t, 6.0) < 5.5 else Color("#E8F6C8"))
 				draw_rect(Rect2(-20, 0, 38, 3), Color("#B9BEC6"))
+
+	# A mug held in the hand: the cup centred on the grip (so it never climbs over the face), the handle behind it, the coffee
+	# showing at the rim, and steam while it waits at their side.
+	func _draw_mug() -> void:
+		var cream := Color("#F4F2EC")
+		var edge := Color("#C2BAAC")
+		draw_arc(Vector2(7.0, -0.5), 4.2, -PI / 2.0, PI / 2.0, 10, cream, 2.6)
+		draw_arc(Vector2(7.0, -0.5), 4.2, -PI / 2.0, PI / 2.0, 10, edge, 0.9)
+		var body := PackedVector2Array([Vector2(-7, -9), Vector2(6.5, -9), Vector2(5.5, 8), Vector2(-6, 8)])
+		draw_colored_polygon(body, cream)
+		draw_polyline(body + PackedVector2Array([body[0]]), edge, 1.3, true)
+		# The rim, and the coffee in it: it shows as the cup tips.
+		var coffee: float = 1.6 + sip * 2.6
+		draw_colored_polygon(CritterDraw.ellipse_points(Vector2(-0.3, -9.0), Vector2(6.8, 2.1), 0.0, 16), Color("#EDE8DE"))
+		draw_colored_polygon(CritterDraw.ellipse_points(Vector2(-0.3, -8.6), Vector2(5.4, coffee), 0.0, 16), Color("#6B3F22"))
+		draw_line(Vector2(-4.2, -5.0), Vector2(-4.6, 5.0), Color(1, 1, 1, 0.75), 2.0)
+		draw_rect(Rect2(-6.4, 2.0, 12.0, 2.2), Color("#D9A23A"))
+		for k in 2:
+			var ph := _t * 1.6 + k * 1.7
+			var fade: float = (1.0 - sip) * 0.4
+			draw_line(Vector2(-2.5 + k * 5.0, -12.0), Vector2(-2.5 + k * 5.0 + sin(ph) * 2.0, -22.0 - fmod(ph, 1.0) * 5.0), Color(1, 1, 1, fade), 1.6)
 
 	# Papa's bike, leaning on its kickstand beside him: two spoked wheels, a frame, handlebars and a saddle, with a shine on
 	# the tubes that slides as he polishes.

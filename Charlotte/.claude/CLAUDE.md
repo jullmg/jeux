@@ -182,7 +182,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `prop_at` (a prop that stays put instead of in the hand), `sit` + `floor` (they sit down, see `Seat`), `jog` (the run cycle on
   the spot) and `done_say` (a word as they finish: Papa coming out of the clouds says "Oups ! J'étais encore dans la lune !");
   props are bigger now (`HELD_SCALE`) and include the clay on the wheel, music notes, his bike, a rag and drops of sweat.
-  `InteriorArt.piano` / `piano_bench` / `pottery_station` stand against the corridor wall (`PIANO_X`, `POTTERY_X`); `Character.task` poses ("stir", "read", "phone",
+  `InteriorArt.piano` / `piano_bench` / `pottery_station` stand against the corridor wall (`PIANO_X`, `POTTERY_X`); `Character.task` poses (the mug of coffee comes up to the lips, not in front of the eyes: `_sip` eases the hand to a point under the head by IK and the mug tips with it, `Character.sip_amount()`; "stir", "read", "phone",
   "type", "wash", "drink", "fridge", "exercise", "piano", "pottery", "bike", "jog", "watch", "daydream" (Dad in the clouds, sometimes: a blank stare (the "blank" expression), head up, a little crescent moon floating before his eyes, the `moon` prop), set in `_task_pose()`), props are drawn by `FamilyRoutine._Prop`; their click
   spot and "!" mark follow them, and `pause(secs, toward_x)` stops them when Charlotte talks to them. Shops have walking customers
   (`world/shop_customer.gd`, `ShopCustomer`, `Shop._add_customers`).

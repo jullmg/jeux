@@ -97,6 +97,8 @@ var work: Array[Vector2] = []
 var sitting := false
 var seat_h := 0.0
 var _sit := 0.0
+# 0 the mug is down by their side, 1 it is at their lips (the chore "drink"), so what they hold can tip with it.
+var _sip := 0.0
 ## The floor under the seat (world y), when the seat is further back than where she walks: she steps back to it as she sits.
 var seat_floor := NAN
 var _stand_y := NAN
@@ -541,6 +543,11 @@ func is_seated() -> bool:
 	return _sit > 0.35
 
 
+## 0 the mug hangs at their side, 1 it is at their lips: a mug follows this to tip as they drink.
+func sip_amount() -> float:
+	return _sip
+
+
 ## 0 standing, 1 fully settled in the seat: what is drawn in front of the seat waits for 1 so it never cuts across her on the way in.
 func seated_amount() -> float:
 	return _sit
@@ -652,6 +659,8 @@ func _aim(i: int, degrees: float, reach := 0.93, wobble := Vector2.ZERO) -> void
 func _task_pose() -> void:
 	var t := _time
 	var f := float(facing)
+	if task != "drink":
+		_sip = 0.0
 	match task:
 		"stir":
 			_body.rotation += 0.05 * f
@@ -711,11 +720,19 @@ func _task_pose() -> void:
 			_body.rotation += 0.06 * f
 			_head.rotation += 0.12 * f
 		"drink":
-			var up := smoothstep(0.0, 0.5, fmod(t, 5.0)) * (1.0 - smoothstep(1.6, 2.1, fmod(t, 5.0)))
-			_aim(1, lerpf(-58.0, -130.0, up), lerpf(0.92, 0.62, up))
+			# The mug comes up to the lips, not in front of the eyes: the hand goes where the mouth is (just under the head,
+			# a little in front), the head tips back a touch, and `_sip` lets the mug tip with it.
+			var cycle := fmod(t, 5.0)
+			_sip = smoothstep(0.0, 0.55, cycle) * (1.0 - smoothstep(1.7, 2.3, cycle))
+			var rest := _arms[1].position + Vector2(-9.0, (_rig.arm_len as float) * 0.66)
+			var lips := _head.position + Vector2(-25.0, 38.0)
+			var reach := _ik(_arms[1], rest.lerp(lips, _sip))
+			_arms[1].rotation = reach.x
+			_elbow_goal[1] = reach.y
+			_snap[1] = true
 			_aim(0, -14.0, 0.97)
 			_hand_goal = ["relaxed", "grip"]
-			_head.rotation += 0.08 * f * up
+			_head.rotation += 0.07 * f * _sip
 		"fridge":
 			_aim(1, -76.0, 0.9, Vector2(0, sin(t * 1.5) * 2.0))
 			_aim(0, -24.0, 0.96)
