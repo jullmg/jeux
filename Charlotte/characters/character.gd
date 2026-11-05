@@ -375,7 +375,8 @@ func _process(delta: float) -> void:
 	if _blink_in <= 0.0:
 		_lids.visible = not _lids.visible and _face_now[0] != "closed" and _face_now[0] != "happy"
 		_blink_in = 0.12 if _lids.visible else randf_range(1.8, 5.0)
-	var target := lerpf(0.09, 0.2, _run) if is_walking else 0.0
+	# The hair trails BEHIND her (a negative angle: a positive one swept it forward over her shoulder as she ran).
+	var target := -lerpf(0.07, 0.26, _run) if is_walking else 0.0
 	_hair_vel += ((target - _hair_angle) * 60.0 - _hair_vel * 7.0) * delta
 	_hair_angle += _hair_vel * delta
 	_apply_pose()
