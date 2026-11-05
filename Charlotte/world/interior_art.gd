@@ -21,6 +21,7 @@ static func _defs() -> String:
 		+ '<linearGradient id="oak" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8A5226"/><stop offset="0.5" stop-color="#A9693A"/><stop offset="1" stop-color="#874F24"/></linearGradient>'
 		+ '<linearGradient id="velvet" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DDA640"/><stop offset="1" stop-color="#B07A1E"/></linearGradient>'
 		+ '<radialGradient id="globe" cx="0.4" cy="0.35"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.6" stop-color="#FFF4D6"/><stop offset="1" stop-color="#F2D9A0"/></radialGradient>'
+		+ '<linearGradient id="steel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#F2F2EF"/><stop offset="0.45" stop-color="#C9C5BC"/><stop offset="1" stop-color="#9A968E"/></linearGradient>'
 		+ '<linearGradient id="outside" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BFD8E8"/><stop offset="0.6" stop-color="#9DB98C"/><stop offset="1" stop-color="#7E8F6A"/></linearGradient>'
 		+ '</defs>')
 
@@ -369,8 +370,15 @@ static func kitchen() -> ImageTexture:
 		s += '<g transform="translate(%s 206)"><path d="%s" stroke="#6E6E6E" stroke-width="2.5" fill="#B9B9B9"/></g>' % [u[0], u[1]]
 	s += '<rect x="114" y="260" width="192" height="14" fill="#2E2E30"/>'
 	s += '<rect x="120" y="274" width="180" height="202" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="2.5"/>'
+	# Shaker doors, not flat rectangles: a sunk panel lit at the top left, a long bar handle, and the toe-kick in shadow.
 	for x in [124.0, 212.0]:
-		s += '<rect x="%s" y="284" width="84" height="182" fill="none" stroke="#C9C2B4" stroke-width="2"/><rect x="%s" y="300" width="22" height="4" fill="#9A9A9A"/>' % [x, x + 31]
+		s += '<rect x="%s" y="284" width="84" height="178" fill="#EFEBE2" stroke="#C9C2B4" stroke-width="2"/>' % x
+		s += '<rect x="%s" y="296" width="60" height="154" fill="#F7F5EF" stroke="#D5CEC2" stroke-width="1.6"/>' % (x + 12)
+		s += '<path d="M%s 296 H%s M%s 296 V450" stroke="#FFFFFF" stroke-width="2" opacity="0.9"/>' % [x + 12, x + 72, x + 12]
+		s += '<path d="M%s 450 H%s M%s 296 V450" stroke="#C4BCAE" stroke-width="1.6" opacity="0.8"/>' % [x + 12, x + 72, x + 72]
+		s += '<rect x="%s" y="300" width="7" height="48" rx="3.5" fill="url(#steel)" stroke="#8E8A82" stroke-width="1"/>' % (x + 70)
+	s += '<rect x="120" y="462" width="180" height="14" fill="#CFC8BA"/><rect x="120" y="462" width="180" height="5" fill="#000000" opacity="0.18"/>'
+	s += '<path d="M114 274 H306" stroke="#FFFFFF" stroke-width="2.5" opacity="0.8"/>'
 	s += '<rect x="130" y="250" width="70" height="10" fill="#3A3A3A"/><circle cx="148" cy="255" r="3" fill="#6E6E6E"/><circle cx="182" cy="255" r="3" fill="#6E6E6E"/>'
 	s += '<path d="M146 250 Q146 226 166 226 Q186 226 186 250 Z" fill="#E04F5F" stroke="#8E1A24" stroke-width="2"/><path d="M186 236 l10 -6" stroke="#8E1A24" stroke-width="3"/><path d="M156 226 q10 -10 20 0" stroke="#2B2B2B" stroke-width="2.5" fill="none"/>'
 	s += '<ellipse cx="260" cy="256" rx="26" ry="6" fill="#F4F2EC" stroke="#9A9A9A" stroke-width="1.5"/>'
