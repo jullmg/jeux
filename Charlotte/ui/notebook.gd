@@ -15,8 +15,8 @@ const TABS := [["Missions", Color("#3D8BD9")], ["Mes amis", Color("#E85FA0")]]
 const FRIENDS := [
 	{"name": "Alphée Turcotte", "note": "La jumelle aux cheveux détachés. On se voit dans la ruelle.", "flag": "met_twins"},
 	{"name": "Constance Turcotte", "note": "La jumelle à la queue de cheval. On se voit dans la ruelle.", "flag": "met_twins"},
-	{"name": "Billie", "note": "Elle a sept ans et une robe à fleurs. La grande sœur d'Auguste, dans la ruelle.", "flag": "met_billie_auguste"},
-	{"name": "Auguste", "note": "Il a cinq ans, les cheveux roux et un chandail de basket. Le petit frère de Billie.", "flag": "met_billie_auguste"},
+	{"name": "Billie", "note": "Elle a sept ans. La grande sœur d'Auguste, dans la ruelle.", "flag": "met_billie_auguste"},
+	{"name": "Auguste", "note": "Il a cinq ans et les cheveux roux. Le petit frère de Billie.", "flag": "met_billie_auguste"},
 ]
 
 var _button: Button
