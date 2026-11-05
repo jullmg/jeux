@@ -613,8 +613,8 @@ func _torso_svg(sx: float, sy: float) -> String:
 		ceili(w), ceili(h), ceili(w), ceili(h), sx, sy, s]
 
 
-const DRESS_SKIRT := "M26 62 H104 Q118 100 128 140 Q120 148 108 142 Q98 150 86 143 Q76 150 65 143 Q54 150 44 143 Q32 150 22 142 Q10 148 2 140 Q12 100 26 62 Z"
-const DRESS_BODICE := "M42 12 Q65 22 88 12 L100 18 Q108 22 108 32 Q107 50 104 64 H26 Q23 50 22 32 Q22 22 30 18 Z"
+const DRESS_SKIRT := "M27 62 H103 Q110 92 128 140 Q120 148 108 142 Q98 150 86 143 Q76 150 65 143 Q54 150 44 143 Q32 150 22 142 Q10 148 2 140 Q20 92 27 62 Z"
+const DRESS_BODICE := "M42 12 Q65 22 88 12 Q101 13 106 25 Q110 36 106 46 Q99 56 101 64 H29 Q31 56 24 46 Q20 36 24 25 Q29 13 42 12 Z"
 
 
 func _dress() -> String:
@@ -690,7 +690,7 @@ func _pattern(big: Array, small: Array, r := 4.5) -> String:
 
 
 # The body of a top and of the shirt under overalls: shoulders, a little waist, a gently curved hem.
-const TOP_BODY := "M42 12 Q65 22 88 12 L100 18 Q108 22 108 32 Q107 58 104 78 Q103 90 106 98 Q106 106 98 105 Q65 109 32 105 Q24 106 24 98 Q27 90 26 78 Q23 58 22 32 Q22 22 30 18 Z"
+const TOP_BODY := "M42 12 Q65 22 88 12 Q101 13 106 25 Q110 36 106 50 Q98 62 97 76 Q97 90 104 100 Q104 108 95 106 Q65 111 35 106 Q26 108 26 100 Q33 90 33 76 Q32 62 24 50 Q20 36 24 25 Q29 13 42 12 Z"
 
 
 func _top() -> String:
@@ -773,7 +773,8 @@ func _hoodie() -> String:
 	return s
 
 
-const COAT_BODY := "M42 12 Q65 22 88 12 L100 18 Q108 22 108 32 L114 136 Q114 144 106 144 H24 Q16 144 16 136 L22 32 Q22 22 30 18 Z"
+# A coat with shoulders, a waist and a skirt that flares to the hem.
+const COAT_BODY := "M42 12 Q65 22 88 12 Q101 13 106 25 Q110 36 106 50 Q100 64 101 80 Q104 110 116 138 Q114 146 104 144 Q65 149 26 144 Q16 146 14 138 Q26 110 29 80 Q30 64 24 50 Q20 36 24 25 Q29 13 42 12 Z"
 
 
 func _coat() -> String:
@@ -813,7 +814,8 @@ func _sleeve_palette(build: Callable) -> String:
 ## goes all the way down to a cloth elbow. Canvas 30 wide; the shoulder pivot is at (15, 8) and the elbow at (15, 8 + length).
 func _upper_arm_svg(length: float) -> String:
 	var ey := 8.0 + length
-	var s := _f('<rect x="9" y="14" width="12" height="%s" rx="5" fill="{skin}" stroke="{skin_line}" stroke-width="2.5"/>' % (length - 4.0))
+	# The arm tapers: a fuller shoulder, slimmer at the elbow.
+	var s := _f('<path d="M8.2 16 Q15 11 21.8 16 L20.4 %s Q15 %s 9.6 %s Z" fill="{skin}" stroke="{skin_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [ey - 4.0, ey - 1.0, ey - 4.0])
 	s += _f('<circle cx="15" cy="%s" r="6.5" fill="{skin}" stroke="{skin_line}" stroke-width="2.5"/>' % ey)
 	s += _f('<rect x="10.4" y="%s" width="9.2" height="13" fill="{skin}"/>' % (ey - 9.0))
 	s += _sleeve_palette(func() -> String:
@@ -839,7 +841,8 @@ func _upper_arm_svg(length: float) -> String:
 ## little creases of a bent elbow. Canvas 30 wide; the elbow pivot is at (15, 8); the wrist at (15, 8 + length).
 func _forearm_svg(length: float) -> String:
 	var wy := 8.0 + length
-	var s := _f('<rect x="9.8" y="8" width="10.4" height="%s" rx="4.5" fill="{skin}" stroke="{skin_line}" stroke-width="2.2"/>' % (length + 3.0))
+	# Fuller at the elbow, narrowing to the wrist.
+	var s := _f('<path d="M9.6 8 H20.4 L19.2 %s Q15 %s 10.8 %s Z" fill="{skin}" stroke="{skin_line}" stroke-width="2.2" stroke-linejoin="round"/>' % [wy - 1.0, wy + 2.0, wy - 1.0])
 	s += _f('<circle cx="15" cy="8" r="5.8" fill="{skin}" stroke="{skin_line}" stroke-width="2.2"/>')
 	s += _f('<rect x="11" y="3" width="8" height="12" fill="{skin}"/>')
 	s += _f('<path d="M11 14 V%s" stroke="{skin_shade}" stroke-width="2" opacity="0.5"/>' % (wy - 4.0))
@@ -925,8 +928,8 @@ func _leg_body(length: float) -> String:
 	var s := LEG_DEFS
 	match look.legwear:
 		"socks":
-			s += _f('<rect x="11" y="0" width="18" height="%s" rx="7" fill="{skin}" stroke="{skin_line}" stroke-width="2.5"/>' % (length - 18.0))
-			s += '<rect x="11" y="0" width="18" height="%s" rx="7" fill="url(#lg)"/>' % (length - 18.0)
+			s += _f('<path d="M9.6 0 H30.4 L28.4 %s Q20 %s 11.6 %s Z" fill="{skin}" stroke="{skin_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [length - 20.0, length - 16.0, length - 20.0])
+			s += '<path d="M9.6 0 H30.4 L28.4 %s Q20 %s 11.6 %s Z" fill="url(#lg)"/>' % [length - 20.0, length - 16.0, length - 20.0]
 			s += _f('<rect x="9" y="%s" width="22" height="18" rx="4" fill="{leg}" stroke="{leg_line}" stroke-width="2"/>' % (length - 34.0))
 			s += '<rect x="9" y="%s" width="22" height="18" rx="4" fill="url(#lg)"/>' % (length - 34.0)
 			# The ribbed cuff of the sock: a darker band with its ribs and a stripe.
@@ -935,13 +938,13 @@ func _leg_body(length: float) -> String:
 				s += _f('<path d="M%d %s v5" stroke="{leg_line}" stroke-width="1" opacity="0.45"/>' % [x, length - 33.0])
 			s += _f('<rect x="9.5" y="%s" width="21" height="2.4" fill="{accent}" opacity="0.8"/>' % (length - 25.0))
 		"tights":
-			s += _f('<rect x="11" y="0" width="18" height="%s" rx="7" fill="{leg}" stroke="{leg_line}" stroke-width="2.5"/>' % (length - 18.0))
-			s += '<rect x="11" y="0" width="18" height="%s" rx="7" fill="url(#lg)"/>' % (length - 18.0)
+			s += _f('<path d="M9.6 0 H30.4 L28.4 %s Q20 %s 11.6 %s Z" fill="{leg}" stroke="{leg_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [length - 20.0, length - 16.0, length - 20.0])
+			s += '<path d="M9.6 0 H30.4 L28.4 %s Q20 %s 11.6 %s Z" fill="url(#lg)"/>' % [length - 20.0, length - 16.0, length - 20.0]
 			# The sheen of knitted tights: two faint stripes of light down the leg.
 			s += '<path d="M15 14 V%s M18.5 14 V%s" stroke="#FFFFFF" stroke-width="1.5" opacity="0.14" stroke-linecap="round"/>' % [length - 30.0, length - 36.0]
 		_:
-			s += _f('<rect x="8" y="0" width="24" height="%s" rx="4" fill="{leg}" stroke="{leg_line}" stroke-width="2.5"/>' % (length - 14.0))
-			s += '<rect x="8" y="0" width="24" height="%s" rx="4" fill="url(#lg)"/>' % (length - 14.0)
+			s += _f('<path d="M6.8 0 H33.2 L31 %s Q20 %s 9 %s Z" fill="{leg}" stroke="{leg_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [length - 14.0, length - 11.0, length - 14.0])
+			s += '<path d="M6.8 0 H33.2 L31 %s Q20 %s 9 %s Z" fill="url(#lg)"/>' % [length - 14.0, length - 11.0, length - 14.0]
 			# Trousers: a turned-up cuff with its stitching, and the outer seam.
 			s += _f('<rect x="8" y="%s" width="24" height="6" fill="{leg_line}" opacity="0.5"/>' % (length - 20.0))
 			s += '<path d="M9 %s H31" stroke="#FFFFFF" stroke-width="1.2" stroke-dasharray="3 2.5" opacity="0.4"/>' % (length - 17.0)

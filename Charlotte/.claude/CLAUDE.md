@@ -218,6 +218,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   start below the knee). `Character._knees` bends the swinging leg when walking (more when running), `_stance_drop` lowers the hips so the
   lower foot stays on the ground; a lunge (petting) keeps both legs straight and symmetrical so both feet stay down; hop and exercise tuck the
   knees; on a bike `_pedal_legs` solves thigh and shin to the pedal (IK).
+- Bodies and clothes have a shape, not a tube: `TOP_BODY`, `DRESS_BODICE`, `COAT_BODY` give sloping shoulders, a waist and hips
+  (the coat flares from the waist to its hem), and the bare limbs taper — a fuller shoulder and elbow narrowing to the wrist
+  (`_upper_arm_svg`, `_forearm_svg`), thighs narrowing to the ankle (`_leg_body`, all legwear).
 - Clothes carry light and detail: `CharacterArt.CLOTH_DEFS` (a sheen from the upper left, shade toward the hem; `_sheen(path)` lays it over any garment
   outline: `TOP_BODY`, `DRESS_SKIRT`, `DRESS_BODICE`, `COAT_BODY`), `LEG_DEFS` (light across a leg). Tops have a slight waist and a curved hem;
   T-shirts a ribbed collar and a stitched hem; sweaters and hoodies knitted ribbing, a rolled neck and (hoodie) a stitched kangaroo pocket; dresses
