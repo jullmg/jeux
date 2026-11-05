@@ -14,7 +14,7 @@ const ALL := {
 		"age": 7, "reward": 2.0,
 	},
 	"hamster": {
-		"title": "Nourris le hamster avant le dodo",
+		"title": "Nourris le hamster",
 		"hint": "Sa gamelle est dans le terrarium, sur la commode de ta chambre.",
 		"find": "Papa a quelque chose à te rappeler…",
 		"age": 7, "reward": 1.0,

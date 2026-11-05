@@ -29,5 +29,5 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 - Soirée cinéma : le dépanneur vend déjà de quoi grignoter (`Shop._buy`, `Shop.PRICES`) et l'argent de poche existe (`GameState.money`) ; il faudrait que Maman ou Papa lui en donne (nouveau), et un lieu où regarder le film (la télé du corridor, `TvScreen`).
 - La fête : il n'y a pas encore de magasin de cadeaux, et Maman ne sort pas encore de la maison (elle marche seulement à l'intérieur, `FamilyRoutine`). À décider.
 - Le livre perdu : il y a déjà un croque-livre dans chaque ruelle (`LaneArt.croque_livre`, `_open_croque_livre` en attente d'une quête) et des
-  enfants qui jouent dans les ruelles (`JumpRopeKid`, `BallKid`, cliquables) qui pourraient être l'ami qui donne la mission. Le lecteur de
+  enfants (il n'y en a plus au hasard dans les ruelles : voir l'historique git pour `JumpRopeKid` et `BallKid`) qui pourraient être l'ami qui donne la mission. Le lecteur de
   livres `BookReader` peut montrer le livre retrouvé.

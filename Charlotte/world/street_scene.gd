@@ -750,26 +750,6 @@ func _build_utility_poles() -> void:
 	add_child(birds)
 
 
-# A neighbourhood child skipping rope (the lanes are where the children play), a little back from Charlotte's
-# walking line (added before her), from its own random numbers.
-func _build_kid(start_x: float) -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_value + 31
-	var seg := _walk_segments()[0]
-	for s in _walk_segments():
-		if start_x >= s.x - 1.0 and start_x <= s.y + 1.0:
-			seg = s
-	var x := rng.randf_range(seg.x + 200.0, seg.y - 200.0)
-	if absf(x - start_x) < 300.0:
-		x = clampf(start_x + 500.0, seg.x + 150.0, seg.y - 150.0)
-	var kid := JumpRopeKid.new()
-	kid.look = CharacterLook.random(rng, "child")
-	Season.dress_for_weather(kid.look)
-	kid.position = Vector2(x, NEIGHBOUR_Y + 10.0)
-	kid.scale = Vector2.ONE * CHAR_SCALE
-	add_child(kid)
-
-
 # Winter: smoke rising from the chimneys, from its own random numbers.
 func _build_life() -> void:
 	var rng := RandomNumberGenerator.new()

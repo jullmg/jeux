@@ -249,9 +249,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `_traffic`, own RNG, rarer in winter, sometimes ringing).
 - Squirrels in the lanes (`ruelle.gd` `_build_lane_squirrels`, `SQUIRRELS_MIDDLE` 6, `SQUIRRELS_CROSS` 2, own RNG): along the foot of the fences (`SQUIRREL_Y`), up the poles and the yard trees. They are drawn over the lane's ground, in front of the trees, so `Squirrel.slips_behind` moves one just behind the tree it climbs (`_home_index`) and back when it lands.
 - Background life: `WireBirds` (`world/wire_birds.gd`: pigeons and sparrows on the poles' cable, fly off when
-  Charlotte comes close or runs, others land later; streets and lanes), children playing in the lanes (not on the
-  streets): a `JumpRopeKid` (`world/jump_rope_kid.gd`, `StreetScene._build_kid`) and a `BallKid` (`world/ball_kid.gd`) in
-  each lane, own RNG, clickable; few passersby on the streets (`passerby_ages`: 2 on the avenues, 1 on Dandurand/Holt), winter chimney smoke (`_build_life`).
+  Charlotte comes close or runs, others land later; streets and lanes), no children playing in the lanes on their own any more (Julien: only the twins, when the quests bring them; the old `JumpRopeKid` and `BallKid` are in the git history); few passersby on the streets (`passerby_ages`: 2 on the avenues, 1 on Dandurand/Holt), winter chimney smoke (`_build_life`).
 - Every corner has planted curb extensions (`world/curb_garden.gd`, `CurbGarden`, `StreetScene._build_curb_gardens`, from
   `reference/rue/terre_plein_01.png et 02`): the curb bulges into the parking lane on both sides of each cross street, perennials
   by season, striped flexible bollards; drawn in front of people.
@@ -351,7 +349,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     one more case in `Carry._build()`, then `Carry.take` / `Carry.put_down` in the quest: nothing else to remember;
   - amies: Mom gives it, the very first one she gives: go and make friends in the middle lane, where the twins Turcotte play; meeting them (`Twins._meet`, flag `met_twins`) completes it, and if she met them first Mom just congratulates her; the notebook's friends page lists them from that flag;
   - cachette: the twins' first quest, after "amies" (`Twins._play_hide_and_seek`): they ask, Charlotte counts with her eyes shut, then each sister (`Twins._Hider`) peeks over a solid fence (`ruelle.gd` `_hide_spots`: boards or cedar, `HIDE_FROM` lots or more away, drawn just behind that fence's sprite, one each side when it can), giggles when Charlotte comes close, and a click finds her; `flags.cachette_found` keeps who has been found across scenes; both found completes it;
-  - hamster: Dad gives it; feeding sets `flags.hamster_fed` (cleared at bedtime); going to bed unfed is refused, fed completes it;
+  - hamster: Dad gives it; feeding it completes the quest at once (it sets `flags.hamster_fed`, cleared at bedtime; bedtime asks nothing);
   - lost cats, `world/lost_cats.gd` (`LostCats.ALL`, ids = quest ids cat, cat2, cat3, chained by `after`): Pistache
     (found on Dandurand, home 5684 6e Av.), Caramel (in the lane, home 5679 5e Av.), Bijou (in the lane, home 2655 rue
     Holt). `StreetScene._build_lost_cats()` (streets and the lane): the "PERDU" `LostCats.Poster` on the street's pole (taken down once the cat is found, `poster_up`)

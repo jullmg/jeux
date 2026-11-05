@@ -207,7 +207,7 @@ func _talk_to_mom() -> void:
 func _talk_to_dad() -> void:
 	_dad_routine.pause(4.0, _charlotte.position.x)
 	if Quests.start("hamster"):
-		_say(_dad, "Avant le dodo, n'oublie pas\nde nourrir ton hamster !", 390.0, 3.5)
+		_say(_dad, "N'oublie pas de nourrir\nton hamster !", 390.0, 3.5)
 	elif Quests.start("plants"):
 		_say(_dad, "Les plantes ont soif ! L'arrosoir\nest dans la cuisine.", 390.0, 3.5)
 	elif Quests.active("plants"):
@@ -531,14 +531,9 @@ func _open_fridge() -> void:
 		_fridge_busy = false)
 
 
-# Bedtime: the room goes night-blue and moonlit, she's tucked in ("Bonne nuit"), little z's float up from the
+# Bedtime (nothing is asked of her first): the room goes night-blue and moonlit, she's tucked in ("Bonne nuit"), little z's float up from the
 # bed; then black, "Le lendemain matin…", and she's up beside the bed (the hamster is hungry again).
 func _go_to_sleep() -> void:
-	if Quests.active("hamster"):
-		if not GameState.flags.get("hamster_fed", false):
-			_say(_charlotte, "Oh ! Mon hamster n'a pas mangé !", 300.0)
-			return
-		Quests.complete("hamster")
 	_control.enabled = false
 	Sfx.play("goodnight")
 	Music.play(["night"], true)
