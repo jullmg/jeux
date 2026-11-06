@@ -9,9 +9,9 @@ const ALIASES := {"printemps": "spring", "ete": "summer", "été": "summer", "au
 ## The story flags each quest leaves behind, cleared with it.
 ## Story flags that belong to no quest, cleared by "Tout effacer".
 const OTHER_FLAGS := ["met_twins", "met_billie_auguste"]
-const QUEST_FLAGS := {"amies": ["met_twins", "met_billie_auguste"], "cachette": ["cachette_found"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"]}
+const QUEST_FLAGS := {"amies": ["met_twins", "met_billie_auguste"], "cachette": ["cachette_found"], "livre": ["book_found"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"]}
 ## What a quest puts in her arms (a lost cat's quest id is the cat's id, handled by `Carry.cat_id()`).
-const QUEST_CARRIES := {"milk": "milk", "plants": "can", "menage": "toy"}
+const QUEST_CARRIES := {"milk": "milk", "plants": "can", "menage": "toy", "livre": "book"}
 
 ## The places to teleport to, in the order of the menu: {name, scene, and where: `x` (Charlotte's x in the scene), or `arrive`
 ## (the Transition.arrive key of a corner or lane opening), or nothing for the scene's usual start}. A line with only a

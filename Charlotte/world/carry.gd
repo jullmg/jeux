@@ -118,6 +118,16 @@ static func _build(kind: String, id: String) -> Node2D:
 			cat.set_meta("hands", "open")
 			cat.set_meta("face", "happy")
 			return cat
+		"book":
+			# Constance's book, held flat against her: its cover must stay the right way round when she turns.
+			var book := Sprite2D.new()
+			book.texture = LaneArt.lost_book()
+			book.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			book.scale = Vector2.ONE * 1.25
+			book.offset = Vector2(0, -6)
+			book.name = "book"
+			book.set_meta("keep_upright", true)
+			return book
 		"toy":
 			# Something from her bedroom floor (the tidying quest): the same picture as on the floor, bigger in her arms.
 			var toy := Sprite2D.new()

@@ -10,7 +10,7 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
    (le dépanneur Xin-Xin vend déjà ces chips, de marque **Ruffles** : présentoir `chips_gondola`, saveur `creme` dans `ShopArt.CHIPS`)
 4. **Aller cueillir des framboises dans la cour**
 5. **Aller cueillir des raisins dans la cour**
-6. **Trouver le livre perdu d'un ami dans le croque-livre** (mission donnée par un ami)
+6. ~~**Trouver le livre perdu d'un ami dans le croque-livre**~~ (fait : la quête `livre`, donnée par Constance après la cachette ; le livre attend dans le croque-livre de la ruelle verte et elles le lisent ensemble au retour)
 7. **Planifier une soirée cinéma avec des amis** : elle se fait d'abord donner de l'argent de poche pour aller acheter des trucs pour la soirée
 8. **La fête d'un ami** : elle va acheter un cadeau avec Maman
 9. ~~**Jouer à la cachette avec les amis**~~ (fait : la quête `cachette`, la première des jumelles)
@@ -25,9 +25,8 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 - Framboises et raisins : la cour de Charlotte est le lot `OWN_LOT` de la ruelle du milieu (balançoire, vélo de Papa, marelle). Il faudra y
   dessiner les plants (`LaneArt._yard`, `_foliage` pour les feuilles) ; ils dépendent de la saison (framboises en été, raisins à l'automne),
   et on peut les porter par `Carry` comme le lait. Le bas de clôture ne permet pas encore d'entrer dans la cour : à décider.
-- Alphée et Constance Turcotte (`world/twins.gd`) donneront des quêtes, lesquelles restent à décider : plusieurs idées ici leur iraient (le livre perdu, la soirée cinéma, la fête).
+- Alphée et Constance Turcotte (`world/twins.gd`) ont déjà donné la cachette et le livre perdu ; la soirée cinéma et la fête leur iraient bien aussi.
 - Soirée cinéma : le dépanneur vend déjà de quoi grignoter (`Shop._buy`, `Shop.PRICES`) et l'argent de poche existe (`GameState.money`) ; il faudrait que Maman ou Papa lui en donne (nouveau), et un lieu où regarder le film (la télé du corridor, `TvScreen`).
 - La fête : il n'y a pas encore de magasin de cadeaux, et Maman ne sort pas encore de la maison (elle marche seulement à l'intérieur, `FamilyRoutine`). À décider.
-- Le livre perdu : il y a déjà un croque-livre dans chaque ruelle (`LaneArt.croque_livre`, `_open_croque_livre` en attente d'une quête) et des
-  enfants (il n'y en a plus au hasard dans les ruelles : voir l'historique git pour `JumpRopeKid` et `BallKid`) qui pourraient être l'ami qui donne la mission. Le lecteur de
-  livres `BookReader` peut montrer le livre retrouvé.
+- Le livre perdu (fait) : Constance le demande, il est dans le croque-livre de la ruelle verte (`ruelle.gd` `BOOK_LANE`), Charlotte le porte dans ses bras
+  (`Carry` « book », `LaneArt.lost_book`) et le `BookReader` s'ouvre sur « Minou et la lune » quand elle le rapporte.

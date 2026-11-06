@@ -725,6 +725,32 @@ static func croque_livre(rng: RandomNumberGenerator) -> ImageTexture:
 	return PropArt.tex(PropArt._svg(100, 200, s))
 
 
+
+## Constance's lost book, « Minou et la lune » (`BookReader.BOOKS[1]`): a closed hardback, its navy cover with the moon and
+## the little grey cat, held in Charlotte's arms. Canvas 62x78.
+static func lost_book() -> ImageTexture:
+	var cover := "#2E3440"
+	var s := _rect(4, 4, 56, 72, "#1C2029", 'rx="3"')
+	s += _rect(2, 2, 56, 72, cover, 'rx="3" stroke="#151821" stroke-width="2"')
+	# The pages, showing along the fore edge and the foot.
+	s += _rect(54, 6, 6, 64, "#F4F1E6", 'rx="2"')
+	for i in 7:
+		s += _rect(54, 10.0 + i * 8.0, 6, 1.4, "#D8D2C2")
+	s += _rect(6, 6, 4, 64, "#3E4858", 'rx="2"')
+	# The moon and the cat sitting under it, and the band of the title.
+	s += '<circle cx="38" cy="24" r="11" fill="#F6E5A8"/>'
+	s += '<circle cx="33" cy="21" r="9" fill="%s"/>' % cover
+	s += '<circle cx="20" cy="18" r="1.6" fill="#F6E5A8"/><circle cx="46" cy="40" r="1.3" fill="#F6E5A8"/><circle cx="16" cy="34" r="1.1" fill="#F6E5A8"/>'
+	s += _poly([Vector2(18, 62), Vector2(18, 48), Vector2(22, 52), Vector2(28, 52), Vector2(32, 48), Vector2(32, 62)], "#9AA3AE")
+	s += '<circle cx="25" cy="46" r="7" fill="#9AA3AE"/>'
+	s += _poly([Vector2(19, 42), Vector2(20, 36), Vector2(24, 41)], "#9AA3AE")
+	s += _poly([Vector2(31, 42), Vector2(30, 36), Vector2(26, 41)], "#9AA3AE")
+	s += '<circle cx="22" cy="45" r="1.4" fill="#2E3440"/><circle cx="28" cy="45" r="1.4" fill="#2E3440"/>'
+	s += '<path d="M32 60 q10 2 12 -6" stroke="#9AA3AE" stroke-width="3" fill="none" stroke-linecap="round"/>'
+	s += _rect(10, 66, 40, 6, "#F6E5A8", 'rx="2" opacity="0.85"')
+	return PropArt.tex(PropArt._svg(62, 78, s))
+
+
 # ── Where the lane meets the avenues and the other lanes ────
 
 ## The side of the plex at a cross lane's corner, square to the lane and facing us (its facade runs away from us down the

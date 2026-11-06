@@ -38,6 +38,8 @@ const BOOKS := [
 	]},
 ]
 
+## Set before it is added to the tree to open straight on that book (the twins' found book), instead of the shelf.
+var start_book := -1
 var _book := -1
 var _page := 0
 var _panel: Panel
@@ -115,6 +117,8 @@ func _ready() -> void:
 	bar.add_child(spacer)
 	_button(bar, "Fermer", _close)
 	_next = _button(bar, "Page suivante ›", func(): _turn(1))
+	if start_book >= 0 and start_book < BOOKS.size():
+		_book = start_book
 	_show()
 
 

@@ -5,7 +5,7 @@ extends RefCounted
 ## not there = still to discover, "active" = in her notebook, "done" = a star. The Notebook autoload shows
 ## them, and announces each new and finished one.
 
-const ORDER := ["amies", "cachette", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3"]
+const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3"]
 const ALL := {
 	"milk": {
 		"title": "Maman a besoin de lait : va au dépanneur",
@@ -36,6 +36,12 @@ const ALL := {
 		"hint": "Alphée et Constance se cachent dans la ruelle du milieu. Regarde bien par-dessus les clôtures !",
 		"find": "Alphée et Constance ont envie de jouer à quelque chose…",
 		"age": 7, "after": "amies", "reward": 2.0,
+	},
+	"livre": {
+		"title": "Retrouve le livre de Constance",
+		"hint": "Constance a oublié « Minou et la lune » dans un croque-livre. Ouvre celui de chaque ruelle, puis rapporte-lui le livre.",
+		"find": "Constance a perdu quelque chose auquel elle tient…",
+		"age": 7, "after": "cachette", "reward": 3.0,
 	},
 	"plants": {
 		"title": "Arrose les plantes",

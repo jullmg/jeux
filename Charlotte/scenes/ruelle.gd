@@ -50,6 +50,8 @@ const SCENES := {
 
 ## Which lane this scene is: "middle", "dandurand" or "holt".
 @export var lane := "middle"
+## Which lane's croque-livre holds Constance's lost book (the quest "livre"): the green lane.
+const BOOK_LANE := "dandurand"
 
 # Lots left to right (x from, x to; their kind), the openings (to an avenue or another lane), clothesline pulleys.
 var _lots: Array[Vector2] = []
@@ -394,7 +396,8 @@ func _build_fronts() -> void:
 		add_child(bike)
 
 
-# Every lane has its croque-livre against a fence: take a book, leave a book. (Ready for a quest later.)
+# Every lane has its croque-livre against a fence: take a book, leave a book. Constance's lost book waits in the green
+# lane's one (the quest "livre"); a "!" marks it while she is looking for it.
 func _build_croque_livre() -> void:
 	var lot := _lots[3 if lane == "middle" else 1]
 	var box := _sprite(LaneArt.croque_livre(_rng), 0.75)
@@ -402,12 +405,28 @@ func _build_croque_livre() -> void:
 	add_child(box)
 	var x := box.position.x + 50.0 * 0.75
 	add_child(DoorSpot.make(Rect2(box.position, Vector2(100, 200) * 0.75), _open_croque_livre, x + 40.0))
+	if lane == BOOK_LANE:
+		add_child(QuestMark.make(box.position + Vector2(38.0, -30.0), func() -> bool:
+			return Quests.active("livre") and not GameState.flags.get("book_found", false), 0.9))
 
 
 func _open_croque_livre() -> void:
-	var lines := ["Un croque-livre ! On prend un livre,\non en laisse un.", "Il y a plein d'histoires\nlà-dedans !"]
-	Bubble.say(self, _charlotte.position + Vector2(0, -190), lines[randi() % lines.size()], 2.8)
 	Sfx.play("page")
+	var at := _charlotte.position + Vector2(0, -190)
+	if Quests.active("livre") and not GameState.flags.get("book_found", false):
+		if lane != BOOK_LANE:
+			Bubble.say(self, at, "Rien de Constance ici…\nJ'essaie une autre ruelle !", 2.8)
+			return
+		if not Carry.take(_charlotte, "book"):
+			Bubble.say(self, at, Carry.FULL_HANDS, 2.6)
+			return
+		GameState.flags["book_found"] = true
+		_charlotte.express("happy", 2.2)
+		Sfx.play("chime", _charlotte.position)
+		Bubble.say(self, at, "« Minou et la lune » !\nC'est le livre de Constance !", 3.0)
+		return
+	var lines := ["Un croque-livre ! On prend un livre,\non en laisse un.", "Il y a plein d'histoires\nlà-dedans !"]
+	Bubble.say(self, at, lines[randi() % lines.size()], 2.8)
 
 
 # Wooden poles along the far edge of the lane, wires from one to the next (no service drops: the galleries' own).

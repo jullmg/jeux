@@ -26,6 +26,25 @@ const COUNTING := [
 	[1, "Oui ! Ferme les yeux et compte jusqu'à dix !"],
 	[-1, "Un, deux, trois, quatre…"],
 ]
+## Their second quest, the lost book: Constance asks, then thanks her for it (0 Alphée, 1 Constance, -1 Charlotte).
+const ASKING := [
+	[1, "Chachoue, j'ai un p'tit problème…"],
+	[-1, "Qu'est-ce qu'il y a, Constance ?"],
+	[1, "Mon livre préféré, « Minou et la lune ».\nJe l'ai mis dans un croque-livre…"],
+	[0, "Pis a' se rappelle pus lequel ! A' l'oublie toute, ma sœur."],
+	[1, "Ben là ! C'était dans une ruelle,\nmais laquelle, mettons…"],
+	[-1, "Je vais le retrouver ! Je connais toutes les ruelles du bloc."],
+	[1, "T'es donc ben fine ! Si tu le trouves, on le lira ensemble."],
+]
+const GIVING := [
+	[-1, "Constance ! Regarde ce que j'ai trouvé !"],
+	[1, "« Minou et la lune » ! C'est lui ! Y'était où ?"],
+	[-1, "Dans le croque-livre de la ruelle verte."],
+	[0, "Je te l'avais dit, tsé, que c'tait là !"],
+	[1, "Merci, Chachoue ! Astheure, on le lit ensemble ?"],
+]
+## Which book of the reader is hers (BookReader.BOOKS).
+const HER_BOOK := 1
 const LINE_SECONDS := 2.3
 const FOUND_FLAG := "cachette_found"
 ## How much of a hiding sister shows over her fence.
@@ -82,7 +101,12 @@ static func met() -> bool:
 
 ## They have something to say and aren't saying it yet (the "!" over them).
 func waiting() -> bool:
-	return (not met() or Quests.available("cachette")) and not _talking
+	if _talking:
+		return false
+	if not met() or Quests.available("cachette") or Quests.available("livre"):
+		return true
+	# She is bringing the book back.
+	return Quests.active("livre") and Carry.has("book")
 
 
 func can_interact() -> bool:
@@ -121,6 +145,15 @@ func interact(who: Character) -> void:
 		sister.facing = 1 if who.position.x > sister.global_position.x else -1
 	if met() and Quests.available("cachette"):
 		_play_hide_and_seek()
+		return
+	if met() and Quests.active("livre") and Carry.has("book"):
+		_take_book_back()
+		return
+	if met() and Quests.available("livre"):
+		_ask_for_book()
+		return
+	if met() and Quests.active("livre"):
+		_say(1, "Cherche dans les croque-livres des ruelles,\nil est sûrement là !")
 		return
 	if met():
 		_say(_clicked, LINES[_clicked][_line[_clicked] % LINES[_clicked].size()])
@@ -171,6 +204,57 @@ func _play_hide_and_seek() -> void:
 		_talking = false
 		if control:
 			control.hands_off = false)
+
+
+# ── The lost book ───────────────────────────────────────────
+
+# Constance explains, and the quest starts.
+func _ask_for_book() -> void:
+	_talk_through(ASKING, func() -> void:
+		Quests.start("livre")
+		_sisters[1].express("worry", 2.0))
+
+
+# Charlotte hands it over: Constance takes it back, the quest is done, and they read it together.
+func _take_book_back() -> void:
+	_talk_through(GIVING, func() -> void:
+		Carry.put_down(_charlotte)
+		GameState.flags.erase("book_found")
+		Quests.complete("livre")
+		for sister in _sisters:
+			sister.express("happy", 2.5)
+		_charlotte.express("happy", 2.5)
+		Sfx.play("chime", _charlotte.position)
+		_read_together())
+
+
+# The reward: her book opens, and the game waits while they read it.
+func _read_together() -> void:
+	var scene := get_parent()
+	var books := BookReader.new()
+	books.start_book = HER_BOOK
+	if control:
+		control.enabled = false
+	books.closed.connect(func() -> void:
+		if control:
+			control.enabled = true)
+	scene.add_child(books)
+
+
+# Says a whole conversation, Charlotte standing still, then runs `after`.
+func _talk_through(lines: Array, after: Callable) -> void:
+	_talking = true
+	if control:
+		control.hands_off = true
+	var steps := create_tween()
+	for step: Array in lines:
+		steps.tween_callback(_say.bind(step[0], step[1]))
+		steps.tween_interval(LINE_SECONDS)
+	steps.tween_callback(func() -> void:
+		_talking = false
+		if control:
+			control.hands_off = false
+		after.call())
 
 
 func _show_sisters(on: bool) -> void:
