@@ -26,12 +26,14 @@ static func gives(street_key: String, art: String, i: int) -> bool:
 	return absi(hash("%s/%s/%d" % [street_key, art, i])) % 3 < GIVES
 
 
-## Only the dark, the moon and the stars: for the back lanes, where nobody hands out candy.
-static func darken(scene: Node2D, width: float) -> void:
+## Only the dark, the moon and the stars: for the back lanes, where nobody hands out candy. `who` (Charlotte) carries
+## her lantern there too, so the lane is never a black wall.
+static func darken(scene: Node2D, width: float, who: Node2D = null) -> void:
 	var night := HalloweenNight.new()
 	night.name = "HalloweenNight"
 	night.z_index = 5
 	night.lane_width = width
+	night.lane_walker = who
 	scene.add_child(night)
 
 
@@ -46,6 +48,8 @@ static func build(scene: Node2D) -> void:
 
 ## Set instead of a street: only the dark over a lane this wide.
 var lane_width := 0.0
+## Who carries the lantern down that lane (Charlotte).
+var lane_walker: Node2D
 var _scene: Node2D
 var _lights: _Lights
 var _hangs: Array[Sprite2D] = []
@@ -89,6 +93,7 @@ func _ready() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 404
 	_lights.moon = Vector2(lane_width * 0.4, 110.0)
+	_lights.lantern = lane_walker
 	for i in 70:
 		_lights.stars.append(Vector2(rng.randf_range(0.0, lane_width), rng.randf_range(10.0, 300.0)))
 
@@ -129,6 +134,9 @@ func _dress_the_houses(scene: Node2D, rng: RandomNumberGenerator) -> void:
 		if scene.cross_streets.has(art):
 			continue
 		var origin: Vector2 = scene._house_origin(i)
+		# A lane mouth gets nothing at all: it stays a black hole, and Charlotte won't go in there tonight.
+		if art.begins_with("ruelle"):
+			continue
 		if not HalloweenNight.gives(str(scene.street_key), art, i):
 			continue
 		# Warm light in the windows.

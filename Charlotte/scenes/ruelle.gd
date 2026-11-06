@@ -29,8 +29,9 @@ const TEE_HALF := 150.0
 ## An avenue at the end of a cross lane: its gap at the facade line, and the corner plex's side wall beside it.
 const AVENUE_W := 560.0
 const WALL_W := 470.0
-## Where Alphée and Constance hang out, in the middle lane: this lot, just short of Charlotte's yard.
-const TWINS_LOT := 5
+## The twins' house (duplex_jumelles, the second house before the Holt lane on 6e), where Alphée and Constance hang out:
+## counted from the Holt end of the middle lane, their yard is the second one, as on the avenue.
+const TWINS_LOT := 1
 ## Billie and Auguste live three houses on from Charlotte's, toward Dandurand.
 const KIDS_LOT := OWN_LOT + 3
 ## How many lots away from where they play the twins go to hide.
@@ -85,8 +86,6 @@ func _ready() -> void:
 	_build_poles()
 	_build_croque_livre()
 	_build_home_gate()
-	if Halloween.night():
-		HalloweenNight.darken(self, _street_width)
 	var ground := _Ground.new()
 	ground.width = _street_width
 	ground.hopscotch = (_lots[_own].x + _lots[_own].y) / 2.0 if _own >= 0 else -1.0
@@ -124,6 +123,9 @@ func _ready() -> void:
 	_control.bounds = _walk_segments()[0]
 	_control.walk_top = 360.0
 	add_child(_control)
+	# Halloween night: the lane goes dark too, and her own little lantern comes with her (she is spawned by now).
+	if Halloween.night():
+		HalloweenNight.darken(self, _street_width, _charlotte)
 	_build_exits()
 	var saver := Saver.new()
 	saver.who = _charlotte
@@ -431,12 +433,6 @@ func _build_fronts() -> void:
 		sprite.position = Vector2(lot.x, FENCE_Y - LaneArt.H)
 		add_child(sprite)
 		_front_sprites[i] = sprite
-	# Dad's bike leaning on Charlotte's fence.
-	if _own >= 0:
-		var own := _lots[_own]
-		var bike := _sprite(PropArt.bike(_rng), 0.8)
-		bike.position = Vector2(own.x + 40.0, FENCE_Y + 4.0 - 90.0 * 0.8)
-		add_child(bike)
 
 
 # Every lane has its croque-livre against a fence: take a book, leave a book. Constance's lost book waits in the green

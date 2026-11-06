@@ -1,0 +1,16 @@
+{
+	"age": 0,
+	"day": 0,
+	"flags": {
+		"carried": "milk"
+	},
+	"money": 1.0,
+	"quests": {
+		"milk": "done",
+		"plants": "active"
+	},
+	"scene": "res://scenes/house.tscn",
+	"season": "",
+	"version": 2,
+	"x": 470.0
+}

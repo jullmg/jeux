@@ -24,10 +24,11 @@ static var quests := {}
 static var flags := {}
 
 
-## Saving is off for test runs, so they never overwrite a real game.
+## Saving is off for test runs, so they never overwrite a real game: screenshots, a forced start x, a script run, or
+## `--no-save` — which any test that opens a scene by itself must pass, since nothing else marks it as a test.
 static func enabled() -> bool:
 	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--screenshot=") or arg.begins_with("--x="):
+		if arg.begins_with("--screenshot=") or arg.begins_with("--x=") or arg == "--no-save":
 			return false
 	var args := OS.get_cmdline_args()
 	return not (args.has("-s") or args.has("--script"))

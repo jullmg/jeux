@@ -315,6 +315,12 @@ func _add_lane(art: String) -> void:
 	var lane := "dandurand" if art == "ruelle_verte" else "holt"
 	var area := Rect2(_house_origin(i) + Vector2(70.0, 330.0) * HOUSE_SCALE, Vector2(w - 140.0, 370.0) * HOUSE_SCALE)
 	add_child(DoorSpot.make(area, func():
+		# Not on Halloween night: a back lane after dark is no place for a little girl, and she knows it.
+		if Halloween.night():
+			_charlotte.express("worry", 2.2)
+			Sfx.play("squeak", _charlotte.position)
+			Bubble.say(self, _charlotte.position + Vector2(0, -210.0), DARK_LANE[randi() % DARK_LANE.size()], 3.0)
+			return
 		_control.enabled = false
 		Transition.arrive = "ruelle_%s_from_%s" % [lane, street_key]
 		Transition.change_scene(self, "res://scenes/ruelle_%s.tscn" % lane), area.get_center().x))
@@ -337,8 +343,9 @@ func _arriving(key: String) -> bool:
 
 
 ## The soundtrack here, first that exists (see Music): this season's street theme, then the street theme.
+## The Halloween theme plays on the streets only while she is out doing the rounds (step 2), nowhere else.
 func _music() -> Array:
-	if Halloween.night():
+	if Halloween.night() and Halloween.step() == 2:
 		return ["halloween", "street_autumn", "street"]
 	return ["street_" + Season.current, "street"]
 
@@ -723,6 +730,12 @@ func _winter_hello() -> void:
 
 
 # ── Halloween night ─────────────────────────────────────────────
+
+## What she says when she thinks of going down a lane on Halloween night: far too dark for her.
+const DARK_LANE := ["Ayoye, c'est ben trop noir là-dedans !\nJe reste sur la rue.",
+	"Pas de ruelle à soir…\nJ'vois même pas le bout !",
+	"Chu pas game d'aller dans la ruelle\nquand il fait noir de même !",
+	"Non non non, la ruelle le soir,\nc'est pas une bonne idée !"]
 
 ## The houses that never hand out candy, whatever the street: her own, the shops, the school, the lane mouths.
 const NO_CANDY := ["duplex_charlotte", "depanneur", "depanneur_front", "ohbon", "ecole", "garages", "ruelle", "ruelle_verte"]

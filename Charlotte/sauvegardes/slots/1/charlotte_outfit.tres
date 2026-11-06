@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="CharacterLook" format=3]
+
+[ext_resource type="Script" path="res://characters/character_look.gd" id="1_1jllu"]
+
+[resource]
+script = ExtResource("1_1jllu")
+mouth = "smile"
+overrides = {
+"accent_light": "#FF7BA3",
+"accent_line": "#D63E72",
+"blush": "#F5A3A0",
+"cloth_fold": "#EDB61A",
+"cloth_line": "#C99410",
+"cloth_shade": "#f51c52",
+"hair_light": "#E3A06A",
+"hair_line": "#8A4527",
+"hair_mid": "#C97A4A",
+"iris_dark": "#5A3318",
+"neck": "#EDC3AC",
+"nose": "#D9947A",
+"shoe_light": "#FF9DBB",
+"shoe_line": "#D63E72",
+"skin_line": "#D9A88E",
+"skin_shade": "#F2C7AE"
+}

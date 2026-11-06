@@ -1,0 +1,27 @@
+{
+	"age": 7,
+	"day": 1,
+	"flags": {
+		"candy": 5,
+		"candy_bag": [
+			"wrapped",
+			"chocolate",
+			"chips",
+			"wrapped",
+			"wrapped"
+		],
+		"halloween_doors": [
+			"6e:6",
+			"6e:7"
+		],
+		"halloween_step": 2.0
+	},
+	"money": 5.0,
+	"quests": {
+		"halloween": "active"
+	},
+	"scene": "res://scenes/main.tscn",
+	"season": "autumn",
+	"version": 2,
+	"x": 6212.21044921875
+}

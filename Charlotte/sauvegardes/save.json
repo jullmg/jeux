@@ -1,0 +1,17 @@
+{
+	"age": 7,
+	"day": 1,
+	"flags": {
+		"hamster_fed": true
+	},
+	"money": 6.0,
+	"quests": {
+		"hamster": "active",
+		"milk": "active",
+		"plants": "done"
+	},
+	"scene": "res://scenes/house.tscn",
+	"season": "autumn",
+	"version": 2,
+	"x": 2885.87719726562
+}

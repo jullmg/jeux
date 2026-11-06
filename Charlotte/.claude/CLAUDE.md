@@ -30,6 +30,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   - `Godot --path . res://tools/animals.tscn -- --screenshot=/path/animals.png [--focus=x,y --zoom=3]` (cat coats/poses, squirrels,
     dog breeds, Charlotte petting a cat and dogs; use focus/zoom to inspect details)
   - Add `--season=winter` (spring, summer, autumn, winter; or printemps/été/automne/hiver) to any of these to see a season.
+  - **Never overwrite a save**: any run that opens a scene by itself (a test scene, a runner that instantiates `main.tscn`…)
+    must pass `-- --no-save`, or its `Saver` writes over the game in progress. `GameState.enabled()` is false for
+    `--no-save`, `--screenshot=`, `--x=` and `-s`/`--script` runs, and for nothing else.
   - Logic tests (clicks, quests, scene changes): headless `extends SceneTree` scripts run with `-s`, with their own quit
     timer; send clicks straight to `scene._control._unhandled_input(event)` (headless window size skews `Input.parse_input_event`).
     Windows only for screenshots, and they must quit by themselves.
@@ -90,7 +93,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   along the lane (board, cedar, picket, chain-link fences, tôle garages, roll-up garages, sheds, planters and bench),
   Virginia creeper by season, poles and wires (no recycling or compost bins, Julien took them out), clotheslines across the lane (`_Clotheslines`), the black cat, yard
   trees, a croque-livre in each lane (`LaneArt.croque_livre`, `_open_croque_livre`: ready for a quest). Charlotte's
-  yard is the middle lane's lot `OWN_LOT` (swing, Dad's bike, chalk hopscotch). The two houses we know from photographs are drawn
+  yard is the middle lane's lot `OWN_LOT` (swing, chalk hopscotch; nothing in front of her gate). The two houses we know from photographs are drawn
   as themselves from the lane (`LaneArt.back(..., style)`, `ruelle.gd _house_style`): **hers** (`_back_charlotte`, from
   `reference/ruelle/Maison_charlotte_ruelle.jpg`: red brick, the white balcony with its lattice panels, the white spiral stair
   curling down in front of the louvred panel, the air conditioner, the raw beam under the balcony, the two white doors) behind her
@@ -413,7 +416,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     `Character.carry`, `flags.has_can`); `flags.watered`; the can goes back when all have drunk.
 - The twins' house, `duplex_jumelles` (generator entry, 5716 6e Avenue, `reference/maison_jumelles/`, replaces `plex_08` in `main.gd`'s layout, the second house before the Holt lane): warm brown brick with dark mortar, black-framed windows under brick arches, a glass door (door style `glass`), white concrete balcony, black open-tread stair curving to the right, low black fence; Halloween decorations kept.
 - Charlotte's own house, `duplex_charlotte`, follows `reference/maison_charlotte/` as closely as can be (no Halloween decorations): red-brown brick with dark headers and grey mortar; double-hung windows (`window_style` "hung", `_hung_window`: black frame, one meeting rail, the same glass as the other houses (Julien), thick stone sill); varnished wood doors (`wood_glass`, `_wood_door`: stone lintel with a fleur-de-lis, dark transom, smoky pane; wide with sidelights downstairs, single upstairs), little lanterns (`_wall_lantern`) and small BLUE number plates under them (`_small_plaque`, `number_up`), a black mailbox; a thick white balcony slab (`slab_h`) with thin widely spaced iron railings and a scroll over each door (`iron_rail`, `_iron_balcony`), twin iron posts with scrolls (`iron_posts`, `_iron_post`), thin awning posts (`awning_posts`); a straight stair, pale treads on a black beam (`stair_beam`); the porch's steps at the LEFT (`steps_side`, `_side_steps`); a low fence of thin bars wide apart (`fence_style` "wide"); iron hearts (`_iron_heart`) along that fence, low on the porch railing and on the two curved rails of the steps; thin grey posts under the porch; leafy plants on the soil behind the fence in summer and autumn (`_greenery`); in winter a string of big old-style bulbs along the hand rail of her porch, the 5672, not the 5674's balcony, and up the two posts holding up that balcony (`_vintage_lights`, `_vintage_post`). Its door is at SVG x 348: the game reads it from `doors.json` (`StreetScene._door_x`). The tree in front of it stands toward its Holt end, past the window to the right of the door, so as not to hide the house (Julien; `StreetScene.tree_shift`, `tree_size`, `_tree_x`), big, its crown over the upper floor.
-- Alphée and Constance Turcotte, twins (spelling: **Alphée**), from `reference/personnages/alfée-et-constance-turcotte.jpg`, nearly identical, a little under a head taller than Charlotte (age `"tween"`, a rig in `CharacterArt.RIGS`, not in `CharacterLook.AGES` so no random passerby gets it), who are her best friends and give her quests (the hide-and-seek and the lost book so far). `CharacterLook.alphee()` (hair down, teal T-shirt with a heart, `look.necklace`), `constance()` (ponytail, beige sweater with the `"birds"` pattern, `look.earring`); which is which was my guess from the photo. `world/twins.gd` (`Twins`): in the middle lane at `TWINS_LOT`, only once the "amies" quest is active or done (or they were met); "!" until the first click, the meeting (`MEETING`, Charlotte hands off, `flags.met_twins`, cleared by the debug menu's "Tout effacer"); then the one clicked says one of her `LINES`. **Their quests go in `Twins.interact`.**
+- Alphée and Constance Turcotte, twins (spelling: **Alphée**), from `reference/personnages/alfée-et-constance-turcotte.jpg`, nearly identical, a little under a head taller than Charlotte (age `"tween"`, a rig in `CharacterArt.RIGS`, not in `CharacterLook.AGES` so no random passerby gets it), who are her best friends and give her quests (the hide-and-seek and the lost book so far). `CharacterLook.alphee()` (hair down, teal T-shirt with a heart, `look.necklace`), `constance()` (ponytail, beige sweater with the `"birds"` pattern, `look.earring`); which is which was my guess from the photo. `world/twins.gd` (`Twins`): in the middle lane at `TWINS_LOT` (1: their house is the second lot from the Holt end of the lane, as `duplex_jumelles` is the second house before the Holt lane on 6e — lot index = 14 − its rank from the Dandurand end, which is how `OWN_LOT` 7 matches her own house), only once the "amies" quest is active or done (or they were met); "!" until the first click, the meeting (`MEETING`, Charlotte hands off, `flags.met_twins`, cleared by the debug menu's "Tout effacer"); then the one clicked says one of her `LINES`. **Their quests go in `Twins.interact`.**
 - Billie (7) and Auguste (5) (`world/billie_auguste.gd`, `BillieAuguste`, `CharacterLook.billie()` / `auguste()`, from `reference/personnages/billie_et_auguste.jpg`; rigs `kid7` and `kid5` in `CharacterArt.RIGS`, smaller than Charlotte, not in `AGES`): Billie light-brown wavy hair, pale blue flowered dress; Auguste ginger bob, freckles, red basketball jersey. They are sister and brother (Julien). Their lines are in Québécois ("chu", "tsé", "gosser"). They stand in the middle lane at `KIDS_LOT` (`OWN_LOT + 3`, three houses on toward Dandurand) when the twins are there (the "amies" quest active or done): "!" until the first click (the meeting, `flags.met_billie_auguste`), then lines; they join the notebook's friends page; **their quests, once friends, go in `BillieAuguste.interact`**. The hiding twins never choose `KIDS_LOT`.
 - Julien's list of quest ideas for later is in `docs/idees-de-quetes.md` (pizza hidden by a squirrel, jogging with Dad,
   buying sour-cream-and-onion chips at the dépanneur…): read it before inventing new quests, and tick them off there.
@@ -435,7 +438,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
      three, never her own house, the shops or the school), hangs their decorations (`world/halloween_art.gd`, `HalloweenArt.PIECES`:
      jack-o'-lanterns, ghosts, cobwebs, skeletons, gravestones, cats, spiders, brooms, candles, bowls, scarecrows, garlands, bats)
      and sends four other children past in costumes. A doorbell (`StreetScene._ring`) at every front door: a lit house gives 1–3
-     sweets once, a dark one is asleep. `Halloween.ENOUGH` houses (12, so more than one street) fill her bag.
+     sweets once, a dark one is asleep. `Halloween.ENOUGH` houses (12, so more than one street) fill her bag. **The back
+     lanes are closed that night** (Julien: far too dark for a little girl to venture in): their mouths stay unlit, and a
+     click or ↑ there only gets a line from her (`StreetScene.DARK_LANE`), so the evening happens on the four streets.
   3. **Rentrer**: Maman counts the haul (`ui/candy_count.gd`, `CandyCount`: each kind with its drawing and the total), then bed.
      Her own little lantern lights the few steps around her all evening, the back lanes go dark too
      (`HalloweenNight.darken`), the notebook counts her sweets, the street asks for a `halloween` music track if there is one,
@@ -456,6 +461,14 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   save at all, just "Nouvelle partie" (slot 1).
 - `GameState.enabled()` is false for test runs (`--screenshot=`, `--x=`, `-s` scripts), so they never write or wipe the save.
   A plain scene run (no such args) does save: back up `user://` first if you must test that way.
+
+## Backing up the games
+
+- The games in progress live in Godot's `user://` (`~/Library/Application Support/Godot/app_userdata/Charlotte/`), outside
+  the repo. A copy is kept in git in `sauvegardes/` (slots, outfits, drawings, `settings.cfg`): `tools/sauvegarder.sh`
+  copies the games into it (then commit), `tools/restaurer.sh` puts them back into the game. Run `sauvegarder.sh` after
+  Julien has played, and never run anything without `--no-save` (see "Run / verify").
+
 
 ## Sound
 
