@@ -491,6 +491,12 @@ func _build_doors() -> void:
 		Transition.change_scene(self, "res://scenes/main.tscn")))
 	add_child(DoorSpot.make(Rect2(CHACHA_DOOR_X, 170, 150, 430), func(): _go_through(BEDROOM_DOOR_X - 40.0, BEDROOM, -1)))
 	add_child(DoorSpot.make(Rect2(BEDROOM_DOOR_X, 170, 150, 430), func(): _go_through(CHACHA_DOOR_X + 75.0, HALL, 1)))
+	# The kitchen's back door: out to the yard and the lane behind the house.
+	add_child(DoorSpot.make(Rect2(KITCHEN_START + 300.0, 250, 120, 350), func():
+		_control.enabled = false
+		Sfx.play("door")
+		Transition.arrive = "ruelle_from_maison"
+		Transition.change_scene(self, "res://scenes/ruelle.tscn"), KITCHEN_START + 300.0))
 	# The fridge: a snack.
 	add_child(DoorSpot.make(Rect2(KITCHEN_START + 4.0, 240, 104, 356), _open_fridge, KITCHEN_START + 140.0))
 	# Her bed: sleep until the next morning.

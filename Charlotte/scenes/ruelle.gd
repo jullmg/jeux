@@ -84,6 +84,7 @@ func _ready() -> void:
 	_build_fronts()
 	_build_poles()
 	_build_croque_livre()
+	_build_home_gate()
 	if Halloween.night():
 		HalloweenNight.darken(self, _street_width)
 	var ground := _Ground.new()
@@ -168,6 +169,9 @@ func _ready() -> void:
 
 # At the opening she came through (Transition.arrive = "<this lane>_from_<where>").
 func _start_x() -> float:
+	# Out of her own kitchen door, into her yard.
+	if _arriving("ruelle_from_maison"):
+		return _gate_x()
 	for o in _openings:
 		if _arriving(o.here):
 			return o.x
@@ -176,6 +180,28 @@ func _start_x() -> float:
 		Transition.street_x = NAN
 		return x
 	return _openings[-1].x - 400.0 if lane == "middle" else _openings[1].x
+
+
+## The middle of her gate, on the lane (her lot's fence: `LaneArt` draws the gate at 12 % across the lot).
+func _gate_x() -> float:
+	if _own < 0:
+		return 0.0
+	var lot: Vector2 = _lots[_own]
+	return lot.x + (lot.y - lot.x) * 0.12 + 48.0
+
+
+# Her own gate, in the green fence of her yard: through it and she is in her kitchen.
+func _build_home_gate() -> void:
+	if _own < 0:
+		return
+	var x := _gate_x()
+	var spot := DoorSpot.make(Rect2(x - 56.0, FENCE_Y - 150.0, 112.0, 180.0), func():
+		_control.enabled = false
+		Sfx.play("door")
+		Transition.inside_x = 3700.0
+		Transition.change_scene(self, "res://scenes/house.tscn"), x)
+	add_child(spot)
+	_label("↑  Chez moi", Vector2(x, FENCE_Y - 182.0), Vector2(190, 30), 17, Color("#F4F1EA"), Color("#2A2520"))
 
 
 func _music() -> Array:
@@ -196,6 +222,17 @@ func _found_x(at: float) -> float:
 
 
 # ── Layout ──────────────────────────────────────────────────────
+
+## The two houses we know from photographs: Charlotte's own and, two lots along, the twins'.
+func _house_style(i: int) -> String:
+	if lane != "middle":
+		return ""
+	if i == _own:
+		return "charlotte"
+	if i == TWINS_LOT:
+		return "twins"
+	return ""
+
 
 func _plan() -> void:
 	var lots := LOTS if lane == "middle" else SIDE_LOTS * 2
@@ -247,6 +284,10 @@ func _plan() -> void:
 		elif _own >= 0 and absi(i - _own) == 1:
 			kind = "cedar" if kind in ["picket", "chainlink", "garden"] else kind
 		_kinds.append(kind)
+	if lane == "middle":
+		# Charlotte's green slatted chain-link with its gate, and the twins' cedar boards.
+		_kinds[OWN_LOT] = "slats"
+		_kinds[TWINS_LOT] = "cedar"
 	# The green lane has its planter boxes (and the middle lane's end near it).
 	if lane == "middle":
 		_kinds[_lots.size() - 1] = "garden"
@@ -326,7 +367,7 @@ func _build_backs() -> void:
 		var corner: Variant = null
 		if lane == "middle" and (i == 0 or i == _lots.size() - 1):
 			corner = _openings[0] if i == 0 else _openings[-1]
-		var made := LaneArt.back(_rng, lot.y - lot.x, i == _own, "#" + corner.ours.color.to_html(false) if corner else "")
+		var made := LaneArt.back(_rng, lot.y - lot.x, i == _own, "#" + corner.ours.color.to_html(false) if corner else "", _house_style(i))
 		if corner:
 			corner.ours.top = made[2]
 		var sprite := _sprite(made[0], 1.0)

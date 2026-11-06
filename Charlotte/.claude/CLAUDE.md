@@ -90,7 +90,14 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   along the lane (board, cedar, picket, chain-link fences, tôle garages, roll-up garages, sheds, planters and bench),
   Virginia creeper by season, poles and wires (no recycling or compost bins, Julien took them out), clotheslines across the lane (`_Clotheslines`), the black cat, yard
   trees, a croque-livre in each lane (`LaneArt.croque_livre`, `_open_croque_livre`: ready for a quest). Charlotte's
-  yard is the middle lane's lot `OWN_LOT` (swing, Dad's bike, chalk hopscotch).
+  yard is the middle lane's lot `OWN_LOT` (swing, Dad's bike, chalk hopscotch). The two houses we know from photographs are drawn
+  as themselves from the lane (`LaneArt.back(..., style)`, `ruelle.gd _house_style`): **hers** (`_back_charlotte`, from
+  `reference/ruelle/Maison_charlotte_ruelle.jpg`: red brick, the white balcony with its lattice panels, the white spiral stair
+  curling down in front of the louvred panel, the air conditioner, the raw beam under the balcony, the two white doors) behind her
+  green slatted fence with its gate (fence kind "slats"), and the **twins'** (`_back_twins`, from `maison_jumelles_ruelle.jpg`:
+  grey horizontal boards under a charcoal band, big black-framed windows and glass doors, the closed parasol) behind cedar boards.
+  Her gate works both ways: "↑ Chez moi" leads into her kitchen (`ruelle.gd _build_home_gate`), and the kitchen's back door comes
+  out at the gate (`house.gd` → `Transition.arrive = "ruelle_from_maison"`, `ruelle.gd _start_x`).
 - Turning corners: `StreetScene._add_corner(cross_street, scene, key)` makes the cross street clickable: Charlotte walks to
   the curb, the other street loads with `Transition.arrive = key`, and that street's `_start_x()` checks `_arriving(key)`
   to put her at the matching corner (keys "<street_key>_from_<other>"). All four corners of the block work both ways. A

@@ -67,7 +67,12 @@ static func vine_colors() -> Array:
 ## The back of a plex: brick or siding, windows, back doors onto stacked wooden galleries with a roof on the top
 ## one, posts down to the yard, zigzag stairs. Returns [texture, pulley, top] where pulley is the clothesline pulley on
 ## the top gallery's post (canvas coordinates), top the roof's height. `brick`: this building's own brick (a corner's).
-static func back(rng: RandomNumberGenerator, w: float, own := false, brick := "") -> Array:
+static func back(rng: RandomNumberGenerator, w: float, own := false, brick := "", style := "") -> Array:
+	# The two houses we know from photographs (reference/ruelle/): Charlotte's and the twins'.
+	if style == "charlotte":
+		return _back_charlotte(w)
+	if style == "twins":
+		return _back_twins(w)
 	var floors := 2 if own else (3 if rng.randf() < 0.55 else 2)
 	var fh := 118.0
 	var ground := H - 30.0
@@ -183,6 +188,139 @@ static func back(rng: RandomNumberGenerator, w: float, own := false, brick := ""
 	return [_tex(w, s), pulley, top]
 
 
+## Charlotte's own house seen from the lane (reference/ruelle/Maison_charlotte_ruelle.jpg): red-brown brick, the white
+## balcony with its lattice railing on the upper floor, the white spiral stair curling down from it, the air conditioner on
+## the wall, the raw wooden beam under the balcony, and the two white doors one above the other.
+static func _back_charlotte(w: float) -> Array:
+	var brick := "#9C5240"
+	var ground := H - 30.0
+	var top := ground - 2.0 * 118.0 - 30.0
+	var s := _rect(0, top, w, H - top, brick)
+	# Brick courses and a few bricks of their own tone.
+	var jr := RandomNumberGenerator.new()
+	jr.seed = 5672
+	var y := top + 12.0
+	var course := 0
+	while y < H:
+		s += _line(Vector2(0, y), Vector2(w, y), _light(brick, 0.22), 1.0, 'opacity="0.45"')
+		var jx: float = -12.0 + (12.0 if course % 2 == 0 else 0.0)
+		while jx < w:
+			s += _line(Vector2(jx, y), Vector2(jx, y + 7.0), _dark(brick, 0.2), 1.0, 'opacity="0.4"')
+			if jr.randf() < 0.2:
+				s += _rect(jx + 1.0, y + 0.5, 22.0, 6.0, _light(brick, jr.randf_range(0.05, 0.14)), 'opacity="0.75"')
+			jx += 24.0
+		course += 1
+		y += 14.0
+	s += _rect(0, top, 10, H - top, "#FFFFFF", 'opacity="0.1"')
+	s += _rect(w - 14, top, 14, H - top, "#000000", 'opacity="0.12"')
+	# The parapet and the little roof over the balcony.
+	s += _rect(-2, top - 10, w + 4, 14, "#C9CDD2")
+	s += _rect(-2, top + 4, w + 4, 3, "#000000", 'opacity="0.18"')
+	var bx := w * 0.3
+	var bw := w * 0.42
+	s += _rect(bx - 16, top - 26, bw + 32, 20, "#D5D9DC", 'stroke="#9AA0A6" stroke-width="2"')
+	# The air conditioner under it, on the brick.
+	s += _rect(bx + bw * 0.42, top + 24, 54, 38, "#D9DCE0", 'stroke="#9AA0A6" stroke-width="2" rx="3"')
+	s += '<circle cx="%.1f" cy="%.1f" r="12" fill="#B9BEC4" stroke="#8E9399" stroke-width="2"/>' % [bx + bw * 0.42 + 27.0, top + 43.0]
+	# The upper balcony: slab, raw wooden beam under it, white posts, lattice panels and the railing.
+	var by := ground - 118.0
+	s += _rect(bx - 10, by - 6, bw + 20, 10, "#E8E4DA")
+	s += _rect(bx - 10, by + 4, bw + 20, 12, "#C9A26E", 'stroke="#9A7A48" stroke-width="1.5"')
+	for px in [bx - 6.0, bx + bw - 4.0]:
+		s += _rect(px, by - 54, 8, 54, "#F2F0EA")
+	s += _rect(bx - 8, by - 58, bw + 16, 7, "#F2F0EA")
+	# Lattice: two panels of criss-cross between the posts.
+	for panel in 2:
+		var px0 := bx + 6.0 + panel * (bw * 0.5 + 4.0)
+		var pw := bw * 0.45
+		s += _rect(px0, by - 50, pw, 44, "#E4E2DC", 'stroke="#C9C5BC" stroke-width="1.5"')
+		var d := -44.0
+		while d < pw:
+			s += _line(Vector2(px0 + d, by - 6), Vector2(px0 + d + 44.0, by - 50), "#FFFFFF", 2.0, 'opacity="0.9"')
+			s += _line(Vector2(px0 + d, by - 50), Vector2(px0 + d + 44.0, by - 6), "#FFFFFF", 2.0, 'opacity="0.9"')
+			d += 11.0
+	# The doors, one above the other, and the windows of the upper floor.
+	for f in 2:
+		var fy := ground - f * 118.0
+		s += _rect(bx + bw * 0.42, fy - 92, 42, 90, "#F4F2EC", 'stroke="#C9C5BC" stroke-width="2.5"')
+		s += _rect(bx + bw * 0.42 + 7, fy - 84, 28, 40, "#B9CCD8", 'opacity="0.85"')
+		for k in 2:
+			var wx := bx - 90.0 + k * (bw + 110.0)
+			if wx < 6.0 or wx + 52.0 > w - 6.0:
+				continue
+			s += _rect(wx - 3, fy - 98, 52, 76, "#F2F0EA")
+			s += _rect(wx, fy - 95, 46, 70, "#6E8494")
+			s += _poly([Vector2(wx, fy - 95), Vector2(wx + 20, fy - 95), Vector2(wx, fy - 60)], "#FFFFFF", 'opacity="0.22"')
+	# The white louvred panel beside the balcony, and the spiral stair curling down from it.
+	s += _rect(bx - 118, by - 128, 96, 120, "#EDEBE5", 'stroke="#C9C5BC" stroke-width="2"')
+	for i in 14:
+		s += _line(Vector2(bx - 114, by - 124 + i * 8.0), Vector2(bx - 26, by - 124 + i * 8.0), "#D5D2CA", 2.0)
+	# The stair curls down in front of the louvred panel, as on the photo.
+	s += _spiral_white(bx - 72.0, by - 10.0, ground + 24.0, 1)
+	var pulley := Vector2(bx + bw + 6.0, by - 46.0)
+	s += '<circle cx="%.1f" cy="%.1f" r="5" fill="#D9D9D9" stroke="#55585C" stroke-width="2"/>' % [pulley.x, pulley.y]
+	return [_tex(w, s), pulley, top]
+
+
+## The twins' house seen from the lane (reference/ruelle/maison_jumelles_ruelle.jpg): a modern back, grey horizontal
+## boards under a charcoal band, big black-framed windows, glass doors on the yard and the closed parasol beside them.
+static func _back_twins(w: float) -> Array:
+	var ground := H - 30.0
+	var top := ground - 2.0 * 118.0 - 24.0
+	var pale := "#A8ABAA"
+	var dark := "#3C4044"
+	var s := _rect(0, top, w, H - top, pale)
+	# Horizontal boards.
+	var y := top + 10.0
+	while y < H:
+		s += _line(Vector2(0, y), Vector2(w, y), _dark(pale, 0.14), 1.6, 'opacity="0.7"')
+		y += 13.0
+	# The charcoal band across the top and the flat parapet.
+	s += _rect(0, top, w, 56, dark)
+	s += _rect(-2, top - 10, w + 4, 12, "#2E3236")
+	s += _rect(0, top, 8, H - top, "#FFFFFF", 'opacity="0.1"')
+	s += _rect(w - 12, top, 12, H - top, "#000000", 'opacity="0.14"')
+	# Two tall windows upstairs, two glass doors downstairs, all in black frames.
+	for k in 2:
+		var wx := w * (0.18 + k * 0.42)
+		var ww := w * 0.26
+		s += _rect(wx - 5, ground - 212, ww + 10, 92, dark)
+		s += _rect(wx, ground - 207, ww, 82, "#6E7F88")
+		s += _poly([Vector2(wx, ground - 207), Vector2(wx + ww * 0.5, ground - 207), Vector2(wx, ground - 150)], "#FFFFFF", 'opacity="0.18"')
+		s += _rect(wx - 5, ground - 96, ww + 10, 96, dark)
+		s += _rect(wx, ground - 91, ww, 88, "#45555E")
+		s += _rect(wx + 4, ground - 87, ww * 0.44, 80, "#F2E3B0", 'opacity="0.55"')
+		s += _line(Vector2(wx + ww * 0.5, ground - 91), Vector2(wx + ww * 0.5, ground - 3), dark, 4.0)
+	# The closed parasol leaning by the doors.
+	var px := w * 0.12
+	s += _line(Vector2(px, ground - 6), Vector2(px + 6, ground - 150), "#3C4044", 5.0)
+	s += _poly([Vector2(px + 2, ground - 96), Vector2(px + 20, ground - 150), Vector2(px + 26, ground - 96), Vector2(px + 14, ground - 74)], "#E8E2D2")
+	s += _line(Vector2(px + 10, ground - 140), Vector2(px + 18, ground - 100), "#C9C2B4", 2.0)
+	var pulley := Vector2(w - 30.0, ground - 180.0)
+	return [_tex(w, s), pulley, top]
+
+
+# A white spiral staircase (Charlotte's), the same helix as the grey one but painted.
+static func _spiral_white(x: float, top: float, bottom: float, turns: int) -> String:
+	var metal := "#F2F0EA"
+	var s := _rect(x - 2.5, top - 40, 5, bottom - top + 40, metal)
+	var r := 26.0
+	var n := 16 * maxi(turns, 1)
+	var rail := PackedStringArray()
+	for i in n + 1:
+		var a := TAU * i / 16.0
+		var y := lerpf(top, bottom, float(i) / n)
+		var tip := x + cos(a) * r
+		var front := sin(a) > 0.0
+		if i < n:
+			s += _poly([Vector2(x, y - 2), Vector2(tip, y - 3), Vector2(tip, y + 1), Vector2(x, y + 2)], "#FFFFFF" if front else "#D9D6CE")
+		rail.append("%s%.1f %.1f" % ["M" if i == 0 else "L", x + cos(a) * (r + 2.0), y - 34.0])
+		if i % 2 == 0:
+			s += _line(Vector2(tip, y - 2), Vector2(x + cos(a) * (r + 2.0), y - 34.0), metal, 1.4)
+	s += '<path d="%s" stroke="%s" stroke-width="3" fill="none"/>' % [" ".join(rail), metal]
+	return s
+
+
 # A helix of steel treads round a central pole, one turn per floor, with its handrail.
 static func _spiral(x: float, top: float, bottom: float, turns: int) -> String:
 	var metal := "#2E3236"
@@ -216,7 +354,7 @@ static func front(rng: RandomNumberGenerator, w: float, kind: String, own := fal
 	if rng.randf() < 0.65 and not own:
 		var rx := rng.randf_range(60.0, 96.0)
 		s += _foliage(rng, Vector2(rng.randf_range(rx + 6.0, w - rx - 6.0), H - 190), Vector2(rx, rng.randf_range(36.0, 56.0)), shrub_colors(), 8.0, 70)
-	if kind in ["picket", "chainlink", "garden"]:
+	if kind in ["picket", "chainlink", "garden", "slats"]:
 		s += _yard(rng, w, own)
 	match kind:
 		"boards":
@@ -228,6 +366,32 @@ static func front(rng: RandomNumberGenerator, w: float, kind: String, own := fal
 			s += _pickets(rng, 0.0, w, 92.0)
 		"chainlink":
 			s += _chainlink(rng, 0.0, w, 140.0)
+		"slats":
+			# Charlotte's fence (reference/ruelle/Maison_charlotte_ruelle.jpg): chain-link threaded with dark green slats,
+			# a grey gate post at one end and the gate beside it.
+			s += _chainlink(rng, 0.0, w, 150.0)
+			var fy := H - 150.0
+			s += _rect(0, fy, w, 150, "#2E5E42", 'opacity="0.92"')
+			var d := -150.0
+			while d < w:
+				s += _line(Vector2(d, H), Vector2(d + 150.0, fy), "#3E7A54", 3.0, 'opacity="0.55"')
+				s += _line(Vector2(d, fy), Vector2(d + 150.0, H), "#245036", 3.0, 'opacity="0.5"')
+				d += 18.0
+			s += _rect(0, fy - 6, w, 8, "#55595E")
+			# The gate, at the left of the yard, and its grey post.
+			var gx := w * 0.12
+			s += _rect(gx - 12, fy - 16, 12, 166, "#9AA0A6", 'stroke="#6E7276" stroke-width="2"')
+			s += _rect(gx + 100, fy - 16, 12, 166, "#9AA0A6", 'stroke="#6E7276" stroke-width="2"')
+			# The gate itself: a lighter green leaf in its frame, with a bar and a handle.
+			s += _rect(gx, fy - 8, 100, 158, "#3E7A54", 'stroke="#1E4030" stroke-width="3"')
+			var gd := -130.0
+			while gd < 100.0:
+				s += _line(Vector2(gx + gd, H), Vector2(gx + gd + 130.0, fy - 8), "#4E9068", 3.0, 'opacity="0.6"')
+				gd += 20.0
+			s += _rect(gx + 2, fy - 6, 96, 9, "#C9C5BC")
+			s += _rect(gx + 2, H - 56, 96, 9, "#C9C5BC")
+			s += '<circle cx="%.1f" cy="%.1f" r="6" fill="#E8E4DA" stroke="#55595E" stroke-width="2.5"/>' % [gx + 86.0, H - 86.0]
+			s += _rect(gx + 70, H - 90, 22, 7, "#55595E", 'rx="3"')
 		"tole":
 			var gw := minf(w - 40.0, rng.randf_range(240.0, 290.0))
 			var gx := rng.randf_range(10.0, w - gw - 10.0)
