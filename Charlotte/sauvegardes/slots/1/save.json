@@ -2,26 +2,25 @@
 	"age": 7,
 	"day": 1,
 	"flags": {
-		"candy": 5,
-		"candy_bag": [
-			"wrapped",
-			"chocolate",
-			"chips",
-			"wrapped",
-			"wrapped"
-		],
-		"halloween_doors": [
-			"6e:6",
-			"6e:7"
-		],
-		"halloween_step": 2.0
+		"halloween_step": 2,
+		"met_twins": true
 	},
-	"money": 5.0,
+	"money": 26.0,
 	"quests": {
-		"halloween": "active"
+		"amies": "done",
+		"cachette": "done",
+		"cat": "done",
+		"cat2": "done",
+		"cat3": "done",
+		"halloween": "active",
+		"hamster": "done",
+		"livre": "done",
+		"menage": "done",
+		"milk": "done",
+		"plants": "done"
 	},
 	"scene": "res://scenes/main.tscn",
 	"season": "autumn",
 	"version": 2,
-	"x": 6212.21044921875
+	"x": 4159.6416015625
 }

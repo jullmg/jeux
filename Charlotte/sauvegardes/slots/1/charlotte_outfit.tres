@@ -5,21 +5,24 @@
 [resource]
 script = ExtResource("1_1jllu")
 mouth = "smile"
+outfit = "sweater"
+accent_color = Color(0.8784314, 0.30980393, 0.37254903, 1)
+pattern = "bike"
+sleeve = "short"
+legwear = "shorts"
+legwear_color = Color(0.18431373, 0.24313726, 0.36078432, 1)
+shoes = "sneaker"
+shoe_color = Color(0.24313726, 0.5568628, 0.3529412, 1)
+hat_color = Color(1, 0.3647059, 0.56078434, 1)
+costume = "chat"
 overrides = {
-"accent_light": "#FF7BA3",
-"accent_line": "#D63E72",
 "blush": "#F5A3A0",
-"cloth_fold": "#EDB61A",
-"cloth_line": "#C99410",
-"cloth_shade": "#f51c52",
 "hair_light": "#E3A06A",
 "hair_line": "#8A4527",
 "hair_mid": "#C97A4A",
 "iris_dark": "#5A3318",
 "neck": "#EDC3AC",
 "nose": "#D9947A",
-"shoe_light": "#FF9DBB",
-"shoe_line": "#D63E72",
 "skin_line": "#D9A88E",
 "skin_shade": "#F2C7AE"
 }
