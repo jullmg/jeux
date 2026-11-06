@@ -275,7 +275,8 @@ static func random(rng: RandomNumberGenerator, age_group := "") -> CharacterLook
 		var whiskers := _pick(rng, ["beard", "mustache"])
 		if not look.lashes and look.hair_style in ["short", "buzz", "bald", "curly"]:
 			look.facial_hair = whiskers
-	look.outfit = _pick(rng, ["dress", "tshirt", "sweater"] if not grown else ["dress", "tshirt", "sweater", "coat", "coat"])
+	look.outfit = _pick(rng, ["dress", "tshirt", "sweater", "hoodie", "cardigan"] if not grown
+		else ["dress", "tshirt", "sweater", "coat", "coat", "cardigan", "raincoat"])
 	if look.outfit == "dress":
 		look.facial_hair = ""
 		if look.hair_style in ["bald", "buzz"]:
@@ -286,23 +287,23 @@ static func random(rng: RandomNumberGenerator, age_group := "") -> CharacterLook
 		look.accent_color = Color.WHITE
 	match look.outfit:
 		"dress":
-			look.pattern = _pick(rng, ["dots", "flowers", "none"])
+			look.pattern = _pick(rng, ["dots", "flowers", "none", "cats", "cherries", "hearts", "stars"])
 			look.sleeve = _pick(rng, ["puff", "short", "long"])
 			look.legwear = _pick(rng, ["socks", "tights", "tights"])
 		"tshirt":
-			look.pattern = _pick(rng, ["stripes", "heart", "star", "none"])
+			look.pattern = _pick(rng, ["stripes", "heart", "star", "none", "checks", "rainbow", "cats", "cherries", "clouds"])
 			look.sleeve = "short"
-			look.legwear = "pants"
-		"sweater":
-			look.pattern = _pick(rng, ["zigzag", "stripes", "none"])
+			look.legwear = "pants" if grown or rng.randf() < 0.6 else "shorts"
+		"sweater", "cardigan", "hoodie":
+			look.pattern = _pick(rng, ["zigzag", "stripes", "none", "checks", "clouds", "none"])
 			look.sleeve = "long"
 			look.legwear = "pants"
-		"coat":
+		"coat", "raincoat":
 			look.pattern = "none"
 			look.sleeve = "long"
 			look.legwear = "pants" if rng.randf() < 0.7 else "tights"
 	look.legwear_color = Color(_pick(rng, PANTS)) if look.legwear != "socks" else Color.WHITE
-	look.shoes = _pick(rng, ["sneaker", "boot", "mary_jane"] if look.outfit == "dress" else ["sneaker", "boot"])
+	look.shoes = _pick(rng, ["sneaker", "boot", "mary_jane", "sandal"] if look.outfit == "dress" else ["sneaker", "boot", "sneaker", "sandal"])
 	look.shoe_color = Color(_pick(rng, SHOES))
 	if rng.randf() < 0.3:
 		look.hat = "tuque"

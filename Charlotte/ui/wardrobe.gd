@@ -10,16 +10,19 @@ const BLUE := Color("#1D4F91")
 const YELLOW := Color("#FFD23F")
 const CREAM := Color("#F6EFE4")
 
-const OUTFITS := [["dress", "Robe"], ["tshirt", "T-shirt"], ["sweater", "Chandail"], ["hoodie", "Coton ouaté"],
+const OUTFITS := [["dress", "Robe"], ["tshirt", "T-shirt"], ["sweater", "Chandail"], ["hoodie", "Coton ouaté"], ["cardigan", "Cardigan"], ["raincoat", "Imperméable"],
 	["overalls", "Salopette"], ["coat", "Manteau"]]
-const DRESS_PATTERNS := [["none", "Uni"], ["dots", "Pois"], ["flowers", "Fleurs"], ["hearts", "Cœurs"], ["stars", "Étoiles"], ["stripes", "Rayures"]]
+const DRESS_PATTERNS := [["none", "Uni"], ["dots", "Pois"], ["flowers", "Fleurs"], ["hearts", "Cœurs"], ["stars", "Étoiles"], ["stripes", "Rayures"],
+	["cats", "Petits chats"], ["cherries", "Cerises"]]
 const TOP_PATTERNS := [["none", "Uni"], ["stripes", "Rayures"], ["heart", "Gros cœur"], ["star", "Grande étoile"], ["zigzag", "Zigzag"],
-	["dots", "Pois"], ["flowers", "Fleurs"], ["hearts", "Cœurs"], ["stars", "Étoiles"], ["bike", "Vélo"]]
+	["checks", "Carreaux"], ["rainbow", "Arc-en-ciel"], ["cats", "Petits chats"], ["cherries", "Cerises"], ["clouds", "Nuages"],
+	["bike", "Vélo"], ["birds", "Oiseaux"], ["dots", "Pois"], ["flowers", "Fleurs"]]
 const SLEEVES := [["puff", "Bouffantes"], ["short", "Courtes"], ["long", "Longues"]]
-const LEGWEAR := [["socks", "Chaussettes"], ["tights", "Collants"], ["pants", "Pantalon"]]
-const SHOES := [["mary_jane", "Souliers"], ["sneaker", "Espadrilles"], ["boot", "Bottes"], ["rain_boot", "Bottes de pluie"]]
+const LEGWEAR := [["socks", "Chaussettes"], ["tights", "Collants"], ["pants", "Pantalon"], ["shorts", "Bermuda"]]
+const SHOES := [["mary_jane", "Souliers"], ["sneaker", "Espadrilles"], ["boot", "Bottes"], ["rain_boot", "Bottes de pluie"], ["sandal", "Sandales"]]
 const HATS := [["", "Rien"], ["bow", "Boucle"], ["headband", "Serre-tête"], ["tuque", "Tuque"], ["cap", "Casquette"],
-	["beret", "Béret"], ["crown", "Couronne"], ["witch", "Sorcière"], ["cat_ears", "Oreilles de chat"]]
+	["beret", "Béret"], ["crown", "Couronne"], ["flower_crown", "Couronne de fleurs"], ["sun_hat", "Chapeau de soleil"],
+	["earmuffs", "Cache-oreilles"], ["helmet", "Casque de vélo"], ["witch", "Sorcière"], ["cat_ears", "Oreilles de chat"]]
 const COLORS := ["#FFD23F", "#FF8A3D", "#E04F5F", "#FF5D8F", "#FFB3C7", "#C2185B", "#7E57C2", "#5C6BC0",
 	"#4A6FA5", "#1FB5C4", "#A5D6A7", "#3E8E5A", "#8D6E63", "#F4F1EA", "#FFFFFF", "#2E3440"]
 const LEG_COLORS := ["#FFFFFF", "#FFB3C7", "#FF5D8F", "#E04F5F", "#FFD23F", "#7E57C2", "#4A6FA5", "#2F3E5C",
@@ -186,7 +189,7 @@ func _clothes_page(page: VBoxContainer) -> void:
 	_choices(page, "Quoi porter", OUTFITS, _look.outfit, func(v):
 		_look.outfit = v
 		var allowed := DRESS_PATTERNS if v == "dress" else TOP_PATTERNS
-		if v in ["coat", "overalls"] or not allowed.any(func(o): return o[0] == _look.pattern):
+		if v in ["coat", "overalls", "raincoat"] or not allowed.any(func(o): return o[0] == _look.pattern):
 			_look.pattern = "none"
 		if v == "overalls":
 			_look.legwear = "pants"
@@ -200,7 +203,7 @@ func _clothes_page(page: VBoxContainer) -> void:
 			_look.legwear_color = c)
 	if _look.outfit == "dress":
 		_choices(page, "Motif", DRESS_PATTERNS, _look.pattern, func(v): _look.pattern = v)
-	elif _look.outfit in ["tshirt", "sweater", "hoodie"]:
+	elif _look.outfit in ["tshirt", "sweater", "hoodie", "cardigan"]:
 		_choices(page, "Motif", TOP_PATTERNS, _look.pattern, func(v): _look.pattern = v)
 	var detail := "Chandail en dessous" if _look.outfit == "overalls" else "Couleur des détails"
 	_swatches(page, detail, COLORS, _look.accent_color, func(c): _look.accent_color = c)
@@ -309,7 +312,7 @@ func _randomize() -> void:
 	_look.outfit = pick.call(OUTFITS)[0]
 	_look.outfit_color = Color(pick.call(COLORS))
 	_look.accent_color = Color(pick.call(COLORS))
-	_look.pattern = pick.call(DRESS_PATTERNS if _look.outfit == "dress" else TOP_PATTERNS)[0] if not _look.outfit in ["coat", "overalls"] else "none"
+	_look.pattern = pick.call(DRESS_PATTERNS if _look.outfit == "dress" else TOP_PATTERNS)[0] if not _look.outfit in ["coat", "overalls", "raincoat"] else "none"
 	_look.sleeve = pick.call(SLEEVES)[0]
 	_look.legwear = pick.call(LEGWEAR)[0]
 	_look.legwear_color = Color(pick.call(LEG_COLORS))

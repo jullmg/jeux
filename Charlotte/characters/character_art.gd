@@ -600,6 +600,28 @@ func _hat() -> String:
 			return _f('<path d="M26 62 Q30 2 116 2 Q198 6 202 52 Q160 72 26 62 Z" fill="{hat}" stroke="{hat_line}" stroke-width="3" stroke-linejoin="round"/>'
 				+ '<path d="M40 50 Q46 14 110 12" stroke="{hat_light}" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.7"/>'
 				+ '<path d="M112 2 Q114 -10 122 -12" stroke="{hat_line}" stroke-width="5" fill="none" stroke-linecap="round"/>')
+		"flower_crown":
+			var s := _f('<path d="M34 72 C38 30 76 14 112 14 C150 14 184 30 188 72" stroke="{hat_line}" stroke-width="9" fill="none" stroke-linecap="round"/>')
+			for i in 6:
+				var a := PI * (0.12 + i * 0.152)
+				var fx := 112.0 - cos(a) * 80.0
+				var fy := 56.0 - sin(a) * 48.0
+				var tone: String = ["#F7A8C4", "#FFFFFF", "#F2C230", "#C9A0E8", "#F7A8C4", "#FFFFFF"][i]
+				for k in 5:
+					var pa := TAU * k / 5.0
+					s += '<circle cx="%.1f" cy="%.1f" r="5" fill="%s"/>' % [fx + cos(pa) * 7.0, fy + sin(pa) * 7.0, tone]
+				s += '<circle cx="%.1f" cy="%.1f" r="3.4" fill="#F2C230"/>' % [fx, fy]
+			return s
+		"earmuffs":
+			return (_f('<path d="M36 56 C44 16 180 16 188 56" stroke="{hat_line}" stroke-width="8" fill="none"/>')
+				+ _f('<ellipse cx="36" cy="72" rx="20" ry="24" fill="{hat}" stroke="{hat_line}" stroke-width="3"/>')
+				+ _f('<ellipse cx="188" cy="72" rx="20" ry="24" fill="{hat}" stroke="{hat_line}" stroke-width="3"/>')
+				+ _f('<ellipse cx="30" cy="66" rx="8" ry="10" fill="{hat_light}" opacity="0.7"/>'))
+		"sun_hat":
+			return (_f('<path d="M-10 76 Q112 34 234 76 Q112 110 -10 76 Z" fill="{hat}" stroke="{hat_line}" stroke-width="3"/>')
+				+ _f('<path d="M54 74 C52 26 86 10 112 10 C140 10 172 26 170 74 Z" fill="{hat}" stroke="{hat_line}" stroke-width="3"/>')
+				+ _f('<path d="M50 62 Q112 48 174 62" stroke="{accent}" stroke-width="10" fill="none"/>')
+				+ _f('<path d="M168 58 q22 -4 30 8 q-18 8 -32 2 z" fill="{accent}" stroke="{accent_line}" stroke-width="2"/>'))
 		"headband":
 			return _f('<path d="M38 70 C40 30 76 14 112 14 C150 14 184 30 186 70" stroke="{hat_line}" stroke-width="13" fill="none" stroke-linecap="round"/>'
 				+ '<path d="M38 70 C40 30 76 14 112 14 C150 14 184 30 186 70" stroke="{hat}" stroke-width="9" fill="none" stroke-linecap="round"/>'
@@ -623,6 +645,10 @@ func _torso_svg(sx: float, sy: float) -> String:
 			s += _overalls()
 		"hoodie":
 			s += _top() + _hoodie()
+		"cardigan":
+			s += _top() + _cardigan()
+		"raincoat":
+			s += _coat() + _raincoat()
 		_:
 			s += _top()
 	if look.backpack != "":
@@ -707,6 +733,12 @@ func _pattern(big: Array, small: Array, r := 4.5) -> String:
 					var a := TAU * i / 5.0
 					s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#FFFFFF"/>' % [c[0] + cos(a) * r * 0.75, c[1] + sin(a) * r * 0.75, r * 0.55]
 				s += _f('<circle cx="%s" cy="%s" r="%.1f" fill="{accent}"/>' % [c[0], c[1], r * 0.45])
+		"cherries":
+			for c in big:
+				s += '<g transform="translate(%s %s)"><path d="M0 -8 q7 -6 10 -2 M0 -8 q-7 -5 -9 2" stroke="#4E7A30" stroke-width="1.5" fill="none"/><circle cx="-8" cy="3" r="4.5" fill="#D9342B"/><circle cx="9" cy="0" r="4.5" fill="#D9342B"/></g>' % [c[0], c[1]]
+		"cats":
+			for c in big:
+				s += _f('<g transform="translate(%s %s)"><circle cx="0" cy="0" r="6" fill="#FFFFFF"/><path d="M-6 -3 l-2 -7 l6 3 z M6 -3 l2 -7 l-6 3 z" fill="#FFFFFF"/><circle cx="-2.2" cy="-1" r="1" fill="{accent}"/><circle cx="2.2" cy="-1" r="1" fill="{accent}"/></g>' % [c[0], c[1]])
 		"hearts":
 			for c in big:
 				s += _f('<path d="M0 3 C-5 -1 -3 -6 0 -3 C3 -6 5 -1 0 3 Z" transform="translate(%s %s) scale(%.2f)" fill="{accent}"/>' % [c[0], c[1], r / 3.0])
@@ -735,6 +767,35 @@ func _top() -> String:
 			s += _f('<path d="M65 38 l5 11 l12 1 l-9 8 l3 12 l-11 -6 l-11 6 l3 -12 l-9 -8 l12 -1 z" fill="{accent}"/>')
 		"zigzag":
 			s += _f('<path d="M24 52 l10 -8 l10 8 l10 -8 l10 8 l10 -8 l10 8 l10 -8 l8 6" stroke="{accent}" stroke-width="5" fill="none" stroke-linejoin="round"/>')
+		"checks":
+			# A checked shirt: two sets of soft bands crossing.
+			s += '<clipPath id="chk"><path d="%s"/></clipPath><g clip-path="url(#chk)">' % TOP_BODY
+			for y in range(16, 112, 16):
+				s += _f('<rect x="18" y="%d" width="96" height="8" fill="{accent}" opacity="0.55"/>' % y)
+			for x in range(22, 112, 16):
+				s += _f('<rect x="%d" y="8" width="8" height="104" fill="{accent}" opacity="0.55"/>' % x)
+			s += '</g>'
+		"rainbow":
+			s += '<clipPath id="rbw"><path d="%s"/></clipPath><g clip-path="url(#rbw)">' % TOP_BODY
+			for i in 5:
+				var band: String = ["#E8542F", "#F2C230", "#4E9A52", "#4FA3E0", "#9C6CC4"][i]
+				s += '<path d="M%d 8 L%d 112 H%d L%d 8 Z" fill="%s" opacity="0.85"/>' % [14 + i * 20, 2 + i * 20, 22 + i * 20, 34 + i * 20, band]
+			s += '</g>'
+		"cats":
+			for c in [[40, 40], [74, 34], [56, 66], [92, 62], [34, 84], [78, 92]]:
+				s += _f('<g transform="translate(%d %d)"><circle cx="0" cy="0" r="7" fill="{accent}"/>' % c
+					+ '<path d="M-7 -4 l-2 -8 l7 4 z M7 -4 l2 -8 l-7 4 z" fill="{accent}"/>'
+					+ '<circle cx="-2.6" cy="-1" r="1.2" fill="#2B2B33"/><circle cx="2.6" cy="-1" r="1.2" fill="#2B2B33"/>'
+					+ '<path d="M-1 2 h2" stroke="#2B2B33" stroke-width="1"/></g>')
+		"cherries":
+			for c in [[42, 42], [80, 36], [60, 70], [96, 76], [36, 86]]:
+				s += _f('<g transform="translate(%d %d)"><path d="M0 -10 q8 -8 12 -2" stroke="{accent}" stroke-width="1.6" fill="none"/>' % c
+					+ '<path d="M0 -10 q-8 -6 -10 2" stroke="{accent}" stroke-width="1.6" fill="none"/>'
+					+ '<circle cx="-10" cy="4" r="5" fill="#D9342B"/><circle cx="12" cy="0" r="5" fill="#D9342B"/>'
+					+ '<circle cx="-11.5" cy="2.5" r="1.6" fill="#FFFFFF" opacity="0.7"/></g>')
+		"clouds":
+			for c in [[40, 38], [82, 48], [56, 78], [96, 86]]:
+				s += '<g transform="translate(%d %d)"><circle cx="-8" cy="2" r="6" fill="#FFFFFF" opacity="0.92"/><circle cx="0" cy="-3" r="8" fill="#FFFFFF" opacity="0.92"/><circle cx="9" cy="2" r="6" fill="#FFFFFF" opacity="0.92"/><rect x="-9" y="1" width="19" height="6" rx="3" fill="#FFFFFF" opacity="0.92"/></g>' % c
 		"bones":
 			# A skeleton's ribcage painted on the front: collar bones, the spine, four pairs of ribs.
 			s += _f('<path d="M46 30 Q65 40 84 30" stroke="{accent}" stroke-width="7" fill="none" stroke-linecap="round"/>')
@@ -840,6 +901,33 @@ func _coat() -> String:
 	for y in [52, 66]:
 		s += _f('<circle cx="58" cy="%d" r="3" fill="{accent}" stroke="{cloth_line}" stroke-width="1.3"/>' % y)
 	s += _f('<path d="M20 138 Q65 144 111 138" stroke="{cloth_line}" stroke-width="1.5" fill="none" stroke-dasharray="3 3" opacity="0.5"/>')
+	return s
+
+
+# An open cardigan over the top: two front panels, a ribbed edge, buttons down one side, pockets.
+func _cardigan() -> String:
+	var s := _f('<path d="M42 12 Q50 24 52 44 Q54 76 50 104 Q36 108 26 102 Q22 70 24 44 Q26 24 42 12 Z" fill="{accent}" stroke="{accent_line}" stroke-width="2.5" stroke-linejoin="round"/>')
+	s += _f('<path d="M88 12 Q80 24 78 44 Q76 76 80 104 Q94 108 104 102 Q108 70 106 44 Q104 24 88 12 Z" fill="{accent}" stroke="{accent_line}" stroke-width="2.5" stroke-linejoin="round"/>')
+	s += _f('<path d="M48 16 Q56 28 57 48 Q58 78 55 102" stroke="{accent_line}" stroke-width="1.6" fill="none" opacity="0.5"/>')
+	s += _f('<path d="M82 16 Q74 28 73 48 Q72 78 75 102" stroke="{accent_line}" stroke-width="1.6" fill="none" opacity="0.5"/>')
+	for y in [46, 64, 82]:
+		s += _f('<circle cx="76" cy="%d" r="3.2" fill="{cloth}" stroke="{accent_line}" stroke-width="1.4"/>' % y)
+	for x in [28.0, 84.0]:
+		s += _f('<path d="M%s 82 h18 v14 h-18 z" fill="{accent_light}" stroke="{accent_line}" stroke-width="1.6"/>' % x)
+	# The knitted edges.
+	for e in ["M42 12 Q26 24 24 44 Q22 70 26 102", "M88 12 Q104 24 106 44 Q108 70 104 102"]:
+		s += _f('<path d="%s" stroke="{accent_line}" stroke-width="4" fill="none" opacity="0.4"/>' % e)
+	return s
+
+
+# A raincoat: the hood down over the shoulders, big round buttons and a shine on the slicker.
+func _raincoat() -> String:
+	var s := _f('<path d="M36 16 Q65 -6 94 16 Q96 42 80 48 Q65 54 50 48 Q34 42 36 16 Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>')
+	s += _f('<path d="M44 20 Q65 6 86 20" stroke="{cloth_line}" stroke-width="2" fill="none" opacity="0.5"/>')
+	for y in [62, 86, 110]:
+		s += _f('<circle cx="65" cy="%d" r="5" fill="{accent}" stroke="{cloth_line}" stroke-width="1.6"/>' % y)
+	s += '<path d="M34 60 Q30 100 32 136" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.3"/>'
+	s += _f('<path d="M18 128 Q65 136 112 128" stroke="{accent}" stroke-width="5" fill="none" opacity="0.8"/>')
 	return s
 
 
@@ -986,6 +1074,12 @@ func _leg_body(length: float) -> String:
 			s += '<path d="M9.6 0 H30.4 L28.4 %s Q20 %s 11.6 %s Z" fill="url(#lg)"/>' % [length - 20.0, length - 16.0, length - 20.0]
 			# The sheen of knitted tights: two faint stripes of light down the leg.
 			s += '<path d="M15 14 V%s M18.5 14 V%s" stroke="#FFFFFF" stroke-width="1.5" opacity="0.14" stroke-linecap="round"/>' % [length - 30.0, length - 36.0]
+		"shorts":
+			# Bare legs under a pair of shorts that stop above the knee.
+			s += _f('<path d="M9.6 0 H30.4 L28.4 %s Q20 %s 11.6 %s Z" fill="{skin}" stroke="{skin_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [length - 20.0, length - 16.0, length - 20.0])
+			s += '<path d="M9.6 0 H30.4 L28.4 %s Q20 %s 11.6 %s Z" fill="url(#lg)"/>' % [length - 20.0, length - 16.0, length - 20.0]
+			s += _f('<path d="M7 0 H33 L31 %s Q20 %s 9 %s Z" fill="{leg}" stroke="{leg_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [length * 0.42, length * 0.45, length * 0.42])
+			s += _f('<path d="M9 %s Q20 %s 31 %s" stroke="{leg_line}" stroke-width="1.5" fill="none" stroke-dasharray="3 3" opacity="0.5"/>' % [length * 0.38, length * 0.41, length * 0.38])
 		_:
 			s += _f('<path d="M6.8 0 H33.2 L31 %s Q20 %s 9 %s Z" fill="{leg}" stroke="{leg_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [length - 14.0, length - 11.0, length - 14.0])
 			s += '<path d="M6.8 0 H33.2 L31 %s Q20 %s 9 %s Z" fill="url(#lg)"/>' % [length - 14.0, length - 11.0, length - 14.0]
@@ -1016,6 +1110,13 @@ func _leg_body(length: float) -> String:
 			s += '<path d="M24 80 L31 82 M24 86 L31 88 M24 92 L32 94" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.7"/>'
 			s += '<path d="M12 80 V94" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity="0.18"/>'
 			s += _f('<path d="M34 98 Q44 98 47 105" stroke="{shoe_line}" stroke-width="1.4" fill="none" stroke-dasharray="2.5 2" opacity="0.7"/>')
+		"sandal":
+			# Summer sandals: a sole, two straps over the foot and one at the heel.
+			s += _f('<path d="M6 104 Q2 96 14 94 H34 Q48 96 48 104 Q49 110 44 110 H10 Q5 110 6 104 Z" fill="{shoe}" stroke="{shoe_line}" stroke-width="2.5" stroke-linejoin="round"/>')
+			s += _f('<path d="M14 94 Q24 84 34 92 M18 94 Q28 80 40 90" stroke="{shoe}" stroke-width="5" fill="none" stroke-linecap="round"/>')
+			s += _f('<path d="M14 94 Q24 84 34 92 M18 94 Q28 80 40 90" stroke="{shoe_line}" stroke-width="1.4" fill="none"/>')
+			s += _f('<path d="M10 92 Q8 82 16 80" stroke="{shoe_line}" stroke-width="3" fill="none" stroke-linecap="round"/>')
+			s += '<rect x="22" y="86" width="5" height="5" rx="1" fill="#F2C94C" stroke="#A47A12" stroke-width="1"/>'
 		"rain_boot":
 			s += _f('<path d="M7 70 H33 V94 Q48 94 48 106 Q49 110 44 110 H6 Q4 100 7 90 Z" fill="{shoe}" stroke="{shoe_line}" stroke-width="2.5" stroke-linejoin="round"/>')
 			s += _f('<rect x="5" y="66" width="30" height="8" rx="4" fill="{shoe_line}"/>')

@@ -225,6 +225,14 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Bodies and clothes have a shape, not a tube: `TOP_BODY`, `DRESS_BODICE`, `COAT_BODY` give sloping shoulders, a waist and hips
   (the coat flares from the waist to its hem), and the bare limbs taper — a fuller shoulder and elbow narrowing to the wrist
   (`_upper_arm_svg`, `_forearm_svg`), thighs narrowing to the ankle (`_leg_body`, all legwear).
+- A wide everyday wardrobe, worn by Charlotte and by the neighbours alike (`CharacterLook.random` picks from the same lists, with
+  the same number of random draws so the street keeps its people): outfits dress, T-shirt, sweater, hoodie, **cardigan** (open, over
+  the top), coat, **raincoat** (hood, big buttons, a shine) and overalls; patterns dots, flowers, hearts, stars, stripes, zigzag,
+  big heart, big star, bike, birds, **checks**, **rainbow**, **cats**, **cherries**, **clouds**, plus the costumes' bones and
+  bandages; legwear socks, tights, trousers and **shorts** (bare legs); shoes mary-jane, sneakers, boots, rain boots and
+  **sandals**; hats bow, headband, tuque, cap, beret, crown, **flower crown**, **sun hat**, **earmuffs**, bike helmet, witch and
+  cat ears. **A new garment = its case in `CharacterArt` + one line in the matching `ui/wardrobe.gd` list (+ `CharacterLook.random`
+  if the neighbours may wear it).**
 - Clothes carry light and detail: `CharacterArt.CLOTH_DEFS` (a sheen from the upper left, shade toward the hem; `_sheen(path)` lays it over any garment
   outline: `TOP_BODY`, `DRESS_SKIRT`, `DRESS_BODICE`, `COAT_BODY`), `LEG_DEFS` (light across a leg). Tops have a slight waist and a curved hem;
   T-shirts a ribbed collar and a stitched hem; sweaters and hoodies knitted ribbing, a rolled neck and (hoodie) a stitched kangaroo pocket; dresses
