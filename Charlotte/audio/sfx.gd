@@ -37,6 +37,18 @@ func _ready() -> void:
 		_flat.append(p)
 
 
+## At exit: stop every player and let go of the sounds, so nothing is still held when the audio server shuts down
+## (Godot reports those as leaked resources otherwise).
+func _exit_tree() -> void:
+	for player in _world:
+		player.stop()
+		player.stream = null
+	for player in _flat:
+		player.stop()
+		player.stream = null
+	_cache.clear()
+
+
 ## Plays a sound. `at`: world position (Vector2.INF = not in the world, e.g. UI). A little random pitch
 ## keeps repeated sounds (footsteps) from sounding mechanical.
 func play(sound: String, at := Vector2.INF, volume_db := 0.0, pitch := 1.0) -> void:

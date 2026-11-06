@@ -30,6 +30,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   - `Godot --path . res://tools/animals.tscn -- --screenshot=/path/animals.png [--focus=x,y --zoom=3]` (cat coats/poses, squirrels,
     dog breeds, Charlotte petting a cat and dogs; use focus/zoom to inspect details)
   - Add `--season=winter` (spring, summer, autumn, winter; or printemps/été/automne/hiver) to any of these to see a season.
+  - **Nothing left behind at exit**: a plain run must end with no "leaked" warnings. A node a scene makes but never adds
+    to the tree has to be freed with it (`StreetScene._unparented()`, listing the cross-street templates, a lane's
+    avenues and its own `_wind`/`_control`, freed on `NOTIFICATION_PREDELETE` — a street is also instantiated with no
+    tree at all just to read another street's `layout`), and the `Sfx` / `Music` autoloads drop their players' streams
+    in `_exit_tree`. Check with `Godot --screen 1 --path . --quit-after 150 --verbose res://scenes/main.tscn -- --no-save`.
   - **Never overwrite a save**: any run that opens a scene by itself (a test scene, a runner that instantiates `main.tscn`…)
     must pass `-- --no-save`, or its `Saver` writes over the game in progress. `GameState.enabled()` is false for
     `--no-save`, `--screenshot=`, `--x=` and `-s`/`--script` runs, and for nothing else.
@@ -433,9 +438,18 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
      colours, headwear through `CharacterArt._hat()`) and adds its own pieces — cape, wings, tail (behind her) and face paint
      (over her eyes). **A new costume = one line in `CostumeArt.ALL`**; new patterns ("bones", "bandages") live in `_top()`.
      `tools/costumes.tscn --page=0|1` is the design sheet.
-  2. **Passer l'Halloween**: `world/halloween_night.gd` (`HalloweenNight`, built by `StreetScene._build_halloween`) darkens the
-     street under a veil (night sky, moon, stars), lights the windows of the houses that give (`HalloweenNight.gives`, two in
-     three, never her own house, the shops or the school), hangs their decorations (`world/halloween_art.gd`, `HalloweenArt.PIECES`:
+  2. **Passer l'Halloween**: `world/halloween_night.gd` (`HalloweenNight`, built by `StreetScene._build_halloween`) turns the
+     street to night. **How the night is drawn** (no grey veil: that washed everything out): a `CanvasModulate` (`NIGHT`)
+     multiplies the whole canvas down to a deep blue, so every drawing keeps its shape and contrast; one additive pass
+     (`_Lights`, all its glows drawn from one soft radial texture, `HalloweenNight.glow_texture()`) puts the light back —
+     stars, the moon's halo, the street lamps with a cone down to the sidewalk, the spill round the lit windows, porch
+     lights, the flicker of the jack-o'-lanterns, the lantern each child carries and a low mist; `_Shutters` draws the glass
+     itself on the facade (behind the trees and the people, so the light is not painted over them): dark where a house
+     sleeps, warm with curtains and window bars where it gives; `_Moon` and the lit panes are painted through the inverse of
+     `NIGHT` so they really shine instead of going blue; `_Bats` cross the sky as silhouettes. The colour grade switches to
+     night too (`StreetScene._build_grade`: no sun bloom or rays, cool tint, deep vignette, a low glow threshold so every
+     light blooms). The houses that give (`HalloweenNight.gives`, two in
+     three, never her own house, the shops or the school) light their windows and hang their decorations (`world/halloween_art.gd`, `HalloweenArt.PIECES`:
      jack-o'-lanterns, ghosts, cobwebs, skeletons, gravestones, cats, spiders, brooms, candles, bowls, scarecrows, garlands, bats)
      and sends four other children past in costumes. A doorbell (`StreetScene._ring`) at every front door: a lit house gives 1–3
      sweets once, a dark one is asleep. `Halloween.ENOUGH` houses (12, so more than one street) fill her bag. **The back

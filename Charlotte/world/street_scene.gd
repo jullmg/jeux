@@ -159,6 +159,26 @@ func _ready() -> void:
 		_save_screenshot(shot)
 
 
+## Nodes a street makes but never adds to the tree (the cross-street templates, a lane's avenues, and its own wind
+## and controls when it is only instantiated to be read) are freed with it, or Godot reports them as leaked nodes
+## when the game quits.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		for node: Node in _unparented():
+			if is_instance_valid(node) and node.get_parent() == null:
+				node.free()
+
+
+## Nodes this scene made but never put in the tree (a subclass adds its own). `_wind` and `_control` are in the list
+## because a street is also instantiated on its own, with no tree at all, to read another street's layout
+## (`_walls_along`): that copy must leave nothing behind either.
+func _unparented() -> Array[Node]:
+	var out: Array[Node] = [_wind, _control]
+	for cs in _cross_streets:
+		out.append(cs)
+	return out
+
+
 func _process(delta: float) -> void:
 	_follow_charlotte()
 	_spawn_stray_cats(delta)
@@ -1215,6 +1235,18 @@ func _build_grade() -> void:
 	mat.shader = preload("res://shaders/grade.gdshader")
 	mat.set_shader_parameter("sun_uv", SkyBackdrop.SUN_POS / VIEW)
 	mat.set_shader_parameter("tint", Season.tint())
+	# Halloween night: no sun to bloom or throw rays, a cool cast, a deeper vignette, and everything that shines
+	# (windows, lamps, pumpkins, her lantern) blooms into the dark.
+	if Halloween.night():
+		mat.set_shader_parameter("tint", Vector3(0.88, 0.92, 1.1))
+		mat.set_shader_parameter("shadow_tint", Vector3(0.0, 0.01, 0.07))
+		mat.set_shader_parameter("saturation", 0.96)
+		mat.set_shader_parameter("contrast", 0.2)
+		mat.set_shader_parameter("bloom", 0.0)
+		mat.set_shader_parameter("rays", 0.0)
+		mat.set_shader_parameter("vignette", 1.1)
+		mat.set_shader_parameter("glow", 0.6)
+		mat.set_shader_parameter("glow_threshold", 0.62)
 	rect.material = mat
 	layer.add_child(rect)
 	add_child(layer)

@@ -189,6 +189,14 @@ func _start_x() -> float:
 	return _openings[-1].x - 400.0 if lane == "middle" else _openings[1].x
 
 
+# The avenues at the ends of a cross lane are templates too (see StreetScene._unparented).
+func _unparented() -> Array[Node]:
+	var out := super()
+	for cs in _avenues:
+		out.append(cs)
+	return out
+
+
 ## The middle of her gate, on the lane (her lot's fence: `LaneArt` draws the gate at 12 % across the lot).
 func _gate_x() -> float:
 	if _own < 0:

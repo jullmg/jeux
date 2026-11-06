@@ -88,6 +88,13 @@ func _advance() -> void:
 	_advancing = false
 
 
+## At exit: nothing is left playing, so the track is let go before the audio server shuts down.
+func _exit_tree() -> void:
+	for player in _players:
+		player.stop()
+		player.stream = null
+
+
 ## Fades the music out (e.g. at bedtime).
 func stop() -> void:
 	if _current < 0:
