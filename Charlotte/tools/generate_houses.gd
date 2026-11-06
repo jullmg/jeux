@@ -1379,7 +1379,8 @@ func _greenery(x0: float, x1: float) -> void:
 			var lit := (x - p.x + cy - p.y) / (r * 2.0)
 			if show and p.y < ground_y:
 				var c := Color(tone).lightened(lit * 0.3) if lit > 0.0 else Color(tone).darkened(-lit * 0.3)
-				out.append('<ellipse cx="%s" cy="%s" rx="6" ry="3" fill="#%s" transform="rotate(%s %s %s)"/>' % [_n(p.x), _n(p.y), c.to_html(false), _n(turn), _n(p.x), _n(p.y)])
+				# A leaf, turned away from the middle of the clump, not a flat ellipse.
+				_plant_leaf(p, 9.0, rad_to_deg(Vector2(p.x - x, p.y - cy).angle() + PI / 2.0) + (turn - 90.0) * 0.12, "#" + c.to_html(false))
 		x += r * rng.randf_range(1.0, 1.5)
 
 
@@ -1401,16 +1402,12 @@ func _garden(gaps: Array) -> void:
 		while x < seg[1] - 14.0:
 			var r := rng.randf_range(12.0, 20.0)
 			var c := _bush(_pick(AUTUMN_BUSHES))
-			_circle(x + 3, ground_y - r * 0.7 + 3, r, "#000000", 'opacity="0.15"')
-			_circle(x, ground_y - r * 0.7, r, c)
-			_circle(x - r * 0.3, ground_y - r * 1.0, r * 0.5, "#" + Color(c).lightened(0.25).to_html(false), 'opacity="0.8"')
-			if season == "winter":
-				out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="#F7F9FB"/>' % [_n(x), _n(ground_y - r * 1.25), _n(r * 0.9), _n(r * 0.45)])
+			_shrub(x, r, c)
 			if rng.randf() < 0.3:
 				var fx := x + rng.randf_range(-8.0, 8.0)
 				var flower := _pick(["#FFD23F", "#FFFFFF", "#C084FC"])
 				if season != "winter":
-					_circle(fx, ground_y - r * 1.1, 3.5, flower)
+					_bloom(fx, ground_y - r * 1.15, 4.6, flower)
 			x += rng.randf_range(18.0, 34.0)
 		var lx: float = seg[0] + 4.0
 		while lx < seg[1] - 4.0:
@@ -2968,3 +2965,59 @@ func _shop_glass_shine(x: float, y: float, w: float, h: float) -> void:
 	_path("M%s %s l%s %s l%s 0 l%s %s Z" % [_n(x + w * 0.56), _n(y + h), _n(d * 0.75), _n(-h), _n(d * 0.14), _n(-d * 0.75), _n(h)],
 		"#FFFFFF", 'opacity="0.08"')
 	_rect(x, y, w, h * 0.18, "#CFE0EC", 'opacity="0.18"')
+
+
+# One leaf of a garden plant, the same shape as the trees' and the lanes': a narrow base, widest low down, a drawn-out tip.
+# `turn` in degrees, 0 = pointing up.
+const PLANT_LEAF := [Vector2(0, 0.16), Vector2(-0.28, -0.02), Vector2(-0.52, -0.38), Vector2(-0.40, -0.76), Vector2(-0.14, -1.08),
+	Vector2(0, -1.3), Vector2(0.16, -1.06), Vector2(0.41, -0.74), Vector2(0.52, -0.37), Vector2(0.29, -0.02)]
+
+
+func _plant_leaf(p: Vector2, size: float, turn: float, color: String) -> void:
+	var a := deg_to_rad(turn)
+	var c := cos(a) * size
+	var sn := sin(a) * size
+	var d := ""
+	for i in PLANT_LEAF.size():
+		var q: Vector2 = PLANT_LEAF[i]
+		d += "%s%s %s" % ["M" if i == 0 else "L", _n(p.x + q.x * c - q.y * sn), _n(p.y + q.x * sn + q.y * c)]
+	_path(d + " Z", color)
+
+
+# A shrub in a front garden: a dark mass, leaves all over it turned outward and lit from the upper left, a few sprigs standing
+# proud of it. In winter the leaves are gone: bare twigs under a cap of snow. The same random draws in every season.
+func _shrub(x: float, r: float, c: String) -> void:
+	var winter := season == "winter"
+	var base := Vector2(x, ground_y - r * 0.7)
+	if not winter:
+		out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="#000000" opacity="0.15"/>' % [_n(x + 3), _n(base.y + 4), _n(r), _n(r * 0.92)])
+		out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="#%s"/>' % [_n(x), _n(base.y), _n(r * 0.92), _n(r * 0.86), Color(c).darkened(0.32).to_html(false)])
+	var leaves := int(r * 1.8)
+	for i in leaves:
+		var a := rng.randf_range(0.0, TAU)
+		var d := sqrt(rng.randf()) * r
+		var p := base + Vector2(cos(a) * d, sin(a) * d * 0.9)
+		var jitter := rng.randf_range(-22.0, 22.0)
+		var pale := rng.randf() < 0.3
+		if p.y > ground_y - 2.0:
+			continue
+		if winter:
+			# A bare twig instead of the leaf.
+			if i % 3 == 0:
+				_path("M%s %s L%s %s" % [_n(base.x), _n(ground_y - 2), _n(p.x), _n(p.y)], "none", _stroke("#7A6450", 1.2) + ' opacity="0.8"')
+			continue
+		var lit := (base.x - p.x + base.y - p.y) / (r * 2.0)
+		var tone := Color(c).lightened(clampf(lit, 0.0, 1.0) * 0.34) if lit > 0.0 else Color(c).darkened(clampf(-lit, 0.0, 1.0) * 0.28)
+		if pale:
+			tone = tone.lightened(0.12)
+		_plant_leaf(p, r * 0.42, rad_to_deg((p - base).angle() + PI / 2.0) + jitter, "#" + tone.to_html(false))
+	if winter:
+		out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="#F7F9FB"/>' % [_n(x), _n(ground_y - r * 1.05), _n(r * 0.9), _n(r * 0.45)])
+
+
+# A little flower: five petals round a heart.
+func _bloom(x: float, y: float, r: float, color: String) -> void:
+	for i in 5:
+		var a := TAU * i / 5.0 - PI / 2.0
+		_circle(x + cos(a) * r * 0.7, y + sin(a) * r * 0.7, r * 0.52, color)
+	_circle(x, y, r * 0.4, "#F2C230" if color != "#FFD23F" else "#E8812E")

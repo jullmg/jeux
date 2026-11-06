@@ -265,6 +265,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Squirrels in the lanes (`ruelle.gd` `_build_lane_squirrels`, `SQUIRRELS_MIDDLE` 6, `SQUIRRELS_CROSS` 2, own RNG): along the foot of the fences (`SQUIRREL_Y`), up the poles and the yard trees. They are drawn over the lane's ground, in front of the trees, so `Squirrel.slips_behind` moves one just behind the tree it climbs (`_home_index`) and back when it lands.
 - Background life: `WireBirds` (`world/wire_birds.gd`: pigeons and sparrows on the poles' cable, fly off when
   Charlotte comes close or runs, others land later; streets and lanes), no children playing in the lanes on their own any more (Julien: only the twins, when the quests bring them; the old `JumpRopeKid` and `BallKid` are in the git history); few passersby on the streets (`passerby_ages`: 2 on the avenues, 1 on Dandurand/Holt), winter chimney smoke (`_build_life`).
+- The greenery in the front gardens is leaves, never balls (generator `_shrub`, `_plant_leaf`, `_bloom`, `_greenery`): a dark mass with
+  leaves of the same pointed shape as the trees' turned outward over it and lit from the upper left, five-petal flowers here and there,
+  and in winter bare twigs under a cap of snow. The same random draws in every season.
 - Every corner has planted curb extensions (`world/curb_garden.gd`, `CurbGarden`, `StreetScene._build_curb_gardens`, from
   `reference/rue/terre_plein_01.png et 02`): the curb bulges into the parking lane on both sides of each cross street, perennials
   by season, striped flexible bollards; drawn in front of people.
