@@ -111,7 +111,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   staples and torn posters) and all wires; `StreetScene._build_utility_poles()` (in `_build_props`) puts them at the curb
   (foot y 662, in front of people, like the lamps; the lane's stand at its fences), every 650-780 px clear of cross streets, trees, lamps, hydrants, racks (own RNG); the lane
   uses them too. Lost-cat posters are stapled to the pole nearest the street's second lamp (`_poster_spot`).
-  `layout` runs: `ecole` (école Saint-Jean-de-Brébeuf, across Dandurand), `rue_dandurand`, Charlotte's block (`depanneur`: the
+  `layout` runs: `ecole` (école Saint-Jean-de-Brébeuf, across Dandurand, drawn from `reference/coin_dandurand/School_on_dandurand.jpg`: two blank end pavilions patterned with a brick diamond lattice, the centre recessed between them with three rows of wide dark-framed windows (`_school_window`) over a pale stone base with red basement windows, a green copper cornice with its dentils stepping up over the pavilions, and the centre entrance — stone surround, red double doors, steps and handrails, the Québec flag over the door, the stone cartouche and the cross on the parapet above), `rue_dandurand`, Charlotte's block (`depanneur`: the
   side of dépanneur Xin-Xin, which fronts Dandurand; `garages`; `ruelle_verte`, the green lane with its sign; … `ruelle`, `coin_holt`),
   `rue_holt`, `coin_holt_est`. The Holt-side lane entrance on 6e has the neighbours' yellow "RALENTISSEZ ! ENFANTS EN
   LIBERTÉ !" sign (`PropArt.slow_sign`, words as labels). The first three buildings of the block are drawn from the photos in `reference/` (the user wants
