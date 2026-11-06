@@ -46,6 +46,8 @@ const ADULT_HAIR: Array[String] = ["short", "bob", "bun", "curly", "long_straigh
 ## A cord with a stone on it, over a top (the stone's colour; "": none), and a small stud in the ear.
 @export var necklace := ""
 @export var earring := false
+## A Halloween costume (`CostumeArt.ALL`): "" = her own clothes. It dresses the whole puppet when the art is built.
+@export var costume := ""
 # Exact hex colours that win over the derived palette (used to keep Charlotte pixel-identical).
 @export var overrides := {}
 
@@ -84,6 +86,9 @@ static func reload_outfit() -> void:
 ## Keeps the outfit for every scene, and on disk.
 static func dress_charlotte(look: CharacterLook) -> void:
 	_outfit = look.duplicate(true)
+	# A test run (a screenshot, a script) never writes into the player's slot.
+	if not GameState.enabled():
+		return
 	DirAccess.make_dir_recursive_absolute(GameState.slot_dir())
 	ResourceSaver.save(_outfit, outfit_path())
 

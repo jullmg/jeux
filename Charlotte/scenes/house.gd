@@ -184,6 +184,11 @@ func _talk_to_mom() -> void:
 		Carry.put_down(_charlotte)
 		_say(_mom, "Du lait ! Merci, Chachoue !", 350.0)
 		Quests.complete("milk")
+	elif Halloween.step() == 1:
+		_say(_mom, "Ton déguisement est dans ta commode,\nma chouette ! Vas-y !", 400.0, 3.5)
+	elif Quests.start("halloween"):
+		_say(_mom, "C'est l'Halloween ce soir, Chachoue !\nVa vite te déguiser dans ta chambre !", 420.0, 4.0)
+		Halloween.set_step(1)
 	elif Quests.start("amies"):
 		if Twins.met():
 			# She has already met them on her own.
@@ -497,13 +502,25 @@ func _build_doors() -> void:
 func _open_wardrobe() -> void:
 	_control.enabled = false
 	var wardrobe := Wardrobe.new(_charlotte.look)
+	# On Halloween the drawers open on the costumes instead of her everyday clothes.
+	wardrobe.costumes_first = Halloween.step() == 1
 	wardrobe.closed.connect(func(look: CharacterLook):
 		if look:
 			CharacterLook.dress_charlotte(look)
 			_charlotte.set_look(CharacterLook.charlotte())
 			_twirl()
+			_costume_chosen()
 		_control.enabled = true)
 	add_child(wardrobe)
+
+
+# Dressed up at last: the evening can begin (she is told where to go next).
+func _costume_chosen() -> void:
+	if Halloween.step() != 1 or not Halloween.dressed(_charlotte):
+		return
+	Halloween.set_step(2)
+	Notebook.announce("step", "C'est parti pour l'Halloween !")
+	_say(_charlotte, "Me v'là déguisée en %s !\nJe m'en vais passer l'Halloween !" % CostumeArt.name_of(_charlotte.look.costume).to_lower(), 300.0, 4.0)
 
 
 # The fridge door swings open (cold light spilling out), she takes a snack, and it floats up with a "Miam !".

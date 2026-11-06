@@ -40,6 +40,10 @@ var _tabs: TabContainer
 var _root: Control
 
 
+## Open on the costume tab (the dresser during Halloween) instead of her ordinary clothes.
+var costumes_first := false
+
+
 func _init(start: CharacterLook) -> void:
 	layer = 60
 	_look = start.duplicate(true)
@@ -59,7 +63,7 @@ func _ready() -> void:
 	panel.size = Vector2(1180, 660)
 	panel.add_theme_stylebox_override("panel", _box(CREAM, BLUE, 6, 26))
 	_root.add_child(panel)
-	var title := _text("La garde-robe de Charlotte", 34)
+	var title := _text("Le déguisement de Charlotte" if costumes_first else "La garde-robe de Charlotte", 34)
 	title.position = Vector2(40, 18)
 	title.size = Vector2(1100, 48)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -69,13 +73,14 @@ func _ready() -> void:
 	_tabs.position = Vector2(400, 78)
 	_tabs.size = Vector2(750, 482)
 	panel.add_child(_tabs)
-	for tab_name in ["Vêtement", "Jambes et pieds", "Coiffure", "Chapeaux", "Accessoires"]:
+	for tab_name in ["Déguisement", "Vêtement", "Jambes et pieds", "Coiffure", "Chapeaux", "Accessoires"]:
 		var scroll := ScrollContainer.new()
 		scroll.name = tab_name
 		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		_tabs.add_child(scroll)
 	_build_buttons(panel)
 	_refresh()
+	_tabs.current_tab = 0 if costumes_first else 1
 	_root.modulate.a = 0.0
 	create_tween().tween_property(_root, "modulate:a", 1.0, 0.25)
 
@@ -157,11 +162,24 @@ func _refresh() -> void:
 		page.add_theme_constant_override("separation", 6)
 		scroll.add_child(page)
 		pages.append(page)
-	_clothes_page(pages[0])
-	_legs_page(pages[1])
-	_hair_page(pages[2])
-	_hats_page(pages[3])
-	_extras_page(pages[4])
+	_costume_page(pages[0])
+	_clothes_page(pages[1])
+	_legs_page(pages[2])
+	_hair_page(pages[3])
+	_hats_page(pages[4])
+	_extras_page(pages[5])
+
+
+# Her Halloween costumes: one button each, and one to take it off. A costume dresses the whole puppet, so the other tabs
+# only matter once it is off.
+func _costume_page(page: VBoxContainer) -> void:
+	var options: Array = [["", "Pas de déguisement"]]
+	for id: String in CostumeArt.ORDER:
+		options.append([id, CostumeArt.name_of(id)])
+	_choices(page, "Mon déguisement", options, _look.costume, func(v): _look.costume = v, [])
+	var note := _text("Un déguisement cache tes vêtements.\nEnlève-le pour t'habiller comme d'habitude.", 18)
+	note.custom_minimum_size = Vector2(0, 60)
+	page.add_child(note)
 
 
 func _clothes_page(page: VBoxContainer) -> void:
@@ -306,6 +324,8 @@ func _randomize() -> void:
 	_look.backpack = pick.call(COLORS) if rng.randf() < 0.3 else ""
 	_look.glasses = pick.call(GLASSES) if rng.randf() < 0.2 else ""
 	_look.hair_style = pick.call(HAIR_STYLES)[0]
+	if _look.costume != "":
+		_look.costume = pick.call(CostumeArt.ORDER)
 	_change(func(_v): pass, null)
 
 

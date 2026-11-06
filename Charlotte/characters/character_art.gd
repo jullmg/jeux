@@ -32,6 +32,11 @@ var p := {}
 
 static func build(character_look: CharacterLook) -> Dictionary:
 	var art := CharacterArt.new()
+	# A costume dresses a copy of her look, so her own clothes underneath are untouched (and the palette below is the
+	# costume's): everything after this draws the costume as if it were an ordinary outfit.
+	if character_look.costume != "":
+		character_look = character_look.duplicate(true)
+		CostumeArt.apply(character_look)
 	art.look = character_look
 	art.p = art._palette()
 	return art._build()
@@ -80,7 +85,28 @@ func _build() -> Dictionary:
 	}
 	if look.backpack != "":
 		tex.backpack = _tex(_backpack_svg())
+	# The costume's own pieces: a cape and wings behind her, a tail at her hip, face paint over her eyes.
+	var dress: Dictionary = CostumeArt.parts(look.costume)
+	if dress.has("cape"):
+		tex.cape = _tex(_piece_svg(CostumeArt.CAPE_CANVAS, sx, sy, CostumeArt.cape(str(dress.cape), str(dress.cape_color), str(dress.cape_lining))))
+		rig.cape_pivot = CostumeArt.CAPE_PIVOT * Vector2(sx, sy)
+	if dress.has("wings"):
+		tex.wings = _tex(_piece_svg(CostumeArt.WINGS_CANVAS, sx, sy, CostumeArt.wings(str(dress.wings))))
+		rig.wings_pivot = CostumeArt.WINGS_PIVOT * Vector2(sx, sy)
+	if dress.has("tail"):
+		tex.tail = _tex(_piece_svg(CostumeArt.TAIL_CANVAS, sx, sy, CostumeArt.tail(str(dress.tail), str(dress.tail_color))))
+		rig.tail_pivot = CostumeArt.TAIL_PIVOT * Vector2(sx, sy)
+	if dress.has("mask"):
+		tex.mask = _tex(_head_frame(CostumeArt.mask(str(dress.mask))))
 	return {"rig": rig, "tex": tex, "art": self}
+
+
+# A costume piece on its own canvas, scaled with the body like the torso is.
+func _piece_svg(canvas: Vector2, sx: float, sy: float, body: String) -> String:
+	var w := canvas.x * sx
+	var h := canvas.y * sy
+	return '<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d"><g transform="scale(%s %s)">%s</g></svg>' % [
+		ceili(w), ceili(h), ceili(w), ceili(h), sx, sy, body]
 
 
 static func _tex(svg: String) -> ImageTexture:
@@ -578,7 +604,8 @@ func _hat() -> String:
 			return _f('<path d="M38 70 C40 30 76 14 112 14 C150 14 184 30 186 70" stroke="{hat_line}" stroke-width="13" fill="none" stroke-linecap="round"/>'
 				+ '<path d="M38 70 C40 30 76 14 112 14 C150 14 184 30 186 70" stroke="{hat}" stroke-width="9" fill="none" stroke-linecap="round"/>'
 				+ '<path d="M60 36 Q80 22 104 19" stroke="{hat_light}" stroke-width="3" fill="none" stroke-linecap="round"/>')
-	return ""
+	# Anything else is a costume's headwear (a hood, a helmet, horns…).
+	return CostumeArt.hat(look.hat, str(p.hat), str(p.hat_line), str(p.hat_light))
 
 
 # --- Body -------------------------------------------------------------------
@@ -708,6 +735,23 @@ func _top() -> String:
 			s += _f('<path d="M65 38 l5 11 l12 1 l-9 8 l3 12 l-11 -6 l-11 6 l3 -12 l-9 -8 l12 -1 z" fill="{accent}"/>')
 		"zigzag":
 			s += _f('<path d="M24 52 l10 -8 l10 8 l10 -8 l10 8 l10 -8 l10 8 l10 -8 l8 6" stroke="{accent}" stroke-width="5" fill="none" stroke-linejoin="round"/>')
+		"bones":
+			# A skeleton's ribcage painted on the front: collar bones, the spine, four pairs of ribs.
+			s += _f('<path d="M46 30 Q65 40 84 30" stroke="{accent}" stroke-width="7" fill="none" stroke-linecap="round"/>')
+			s += _f('<rect x="61" y="38" width="8" height="52" rx="3" fill="{accent}"/>')
+			for i in 4:
+				var ry := 44.0 + i * 13.0
+				var spread := 26.0 - i * 2.5
+				s += _f('<path d="M61 %s q-%s 2 -%s 12" stroke="{accent}" stroke-width="6" fill="none" stroke-linecap="round"/>' % [ry, spread, spread])
+				s += _f('<path d="M69 %s q%s 2 %s 12" stroke="{accent}" stroke-width="6" fill="none" stroke-linecap="round"/>' % [ry, spread, spread])
+			s += _f('<path d="M52 94 q13 8 26 0" stroke="{accent}" stroke-width="6" fill="none" stroke-linecap="round"/>')
+		"bandages":
+			# A mummy's wrappings: strips wound diagonally, with a frayed end hanging loose.
+			for i in 7:
+				var by := 18.0 + i * 13.0
+				s += _f('<path d="M22 %s L108 %s" stroke="{accent}" stroke-width="9" opacity="0.85" stroke-linecap="round"/>' % [by + 10.0, by - 4.0])
+				s += _f('<path d="M22 %s L108 %s" stroke="{cloth_line}" stroke-width="1.4" opacity="0.5"/>' % [by + 15.0, by + 1.0])
+			s += _f('<path d="M88 74 q14 10 10 28 q-10 -4 -16 -18 z" fill="{accent}" stroke="{cloth_line}" stroke-width="1.5"/>')
 		"bike":
 			# A bicycle printed on the chest: two wheels, the frame, a saddle and handlebars.
 			s += _f('<g transform="translate(65 60) scale(0.62) translate(-65 -60)" stroke="{accent}" stroke-width="3.6" fill="none" stroke-linecap="round" stroke-linejoin="round">'

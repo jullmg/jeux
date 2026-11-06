@@ -150,7 +150,13 @@ func _build() -> void:
 	var neck := Vector2(0, _rig.neck_y)
 	_body = Node2D.new()
 	add_child(_body)
-	# Children are drawn back to front.
+	# Children are drawn back to front: a costume's cape, wings and tail go behind everything.
+	if tex.has("cape"):
+		_part(_body, tex.cape, _rig.cape_pivot, Vector2(0, (_rig.shoulder_y as float) - 6.0))
+	if tex.has("wings"):
+		_part(_body, tex.wings, _rig.wings_pivot, Vector2(0, (_rig.shoulder_y as float) + 10.0))
+	if tex.has("tail"):
+		_part(_body, tex.tail, _rig.tail_pivot, Vector2(16.0 * (_rig.sx as float), -(_rig.leg_len as float) + 10.0))
 	_hair_back = _part(_body, tex.hair_back, _rig.head_pivot, neck)
 	_hair_back.scale = Vector2.ONE * (_rig.head_scale as float)
 	_leg_back = _part(_body, tex.thigh, _rig.leg_pivot, Vector2(_rig.leg_x, -leg), BACK_TINT)
@@ -178,6 +184,8 @@ func _build() -> void:
 	_brows_spr = _face_part("brows", "normal")
 	_mouth_spr = _face_part("mouth", "smile")
 	_face_now = ["normal", "normal", "smile"]
+	if tex.has("mask"):
+		_part(_head, tex.mask, _rig.head_pivot, Vector2.ZERO)
 	_part(_head, tex.hair_front, _rig.head_pivot, Vector2.ZERO)
 	_arm_front = _make_arm(tex, Vector2(-(_rig.arm_x as float), _rig.shoulder_y), Color.WHITE)
 	_apply_pose()

@@ -211,7 +211,7 @@ func _section(heading: String, ids: Array, kind: String, line: String, hint: Str
 	var head := _label(heading, 22, BLUE)
 	_list.add_child(head)
 	for id in ids:
-		_list.add_child(_row(kind, Quests.ALL[id][line], Quests.ALL[id][hint] if not hint.is_empty() else "", INK if kind != "unknown" else Color(INK, 0.7)))
+		_list.add_child(_row(kind, Quests.ALL[id][line], Quests.hint(id) if hint == "hint" else (Quests.ALL[id][hint] if not hint.is_empty() else ""), INK if kind != "unknown" else Color(INK, 0.7)))
 
 
 func _row(kind: String, line: String, small_line: String, color: Color) -> HBoxContainer:
@@ -253,7 +253,9 @@ func _next_toast() -> void:
 	_toasting = true
 	var item: Array = _toasts.pop_front()
 	var done: bool = item[0] == "done"
-	var quest: Dictionary = Quests.ALL[item[1]]
+	# A step of a long quest announces its own words instead of naming a quest.
+	var a_step: bool = item[0] == "step"
+	var quest: Dictionary = {"title": item[1], "reward": 0.0} if a_step else Quests.ALL[item[1]]
 	var box := PanelContainer.new()
 	var style := StyleBoxFlat.new()
 	style.bg_color = CREAM
@@ -266,7 +268,7 @@ func _next_toast() -> void:
 	box.add_theme_stylebox_override("panel", style)
 	var words := VBoxContainer.new()
 	words.add_theme_constant_override("separation", 2)
-	var head := _label("★  Quête réussie !" if done else "Nouvelle quête dans ton carnet", 22, BLUE)
+	var head := _label("🎃  Halloween" if a_step else ("★  Quête réussie !" if done else "Nouvelle quête dans ton carnet"), 22, BLUE)
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	words.add_child(head)
 	var title := _label(quest.title, 18, INK)

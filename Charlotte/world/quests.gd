@@ -5,7 +5,7 @@ extends RefCounted
 ## not there = still to discover, "active" = in her notebook, "done" = a star. The Notebook autoload shows
 ## them, and announces each new and finished one.
 
-const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3"]
+const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween"]
 const ALL := {
 	"milk": {
 		"title": "Maman a besoin de lait : va au dépanneur",
@@ -61,6 +61,12 @@ const ALL := {
 		"find": "Une autre affiche, sur la 5e Avenue…",
 		"age": 7, "after": "cat", "reward": 2.0,
 	},
+	"halloween": {
+		"title": "C'est l'Halloween !",
+		"hint": "Déguise-toi, passe l'Halloween dans le quartier, puis rentre compter tes bonbons.",
+		"find": "La grande soirée de l'Halloween approche…",
+		"age": 7, "after_all": true, "reward": 3.0,
+	},
 	"cat3": {
 		"title": "Retrouve Bijou, la chatte de Mme Nguyen",
 		"hint": "Une chatte calico au collier rose, vue près de la ruelle verte. Ramène-la au 2655, rue Holt.",
@@ -68,6 +74,13 @@ const ALL := {
 		"age": 7, "after": "cat2", "reward": 3.0,
 	},
 }
+
+
+## What her notebook should tell her to do next: the fixed hint, or the step she is on for a quest that has several.
+static func hint(id: String) -> String:
+	if id == Halloween.QUEST and active(id):
+		return Halloween.hint()
+	return str(ALL.get(id, {}).get("hint", ""))
 
 
 ## "" (not started), "active" or "done".
@@ -86,7 +99,12 @@ static func done(id: String) -> bool:
 ## Not started yet, but Charlotte is old enough and what it waits for is done: someone can give it to her.
 static func available(id: String) -> bool:
 	var quest: Dictionary = ALL[id]
-	return status(id) == "" and GameState.age >= int(quest.age) and (not quest.has("after") or done(quest.after))
+	if status(id) != "" or GameState.age < int(quest.age):
+		return false
+	if quest.has("after") and not done(quest.after):
+		return false
+	# A quest that waits for the whole notebook (the Halloween evening).
+	return not quest.get("after_all", false) or Halloween.ready()
 
 
 ## Puts the quest in her notebook. Returns false if it can't start (already started, or not available).

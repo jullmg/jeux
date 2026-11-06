@@ -11,7 +11,7 @@ extends RefCounted
 const CAPE_CANVAS := Vector2(240, 230)
 const CAPE_PIVOT := Vector2(120, 14)
 const WINGS_CANVAS := Vector2(260, 200)
-const WINGS_PIVOT := Vector2(130, 30)
+const WINGS_PIVOT := Vector2(130, 46)
 const TAIL_CANVAS := Vector2(170, 160)
 const TAIL_PIVOT := Vector2(26, 44)
 
@@ -387,9 +387,10 @@ static func mask(kind: String) -> String:
 				+ '<circle cx="76" cy="206" r="13" fill="#F7A8C4" opacity="0.8"/><circle cx="152" cy="206" r="13" fill="#F7A8C4" opacity="0.8"/>'
 				+ '<path d="M70 146 q18 -16 36 -2 M158 146 q-18 -16 -36 -2" stroke="#2C5FC4" stroke-width="4" fill="none" stroke-linecap="round"/>')
 		"ninja":
-			return ('<path d="M18 140 H210 V180 H18 Z" fill="#2E3440"/>'
-				+ '<path d="M18 196 H210 V250 H18 Z" fill="#2E3440"/>'
-				+ '<path d="M20 182 H208" stroke="#1A1E26" stroke-width="2" opacity="0.6"/>')
+			# Only a band across her eyes shows between the hood and the face cloth.
+			return ('<path d="M40 138 Q112 128 184 138 L184 160 Q112 152 40 160 Z" fill="#2E3440"/>'
+				+ '<path d="M44 196 Q112 188 180 196 L178 246 Q112 256 46 246 Z" fill="#2E3440"/>'
+				+ '<path d="M46 162 Q112 154 178 162" stroke="#1A1E26" stroke-width="2" fill="none" opacity="0.6"/>')
 		"freckles":
 			var s := ""
 			for i in 8:
