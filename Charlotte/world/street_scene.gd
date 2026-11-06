@@ -338,6 +338,8 @@ func _arriving(key: String) -> bool:
 
 ## The soundtrack here, first that exists (see Music): this season's street theme, then the street theme.
 func _music() -> Array:
+	if Halloween.night():
+		return ["halloween", "street_autumn", "street"]
 	return ["street_" + Season.current, "street"]
 
 

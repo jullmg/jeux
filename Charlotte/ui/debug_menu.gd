@@ -9,7 +9,7 @@ const ALIASES := {"printemps": "spring", "ete": "summer", "été": "summer", "au
 ## The story flags each quest leaves behind, cleared with it.
 ## Story flags that belong to no quest, cleared by "Tout effacer".
 const OTHER_FLAGS := ["met_twins", "met_billie_auguste"]
-const QUEST_FLAGS := {"amies": ["met_twins", "met_billie_auguste"], "cachette": ["cachette_found"], "livre": ["book_found"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"]}
+const QUEST_FLAGS := {"amies": ["met_twins", "met_billie_auguste"], "cachette": ["cachette_found"], "livre": ["book_found"], "halloween": ["halloween_step", "candy", "candy_bag", "halloween_doors", "halloween_counted", "halloween_total", "winter_greeting"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"]}
 ## What a quest puts in her arms (a lost cat's quest id is the cat's id, handled by `Carry.cat_id()`).
 const QUEST_CARRIES := {"milk": "milk", "plants": "can", "menage": "toy", "livre": "book"}
 

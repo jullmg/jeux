@@ -423,6 +423,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
      and sends four other children past in costumes. A doorbell (`StreetScene._ring`) at every front door: a lit house gives 1–3
      sweets once, a dark one is asleep. `Halloween.ENOUGH` houses (12, so more than one street) fill her bag.
   3. **Rentrer**: Maman counts the haul (`ui/candy_count.gd`, `CandyCount`: each kind with its drawing and the total), then bed.
+     Her own little lantern lights the few steps around her all evening, the back lanes go dark too
+     (`HalloweenNight.darken`), the notebook counts her sweets, the street asks for a `halloween` music track if there is one,
+     and the debug menu's "Effacer" wipes the whole evening.
      The morning after, the quest is done, the costume goes away and **the season is winter** (`_end_halloween`); the first time
      she steps outside, she says so (`StreetScene._winter_hello`).
 

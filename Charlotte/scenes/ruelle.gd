@@ -84,6 +84,8 @@ func _ready() -> void:
 	_build_fronts()
 	_build_poles()
 	_build_croque_livre()
+	if Halloween.night():
+		HalloweenNight.darken(self, _street_width)
 	var ground := _Ground.new()
 	ground.width = _street_width
 	ground.hopscotch = (_lots[_own].x + _lots[_own].y) / 2.0 if _own >= 0 else -1.0

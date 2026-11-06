@@ -174,6 +174,9 @@ func _turn_to(i: int) -> void:
 
 func _fill() -> void:
 	_header.text = "Charlotte, %d ans\nArgent de poche : %s" % [GameState.age, Quests.money_text(GameState.money)]
+	# On Halloween night, what is in her bag so far.
+	if Halloween.night() or Halloween.candy() > 0:
+		_header.text += "\n🎃 Bonbons : %d" % Halloween.candy()
 	_title.text = "Mon carnet" if _tab == 0 else "Mes amis"
 	for i in _tabs.size():
 		_tabs[i].custom_minimum_size = Vector2(118.0 if i == _tab else 98.0, 54.0)

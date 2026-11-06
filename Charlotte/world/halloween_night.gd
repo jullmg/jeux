@@ -26,6 +26,15 @@ static func gives(street_key: String, art: String, i: int) -> bool:
 	return absi(hash("%s/%s/%d" % [street_key, art, i])) % 3 < GIVES
 
 
+## Only the dark, the moon and the stars: for the back lanes, where nobody hands out candy.
+static func darken(scene: Node2D, width: float) -> void:
+	var night := HalloweenNight.new()
+	night.name = "HalloweenNight"
+	night.z_index = 5
+	night.lane_width = width
+	scene.add_child(night)
+
+
 ## Builds the whole evening into `scene` (a StreetScene).
 static func build(scene: Node2D) -> void:
 	var night := HalloweenNight.new()
@@ -35,6 +44,8 @@ static func build(scene: Node2D) -> void:
 	night._build(scene)
 
 
+## Set instead of a street: only the dark over a lane this wide.
+var lane_width := 0.0
 var _scene: Node2D
 var _lights: _Lights
 var _hangs: Array[Sprite2D] = []
@@ -57,9 +68,29 @@ func _build(scene: Node2D) -> void:
 	_lights.material = glow
 	add_child(_lights)
 	_moon_and_stars(scene, rng)
+	_lights.lantern = scene._charlotte
 	_light_the_lamps(scene)
 	_dress_the_houses(scene, rng)
 	_trick_or_treaters(scene, rng)
+
+
+func _ready() -> void:
+	if lane_width <= 0.0:
+		return
+	var veil := _Veil.new()
+	veil.width = lane_width + 600.0
+	add_child(veil)
+	_lights = _Lights.new()
+	_lights.z_index = 1
+	var glow := CanvasItemMaterial.new()
+	glow.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	_lights.material = glow
+	add_child(_lights)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 404
+	_lights.moon = Vector2(lane_width * 0.4, 110.0)
+	for i in 70:
+		_lights.stars.append(Vector2(rng.randf_range(0.0, lane_width), rng.randf_range(10.0, 300.0)))
 
 
 func _process(delta: float) -> void:
@@ -85,8 +116,8 @@ func _moon_and_stars(scene: Node2D, rng: RandomNumberGenerator) -> void:
 # The street lamps and the glow they throw on the sidewalk.
 func _light_the_lamps(scene: Node2D) -> void:
 	for x: float in scene._lamp_x:
-		_lights.halos.append([Vector2(x - 8.0, 470.0), 70.0, Color(1.0, 0.88, 0.58, 0.5)])
-		_lights.halos.append([Vector2(x - 8.0, 650.0), 120.0, Color(1.0, 0.86, 0.55, 0.14)])
+		_lights.halos.append([Vector2(x - 8.0, 470.0), 40.0, Color(1.0, 0.88, 0.58, 0.42)])
+		_lights.halos.append([Vector2(x - 8.0, 652.0), 78.0, Color(1.0, 0.86, 0.55, 0.10)])
 
 
 # Every house: the ones that give light their windows and put their decorations out, the others stay dark.
@@ -112,7 +143,7 @@ func _dress_the_houses(scene: Node2D, rng: RandomNumberGenerator) -> void:
 		var door_x: float = scene._door_x(art)
 		if is_nan(door_x):
 			door_x = origin.x + scene._tex(art).get_width() * s * 0.5
-		_lights.halos.append([Vector2(door_x, StreetScene.HOUSE_BASE_Y - 150.0), 54.0, Color(1.0, 0.8, 0.45, 0.45)])
+		_lights.halos.append([Vector2(door_x, StreetScene.HOUSE_BASE_Y - 158.0), 34.0, Color(1.0, 0.8, 0.45, 0.4)])
 		var width: float = scene._tex(art).get_width() * s
 		var spots := _spots(origin, width, door_x)
 		var how_many := rng.randi_range(2, 3)
@@ -137,7 +168,7 @@ func _dress_the_houses(scene: Node2D, rng: RandomNumberGenerator) -> void:
 			add_child(sprite)
 			if piece.has("glow"):
 				var g: Vector2 = piece.glow
-				_lights.halos.append([at + g * float(piece.scale), 46.0, Color(1.0, 0.62, 0.2, 0.55)])
+				_lights.halos.append([at + g * float(piece.scale), 34.0, Color(1.0, 0.62, 0.2, 0.5)])
 
 
 # Where a house can put things: on the steps either side of its door, hung from the balcony, in the corner of the
@@ -177,6 +208,8 @@ class _Lights:
 	var halos: Array = []
 	var stars: Array[Vector2] = []
 	var moon := Vector2.INF
+	## Charlotte: her own little lantern lights the few steps around her.
+	var lantern: Node2D
 	var flicker := 0.0
 
 	func _draw() -> void:
@@ -190,6 +223,11 @@ class _Lights:
 		for rect in windows:
 			draw_rect(rect, Color(WINDOW_LIGHT, 0.5))
 			draw_rect(rect.grow(2.0), Color(WINDOW_LIGHT, 0.18))
+		if is_instance_valid(lantern):
+			var at: Vector2 = lantern.position + Vector2(0, -60.0)
+			for ring in 4:
+				var t := (ring + 1.0) / 4.0
+				draw_circle(at, 150.0 * t, Color(1.0, 0.86, 0.6, 0.085 * (1.0 - t * 0.6)))
 		for h: Array in halos:
 			var c: Color = h[2]
 			var wobble := 1.0 + 0.05 * sin(flicker * 3.1 + (h[0] as Vector2).x * 0.01)
