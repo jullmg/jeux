@@ -143,29 +143,13 @@ func _build_shell() -> void:
 # `work` says where their hands go (x from where they stand, y in the world), `sit` seats them, `jog` runs on the spot.
 const MOM_TASKS := [
 	{"x": POTTERY_X + 18.0, "facing": 1, "task": "pottery", "prop": "clay", "prop_at": Vector2(82.0, 505.0), "work": [Vector2(70.0, 512.0), Vector2(92.0, 516.0)], "sit": 92.0, "floor": 654.0,
-		"secs": 16.0, "say": ["Mon beau pot !", "Ça tourne, ça tourne…"], "done_say": ["Y est pas pire, han ?"]},
-	{"x": KITCHEN_START + 200.0, "facing": 1, "task": "stir", "prop": "bowl", "prop_at": Vector2(44.0, 548.0), "work": [Vector2(44.0, 534.0), Vector2(22.0, 552.0)],
-		"secs": 12.0, "say": ["Mmm, ça sent bon !", "Un p'tit gâteau !"], "done_say": ["C'est au four !"]},
-	{"x": KITCHEN_START + 138.0, "facing": -1, "task": "fridge", "prop": "", "secs": 5.0, "say": ["Qu'est-ce qu'on mange ?", "Il manque du lait…"]},
-	{"x": KITCHEN_START + 300.0, "facing": 1, "task": "wash", "prop": "plate", "secs": 8.0, "say": ["J'essuie la vaisselle."]},
-	{"x": KITCHEN_START + 340.0, "facing": -1, "task": "drink", "prop": "mug", "secs": 9.0, "say": ["Un bon café…", "Chu pas réveillée sans mon café !"]},
-	{"x": KITCHEN_START + 250.0, "facing": 1, "task": "phone", "prop": "phone", "secs": 7.0, "say": ["Ah, un message de mamie !"]},
-	{"x": KITCHEN_START - 140.0, "facing": 1, "task": "watch", "prop": "", "secs": 5.0, "say": []},
+		"secs": 22.0, "say": ["Mon beau pot !", "Ça tourne, ça tourne…"], "done_say": ["Y est pas pire, han ?"]},
+	{"x": KITCHEN_START + 340.0, "facing": -1, "task": "drink", "prop": "mug", "secs": 12.0, "say": ["Un bon café…", "Chu pas réveillée sans mon café !"]},
 ]
 const DAD_TASKS := [
-	{"x": PIANO_X + 236.0, "facing": -1, "task": "piano", "prop": "notes", "prop_at": Vector2(-120.0, 430.0),
-		"work": [Vector2(-66.0, 516.0), Vector2(-40.0, 516.0)], "sit": 86.0, "floor": 650.0,
-		"secs": 18.0, "say": ["Pom pom pom…", "Écoute ben ça !"], "done_say": ["Faut que je pratique plus, tsé."]},
-	{"x": 1150.0, "facing": 1, "task": "bike", "prop": "bike", "prop_at": Vector2(86.0, 644.0), "work": [Vector2(64.0, 556.0), Vector2(40.0, 580.0)],
-		"secs": 14.0, "say": ["Mon vélo brille !", "Une p'tite ride demain…"], "done_say": ["Astheure il roule comme neuf !"]},
-	{"x": 2010.0, "facing": 1, "task": "jog", "prop": "sweat", "secs": 11.0, "say": ["Un, deux, un, deux !", "Chu en forme !"], "done_say": ["Ouf ! Ça fait du bien."]},
-	{"x": 1880.0, "facing": 1, "task": "type", "prop": "laptop", "secs": 10.0, "say": ["Encore des courriels…"]},
-	{"x": 1650.0, "facing": -1, "task": "drink", "prop": "mug", "secs": 8.0, "say": ["Quel beau temps !"]},
-	{"x": 2150.0, "facing": 1, "task": "read", "prop": "book", "secs": 10.0, "say": ["Passionnant, ce livre."]},
-	{"x": 930.0, "facing": 1, "task": "phone", "prop": "phone", "secs": 7.0, "say": ["Tiens, le match !"]},
-	{"x": 2530.0, "facing": 1, "task": "watch", "prop": "", "secs": 8.0, "say": ["Bonne émission."]},
-	# Sometimes he drifts off, staring at nothing, a little moon floating before his empty gaze.
-	{"x": 1380.0, "facing": 1, "task": "daydream", "prop": "moon", "secs": 8.0, "say": [], "done_say": ["Oups ! J'étais encore dans la lune !"]},
+	# In the clouds, staring at nothing, a little moon floating before his empty gaze.
+	{"x": 1380.0, "facing": 1, "task": "daydream", "prop": "moon", "secs": 14.0, "say": [], "done_say": ["Oups ! J'étais encore dans la lune !"]},
+	{"x": 1650.0, "facing": -1, "task": "drink", "prop": "mug", "secs": 12.0, "say": ["Quel beau temps !", "Un p'tit café pis ça va mieux."]},
 ]
 
 
