@@ -149,6 +149,14 @@ static func sofa() -> ImageTexture:
 	s += '<path d="M514 100 Q514 80 536 80 H570 Q590 80 590 100 V200 H514 Z" fill="url(#velvet)" stroke="#8A5E14" stroke-width="3"/>'
 	s += '<path d="M70 130 Q70 116 86 116 H514 Q530 116 530 130 V200 H70 Z" fill="#D9A23A" stroke="#8A5E14" stroke-width="3"/>'
 	s += '<path d="M300 118 V198" stroke="#8A5E14" stroke-width="2"/>'
+	# Velvet that gives: the seat cushions sag a little in the middle, each one creased at its corners, and the back cushions
+	# are buttoned, so the sofa reads as soft instead of as a block.
+	for x in [72.0, 300.0]:
+		s += '<path d="M%s 126 Q%s 136 %s 126" stroke="#B5801E" stroke-width="2" fill="none" opacity="0.7"/>' % [x + 10, x + 110, x + 210]
+		s += '<path d="M%s 196 Q%s 186 %s 196" stroke="#F2C66A" stroke-width="2.5" fill="none" opacity="0.5"/>' % [x + 12, x + 110, x + 208]
+	for x in [70.0, 230.0, 390.0]:
+		s += '<circle cx="%s" cy="70" r="3.4" fill="#8A5E14" opacity="0.8"/>' % (x + 70)
+		s += '<path d="M%s 42 q6 26 0 52 M%s 42 q-6 26 0 52" stroke="#8A5E14" stroke-width="1.6" fill="none" opacity="0.35"/>' % [x + 30, x + 110]
 	# Velvet sheen on the cushion tops, shadow tucked under the back cushions, piping along the seat front.
 	for x in [70.0, 230.0, 390.0]:
 		s += '<path d="M%s 28 Q%s 22 %s 22 H%s" stroke="#F2C66A" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.7"/>' % [x + 12, x + 14, x + 30, x + 110]
