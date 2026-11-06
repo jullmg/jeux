@@ -184,6 +184,10 @@ func _talk_to_mom() -> void:
 		Carry.put_down(_charlotte)
 		_say(_mom, "Du lait ! Merci, Chachoue !", 350.0)
 		Quests.complete("milk")
+	elif Halloween.step() == 3:
+		_count_the_candy()
+	elif Halloween.step() == 2:
+		_say(_mom, "Amuse-toi bien, ma chouette !\nReviens quand ton sac sera plein.", 400.0, 3.5)
 	elif Halloween.step() == 1:
 		_say(_mom, "Ton déguisement est dans ta commode,\nma chouette ! Vas-y !", 400.0, 3.5)
 	elif Quests.start("halloween"):
@@ -588,7 +592,10 @@ func _go_to_sleep() -> void:
 	tween.parallel().tween_property(zs, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(func():
 		GameState.flags.erase("hamster_fed")
-		words.text = "Le lendemain matin…"
+		var halloween_over: bool = Halloween.step() == 3 and GameState.flags.get("halloween_counted", false)
+		if halloween_over:
+			_end_halloween()
+		words.text = "Le lendemain matin…" if not halloween_over else "Le lendemain matin… il a neigé !"
 		words.position.y = 0.0
 		moon.queue_free()
 		_charlotte.position.x = BEDROOM.x + 840.0
@@ -605,6 +612,22 @@ func _go_to_sleep() -> void:
 		_control.enabled = true)
 
 
+# The morning after Halloween: the quest is done, the costume goes back in the drawer, and winter has come overnight.
+func _end_halloween() -> void:
+	var total := Halloween.candy()
+	Quests.complete("halloween")
+	Halloween.pack_away()
+	GameState.flags.erase("halloween_counted")
+	GameState.flags["halloween_total"] = total
+	GameState.flags["winter_greeting"] = true
+	var look := CharacterLook.charlotte()
+	look.costume = ""
+	CharacterLook.dress_charlotte(look)
+	_charlotte.set_look(CharacterLook.charlotte())
+	# Winter came overnight; the street will be white when she steps out (the save keeps the season).
+	Season.current = "winter"
+
+
 func _night_label(text: String, font_size: int) -> Label:
 	var label := Label.new()
 	label.text = text
@@ -615,6 +638,21 @@ func _night_label(text: String, font_size: int) -> Label:
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.modulate.a = 0.0
 	return label
+
+
+# Back from the rounds: Maman counts the haul with her on the kitchen table, then it is time for bed.
+func _count_the_candy() -> void:
+	_say(_mom, "Montre-moi ta récolte, Chachoue !", 380.0, 2.4)
+	_control.enabled = false
+	var steps := create_tween()
+	steps.tween_interval(1.6)
+	steps.tween_callback(func() -> void:
+		var sheet := CandyCount.new()
+		sheet.closed.connect(func() -> void:
+			_control.enabled = true
+			_say(_charlotte, "Je vais me coucher !", 300.0, 2.4)
+			GameState.flags["halloween_counted"] = true)
+		add_child(sheet))
 
 
 func _open_books() -> void:

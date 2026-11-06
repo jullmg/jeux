@@ -405,6 +405,27 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   buying sour-cream-and-onion chips at the dépanneur…): read it before inventing new quests, and tick them off there.
 - The dépanneurs have real Montréal prices (2026), in `Shop.PRICES` (candy 1,25 $, lollipop 0,75 $, chips 2,99 $, sloche 2,75 $, hot chocolate 2,25 $, popsicle 1,75 $, juice 2,25 $, pint of milk 3,29 $, bread 3,99 $, coffee 2,00 $; the specials board and the "CAFÉ 2 $" poster use them). `Shop._buy(picture, text, price)` first opens `ui/buy_dialog.gd` (`BuyDialog`, CanvasLayer 62, group "modal": item, price, pocket money and what is left, "Acheter" / "Non merci"; when short, how much is missing and only "D'accord"), then pays from `GameState.money`. Start money is 5,00 $ and quest rewards are 1–3 $ so a snack costs one or two quests.
 
+## Halloween (the long quest)
+
+- Once every other quest is done (`Quests` `after_all`), Maman tells her it is Halloween: `world/halloween.gd` (`Halloween`)
+  holds the whole evening — the step she is on (`GameState.flags.halloween_step`), the candy (`candy()`, `counted()` by kind),
+  the doors already knocked (`knocked()`), whether it is night out (`night()`) and what the notebook says next (`hint()`,
+  through `Quests.hint(id)`).
+  1. **Se déguiser**: the dresser opens the wardrobe on its "Déguisement" tab (`Wardrobe.costumes_first`). A costume is one
+     `look.costume` id: `characters/costume_art.gd` (`CostumeArt.ALL`, 22 of them) dresses a *copy* of her look (clothes,
+     colours, headwear through `CharacterArt._hat()`) and adds its own pieces — cape, wings, tail (behind her) and face paint
+     (over her eyes). **A new costume = one line in `CostumeArt.ALL`**; new patterns ("bones", "bandages") live in `_top()`.
+     `tools/costumes.tscn --page=0|1` is the design sheet.
+  2. **Passer l'Halloween**: `world/halloween_night.gd` (`HalloweenNight`, built by `StreetScene._build_halloween`) darkens the
+     street under a veil (night sky, moon, stars), lights the windows of the houses that give (`HalloweenNight.gives`, two in
+     three, never her own house, the shops or the school), hangs their decorations (`world/halloween_art.gd`, `HalloweenArt.PIECES`:
+     jack-o'-lanterns, ghosts, cobwebs, skeletons, gravestones, cats, spiders, brooms, candles, bowls, scarecrows, garlands, bats)
+     and sends four other children past in costumes. A doorbell (`StreetScene._ring`) at every front door: a lit house gives 1–3
+     sweets once, a dark one is asleep. `Halloween.ENOUGH` houses (12, so more than one street) fill her bag.
+  3. **Rentrer**: Maman counts the haul (`ui/candy_count.gd`, `CandyCount`: each kind with its drawing and the total), then bed.
+     The morning after, the quest is done, the costume goes away and **the season is winter** (`_end_halloween`); the first time
+     she steps outside, she says so (`StreetScene._winter_hello`).
+
 ## Saving
 
 - `world/game_state.gd` (`GameState`): the game in progress (pocket `money`, `quests`, story `flags`, plus `Season.day` /

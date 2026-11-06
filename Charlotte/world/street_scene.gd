@@ -136,6 +136,7 @@ func _ready() -> void:
 	_build_trees(trees)
 	_build_props()
 	_build_lost_cats()
+	_build_halloween()
 	Foreground.build(self, _street_width, VIEW.x)
 	add_child(_wind)
 	_camera = Camera2D.new()
@@ -152,6 +153,7 @@ func _ready() -> void:
 	Sfx.ambience(self)
 	Music.play(_music())
 	Transition.fade_in(self)
+	_winter_hello()
 	var shot := _arg("--screenshot=")
 	if not shot.is_empty():
 		_save_screenshot(shot)
@@ -699,6 +701,104 @@ func _build_window_cats() -> void:
 	_window_cats = WindowCats.new()
 	_window_cats.setup(houses)
 	add_child(_window_cats)
+
+
+## The morning after Halloween, the first time she steps outside: it snowed during the night, and she says so.
+const WINTER_WORDS := ["Oh !! Il a neigé pendant la nuit !", "De la neige ! L'hiver est arrivé !",
+	"Wow, tout est blanc ! Bonjour l'hiver !"]
+
+
+func _winter_hello() -> void:
+	if not GameState.flags.get("winter_greeting", false):
+		return
+	GameState.flags.erase("winter_greeting")
+	var steps := create_tween()
+	steps.tween_interval(0.9)
+	steps.tween_callback(func() -> void:
+		_charlotte.express("surprised", 2.6)
+		Sfx.play("chime", _charlotte.position)
+		Bubble.say(self, _charlotte.position + Vector2(0, -210.0), WINTER_WORDS[randi() % WINTER_WORDS.size()], 3.4))
+
+
+# ── Halloween night ─────────────────────────────────────────────
+
+## The houses that never hand out candy, whatever the street: her own, the shops, the school, the lane mouths.
+const NO_CANDY := ["duplex_charlotte", "depanneur", "depanneur_front", "ohbon", "ecole", "garages", "ruelle", "ruelle_verte"]
+
+
+## The evening of the Halloween quest: the dark, the lit houses with their decorations, the other children, and a
+## doorbell at every front door (`HalloweenNight`). Nothing at all on an ordinary night.
+func _build_halloween() -> void:
+	if not Halloween.night():
+		return
+	HalloweenNight.build(self)
+	for i in layout.size():
+		var art: String = layout[i]
+		if cross_streets.has(art) or NO_CANDY.has(art):
+			continue
+		var x := _door_x(art)
+		if is_nan(x):
+			continue
+		var key := "%s:%d" % [street_key, i]
+		var gives := HalloweenNight.gives(street_key, art, i)
+		var bell := DoorSpot.make(Rect2(x - 46.0, HOUSE_BASE_Y - 236.0, 92.0, 180.0), _ring.bind(key, gives, x), x)
+		add_child(bell)
+		if gives:
+			add_child(QuestMark.make(Vector2(x, HOUSE_BASE_Y - 262.0), func() -> bool:
+				return Halloween.night() and not Halloween.knocked().has(key), 0.62))
+
+
+# She rings: a lit, decorated house hands out candy (once), a dark one is already asleep.
+func _ring(key: String, gives: bool, door_x: float) -> void:
+	if Halloween.knocked().has(key):
+		Bubble.say(self, _charlotte.position + Vector2(0, -210.0), "J'y suis déjà allée !", 2.2)
+		return
+	_control.enabled = false
+	_charlotte.facing = 1 if door_x > _charlotte.position.x else -1
+	Sfx.play("chime", _charlotte.position)
+	var hello: String = HalloweenNight.CANDY_LINES[randi() % HalloweenNight.CANDY_LINES.size()]
+	Bubble.say(self, _charlotte.position + Vector2(0, -210.0), hello, 2.2)
+	var steps := create_tween()
+	steps.tween_interval(1.7)
+	steps.tween_callback(func() -> void:
+		if not gives:
+			_charlotte.express("worry", 2.0)
+			Bubble.say(self, _charlotte.position + Vector2(0, -210.0), HalloweenNight.ASLEEP[randi() % HalloweenNight.ASLEEP.size()], 2.4)
+			_control.enabled = true
+			return
+		Halloween.knock(key)
+		var got := randi_range(1, 3)
+		Halloween.add_candy(got)
+		Sfx.play("pop", _charlotte.position)
+		_charlotte.express("yum", 2.4)
+		Bubble.say(self, Vector2(door_x, HOUSE_BASE_Y - 250.0), HalloweenNight.NEIGHBOUR_LINES[randi() % HalloweenNight.NEIGHBOUR_LINES.size()], 2.6)
+		_candy_pop(got))
+	steps.tween_interval(1.9)
+	steps.tween_callback(func() -> void:
+		_control.enabled = true
+		if gives and Halloween.enough() and Halloween.step() == 2:
+			Halloween.set_step(3)
+			Notebook.announce("step", "Ton sac est plein ! Rentre à la maison.")
+			Bubble.say(self, _charlotte.position + Vector2(0, -210.0), "Mon sac est plein !\nJe rentre à la maison !", 3.0))
+
+
+# The candy she just got floats up over her head.
+func _candy_pop(n: int) -> void:
+	var label := Label.new()
+	label.text = "+%d bonbon%s" % [n, "s" if n > 1 else ""]
+	label.add_theme_font_size_override("font_size", 22)
+	label.add_theme_color_override("font_color", Color("#FFD23F"))
+	label.add_theme_color_override("font_outline_color", Color("#3A2A12"))
+	label.add_theme_constant_override("outline_size", 6)
+	label.position = _charlotte.position + Vector2(-70.0, -250.0)
+	label.size = Vector2(140, 30)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.z_index = 7
+	add_child(label)
+	var rise := create_tween()
+	rise.tween_property(label, "position:y", label.position.y - 60.0, 1.6)
+	rise.parallel().tween_property(label, "modulate:a", 0.0, 1.6).set_delay(0.6)
+	rise.tween_callback(label.queue_free)
 
 
 # ── Utility poles ───────────────────────────────────────────────

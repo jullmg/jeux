@@ -11,6 +11,10 @@ extends RefCounted
 const QUEST := "halloween"
 const STEP := "halloween_step"
 const CANDY := "candy"
+const BAG := "candy_bag"
+## What the neighbours hand out.
+const KINDS := ["wrapped", "lollipop", "chocolate", "gum", "chips"]
+const KIND_NAMES := {"wrapped": "Bonbons", "lollipop": "Suçons", "chocolate": "Chocolats", "gum": "Gommes", "chips": "Petits sacs de chips"}
 ## How many houses she must do before she can call it a night.
 const ENOUGH := 12
 
@@ -39,8 +43,33 @@ static func candy() -> int:
 	return int(GameState.flags.get(CANDY, 0))
 
 
+## Adds `n` sweets to her bag, each of a kind picked at the door.
 static func add_candy(n: int) -> void:
 	GameState.flags[CANDY] = candy() + n
+	var bag: Array = GameState.flags.get(BAG, [])
+	for i in n:
+		bag.append(KINDS[randi() % KINDS.size()])
+	GameState.flags[BAG] = bag
+
+
+## How many of each kind she has, for the counting on the kitchen table.
+static func counted() -> Dictionary:
+	var counts := {}
+	for kind: String in GameState.flags.get(BAG, []):
+		counts[kind] = int(counts.get(kind, 0)) + 1
+	# An old save (or the debug menu) may have a total without the bag: spread it over the kinds.
+	var listed := 0
+	for k in counts:
+		listed += int(counts[k])
+	if listed < candy():
+		counts[KINDS[0]] = int(counts.get(KINDS[0], 0)) + candy() - listed
+	return counts
+
+
+## Everything of the evening is put away (the morning after).
+static func pack_away() -> void:
+	for key in [STEP, CANDY, BAG, "halloween_doors"]:
+		GameState.flags.erase(key)
 
 
 ## The doors she has already knocked at, so each house gives only once ("<street>:<x>").
