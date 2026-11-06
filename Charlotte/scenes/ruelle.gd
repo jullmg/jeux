@@ -53,6 +53,11 @@ const SCENES := {
 @export var lane := "middle"
 ## Which lane's croque-livre holds Constance's lost book (the quest "livre"): the green lane.
 const BOOK_LANE := "dandurand"
+## What she calls each lane out loud, when she works out where Constance's book can still be.
+const LANE_NAMES := {"middle": "la ruelle derrière chez nous", "holt": "la ruelle du bord de Holt",
+	"dandurand": "la ruelle verte"}
+## The lanes whose croque-livre she has already looked in (the quest "livre").
+const CHECKED := "croque_checked"
 
 # Lots left to right (x from, x to; their kind), the openings (to an avenue or another lane), clothesline pulleys.
 var _lots: Array[Vector2] = []
@@ -454,7 +459,20 @@ func _open_croque_livre() -> void:
 	var at := _charlotte.position + Vector2(0, -190)
 	if Quests.active("livre") and not GameState.flags.get("book_found", false):
 		if lane != BOOK_LANE:
-			Bubble.say(self, at, "Rien de Constance ici…\nJ'essaie une autre ruelle !", 2.8)
+			# She remembers the boxes she has already looked in, and works out where the book can still be.
+			var checked: Array = GameState.flags.get(CHECKED, [])
+			if not checked.has(lane):
+				checked.append(lane)
+			GameState.flags[CHECKED] = checked
+			var left: Array = []
+			for key: String in LANE_NAMES:
+				if not checked.has(key):
+					left.append(key)
+			_charlotte.express("worry", 2.2)
+			if left.size() == 1:
+				Bubble.say(self, at, "Pas ici non plus !\nIl me reste juste %s." % LANE_NAMES[left[0]], 3.2)
+			else:
+				Bubble.say(self, at, "Pas de livre de Constance ici…\nJ'essaie le croque-livre d'une autre ruelle !", 3.0)
 			return
 		if not Carry.take(_charlotte, "book"):
 			Bubble.say(self, at, Carry.FULL_HANDS, 2.6)
@@ -756,6 +774,12 @@ class _Ground:
 # out of view above), with the laundry getting bigger as it comes closer. Drawn in front of everything.
 class _Clotheslines:
 	extends Node2D
+	## The neighbours' washing, hung near the gallery's pulley: a few pieces per line, swaying in the wind.
+	const COLORS := ["#E74C3C", "#FFFFFF", "#3498DB", "#F1C40F", "#9B59B6", "#F7C6D9", "#2ECC71", "#ECF0F1",
+		"#E67E22", "#7FB3D5", "#FDEBD0"]
+	const PEG := Color("#C9A24A")
+	const PEG_DARK := Color("#8C6B2A")
+
 	var pulleys: Array[Vector2] = []
 	var seed_value := 1
 	var _items: Array = []
@@ -765,50 +789,133 @@ class _Clotheslines:
 		z_index = 2
 		var rng := RandomNumberGenerator.new()
 		rng.seed = seed_value
+		# The same random numbers in every season: in winter the washing is simply taken in.
+		var hanging := not Season.is_winter()
 		for p in pulleys:
 			var end := p + Vector2(rng.randf_range(450.0, 750.0) * (1.0 if rng.randf() < 0.5 else -1.0), -p.y - 40.0)
 			# Hung within reach of the gallery, near the pulley, not out in the sky over the lane.
 			var line := []
-			if not Season.is_winter():
-				for k in rng.randi_range(2, 6):
-					line.append([rng.randf_range(0.06, 0.3), rng.randi_range(0, 3), Color(PropArt._pick(rng,
-						["#E74C3C", "#FFFFFF", "#3498DB", "#F1C40F", "#9B59B6", "#F7C6D9", "#2ECC71", "#ECF0F1"])), rng.randf_range(0, TAU)])
+			# Spread along the first third of the line, one after the other, so nothing overlaps.
+			var how_many := rng.randi_range(2, 5)
+			var step := 0.26 / how_many
+			for k in how_many:
+				var piece := {
+					"t": 0.07 + (k + 0.5) * step + rng.randf_range(-0.012, 0.012),
+					"kind": rng.randi_range(0, 5),
+					"color": Color(PropArt._pick(rng, COLORS)),
+					"phase": rng.randf_range(0, TAU),
+					"pattern": rng.randi_range(0, 2),
+				}
+				if hanging:
+					line.append(piece)
 			_items.append([p, end, line])
 
 	func _process(delta: float) -> void:
 		_t += delta
 		queue_redraw()
 
-	func _point(a: Vector2, b: Vector2, t: float) -> Vector2:
-		return a.lerp(b, t) + Vector2(0, sin(t * PI) * 40.0)
+	# The line hangs in a curve, sagging a little more under a full load.
+	func _point(a: Vector2, b: Vector2, t: float, sag := 40.0) -> Vector2:
+		return a.lerp(b, t) + Vector2(0, sin(t * PI) * sag)
 
 	func _draw() -> void:
 		for item in _items:
 			var a: Vector2 = item[0]
 			var b: Vector2 = item[1]
+			var load_count: int = (item[2] as Array).size()
+			var sag := 36.0 + 3.0 * load_count
 			for off: float in [0.0, 7.0]:
 				var pts := PackedVector2Array()
 				for k in 21:
 					var t := k / 20.0
-					pts.append(_point(a + Vector2(0, off * 0.3), b + Vector2(off * 3.0, off), t))
+					pts.append(_point(a + Vector2(0, off * 0.3), b + Vector2(off * 3.0, off), t, sag))
 				draw_polyline(pts, Color(0.92, 0.92, 0.9, 0.9), 1.6, true)
-			for thing in item[2]:
-				var t: float = thing[0]
-				var at := _point(a, b, t)
-				var k := 0.62 + t * 0.7
-				var sway := sin(_t * 1.6 + thing[3]) * 0.06
+			for piece: Dictionary in item[2]:
+				var t: float = piece.t
+				var at := _point(a, b, t, sag)
+				var k: float = 0.62 + t * 0.7
+				var sway := sin(_t * 1.6 + float(piece.phase)) * 0.06
 				draw_set_transform(at, sway, Vector2(k, k))
-				var c: Color = thing[2]
-				match thing[1]:
-					0:  # A T-shirt.
-						draw_colored_polygon(PackedVector2Array([Vector2(-14, 0), Vector2(14, 0), Vector2(20, 8), Vector2(13, 11),
-							Vector2(12, 32), Vector2(-12, 32), Vector2(-13, 11), Vector2(-20, 8)]), c)
-					1:  # Trousers.
-						draw_colored_polygon(PackedVector2Array([Vector2(-11, 0), Vector2(11, 0), Vector2(12, 36), Vector2(3, 36),
-							Vector2(0, 10), Vector2(-3, 36), Vector2(-12, 36)]), c.darkened(0.3))
-					2:  # A sheet.
-						draw_rect(Rect2(-17, 0, 34, 30), c.lightened(0.3))
-					_:  # Socks.
-						draw_colored_polygon(PackedVector2Array([Vector2(-4, 0), Vector2(2, 0), Vector2(2, 14), Vector2(7, 18), Vector2(-4, 18)]), c)
-				draw_rect(Rect2(-3, -2, 6, 4), Color("#C9A24A"))
+				_garment(piece)
 				draw_set_transform(Vector2.ZERO)
+
+	# One piece of washing, drawn like the rest of the game: a flat shape with an outline, light from the upper left,
+	# a shaded hem, its own stitching, and the wooden pegs holding it to the line.
+	func _garment(piece: Dictionary) -> void:
+		var c: Color = piece.color
+		var shape := PackedVector2Array()
+		var pegs: Array[Vector2] = [Vector2(-9, 0), Vector2(9, 0)]
+		match int(piece.kind):
+			0:  # A T-shirt: sleeves, a collar, a stitched hem.
+				shape = PackedVector2Array([Vector2(-14, 0), Vector2(-5, 2), Vector2(5, 2), Vector2(14, 0), Vector2(21, 9),
+					Vector2(13, 13), Vector2(12, 34), Vector2(-12, 34), Vector2(-13, 13), Vector2(-21, 9)])
+				pegs = [Vector2(-13, 0), Vector2(13, 0)]
+			1:  # Trousers: two legs and a waistband.
+				shape = PackedVector2Array([Vector2(-11, 0), Vector2(11, 0), Vector2(13, 38), Vector2(3, 38),
+					Vector2(0, 12), Vector2(-3, 38), Vector2(-13, 38)])
+			2:  # A sheet, wide, its bottom edge rippling.
+				shape = PackedVector2Array([Vector2(-19, 0), Vector2(19, 0), Vector2(20, 26), Vector2(12, 31),
+					Vector2(3, 26), Vector2(-6, 31), Vector2(-15, 26), Vector2(-20, 30)])
+				pegs = [Vector2(-16, 0), Vector2(16, 0)]
+			3:  # A pair of socks, side by side.
+				for side in 2:
+					var dx := -7.0 + side * 14.0
+					var toe := 1.0 if side == 0 else -1.0
+					_cloth(PackedVector2Array([Vector2(dx - 4, 0), Vector2(dx + 4, 0), Vector2(dx + 4, 13),
+						Vector2(dx + 4 + 5 * toe, 18), Vector2(dx - 4, 18)]), c)
+					draw_line(Vector2(dx - 4, 4), Vector2(dx + 4, 4), c.darkened(0.25), 1.2)
+				_pegs([Vector2(-7, 0), Vector2(7, 0)])
+				return
+			4:  # A little dress, flaring out at the hem.
+				shape = PackedVector2Array([Vector2(-10, 0), Vector2(10, 0), Vector2(13, 12), Vector2(17, 34),
+					Vector2(-17, 34), Vector2(-13, 12)])
+			_:  # A towel, with its woven stripes.
+				shape = PackedVector2Array([Vector2(-13, 0), Vector2(13, 0), Vector2(13, 36), Vector2(-13, 36)])
+		_cloth(shape, c)
+		# Folds and stitching.
+		match int(piece.kind):
+			0:
+				draw_arc(Vector2(0, 1), 5.0, 0.2, PI - 0.2, 10, c.darkened(0.3), 1.4)
+				draw_line(Vector2(-11, 31), Vector2(11, 31), c.darkened(0.22), 1.2)
+			1:
+				draw_line(Vector2(-11, 5), Vector2(11, 5), c.darkened(0.3), 1.4)
+				draw_line(Vector2(0, 12), Vector2(0, 36), c.darkened(0.25), 1.0)
+			2:
+				draw_line(Vector2(-6, 2), Vector2(-4, 24), c.darkened(0.14), 1.2)
+				draw_line(Vector2(7, 2), Vector2(6, 25), c.darkened(0.14), 1.2)
+			4:
+				draw_line(Vector2(-9, 12), Vector2(9, 12), c.darkened(0.25), 1.2)
+			5:
+				for y: float in [6.0, 10.0, 26.0, 30.0]:
+					draw_line(Vector2(-12, y), Vector2(12, y), c.darkened(0.28), 1.6)
+		# Dots or stripes on some of them.
+		if int(piece.kind) != 5 and int(piece.pattern) > 0:
+			var mark := c.darkened(0.3) if c.get_luminance() > 0.5 else c.lightened(0.4)
+			if int(piece.pattern) == 1:
+				for y in 3:
+					for x in 3:
+						draw_circle(Vector2(-7.0 + x * 7.0, 10.0 + y * 8.0), 1.5, mark)
+			else:
+				for y in 4:
+					draw_line(Vector2(-10, 9.0 + y * 7.0), Vector2(10, 9.0 + y * 7.0), mark, 1.3)
+		_pegs(pegs)
+
+	# A flat garment: the cloth, a lighter panel up on the left where the light falls, a shaded hem, and an outline.
+	func _cloth(shape: PackedVector2Array, c: Color) -> void:
+		draw_colored_polygon(shape, c)
+		var box := Rect2(shape[0], Vector2.ZERO)
+		for p in shape:
+			box = box.expand(p)
+		draw_rect(Rect2(box.position.x, box.position.y + box.size.y * 0.74, box.size.x, box.size.y * 0.26),
+			Color(0.10, 0.08, 0.14, 0.10))
+		draw_rect(Rect2(box.position.x, box.position.y, box.size.x * 0.40, box.size.y * 0.32), Color(1, 1, 1, 0.13))
+		var outline := shape.duplicate()
+		outline.append(shape[0])
+		draw_polyline(outline, c.darkened(0.42), 1.3, true)
+
+	# The wooden pegs that hold it to the line.
+	func _pegs(points: Array) -> void:
+		for p: Vector2 in points:
+			draw_rect(Rect2(p.x - 2.6, p.y - 4.5, 5.2, 9.0), PEG)
+			draw_rect(Rect2(p.x - 2.6, p.y - 4.5, 5.2, 9.0), PEG_DARK, false, 1.0)
+			draw_line(Vector2(p.x, p.y - 3.5), Vector2(p.x, p.y + 3.5), PEG_DARK, 0.8)

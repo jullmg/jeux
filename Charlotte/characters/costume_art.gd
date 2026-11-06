@@ -215,12 +215,13 @@ static func hat(kind: String, color: String, line: String, light: String) -> Str
 			return s
 		"robot":
 			# A boxy helmet with a visor, bolts and an aerial.
-			var s := '<rect x="24" y="-10" width="176" height="108" rx="12" fill="%s" stroke="%s" stroke-width="3"/>' % [color, line]
-			s += '<rect x="40" y="10" width="144" height="46" rx="8" fill="#2E3440" stroke="%s" stroke-width="3"/>' % line
-			s += '<rect x="52" y="18" width="40" height="12" rx="6" fill="#1FB5C4"/><rect x="132" y="18" width="40" height="12" rx="6" fill="#1FB5C4"/>'
-			s += '<rect x="64" y="66" width="96" height="14" rx="6" fill="#5E6368"/>'
+			# It sits on her head like a helmet: her own face stays in view under it.
+			var s := '<rect x="24" y="-10" width="176" height="88" rx="12" fill="%s" stroke="%s" stroke-width="3"/>' % [color, line]
+			s += '<rect x="40" y="6" width="144" height="38" rx="8" fill="#2E3440" stroke="%s" stroke-width="3"/>' % line
+			s += '<rect x="52" y="14" width="40" height="11" rx="5" fill="#1FB5C4"/><rect x="132" y="14" width="40" height="11" rx="5" fill="#1FB5C4"/>'
+			s += '<rect x="64" y="54" width="96" height="12" rx="6" fill="#5E6368"/>'
 			for bx in [40.0, 184.0]:
-				s += '<circle cx="%s" cy="76" r="7" fill="%s" stroke="%s" stroke-width="2"/>' % [bx, light, line]
+				s += '<circle cx="%s" cy="60" r="7" fill="%s" stroke="%s" stroke-width="2"/>' % [bx, light, line]
 			s += '<rect x="106" y="-40" width="8" height="32" fill="%s"/><circle cx="110" cy="-46" r="10" fill="#C8202A"/>' % line
 			return s + '<path d="M38 20 Q44 -2 76 -4" stroke="%s" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.7"/>' % light
 		"space":
@@ -348,54 +349,78 @@ static func tail(kind: String, color: String) -> String:
 	return ""
 
 
-## Face paint and small pieces worn on the face, drawn over her eyes and under the fringe. Head space, like the hats.
+## Face paint and small pieces worn on the face, drawn over her eyes and under the fringe. Head space, like the hats:
+## her eyes sit at (94, 130) and (149, 130), the face's middle is x 122, the nose tip y 152, the mouth y 170, the
+## forehead y 96 and the chin y 196 — everything here is placed on those, so nothing lands on the wrong feature.
 static func mask(kind: String) -> String:
 	match kind:
 		"whiskers":
-			return ('<path d="M46 190 h34 M44 204 h34 M146 190 h34 M148 204 h34" stroke="#2B2B33" stroke-width="3" stroke-linecap="round"/>'
-				+ '<path d="M100 176 q12 -8 24 0 q-6 12 -12 12 q-6 0 -12 -12 z" fill="#2B2B33"/>')
+			# A little nose on the nose, and three whiskers a side out over the cheeks, clear of her smile.
+			var s := '<path d="M110 142 h24 q2 8 -12 17 q-14 -9 -12 -17 z" fill="#2B2B33"/>'
+			for i in 3:
+				var y: float = 150.0 + i * 11.0
+				var lift: float = -4.0 + i * 4.0
+				s += '<path d="M56 %s q22 %s 44 %s" stroke="#2B2B33" stroke-width="2.6" fill="none" stroke-linecap="round" opacity="0.9"/>' % [y, lift, lift * 0.4]
+				s += '<path d="M188 %s q-22 %s -44 %s" stroke="#2B2B33" stroke-width="2.6" fill="none" stroke-linecap="round" opacity="0.9"/>' % [y, lift, lift * 0.4]
+			return s
 		"ghost":
-			return ('<ellipse cx="88" cy="166" rx="16" ry="21" fill="#2B2B33" opacity="0.8"/>'
-				+ '<ellipse cx="140" cy="166" rx="16" ry="21" fill="#2B2B33" opacity="0.8"/>'
-				+ '<path d="M98 208 q14 16 30 0 q-14 -8 -30 0 z" fill="#2B2B33" opacity="0.8"/>')
+			# Under the sheet: her face goes pale, nothing more (two painted holes read as bruises).
+			return ('<ellipse cx="111" cy="132" rx="76" ry="72" fill="#F4F2EC" opacity="0.38"/>'
+				+ '<ellipse cx="111" cy="132" rx="76" ry="72" fill="none" stroke="#DAD3C4" stroke-width="2" opacity="0.5"/>')
 		"jack":
-			return ('<path d="M72 150 l30 26 l-34 10 z" fill="#2B2B33"/><path d="M156 150 l-30 26 l34 10 z" fill="#2B2B33"/>'
-				+ '<path d="M76 202 q36 26 76 0 q-10 -6 -18 2 q-10 -8 -20 0 q-10 -8 -20 -2 q-9 -6 -18 0 z" fill="#2B2B33"/>')
+			# Jack-o-lantern brows over her own, and a soft orange glow on the face.
+			return ('<ellipse cx="111" cy="134" rx="74" ry="70" fill="#E8812E" opacity="0.18"/>'
+				+ '<path d="M72 102 l26 -12 l2 16 z" fill="#8A4A14" opacity="0.85"/>'
+				+ '<path d="M170 102 l-26 -12 l-2 16 z" fill="#8A4A14" opacity="0.85"/>')
 		"skull":
-			return ('<ellipse cx="86" cy="170" rx="21" ry="25" fill="#23232B"/><ellipse cx="142" cy="170" rx="21" ry="25" fill="#23232B"/>'
-				+ '<path d="M106 194 l8 -14 l8 14 z" fill="#23232B"/>'
-				+ '<path d="M76 214 h76" stroke="#23232B" stroke-width="4"/>'
-				+ '<path d="M90 214 v12 M106 214 v12 M122 214 v12 M138 214 v12" stroke="#23232B" stroke-width="3"/>')
+			# Painted on, not a blindfold: the sockets are see-through, so her eyes still show.
+			return ('<ellipse cx="94" cy="130" rx="27" ry="30" fill="#23232B" opacity="0.5"/>'
+				+ '<ellipse cx="149" cy="130" rx="25" ry="29" fill="#23232B" opacity="0.5"/>'
+				+ '<path d="M114 150 l9 -15 l9 15 z" fill="#23232B" opacity="0.75"/>'
+				+ '<path d="M86 170 h74" stroke="#23232B" stroke-width="3.5" opacity="0.6"/>'
+				+ '<path d="M98 160 v20 M112 160 v20 M126 160 v20 M140 160 v20 M154 162 v16" stroke="#23232B" stroke-width="2.6" opacity="0.6"/>')
 		"fangs":
-			return ('<path d="M104 212 l6 16 l6 -16 z" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="1"/>'
-				+ '<path d="M122 212 l6 16 l6 -16 z" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="1"/>'
-				+ '<path d="M78 148 q14 -10 30 -4 M150 148 q-14 -10 -30 -4" stroke="#2B1020" stroke-width="3.5" fill="none" stroke-linecap="round"/>')
+			# Two little fangs under her lip, and dark arched brows.
+			return ('<path d="M110 172 l5 15 l5 -15 z" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="1"/>'
+				+ '<path d="M128 172 l5 15 l5 -15 z" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="1"/>'
+				+ '<path d="M74 102 q18 -12 36 -4 M172 100 q-18 -12 -36 -4" stroke="#2B1020" stroke-width="3.5" fill="none" stroke-linecap="round"/>')
 		"patch":
-			return ('<path d="M36 156 Q100 142 128 160" stroke="#23232B" stroke-width="5" fill="none"/>'
-				+ '<ellipse cx="88" cy="170" rx="24" ry="22" fill="#23232B"/>')
+			# Over one eye, its strap round the head.
+			return ('<path d="M36 118 Q110 100 188 116" stroke="#23232B" stroke-width="5" fill="none"/>'
+				+ '<ellipse cx="94" cy="130" rx="25" ry="23" fill="#23232B"/>'
+				+ '<ellipse cx="87" cy="123" rx="7" ry="5" fill="#FFFFFF" opacity="0.18"/>')
 		"domino":
-			return ('<path d="M54 152 Q114 138 172 152 Q178 186 146 192 Q114 198 80 192 Q48 186 54 152 Z" fill="#2C5FC4" stroke="#1B3E85" stroke-width="3" stroke-linejoin="round"/>'
-				+ '<ellipse cx="88" cy="168" rx="17" ry="14" fill="#F4F2EC" opacity="0.9"/>'
-				+ '<ellipse cx="140" cy="168" rx="17" ry="14" fill="#F4F2EC" opacity="0.9"/>')
+			# A hero mask with real eye holes (even-odd: the two ellipses are cut out of the band).
+			return ('<path fill-rule="evenodd" fill="#2C5FC4" stroke="#1B3E85" stroke-width="3" stroke-linejoin="round"'
+				+ ' d="M44 112 Q122 94 200 112 Q206 150 170 160 Q122 168 74 160 Q38 150 44 112 Z'
+				+ ' M94 112 m-20 0 a20 15 0 1 0 40 0 a20 15 0 1 0 -40 0'
+				+ ' M152 112 m-19 0 a19 15 0 1 0 38 0 a19 15 0 1 0 -38 0 Z"/>')
 		"mummy":
-			return ('<path d="M44 156 Q114 144 184 160" stroke="#E8E0CC" stroke-width="16" fill="none" opacity="0.9"/>'
-				+ '<path d="M44 156 Q114 144 184 160" stroke="#C9BFA6" stroke-width="2" fill="none" opacity="0.7"/>'
-				+ '<path d="M52 204 Q114 216 176 200" stroke="#E8E0CC" stroke-width="14" fill="none" opacity="0.9"/>')
+			# Bandages across the forehead and the chin: her eyes and her smile stay clear.
+			return ('<path d="M38 104 Q112 86 192 106" stroke="#E8E0CC" stroke-width="18" fill="none" opacity="0.92"/>'
+				+ '<path d="M38 104 Q112 86 192 106" stroke="#C9BFA6" stroke-width="2" fill="none" opacity="0.6"/>'
+				+ '<path d="M54 202 Q112 216 174 198" stroke="#E8E0CC" stroke-width="14" fill="none" opacity="0.92"/>'
+				+ '<path d="M54 202 Q112 216 174 198" stroke="#C9BFA6" stroke-width="2" fill="none" opacity="0.5"/>'
+				+ '<path d="M168 112 l16 -8 l6 14 z" fill="#E8E0CC" stroke="#C9BFA6" stroke-width="1.5" opacity="0.95"/>')
 		"clown":
-			return ('<circle cx="114" cy="192" r="15" fill="#E8542F" stroke="#B5361A" stroke-width="2.5"/>'
-				+ '<circle cx="108" cy="187" r="5" fill="#FFFFFF" opacity="0.7"/>'
-				+ '<circle cx="76" cy="206" r="13" fill="#F7A8C4" opacity="0.8"/><circle cx="152" cy="206" r="13" fill="#F7A8C4" opacity="0.8"/>'
-				+ '<path d="M70 146 q18 -16 36 -2 M158 146 q-18 -16 -36 -2" stroke="#2C5FC4" stroke-width="4" fill="none" stroke-linecap="round"/>')
+			# The red nose on her nose, a painted smile round her mouth, diamonds over the eyes and two round cheeks.
+			return ('<circle cx="76" cy="162" r="14" fill="#F7A8C4" opacity="0.85"/><circle cx="164" cy="160" r="14" fill="#F7A8C4" opacity="0.85"/>'
+				+ '<path d="M86 166 Q123 206 160 164" stroke="#E8542F" stroke-width="5" fill="none" stroke-linecap="round"/>'
+				+ '<path d="M94 92 l9 14 l-9 14 l-9 -14 z" fill="#2C5FC4" opacity="0.85"/>'
+				+ '<path d="M149 92 l9 14 l-9 14 l-9 -14 z" fill="#2C5FC4" opacity="0.85"/>'
+				+ '<circle cx="123" cy="152" r="14" fill="#E8542F" stroke="#B5361A" stroke-width="2.5"/>'
+				+ '<circle cx="117" cy="147" r="5" fill="#FFFFFF" opacity="0.7"/>')
 		"ninja":
-			# Only a band across her eyes shows between the hood and the face cloth.
-			return ('<path d="M40 138 Q112 128 184 138 L184 160 Q112 152 40 160 Z" fill="#2E3440"/>'
-				+ '<path d="M44 196 Q112 188 180 196 L178 246 Q112 256 46 246 Z" fill="#2E3440"/>'
-				+ '<path d="M46 162 Q112 154 178 162" stroke="#1A1E26" stroke-width="2" fill="none" opacity="0.6"/>')
+			# Hood and face cloth, with a band of her own face left between them.
+			return ('<path d="M34 72 Q112 54 190 72 L190 108 Q112 96 34 110 Z" fill="#2E3440"/>'
+				+ '<path d="M38 152 Q112 142 186 152 L182 214 Q112 228 42 214 Z" fill="#2E3440"/>'
+				+ '<path d="M40 112 Q112 100 188 114" stroke="#1A1E26" stroke-width="2" fill="none" opacity="0.6"/>'
+				+ '<path d="M40 156 Q112 146 186 156" stroke="#1A1E26" stroke-width="2" fill="none" opacity="0.6"/>')
 		"freckles":
 			var s := ""
 			for i in 8:
-				var fx: float = [70.0, 84.0, 96.0, 78.0, 142.0, 156.0, 168.0, 150.0][i]
-				var fy: float = [190.0, 198.0, 190.0, 206.0, 190.0, 198.0, 190.0, 206.0][i]
+				var fx: float = [68.0, 82.0, 94.0, 76.0, 150.0, 164.0, 176.0, 158.0][i]
+				var fy: float = [152.0, 160.0, 152.0, 168.0, 150.0, 158.0, 150.0, 166.0][i]
 				s += '<circle cx="%s" cy="%s" r="2.6" fill="#B5603F" opacity="0.7"/>' % [fx, fy]
 			return s
 	return ""

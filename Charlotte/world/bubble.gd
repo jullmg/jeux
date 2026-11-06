@@ -35,6 +35,8 @@ static func say(parent: Node, at: Vector2, text: String, seconds := 2.4) -> void
 			others.append(old.get_rect())
 	bubble.add_to_group("bubble")
 	bubble.set_meta("anchor", at)
+	# Above everything in the scene (washing on a line, decorations, the night): speech is never hidden.
+	bubble.z_index = 20
 	parent.add_child(bubble)
 	bubble.reset_size()
 	bubble.position = at - Vector2(bubble.size.x / 2.0, bubble.size.y)

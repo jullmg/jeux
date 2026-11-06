@@ -193,8 +193,14 @@ func _spots(origin: Vector2, width: float, door_x: float) -> Dictionary:
 	}
 
 
-# A few other children doing the rounds, each in a costume of their own.
+# A few other children doing the rounds, each in a costume of their own and a little lantern of their own.
 func _trick_or_treaters(scene: Node2D, rng: RandomNumberGenerator) -> void:
+	# They walk among the grown-ups, not behind the street: slipped into the child order right after the other
+	# passersby, so the trees, lamps and poles still pass in front of them.
+	var after := -1
+	for i in scene.get_child_count():
+		if scene.get_child(i) is Passerby:
+			after = i
 	for i in 4:
 		var kid := Passerby.new()
 		kid.look = CharacterLook.random(rng, "child")
@@ -204,8 +210,11 @@ func _trick_or_treaters(scene: Node2D, rng: RandomNumberGenerator) -> void:
 		kid.scale = Vector2.ONE * StreetScene.CHAR_SCALE * 0.94
 		kid.facing = 1 if rng.randf() < 0.5 else -1
 		kid.bounds = Vector2(-140.0, scene._street_width + 140.0)
-		kid.z_index = -1
 		scene.add_child(kid)
+		if after >= 0:
+			after += 1
+			scene.move_child(kid, after)
+		_lights.walkers.append(kid)
 
 
 # Window light, lamp halos and the glow of the pumpkins, all drawn in one additive pass over the dark.
@@ -218,6 +227,8 @@ class _Lights:
 	var moon := Vector2.INF
 	## Charlotte: her own little lantern lights the few steps around her.
 	var lantern: Node2D
+	## The other children out tonight: each carries a smaller light of their own.
+	var walkers: Array[Node2D] = []
 	var flicker := 0.0
 
 	func _draw() -> void:
@@ -231,6 +242,12 @@ class _Lights:
 		for rect in windows:
 			draw_rect(rect, Color(WINDOW_LIGHT, 0.5))
 			draw_rect(rect.grow(2.0), Color(WINDOW_LIGHT, 0.18))
+		for who in walkers:
+			if is_instance_valid(who):
+				var spot: Vector2 = who.position + Vector2(0, -54.0)
+				for ring in 3:
+					var t := (ring + 1.0) / 3.0
+					draw_circle(spot, 74.0 * t, Color(1.0, 0.82, 0.52, 0.055 * (1.0 - t * 0.6)))
 		if is_instance_valid(lantern):
 			var at: Vector2 = lantern.position + Vector2(0, -60.0)
 			for ring in 4:
