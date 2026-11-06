@@ -10,8 +10,7 @@ Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks
 (ground floor of `duplex_charlotte`, n° 5672) to go inside her flat. In her bedroom, click the dresser's drawers to open her
 wardrobe and change clothes. Click her desk to draw (`ui/drawing_pad.gd`, `DrawingPad`: crayons, sizes, eraser); "Sur le frigo !" saves the
 drawing to the game's `user://slots/<n>/drawings/` (newest 4 kept) and sticks it on the kitchen fridge. Delete that folder after tests.
-Click the bookshelf in her bedroom to read (`ui/book_reader.gd`, `BookReader`: four short original stories, a
-picture and text per page). Click her bed to sleep: night falls, "Bonne nuit, Chachoue…", then "Le lendemain matin…" (no day count shown or kept for now; `Season.day` stays 1).
+Click the bookshelf in her bedroom to read (`ui/book_reader.gd`, `BookReader`: six short original stories — two set in the neighbourhood, « La ruelle aux trésors » and « Le hibou de la 5e Avenue ». The shelf shows illustrated covers (`_Cover`: the first page's picture under a title band), and an open book is a real two-page spread (`_Spread`: cream pages, the fold, a page number) with the picture framed on the left and the words on the right; the pictures (`_Art`) are drawn with outlines, a sky gradient, clouds or stars and a rolling ground). Click her bed to sleep: night falls, "Bonne nuit, Chachoue…", then "Le lendemain matin…" (no day count shown or kept for now; `Season.day` stays 1).
 Click the fridge: it opens (`InteriorArt.fridge_open()`) and she takes a random snack (`InteriorArt.snack(kind)`), "Miam !".
 Click the hallway TV to turn it on and change channels, then off. `world/tv_shows.gd` (`TvShows`) is the
 catalogue of channels, all original (no copyrighted shows or characters): news, animals, cartoon, hockey (the Canadiens in red with the CH at centre ice, against a team in white; real team, Julien's wish), weather, the
