@@ -193,8 +193,16 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   "shelves" [x, "shelves", seed], one every ~340 px) so the two feel different.
 - A dépanneur's window seen from the street is never a dark pane (generator `_shop_glass_glow`, `_shop_glass_goods`, `_shop_glass_shine`,
   own RNG): the shop's warm light behind the glass, shelves of tins, bottles and boxes against it, a poster taped up, and the street
-  reflected in broad diagonal streaks. Used by Xin-Xin's front (`_depanneur_front`, its fridge dropped lower so the shelves show) and
-  by Oh Bon! (`_ohbon`).
+  reflected in broad diagonal streaks. Used by Xin-Xin's front (`_depanneur_front`, its fridge dropped lower so the shelves show),
+  by Xin-Xin's side (`_depanneur_side`) and by Oh Bon! (`_ohbon`).
+- Xin-Xin's side on 6e Avenue, at the Dandurand corner (`_depanneur_side`, from `reference/coin_dandurand/coin_dépanneur_sur_6eme_coin_dandurand.jpg`),
+  is the first thing Charlotte sees of her block: old brick worn by a century (`_brick_wear`: single headers fired almost black on the
+  real brick grid, patches of fresher mortar, pale washes, soot run down from under the parapet, weep holes), the parged concrete base
+  (`_depanneur_base`: drip course, trowel marks, stains, a crack, the hose bib, the barred vent), the big shop window
+  (`_depanneur_window`: speckled granite lintel, white painted wood frame and mullion with its peeling paint, the lit shop behind the
+  glass — dropped ceiling, fluorescent tubes, shelves, blue packs — the security grid over the lower two thirds, the three posters
+  taped along the bottom, the street in the pane, a projecting sill), the meter on its board with its mast and the service cable
+  (`_depanneur_fittings`), and the Dandurand balcony poking round the corner with its green corrugated awning (`_depanneur_corner`).
 - Shop walls get advertising posters, never house picture frames: `ShopArt.ad_poster(kind)` (`AD_POSTERS`: coffee, ice cream, slush, hot dogs, cold drinks), hung with `Shop._ad(kind, x, bottom, scale)` (title label over the strip).
 - `tools/shop_objects.tscn` is the catalogue of every `ShopArt` object, twelve to a page, to judge their drawing: `Godot --path . --screen 1 res://tools/shop_objects.tscn -- --screenshot=/path/p.png --page=0` (pages 0–5; wait for `RenderingServer.frame_post_draw` before capturing in a tool scene, or the shot comes out transparent).
 - More shop objects in `ShopArt` (shopping cart, old cash register, spinner rack, produce crates, flower buckets, gumball machine,

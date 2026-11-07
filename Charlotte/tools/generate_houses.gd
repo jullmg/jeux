@@ -1773,88 +1773,221 @@ func _scroll_railing(x0: float, x1: float, top: float, bottom: float) -> void:
 		_rect(px, top - 6, 6, h + 6, "#1F1F1F")
 
 
-# Dépanneur Xin-Xin's side on 6e Avenue: dark variegated brick, quoins on the corner, a tall concrete base with
-# a vent, one big shop window (security grid, ads) under a granite lintel, and the corner balcony with its
-# green corrugated awning poking out from the Dandurand front.
+# ── Dépanneur Xin-Xin, its side on 6e Avenue ───────────────────────────────
+# From reference/coin_dandurand/coin_dépanneur_sur_6eme_coin_dandurand.jpg: old variegated brick with burnt
+# headers, patched mortar and soot running down from the parapet; quoins at the corner; a parged concrete base
+# with its barred vent; and the one big shop window — the shop lit behind the glass, its dropped ceiling, tubes,
+# shelves and packs, the security grid over the lower two thirds and the posters taped along the bottom — under
+# a rough granite lintel on a projecting sill. Round the corner the Dandurand balcony's white soffit, its
+# scrolled railing and the green corrugated awning poke out past the building's edge.
 func _depanneur_side() -> void:
 	var top := _top()
 	var concrete := base_y - 84.0
 	_bricks(top, concrete)
+	_brick_wear(top, concrete)
+	_soldier_course(top + 2.0)
 	_wall_shading(top)
 	_flat_parapet(top)
 	_quoins(X0, 1.0, top + 4.0, concrete)
-	# Concrete base, stained, with the basement vent.
-	_rect(X0, concrete, X1 - X0, ground_y - concrete, "#A8A49D")
-	_rect(X0, concrete, X1 - X0, 6, "#BDB9B1")
+	_depanneur_base(concrete)
+	_depanneur_window(286.0, concrete - 22.0)
+	_depanneur_fittings(top, concrete)
+	_depanneur_corner(top)
+
+
+# A wall that has stood there a hundred years: single headers fired almost black, patches of fresher mortar,
+# pale washes between the courses, soot run down from under the parapet, and the weep holes along the bottom.
+func _brick_wear(y0: float, y1: float) -> void:
+	var row := 0
+	var y := y0
+	while y < y1 - 12.0:
+		var x := X0 - (18.0 if row % 2 == 1 else 0.0)
+		while x < X1:
+			if rng.randf() < 0.06:
+				var bx := maxf(x, X0)
+				var bw := minf(x + 34.0, X1) - bx
+				if bw > 3.0:
+					_rect(bx, y, bw, 11, _pick(["#3A211C", "#48291F", "#2C1915"]))
+			x += 36.0
+		y += 13.0
+		row += 1
+	for i in 3:
+		var pw := rng.randf_range(100.0, 240.0)
+		_rect(rng.randf_range(X0, X1 - pw), rng.randf_range(y0 + 40.0, y1 - 70.0), pw,
+			rng.randf_range(15.0, 42.0), "#CCC2B4", 'opacity="0.2"')
 	for i in 6:
-		_rect(rng.randf_range(X0, X1 - 60), rng.randf_range(concrete + 20, ground_y - 30), rng.randf_range(30, 90), rng.randf_range(8, 24), "#8E8A83", 'opacity="0.35"')
-	var vx := X1 - 250.0
-	_rect(vx, concrete + 58, 160, 78, "#5E5A55", _stroke("#77736C", 4))
-	var gx := vx + 8.0
+		var ew := rng.randf_range(14.0, 36.0)
+		_rect(rng.randf_range(X0 + 10.0, X1 - ew - 10.0), rng.randf_range(y0 + 30.0, y1 - 160.0), ew,
+			rng.randf_range(60.0, 150.0), "#EAE2D6", 'opacity="0.1"')
+	# Soot washed down from under the parapet, wider at the top.
+	for i in 7:
+		var sw := rng.randf_range(16.0, 46.0)
+		var sx := rng.randf_range(X0 + 6.0, X1 - sw - 6.0)
+		var sh := rng.randf_range(70.0, 200.0)
+		_path("M%s %s h%s l%s %s h%s z" % [_n(sx), _n(y0), _n(sw), _n(-sw * 0.3), _n(sh), _n(-sw * 0.4)],
+			"#231713", 'opacity="0.1"')
+	var wx := X0 + 46.0
+	while wx < X1 - 30.0:
+		_rect(wx, y1 - 11.0, 4, 9, "#2A1A16", 'opacity="0.5"')
+		wx += 74.0
+
+
+# The parged concrete base: trowelled render with a drip course at its top, old water stains, a crack running
+# down from it, the hose bib, and the basement vent recessed in its frame.
+func _depanneur_base(concrete: float) -> void:
+	_rect(X0, concrete, X1 - X0, ground_y - concrete, "#A8A49D")
+	for i in 9:
+		_rect(rng.randf_range(X0, X1 - 70.0), rng.randf_range(concrete + 20.0, ground_y - 26.0),
+			rng.randf_range(34.0, 100.0), rng.randf_range(8.0, 26.0), "#8E8A83", 'opacity="0.3"')
+	for i in 4:
+		_rect(rng.randf_range(X0 + 30.0, X1 - 40.0), concrete + 10, rng.randf_range(10.0, 26.0),
+			rng.randf_range(26.0, 62.0), "#7E7A73", 'opacity="0.2"')
+	# Trowel marks left in the render, and the grime where it meets the sidewalk.
+	for i in 14:
+		var tw := rng.randf_range(40.0, 130.0)
+		_path("M%s %s h%s" % [_n(rng.randf_range(X0, X1 - tw)), _n(rng.randf_range(concrete + 14.0, ground_y - 16.0)), _n(tw)],
+			"none", _stroke("#B8B4AD", 2) + ' opacity="0.5"')
+	_path("M%s %s l6 18 l-5 16 l7 22 l-3 16" % [_n(X0 + 92.0), _n(concrete + 12)], "none", _stroke("#7A766F", 2))
+	_rect(X0, ground_y - 20, X1 - X0, 20, "#000000", 'opacity="0.1"')
+	_rect(X0, ground_y - 9, X1 - X0, 9, "#6E6A64", 'opacity="0.35"')
+	# The drip course capping the render.
+	_rect(X0 - 4, concrete - 8, X1 - X0 + 8, 11, "#BFBBB3", _stroke("#8E8A83", 1))
+	_rect(X0 - 4, concrete - 8, X1 - X0 + 8, 3, "#D2CEC6")
+	_rect(X0 - 4, concrete + 3, X1 - X0 + 8, 5, "#000000", 'opacity="0.16"')
+	_snow(X0 - 4, X1 - X0 + 8, concrete - 8)
+	# The hose bib.
+	_rect(X1 - 74, concrete + 32, 7, 18, "#8E918E")
+	_circle(X1 - 70.5, concrete + 30, 7, "#B9BCB8", _stroke("#7E817E", 1.5))
+	# The basement vent: a frame set into the render, its grille deep behind.
+	var vx := X1 - 248.0
+	var vy := concrete + 56.0
+	_rect(vx - 6, vy - 6, 172, 90, "#8E8A83", _stroke("#75716B", 1.5))
+	_rect(vx, vy, 160, 78, "#3A3835")
+	var gx := vx + 6.0
 	while gx < vx + 154.0:
-		_rect(gx, concrete + 64, 2, 66, "#2E2C2A")
+		_rect(gx, vy + 6, 2, 66, "#56534E")
 		gx += 7.0
-	var gy := concrete + 66.0
-	while gy < concrete + 130.0:
-		_rect(vx + 6, gy, 148, 2, "#2E2C2A")
+	var gy := vy + 8.0
+	while gy < vy + 72.0:
+		_rect(vx + 6, gy, 148, 2, "#56534E")
 		gy += 7.0
-	# The shop window.
-	var wx := 250.0
-	var ww := 320.0
-	var wy := 290.0
-	var wh := concrete - 20.0 - wy
-	_rect(wx - 24, wy - 40, ww + 48, 34, "#8E8B85", _stroke("#6E6B66", 1.5))
-	for i in 40:
-		_circle(rng.randf_range(wx - 20, wx + ww + 20), rng.randf_range(wy - 36, wy - 10), 1.4, _pick(["#5E5B56", "#B5B2AB"]))
-	_rect(wx + ww / 2 - 30, wy - 48, 60, 46, "#9A9790", _stroke("#6E6B66", 1.5))
-	_rect(wx - 6, wy - 6, ww + 12, wh + 12, "#F2F0EA", _stroke("#B9B5AC", 2))
-	_rect(wx, wy, ww, wh, "#3E4A52")
-	_rect(wx + 10, wy + 14, ww - 20, 4, "#F4F8FF", 'opacity="0.9"')
-	# Security grid behind the glass, top two thirds.
+	_rect(vx, vy, 160, 7, "#000000", 'opacity="0.4"')
+
+
+# The one big shop window, `wy` to `wb`: the granite lintel, the white painted wood frame and mullion, the lit
+# shop behind the glass, the security grid over the lower two thirds, the posters along the bottom, the street
+# caught in the pane, and the projecting concrete sill.
+func _depanneur_window(wy: float, wb: float) -> void:
+	var wx := 214.0
+	var ww := 306.0
+	var wh := wb - wy
+	# Rough granite lintel, projecting, with its shadow thrown on the brick below.
+	_rect(wx - 30, wy - 48, ww + 60, 40, "#938F89", _stroke("#6E6B66", 1.5))
+	_rect(wx - 30, wy - 48, ww + 60, 7, "#AEAAA4")
+	for i in 80:
+		_circle(rng.randf_range(wx - 26.0, wx + ww + 26.0), rng.randf_range(wy - 44.0, wy - 12.0),
+			rng.randf_range(0.9, 2.2), _pick(["#625F5A", "#B7B3AD", "#7E7B76", "#565350"]))
+	_rect(wx - 30, wy - 9, ww + 60, 8, "#000000", 'opacity="0.2"')
+	_snow(wx - 30, ww + 60, wy - 48)
+	# The glass, and the shop's own light behind it.
+	_rect(wx - 10, wy - 10, ww + 20, wh + 20, "#EEEADF", _stroke("#B9B3A8", 2))
+	_rect(wx, wy, ww, wh, "#2F3A41")
+	_shop_glass_glow(wx, wy, ww, wh, 613)
+	# The dropped ceiling and its fluorescent tubes, deep inside.
+	_rect(wx + 2, wy + 2, ww - 4, 18, "#C9C4B6", 'opacity="0.5"')
+	for tx in [wx + 20.0, wx + ww * 0.54]:
+		_rect(tx, wy + 24, ww * 0.34, 7, "#FFF6D8", 'opacity="0.85"')
+		_rect(tx, wy + 31, ww * 0.34, 6, "#FFE9A8", 'opacity="0.35"')
+	# Shelves of tins, bottles and boxes against the glass, and the blue packs stacked at the back.
+	_shop_glass_goods(wx + 4, wy + 36, ww - 8, 104.0, 613, 2)
+	for i in 3:
+		_rect(wx + ww - 84, wy + 46 + i * 17.0, 62, 15, "#4C9BD8", _stroke("#2F6FA8", 1))
+		_rect(wx + ww - 78, wy + 50 + i * 17.0, 26, 7, "#F2F6FA", 'opacity="0.75"')
+	# The security grid behind the glass, over the lower two thirds.
+	var gt := wy + wh * 0.3
+	var gh := wh * 0.56
 	var lx := wx + 8.0
-	while lx < wx + ww - 6:
-		_rect(lx, wy + 30, 3, wh * 0.6, "#E9EEF2", 'opacity="0.8"')
-		lx += 26.0
-	var ly := wy + 30.0
-	while ly < wy + 30 + wh * 0.6:
-		_rect(wx + 6, ly, ww - 12, 3, "#E9EEF2", 'opacity="0.8"')
-		ly += 26.0
-	# Ads along the bottom: a peach one with a face, a yellow one, the orange-juice one; a blue sticker up top.
+	while lx < wx + ww - 6.0:
+		_rect(lx, gt, 2.5, gh, "#EFF3F6", 'opacity="0.75"')
+		lx += 24.0
+	var ly := gt
+	while ly < gt + gh:
+		_rect(wx + 6, ly, ww - 12, 2.5, "#EFF3F6", 'opacity="0.75"')
+		ly += 24.0
+	# The posters taped along the bottom of the pane.
 	var py := wy + wh * 0.58
-	_rect(wx + 14, py - 30, 62, wh * 0.42 + 24, "#F2A27A", _stroke("#C46A44", 1.5))
-	_circle(wx + 45, py + 4, 18, "#E8743A")
-	_rect(wx + 84, py, 70, wh * 0.42 - 6, "#F2D23A")
-	_rect(wx + 88, py + 8, 62, 6, "#2E8B47")
-	_rect(wx + 160, py - 6, 150, wh * 0.42, "#F29B30")
-	for o in [[190, 40], [222, 52], [256, 38], [286, 54]]:
-		_circle(wx + o[0], py + o[1], 13, "#F57C1F", _stroke("#C45A12", 1.5))
-	_rect(wx + 200, py + 4, 22, 30, "#F4E9C8")
-	_rect(wx + ww - 70, wy + 30, 40, 26, "#2E6FD0")
-	_rect(wx + ww / 2 - 3, wy, 6, wh, "#F2F0EA")
-	_path("M%s %s l50 0 l-90 %s l-50 0 z" % [_n(wx + ww - 120), _n(wy), _n(wh)], "#FFFFFF", 'opacity="0.1"')
-	_rect(wx - 16, wy + wh + 4, ww + 32, 14, "#B8B4AC", _stroke("#8E8A83", 1.5))
-	# Upstairs the 6e side is plain brick: a soldier course under the roof, a downspout, the electric meter.
-	_soldier_course(top + 2.0)
-	_downspout(X1 - 12.0, top)
-	var mx := 150.0
-	_rect(mx, concrete - 150, 34, 46, "#B9BCB8", _stroke("#7E817E", 1.5))
-	_circle(mx + 17, concrete - 132, 9, "#E9ECE6", _stroke("#7E817E", 1))
-	_rect(mx + 14, concrete - 104, 5, 104, "#8E918E")
-	_rect(mx + 14, top + 40, 5, concrete - 150 - top - 40, "#8E918E")
-	# Corner balcony: white soffit, scrolled railing, posts, and the green corrugated awning.
+	var ph := wh * 0.42 - 8.0
+	# A peach one with a face on it.
+	_rect(wx + 12, py - 24, 64, ph + 20, "#F2A27A", _stroke("#C46A44", 1.5))
+	_circle(wx + 44, py + 10, 21, "#E8743A")
+	_circle(wx + 44, py + 7, 14, "#F7CBA6")
+	_path("M%s %s q6 7 12 0" % [_n(wx + 38), _n(py + 12)], "none", _stroke("#C4503A", 2.5))
+	_rect(wx + 20, py + ph - 6, 48, 5, "#FBE3CE", 'opacity="0.8"')
+	# A yellow one with its green band and its lines of red writing.
+	_rect(wx + 84, py - 4, 70, ph, "#F2D23A", _stroke("#C9A820", 1.5))
+	_rect(wx + 90, py + 4, 58, 8, "#2E8B47")
+	for i in 3:
+		_rect(wx + 90, py + 20 + i * 11.0, 54.0 - i * 12.0, 5, "#C8202A")
+	# The juice ad: oranges and three slim cans.
+	_rect(wx + 162, py - 12, 130, ph + 8, "#F29B30", _stroke("#C4701A", 1.5))
+	for o in [[26.0, 44.0, 14.0], [58.0, 56.0, 12.0], [92.0, 42.0, 13.0], [114.0, 58.0, 11.0]]:
+		_circle(wx + 162 + o[0], py + o[1], o[2], "#F57C1F", _stroke("#C45A12", 1.5))
+		_path("M%s %s q7 -6 12 -1" % [_n(wx + 162 + o[0] - 2), _n(py + o[1] - o[2])], "none", _stroke("#4E8A3A", 2.5))
+	for i in 3:
+		var cx2 := wx + 176.0 + i * 20.0
+		_rect(cx2, py + 2, 14, 38, "#F7D98E", 'rx="3" ' + _stroke("#C49A3A", 1))
+		_rect(cx2 + 1, py + 14, 12, 9, "#E8542F")
+	# The white mullion down the middle, the street in the glass, and the frame's peeling paint.
+	_rect(wx + ww / 2 - 5, wy, 10, wh, "#EEEADF", _stroke("#C3BCB0", 1))
+	_shop_glass_shine(wx, wy, ww, wh)
+	for i in 10:
+		_rect((wx - 9.0) if i % 2 == 0 else (wx + ww + 1.0), rng.randf_range(wy, wb - 14.0),
+			8, rng.randf_range(6.0, 20.0), "#C0B7A8", 'opacity="0.5"')
+	# The projecting concrete sill.
+	_rect(wx - 22, wb + 8, ww + 44, 16, "#B5B1A9", _stroke("#8A8780", 1.5))
+	_rect(wx - 22, wb + 8, ww + 44, 5, "#C8C4BC")
+	_rect(wx - 22, wb + 24, ww + 44, 7, "#000000", 'opacity="0.18"')
+	_snow(wx - 22, ww + 44, wb + 8)
+
+
+# What is screwed to the side wall: the meter on its board with the service mast going up to the roof, the
+# cable sagging in from the pole, and two old anchor plates where a sign used to hang.
+func _depanneur_fittings(top: float, concrete: float) -> void:
+	var mx := 96.0
+	_path("M%s %s Q%s %s %s %s" % [_n(X1 - 6), _n(top + 26), _n((mx + X1) / 2.0), _n(top + 104),
+		_n(mx + 26), _n(top + 58)], "none", _stroke("#1F1F1F", 3))
+	_rect(mx + 15, top + 40, 6, concrete - 166 - top - 40, "#8E918E")
+	_path("M%s %s q1 -20 24 -22" % [_n(mx + 18), _n(top + 46)], "none", _stroke("#8E918E", 6))
+	for sy in [top + 100.0, top + 200.0, top + 300.0]:
+		_rect(mx + 11, sy, 14, 5, "#6E716E")
+	_rect(mx - 6, concrete - 172, 52, 66, "#6E5A44", _stroke("#4E3F2E", 1.5))
+	_rect(mx, concrete - 166, 40, 52, "#B9BCB8", _stroke("#7E817E", 1.5))
+	_rect(mx + 5, concrete - 161, 30, 20, "#D7DAD6", _stroke("#8E918E", 1))
+	_circle(mx + 20, concrete - 132, 10, "#E9ECE6", _stroke("#7E817E", 1))
+	_rect(mx + 17, concrete - 114, 6, 114, "#8E918E")
+
+
+# Round the corner from Dandurand: the balcony's white soffit and its scrolled railing on black posts, with the
+# green corrugated awning over them, poking out past the corner of the building.
+func _depanneur_corner(top: float) -> void:
 	var by := _fb(1) + 10.0
-	_rect(0, by, 170, 18, "#ECEAE4", _stroke("#B5B1A8", 1.5))
-	_rect(0, by + 18, 170, 16, "url(#drop)")
-	_scroll_railing(0, 166, by - 62, by)
-	for px in [4.0, 160.0]:
-		_rect(px, top + 30, 6, by - top - 30, "#1F1F1F")
-	_path("M0 %s L190 %s L190 %s L0 %s Z" % [_n(top - 18), _n(top + 18), _n(top + 52), _n(top + 16)], "#3E8C5A", _stroke("#2A6340", 2))
+	_rect(0, by, 132, 20, "#ECEAE4", _stroke("#B5B1A8", 1.5))
+	for i in 5:
+		_rect(rng.randf_range(0.0, 104.0), by + rng.randf_range(3.0, 13.0), rng.randf_range(16.0, 40.0), 3,
+			"#B9B2A4", 'opacity="0.55"')
+	_rect(0, by + 20, 132, 18, "url(#drop)")
+	_scroll_railing(0, 126, by - 64, by)
+	_snow(0, 126, by - 64)
+	for px in [4.0, 120.0]:
+		_rect(px, top + 34, 7, by - top - 34, "#1F1F1F")
+	_path("M0 %s L152 %s L152 %s L0 %s Z" % [_n(top - 20), _n(top + 14), _n(top + 50), _n(top + 16)],
+		"#3E8C5A", _stroke("#2A6340", 2))
 	var rx := 6.0
-	while rx < 190.0:
-		_path("M%s %s l0 32" % [_n(rx), _n(top - 16 + rx * 36.0 / 190.0)], "none", _stroke("#2A6340", 2.5))
+	while rx < 152.0:
+		_path("M%s %s l0 34" % [_n(rx), _n(top - 18 + rx * 34.0 / 152.0)], "none", _stroke("#2A6340", 2.5))
 		rx += 11.0
-	_path("M0 %s L190 %s" % [_n(top + 16), _n(top + 52)], "none", _stroke("#F2F0EA", 4))
-	_rect(0, top + 52, 190, 20, "url(#drop)")
+	_path("M0 %s L152 %s" % [_n(top + 16), _n(top + 50)], "none", _stroke("#F2F0EA", 4))
+	_rect(0, top + 50, 152, 22, "url(#drop)")
 
 
 # Dépanneur Xin-Xin's front on Dandurand: under a long balcony (scrolled railing, white soffit, green corrugated
