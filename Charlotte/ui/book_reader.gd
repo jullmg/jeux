@@ -7,6 +7,9 @@ signal closed
 
 const BLUE := Color("#1D4F91")
 const YELLOW := Color("#FFD23F")
+## Where the picture and the words sit on the open book, so a page can slide in from the right place.
+const ART_AT := Vector2(66, 92)
+const TEXT_AT := Vector2(556, 138)
 const BOOKS := [
 	{"title": "La noix de Noisette", "cover": "#B5603F", "pages": [
 		["nut", "Noisette est un écureuil de la 6e Avenue. Un matin d'automne, il trouve la plus belle noix de toute la rue."],
@@ -58,12 +61,14 @@ var _book := -1
 var _page := 0
 var _panel: Panel
 var _art: _Art
-var _text: Label
+var _text: RichTextLabel
 var _title: Label
 var _prev: Button
 var _next: Button
 var _shelf: HBoxContainer
 var _spread: Control
+var _shelf_board: _Shelf
+var _turn_dir := 1
 
 
 func _init() -> void:
@@ -88,29 +93,38 @@ func _ready() -> void:
 	_title.size = Vector2(1040, 40)
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_panel.add_child(_title)
+	_shelf_board = _Shelf.new()
+	_shelf_board.position = Vector2(26, 96)
+	_shelf_board.size = Vector2(988, 400)
+	_shelf_board.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_panel.add_child(_shelf_board)
 	_shelf = HBoxContainer.new()
-	_shelf.position = Vector2(56, 130)
-	_shelf.add_theme_constant_override("separation", 22)
+	_shelf.position = Vector2(44, 128)
+	_shelf.add_theme_constant_override("separation", 18)
+	_shelf.alignment = BoxContainer.ALIGNMENT_CENTER
 	_panel.add_child(_shelf)
 	for i in BOOKS.size():
+		# Each book is a little taller or shorter than its neighbour, as on a real shelf.
+		var tall := 238.0 + float((i * 5) % 3) * 12.0
+		var holder := Control.new()
+		holder.custom_minimum_size = Vector2(146, 278)
 		var b := Button.new()
-		b.custom_minimum_size = Vector2(150, 236)
-		var cover := Color(BOOKS[i].cover)
-		b.add_theme_stylebox_override("normal", _box(cover, cover.darkened(0.4), 5, 10))
-		b.add_theme_stylebox_override("hover", _box(cover.lightened(0.1), YELLOW, 5, 10))
-		b.add_theme_stylebox_override("pressed", _box(cover, YELLOW, 5, 10))
+		b.position = Vector2(0, 278.0 - tall)
+		b.size = Vector2(146, tall)
+		b.flat = true
 		b.pressed.connect(_open_book.bind(i))
-		# The cover: the first page's picture, with the title on a band across the bottom.
-		var art := _Cover.new()
-		art.kind = BOOKS[i].pages[0][0]
-		art.title = BOOKS[i].title
-		art.band = cover
-		art.position = Vector2(10, 10)
-		art.size = b.custom_minimum_size - Vector2(20, 20)
-		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		art.clip_contents = true
-		b.add_child(art)
-		_shelf.add_child(b)
+		var cover := _Cover.new()
+		cover.kind = BOOKS[i].pages[0][0]
+		cover.title = BOOKS[i].title
+		cover.band = Color(BOOKS[i].cover)
+		cover.set_anchors_preset(Control.PRESET_FULL_RECT)
+		cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(cover)
+		# It lifts a little off the shelf when the mouse is on it.
+		b.mouse_entered.connect(func() -> void: _lift(b, -10.0, 278.0 - tall))
+		b.mouse_exited.connect(func() -> void: _lift(b, 0.0, 278.0 - tall))
+		holder.add_child(b)
+		_shelf.add_child(holder)
 	# The open book: two cream pages with a fold down the middle, the picture on the left, the words on the right.
 	_spread = _Spread.new()
 	_spread.position = Vector2(34, 70)
@@ -119,17 +133,18 @@ func _ready() -> void:
 	_spread.visible = false
 	_panel.add_child(_spread)
 	_art = _Art.new()
-	_art.position = Vector2(66, 92)
+	_art.position = ART_AT
 	_art.size = Vector2(404, 386)
 	_art.clip_contents = true
 	_art.visible = false
 	_panel.add_child(_art)
-	_text = _label("", 26)
-	_text.position = Vector2(556, 120)
-	_text.size = Vector2(404, 330)
-	_text.autowrap_mode = TextServer.AUTOWRAP_WORD
-	_text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_text.add_theme_color_override("font_color", Color("#3A2A1E"))
+	_text = RichTextLabel.new()
+	_text.bbcode_enabled = true
+	_text.scroll_active = false
+	_text.position = Vector2(TEXT_AT.x, TEXT_AT.y)
+	_text.size = Vector2(404, 300)
+	_text.add_theme_font_size_override("normal_font_size", 26)
+	_text.add_theme_color_override("default_color", Color("#3A2A1E"))
 	_text.visible = false
 	_panel.add_child(_text)
 	var bar := HBoxContainer.new()
@@ -167,6 +182,7 @@ func _open_book(i: int) -> void:
 
 func _turn(dir: int) -> void:
 	Sfx.play("page")
+	_turn_dir = dir
 	var pages: Array = BOOKS[_book].pages
 	_page += dir
 	if _page < 0:
@@ -180,6 +196,7 @@ func _turn(dir: int) -> void:
 func _show() -> void:
 	var reading := _book >= 0
 	_shelf.visible = not reading
+	_shelf_board.visible = not reading
 	_spread.visible = reading
 	_art.visible = reading
 	_text.visible = reading
@@ -192,11 +209,36 @@ func _show() -> void:
 	_title.text = BOOKS[_book].title
 	_art.kind = pages[_page][0]
 	_art.queue_redraw()
-	_text.text = pages[_page][1]
+	_text.text = _story(str(pages[_page][1]))
 	_spread.page = _page + 1
 	_spread.of_pages = pages.size()
 	_spread.queue_redraw()
 	_next.text = "Page suivante ›" if _page < pages.size() - 1 else "Fin ›"
+	_slide_in()
+
+
+## The page coming in: it slides from the side the reader turned towards, and fades up.
+func _slide_in() -> void:
+	var from := 30.0 * float(_turn_dir)
+	for node: Control in [_art, _text]:
+		var home: Vector2 = ART_AT if node == _art else TEXT_AT
+		node.position = home + Vector2(from, 0)
+		node.modulate.a = 0.0
+		var tween := node.create_tween().set_parallel()
+		tween.tween_property(node, "position", home, 0.24).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tween.tween_property(node, "modulate:a", 1.0, 0.2)
+
+
+## The words of a page, with a big coloured letter to start it, the way a storybook does.
+func _story(words: String) -> String:
+	if words.is_empty():
+		return ""
+	return "[font_size=54][color=#C8202A]%s[/color][/font_size]%s" % [words.substr(0, 1), words.substr(1)]
+
+
+## A book lifting off the shelf under the mouse.
+func _lift(b: Button, by: float, rest: float) -> void:
+	b.create_tween().tween_property(b, "position:y", rest + by, 0.12).set_trans(Tween.TRANS_SINE)
 
 
 func _close() -> void:
@@ -268,7 +310,8 @@ class _Art:
 		# The sky in two bands, so it deepens toward the top the way a sky does.
 		draw_polygon(PackedVector2Array([Vector2(6, 6), Vector2(w - 6, 6), Vector2(w - 6, horizon * 0.58), Vector2(6, horizon * 0.58)]),
 			PackedColorArray([sky_top, sky_top, sky_mid, sky_mid]))
-		draw_polygon(PackedVector2Array([Vector2(6, horizon * 0.58), Vector2(w - 6, horizon * 0.58), Vector2(w - 6, horizon), Vector2(6, horizon)]),
+		draw_polygon(PackedVector2Array([Vector2(6, horizon * 0.58), Vector2(w - 6, horizon * 0.58),
+			Vector2(w - 6, horizon + 16), Vector2(6, horizon + 16)]),
 			PackedColorArray([sky_mid, sky_mid, sky_low, sky_low]))
 		if night:
 			_stars(w, horizon)
@@ -322,12 +365,12 @@ class _Art:
 				_squirrel(Vector2(w * 0.78, h * 0.8), -1.0)
 			"cat":
 				_sun(Vector2(w - 78, 62))
-				_balcony(w, h * 0.56)
-				_cat(Vector2(w * 0.45, h * 0.54), false)
+				_balcony(w, h * 0.7)
+				_cat(Vector2(w * 0.45, h * 0.68), false)
 			"jump", "sleep":
 				_moon(Vector2(w - 86, 72))
-				_balcony(w, h * 0.56)
-				_cat(Vector2(w * 0.45, h * 0.54 - (60.0 if kind == "jump" else 0.0)), kind == "sleep")
+				_balcony(w, h * 0.7)
+				_cat(Vector2(w * 0.45, h * 0.68 - (60.0 if kind == "jump" else 0.0)), kind == "sleep")
 			"moon":
 				_moon(Vector2(w * 0.5, h * 0.3))
 				_cat(Vector2(w * 0.24, h * 0.8), false)
@@ -981,19 +1024,29 @@ class _Art:
 			i += 1
 
 
-# The open book under the picture and the words: two cream pages, the fold between them, and the page number.
+# The open book under the picture and the words: two cream pages with their grain, the fold between them, a
+# ribbon bookmark down the gutter, a curled corner on the right page and the page number at the foot of each.
 class _Spread:
 	extends Control
 
 	var page := 1
 	var of_pages := 5
+	var _rng := RandomNumberGenerator.new()
 
 	func _draw() -> void:
 		var half := size.x / 2.0
 		for side in 2:
 			var r := Rect2(Vector2(side * half, 0), Vector2(half, size.y))
 			draw_rect(r, Color("#FFFBF0"))
-			draw_rect(r, Color("#DCCFB4"), false, 2.0)
+		# The grain of the paper, and a warmer wash along the outer edges.
+		for i in 420:
+			draw_circle(Vector2(fmod(i * 131.0, size.x - 12) + 6, fmod(i * 79.0, size.y - 12) + 6), 1.0,
+				Color(0.65, 0.56, 0.42, 0.07))
+		for side in 2:
+			for i in 14:
+				var t := i / 13.0
+				var x := (6.0 + t * 26.0) if side == 0 else (size.x - 6.0 - t * 26.0)
+				draw_line(Vector2(x, 4), Vector2(x, size.y - 4), Color(0.72, 0.6, 0.42, 0.05 * (1.0 - t)), 2.0)
 		# The fold: a shadow either side of the middle.
 		for i in 10:
 			var t := i / 9.0
@@ -1001,30 +1054,99 @@ class _Spread:
 			draw_rect(Rect2(half - 16.0 * t, 0, 16.0 * t, size.y), Color(0.45, 0.33, 0.2, a * 0.5))
 			draw_rect(Rect2(half, 0, 16.0 * t, size.y), Color(0.45, 0.33, 0.2, a * 0.5))
 		draw_line(Vector2(half, 6), Vector2(half, size.y - 6), Color("#C9B894"), 2.0)
-		# A page number at the foot of the right page.
+		for side in 2:
+			draw_rect(Rect2(Vector2(side * half, 0), Vector2(half, size.y)), Color("#DCCFB4"), false, 2.0)
+		# The ribbon bookmark, hanging out of the gutter.
+		draw_rect(Rect2(half - 9, 2, 18, 54), Color("#C8202A"))
+		draw_rect(Rect2(half - 9, 2, 6, 54), Color("#D94A52"))
+		draw_colored_polygon(PackedVector2Array([Vector2(half - 9, 50), Vector2(half, 40), Vector2(half + 9, 50),
+			Vector2(half + 9, 62), Vector2(half - 9, 62)]), Color("#A8141E"))
+		# The corner of the right page, turned up a little.
+		var c := Vector2(size.x - 4, size.y - 4)
+		draw_colored_polygon(PackedVector2Array([c + Vector2(-34, 0), c, c + Vector2(0, -34)]), Color("#F1E7D2"))
+		draw_polyline(PackedVector2Array([c + Vector2(-34, 0), c + Vector2(-6, -6), c + Vector2(0, -34)]),
+			Color("#C9B894"), 2.0)
+		# The page number at the foot of each page.
 		var font := ThemeDB.fallback_font
-		var words := "%d / %d" % [page, of_pages]
-		var at := Vector2(size.x - 70.0, size.y - 16.0)
-		draw_string(font, at, words, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("#A89878"))
+		draw_string(font, Vector2(half + half * 0.5 - 40.0, size.y - 18.0), "— %d —" % page,
+			HORIZONTAL_ALIGNMENT_CENTER, 80, 17, Color("#B5A484"))
+		# The last page of a story gets its three little stars.
+		if page == of_pages:
+			_rng.seed = 7
+			for i in 3:
+				CuteArt.star(self, Vector2(size.x * 0.75 - 40.0 + i * 40.0, size.y - 62.0), 13.0, Color("#FFD23F"), true, _rng)
 
 
-# A book on the shelf: its first picture, with the title on a band across the bottom.
+# The shelf the books stand on: a waxed board with its brackets, and the wall behind it.
+class _Shelf:
+	extends Control
+
+	func _draw() -> void:
+		var y := size.y - 92.0
+		# The books' shadow falls on the board.
+		draw_rect(Rect2(28, y - 12, size.x - 56, 12), Color(0.45, 0.33, 0.2, 0.1))
+		draw_rect(Rect2(8, y, size.x - 16, 20), Color("#B07A4A"))
+		draw_rect(Rect2(8, y, size.x - 16, 7), Color("#C99464"))
+		draw_rect(Rect2(8, y, size.x - 16, 20), Color("#7A5230"), false, 2.5)
+		draw_rect(Rect2(8, y + 20, size.x - 16, 7), Color(0.3, 0.2, 0.12, 0.2))
+		for e: float in [0.14, 0.86]:
+			var x := size.x * e
+			draw_colored_polygon(PackedVector2Array([Vector2(x - 16, y + 20), Vector2(x + 16, y + 20),
+				Vector2(x, y + 54)]), Color("#8A5E38"))
+		var font := ThemeDB.fallback_font
+		draw_string(font, Vector2(0, y + 76), "Choisis un livre à lire…", HORIZONTAL_ALIGNMENT_CENTER, size.x, 22,
+			Color("#8A7A62"))
+
+
+# A book standing on the shelf: its boards, the spine, the page edges, the first picture in a frame and the
+# title under it.
 class _Cover:
-	extends _Art
+	extends Control
 
+	## The size the pictures are drawn at, before the cover shrinks them.
+	const PICTURE := Vector2(404, 386)
+
+	var kind := ""
 	var title := ""
 	var band := Color("#B5603F")
 
+	## The picture is drawn at its full size and then shrunk to fit the cover, so the whole scene is there
+	## instead of a close-up crop of its middle.
+	func _ready() -> void:
+		var art := _Art.new()
+		art.kind = kind
+		art.size = PICTURE
+		art.position = Vector2(20, 20)
+		art.scale = Vector2.ONE * ((size.x - 40.0) / PICTURE.x)
+		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(art)
+
 	func _draw() -> void:
-		super._draw()
+		draw_rect(Rect2(Vector2(3, 5), size - Vector2(2, 4)), Color(0.2, 0.14, 0.08, 0.18))
+		# The page edges along the right, then the boards.
+		draw_rect(Rect2(Vector2(size.x - 9, 5), Vector2(9, size.y - 10)), Color("#F2EADA"))
+		for i in 5:
+			draw_line(Vector2(size.x - 8 + i * 1.7, 7), Vector2(size.x - 8 + i * 1.7, size.y - 7), Color("#DCD0B8"), 1.0)
+		draw_rect(Rect2(Vector2.ZERO, size - Vector2(8, 0)), band)
+		draw_rect(Rect2(Vector2.ZERO, Vector2(13, size.y)), band.darkened(0.28))
+		draw_line(Vector2(13, 0), Vector2(13, size.y), band.darkened(0.5), 2.0)
+		for i in 3:
+			draw_line(Vector2(3, 24 + i * (size.y - 48) / 2.0), Vector2(10, 24 + i * (size.y - 48) / 2.0),
+				band.lightened(0.25), 2.0)
+		# The frame round the picture, and the title under it.
+		var pw := size.x - 40.0
+		var ph := pw * PICTURE.y / PICTURE.x
+		draw_rect(Rect2(Vector2(16, 16), Vector2(pw + 8, ph + 8)), Color("#F6EFE4"))
+		draw_rect(Rect2(Vector2(16, 16), Vector2(pw + 8, ph + 8)), band.darkened(0.3), false, 2.0)
+		draw_rect(Rect2(Vector2(3, 3), size - Vector2(14, 6)), band.lightened(0.18), false, 2.0)
 		var font := ThemeDB.fallback_font
-		var h := 72.0
-		draw_rect(Rect2(Vector2(0, size.y - h), Vector2(size.x, h)), Color(band, 0.92))
-		draw_line(Vector2(0, size.y - h), Vector2(size.x, size.y - h), Color(1, 1, 1, 0.5), 2.0)
-		var lines := _wrap(font, title, size.x - 16.0)
+		var top := 32.0 + ph
+		draw_line(Vector2(22, top), Vector2(size.x - 18, top), Color(1, 1, 1, 0.45), 2.0)
+		var lines := _wrap(font, title, size.x - 36.0)
 		for i in lines.size():
-			var y := size.y - h + 26.0 + i * 20.0
-			draw_string(font, Vector2(8, y), lines[i], HORIZONTAL_ALIGNMENT_CENTER, size.x - 16.0, 17, Color.WHITE)
+			draw_string(font, Vector2(16, top + 26.0 + i * 20.0), lines[i], HORIZONTAL_ALIGNMENT_CENTER,
+				size.x - 30.0, 17, Color.WHITE)
+		CuteArt.star(self, Vector2(size.x / 2.0, size.y - 22.0), 9.0, Color(1, 1, 1, 0.55))
 
 	func _wrap(font: Font, text: String, width: float) -> Array:
 		var lines := []
