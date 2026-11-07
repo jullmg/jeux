@@ -248,26 +248,37 @@ class _Prop:
 				draw_rect(Rect2(-14, -18, 26, 16), Color("#9FE0F5") if fmod(_t, 6.0) < 5.5 else Color("#E8F6C8"))
 				draw_rect(Rect2(-20, 0, 38, 3), Color("#B9BEC6"))
 
-	# A mug held in the hand: the cup centred on the grip (so it never climbs over the face), the handle behind it, the coffee
-	# showing at the rim, and steam while it waits at their side.
+	# A mug held in the hand: the HANDLE is where the fingers are (the prop's origin is the hand), the cup sits just
+	# inward of it, and the coffee inside keeps its surface level however far the cup is tipped.
 	func _draw_mug() -> void:
 		var cream := Color("#F4F2EC")
 		var edge := Color("#C2BAAC")
-		draw_arc(Vector2(7.0, -0.5), 4.2, -PI / 2.0, PI / 2.0, 10, cream, 2.6)
-		draw_arc(Vector2(7.0, -0.5), 4.2, -PI / 2.0, PI / 2.0, 10, edge, 0.9)
-		var body := PackedVector2Array([Vector2(-7, -9), Vector2(6.5, -9), Vector2(5.5, 8), Vector2(-6, 8)])
+		var cx := -8.5
+		# The handle: a C standing where the fingers are, so the hand really goes through it.
+		draw_arc(Vector2(cx + 7.4, -0.5), 5.8, -PI / 2.0, PI / 2.0, 14, edge, 5.2)
+		draw_arc(Vector2(cx + 7.4, -0.5), 5.8, -PI / 2.0, PI / 2.0, 14, cream, 3.0)
+		var body := PackedVector2Array([Vector2(cx - 7.6, -10), Vector2(cx + 7.6, -10), Vector2(cx + 6.2, 9), Vector2(cx - 6.2, 9)])
 		draw_colored_polygon(body, cream)
 		draw_polyline(body + PackedVector2Array([body[0]]), edge, 1.3, true)
-		# The rim, and the coffee in it: it shows as the cup tips.
-		var coffee: float = 1.6 + sip * 2.6
-		draw_colored_polygon(CritterDraw.ellipse_points(Vector2(-0.3, -9.0), Vector2(6.8, 2.1), 0.0, 16), Color("#EDE8DE"))
-		draw_colored_polygon(CritterDraw.ellipse_points(Vector2(-0.3, -8.6), Vector2(5.4, coffee), 0.0, 16), Color("#6B3F22"))
-		draw_line(Vector2(-4.2, -5.0), Vector2(-4.6, 5.0), Color(1, 1, 1, 0.75), 2.0)
-		draw_rect(Rect2(-6.4, 2.0, 12.0, 2.2), Color("#D9A23A"))
+		# The rim and the shadowed inside of the cup.
+		draw_colored_polygon(CritterDraw.ellipse_points(Vector2(cx, -10.0), Vector2(7.6, 2.4), 0.0, 18), Color("#EDE8DE"))
+		draw_colored_polygon(CritterDraw.ellipse_points(Vector2(cx, -9.6), Vector2(6.2, 1.8), 0.0, 18), Color("#4A2B14"))
+		# The coffee, always INSIDE the rim (it used to bulge out over it): a little disc of it deep in the cup,
+		# rising and spreading to the mouth of the cup as they tip it up to drink.
+		var fill := Vector2(1.6 + sip * 4.4, 0.5 + sip * 1.2)
+		draw_colored_polygon(CritterDraw.ellipse_points(Vector2(cx, -9.5), fill, 0.0, 18), Color("#6B3F22"))
+		draw_colored_polygon(CritterDraw.ellipse_points(Vector2(cx - fill.x * 0.25, -9.7), fill * 0.4, 0.0, 14), Color("#90603A"))
+		# A shine down the cup and its gold band.
+		draw_line(Vector2(cx - 4.4, -6.0), Vector2(cx - 4.8, 6.0), Color(1, 1, 1, 0.7), 2.0)
+		draw_rect(Rect2(cx - 6.8, 2.0, 13.4, 2.2), Color("#D9A23A"))
+		# The steam goes straight up, whatever the cup is doing.
+		draw_set_transform(Vector2(cx, -11.0), -rotation, Vector2.ONE)
 		for k in 2:
 			var ph := _t * 1.6 + k * 1.7
-			var fade: float = (1.0 - sip) * 0.4
-			draw_line(Vector2(-2.5 + k * 5.0, -12.0), Vector2(-2.5 + k * 5.0 + sin(ph) * 2.0, -22.0 - fmod(ph, 1.0) * 5.0), Color(1, 1, 1, fade), 1.6)
+			var fade: float = (1.0 - sip) * 0.45
+			draw_line(Vector2(-2.5 + k * 5.0, 0.0), Vector2(-2.5 + k * 5.0 + sin(ph) * 2.0, -10.0 - fmod(ph, 1.0) * 5.0), Color(1, 1, 1, fade), 1.6)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
 
 	# Papa's bike, leaning on its kickstand beside him: two spoked wheels, a frame, handlebars and a saddle, with a shine on
 	# the tubes that slides as he polishes.
