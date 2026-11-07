@@ -184,7 +184,7 @@ func _say(who: Node2D, text: String, height := 280.0, seconds := 2.4) -> void:
 
 ## Something Charlotte gets (a snack, a treat): its picture floats up above her with `text`, and a happy sound.
 func _treat(picture: Texture2D, text: String, delay := 0.0) -> void:
-	_charlotte.express("yum", 2.4 + delay)
+	_charlotte.express("yum", 3.4 + delay)
 	var treat := Node2D.new()
 	treat.position = _charlotte.position + Vector2(0, -270)
 	treat.modulate.a = 0.0
@@ -207,7 +207,8 @@ func _treat(picture: Texture2D, text: String, delay := 0.0) -> void:
 	tween.tween_callback(func(): Sfx.play("miam"))
 	tween.tween_property(treat, "modulate:a", 1.0, 0.25)
 	tween.parallel().tween_property(treat, "position:y", treat.position.y - 30.0, 1.6)
-	tween.tween_interval(0.6)
+	# Long enough to read what she has just been given.
+	tween.tween_interval(1.6)
 	tween.tween_property(treat, "modulate:a", 0.0, 0.4)
 	tween.tween_callback(treat.queue_free)
 
