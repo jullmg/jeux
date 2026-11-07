@@ -43,8 +43,9 @@ var _tabs: TabContainer
 var _root: Control
 
 
-## Open on the costume tab (the dresser during Halloween) instead of her ordinary clothes.
-var costumes_first := false
+## While the Halloween quest is on, the drawers hold nothing but costumes: the costume tab is the only one, and
+## "Au hasard" and "Comme d'habitude" pick a costume instead of an outfit.
+var costumes_only := false
 
 
 func _init(start: CharacterLook) -> void:
@@ -66,7 +67,7 @@ func _ready() -> void:
 	panel.size = Vector2(1180, 660)
 	panel.add_theme_stylebox_override("panel", _box(CREAM, BLUE, 6, 26))
 	_root.add_child(panel)
-	var title := _text("Le déguisement de Charlotte" if costumes_first else "La garde-robe de Charlotte", 34)
+	var title := _text("Le déguisement de Charlotte" if costumes_only else "La garde-robe de Charlotte", 34)
 	title.position = Vector2(40, 18)
 	title.size = Vector2(1100, 48)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -76,14 +77,15 @@ func _ready() -> void:
 	_tabs.position = Vector2(400, 78)
 	_tabs.size = Vector2(750, 482)
 	panel.add_child(_tabs)
-	for tab_name in ["Déguisement", "Vêtement", "Jambes et pieds", "Coiffure", "Chapeaux", "Accessoires"]:
+	var tabs := ["Déguisement"] if costumes_only else ["Déguisement", "Vêtement", "Jambes et pieds", "Coiffure", "Chapeaux", "Accessoires"]
+	for tab_name in tabs:
 		var scroll := ScrollContainer.new()
 		scroll.name = tab_name
 		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		_tabs.add_child(scroll)
 	_build_buttons(panel)
 	_refresh()
-	_tabs.current_tab = 0 if costumes_first else 1
+	_tabs.current_tab = 0 if costumes_only else 1
 	_root.modulate.a = 0.0
 	create_tween().tween_property(_root, "modulate:a", 1.0, 0.25)
 
@@ -123,9 +125,14 @@ func _build_buttons(panel: Control) -> void:
 	bar.add_theme_constant_override("separation", 14)
 	panel.add_child(bar)
 	_action(bar, "Au hasard", _randomize)
-	_action(bar, "Comme d'habitude", func():
-		_look = CharacterLook.usual()
-		_refresh())
+	if costumes_only:
+		_action(bar, "Sans déguisement", func():
+			_look.costume = ""
+			_refresh())
+	else:
+		_action(bar, "Comme d'habitude", func():
+			_look = CharacterLook.usual()
+			_refresh())
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.add_child(spacer)
@@ -166,6 +173,8 @@ func _refresh() -> void:
 		scroll.add_child(page)
 		pages.append(page)
 	_costume_page(pages[0])
+	if costumes_only:
+		return
 	_clothes_page(pages[1])
 	_legs_page(pages[2])
 	_hair_page(pages[3])
@@ -180,7 +189,8 @@ func _costume_page(page: VBoxContainer) -> void:
 	for id: String in CostumeArt.ORDER:
 		options.append([id, CostumeArt.name_of(id)])
 	_choices(page, "Mon déguisement", options, _look.costume, func(v): _look.costume = v, [])
-	var note := _text("Un déguisement cache tes vêtements.\nEnlève-le pour t'habiller comme d'habitude.", 18)
+	var note := _text("C'est l'Halloween : choisis ton déguisement !" if costumes_only
+		else "Un déguisement cache tes vêtements.\nEnlève-le pour t'habiller comme d'habitude.", 18)
 	note.custom_minimum_size = Vector2(0, 60)
 	page.add_child(note)
 
@@ -306,6 +316,12 @@ func _change(on_pick: Callable, value: Variant, drop := CLOTHING_OVERRIDES) -> v
 
 
 func _randomize() -> void:
+	if costumes_only:
+		# Tonight the drawers hold only costumes, so chance picks one of those.
+		var other: Array = CostumeArt.ORDER.filter(func(id: String): return id != _look.costume)
+		_look.costume = other[randi() % other.size()]
+		_change(func(_v): pass, null)
+		return
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	var pick := func(list: Array) -> Variant: return list[rng.randi_range(0, list.size() - 1)]

@@ -35,7 +35,7 @@ const ALL := {
 		"mask": "ghost",
 	},
 	"citrouille": {
-		"name": "Citrouille", "outfit": "sweater", "outfit_color": "#E8812E", "accent_color": "#2E6B32", "pattern": "none",
+		"name": "Citrouille", "outfit": "sweater", "outfit_color": "#E8812E", "accent_color": "#8A4A14", "pattern": "pumpkin",
 		"legwear": "tights", "legwear_color": "#2E6B32", "shoes": "boot", "shoe_color": "#5E4228",
 		"hat": "pumpkin", "hat_color": "#2E6B32", "mask": "jack",
 	},
@@ -174,10 +174,16 @@ static func apply(look: CharacterLook) -> void:
 static func hat(kind: String, color: String, line: String, light: String) -> String:
 	match kind:
 		"ghost":
-			# A sheet over her head: it hides the hair, with a soft fold along the brow.
-			var s := '<path d="M10 96 C8 28 58 -12 112 -12 C168 -12 216 28 214 96 C180 86 140 82 112 82 C84 82 44 86 10 96 Z" fill="%s" stroke="%s" stroke-width="3"/>' % [color, line]
-			s += '<path d="M28 76 C60 64 164 64 196 76" stroke="%s" stroke-width="3" fill="none" opacity="0.5"/>' % line
-			return s + '<path d="M44 52 Q58 20 96 10" stroke="%s" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.6"/>' % light
+			# A whole sheet thrown over her head: it hides her hair and her face, with two holes cut for the eyes,
+			# a soft fold along the brow and a torn hem under the chin.
+			var s := '<path d="M4 236 C-6 110 36 -16 121 -16 C206 -16 248 110 238 236 Q226 252 214 236 Q200 256 186 238 Q172 258 158 240 Q144 260 130 240 Q116 260 102 240 Q88 258 74 240 Q60 258 46 238 Q32 256 18 236 Q10 250 4 236 Z" fill="%s" stroke="%s" stroke-width="3" stroke-linejoin="round"/>' % [color, line]
+			s += '<path d="M22 150 C30 50 70 2 118 2 C92 22 56 72 48 168 Z" fill="%s" opacity="0.6"/>' % light
+			s += '<path d="M30 108 C70 92 172 92 212 108" stroke="%s" stroke-width="3" fill="none" opacity="0.35"/>' % line
+			s += '<path d="M28 188 C70 178 172 178 214 188" stroke="%s" stroke-width="2.5" fill="none" opacity="0.25"/>' % line
+			# The eye holes, right where her eyes are, and a little round mouth.
+			s += '<ellipse cx="94" cy="130" rx="19" ry="24" fill="#2B2430"/><ellipse cx="149" cy="130" rx="19" ry="24" fill="#2B2430"/>'
+			s += '<ellipse cx="90" cy="121" rx="5" ry="6" fill="#4A4458" opacity="0.7"/>'
+			return s + '<ellipse cx="121" cy="178" rx="15" ry="13" fill="#2B2430"/>'
 		"pumpkin":
 			# The stalk and a curl of vine on top of her head.
 			return ('<path d="M100 24 q6 -34 22 -40 q10 16 4 40 z" fill="%s" stroke="%s" stroke-width="3" stroke-linejoin="round"/>' % [color, line]
@@ -214,22 +220,36 @@ static func hat(kind: String, color: String, line: String, light: String) -> Str
 				s += '<path d="M%s 30 q-22 22 -14 56 q16 -16 26 -52 z" fill="%s" opacity="0.95"/>' % [58.0 + i * 9.0, mane]
 			return s
 		"robot":
-			# A boxy helmet with a visor, bolts and an aerial.
-			# It sits on her head like a helmet: her own face stays in view under it.
-			var s := '<rect x="24" y="-10" width="176" height="88" rx="12" fill="%s" stroke="%s" stroke-width="3"/>' % [color, line]
-			s += '<rect x="40" y="6" width="144" height="38" rx="8" fill="#2E3440" stroke="%s" stroke-width="3"/>' % line
-			s += '<rect x="52" y="14" width="40" height="11" rx="5" fill="#1FB5C4"/><rect x="132" y="14" width="40" height="11" rx="5" fill="#1FB5C4"/>'
-			s += '<rect x="64" y="54" width="96" height="12" rx="6" fill="#5E6368"/>'
-			for bx in [40.0, 184.0]:
-				s += '<circle cx="%s" cy="60" r="7" fill="%s" stroke="%s" stroke-width="2"/>' % [bx, light, line]
-			s += '<rect x="106" y="-40" width="8" height="32" fill="%s"/><circle cx="110" cy="-46" r="10" fill="#C8202A"/>' % line
-			return s + '<path d="M38 20 Q44 -2 76 -4" stroke="%s" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.7"/>' % light
+			# A box worn ON her head, not balanced over it: the face looks out of a square opening, with a lit
+			# strip, bolts, two ear discs, a grille under the chin and an aerial on top.
+			# Four plates round a square opening, so her own face looks out of the box.
+			var s := '<rect x="14" y="-4" width="214" height="104" rx="16" fill="%s" stroke="%s" stroke-width="3.5"/>' % [color, line]
+			s += '<rect x="14" y="96" width="36" height="124" fill="%s" stroke="%s" stroke-width="3.5"/>' % [color, line]
+			s += '<rect x="192" y="96" width="36" height="124" fill="%s" stroke="%s" stroke-width="3.5"/>' % [color, line]
+			s += '<rect x="14" y="192" width="214" height="28" rx="12" fill="%s" stroke="%s" stroke-width="3.5"/>' % [color, line]
+			# The lit strip and the dials on the forehead plate.
+			s += '<rect x="40" y="18" width="162" height="40" rx="10" fill="#2E3440" stroke="%s" stroke-width="3"/>' % line
+			s += '<rect x="52" y="30" width="46" height="13" rx="6" fill="#1FB5C4"/><rect x="144" y="30" width="46" height="13" rx="6" fill="#1FB5C4"/>'
+			s += '<circle cx="121" cy="36" r="7" fill="#C8202A"/>'
+			s += '<rect x="60" y="70" width="122" height="14" rx="7" fill="#5E6368"/>'
+			for i in 5:
+				s += '<rect x="%s" y="196" width="9" height="18" rx="4" fill="#5E6368"/>' % (78 + i * 18)
+			for b: Array in [[30.0, 12.0], [212.0, 12.0], [30.0, 206.0], [212.0, 206.0]]:
+				s += '<circle cx="%s" cy="%s" r="7" fill="%s" stroke="%s" stroke-width="2"/>' % [b[0], b[1], light, line]
+			# The ear discs and the aerial.
+			s += '<circle cx="4" cy="146" r="18" fill="%s" stroke="%s" stroke-width="3"/>' % [light, line]
+			s += '<circle cx="238" cy="146" r="18" fill="%s" stroke="%s" stroke-width="3"/>' % [light, line]
+			s += '<rect x="117" y="-40" width="8" height="38" fill="%s"/><circle cx="121" cy="-46" r="11" fill="#C8202A" stroke="#8E1A20" stroke-width="2"/>' % line
+			return s + '<path d="M34 42 Q42 4 80 0" stroke="%s" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.6"/>' % light
 		"space":
-			# A bubble helmet: the glass, its white collar and the sun caught in it.
-			var s := '<path d="M6 92 C0 22 50 -24 112 -24 C176 -24 224 22 218 92 Z" fill="#CFE6F2" opacity="0.55" stroke="%s" stroke-width="4"/>' % color
-			s += '<path d="M-2 86 H226 V104 H-2 Z" fill="%s" stroke="#B9B4AA" stroke-width="3"/>' % color
-			s += '<path d="M38 58 Q46 8 94 -8" stroke="#FFFFFF" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.7"/>'
-			return s + '<circle cx="186" cy="26" r="9" fill="#F2C230" stroke="#C99410" stroke-width="2"/>'
+			# A bubble helmet right over her head: the glass, its white rim and collar, and the sun caught in it.
+			var s := '<path d="M-2 196 C-10 58 44 -28 121 -28 C198 -28 252 58 244 196 Z" fill="#CFE6F2" opacity="0.42" stroke="%s" stroke-width="5"/>' % color
+			s += '<path d="M-6 190 H248 Q252 224 244 238 H-2 Q-10 224 -6 190 Z" fill="%s" stroke="#B9B4AA" stroke-width="3"/>' % color
+			s += '<path d="M-4 200 H246" stroke="#FFFFFF" stroke-width="4" fill="none" opacity="0.5"/>'
+			s += '<path d="M34 92 Q44 14 100 -8" stroke="#FFFFFF" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.55"/>'
+			s += '<path d="M28 140 Q32 70 70 30" stroke="#FFFFFF" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.4"/>'
+			s += '<circle cx="206" cy="42" r="11" fill="#F2C230" stroke="#C99410" stroke-width="2" opacity="0.9"/>'
+			return s + '<path d="M-2 196 H244" stroke="#B9B4AA" stroke-width="3" fill="none"/>'
 		"mummy":
 			# Bandages wound round her head, one end hanging loose.
 			var s := '<path d="M16 96 C14 30 60 -8 112 -8 C166 -8 212 30 210 96 C170 84 56 84 16 96 Z" fill="%s" stroke="#C9BFA6" stroke-width="3"/>' % color
@@ -267,11 +287,13 @@ static func hat(kind: String, color: String, line: String, light: String) -> Str
 				+ '<path d="M96 10 Q112 24 128 10" stroke="%s" stroke-width="3" fill="none"/>' % line
 				+ '<rect x="52" y="60" width="122" height="14" fill="#5E4228"/><rect x="104" y="58" width="18" height="18" fill="#F2C230" stroke="#C99410" stroke-width="2"/>')
 		"ninja":
-			# The hood of a ninja: everything covered but a band across the eyes (the mask draws that).
-			var s := '<path d="M14 104 C12 30 60 -10 112 -10 C166 -10 214 30 212 104 C170 92 54 92 14 104 Z" fill="%s" stroke="%s" stroke-width="3"/>' % [color, line]
-			s += '<path d="M16 96 H208 V112 H16 Z" fill="%s"/>' % color
-			s += '<path d="M202 44 q26 10 30 34 q-22 0 -34 -18 z" fill="%s" stroke="%s" stroke-width="2.5" stroke-linejoin="round"/>' % [color, line]
-			return s + '<path d="M40 64 Q52 22 96 8" stroke="%s" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.3"/>' % light
+			# The hood of a ninja: it comes right down the sides of her head and over her shoulders, with only a
+			# band across the eyes left open (the mask draws the cloth above and below it).
+			var s := '<path d="M22 150 C20 26 62 -14 121 -14 C180 -14 222 26 220 150 Q222 196 214 226 L192 220 Q202 178 198 142 C198 64 166 28 121 28 C76 28 44 64 44 142 Q40 178 50 220 L28 226 Q20 196 22 150 Z" fill="%s" stroke="%s" stroke-width="3" stroke-linejoin="round"/>' % [color, line]
+			s += '<path d="M36 118 C40 50 76 16 121 16 C166 16 202 50 206 118 Q121 98 36 118 Z" fill="%s" stroke="%s" stroke-width="3"/>' % [color, line]
+			s += '<path d="M222 70 q30 12 34 38 q-26 0 -38 -20 z" fill="%s" stroke="%s" stroke-width="2.5" stroke-linejoin="round"/>' % [color, line]
+			s += '<path d="M226 104 q22 24 16 54 q-18 -10 -24 -36 z" fill="%s" stroke="%s" stroke-width="2.5" stroke-linejoin="round"/>' % [color, line]
+			return s + '<path d="M48 72 Q60 26 104 12" stroke="%s" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.25"/>' % light
 	return ""
 
 
@@ -306,16 +328,20 @@ static func wings(kind: String) -> String:
 				s += "</g>"
 		"fairy":
 			for side in [-1.0, 1.0]:
-				s += '<g transform="translate(130 36) scale(%s 1)">' % side
-				s += '<path d="M4 4 Q76 -40 98 10 Q84 56 24 36 Z" fill="#F7D8EC" opacity="0.8" stroke="#D9A6CC" stroke-width="3"/>'
-				s += '<path d="M8 36 Q66 32 84 78 Q52 102 18 70 Z" fill="#DFF1F8" opacity="0.8" stroke="#A8C6D4" stroke-width="3"/>'
-				s += '<path d="M16 12 Q62 -8 86 16 M18 48 Q56 48 74 76" stroke="#FFFFFF" stroke-width="2.5" fill="none" opacity="0.8"/>'
+				s += '<g transform="translate(130 32) scale(%s 1)">' % side
+				s += '<path d="M2 2 Q92 -54 118 6 Q102 62 26 40 Z" fill="#F7D8EC" opacity="0.85" stroke="#D9A6CC" stroke-width="3"/>'
+				s += '<path d="M6 40 Q78 36 98 92 Q58 122 18 82 Z" fill="#DFF1F8" opacity="0.85" stroke="#A8C6D4" stroke-width="3"/>'
+				s += '<path d="M14 10 Q70 -22 104 12 M16 54 Q62 54 86 90" stroke="#FFFFFF" stroke-width="3" fill="none" opacity="0.85"/>'
+				s += '<path d="M24 20 Q74 -4 98 18" stroke="#FFFFFF" stroke-width="2" fill="none" opacity="0.5"/>'
+				for d: Array in [[72.0, -12.0], [96.0, 22.0], [54.0, 72.0]]:
+					s += '<circle cx="%s" cy="%s" r="4" fill="#FFFFFF" opacity="0.8"/>' % [d[0], d[1]]
 				s += "</g>"
 		"bat":
 			for side in [-1.0, 1.0]:
 				s += '<g transform="translate(130 30) scale(%s 1)">' % side
-				s += '<path d="M4 2 L112 -18 L104 24 L118 30 L96 62 L74 44 L52 70 L34 44 L10 58 Z" fill="#2B2B38" stroke="#17171F" stroke-width="3" stroke-linejoin="round"/>'
-				s += '<path d="M12 8 L96 -8 M22 22 L86 24 M30 40 L72 46" stroke="#4A4A5E" stroke-width="2.5" fill="none"/>'
+				s += '<path d="M0 14 L30 -52 L48 -8 L96 -62 L108 -10 L160 -56 L158 18 L142 54 L122 32 L104 76 L84 42 L62 86 L42 48 L18 70 Z" fill="#2B2B38" stroke="#17171F" stroke-width="3" stroke-linejoin="round"/>'
+				s += '<path d="M8 16 L32 -44 M22 22 L96 -52 M40 34 L154 -48" stroke="#4A4A5E" stroke-width="3" fill="none" stroke-linecap="round"/>'
+				s += '<path d="M0 14 L30 -52 L48 -8 Z" fill="#3C3C4E" opacity="0.7"/>'
 				s += "</g>"
 	return s
 

@@ -512,8 +512,8 @@ func _build_doors() -> void:
 func _open_wardrobe() -> void:
 	_control.enabled = false
 	var wardrobe := Wardrobe.new(_charlotte.look)
-	# On Halloween the drawers open on the costumes instead of her everyday clothes.
-	wardrobe.costumes_first = Halloween.step() == 1
+	# All through the Halloween quest the drawers hold nothing but costumes, never her everyday clothes.
+	wardrobe.costumes_only = Quests.active(Halloween.QUEST)
 	wardrobe.closed.connect(func(look: CharacterLook):
 		if look:
 			CharacterLook.dress_charlotte(look)

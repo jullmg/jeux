@@ -806,6 +806,13 @@ func _top() -> String:
 				s += _f('<path d="M61 %s q-%s 2 -%s 12" stroke="{accent}" stroke-width="6" fill="none" stroke-linecap="round"/>' % [ry, spread, spread])
 				s += _f('<path d="M69 %s q%s 2 %s 12" stroke="{accent}" stroke-width="6" fill="none" stroke-linecap="round"/>' % [ry, spread, spread])
 			s += _f('<path d="M52 94 q13 8 26 0" stroke="{accent}" stroke-width="6" fill="none" stroke-linecap="round"/>')
+		"pumpkin":
+			# A carved pumpkin on her front: the ribs curving down the belly and a jack-o'-lantern face.
+			for dx: float in [-30.0, -15.0, 0.0, 15.0, 30.0]:
+				s += _f('<path d="M%s 18 q-6 42 0 84" stroke="{accent}" stroke-width="3" fill="none" opacity="0.6"/>' % (65.0 + dx))
+			s += _f('<path d="M40 44 l13 -14 l13 14 z" fill="{accent}"/>')
+			s += _f('<path d="M90 44 l-13 -14 l-13 14 z" fill="{accent}"/>')
+			s += _f('<path d="M40 62 q25 24 50 0 q-7 1 -9 -7 q-8 8 -16 0 q-8 8 -16 0 q-2 8 -9 7 z" fill="{accent}"/>')
 		"bandages":
 			# A mummy's wrappings: strips wound diagonally, with a frayed end hanging loose.
 			for i in 7:
