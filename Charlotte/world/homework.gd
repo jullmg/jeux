@@ -206,6 +206,18 @@ static func pay() -> float:
 	return REWARD
 
 
+## Wipes this week clean, reward and all (the debug menu's "Effacer").
+static func reset() -> void:
+	_all().erase(str(week().get("from", "-")))
+
+
+## Every question answered at once (the debug menu's "Finir"), without paying the reward: the cahier pays it when
+## she opens it and sees the page of congratulations.
+static func finish_all() -> void:
+	for i in exercises().size():
+		mark_done(i)
+
+
 ## Starts the week over, to practise again. What it paid stays paid: a week is only ever worth REWARD once.
 static func forget() -> void:
 	var mine := _this_week()

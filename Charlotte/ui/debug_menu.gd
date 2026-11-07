@@ -8,8 +8,8 @@ extends CanvasLayer
 const ALIASES := {"printemps": "spring", "ete": "summer", "été": "summer", "automne": "autumn", "hiver": "winter"}
 ## The story flags each quest leaves behind, cleared with it.
 ## Story flags that belong to no quest, cleared by "Tout effacer".
-const OTHER_FLAGS := ["met_twins", "met_billie_auguste"]
-const QUEST_FLAGS := {"amies": ["met_twins", "met_billie_auguste"], "cachette": ["cachette_found"], "livre": ["book_found", "croque_checked"], "halloween": ["halloween_step", "candy", "candy_bag", "halloween_doors", "halloween_counted", "halloween_total", "winter_greeting"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"]}
+const OTHER_FLAGS := ["met_twins", "met_billie_auguste", "devoirs", "candy_bag_kind"]
+const QUEST_FLAGS := {"amies": ["met_twins", "met_billie_auguste"], "cachette": ["cachette_found"], "livre": ["book_found", "croque_checked"], "halloween": ["halloween_step", "candy", "candy_bag", "candy_bag_kind", "halloween_doors", "halloween_counted", "halloween_total", "winter_greeting"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"]}
 ## What a quest puts in her arms (a lost cat's quest id is the cat's id, handled by `Carry.cat_id()`).
 const QUEST_CARRIES := {"milk": "milk", "plants": "can", "menage": "toy", "livre": "book"}
 
@@ -215,6 +215,29 @@ func _quest_list(parent: Control) -> void:
 			b.disabled = state == action[1]
 			b.pressed.connect(_set_quest.bind(id, action[1]))
 			row.add_child(b)
+	# The homework of the week is no quest, but it starts over the same way.
+	var devoirs := HBoxContainer.new()
+	devoirs.add_theme_constant_override("separation", 8)
+	list.add_child(devoirs)
+	var left := Label.new()
+	var count := Homework.exercises().size()
+	left.text = "%s  devoirs %d/%d" % ["★" if Homework.all_done() else "▶", Homework.done_count(), count]
+	left.custom_minimum_size = Vector2(120, 0)
+	left.add_theme_font_size_override("font_size", 17)
+	devoirs.add_child(left)
+	for action: Array in [["Effacer", false], ["Tout finir", true]]:
+		var b := Button.new()
+		b.text = action[0]
+		b.add_theme_font_size_override("font_size", 15)
+		b.disabled = Homework.all_done() if action[1] else Homework.done_count() == 0
+		b.pressed.connect(func() -> void:
+			if action[1]:
+				Homework.finish_all()
+			else:
+				Homework.reset()
+			_close()
+			_reload())
+		devoirs.add_child(b)
 	var all := Button.new()
 	all.text = "Tout effacer"
 	all.add_theme_font_size_override("font_size", 15)
