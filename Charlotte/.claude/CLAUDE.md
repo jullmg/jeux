@@ -147,6 +147,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     data (`rooms`, `chair_rails`, `posts`, `casings`, `gleams` = x of lights mirrored on the floor). Per-room wallpaper
     options: `pattern` ("stars", "dots", "stripes", "diamonds"), `pattern_color`, `pattern_alpha`, `wainscot` (Color) +
     `wainscot_height` (panelled lower wall); shops use `tile_colors`.
+  - `InteriorArt.window(w, h)` is a sash window with a real view out over the back lane (`_view`, `_view_tree`): the
+    season's sky with its clouds, the neighbours' brick back with their windows, gallery rail and downpipe, the yard
+    tree (tapering trunk, three limbs, clumps of real leaves; bare and snowy in winter), the board fence and birds on
+    the wire. On Halloween night (`Halloween.night()`) it is the evening out there instead — deep blue sky, stars,
+    the moon, a bat, the tree in silhouette, their windows warm and a jack-o'-lantern on their gallery — and the
+    shared `outside` gradient (the kitchen's back door) turns night-blue with it.
   - `world/interior_art.gd` (`InteriorArt`): one SVG function per piece of furniture; `world/fairy_lights.gd` (`FairyLights`).
     Decor pieces for any bedroom/house: `moon_decal`, `mobile` (sways, tweened in the scene), `wall_clock`, `house_plant`; kitchen/entrance: `wall_calendar`, `kitchen_toppers` (things on the fridge and cabinet), `kitchen_curtain`, `kitchen_mat`, `umbrella_stand`. SVG `<pattern>` does not render in these textures: draw checks/stripes as plain shapes.
 - Sitting (`world/seat.gd`, `Seat`, an interactable like a `DoorSpot`): `Seat.make(rect, x_span, height, facing)` anywhere (set `floor_y` when the seat is further back than where she walks); click it and she walks over and sits where she arrives, click it again, press an arrow/↑ or click elsewhere and she gets up (`PlayerControl` waits until `Character.is_seated()` is false before walking). `Character.sitting` / `seat_h` / `seat_floor` / `_sit` (eased): thighs forward, lower legs hanging and swinging when the seat is high (`_sit_legs`, `_sit_lift`: the hips are held `seat_h` above the floor, so a kid on a grown-up sofa dangles her feet), and `Seat.sit(character)` seats any character (parents). The salon sofa has one (`house.gd` `_build_salon`) plus a copy of its front drawn over her (`front`, z_index 3) so she sits in it.

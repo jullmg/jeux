@@ -22,8 +22,15 @@ static func _defs() -> String:
 		+ '<linearGradient id="velvet" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DDA640"/><stop offset="1" stop-color="#B07A1E"/></linearGradient>'
 		+ '<radialGradient id="globe" cx="0.4" cy="0.35"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.6" stop-color="#FFF4D6"/><stop offset="1" stop-color="#F2D9A0"/></radialGradient>'
 		+ '<linearGradient id="steel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#F2F2EF"/><stop offset="0.45" stop-color="#C9C5BC"/><stop offset="1" stop-color="#9A968E"/></linearGradient>'
-		+ '<linearGradient id="outside" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BFD8E8"/><stop offset="0.6" stop-color="#9DB98C"/><stop offset="1" stop-color="#7E8F6A"/></linearGradient>'
+		+ _outside_gradient()
 		+ '</defs>')
+
+
+# What is seen through a door's glass or a window: daylight over the yard, or the deep blue of Halloween night.
+static func _outside_gradient() -> String:
+	if Halloween.night():
+		return '<linearGradient id="outside" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16214A"/><stop offset="0.6" stop-color="#28325C"/><stop offset="1" stop-color="#3A4160"/></linearGradient>'
+	return '<linearGradient id="outside" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BFD8E8"/><stop offset="0.6" stop-color="#9DB98C"/><stop offset="1" stop-color="#7E8F6A"/></linearGradient>'
 
 
 static func _grain(x: float, y: float, w: float, h: float, rng: RandomNumberGenerator, n := 6) -> String:
@@ -594,24 +601,40 @@ static func kid_table() -> ImageTexture:
 
 # ── Windows, plants, lamps and small things ──────────────────
 
-## Canvas w x h: window with white trim, sheer curtains and the view out: sky, the neighbour's brick
-## wall across the lane and an autumn tree.
+## Canvas w x h: a sash window with its white trim, sheer curtains and a real view out over the back lane — the
+## season's sky, the neighbours' brick back across the lane with their windows, gallery and downpipe, the yard tree
+## and the board fence, birds on the wire. On Halloween night (`Halloween.night()`) it is the evening out there:
+## a deep blue sky with the moon and the stars, the neighbours' windows warm, a jack-o-lantern on their gallery
+## and a bat going by.
 static func window(w: float, h: float) -> ImageTexture:
+	var night := Halloween.night()
 	var s := _defs()
-	s += '<rect x="0" y="0" width="%s" height="%s" fill="%s" stroke="%s" stroke-width="3"/>' % [w, h, TRIM, TRIM_DARK]
-	s += '<rect x="16" y="16" width="%s" height="%s" fill="url(#outside)"/>' % [w - 32, h - 46]
-	s += '<rect x="16" y="%s" width="%s" height="%s" fill="#B5603F" opacity="0.75"/>' % [h * 0.42, w - 32, h * 0.45]
-	for y in range(int(h * 0.42) + 8, int(h) - 30, 12):
-		s += '<path d="M16 %d H%s" stroke="#9A4E34" stroke-width="1.5" opacity="0.7"/>' % [y, w - 16]
-	# A tree in the lane: trunk and a few clumps in the season's colours.
-	s += '<path d="M%s %s V%s" stroke="#5E4636" stroke-width="7"/>' % [w * 0.36, h * 0.88, h * 0.3]
-	var leaves := Season.foliage()
-	for i in 5:
-		var c: Array = [[0.22, 0.3, 0.13], [0.42, 0.22, 0.15], [0.3, 0.15, 0.11], [0.52, 0.34, 0.1], [0.18, 0.18, 0.09]][i]
-		s += '<circle cx="%s" cy="%s" r="%s" fill="#%s"/>' % [w * c[0], h * c[1], w * c[2], leaves[i].to_html(false)]
-	s += '<rect x="%s" y="16" width="8" height="%s" fill="%s"/>' % [w / 2 - 4, h - 46, TRIM]
-	s += '<rect x="16" y="%s" width="%s" height="8" fill="%s"/>' % [h * 0.45, w - 32, TRIM]
-	s += '<path d="M20 20 L%s 20 L30 %s L20 %s Z" fill="#FFFFFF" opacity="0.35"/>' % [w * 0.4, h * 0.6, h * 0.6]
+	var gx := 16.0
+	var gy := 16.0
+	var gw := w - 32.0
+	var gh := h - 46.0
+	s += '<defs><clipPath id="pane"><rect x="%s" y="%s" width="%s" height="%s"/></clipPath>' % [gx, gy, gw, gh]
+	# The sky of the hour, as a gradient of its own.
+	if night:
+		s += ('<linearGradient id="view_sky" x1="0" y1="0" x2="0" y2="1">'
+			+ '<stop offset="0" stop-color="#101A3A"/><stop offset="0.55" stop-color="#1E2C54"/>'
+			+ '<stop offset="1" stop-color="#36406A"/></linearGradient></defs>')
+	else:
+		var sky := Season.sky()
+		s += ('<linearGradient id="view_sky" x1="0" y1="0" x2="0" y2="1">'
+			+ '<stop offset="0" stop-color="#%s"/><stop offset="0.5" stop-color="#%s"/>'
+			+ '<stop offset="1" stop-color="#%s"/></linearGradient></defs>') % [
+				sky[0].to_html(false), sky[2].to_html(false), sky[3].to_html(false)]
+	s += '<g clip-path="url(#pane)">'
+	s += '<rect x="%s" y="%s" width="%s" height="%s" fill="url(#view_sky)"/>' % [gx, gy, gw, gh]
+	s += _view(gx, gy, gw, gh, night)
+	s += "</g>"
+	# The frame round the glass, its bars, the sash and the sill.
+	s += '<path d="M0 0 H%s V16 H0 Z M0 %s H%s V%s H0 Z M0 16 H16 V%s H0 Z M%s 16 H%s V%s H%s Z" fill="%s" stroke="%s" stroke-width="3" stroke-linejoin="round"/>' % [
+		w, gy + gh, w, h, gy + gh, w - 16.0, w, gy + gh, w - 16.0, TRIM, TRIM_DARK]
+	s += '<rect x="%s" y="16" width="8" height="%s" fill="%s"/>' % [w / 2 - 4, gh, TRIM]
+	s += '<rect x="16" y="%s" width="%s" height="8" fill="%s"/>' % [h * 0.45, gw, TRIM]
+	s += '<path d="M20 20 L%s 20 L30 %s L20 %s Z" fill="#FFFFFF" opacity="%s"/>' % [w * 0.4, h * 0.6, h * 0.6, 0.18 if night else 0.35]
 	s += '<rect x="-6" y="%s" width="%s" height="16" fill="%s" stroke="%s" stroke-width="2"/>' % [h - 30, w + 12, TRIM, TRIM_DARK]
 	# Sheer curtains gathered at the sides.
 	for side in [0, 1]:
@@ -622,6 +645,151 @@ static func window(w: float, h: float) -> ImageTexture:
 			s += '<path d="M%s 8 q%s %s 0 %s" stroke="#E3DACB" stroke-width="1.5" fill="none"/>' % [x0 + dir * (10 + k * 10), dir * 6, h * 0.4, h - 44]
 	s += '<rect x="-10" y="0" width="%s" height="6" rx="3" fill="#B08A5A"/>' % (w + 20)
 	return tex(w, h, s)
+
+
+# What is out there, inside the glass: the lane behind the house. Everything is laid out on the pane's own
+# rectangle, so the same view fits any window.
+static func _view(x: float, y: float, w: float, h: float, night: bool) -> String:
+	var s := ""
+	var horizon := y + h * 0.40
+	var ground := y + h * 0.80
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 404
+	if night:
+		# The moon over the lane, and the stars.
+		for i in 26:
+			var sx := x + rng.randf_range(2.0, w - 2.0)
+			var sy := y + rng.randf_range(2.0, h * 0.38)
+			s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#FFF6D8" opacity="%.2f"/>' % [sx, sy, rng.randf_range(0.7, 1.5), rng.randf_range(0.4, 0.95)]
+		var mx := x + w * 0.74
+		var my := y + h * 0.13
+		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#FFF6D8" opacity="0.14"/>' % [mx, my, w * 0.22]
+		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#FDF6DC"/>' % [mx, my, w * 0.085]
+		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#E8E0C4" opacity="0.7"/>' % [mx - w * 0.025, my - w * 0.02, w * 0.02]
+		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#E8E0C4" opacity="0.6"/>' % [mx + w * 0.03, my + w * 0.02, w * 0.024]
+		# A bat crossing in front of the moon.
+		var bx := x + w * 0.42
+		var by := y + h * 0.2
+		s += '<path d="M%.1f %.1f l-13 -5 l10 2 l-7 -8 l13 7 l6 -3 l6 3 l13 -7 l-7 8 l10 -2 l-13 5 z" fill="#161528" opacity="0.9"/>' % [bx, by]
+	else:
+		# A few soft clouds.
+		for i in 3:
+			var cx := x + w * (0.12 + i * 0.36) + rng.randf_range(-6.0, 6.0)
+			var cy := y + h * rng.randf_range(0.06, 0.2)
+			var cr := w * rng.randf_range(0.09, 0.14)
+			s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#FFFFFF" opacity="0.75"/>' % [cx, cy, cr, cr * 0.5]
+			s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#FFFFFF" opacity="0.65"/>' % [cx + cr * 0.7, cy + cr * 0.12, cr * 0.7, cr * 0.4]
+	# The neighbours' back across the lane: brick, its courses, a cornice, a downpipe, a gallery and its windows.
+	var wall := "#7E4536" if night else "#A85C3E"
+	var wall_dark := "#5E3327" if night else "#8A4530"
+	s += '<rect x="%s" y="%s" width="%s" height="%s" fill="%s"/>' % [x, horizon, w, ground - horizon + 2.0, wall]
+	var course := horizon + 5.0
+	while course < ground:
+		s += '<path d="M%s %.1f H%s" stroke="%s" stroke-width="1.2" opacity="0.5"/>' % [x, course, x + w, wall_dark]
+		course += 7.0
+	s += '<rect x="%s" y="%s" width="%s" height="7" fill="%s"/>' % [x, horizon, w, wall_dark]
+	s += '<rect x="%s" y="%s" width="%s" height="4" fill="#FFFFFF" opacity="%s"/>' % [x, horizon - 4.0, w, 0.12 if night else 0.3]
+	# Two windows of theirs, dark by day, warm tonight.
+	for i in 2:
+		var wx := x + w * (0.12 + i * 0.52)
+		var wy := horizon + h * 0.08
+		var ww := w * 0.2
+		var wh := h * 0.19
+		s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#E8E2D4" stroke="#C2B8A6" stroke-width="2"/>' % [wx - 3.0, wy - 3.0, ww + 6.0, wh + 6.0]
+		if night:
+			s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#FFCE70"/>' % [wx, wy, ww, wh]
+			s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#FFE7B4"/>' % [wx + ww * 0.2, wy, ww * 0.6, wh * 0.6]
+			s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#B5692A" opacity="0.5"/>' % [wx, wy, ww * 0.26, wh]
+		else:
+			s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#4E6B7A"/>' % [wx, wy, ww, wh]
+			s += '<path d="M%.1f %.1f l%.1f 0 l-%.1f %.1f l-%.1f 0 z" fill="#FFFFFF" opacity="0.2"/>' % [wx + ww * 0.45, wy, ww * 0.3, ww * 0.35, wh, ww * 0.3]
+		s += '<path d="M%.1f %.1f v%.1f M%.1f %.1f h%.1f" stroke="#E8E2D4" stroke-width="2"/>' % [wx + ww * 0.5, wy, wh, wx, wy + wh * 0.45, ww]
+	# Their gallery: posts, a rail and (tonight) a jack-o-lantern on it.
+	var rail := ground - h * 0.1
+	s += '<rect x="%s" y="%.1f" width="%s" height="3" fill="#3A3A42"/>' % [x, rail, w]
+	s += '<rect x="%s" y="%.1f" width="%s" height="3" fill="#3A3A42"/>' % [x, rail + h * 0.055, w]
+	var bar := x + 4.0
+	while bar < x + w:
+		s += '<rect x="%.1f" y="%.1f" width="2" height="%.1f" fill="#3A3A42"/>' % [bar, rail, h * 0.058]
+		bar += w * 0.055
+	s += '<rect x="%.1f" y="%s" width="5" height="%.1f" fill="%s"/>' % [x + w * 0.84, horizon, ground - horizon, "#4E3A2E" if night else "#6E5444"]
+	if night:
+		var px := x + w * 0.3
+		var py := rail - h * 0.018
+		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#FFB347" opacity="0.28"/>' % [px, py, w * 0.11]
+		s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#E8812E" stroke="#B5651A" stroke-width="1.5"/>' % [px, py, w * 0.045, w * 0.037]
+		s += '<path d="M%.1f %.1f l%.1f -%.1f l%.1f %.1f z" fill="#FFE07A"/>' % [px - w * 0.028, py - w * 0.002, w * 0.014, w * 0.016, w * 0.014, w * 0.016]
+		s += '<path d="M%.1f %.1f l%.1f -%.1f l%.1f %.1f z" fill="#FFE07A"/>' % [px + w * 0.001, py - w * 0.002, w * 0.014, w * 0.016, w * 0.014, w * 0.016]
+		s += '<path d="M%.1f %.1f q%.1f %.1f %.1f 0 z" fill="#FFE07A"/>' % [px - w * 0.026, py + w * 0.012, w * 0.026, w * 0.024, w * 0.052]
+	# The lane itself, then the board fence at the bottom of the yard.
+	s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" fill="%s"/>' % [x, ground, w, y + h - ground, "#3E4152" if night else "#8E9A7A"]
+	s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" fill="%s" opacity="0.5"/>' % [x, ground, w, h * 0.03, "#4C5068" if night else "#A3AE8A"]
+	# The yard tree, in front of it all: a tapering trunk, three limbs, clumps of real leaves.
+	s += _view_tree(x + w * 0.3, ground + h * 0.04, w * 0.95, h * 0.6, night)
+	var board := x
+	var fence_top := y + h * 0.86
+	while board < x + w:
+		s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="2" fill="%s" stroke="%s" stroke-width="1"/>' % [
+			board, fence_top, w * 0.062, y + h - fence_top, "#4A4030" if night else "#9A7A4E", "#3A3024" if night else "#7E6038"]
+		board += w * 0.072
+	s += '<rect x="%s" y="%.1f" width="%s" height="4" fill="%s"/>' % [x, fence_top, w, "#3A3024" if night else "#7E6038"]
+	if not night:
+		# Birds on the wire, by day.
+		s += '<path d="M%s %.1f Q%.1f %.1f %s %.1f" stroke="#3A3A42" stroke-width="1.6" fill="none"/>' % [
+			x, y + h * 0.3, x + w * 0.5, y + h * 0.35, x + w, y + h * 0.29]
+		for i in 3:
+			var bx := x + w * (0.22 + i * 0.22)
+			var by := y + h * (0.325 - i * 0.004)
+			s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#4A4A55"/>' % [bx, by - 3.0, w * 0.022, w * 0.016]
+			s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#4A4A55"/>' % [bx + w * 0.018, by - 5.5, w * 0.012]
+	return s
+
+
+# The tree in the yard next door, seen through the window: a tapering trunk, three limbs and clumps of leaves in
+# the season's colours (bare and snowy in winter, a silhouette at night).
+static func _view_tree(cx: float, foot: float, w: float, h: float, night: bool) -> String:
+	var trunk := "#2A2438" if night else "#5E4636"
+	var s := '<path d="M%.1f %.1f q-%.1f -%.1f -%.1f -%.1f l%.1f 0 q%.1f %.1f %.1f %.1f z" fill="%s"/>' % [
+		cx - w * 0.035, foot, w * 0.004, h * 0.4, w * 0.012, h * 0.62, w * 0.07, w * 0.008, h * 0.22, w * 0.012, h * 0.62, trunk]
+	for limb: Array in [[-1.0, 0.34, 0.46], [1.0, 0.3, 0.52], [-0.6, 0.18, 0.64]]:
+		s += '<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" stroke="%s" stroke-width="%.1f" fill="none" stroke-linecap="round"/>' % [
+			cx, foot - h * float(limb[2]) * 0.7, cx + w * 0.07 * float(limb[0]), foot - h * (float(limb[2]) + 0.06),
+			cx + w * float(limb[1]) * float(limb[0]), foot - h * (float(limb[2]) + 0.14), trunk, w * 0.022]
+	if Season.current == "winter" and not night:
+		for twig: Array in [[-0.3, 0.72], [0.28, 0.78], [-0.12, 0.84], [0.1, 0.9]]:
+			s += '<path d="M%.1f %.1f l%.1f -%.1f" stroke="%s" stroke-width="%.1f" fill="none" stroke-linecap="round"/>' % [
+				cx, foot - h * float(twig[1]), w * 0.16 * float(twig[0]), h * 0.1, trunk, w * 0.012]
+		for cap: Array in [[-0.2, 0.8, 0.1], [0.22, 0.86, 0.09], [0.0, 0.94, 0.11]]:
+			s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#F2F5F8" opacity="0.9"/>' % [
+				cx + w * float(cap[0]), foot - h * float(cap[1]), w * float(cap[2]), w * float(cap[2]) * 0.45]
+		return s
+	var leaves := Season.foliage()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 77
+	var clumps := [[-0.3, 0.74, 0.17], [0.26, 0.8, 0.19], [-0.1, 0.93, 0.18], [0.12, 0.66, 0.14], [-0.34, 0.9, 0.13]]
+	for i in clumps.size():
+		var c: Array = clumps[i]
+		var ccx := cx + w * float(c[0])
+		var ccy := foot - h * float(c[1])
+		var cr := w * float(c[2])
+		var tone: String = "#1C2038" if night else "#" + leaves[i % leaves.size()].darkened(0.3).to_html(false)
+		s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="%s"/>' % [ccx, ccy, cr, cr * 0.82, tone]
+		if night:
+			continue
+		# Real leaves over the shade, lit from the upper left, turned outward.
+		for k in 16:
+			var a := rng.randf_range(0.0, TAU)
+			var d := cr * sqrt(rng.randf()) * 0.95
+			var lx := ccx + cos(a) * d
+			var ly := ccy + sin(a) * d * 0.82
+			var ls := cr * rng.randf_range(0.22, 0.34)
+			var col: Color = leaves[rng.randi() % leaves.size()]
+			if lx < ccx and ly < ccy:
+				col = col.lightened(0.14)
+			s += '<path d="M%.1f %.1f q%.1f -%.1f %.1f -%.1f q-%.1f %.1f -%.1f %.1f z" fill="#%s" transform="rotate(%.0f %.1f %.1f)"/>' % [
+				lx, ly, ls * 0.75, ls * 0.4, ls * 1.5, ls * 0.1, ls * 0.75, ls * 0.5, ls * 1.5, ls * 0.1,
+				col.to_html(false), rad_to_deg(a), lx, ly]
+	return s
 
 
 ## Canvas 200x330: big monstera in a terracotta pot. Floor at y 330.
