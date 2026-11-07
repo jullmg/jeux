@@ -8,7 +8,8 @@ Current state: a living, side-scrolling street. Charlotte walks with ←/→ or 
 (`Character.running`, `RUN_SPEED` × walk speed, eased; `Character.speed()` gives the current speed).
 Interactions: click (or tap) a stray cat or a passerby's dog and Charlotte walks over and pets it. Click her front door
 (ground floor of `duplex_charlotte`, n° 5672) to go inside her flat. In her bedroom, click the dresser's drawers to open her
-wardrobe and change clothes. Click her desk to draw (`ui/drawing_pad.gd`, `DrawingPad`: crayons, sizes, eraser); "Sur le frigo !" saves the
+wardrobe and change clothes. Click her desk and it asks what she wants to do (`ui/choice_card.gd`, `ChoiceCard`): her homework of the week (see
+Devoirs), or draw (`ui/drawing_pad.gd`, `DrawingPad`: crayons, sizes, eraser); "Sur le frigo !" saves the
 drawing to the game's `user://slots/<n>/drawings/` (newest 4 kept) and sticks it on the kitchen fridge. Delete that folder after tests.
 Click the bookshelf in her bedroom to read (`ui/book_reader.gd`, `BookReader`: six short original stories — two set in the neighbourhood, « La ruelle aux trésors » and « Le hibou de la 5e Avenue ». The shelf shows illustrated covers (`_Cover`: the first page's picture under a title band), and an open book is a real two-page spread (`_Spread`: cream pages, the fold, a page number) with the picture framed on the left and the words on the right; the pictures (`_Art`) are drawn with outlines, a sky gradient, clouds or stars and a rolling ground). Click her bed to sleep: night falls, "Bonne nuit, Chachoue…", then "Le lendemain matin…" (no day count shown or kept for now; `Season.day` stays 1).
 Click the fridge: it opens (`InteriorArt.fridge_open()`) and she takes a random snack (`InteriorArt.snack(kind)`), "Miam !".
@@ -387,7 +388,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   starts, `age`, optional `after` = quest it waits for, `reward` in $). Several quests can be on at once. State in
   `GameState.quests` (absent / "active" / "done"); `available`, `start`, `complete` (adds the reward), `stars`, `money_text`.
 - `ui/notebook.gd` is the `Notebook` autoload (CanvasLayer 75): button left of the mute button (N key), "Mon carnet" with
-  two pages behind coloured tabs on its edge (`Notebook.TABS`, click or ←/→): Missions (En cours + hint, Réussies with yellow stars, À découvrir with clues) and Mes amis (`Notebook.FRIENDS`: name, note, story flag; **a new friend = one line there**); age and pocket money; crayon doodles, ribbon bookmark, elastic,
+  three pages behind coloured tabs on its edge (`Notebook.TABS`, click or ←/→): Missions (En cours + hint, Réussies with yellow stars, À découvrir with clues), Mes devoirs (the week's homework, part by part) and Mes amis (`Notebook.FRIENDS`: name, note, story flag; **a new friend = one line there**); age and pocket money; crayon doodles, ribbon bookmark, elastic,
   washi tape on the page; pauses the game while open. Hidden
   on the title and `tools/` scenes. `Notebook.announce()` (called by `Quests`) pops "Nouvelle quête" / "Quête réussie !".
 - `QuestMark.make(at, condition, scale)` (`world/quest_mark.gd`): a bobbing yellow "!" over a quest giver, or over where
@@ -435,6 +436,33 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Julien's list of quest ideas for later is in `docs/idees-de-quetes.md` (pizza hidden by a squirrel, jogging with Dad,
   buying sour-cream-and-onion chips at the dépanneur…): read it before inventing new quests, and tick them off there.
 - The dépanneurs have real Montréal prices (2026), in `Shop.PRICES` (candy 1,25 $, lollipop 0,75 $, chips 2,99 $, sloche 2,75 $, hot chocolate 2,25 $, popsicle 1,75 $, juice 2,25 $, pint of milk 3,29 $, bread 3,99 $, coffee 2,00 $; the specials board and the "CAFÉ 2 $" poster use them). `Shop._buy(picture, text, price)` first opens `ui/buy_dialog.gd` (`BuyDialog`, CanvasLayer 62, group "modal": item, price, pocket money and what is left, "Acheter" / "Non merci"; when short, how much is missing and only "D'accord"), then pays from `GameState.money`. Start money is 5,00 $ and quest rewards are 1–3 $ so a snack costs one or two quests.
+
+## Devoirs de la semaine (homework)
+
+- A mode of its own, nothing to do with the quests: it is **always on**, whatever she has or hasn't finished.
+- `world/homework.gd` (`Homework`): the catalogue. **Julien gives the week's homework and it goes in `WEEKS`**, one entry
+  per week: `{"from": "<the Monday, ISO>", "title": …, "exercises": […]}`. The week in force is the LAST one whose Monday
+  has come (`week()`, the week starting Monday, `monday()`), so a week nobody gave keeps the one before it and nothing
+  ever has to be removed. An exercise is `{kind, show, say, answer, options, hint, part}`: `kind` is "nombre" (the number
+  pad), "mot" (the keyboard) or "choix" (one of the answers); `show` is what is written, `say` what the voice reads (a
+  dictée writes "Écris le mot que tu entends." and says the word — with no voice on the computer the page writes `say`
+  instead); `answer` is the right answer or an array of them; `part` groups the questions into the week's parts.
+  `check()` forgives the case, the spaces and the punctuation, and answers "presque" for a word right but for its accents
+  (which still counts). Her progress is saved in `GameState.flags.devoirs` ({week: {done: [...], paid: bool}}); the finished
+  week pays `Homework.REWARD` once (`pay()`), and "Les refaire pour pratiquer" (`forget()`) clears the stars but not the pay.
+- `ui/homework_pad.gd` (`HomeworkPad`, CanvasLayer 62, group "modal"): the cahier, opened from her desk. A page of ruled
+  school paper with a red margin, the week and the part at the top, one star per question across the page (they shrink so
+  thirty-five still fit), the question on its card with the loudspeaker that says it again, and below it the number pad, the
+  writing line or the answers to pick. Right: a star lights up and it moves on; wrong: "Essaie encore", the page shakes.
+  The finished week gets a real page of congratulations (`_Party`): confetti, "Bravo Chachoue !", her own crayon drawings
+  (`CuteArt`), the reward and a note in the notebook.
+- `audio/voice.gd` is the `Voice` autoload: the questions are **read out loud** by the computer's own voice (Godot's
+  `DisplayServer.tts_*`, which needs `audio/general/text_to_speech=true` in project.godot), so there is no sound file and no
+  licence and any sentence we write can be read. It picks a Québec French voice (Amélie on a Mac, `PREFERRED`), reads a
+  little slowly (`RATE`), and says nothing while the sound is muted or "Voix des devoirs" is unticked in the options.
+  `Voice.say(text)`, `stop()`, `available()`.
+- `ui/choice_card.gd` (`ChoiceCard`): the little card that asks what to do where there is more than one thing (her desk:
+  homework or drawing). `ChoiceCard.ask(parent, question, [{text, note, color}, …])` then `chose(i)`.
 
 ## Halloween (the long quest)
 
@@ -518,6 +546,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   licences): `Sfx.play(name, world_position = Vector2.INF, volume_db, pitch)`; names include steps (`Sfx.step_for(outside)`
   picks wood / street / leaves / snow by season), door, click, tv, fridge, miam, meow, purr, bark, squeak, nibble, page,
   swoosh, pop, chime, goodnight, bird, wind. `Sfx.ambience(scene)` adds birdsong outdoors (not in winter).
+- Spoken words (the homework's questions) are not sound effects: see `Voice` under Devoirs de la semaine.
 - `ui/cute_art.gd` (`CuteArt`): little drawings on any CanvasItem (cat, dog, hamster heads, `capybara` / `capybara_head` with an orange on its head: Julien wants some in the children's doodles on the menu, the map and the notebook, flower, heart, star, sun,
   house, Charlotte's self-portrait), clean or `crayon` (hatched fill clipped to the shape, wobbly double outline). The
   notebook's doodles use the crayon style, the menu card the clean one.

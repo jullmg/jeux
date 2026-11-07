@@ -588,6 +588,25 @@ static func desk() -> ImageTexture:
 	return tex(360, 260, s)
 
 
+## Canvas 112x64: her school exercise book lying open-corner on the desk with a pencil across it, seen from the
+## side the way everything on a desk is. The desk's top is at y 64.
+static func homework_book() -> ImageTexture:
+	# Two sheets poking out, then the blue cover over them.
+	var s := '<path d="M14 54 L34 38 H102 L82 54 Z" fill="#FDFBF4" stroke="#C9C2B4" stroke-width="1.6"/>'
+	s += '<path d="M10 58 L30 42 H98 L78 58 Z" fill="#FBF6EA" stroke="#C9C2B4" stroke-width="1.6"/>'
+	s += '<path d="M8 52 L28 36 H96 L76 52 Z" fill="#8FB7D9" stroke="#3E6F99" stroke-width="2"/>'
+	# The white label, with three lines of her writing on it.
+	s += '<path d="M28 48 L40 38 H74 L62 48 Z" fill="#FDFBF4" stroke="#B8B0A0" stroke-width="1.4"/>'
+	for i in 3:
+		s += '<path d="M%s %s L%s %s" stroke="#9FB4C8" stroke-width="1.2"/>' % [34 + i * 2, 46 - i * 2.6, 64 + i * 2, 46 - i * 2.6]
+	# A yellow pencil laid across the cover, lead end to the left.
+	s += '<path d="M30 30 L84 18 L86 25 L32 37 Z" fill="#F2C14E" stroke="#B58A24" stroke-width="1.6"/>'
+	s += '<path d="M30 30 L22 32 L32 37 Z" fill="#F3DCC0" stroke="#B58A24" stroke-width="1.4"/>'
+	s += '<path d="M24 31.5 L22 32 L25 33.5 Z" fill="#3A3A3A"/>'
+	s += '<path d="M84 18 L86 25 L92 23.6 L90 16.6 Z" fill="#E88CA6" stroke="#B5647F" stroke-width="1.4"/>'
+	return tex(112, 64, s)
+
+
 ## Canvas 140x120: little white kids' table and chair. Floor at y 120.
 static func kid_table() -> ImageTexture:
 	var s := '<rect x="40" y="50" width="96" height="10" fill="#F7F6F2" stroke="#C9C2B4" stroke-width="2"/>'

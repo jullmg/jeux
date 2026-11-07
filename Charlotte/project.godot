@@ -23,6 +23,7 @@ environment/defaults/default_clear_color=Color(0.06, 0.03, 0.02, 1)
 DebugMenu="*res://ui/debug_menu.gd"
 Sfx="*res://audio/sfx.gd"
 Music="*res://audio/music.gd"
+Voice="*res://audio/voice.gd"
 MuteButton="*res://ui/mute_button.gd"
 Notebook="*res://ui/notebook.gd"
 TownMap="*res://ui/town_map.gd"
@@ -32,3 +33,7 @@ PlaceLabel="*res://ui/place_label.gd"
 [gui]
 
 theme/custom_font="res://ui/fonts/fredoka.tres"
+
+[audio]
+
+general/text_to_speech=true

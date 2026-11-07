@@ -10,7 +10,7 @@ const CREAM := Color("#FBF6EA")
 const INK := Color("#3A3A48")
 const PAGE := Vector2(760, 600)
 ## The coloured tabs on the page's edge: its name, its colour. Click one (or ←/→) to turn to that page.
-const TABS := [["Missions", Color("#3D8BD9")], ["Mes amis", Color("#E85FA0")]]
+const TABS := [["Missions", Color("#3D8BD9")], ["Mes devoirs", Color("#7CCB5A")], ["Mes amis", Color("#E85FA0")]]
 ## Her friends, once she has met them (the story flag). A new friend = one more line here.
 const FRIENDS := [
 	{"name": "Alphée Turcotte", "note": "La jumelle aux cheveux détachés. On se voit dans la ruelle.", "flag": "met_twins"},
@@ -177,7 +177,7 @@ func _fill() -> void:
 	# On Halloween night, what is in her bag so far.
 	if Halloween.night() or Halloween.candy() > 0:
 		_header.text += "\n🎃 Bonbons : %d" % Halloween.candy()
-	_title.text = "Mon carnet" if _tab == 0 else "Mes amis"
+	_title.text = "Mon carnet" if _tab == 0 else str(TABS[_tab][0])
 	for i in _tabs.size():
 		_tabs[i].custom_minimum_size = Vector2(118.0 if i == _tab else 98.0, 54.0)
 		_tabs[i].size = _tabs[i].custom_minimum_size
@@ -185,6 +185,9 @@ func _fill() -> void:
 		child.queue_free()
 	_scroll.scroll_vertical = 0
 	if _tab == 1:
+		_devoirs()
+		return
+	if _tab == 2:
 		_friends()
 		return
 	var on := Quests.ORDER.filter(func(id: String) -> bool: return Quests.active(id))
@@ -198,6 +201,26 @@ func _fill() -> void:
 		_list.add_child(_label("… et d'autres quand tu seras plus grande !", 17, Color(INK, 0.6)))
 	if on.is_empty() and done.is_empty() and next.is_empty():
 		_list.add_child(_label("Rien pour l'instant. Va jouer dehors !", 20, INK))
+
+
+# Her homework for the week (Homework): what she was given, part by part, and where to go and do it.
+func _devoirs() -> void:
+	if Homework.exercises().is_empty():
+		_list.add_child(_label("Pas de devoirs cette semaine. Chanceuse !", 20, INK))
+		return
+	_list.add_child(_label(Homework.title(), 22, BLUE))
+	_list.add_child(_label(Homework.week_text(), 16, Color(INK, 0.6)))
+	for part in Homework.parts():
+		var one: Dictionary = part
+		var whole: bool = int(one.done) == int(one.count)
+		_list.add_child(_row("done" if whole else "active", str(one.name),
+			"%d sur %d" % [int(one.done), int(one.count)], INK))
+	var left := Homework.exercises().size() - Homework.done_count()
+	if left == 0:
+		_list.add_child(_label("Tout est fait, bravo ! ★", 20, Color("#2E7D32")))
+	else:
+		_list.add_child(_label("Il te reste %d question%s à faire, sur ton bureau dans ta chambre."
+			% [left, "s" if left > 1 else ""], 17, Color(INK, 0.65)))
 
 
 func _friends() -> void:
@@ -257,7 +280,7 @@ func _next_toast() -> void:
 	var item: Array = _toasts.pop_front()
 	var done: bool = item[0] == "done"
 	# A step of a long quest announces its own words instead of naming a quest.
-	var a_step: bool = item[0] == "step"
+	var a_step: bool = item[0] == "step" or item[0] == "devoirs"
 	var quest: Dictionary = {"title": item[1], "reward": 0.0} if a_step else Quests.ALL[item[1]]
 	var box := PanelContainer.new()
 	var style := StyleBoxFlat.new()
@@ -271,7 +294,14 @@ func _next_toast() -> void:
 	box.add_theme_stylebox_override("panel", style)
 	var words := VBoxContainer.new()
 	words.add_theme_constant_override("separation", 2)
-	var head := _label("🎃  Halloween" if a_step else ("★  Quête réussie !" if done else "Nouvelle quête dans ton carnet"), 22, BLUE)
+	var heading := "Nouvelle quête dans ton carnet"
+	if item[0] == "devoirs":
+		heading = "★  Devoirs de la semaine finis !"
+	elif item[0] == "step":
+		heading = "🎃  Halloween"
+	elif done:
+		heading = "★  Quête réussie !"
+	var head := _label(heading, 22, BLUE)
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	words.add_child(head)
 	var title := _label(quest.title, 18, INK)

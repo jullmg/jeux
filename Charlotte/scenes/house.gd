@@ -503,8 +503,11 @@ func _build_doors() -> void:
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 360.0, 380, 448, 228), _go_to_sleep, BEDROOM.x + 600.0))
 	# The book ledges: her books.
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 960.0, 270, 136, 200), _open_books, BEDROOM.x + 1030.0))
-	# Her desk: drawing paper and crayons.
-	add_child(DoorSpot.make(Rect2(BEDROOM.x + 1110.0, 420, 300, 186), _open_drawing_pad, BEDROOM.x + 1200.0))
+	# Her desk: drawing paper and crayons, and the homework of the week.
+	add_child(DoorSpot.make(Rect2(BEDROOM.x + 1110.0, 420, 300, 186), _use_desk, BEDROOM.x + 1200.0))
+	# A "!" over the desk as long as this week's homework isn't finished.
+	add_child(QuestMark.make(Vector2(BEDROOM.x + 1372.0, 398.0), func() -> bool:
+		return not Homework.all_done()))
 	# The dresser's drawers (under the terrarium): her wardrobe.
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 40.0, 444, 276, 162), _open_wardrobe, BEDROOM.x + 180.0))
 
@@ -666,6 +669,31 @@ func _open_books() -> void:
 	var books := BookReader.new()
 	books.closed.connect(func(): _control.enabled = true)
 	add_child(books)
+
+
+# Her desk does two things, so it asks: her homework, or drawing.
+func _use_desk() -> void:
+	_control.enabled = false
+	var left := Homework.exercises().size() - Homework.done_count()
+	var note := "Tout est fait !" if left == 0 else "Il te reste %d question%s" % [left, "s" if left > 1 else ""]
+	var card := ChoiceCard.ask(self, "Qu'est-ce que tu veux faire ?", [
+		{"text": "Mes devoirs", "note": note, "color": Color("#B8E986")},
+		{"text": "Dessiner", "note": "Du papier et des crayons", "color": Color("#8FCBF2")},
+	])
+	card.chose.connect(func(which: int) -> void:
+		if which == 0:
+			_open_homework()
+		elif which == 1:
+			_open_drawing_pad()
+		else:
+			_control.enabled = true)
+
+
+func _open_homework() -> void:
+	_control.enabled = false
+	var pad := HomeworkPad.new()
+	pad.closed.connect(func() -> void: _control.enabled = true)
+	add_child(pad)
 
 
 func _open_drawing_pad() -> void:
@@ -866,6 +894,7 @@ func _build_bedroom() -> void:
 	_put(InteriorArt.strawberry_poster(), x + 1130.0, 300.0, 0.8, "wall")
 	_plate(x + 1300.0, 330.0, false)
 	_put(InteriorArt.desk(), x + 1110.0, 606.0, 0.85, "floor")
+	_put(InteriorArt.homework_book(), x + 1326.0, 471.0, 0.68)
 	_put(InteriorArt.laundry_basket(), x + 1300.0, 618.0, 0.8, "floor")
 	_put(InteriorArt.plushies(), x + 770.0, 626.0, 0.8, "floor")
 	_put(InteriorArt.panel_door(), BEDROOM_DOOR_X, WALL_BASE)

@@ -96,6 +96,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		var town_map := get_node_or_null("/root/TownMap")
 		if town_map and town_map._open:
 			return
+		# A card of its own is open (her homework, the shop's till…): Escape belongs to it.
+		if not get_tree().get_nodes_in_group("modal").is_empty():
+			return
 		get_viewport().set_input_as_handled()
 		toggle()
 
@@ -191,20 +194,15 @@ func _build_page() -> void:
 	_options.add_child(_title("Options"))
 	_options.add_child(_slider("Musique", "music", Sfx.BUS_MUSIC, CRAYONS[0], "note"))
 	_options.add_child(_slider("Effets sonores", "effects", Sfx.BUS_SFX, CRAYONS[1], "star"))
-	var full := CheckBox.new()
-	full.text = "Plein écran"
-	full.focus_mode = Control.FOCUS_NONE
-	full.add_theme_font_size_override("font_size", 22)
-	full.add_theme_constant_override("h_separation", 14)
-	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color"]:
-		full.add_theme_color_override(color_name, INK)
-	for state in ["normal", "hover", "pressed", "hover_pressed", "focus"]:
-		full.add_theme_stylebox_override(state, StyleBoxEmpty.new())
-	full.add_theme_icon_override("unchecked", _box_icon(false))
-	full.add_theme_icon_override("checked", _box_icon(true))
-	full.button_pressed = _setting("fullscreen", false)
-	full.toggled.connect(func(on: bool):
-		_store("fullscreen", on)
+	# The voice that reads her homework out loud (the computer's own voice, see the Voice autoload).
+	var voice := _check("Voix des devoirs", "voice", true)
+	voice.toggled.connect(func(on: bool):
+		if not on:
+			Voice.stop()
+		Sfx.play("click"))
+	_options.add_child(voice)
+	var full := _check("Plein écran", "fullscreen", false)
+	full.toggled.connect(func(_on: bool):
 		_apply_settings()
 		Sfx.play("click"))
 	_options.add_child(full)
@@ -416,6 +414,24 @@ func _box_icon(on: bool) -> ImageTexture:
 						c = BLUE
 			img.set_pixel(x, y, Color(c, a))
 	return ImageTexture.create_from_image(img)
+
+
+# A drawn tick box for one of the options, remembered in the settings as soon as it is ticked.
+func _check(text: String, key: String, default: bool) -> CheckBox:
+	var box := CheckBox.new()
+	box.text = text
+	box.focus_mode = Control.FOCUS_NONE
+	box.add_theme_font_size_override("font_size", 22)
+	box.add_theme_constant_override("h_separation", 14)
+	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color"]:
+		box.add_theme_color_override(color_name, INK)
+	for state in ["normal", "hover", "pressed", "hover_pressed", "focus"]:
+		box.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+	box.add_theme_icon_override("unchecked", _box_icon(false))
+	box.add_theme_icon_override("checked", _box_icon(true))
+	box.button_pressed = _setting(key, default)
+	box.toggled.connect(func(on: bool): _store(key, on))
+	return box
 
 
 # ── Settings and leaving ────────────────────────────────────
