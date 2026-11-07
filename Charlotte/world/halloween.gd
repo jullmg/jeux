@@ -25,6 +25,13 @@ const HINTS := {
 }
 
 
+## The evening opens by itself the moment everything else in her notebook is done: she is told straight away to go
+## and get dressed, without having to go and find Maman first. Every scene asks this as it opens.
+static func start_if_ready() -> void:
+	if Quests.start(QUEST):
+		set_step(1)
+
+
 ## Which step she is on (0 = the quest has not started).
 static func step() -> int:
 	return int(GameState.flags.get(STEP, 0)) if Quests.status(QUEST) != "" else 0

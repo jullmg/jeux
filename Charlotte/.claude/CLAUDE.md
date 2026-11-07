@@ -466,7 +466,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 
 ## Halloween (the long quest)
 
-- Once every other quest is done (`Quests` `after_all`), Maman tells her it is Halloween: `world/halloween.gd` (`Halloween`)
+- Once every other quest is done (`Quests` `after_all`) the evening **opens by itself**: every scene calls
+  `Halloween.start_if_ready()` as it loads, which starts the quest and puts her straight on step 1 (go and get
+  dressed) — she no longer has to go and find Maman first (Maman still reminds her where the costume is). `world/halloween.gd` (`Halloween`)
   holds the whole evening — the step she is on (`GameState.flags.halloween_step`), the candy (`candy()`, `counted()` by kind),
   the doors already knocked (`knocked()`), whether it is night out (`night()`) and what the notebook says next (`hint()`,
   through `Quests.hint(id)`).
@@ -507,7 +509,16 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
      "rail"). Each canvas is drawn with its feet on the bottom edge ("anchor": "foot"), or from the top for what hangs.
      `tools/halloween_props.tscn` is the design sheet of all of them
      (`Godot --path . --screen 1 res://tools/halloween_props.tscn -- --screenshot=/path/p.png`).
-     Nine other children go past in costumes, spread the length of the street, each with a light of their own. A doorbell (`StreetScene._ring`) at every front door: a lit house gives 1–3
+     Sixteen other children go past in costumes, spread the length of the street, each with a light of their own, and
+     **every one of them carries a bag** — as does Charlotte (`world/candy_bag.gd`, `CandyBag`: it hangs from the hand
+     (`Character.hand_position()`, `hand_mode` "grip"), swings as they walk, and is a child node of the character so it
+     follows them and is drawn over them). Eight sorts (`CandyBag.KINDS`, drawn by `HalloweenArt.bag_texture`, canvases
+     in `HalloweenArt.BAGS` with the handle at (48, 6)): the orange pumpkin pail, the plastic sack, a pillowcase, a cat
+     tote, a little cauldron, a spider-web tote, a ghost bag and a monster bag; Charlotte's is picked once and kept
+     (`GameState.flags.candy_bag_kind`). **A new bag = one case in `HalloweenArt._bag` + its canvas in `BAGS` + its name
+     in `CandyBag.KINDS`.** That night the street belongs to the children: no cyclists (`StreetScene._spawn_cyclists`)
+     and only one grown-up passerby (`_build_passersby` makes them all as usual and only then frees the extra ones, so
+     the random draws — and the whole street — don't move with the evening). A doorbell (`StreetScene._ring`) at every front door: a lit house gives 1–3
      sweets once, a dark one is asleep. `Halloween.ENOUGH` houses (12, so more than one street) fill her bag. **The back
      lanes are closed that night** (Julien: far too dark for a little girl to venture in): their mouths stay unlit, and a
      click or ↑ there only gets a line from her (`StreetScene.DARK_LANE`), so the evening happens on the four streets.

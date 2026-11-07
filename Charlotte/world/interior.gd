@@ -38,6 +38,7 @@ func _process(delta: float) -> void:
 
 ## Adds Charlotte (dressed as she chose), her controls and the camera. `--x=` on the command line overrides x.
 func _spawn_charlotte(x: float, facing := 1) -> void:
+	Halloween.start_if_ready()
 	_charlotte = Character.new()
 	_charlotte.look = CharacterLook.charlotte()
 	_charlotte.fidgets = true

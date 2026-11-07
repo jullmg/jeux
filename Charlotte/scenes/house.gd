@@ -190,9 +190,6 @@ func _talk_to_mom() -> void:
 		_say(_mom, "Amuse-toi bien, ma chouette !\nReviens quand ton sac sera plein.", 400.0, 3.5)
 	elif Halloween.step() == 1:
 		_say(_mom, "Ton déguisement est dans ta commode,\nma chouette ! Vas-y !", 400.0, 3.5)
-	elif Quests.start("halloween"):
-		_say(_mom, "C'est l'Halloween ce soir, Chachoue !\nVa vite te déguiser dans ta chambre !", 420.0, 4.0)
-		Halloween.set_step(1)
 	elif Quests.start("amies"):
 		if Twins.met():
 			# She has already met them on her own.

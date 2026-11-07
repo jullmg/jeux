@@ -86,6 +86,7 @@ var _start := 0.0
 
 
 func _ready() -> void:
+	Halloween.start_if_ready()
 	_rng.seed = seed_value
 	add_child(SkyBackdrop.new())
 	_starts = _layout_starts()
@@ -191,7 +192,8 @@ func _process(delta: float) -> void:
 
 # Now and then someone rides by in the traffic lane, from one end of the view to the other (rarer in winter).
 func _spawn_cyclists(delta: float) -> void:
-	if _traffic == null:
+	# Nobody rides by on Halloween night: the street belongs to the children.
+	if _traffic == null or Halloween.night():
 		return
 	_bike_timer -= delta
 	if _bike_timer > 0.0:
@@ -1091,8 +1093,16 @@ func _build_passersby() -> void:
 		npc.bounds = Vector2(-140.0, _street_width + 140.0)
 		npc.modulate = Color(0.94, 0.94, 0.96)
 		add_child(npc)
+		var dog: Dog = null
 		if passerby_ages[i] != "child" and _rng.randf() < 0.45:
-			add_child(Dog.random(_rng, npc))
+			dog = Dog.random(_rng, npc)
+			add_child(dog)
+		# On Halloween night only one grown-up stays out, the street being full of children. They are made all the
+		# same and only then taken away, so the random draws — and the whole street — don't move with the evening.
+		if Halloween.night() and i > 0:
+			if dog:
+				dog.queue_free()
+			npc.queue_free()
 
 
 func _build_squirrels() -> void:

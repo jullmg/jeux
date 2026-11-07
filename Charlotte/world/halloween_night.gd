@@ -102,6 +102,9 @@ func _build(scene: Node2D) -> void:
 		_lights.stars.append(Vector3(rng.randf_range(0.0, scene._street_width), rng.randf_range(10.0, 330.0),
 			rng.randf_range(0.7, 1.8)))
 	_lights.lantern = scene._charlotte
+	# Her own bag, the one she keeps all evening.
+	if scene._charlotte:
+		CandyBag.give(scene._charlotte, CandyBag.charlotte_kind())
 	for x: float in scene._lamp_x:
 		_lights.lamps.append(Vector2(x - 8.0, 470.0))
 	_dress_the_houses(scene, rng)
@@ -318,7 +321,7 @@ func _trick_or_treaters(scene: Node2D, rng: RandomNumberGenerator) -> void:
 		if scene.get_child(i) is Passerby:
 			after = i
 	# A good crowd of them, spread the length of the street and often in twos, the way children go round.
-	var how_many := 9
+	var how_many := 16
 	var span: float = maxf(scene._street_width - 400.0, 600.0)
 	for i in how_many:
 		var kid := Passerby.new()
@@ -333,6 +336,7 @@ func _trick_or_treaters(scene: Node2D, rng: RandomNumberGenerator) -> void:
 		kid.facing = 1 if rng.randf() < 0.5 else -1
 		kid.bounds = Vector2(-140.0, scene._street_width + 140.0)
 		scene.add_child(kid)
+		CandyBag.give(kid, CandyBag.KINDS[rng.randi() % CandyBag.KINDS.size()])
 		if after >= 0:
 			after += 1
 			scene.move_child(kid, after)
