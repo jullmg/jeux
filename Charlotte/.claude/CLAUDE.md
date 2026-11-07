@@ -267,7 +267,10 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - `characters/`: `Character` (paper-cutout puppet: walk cycle, blink, hair follow-through, breathing, soft shading by
   `shaders/character_shade.gdshader` (lit from the left, follows `facing`), hair strands clipped to each hairstyle (`CharacterArt._strands`), clothing folds
   (dress gathers and hem, top creases, elbow and knee creases), idle gestures when `fidgets` (wave, hop,
-  stretch, look round: Charlotte and her parents); `set_look()` rebuilds it), `PlayerControl` (keys and
+  stretch, look round, and for Charlotte **daydream** — `Character.CHARLOTTE_FIDGETS`, set by `StreetScene._spawn_charlotte`
+  and `Interior._spawn_charlotte`: standing still 5 to 10 seconds she falls "dans la lune" like her father, blank face,
+  head up, the loose-armed pose, and the little crescent moon of `world/dream_moon.gd` (`DreamMoon`, shared with
+  `FamilyRoutine`'s "daydream" task) floating in front of her for about five seconds); `set_look()` rebuilds it), `PlayerControl` (keys and
   click/tap-to-walk, walks to interactables and calls them; used by the street and the house), `CharacterArt` (generates the
   body-part SVGs from a look), `CharacterLook` (Resource; `CharacterLook.charlotte()` and `CharacterLook.random(rng, age)`).
 - `world/`: one `class_name` per element (`SkyBackdrop`, `Skyline`, `Cloud`, `Birds`, `Street`, `Squirrel`, `Passerby`, `PropArt`),

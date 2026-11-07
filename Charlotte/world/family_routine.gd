@@ -320,26 +320,8 @@ class _Prop:
 			if k != 1:
 				draw_line(at + Vector2(4.5, -20), at + Vector2(12, -13), c, 2.2)
 
-	# A little crescent moon that pops up, bobs, glows softly, with two stars twinkling by it.
+	# A little crescent moon that pops up, bobs, glows softly, with two stars twinkling by it (`DreamMoon`, shared
+	# with Charlotte's own daydream).
 	func _draw_moon() -> void:
-		var grow := smoothstep(0.0, 0.7, _t)
-		var bob := Vector2(sin(_t * 1.3) * 3.0, sin(_t * 2.1) * 4.0)
-		draw_set_transform(bob, sin(_t * 0.9) * 0.12, Vector2.ONE * (grow * (1.0 + 0.12 * sin(_t * 6.0) * (1.0 - grow))))
-		draw_circle(Vector2.ZERO, 24.0, Color(1.0, 0.95, 0.7, 0.16))
-		draw_circle(Vector2.ZERO, 17.0, Color(1.0, 0.95, 0.7, 0.2))
-		var outer := PackedVector2Array()
-		var inner := PackedVector2Array()
-		for i in 36:
-			var a := TAU * i / 36.0
-			outer.append(Vector2.from_angle(a) * 13.0)
-			inner.append(Vector2(7.0, -3.0) + Vector2.from_angle(a) * 11.0)
-		for piece: PackedVector2Array in Geometry2D.clip_polygons(outer, inner):
-			draw_colored_polygon(piece, Color("#FFD84D"))
-			draw_polyline(piece + PackedVector2Array([piece[0]]), Color("#B8892A"), 2.2, true)
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-		for k in 2:
-			var tw := 0.5 + 0.5 * sin(_t * 3.0 + k * 2.4)
-			var at := bob + (Vector2(22.0, -14.0) if k == 0 else Vector2(-16.0, 15.0)) * grow
-			draw_line(at - Vector2(3.5, 0) * tw, at + Vector2(3.5, 0) * tw, Color("#FFF3C4"), 1.4)
-			draw_line(at - Vector2(0, 3.5) * tw, at + Vector2(0, 3.5) * tw, Color("#FFF3C4"), 1.4)
+		DreamMoon.paint(self, _t)
 

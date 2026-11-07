@@ -104,6 +104,9 @@ var seat_floor := NAN
 var _stand_y := NAN
 ## Which idle gestures she may do (a shopkeeper just looks round and stretches).
 var fidget_moves: Array[String] = ["wave", "hop", "stretch", "look", "look"]
+## Charlotte's own list: standing still a few seconds, she is as likely as not to drift off "dans la lune", the way
+## her father does over his chores.
+const CHARLOTTE_FIDGETS: Array[String] = ["wave", "hop", "stretch", "look", "look", "daydream", "daydream"]
 ## The face: `expression` forces one ("" = whatever she is doing, see `_auto_expression`); `express(name, seconds)` shows one for a moment
 ## (talking, a treat, an oops). Each is an eyes + brows + mouth picture (`EXPRESSIONS`), swapped on the face layers.
 var expression := ""
@@ -116,6 +119,8 @@ var _mouth_spr: Sprite2D
 var _face_now := ["", "", ""]
 var _shade: ShaderMaterial
 var _idle := 0.0
+## The crescent moon in front of her while the "daydream" gesture lasts.
+var _dream: DreamMoon
 var _gesture := ""
 var _gesture_t := 0.0
 var _gesture_len := 1.0
@@ -217,6 +222,8 @@ func _auto_expression() -> String:
 		return "happy"
 	if _gesture == "stretch":
 		return "yawn"
+	if _gesture == "daydream":
+		return "blank"
 	if _pet > 0.5:
 		return "happy"
 	if carry_lift > 0.5:
@@ -358,17 +365,45 @@ func _fidget(delta: float) -> void:
 		_gesture_t -= delta
 		if _gesture_t <= 0.0 or is_walking or is_petting():
 			_gesture = ""
+			_stop_dreaming()
+		elif _gesture == "daydream":
+			_follow_dream()
 		return
 	if not fidgets or is_walking or is_petting() or is_holding():
 		_idle = 0.0
-		_next_gesture = randf_range(5.0, 9.0)
+		_next_gesture = randf_range(5.0, 10.0)
 		return
 	_idle += delta
 	if _idle >= _next_gesture:
 		_gesture = fidget_moves[randi() % fidget_moves.size()]
-		_gesture_len = {"wave": 1.6, "hop": 0.9, "stretch": 1.4, "look": 2.2}[_gesture]
+		_gesture_len = {"wave": 1.6, "hop": 0.9, "stretch": 1.4, "look": 2.2, "daydream": 5.5}[_gesture]
 		_gesture_t = _gesture_len
 		_next_gesture = _idle + randf_range(7.0, 14.0)
+		if _gesture == "daydream":
+			_start_dreaming()
+
+
+# The little moon that floats in front of her while she is away with the fairies, and goes when she comes back.
+func _start_dreaming() -> void:
+	_stop_dreaming()
+	_dream = DreamMoon.new()
+	_dream.z_index = 2
+	add_child(_dream)
+	_follow_dream()
+
+
+func _stop_dreaming() -> void:
+	if is_instance_valid(_dream):
+		_dream.queue_free()
+	_dream = null
+
+
+func _follow_dream() -> void:
+	if not is_instance_valid(_dream):
+		return
+	# In front of her blank gaze, a little above it (our own space, so the head's height carries it).
+	_dream.position = Vector2(facing * 185.0, _head.position.y - 60.0)
+	_dream.scale = Vector2(float(facing), 1.0) * 2.6
 
 
 func speed() -> float:
@@ -526,6 +561,11 @@ func _apply_pose() -> void:
 				_torso.scale.y += 0.03 * w
 			"look":
 				_head.rotation += sin(t * TAU) * 0.18 * w
+			"daydream":
+				# Dans la lune, like her father: the arms hang loose and the head drifts up and away.
+				_aim(1, -5.0 + sin(_time * 0.7) * 3.0, 0.97)
+				_aim(0, -4.0 - sin(_time * 0.7 + 1.0) * 3.0, 0.97)
+				_head.rotation += (-0.08 + sin(_time * 0.5) * 0.03) * w
 	if task != "":
 		_task_pose()
 	if hand_mode != "" and _hand_goal[1] == "relaxed":

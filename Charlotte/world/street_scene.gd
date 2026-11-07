@@ -1194,6 +1194,8 @@ func _spawn_charlotte(x: float) -> Character:
 	if Season.is_winter():
 		charlotte.look = CharacterLook.charlotte_for_winter(charlotte.look)
 	charlotte.fidgets = true
+	# Standing still too long, she falls into the moon like her father.
+	charlotte.fidget_moves = Character.CHARLOTTE_FIDGETS
 	charlotte.step_sound = Sfx.step_for(true)
 	charlotte.position = Vector2(x, CHARLOTTE_Y)
 	charlotte.scale = Vector2.ONE * CHAR_SCALE
