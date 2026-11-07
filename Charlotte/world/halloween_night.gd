@@ -168,17 +168,6 @@ func _process(delta: float) -> void:
 func _dress_the_houses(scene: Node2D, rng: RandomNumberGenerator) -> void:
 	var panes: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://art/decor/windows.json"))
 	var s: float = StreetScene.HOUSE_SCALE
-	# The glass itself — dark where a house sleeps, warm where it gives — belongs on the facade, behind the trees and
-	# the people, so it is not painted over them: its own pass, slipped in just before the passersby.
-	var shutters := _Shutters.new()
-	shutters.shade = NIGHT
-	var before := scene.get_child_count()
-	for i in scene.get_child_count():
-		if scene.get_child(i) is Passerby:
-			before = i
-			break
-	scene.add_child(shutters)
-	scene.move_child(shutters, before)
 	for i in scene.layout.size():
 		var art: String = scene.layout[i]
 		if scene.cross_streets.has(art):
@@ -187,64 +176,137 @@ func _dress_the_houses(scene: Node2D, rng: RandomNumberGenerator) -> void:
 		# A lane mouth gets nothing at all: it stays a black hole, and Charlotte won't go in there tonight.
 		if art.begins_with("ruelle"):
 			continue
-		if not HalloweenNight.gives(str(scene.street_key), art, i):
-			for w: Dictionary in panes.get(art, []):
-				var dark: Array = w.pane
-				shutters.panes.append(Rect2(origin + Vector2(float(dark[0]), float(dark[1])) * s,
-					Vector2(float(dark[2]), float(dark[3])) * s))
-			continue
-		# Warm light in the windows.
+		var house_gives := HalloweenNight.gives(str(scene.street_key), art, i)
+		# The glass of this house, lit or dark. It is painted over its facade but UNDER everything the house draws
+		# in front of its windows (`StreetScene.over_tex`), so its outdoor stair, its balconies and their railings
+		# still pass in front of the light instead of being covered by it.
+		var dark: Array[Dictionary] = []
+		var warm: Array[Dictionary] = []
 		for w: Dictionary in panes.get(art, []):
 			var r: Array = w.pane
 			var rect := Rect2(origin + Vector2(float(r[0]), float(r[1])) * s, Vector2(float(r[2]), float(r[3])) * s)
-			if rect.position.y > StreetScene.HOUSE_BASE_Y - 40.0:
-				continue
-			shutters.lit.append(rect)
-			_lights.windows.append(rect)
-		# Its decorations, two or three of them, and the porch light over the door.
+			var bar := origin.y + float(w.get("bar_y", 0.0)) * s
+			# A basement window never lights up, even in a house that gives.
+			var pane := {"rect": rect, "bar": bar, "trim": Color(str(w.get("trim", "#FFFFFF")))}
+			if house_gives and rect.position.y < StreetScene.HOUSE_BASE_Y - 40.0:
+				warm.append(pane)
+				_lights.windows.append(rect)
+			else:
+				dark.append(pane)
+		var facade: Sprite2D = scene._house_sprites.get(i)
+		# Where this house's own things go among the scene's children: its glass right over its facade, then the
+		# garden (so a tombstone stands behind the fence), then everything the house draws in front of its windows,
+		# and last what sits on the porch and the steps.
+		var slot := -1
+		if facade != null:
+			slot = facade.get_index() + 1
+			if not (dark.is_empty() and warm.is_empty()):
+				var shutters := _Shutters.new()
+				shutters.shade = NIGHT
+				shutters.panes = dark
+				shutters.lit = warm
+				scene.add_child(shutters)
+				scene.move_child(shutters, slot)
+				slot += 1
+		if not house_gives:
+			continue
 		var door_x: float = scene._door_x(art)
 		if is_nan(door_x):
 			door_x = origin.x + scene._tex(art).get_width() * s * 0.5
 		_lights.porches.append(Vector2(door_x, StreetScene.HOUSE_BASE_Y - 158.0))
 		var width: float = scene._tex(art).get_width() * s
 		var spots := _spots(origin, width, door_x)
-		var how_many := rng.randi_range(2, 3)
-		var used := []
-		for n in how_many:
+		# Three to five pieces, never two of a kind, each where it belongs.
+		var chosen: Array[Dictionary] = []
+		var picked: Array[String] = []
+		var tries := 0
+		var wanted := rng.randi_range(3, 5)
+		while chosen.size() < wanted and tries < 30:
+			tries += 1
 			var kind: String = HalloweenArt.CHOICES[rng.randi() % HalloweenArt.CHOICES.size()]
-			var piece: Dictionary = HalloweenArt.PIECES[kind]
-			var where: String = piece.where
-			if used.has(kind) or not spots.has(where) or spots[where].is_empty():
+			var where: String = HalloweenArt.PIECES[kind].where
+			if picked.has(kind) or not spots.has(where) or spots[where].is_empty():
 				continue
-			used.append(kind)
-			var at: Vector2 = spots[where].pop_front()
-			var sprite := Sprite2D.new()
-			sprite.texture = HalloweenArt.texture(kind)
-			sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-			sprite.scale = Vector2.ONE * float(piece.scale)
-			sprite.centered = false
-			sprite.position = at
-			if where == "hang" or where == "corner":
-				sprite.offset = Vector2(-float(piece.size.x) * 0.5, 0.0)
-				_hangs.append(sprite)
-			add_child(sprite)
-			if piece.has("glow"):
-				var g: Vector2 = piece.glow
-				_lights.pumpkins.append(at + g * float(piece.scale))
+			picked.append(kind)
+			chosen.append({"kind": kind, "at": spots[where].pop_front()})
+		# The garden and the steps first, so they stand BEHIND the fence and never look as if they were put out on
+		# the sidewalk; what hangs on the facade and the balcony goes over it.
+		for pass_yard in [true, false]:
+			for one: Dictionary in chosen:
+				var kind: String = one.kind
+				var piece: Dictionary = HalloweenArt.PIECES[kind]
+				var where: String = piece.where
+				if (where == "yard" or where == "step") != pass_yard:
+					continue
+				var at: Vector2 = one.at
+				var size: Vector2 = piece.size
+				var k: float = piece.scale
+				var sprite := Sprite2D.new()
+				sprite.texture = HalloweenArt.texture(kind)
+				sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+				sprite.scale = Vector2.ONE * k
+				sprite.centered = false
+				sprite.position = at
+				# A piece stands on its feet; the ones that hang are held by the top of their canvas.
+				var anchor: String = piece.get("anchor", "foot")
+				var top := anchor != "foot"
+				match anchor:
+					"corner":
+						sprite.offset = Vector2.ZERO
+					"top":
+						sprite.offset = Vector2(-size.x * 0.5, 0.0)
+					_:
+						sprite.offset = Vector2(-size.x * 0.5, -size.y)
+				if top and (where == "hang" or where == "corner"):
+					_hangs.append(sprite)
+				if (where == "yard" or where == "step") and slot >= 0:
+					scene.add_child(sprite)
+					scene.move_child(sprite, slot)
+					slot += 1
+				else:
+					add_child(sprite)
+				for g: Vector2 in piece.get("glow", []):
+					_lights.pumpkins.append(at + (sprite.offset + g) * k)
+			if pass_yard and slot >= 0:
+				# Everything the house draws in front of its windows, laid back over the lit glass and the garden.
+				var over: Texture2D = scene.over_tex(art)
+				if over != null:
+					var front := Sprite2D.new()
+					front.texture = over
+					front.centered = false
+					front.scale = Vector2.ONE * StreetScene.HOUSE_SCALE
+					front.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+					front.position = origin
+					front.material = facade.material
+					scene.add_child(front)
+					scene.move_child(front, slot)
+					slot += 1
 
 
-# Where a house can put things: on the steps either side of its door, hung from the balcony, in the corner of the
-# facade, along the railing, in the little garden behind the fence.
+# Where a house can put things. NOTHING GOES ON THE SIDEWALK: the garden is the strip of soil behind the fence, at
+# the foot of the facade (`HOUSE_BASE_Y`), the steps and the porch are beside the front door, and the rest hangs on
+# the facade itself. A spot is the point the piece stands on (or hangs from).
 func _spots(origin: Vector2, width: float, door_x: float) -> Dictionary:
 	var ground := StreetScene.HOUSE_BASE_Y
-	return {
-		"step": [Vector2(door_x - 78.0, ground - 46.0), Vector2(door_x + 46.0, ground - 46.0)],
-		"yard": [Vector2(origin.x + 30.0, ground - 10.0), Vector2(origin.x + width - 90.0, ground - 10.0)],
-		"wall": [Vector2(origin.x + width - 110.0, ground - 250.0)],
-		"corner": [Vector2(origin.x + 20.0, ground - 290.0)],
-		"hang": [Vector2(door_x + 8.0, ground - 230.0)],
-		"rail": [Vector2(origin.x + 24.0, ground - 212.0)],
+	# The porch floor, a little under the first-floor door.
+	var left := origin.x + 56.0
+	var right := origin.x + width - 56.0
+	var spots := {
+		# At the foot of the front steps, one each side: that is where a Montréal porch keeps its pumpkins.
+		"step": [Vector2(door_x - 78.0, ground - 2.0), Vector2(door_x + 78.0, ground - 2.0)],
+		"yard": [],
+		"wall": [Vector2(origin.x + width - 96.0, ground - 300.0)],
+		"corner": [Vector2(origin.x + 26.0, ground - 318.0)],
+		"hang": [Vector2(door_x + 4.0, ground - 234.0)],
+		"rail": [Vector2(origin.x + width * 0.5, ground - 214.0)],
 	}
+	# Three places along the garden, well clear of the path up to the door.
+	for x: float in [left + 24.0, lerpf(left, right, 0.5), right - 24.0]:
+		if absf(x - door_x) > 96.0:
+			spots["yard"].append(Vector2(x, ground - 2.0))
+	if spots["yard"].is_empty():
+		spots["yard"].append(Vector2(left + 24.0, ground - 2.0))
+	return spots
 
 
 # A few other children doing the rounds, each in a costume of their own and a little lantern of their own.
@@ -255,12 +317,18 @@ func _trick_or_treaters(scene: Node2D, rng: RandomNumberGenerator) -> void:
 	for i in scene.get_child_count():
 		if scene.get_child(i) is Passerby:
 			after = i
-	for i in 4:
+	# A good crowd of them, spread the length of the street and often in twos, the way children go round.
+	var how_many := 9
+	var span: float = maxf(scene._street_width - 400.0, 600.0)
+	for i in how_many:
 		var kid := Passerby.new()
 		kid.look = CharacterLook.random(rng, "child")
 		kid.look.costume = CostumeArt.ORDER[rng.randi() % CostumeArt.ORDER.size()]
 		kid.walk_speed = rng.randf_range(150.0, 200.0)
-		kid.position = Vector2(rng.randf_range(260.0, maxf(scene._street_width - 260.0, 400.0)), StreetScene.NEIGHBOUR_Y)
+		var along := 200.0 + span * (float(i) + rng.randf_range(0.1, 0.9)) / float(how_many)
+		if i % 3 == 1:
+			along += rng.randf_range(44.0, 70.0)
+		kid.position = Vector2(along, StreetScene.NEIGHBOUR_Y)
 		kid.scale = Vector2.ONE * StreetScene.CHAR_SCALE * 0.94
 		kid.facing = 1 if rng.randf() < 0.5 else -1
 		kid.bounds = Vector2(-140.0, scene._street_width + 140.0)
@@ -291,13 +359,16 @@ class _Moon:
 		draw_circle(where + Vector2(14, -12), 4.0, _lit(Color(0.90, 0.89, 0.83)))
 
 
-# The glass of the houses that are asleep: no light behind it tonight.
+# The glass of every window tonight: painted over the facade but under everything the house draws in front of its
+# windows (its stair, its balconies, their railings — `StreetScene.over_tex`). A house that sleeps gets cold dark
+# glass; a house that hands out candy gets the warm room behind it, its curtains and, now and then, a shape on the
+# sill. Each pane is {rect, bar (the y of its horizontal bar), trim (the frame colour)}, from `art/decor/windows.json`.
 class _Shutters:
 	extends Node2D
-	## The panes of the houses that are asleep.
-	var panes: Array[Rect2] = []
-	## The panes of the houses that hand out candy: warm light behind the glass.
-	var lit: Array[Rect2] = []
+	## The panes of a house that is asleep.
+	var panes: Array[Dictionary] = []
+	## The panes of a house that hands out candy: warm light behind the glass.
+	var lit: Array[Dictionary] = []
 	## The night's multiply: a lit window is painted through its inverse, so it really shines instead of going dark
 	## blue with the rest of the street.
 	var shade := Color.WHITE
@@ -305,28 +376,76 @@ class _Shutters:
 	func _lit_color(c: Color) -> Color:
 		return Color(c.r / shade.r, c.g / shade.g, c.b / shade.b, c.a)
 
+	# The frame's bars, which the facade drew on the glass we have just painted over.
+	func _bars(pane: Dictionary, tint: Color) -> void:
+		var rect: Rect2 = pane.rect
+		var trim: Color = pane.trim * tint
+		var bar: float = pane.bar
+		if bar > rect.position.y and bar < rect.end.y:
+			draw_rect(Rect2(rect.position.x, bar - 3.0, rect.size.x, 6.0), trim)
+			draw_rect(Rect2(rect.get_center().x - 3.0, bar, 6.0, rect.end.y - bar), trim)
+
 	func _draw() -> void:
-		for rect in panes:
-			draw_rect(rect, Color(0.04, 0.05, 0.12, 0.92))
-		for rect in lit:
-			# The light behind the glass, brightest in the middle...
-			draw_rect(rect, _lit_color(Color(1.0, 0.78, 0.40)))
-			draw_rect(rect.grow(-rect.size.x * 0.22), _lit_color(Color(1.0, 0.92, 0.70, 0.7)))
-			# ...the curtains drawn back to the sides, and the bars of the window over it all.
+		for pane in panes:
+			var rect: Rect2 = pane.rect
+			# Cold glass: the night in it, a little paler at the top where it catches the sky.
+			draw_rect(rect, Color(0.09, 0.10, 0.18))
+			draw_rect(Rect2(rect.position, Vector2(rect.size.x, rect.size.y * 0.45)), Color(0.13, 0.15, 0.25))
+			draw_colored_polygon(PackedVector2Array([
+				rect.position + Vector2(rect.size.x * 0.52, 0.0), rect.position + Vector2(rect.size.x * 0.78, 0.0),
+				rect.position + Vector2(rect.size.x * 0.26, rect.size.y), rect.position + Vector2(0.0, rect.size.y)]),
+				Color(0.34, 0.40, 0.58, 0.18))
+			_bars(pane, Color(0.34, 0.36, 0.44))
+		for pane in lit:
+			var rect: Rect2 = pane.rect
 			var w := rect.size.x
 			var h := rect.size.y
+			# The room behind the glass: warm, brightest where the lamp is, amber down at the sill.
+			draw_rect(rect, _lit_color(Color(0.98, 0.70, 0.32)))
+			draw_rect(rect.grow(-minf(w, h) * 0.14), _lit_color(Color(1.0, 0.86, 0.56, 0.9)))
+			draw_rect(Rect2(rect.position + Vector2(w * 0.28, 0.0), Vector2(w * 0.44, h * 0.44)),
+				_lit_color(Color(1.0, 0.95, 0.76, 0.55)))
+			draw_rect(Rect2(rect.position + Vector2(0.0, h * 0.84), Vector2(w, h * 0.16)),
+				_lit_color(Color(0.84, 0.48, 0.20, 0.5)))
+			# The curtains, drawn back against the jambs and gathered at half their height.
 			for side in 2:
 				var x0: float = rect.position.x if side == 0 else rect.end.x
 				var dir := 1.0 if side == 0 else -1.0
 				draw_colored_polygon(PackedVector2Array([
 					Vector2(x0, rect.position.y), Vector2(x0 + dir * w * 0.3, rect.position.y),
-					Vector2(x0 + dir * w * 0.22, rect.position.y + h * 0.55),
-					Vector2(x0 + dir * w * 0.3, rect.end.y), Vector2(x0, rect.end.y)]),
-					Color(0.35, 0.22, 0.12, 0.35))
-			var mid := rect.position.x + w * 0.5
-			draw_line(Vector2(mid, rect.position.y), Vector2(mid, rect.end.y), Color(0.16, 0.11, 0.08, 0.8), maxf(w * 0.05, 1.6))
-			var rail := rect.position.y + h * 0.42
-			draw_line(Vector2(rect.position.x, rail), Vector2(rect.end.x, rail), Color(0.16, 0.11, 0.08, 0.7), maxf(h * 0.03, 1.4))
+					Vector2(x0 + dir * w * 0.2, rect.position.y + h * 0.5),
+					Vector2(x0 + dir * w * 0.32, rect.end.y), Vector2(x0, rect.end.y)]),
+					_lit_color(Color(0.66, 0.37, 0.21, 0.6)))
+			# One window in three has something on its sill, a shape against the light.
+			var c := Vector2.ZERO
+			var r := minf(w, h)
+			var ink := _lit_color(Color(0.24, 0.13, 0.06))
+			match absi(int(rect.position.x) * 7 + int(rect.position.y)) % 6:
+				0:
+					# A jack-o'-lantern someone stood in the window.
+					c = Vector2(rect.position.x + w * 0.5, rect.end.y - r * 0.16)
+					r *= 0.16
+					draw_circle(c, r, ink)
+					draw_line(c + Vector2(0, -r * 0.9), c + Vector2(0, -r * 1.7), ink, r * 0.3)
+				1:
+					# A pot plant.
+					c = Vector2(rect.position.x + w * 0.74, rect.end.y)
+					r *= 0.13
+					draw_colored_polygon(PackedVector2Array([c + Vector2(-r, -r), c + Vector2(r, -r),
+						c + Vector2(r * 0.7, 0), c + Vector2(-r * 0.7, 0)]), ink)
+					for leaf in 3:
+						draw_line(c + Vector2(0, -r), c + Vector2(-r + leaf * r, -r * 2.9), ink, r * 0.26)
+				2:
+					# A cat watching the street go by.
+					c = Vector2(rect.position.x + w * 0.3, rect.end.y)
+					r *= 0.17
+					draw_colored_polygon(PackedVector2Array([c + Vector2(-r * 0.85, 0), c + Vector2(-r * 0.7, -r * 0.95),
+						c + Vector2(-r * 0.78, -r * 1.55), c + Vector2(-r * 0.42, -r * 1.2),
+						c + Vector2(-r * 0.06, -r * 1.2), c + Vector2(r * 0.22, -r * 1.6),
+						c + Vector2(r * 0.3, -r * 0.95), c + Vector2(r * 0.85, 0)]), ink)
+				_:
+					pass
+			_bars(pane, Color(0.5, 0.42, 0.34))
 
 
 # Bats crossing the sky now and then, as silhouettes against the night.

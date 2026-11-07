@@ -443,15 +443,29 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
      multiplies the whole canvas down to a deep blue, so every drawing keeps its shape and contrast; one additive pass
      (`_Lights`, all its glows drawn from one soft radial texture, `HalloweenNight.glow_texture()`) puts the light back —
      stars, the moon's halo, the street lamps with a cone down to the sidewalk, the spill round the lit windows, porch
-     lights, the flicker of the jack-o'-lanterns, the lantern each child carries and a low mist; `_Shutters` draws the glass
-     itself on the facade (behind the trees and the people, so the light is not painted over them): dark where a house
-     sleeps, warm with curtains and window bars where it gives; `_Moon` and the lit panes are painted through the inverse of
-     `NIGHT` so they really shine instead of going blue; `_Bats` cross the sky as silhouettes. The colour grade switches to
-     night too (`StreetScene._build_grade`: no sun bloom or rays, cool tint, deep vignette, a low glow threshold so every
-     light blooms). The houses that give (`HalloweenNight.gives`, two in
-     three, never her own house, the shops or the school) light their windows and hang their decorations (`world/halloween_art.gd`, `HalloweenArt.PIECES`:
-     jack-o'-lanterns, ghosts, cobwebs, skeletons, gravestones, cats, spiders, brooms, candles, bowls, scarecrows, garlands, bats)
-     and sends four other children past in costumes. A doorbell (`StreetScene._ring`) at every front door: a lit house gives 1–3
+     lights, the flicker of the jack-o'-lanterns, the lantern each child carries and a low mist; `_Moon` and the lit panes
+     are painted through the inverse of `NIGHT` so they really shine instead of going blue; `_Bats` cross the sky as
+     silhouettes. The colour grade switches to night too (`StreetScene._build_grade`: no sun bloom or rays, cool tint,
+     deep vignette, a low glow threshold so every light blooms).
+     **Each house is a little stack that night**, in this order among the street's children: its facade, its glass
+     (`_Shutters`: cold dark panes for a house that sleeps; for one that gives, the warm room behind the glass with its
+     curtains, the window bars redrawn from `windows.json` and, one window in three, a jack-o'-lantern, a pot plant or a
+     cat on the sill), its garden and porch decorations, then **its "over" layer** — everything the generator draws in
+     front of its windows (doors, balconies, porch, outdoor stair, railings, fence, garden), written on its own
+     transparent sheet to `art/decor/over/<name>.svg` by a fifth pass of `tools/generate_houses.gd` (`night`/`split`,
+     read back by `StreetScene.over_tex`). That is what keeps the stairs and the railings passing IN FRONT of the lit
+     windows and the fence in front of the tombstones, instead of the light being painted over them.
+     The houses that give (`HalloweenNight.gives`, two in three, never her own house, the shops or the school) light
+     their windows and put their decorations out (`world/halloween_art.gd`, `HalloweenArt.PIECES`, 3 to 5 per house:
+     carved and whole pumpkins, a bowl of sweets, candle lanterns, a broom, a bubbling cauldron, tombstones with RIP, a
+     little graveyard, **skeleton hands clawing out of the lawn**, a skeleton, a scarecrow, a black cat, a bale of straw
+     with mums and corn stalks, lit path stakes, cobwebs, a hung ghost, a spider, bats, a garland).
+     **Nothing is ever put on the sidewalk**: a piece stands in the garden behind the fence ("yard") or at the foot of
+     the front steps ("step") — both drawn under the over layer — or hangs on the facade ("wall", "corner", "hang",
+     "rail"). Each canvas is drawn with its feet on the bottom edge ("anchor": "foot"), or from the top for what hangs.
+     `tools/halloween_props.tscn` is the design sheet of all of them
+     (`Godot --path . --screen 1 res://tools/halloween_props.tscn -- --screenshot=/path/p.png`).
+     Nine other children go past in costumes, spread the length of the street, each with a light of their own. A doorbell (`StreetScene._ring`) at every front door: a lit house gives 1–3
      sweets once, a dark one is asleep. `Halloween.ENOUGH` houses (12, so more than one street) fill her bag. **The back
      lanes are closed that night** (Julien: far too dark for a little girl to venture in): their mouths stay unlit, and a
      click or ↑ there only gets a line from her (`StreetScene.DARK_LANE`), so the evening happens on the four streets.
@@ -516,7 +530,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   in the same order** in every season (only colours/visibility change), so the street stays the same people and places.
 - Facades: the generator writes autumn to `art/decor/*.svg` and the other seasons to `art/decor/<season>/*.svg` (snow on
   ledges, wreaths on 17 % of the doors (`WREATH_PERCENT`), Christmas lights in winter; tulips/geraniums instead of pumpkins; ghosts/cobwebs/bats autumn only).
-- `ui/debug_menu.gd` is the `DebugMenu` autoload: reads `--season=`, and in debug builds F1 opens a "Saisons" menu that
+- `ui/debug_menu.gd` is the `DebugMenu` autoload: reads `--season=` and `--halloween` (the evening of the Halloween
+  quest, step 2, for a screenshot or a test run), and in debug builds F1 opens a "Saisons" menu that
   switches season while playing (reloads the scene; Charlotte keeps her x via `Transition.street_x` / `Transition.inside_x`),
   teleports to any place (`DebugMenu.PLACES`: streets, corners, lanes, rooms of her flat, spots in the shop; **when you add a new
   place, add it to `PLACES`** — a scene missing from the list shows under "Autres lieux" anyway),

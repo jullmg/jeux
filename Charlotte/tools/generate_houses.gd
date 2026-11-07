@@ -273,6 +273,13 @@ var ground_y := GROUND
 var windows := {}
 var doors := {}
 var season := "autumn"
+## The Halloween-night pass: everything a house draws AFTER its windows (its doors, balconies, porch, outdoor
+## stair, railings, fence and garden) on its own, written to `art/decor/over/`. On Halloween night the game lays
+## that layer back over the warm light it paints in the panes, so the stairs and the railings keep passing in
+## front of the lit windows instead of being covered by them.
+var night := false
+## Where the facade's "over" layer starts in `out` (set right after the last window is drawn).
+var split := 0
 
 
 func _init() -> void:
@@ -284,6 +291,12 @@ func _init() -> void:
 		if s != "autumn":
 			DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://art/decor/" + s))
 		_generate(configs)
+	# And once more in autumn, keeping only what each house draws in front of its windows, for Halloween night.
+	season = "autumn"
+	night = true
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://art/decor/over"))
+	_generate(configs)
+	night = false
 	FileAccess.open("res://art/decor/windows.json", FileAccess.WRITE).store_string(JSON.stringify(windows, "\t"))
 	FileAccess.open("res://art/decor/doors.json", FileAccess.WRITE).store_string(JSON.stringify(doors, "\t"))
 	quit()
@@ -301,7 +314,16 @@ func _generate(configs: Array) -> void:
 		if k.kind == "plex":
 			doors[k.name] = k.door_cx
 		out = PackedStringArray()
+		split = 0
 		_svg()
+		if night:
+			# Only what is drawn in front of the windows, on its own transparent sheet.
+			if split <= 0:
+				continue
+			var over := PackedStringArray([out[0], out[1]])
+			over.append_array(out.slice(split))
+			FileAccess.open("res://art/decor/over/%s.svg" % k.name, FileAccess.WRITE).store_string("\n".join(over))
+			continue
 		var path := "res://art/decor/%s.svg" % k.name if season == "autumn" else "res://art/decor/%s/%s.svg" % [season, k.name]
 		FileAccess.open(path, FileAccess.WRITE).store_string("\n".join(out))
 
@@ -441,6 +463,8 @@ func _building() -> void:
 	for f in range(first_floor, floors):
 		for w in k.windows:
 			_window(w[0], _win_y(f), w[1], 160.0)
+	# Everything from here on (doors, balconies, porch, stair, railings, fence, garden) is the house's "over" layer.
+	split = out.size()
 	match k.kind:
 		"shop":
 			_storefront()
@@ -671,7 +695,7 @@ func _window(x: float, y: float, w: float, h: float) -> void:
 	_rect(x, y, w, h, k.trim)
 	var lit := rng.randf() < 0.22
 	_rect(x + 8, y + 8, w - 16, h - 16, "url(#warm)" if lit else "url(#glass)")
-	if season == "autumn":
+	if season == "autumn" and not night:
 		if not windows.has(k.name):
 			windows[k.name] = []
 		windows[k.name].append({"pane": [x + 8, y + 8, w - 16, h - 16], "bar_y": y + h * 0.34, "trim": k.trim,
@@ -726,7 +750,7 @@ func _hung_window(x: float, y: float, w: float, h: float) -> void:
 	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(x + w * 0.55), _n(y + 8), _n(x + w * 0.55 + 16), _n(y + 8), _n(x + 24), _n(y + 8 + pane_h), _n(x + 8), _n(y + 8 + pane_h)], "#FFFFFF", 'opacity="0.22"')
 	_rect(x + 8, y + 8, w - 16, 10, "url(#drop)")
 	_rect(x + 8, y + 8, 7, h - 16, "#000000", 'opacity="0.14"')
-	if season == "autumn":
+	if season == "autumn" and not night:
 		if not windows.has(k.name):
 			windows[k.name] = []
 		windows[k.name].append({"pane": [x + 8, y + 8, w - 16, h - 16], "bar_y": rail_y, "trim": FRAME, "lit": lit, "flower_box": false, "no_cat": y > _fb(1)})

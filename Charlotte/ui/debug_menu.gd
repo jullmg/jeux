@@ -1,6 +1,6 @@
 extends CanvasLayer
 ## Autoload. `--season=<spring|summer|autumn|winter>` (or printemps/été/automne/hiver) picks the season at
-## start. In debug builds, F1 opens a small menu to switch seasons while playing, to reset, start or finish any quest
+## start, and `--halloween` starts the evening of the Halloween quest (step 2: night out on the rounds). In debug builds, F1 opens a small menu to switch seasons while playing, to reset, start or finish any quest
 ## (to test it again) and to teleport to any place of the game: the scene reloads with a fade and Charlotte reappears
 ## where she was (or at the chosen place). EVERY NEW PLACE goes in PLACES below; a scene (.tscn in res://scenes) that is not
 ## listed shows up on its own under "Autres lieux" so it can never be forgotten.
@@ -70,6 +70,10 @@ func _ready() -> void:
 			s = ALIASES.get(s, s)
 			if s in Season.ALL:
 				Season.current = s
+		elif arg == "--halloween":
+			# The Halloween evening, for a screenshot or a test run: the quest on, out on the rounds.
+			GameState.quests[Halloween.QUEST] = "active"
+			GameState.flags[Halloween.STEP] = 2
 
 
 func _unhandled_input(event: InputEvent) -> void:

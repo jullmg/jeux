@@ -48,6 +48,10 @@ var street_key := ""
 var _street_width := 0.0
 var _starts: Array[float] = []
 var _textures := {}
+var _night_textures := {}
+## Each house's facade sprite by its index in `layout`, so Halloween night can slip its lit windows in behind
+## the stairs and the railings.
+var _house_sprites := {}
 var _charlotte: Character
 var _camera: Camera2D
 # Filled by _build_trees, after the squirrels (which share this array) are built behind them.
@@ -600,6 +604,17 @@ func _tex(art: String) -> Texture2D:
 	return _textures[art]
 
 
+## What a house draws in front of its windows — its doors, balcony, porch, outdoor stair, railings, fence and
+## garden — on its own transparent sheet (`art/decor/over/`, written by the generator). `HalloweenNight` lays it
+## back over the warm light it paints in the panes, so the stairs keep passing in front of the lit windows.
+## Null for a building that has no such layer (a lane mouth, a shop front, a side wall).
+func over_tex(art: String) -> Texture2D:
+	if not _night_textures.has(art):
+		var path := "res://art/decor/over/%s.svg" % art
+		_night_textures[art] = load(path) if ResourceLoader.exists(path) else null
+	return _night_textures[art]
+
+
 # Start x of each building along the street, plus the total street width at the end.
 func _layout_starts() -> Array[float]:
 	var starts: Array[float] = []
@@ -710,6 +725,7 @@ func _build_houses() -> void:
 		house.position = _house_origin(i)
 		house.material = weathered(i)
 		add_child(house)
+		_house_sprites[i] = house
 		_decorate_house(i, house)
 
 
