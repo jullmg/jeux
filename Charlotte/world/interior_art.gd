@@ -536,23 +536,106 @@ static func strawberry_poster() -> ImageTexture:
 	return tex(120, 160, s)
 
 
-## Canvas 170x250: three white book ledges with colourful picture books facing out.
+## Canvas 170x250: three white picture-book ledges. Not flat rectangles: every book has its own height, width
+## and colour, a cloth band top and bottom and a few marks of a title on its spine, some lean against the next,
+## one shelf has a pile lying flat and another a book stood up with its cover showing (a sun over a hill, the way
+## a picture book looks). Hung on the wall.
 static func book_ledges() -> ImageTexture:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 12
+	var covers := ["#F2C12E", "#7E57C2", "#E04F5F", "#3E8E5A", "#1D4F91", "#FF8A3D", "#F2A7C9", "#1FB5C4",
+		"#8D6E63", "#C0417A", "#5AA7E0", "#E8812E"]
 	var s := ""
-	var covers := ["#F2C12E", "#7E57C2", "#E04F5F", "#3E8E5A", "#1D4F91", "#FF8A3D", "#F2A7C9", "#1FB5C4", "#8D6E63"]
 	for r in 3:
-		var y := 70.0 + r * 80.0
-		var x := 8.0
-		var k := r * 3
-		while x < 150.0:
-			var w := 34.0 + (k * 5) % 12
-			var h := 44.0 + (k * 7) % 16
-			s += '<rect x="%s" y="%s" width="%s" height="%s" fill="%s" stroke="#3A3A3A" stroke-width="1.5"/>' % [x, y - h, w, h, covers[k % covers.size()]]
-			s += '<rect x="%s" y="%s" width="%s" height="%s" fill="#FFFFFF" opacity="0.5"/>' % [x + 5, y - h + 8, w - 10, 8]
-			x += w + 3.0
-			k += 1
-		s += '<rect x="2" y="%s" width="166" height="10" fill="#F7F6F2" stroke="#C9C2B4" stroke-width="2"/>' % y
+		var base := 70.0 + r * 80.0
+		var x := 7.0
+		var lean := 0.0
+		# The books standing along the shelf, each leaning a little once in a while.
+		while x < 118.0:
+			var w := rng.randf_range(13.0, 24.0)
+			var h := rng.randf_range(42.0, 66.0)
+			var tilt := 0.0
+			if lean == 0.0 and rng.randf() < 0.22:
+				tilt = rng.randf_range(7.0, 13.0)
+				lean = tilt
+			elif lean > 0.0:
+				tilt = 0.0
+				lean = 0.0
+			s += _book_spine(x, base, w, h, covers[rng.randi() % covers.size()], tilt, rng)
+			x += w + (6.0 if tilt > 0.0 else 1.4)
+		# The end of the shelf: a pile lying flat on two of them, a book with its cover out on the other.
+		if r == 1:
+			s += _book_cover(x + 6.0, base, covers[rng.randi() % covers.size()])
+		else:
+			s += _book_pile(x + 4.0, base, covers, rng)
+		# The ledge itself, over the feet of the books so they really stand on it.
+		s += '<rect x="2" y="%s" width="166" height="6" rx="2" fill="#FDFCF8" stroke="#C9C2B4" stroke-width="1.6"/>' % base
+		s += '<rect x="2" y="%s" width="166" height="5" rx="2" fill="#E6E0D2" stroke="#C9C2B4" stroke-width="1.4"/>' % (base + 5.0)
+		s += '<rect x="6" y="%s" width="158" height="4" rx="2" fill="#000000" opacity="0.07"/>' % (base + 11.0)
 	return tex(170, 250, s)
+
+
+# One book standing on a ledge: a cloth spine with a band top and bottom, the marks of a title, the pages showing
+# down its side, and a rounded head on the hardbacks. `tilt` leans it against its neighbour.
+static func _book_spine(x: float, base: float, w: float, h: float, hue: String, tilt: float, rng: RandomNumberGenerator) -> String:
+	var top := base - h
+	var s := '<g transform="rotate(%.1f %s %s)">' % [-tilt, x, base]
+	var hard := rng.randf() < 0.55
+	if hard:
+		s += '<path d="M%s %s q%s -5 %s 0 v%s h-%s z" fill="%s" %s/>' % [
+			x, top + 3.0, w * 0.5, w, h - 3.0, w, hue, _edge()]
+	else:
+		s += '<rect x="%s" y="%s" width="%s" height="%s" rx="2" fill="%s" %s/>' % [x, top, w, h, hue, _edge()]
+	# The pages, a sliver of cream down the right, and the shade the next book throws on it.
+	s += '<rect x="%s" y="%s" width="3" height="%s" fill="#F7F2E4"/>' % [x + w - 3.5, top + 3.0, h - 5.0]
+	s += '<rect x="%s" y="%s" width="%s" height="%s" fill="#000000" opacity="0.16"/>' % [x + w - 2.0, top + 2.0, 2.0, h - 3.0]
+	s += '<rect x="%s" y="%s" width="2.4" height="%s" fill="#FFFFFF" opacity="0.22"/>' % [x + 1.4, top + 4.0, h - 7.0]
+	# Two cloth bands and a few marks for the title.
+	for band: float in [top + 7.0, base - 11.0]:
+		s += '<rect x="%s" y="%s" width="%s" height="2.6" fill="#FFFFFF" opacity="0.4"/>' % [x, band, w]
+	var lines := 2 + (1 if h > 54.0 else 0)
+	for i in lines:
+		var ty := top + 18.0 + i * 7.0
+		s += '<rect x="%s" y="%.1f" width="%.1f" height="2" rx="1" fill="#FFFFFF" opacity="0.75"/>' % [
+			x + 4.0, ty, maxf(w - 9.0 - (i * 2.0), 4.0)]
+	s += '</g>'
+	return s
+
+
+# Two or three books lying flat at the end of a ledge, the pages of each showing.
+static func _book_pile(x: float, base: float, covers: Array, rng: RandomNumberGenerator) -> String:
+	var s := ""
+	var y := base
+	for i in 2 + (1 if rng.randf() < 0.5 else 0):
+		var w: float = 40.0 - i * 5.0 - rng.randf_range(0.0, 4.0)
+		var h := 7.0
+		y -= h
+		var hue: String = covers[rng.randi() % covers.size()]
+		var at := x + rng.randf_range(-2.0, 3.0)
+		s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%s" rx="2" fill="%s" %s/>' % [at, y, w, h, hue, _edge()]
+		s += '<rect x="%.1f" y="%.1f" width="%.1f" height="2.6" fill="#F7F2E4"/>' % [at + 1.5, y + 2.4, w - 3.0]
+		y -= 1.0
+	return s
+
+
+# A picture book stood up with its cover out, the way they are shown on a child's ledge.
+static func _book_cover(x: float, base: float, hue: String) -> String:
+	var w := 32.0
+	var h := 44.0
+	var top := base - h
+	var s := '<rect x="%s" y="%s" width="%s" height="%s" rx="2" fill="%s" %s/>' % [x, top, w, h, hue, _edge()]
+	s += '<rect x="%s" y="%s" width="3" height="%s" fill="#FFFFFF" opacity="0.25"/>' % [x + 1.5, top + 3.0, h - 6.0]
+	# Its picture: a sun over a hill, framed in cream.
+	s += '<rect x="%s" y="%s" width="%s" height="18" rx="2" fill="#FDF8EC"/>' % [x + 4.0, top + 6.0, w - 8.0]
+	s += '<circle cx="%s" cy="%s" r="4" fill="#F2C12E"/>' % [x + w - 10.0, top + 12.0]
+	s += '<path d="M%s %s q7 -9 14 0 q6 -6 10 0 z" fill="#7CCB5A"/>' % [x + 4.0, top + 24.0]
+	s += '<rect x="%s" y="%s" width="%s" height="3" rx="1.5" fill="#FFFFFF" opacity="0.8"/>' % [x + 6.0, top + 29.0, w - 12.0]
+	s += '<rect x="%s" y="%s" width="%s" height="3" rx="1.5" fill="#FFFFFF" opacity="0.6"/>' % [x + 9.0, top + 35.0, w - 18.0]
+	return s
+
+
+static func _edge() -> String:
+	return 'stroke="#3A332C" stroke-width="1.3" stroke-linejoin="round"'
 
 
 ## Canvas 180x170: fluffy white sheepskin chair. Floor at y 170.
