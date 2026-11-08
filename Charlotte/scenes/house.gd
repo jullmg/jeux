@@ -58,6 +58,11 @@ const SNACKS := [["apple", "Une pomme !"], ["yogurt", "Un yogourt !"], ["cheese"
 # Lights that the switches and the floor lamp turn on and off.
 var _vestibule_light: Sprite2D
 var _salon_pendant: Sprite2D
+# The two sash windows (salon and bedroom): their view redraws for the hour and the season, so after a night's
+# sleep they must be redrawn too, or they keep showing the evening she fell asleep under (Halloween's, if that
+# was the night).
+var _salon_window: Sprite2D
+var _bedroom_window: Sprite2D
 # The front of the sofa drawn over whoever sits in it (only shown while someone does).
 var _sofa_front: Sprite2D
 var _sofa_seat: Seat
@@ -628,6 +633,12 @@ func _go_to_sleep() -> void:
 		var halloween_over: bool = Halloween.step() == 3 and GameState.flags.get("halloween_counted", false)
 		if halloween_over:
 			_end_halloween()
+			# Her two windows were drawn for last night, Halloween's own dark blue with its moon and its
+			# bat: redraw them now that Halloween.night() is false again, or they'd go on showing it.
+			if _salon_window:
+				_salon_window.texture = InteriorArt.window(170.0, 300.0)
+			if _bedroom_window:
+				_bedroom_window.texture = InteriorArt.window(180.0, 300.0)
 		words.text = "Le lendemain matin…" if not halloween_over else "Le lendemain matin… il a neigé !"
 		words.position.y = 0.0
 		moon.queue_free()
@@ -852,7 +863,7 @@ func _build_salon() -> void:
 	_sofa_seat = sofa_seat
 	add_child(sofa_seat)
 	_put(InteriorArt.side_table(), 1390.0, 610.0, 0.8, "floor")
-	_put(InteriorArt.window(170.0, 300.0), 1580.0, 470.0, 1.0, "wall")
+	_salon_window = _put(InteriorArt.window(170.0, 300.0), 1580.0, 470.0, 1.0, "wall")
 	_daylight(Vector2(1580.0, 170.0), 170.0, 0.12)
 	_plant("fenetre", "pothos", 1590.0, 606.0, 0.5)
 	_plate(1780.0, 330.0, false)
@@ -904,7 +915,7 @@ func _dress_kitchen() -> void:
 func _build_bedroom() -> void:
 	var x := BEDROOM.x
 	_put(InteriorArt.round_rug(), x + 380.0, 700.0, 1.0)
-	_put(InteriorArt.window(180.0, 300.0), x + 90.0, 420.0, 1.0, "wall")
+	_bedroom_window = _put(InteriorArt.window(180.0, 300.0), x + 90.0, 420.0, 1.0, "wall")
 	_daylight(Vector2(x + 90.0, 120.0), 180.0, 0.14)
 	var tank := _put(InteriorArt.terrarium(false), x + 30.0, 606.0, 0.85, "floor")
 	var hamster := Hamster.new()
