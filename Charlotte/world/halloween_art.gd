@@ -592,17 +592,23 @@ static func _bag(kind: String) -> String:
 	match kind:
 		"citrouille":
 			# The orange plastic pumpkin pail, with its black handle and its moulded face.
-			var s := '<path d="M26 20 q22 -22 44 0" fill="none" %s/>' % _stroke("#2B2B2B", 5)
+			var s := '<path d="M20 38 q28 -64 56 0" fill="none" %s/>' % _stroke("#2B2B2B", 5)
 			s += '<path d="M14 36 h68 q6 34 -6 54 q-28 12 -56 0 q-12 -20 -6 -54 z" fill="%s" %s/>' % [ORANGE, _stroke(DEEP, 3)]
 			s += '<rect x="10" y="28" width="76" height="12" rx="6" fill="%s" %s/>' % [LIGHT, _stroke(DEEP, 2.5)]
+			# Where the handle is riveted to the rim, over the pail so it is plainly held on.
+			s += '<path d="M20 29 v10 M76 29 v10" fill="none" %s/>' % _stroke("#2B2B2B", 5)
+			s += '<circle cx="20" cy="34" r="3.6" fill="#4A4A52"/><circle cx="76" cy="34" r="3.6" fill="#4A4A52"/>'
 			s += '<path d="M22 44 q-4 26 2 42 q-10 -18 -8 -42 z" fill="#FFFFFF" opacity="0.22"/>'
 			s += '<path d="M30 54 l12 8 l-12 6 z M66 54 l-12 8 l12 6 z" fill="#3A2410"/>'
 			s += '<path d="M30 74 q18 12 36 0 q-6 10 -18 10 q-12 0 -18 -10 z" fill="#3A2410"/>'
 			return s
 		"sac":
 			# The classic orange plastic sack, gathered at the neck, heavy with sweets.
-			var s := '<path d="M34 12 q14 -10 28 0" fill="none" %s/>' % _stroke("#B04F11", 4)
+			var s := '<path d="M36 24 q12 -36 24 0" fill="none" %s/>' % _stroke("#B04F11", 4)
 			s += '<path d="M34 18 q14 8 28 0 l10 16 q16 30 6 56 q-24 16 -60 0 q-10 -26 6 -56 z" fill="%s" %s/>' % [ORANGE, _stroke(DEEP, 3)]
+			# The neck gathered round the handle's two ends.
+			s += '<path d="M36 20 v8 M60 20 v8" fill="none" %s/>' % _stroke("#B04F11", 4)
+			s += '<path d="M34 22 q14 8 28 0" fill="none" %s opacity="0.8"/>' % _stroke(DEEP, 2.5)
 			s += '<path d="M30 42 q-10 28 -2 48 q-12 -24 -4 -48 z" fill="#FFFFFF" opacity="0.2"/>'
 			s += '<path d="M34 56 l12 9 l-12 7 z M62 56 l-12 9 l12 7 z" fill="#3A2410"/>'
 			s += '<path d="M28 78 q20 14 40 0 q-4 12 -20 12 q-16 0 -20 -12 z" fill="#3A2410"/>'
@@ -620,11 +626,14 @@ static func _bag(kind: String) -> String:
 			return s
 		"chat":
 			# A black cat tote: two ears, yellow eyes and whiskers.
-			var s := '<path d="M28 22 q20 -20 40 0" fill="none" %s/>' % _stroke("#2B2B2B", 5)
+			var s := '<path d="M28 44 q20 -76 40 0" fill="none" %s/>' % _stroke("#2B2B2B", 5)
 			s += '<path d="M18 32 h60 q8 32 0 58 q-30 12 -60 0 q-8 -26 0 -58 z" fill="#333040" %s/>' % _stroke("#1A1824", 3)
 			# The ears, drawn over the bag so they stand up against the night.
 			s += '<path d="M18 36 l4 -24 l20 16 z M78 36 l-4 -24 l-20 16 z" fill="#333040" %s/>' % _stroke("#1A1824", 2.5)
 			s += '<path d="M22 32 l2 -12 l10 8 z M74 32 l-2 -12 l-10 8 z" fill="#8A6A86"/>'
+			# The two straps sewn onto the front of the tote.
+			s += '<path d="M28 32 v12 M68 32 v12" fill="none" %s/>' % _stroke("#2B2B2B", 5)
+			s += '<path d="M24 44 h8 M64 44 h8" fill="none" %s opacity="0.7"/>' % _stroke("#6A6678", 2)
 			s += '<path d="M26 40 q-6 26 -2 46 q-10 -20 2 -46 z" fill="#FFFFFF" opacity="0.14"/>'
 			s += '<ellipse cx="36" cy="58" rx="8" ry="9" fill="#F7D046"/><ellipse cx="60" cy="58" rx="8" ry="9" fill="#F7D046"/>'
 			s += '<ellipse cx="36" cy="58" rx="2.6" ry="8" fill="#2B2B2B"/><ellipse cx="60" cy="58" rx="2.6" ry="8" fill="#2B2B2B"/>'
@@ -633,9 +642,13 @@ static func _bag(kind: String) -> String:
 			return s
 		"chaudron":
 			# A little witch's cauldron, something green bubbling in it.
-			var s := '<path d="M24 20 q24 -18 48 0" fill="none" %s/>' % _stroke("#4A4A55", 5)
+			var s := '<path d="M16 40 q32 -68 64 0" fill="none" %s/>' % _stroke("#4A4A55", 5)
 			s += '<ellipse cx="48" cy="38" rx="36" ry="10" fill="#2E2E38" %s/>' % _stroke("#1A1A22", 3)
 			s += '<path d="M12 38 q6 44 36 46 q30 -2 36 -46 q-36 14 -72 0 z" fill="#3A3A46" %s/>' % _stroke("#1A1A22", 3)
+			# The bail's two ears, hooked through the rim.
+			s += '<path d="M16 32 v10 M80 32 v10" fill="none" %s/>' % _stroke("#4A4A55", 5)
+			s += '<circle cx="16" cy="38" r="4" fill="none" %s/><circle cx="80" cy="38" r="4" fill="none" %s/>' % [
+				_stroke("#5E5E6A", 3), _stroke("#5E5E6A", 3)]
 			s += '<path d="M22 46 q2 30 14 38 q-18 -8 -20 -38 z" fill="#FFFFFF" opacity="0.14"/>'
 			s += '<ellipse cx="48" cy="38" rx="28" ry="7" fill="#7ED957"/>'
 			for p: Array in [[38.0, 34.0, 4.0], [54.0, 32.0, 5.0], [47.0, 28.0, 3.0]]:
@@ -643,8 +656,11 @@ static func _bag(kind: String) -> String:
 			return s
 		"toile":
 			# A purple tote with a web printed on it and a little spider coming down.
-			var s := '<path d="M30 20 q18 -18 36 0" fill="none" %s/>' % _stroke("#4B3570", 5)
+			var s := '<path d="M30 42 q18 -72 36 0" fill="none" %s/>' % _stroke("#4B3570", 5)
 			s += '<path d="M16 30 h64 l6 56 q-38 16 -76 0 z" fill="%s" %s/>' % [PURPLE, _stroke("#4B3570", 3)]
+			# The straps sewn to the front of the tote.
+			s += '<path d="M30 30 v12 M66 30 v12" fill="none" %s/>' % _stroke("#4B3570", 5)
+			s += '<path d="M26 42 h8 M62 42 h8" fill="none" %s opacity="0.8"/>' % _stroke("#9B82C4", 2)
 			s += '<path d="M24 38 q-4 28 0 46 q-10 -22 0 -46 z" fill="#FFFFFF" opacity="0.16"/>'
 			# The web, strung from the upper left corner.
 			for a: float in [0.0, 18.0, 36.0, 54.0, 72.0]:
@@ -659,16 +675,22 @@ static func _bag(kind: String) -> String:
 			return s
 		"fantome":
 			# A white bag with a ghost's face and a scalloped hem.
-			var s := '<path d="M32 18 q16 -14 32 0" fill="none" %s/>' % _stroke("#B9B4C8", 4.5)
+			var s := '<path d="M32 40 q16 -68 32 0" fill="none" %s/>' % _stroke("#B9B4C8", 4.5)
 			s += '<path d="M22 28 h52 q10 32 6 58 q-8 -10 -14 0 q-8 -10 -16 0 q-8 -10 -16 0 q-8 -10 -14 0 q-4 -26 2 -58 z" fill="#FBF9F2" %s/>' % _stroke("#C3BEB0", 3)
+			# The straps sewn to the front.
+			s += '<path d="M32 28 v12 M64 28 v12" fill="none" %s/>' % _stroke("#B9B4C8", 4.5)
+			s += '<path d="M28 40 h8 M60 40 h8" fill="none" %s opacity="0.8"/>' % _stroke("#C3BEB0", 2)
 			s += '<path d="M30 36 q-6 26 -4 44 q-8 -22 4 -44 z" fill="#FFFFFF" opacity="0.8"/>'
 			s += '<ellipse cx="38" cy="52" rx="7" ry="9" fill="#2B2B38"/><ellipse cx="60" cy="52" rx="7" ry="9" fill="#2B2B38"/>'
 			s += '<ellipse cx="49" cy="72" rx="8" ry="7" fill="#2B2B38"/>'
 			return s
 		_:
 			# A green monster bag, all teeth and two eyes on top.
-			var s := '<path d="M30 22 q18 -18 36 0" fill="none" %s/>' % _stroke("#2F6B2A", 5)
+			var s := '<path d="M30 46 q18 -80 36 0" fill="none" %s/>' % _stroke("#2F6B2A", 5)
 			s += '<path d="M16 34 h64 q8 30 2 54 q-34 16 -68 0 q-6 -24 2 -54 z" fill="#5EA83F" %s/>' % _stroke("#2F6B2A", 3)
+			# The straps sewn to the front.
+			s += '<path d="M30 34 v12 M66 34 v12" fill="none" %s/>' % _stroke("#2F6B2A", 5)
+			s += '<path d="M26 46 h8 M62 46 h8" fill="none" %s opacity="0.8"/>' % _stroke("#8FCB6E", 2)
 			s += '<path d="M24 42 q-6 26 -2 44 q-10 -20 2 -44 z" fill="#FFFFFF" opacity="0.18"/>'
 			s += '<path d="M18 58 h60 l-6 10 l-8 -8 l-8 10 l-8 -10 l-8 8 l-8 -10 z" fill="#FBF9F2" %s/>' % _stroke("#2F6B2A", 1.6)
 			s += '<circle cx="34" cy="44" r="9" fill="#FBF9F2" %s/><circle cx="62" cy="44" r="9" fill="#FBF9F2" %s/>' % [_stroke("#2F6B2A", 2), _stroke("#2F6B2A", 2)]
