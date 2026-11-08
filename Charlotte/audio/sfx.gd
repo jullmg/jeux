@@ -73,9 +73,10 @@ func play(sound: String, at := Vector2.INF, volume_db := 0.0, pitch := 1.0) -> v
 		p.play()
 
 
-## Outdoor ambience for a scene: now and then a bird calls somewhere near the camera (not in winter).
+## Outdoor ambience for a scene: now and then a bird calls somewhere near the camera (not in winter, and not on
+## Halloween night: the birds are long asleep by then).
 func ambience(parent: Node) -> void:
-	if Season.is_winter():
+	if Season.is_winter() or Halloween.night():
 		return
 	var timer := Timer.new()
 	timer.wait_time = 3.0
