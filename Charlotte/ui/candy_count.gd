@@ -25,8 +25,8 @@ func _ready() -> void:
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(dim)
 	var panel := PanelContainer.new()
-	panel.position = Vector2(230, 70)
-	panel.size = Vector2(820, 580)
+	panel.position = Vector2(240, 35)
+	panel.size = Vector2(800, 650)
 	var style := StyleBoxFlat.new()
 	style.bg_color = CREAM
 	style.border_color = ORANGE
@@ -44,23 +44,42 @@ func _ready() -> void:
 	var counts := Halloween.counted()
 	var grid := GridContainer.new()
 	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 40)
-	grid.add_theme_constant_override("v_separation", 10)
+	grid.add_theme_constant_override("h_separation", 22)
+	grid.add_theme_constant_override("v_separation", 14)
 	column.add_child(grid)
 	for kind: String in Halloween.KINDS:
 		var n: int = counts.get(kind, 0)
 		if n == 0:
 			continue
+		# A little card of its own per kind, so each candy sits on its own spot on the table instead of in a
+		# bare list row.
+		var card := PanelContainer.new()
+		var card_style := StyleBoxFlat.new()
+		card_style.bg_color = Color("#FFF8E8")
+		card_style.border_color = Color(ORANGE, 0.35)
+		card_style.set_border_width_all(2)
+		card_style.set_corner_radius_all(16)
+		card_style.set_content_margin_all(8)
+		card.add_theme_stylebox_override("panel", card_style)
+		grid.add_child(card)
 		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 14)
+		row.add_theme_constant_override("separation", 12)
+		card.add_child(row)
+		# The candy itself, drawn bigger than life-size here (the stash under her bed keeps it at its usual size),
+		# with a little tilt of its own — set down on the table, not lined up like a chart.
+		var icon_box := Control.new()
+		icon_box.custom_minimum_size = Vector2(88, 88)
 		var pic := CandyIcon.new()
 		pic.kind = kind
-		pic.custom_minimum_size = Vector2(78, 78)
-		row.add_child(pic)
-		var words := _label("%s  ×  %d" % [Halloween.KIND_NAMES[kind], n], 26, INK)
+		pic.size = Vector2(78, 78)
+		pic.position = (icon_box.custom_minimum_size - pic.size) / 2.0
+		pic.scale_factor = 1.2
+		pic.tilt = (float(hash(kind) % 100) / 100.0 - 0.5) * 0.3
+		icon_box.add_child(pic)
+		row.add_child(icon_box)
+		var words := _label("%s\n×  %d" % [Halloween.KIND_NAMES[kind], n], 22, INK)
 		words.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		row.add_child(words)
-		grid.add_child(row)
 	var total := Halloween.candy()
 	column.add_child(_label("%d bonbons en tout !" % total, 34, Color("#2E7D32")))
 	column.add_child(_label(_verdict(total), 22, INK))

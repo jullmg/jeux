@@ -7,6 +7,11 @@ extends Control
 ## One candy, drawn as a real little object and not as flat shapes: lit from the upper left, its own outline, a
 # highlight where the light lands, a darker edge underneath and a soft shadow so it sits on the page.
 var kind := "wrapped"
+## How big it is drawn within its box, about its own centre: 1.0 is the original size the shapes below were
+## drawn at. The haul screen draws its candies bigger than the stash does.
+var scale_factor := 1.0
+## A little tilt, as if she'd just set it down: radians.
+var tilt := 0.0
 
 # An oval (or a circle), turned by `turn` radians, as a polygon.
 func _oval(c: Vector2, r: Vector2, turn := 0.0, steps := 30) -> PackedVector2Array:
@@ -28,7 +33,8 @@ func _shadow(c: Vector2, rx: float) -> void:
 	draw_colored_polygon(_oval(c, Vector2(rx, rx * 0.26)), Color(0.2, 0.14, 0.08, 0.16))
 
 func _draw() -> void:
-	var c := size / 2.0
+	draw_set_transform(size / 2.0, tilt, Vector2.ONE * scale_factor)
+	var c := Vector2.ZERO
 	match kind:
 		"wrapped":
 			# A sweet in its twisted wrapper: the two crimped ends, the golden body and its red stripe.
