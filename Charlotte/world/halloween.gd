@@ -15,8 +15,9 @@ const BAG := "candy_bag"
 ## What the neighbours hand out.
 const KINDS := ["wrapped", "lollipop", "chocolate", "gum", "chips"]
 const KIND_NAMES := {"wrapped": "Bonbons", "lollipop": "Suçons", "chocolate": "Chocolats", "gum": "Gommes", "chips": "Petits sacs de chips"}
-## How many houses she must do before she can call it a night.
-const ENOUGH := 12
+## How many houses she must do before her bag is full and she can call it a night. Julien raised it by half
+## (12 → 18) so the evening lasts, and so more than one street is really needed.
+const ENOUGH := 18
 
 const HINTS := {
 	1: "Va te déguiser ! Ouvre les tiroirs de ta commode, dans ta chambre.",

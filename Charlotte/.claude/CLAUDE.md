@@ -531,7 +531,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
      in `CandyBag.KINDS`.** That night the street belongs to the children: no cyclists (`StreetScene._spawn_cyclists`)
      and only one grown-up passerby (`_build_passersby` makes them all as usual and only then frees the extra ones, so
      the random draws — and the whole street — don't move with the evening). A doorbell (`StreetScene._ring`) at every front door: a lit house gives 1–3
-     sweets once, a dark one is asleep. `Halloween.ENOUGH` houses (12, so more than one street) fill her bag. **The back
+     sweets once, a dark one is asleep. `Halloween.ENOUGH` houses (18, so a good two or three streets) fill her bag. **The back
      lanes are closed that night** (Julien: far too dark for a little girl to venture in): their mouths stay unlit, and a
      click or ↑ there only gets a line from her (`StreetScene.DARK_LANE`), so the evening happens on the four streets.
   3. **Rentrer**: Maman counts the haul (`ui/candy_count.gd`, `CandyCount`: each kind with its drawing and the total), then bed.
