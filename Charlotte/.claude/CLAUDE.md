@@ -229,6 +229,14 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   clean-shaven, blue eyes, navy T-shirt with the "bike" top pattern) in the salon; both stand at 1.18× Charlotte's scale. Click them and they say a line (`MOM_LINES` / `DAD_LINES`
   in house.gd).
 - By her bedroom door, her height in pencil straight on the wall (`world/growth_marks.gd`, `GrowthMarks`): a line and "N ans" from 3 up to `GameState.age`.
+- Her hiding place for junk food (Julien): `world/stash.gd` (`Stash`), a shoebox half pulled out from under her bed
+  (`InteriorArt.stash_box`, `house.gd _open_stash`, the clickable part being only what shows below the bed, or a click
+  would send her to sleep). `ui/stash_box.gd` (`StashBox`) opens it: every kind with its drawing (`ui/candy_icon.gd`,
+  `CandyIcon`, shared with the Halloween count sheet), how many are left, and a "Miam !" to eat one (`STASH_MIAM`
+  whispers a line per kind). Kept in `GameState.flags.stash` as {kind: how many}, the kinds being `Halloween.KINDS`.
+  **Everything sweet or salty ends up in it**: the whole Halloween haul once Maman has counted it
+  (`Stash.from_halloween`), and the candy, lollipops and bags of chips she buys at either dépanneur (`Shop._buy`'s
+  `keep` argument — a sloche or a hot chocolate is drunk on the spot and keeps it empty).
 - Charlotte's hamster (`world/hamster.gd`, `Hamster`) lives in the terrarium on her bedroom dresser. The terrarium art is two
   layers, `InteriorArt.terrarium(false)` behind and `terrarium(true)` in front (glass glare, things on the dresser); the
   hamster node shares its position/scale and works in its canvas units. It wanders, grooms, runs its wheel, naps in the

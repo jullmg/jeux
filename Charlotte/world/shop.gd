@@ -81,7 +81,9 @@ var _asking := false
 
 # She picks something: a window shows it with its price (and what is left in her pocket) and asks first; if she says yes the
 # money goes and she gets it with the shopkeeper's thanks; if she is short the window says how much is missing.
-func _buy(picture: Texture2D, text: String, price: float) -> void:
+## `keep` is the `Halloween.KINDS` kind it becomes once home: a sweet or a bag of chips goes into the shoebox
+## under her bed (`Stash`); a sloche or a hot chocolate is drunk on the spot and keeps `keep` empty.
+func _buy(picture: Texture2D, text: String, price: float, keep := "") -> void:
 	if _asking:
 		return
 	_asking = true
@@ -96,22 +98,24 @@ func _buy(picture: Texture2D, text: String, price: float) -> void:
 		return
 	GameState.money -= price
 	_treat(picture, "%s  − %s" % [text, Quests.money_text(price)])
+	if keep != "":
+		Stash.add(keep)
 	_thanks("Merci, bonne journée !")
 
 
 # A handful of candies or a lollipop, one or the other.
 func _buy_candy() -> void:
 	if randf() < 0.5:
-		_buy(ShopArt.treat("candy"), "Des bonbons !", PRICES.candy)
+		_buy(ShopArt.treat("candy"), "Des bonbons !", PRICES.candy, "wrapped")
 	else:
-		_buy(ShopArt.treat("lollipop"), "Une sucette !", PRICES.lollipop)
+		_buy(ShopArt.treat("lollipop"), "Une sucette !", PRICES.lollipop, "lollipop")
 
 
 # A bag of chips: one of the classic flavours, picked at random (or the one she looked at).
 func _buy_chips() -> void:
 	var f := randi() % ShopArt.CHIPS.size()
 	var said: String = ShopArt.CHIPS[f].said
-	_buy(ShopArt.chip_treat(f), "%s !" % (said.substr(0, 1).to_upper() + said.substr(1)), PRICES.chips)
+	_buy(ShopArt.chip_treat(f), "%s !" % (said.substr(0, 1).to_upper() + said.substr(1)), PRICES.chips, "chips")
 
 
 # The pint of milk: Mom's money pays for it while she's on the "milk" quest, and Charlotte carries it home in her arms (if

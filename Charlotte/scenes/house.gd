@@ -522,6 +522,9 @@ func _build_doors() -> void:
 	add_child(DoorSpot.make(Rect2(KITCHEN_START + 4.0, 240, 104, 356), _open_fridge, KITCHEN_START + 140.0))
 	# Her bed: sleep until the next morning.
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 360.0, 380, 448, 228), _go_to_sleep, BEDROOM.x + 600.0))
+	# Under it, her hiding place: the shoebox of junk food.
+	# Only the part showing below the bed is clickable, or a click on the box would send her to bed.
+	add_child(DoorSpot.make(Rect2(BEDROOM.x + 575.0, 606, 105, 30), _open_stash, BEDROOM.x + 640.0))
 	# The book ledges: her books.
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 960.0, 270, 136, 200), _open_books, BEDROOM.x + 1030.0))
 	# Her desk: drawing paper and crayons, and the homework of the week.
@@ -680,9 +683,40 @@ func _count_the_candy() -> void:
 		var sheet := CandyCount.new()
 		sheet.closed.connect(func() -> void:
 			_control.enabled = true
-			_say(_charlotte, "Je vais me coucher !", 300.0, 2.4)
+			# The whole haul goes into the shoebox under her bed, where everything sweet ends up.
+			Stash.from_halloween()
+			_say(_charlotte, "Je cache tout ça sous mon lit,\npis je vais me coucher !", 300.0, 3.6)
 			GameState.flags["halloween_counted"] = true)
 		add_child(sheet))
+
+
+## What she whispers as she helps herself from the box: never out loud, it is a secret.
+const STASH_MIAM := {
+	"wrapped": "Miam ! Un bon p'tit bonbon…",
+	"lollipop": "Un suçon ! C'est ben bon, ça.",
+	"chocolate": "Du chocolat ! Chut, chut, chut…",
+	"gum": "Une gomme, pis personne le sait !",
+	"chips": "Des chips ! Faut pas que j'fasse de bruit…",
+}
+
+
+# The shoebox under her bed: she pulls it out, helps herself to one thing, and pushes it back.
+func _open_stash() -> void:
+	if Stash.total() == 0:
+		_charlotte.express("sad", 2.6)
+		_say(_charlotte, Stash.EMPTY, 300.0, 3.4)
+		return
+	_control.enabled = false
+	Sfx.play("swoosh", _charlotte.position)
+	var box := StashBox.new()
+	box.closed.connect(func(eaten: String) -> void:
+		_control.enabled = true
+		if eaten == "":
+			return
+		_charlotte.express("yum", 3.2)
+		Sfx.play("miam", _charlotte.position)
+		_say(_charlotte, str(STASH_MIAM.get(eaten, "Miam !")), 300.0, 3.0))
+	add_child(box)
 
 
 func _open_books() -> void:
@@ -909,6 +943,9 @@ func _build_bedroom() -> void:
 		add_child(star)
 	_plant("chambre", "lily", x + 272.0, 606.0, 0.5)
 	_put(InteriorArt.bed(), x + 360.0, 608.0, 0.8, "floor")
+	# Her hiding place: the shoebox of junk food, half pulled out from under the bed (it laps over the bed's skirt,
+	# which is what says "under there"), and a little in the shade.
+	_put(InteriorArt.stash_box(), x + 575.0, 634.0, 0.7, "floor").modulate = Color(0.86, 0.82, 0.84)
 	_put(InteriorArt.kid_table(), x + 830.0, 612.0, 0.75, "floor")
 	_put(InteriorArt.book_ledges(), x + 960.0, 470.0, 0.8, "wall")
 	_put(InteriorArt.fluffy_chair(), x + 960.0, 606.0, 0.8, "floor")

@@ -1255,6 +1255,29 @@ static func laundry_basket() -> ImageTexture:
 	return tex(120, 110, s)
 
 
+## Canvas 150x86: the shoebox Charlotte keeps her junk food in, pushed under her bed with the lid askew, a strip
+## of tape across it, "PRIVÉ !" written on the side in crayon, a heart sticker, and a wrapper poking out. Floor at y 86.
+static func stash_box() -> ImageTexture:
+	# The box itself, a little turned so we see its lid.
+	var s := '<path d="M10 34 H140 L134 82 H16 Z" fill="#C9A06A" stroke="#8A6A3E" stroke-width="3"/>'
+	s += '<path d="M10 34 H140 L134 82 H16 Z" fill="none" stroke="#B08A54" stroke-width="1" opacity="0.8"/>'
+	# Corrugated cardboard: the ridges down its front.
+	for x in range(22, 134, 11):
+		s += '<path d="M%d 38 L%d 78" stroke="#B88E58" stroke-width="1.6" opacity="0.5"/>' % [x, x - 2]
+	# The lid, off its box and leaning on top.
+	s += '<path d="M6 24 H132 L138 36 H12 Z" fill="#D9B482" stroke="#8A6A3E" stroke-width="3"/>'
+	s += '<path d="M8 27 H128" stroke="#EBD0A8" stroke-width="2" opacity="0.7"/>'
+	# A strip of tape across the lid, and the crayon label on the side.
+	s += '<path d="M60 22 h22 v16 h-22 z" fill="#F4F1E4" opacity="0.75" stroke="#D5CFBC" stroke-width="1.2"/>'
+	s += '<path d="M24 52 h58" stroke="#C8202A" stroke-width="3" stroke-linecap="round" opacity="0.9"/>'
+	s += '<path d="M24 52 q14 -5 28 2 q14 6 30 -2" fill="none" stroke="#C8202A" stroke-width="3" stroke-linecap="round"/>'
+	s += '<path d="M100 48 q6 -8 12 0 q6 -8 12 0 q0 10 -12 18 q-12 -8 -12 -18 z" fill="#E8597A" stroke="#B5415C" stroke-width="2"/>'
+	# A sweet she did not quite push back in, sticking out under the lid.
+	s += '<path d="M96 30 l14 -4 l-2 8 z" fill="#F2C230" stroke="#C9962E" stroke-width="1.5"/>'
+	s += '<ellipse cx="104" cy="33" rx="7" ry="5" fill="#E8542F" stroke="#B23A1C" stroke-width="1.5"/>'
+	return tex(150, 86, s)
+
+
 ## Canvas 150x90: plushies sitting on the floor (a bear and a cat). Floor at y 90.
 static func plushies() -> ImageTexture:
 	var s := '<ellipse cx="45" cy="66" rx="30" ry="24" fill="#C49A6C" stroke="#7E5E3A" stroke-width="2.5"/>'
