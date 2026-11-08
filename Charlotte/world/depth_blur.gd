@@ -5,6 +5,11 @@ extends Node2D
 ##    distant roofs and steeples are out of focus;
 ##  - DepthBlur.vista(cs): over a cross street's gap, after its VISTA, blurring only round its vanishing point (far
 ##    buildings, Mount Royal), the near walls staying sharp. A BackBufferCopy before it refreshes the screen copy.
+##
+## Neither of them runs on Halloween night. The blur reads the screen back through its mipmaps, and when everything
+## far away is almost black the higher mips mix the brighter surroundings into it: the gap came out as a flat, paler
+## rectangle with a hard edge down the street (Julien saw it at the corner of Holt). Nothing is lost by leaving it
+## out — at that hour the distance is a silhouette already.
 
 var vista_of: CrossStreet
 var _rect := Rect2()
@@ -12,6 +17,8 @@ var _mat: ShaderMaterial
 
 
 static func far(parent: Node, lod := 1.2) -> DepthBlur:
+	if Halloween.night():
+		return null
 	var blur := DepthBlur.new()
 	blur._setup(lod)
 	parent.add_child(blur)
@@ -19,6 +26,8 @@ static func far(parent: Node, lod := 1.2) -> DepthBlur:
 
 
 static func vista(parent: Node, cs: CrossStreet) -> DepthBlur:
+	if Halloween.night():
+		return null
 	# The whole screen, not just the gap: the blur's mipmaps reach outside the gap, and a partial copy left them grey.
 	var copy := BackBufferCopy.new()
 	copy.copy_mode = BackBufferCopy.COPY_MODE_VIEWPORT
