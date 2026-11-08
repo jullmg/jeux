@@ -540,6 +540,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
      sweets once, a dark one is asleep. `Halloween.ENOUGH` houses (18, so a good two or three streets) fill her bag. **The back
      lanes are closed that night** (Julien: far too dark for a little girl to venture in): their mouths stay unlit, and a
      click or ↑ there only gets a line from her (`StreetScene.DARK_LANE`), so the evening happens on the four streets.
+     **Her kitchen's back door is shut the same way** (`house.gd _build_doors`), or she slipped out to the lane
+     through her own yard.
   3. **Rentrer**: Maman counts the haul (`ui/candy_count.gd`, `CandyCount`: each kind with its drawing and the total), then bed.
      Her own little lantern lights the few steps around her all evening, the back lanes go dark too
      (`HalloweenNight.darken`), the notebook counts her sweets, the street asks for a `halloween` music track if there is one,

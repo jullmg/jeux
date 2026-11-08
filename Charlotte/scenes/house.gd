@@ -488,8 +488,14 @@ func _build_doors() -> void:
 		Transition.change_scene(self, "res://scenes/main.tscn")))
 	add_child(DoorSpot.make(Rect2(CHACHA_DOOR_X, 170, 150, 430), func(): _go_through(BEDROOM_DOOR_X - 40.0, BEDROOM, -1)))
 	add_child(DoorSpot.make(Rect2(BEDROOM_DOOR_X, 170, 150, 430), func(): _go_through(CHACHA_DOOR_X + 75.0, HALL, 1)))
-	# The kitchen's back door: out to the yard and the lane behind the house.
+	# The kitchen's back door: out to the yard and the lane behind the house. Shut on Halloween night like every
+	# other way into a lane — the evening happens on the four streets, not out the back in the dark.
 	add_child(DoorSpot.make(Rect2(KITCHEN_START + 300.0, 250, 120, 350), func():
+		if Halloween.night():
+			_charlotte.express("worry", 2.2)
+			Sfx.play("squeak", _charlotte.position)
+			_say(_charlotte, StreetScene.DARK_LANE[randi() % StreetScene.DARK_LANE.size()], 280.0, 3.0)
+			return
 		_control.enabled = false
 		Sfx.play("door")
 		Transition.arrive = "ruelle_from_maison"
