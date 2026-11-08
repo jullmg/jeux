@@ -149,9 +149,13 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     options: `pattern` ("stars", "dots", "stripes", "diamonds"), `pattern_color`, `pattern_alpha`, `wainscot` (Color) +
     `wainscot_height` (panelled lower wall); shops use `tile_colors`.
   - `InteriorArt.window(w, h)` is a sash window with a real view out over the back lane (`_view`, `_view_tree`): the
-    season's sky with its clouds, the neighbours' brick back with their windows, gallery rail and downpipe, the yard
+    season's sky with its clouds, and across the lane the neighbours' back, which must plainly be a **brick duplex**
+    (Julien) — staggered brick courses with their heads, a cornice, a flat under each roof, and **one flat over the
+    other, each with its own door** (`_view_door`) and window (`_view_pane`); the upper one opens onto the **gallery**
+    (slab, iron rail, wooden posts, the shade it throws on the ground floor) and the **stair** comes down from it into
+    the yard (sloped beam, treads, handrail and balusters); plus the corner downpipe, the yard
     tree (tapering trunk, three limbs, clumps of real leaves; bare and snowy in winter), the board fence and birds on
-    the wire. On Halloween night (`Halloween.night()`) it is the evening out there instead — deep blue sky, stars,
+    the wire over their roof. On Halloween night (`Halloween.night()`) it is the evening out there instead — deep blue sky, stars,
     the moon, a bat, the tree in silhouette, their windows warm and a jack-o'-lantern on their gallery — and the
     shared `outside` gradient (the kitchen's back door) turns night-blue with it.
   - `world/interior_art.gd` (`InteriorArt`): one SVG function per piece of furniture; `world/fairy_lights.gd` (`FairyLights`).

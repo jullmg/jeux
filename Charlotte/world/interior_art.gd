@@ -753,7 +753,7 @@ static func window(w: float, h: float) -> ImageTexture:
 # rectangle, so the same view fits any window.
 static func _view(x: float, y: float, w: float, h: float, night: bool) -> String:
 	var s := ""
-	var horizon := y + h * 0.40
+	var horizon := y + h * 0.24
 	var ground := y + h * 0.80
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 404
@@ -761,63 +761,97 @@ static func _view(x: float, y: float, w: float, h: float, night: bool) -> String
 		# The moon over the lane, and the stars.
 		for i in 26:
 			var sx := x + rng.randf_range(2.0, w - 2.0)
-			var sy := y + rng.randf_range(2.0, h * 0.38)
+			var sy := y + rng.randf_range(2.0, h * 0.22)
 			s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#FFF6D8" opacity="%.2f"/>' % [sx, sy, rng.randf_range(0.7, 1.5), rng.randf_range(0.4, 0.95)]
 		var mx := x + w * 0.74
-		var my := y + h * 0.13
+		var my := y + h * 0.09
 		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#FFF6D8" opacity="0.14"/>' % [mx, my, w * 0.22]
 		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#FDF6DC"/>' % [mx, my, w * 0.085]
 		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#E8E0C4" opacity="0.7"/>' % [mx - w * 0.025, my - w * 0.02, w * 0.02]
 		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#E8E0C4" opacity="0.6"/>' % [mx + w * 0.03, my + w * 0.02, w * 0.024]
 		# A bat crossing in front of the moon.
 		var bx := x + w * 0.42
-		var by := y + h * 0.2
+		var by := y + h * 0.17
 		s += '<path d="M%.1f %.1f l-13 -5 l10 2 l-7 -8 l13 7 l6 -3 l6 3 l13 -7 l-7 8 l10 -2 l-13 5 z" fill="#161528" opacity="0.9"/>' % [bx, by]
 	else:
 		# A few soft clouds.
 		for i in 3:
 			var cx := x + w * (0.12 + i * 0.36) + rng.randf_range(-6.0, 6.0)
-			var cy := y + h * rng.randf_range(0.06, 0.2)
+			var cy := y + h * rng.randf_range(0.03, 0.14)
 			var cr := w * rng.randf_range(0.09, 0.14)
 			s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#FFFFFF" opacity="0.75"/>' % [cx, cy, cr, cr * 0.5]
 			s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#FFFFFF" opacity="0.65"/>' % [cx + cr * 0.7, cy + cr * 0.12, cr * 0.7, cr * 0.4]
-	# The neighbours' back across the lane: brick, its courses, a cornice, a downpipe, a gallery and its windows.
+	# The neighbours' back across the lane: a brick duplex, one flat over the other, each with its own door, the
+	# gallery running along the upper floor and the stair coming down from it into the yard.
 	var wall := "#7E4536" if night else "#A85C3E"
 	var wall_dark := "#5E3327" if night else "#8A4530"
-	s += '<rect x="%s" y="%s" width="%s" height="%s" fill="%s"/>' % [x, horizon, w, ground - horizon + 2.0, wall]
-	var course := horizon + 5.0
+	var mortar := "#4E2A20" if night else "#7A3D2A"
+	var iron := "#2E2E36" if night else "#3A3A42"
+	var wood := "#4E3A2E" if night else "#6E5444"
+	var wall_h := ground - horizon
+	var floor_y := horizon + wall_h * 0.48
+	s += '<rect x="%s" y="%s" width="%s" height="%s" fill="%s"/>' % [x, horizon, w, wall_h + 2.0, wall]
+	# Brick: the courses, and the heads staggered row by row so it reads as brick and not as stripes.
+	var course := horizon + 6.0
+	var row := 0
 	while course < ground:
-		s += '<path d="M%s %.1f H%s" stroke="%s" stroke-width="1.2" opacity="0.5"/>' % [x, course, x + w, wall_dark]
+		s += '<path d="M%s %.1f H%s" stroke="%s" stroke-width="1.2" opacity="0.5"/>' % [x, course, x + w, mortar]
+		var head := x - (w * 0.045 if row % 2 == 1 else 0.0)
+		while head < x + w:
+			s += '<path d="M%.1f %.1f v7" stroke="%s" stroke-width="1" opacity="0.32"/>' % [head, course, mortar]
+			head += w * 0.09
 		course += 7.0
+		row += 1
+	# The cornice along the roof, and the band of the floor between the two flats.
 	s += '<rect x="%s" y="%s" width="%s" height="7" fill="%s"/>' % [x, horizon, w, wall_dark]
 	s += '<rect x="%s" y="%s" width="%s" height="4" fill="#FFFFFF" opacity="%s"/>' % [x, horizon - 4.0, w, 0.12 if night else 0.3]
-	# Two windows of theirs, dark by day, warm tonight.
-	for i in 2:
-		var wx := x + w * (0.12 + i * 0.52)
-		var wy := horizon + h * 0.08
-		var ww := w * 0.2
-		var wh := h * 0.19
-		s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#E8E2D4" stroke="#C2B8A6" stroke-width="2"/>' % [wx - 3.0, wy - 3.0, ww + 6.0, wh + 6.0]
-		if night:
-			s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#FFCE70"/>' % [wx, wy, ww, wh]
-			s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#FFE7B4"/>' % [wx + ww * 0.2, wy, ww * 0.6, wh * 0.6]
-			s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#B5692A" opacity="0.5"/>' % [wx, wy, ww * 0.26, wh]
-		else:
-			s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#4E6B7A"/>' % [wx, wy, ww, wh]
-			s += '<path d="M%.1f %.1f l%.1f 0 l-%.1f %.1f l-%.1f 0 z" fill="#FFFFFF" opacity="0.2"/>' % [wx + ww * 0.45, wy, ww * 0.3, ww * 0.35, wh, ww * 0.3]
-		s += '<path d="M%.1f %.1f v%.1f M%.1f %.1f h%.1f" stroke="#E8E2D4" stroke-width="2"/>' % [wx + ww * 0.5, wy, wh, wx, wy + wh * 0.45, ww]
-	# Their gallery: posts, a rail and (tonight) a jack-o-lantern on it.
-	var rail := ground - h * 0.1
-	s += '<rect x="%s" y="%.1f" width="%s" height="3" fill="#3A3A42"/>' % [x, rail, w]
-	s += '<rect x="%s" y="%.1f" width="%s" height="3" fill="#3A3A42"/>' % [x, rail + h * 0.055, w]
-	var bar := x + 4.0
-	while bar < x + w:
-		s += '<rect x="%.1f" y="%.1f" width="2" height="%.1f" fill="#3A3A42"/>' % [bar, rail, h * 0.058]
-		bar += w * 0.055
-	s += '<rect x="%.1f" y="%s" width="5" height="%.1f" fill="%s"/>' % [x + w * 0.84, horizon, ground - horizon, "#4E3A2E" if night else "#6E5444"]
+	s += '<rect x="%s" y="%.1f" width="%s" height="3" fill="%s" opacity="0.6"/>' % [x, floor_y - wall_h * 0.03, w, wall_dark]
+	# The downpipe down the corner, from the cornice to the ground.
+	s += '<rect x="%.1f" y="%s" width="5" height="%.1f" fill="%s"/>' % [x + w * 0.005, horizon, wall_h, wood]
+	# One door and one window per flat: that is what says duplex, a home on each floor.
+	var door_w := w * 0.19
+	var door_h := wall_h * 0.37
+	s += _view_pane(x + w * 0.44, horizon + wall_h * 0.1, w * 0.3, wall_h * 0.27, night)
+	s += _view_door(x + w * 0.09, floor_y - door_h, door_w, door_h, night)
+	s += _view_pane(x + w * 0.44, floor_y + wall_h * 0.08, w * 0.3, wall_h * 0.27, night)
+	# Under the gallery it is in the shade, and that is where the ground-floor door is.
+	s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" fill="#1A1008" opacity="%s"/>' % [x, floor_y, w, ground - floor_y, 0.3 if night else 0.22]
+	s += _view_door(x + w * 0.09, ground - door_h, door_w, door_h, night)
+	# The posts holding the gallery up, then its slab.
+	for px: float in [0.33, 0.88]:
+		s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="%s"/>' % [x + w * px, floor_y, w * 0.035, ground - floor_y, wood]
+	s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" fill="%s"/>' % [x, floor_y, w, wall_h * 0.055, "#6E6A64" if night else "#CFC7B6"]
+	s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" fill="#1A1008" opacity="0.35"/>' % [x, floor_y + wall_h * 0.055, w, wall_h * 0.015]
+	# The stair: a sloped beam out of the gallery, its treads, and the handrail above them.
+	var st_x := x + w * 0.4
+	var st_y := floor_y
+	var sf_x := x + w * 0.96
+	var rise := ground - floor_y
+	var run := sf_x - st_x
+	s += '<path d="M%.1f %.1f L%.1f %.1f" stroke="%s" stroke-width="%.1f" stroke-linecap="square" fill="none"/>' % [
+		st_x, st_y + wall_h * 0.06, sf_x, ground, iron, wall_h * 0.05]
+	for i in 7:
+		var tt := float(i) / 7.0
+		s += '<rect x="%.1f" y="%.1f" width="%.1f" height="3" fill="%s"/>' % [
+			st_x + run * tt, st_y + wall_h * 0.055 + rise * tt, run / 7.0 + 2.0, "#8A857A" if night else "#C8C0AE"]
+	var hr := wall_h * 0.22
+	s += '<path d="M%.1f %.1f L%.1f %.1f" stroke="%s" stroke-width="2.5" fill="none"/>' % [st_x, st_y - hr, sf_x, ground - hr, iron]
+	for i in 6:
+		var bt := (float(i) + 0.5) / 6.0
+		s += '<path d="M%.1f %.1f v%.1f" stroke="%s" stroke-width="1.6"/>' % [
+			st_x + run * bt, st_y - hr + rise * bt, hr, iron]
+	# The gallery rail, along the part of the floor the stair does not take.
+	var rail := floor_y - wall_h * 0.24
+	for ry: float in [0.0, 0.2]:
+		s += '<rect x="%s" y="%.1f" width="%.1f" height="3" fill="%s"/>' % [x, rail + wall_h * ry, w * 0.4, iron]
+	var bar := x + 3.0
+	while bar < x + w * 0.4:
+		s += '<rect x="%.1f" y="%.1f" width="2" height="%.1f" fill="%s"/>' % [bar, rail, wall_h * 0.24, iron]
+		bar += w * 0.045
 	if night:
-		var px := x + w * 0.3
-		var py := rail - h * 0.018
+		# A jack-o-lantern on their gallery.
+		var px := x + w * 0.22
+		var py := rail - w * 0.03
 		s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#FFB347" opacity="0.28"/>' % [px, py, w * 0.11]
 		s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#E8812E" stroke="#B5651A" stroke-width="1.5"/>' % [px, py, w * 0.045, w * 0.037]
 		s += '<path d="M%.1f %.1f l%.1f -%.1f l%.1f %.1f z" fill="#FFE07A"/>' % [px - w * 0.028, py - w * 0.002, w * 0.014, w * 0.016, w * 0.014, w * 0.016]
@@ -827,7 +861,7 @@ static func _view(x: float, y: float, w: float, h: float, night: bool) -> String
 	s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" fill="%s"/>' % [x, ground, w, y + h - ground, "#3E4152" if night else "#8E9A7A"]
 	s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" fill="%s" opacity="0.5"/>' % [x, ground, w, h * 0.03, "#4C5068" if night else "#A3AE8A"]
 	# The yard tree, in front of it all: a tapering trunk, three limbs, clumps of real leaves.
-	s += _view_tree(x + w * 0.3, ground + h * 0.04, w * 0.95, h * 0.6, night)
+	s += _view_tree(x + w * 0.78, ground + h * 0.06, w * 0.62, h * 0.52, night)
 	var board := x
 	var fence_top := y + h * 0.86
 	while board < x + w:
@@ -838,12 +872,42 @@ static func _view(x: float, y: float, w: float, h: float, night: bool) -> String
 	if not night:
 		# Birds on the wire, by day.
 		s += '<path d="M%s %.1f Q%.1f %.1f %s %.1f" stroke="#3A3A42" stroke-width="1.6" fill="none"/>' % [
-			x, y + h * 0.3, x + w * 0.5, y + h * 0.35, x + w, y + h * 0.29]
+			x, y + h * 0.145, x + w * 0.5, y + h * 0.195, x + w, y + h * 0.135]
 		for i in 3:
 			var bx := x + w * (0.22 + i * 0.22)
-			var by := y + h * (0.325 - i * 0.004)
+			var by := y + h * (0.172 - i * 0.004)
 			s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#4A4A55"/>' % [bx, by - 3.0, w * 0.022, w * 0.016]
 			s += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#4A4A55"/>' % [bx + w * 0.018, by - 5.5, w * 0.012]
+	return s
+
+
+# One of their windows, seen across the lane: its casing, a dark pane by day and a warm room tonight.
+static func _view_pane(x: float, y: float, w: float, h: float, night: bool) -> String:
+	var s := '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#E8E2D4" stroke="#C2B8A6" stroke-width="2"/>' % [
+		x - 3.0, y - 3.0, w + 6.0, h + 6.0]
+	if night:
+		s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#FFCE70"/>' % [x, y, w, h]
+		s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#FFE7B4"/>' % [x + w * 0.2, y, w * 0.6, h * 0.6]
+		s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#B5692A" opacity="0.5"/>' % [x, y, w * 0.26, h]
+	else:
+		s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#4E6B7A"/>' % [x, y, w, h]
+		s += '<path d="M%.1f %.1f l%.1f 0 l-%.1f %.1f l-%.1f 0 z" fill="#FFFFFF" opacity="0.2"/>' % [
+			x + w * 0.45, y, w * 0.3, w * 0.35, h, w * 0.3]
+	s += '<path d="M%.1f %.1f v%.1f M%.1f %.1f h%.1f" stroke="#E8E2D4" stroke-width="2"/>' % [
+		x + w * 0.5, y, h, x, y + h * 0.45, w]
+	return s
+
+
+# One of their back doors: a painted door with its glass, a knob and a step, standing on the gallery or in the yard.
+static func _view_door(x: float, y: float, w: float, h: float, night: bool) -> String:
+	var s := '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#E8E2D4" stroke="#C2B8A6" stroke-width="2"/>' % [
+		x - 3.0, y - 3.0, w + 6.0, h + 6.0]
+	s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="%s"/>' % [x, y, w, h, "#2E4A3A" if night else "#43684F"]
+	s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="%s"/>' % [
+		x + w * 0.16, y + h * 0.08, w * 0.68, h * 0.4, "#FFD98A" if night else "#5E7F8C"]
+	s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="none" stroke="%s" stroke-width="1.5" opacity="0.6"/>' % [
+		x + w * 0.16, y + h * 0.56, w * 0.68, h * 0.34, "#20362A"]
+	s += '<circle cx="%.1f" cy="%.1f" r="2" fill="#C9A227"/>' % [x + w * 0.84, y + h * 0.54]
 	return s
 
 
