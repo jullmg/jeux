@@ -161,7 +161,8 @@ func _build() -> void:
 	if tex.has("wings"):
 		_part(_body, tex.wings, _rig.wings_pivot, Vector2(0, (_rig.shoulder_y as float) + 10.0))
 	if tex.has("tail"):
-		_part(_body, tex.tail, _rig.tail_pivot, Vector2(16.0 * (_rig.sx as float), -(_rig.leg_len as float) + 10.0))
+		# Its root sits a little behind her hip, so the tail trails clear of her body instead of hiding behind it.
+		_part(_body, tex.tail, _rig.tail_pivot, Vector2(-14.0 * (_rig.sx as float), -(_rig.leg_len as float) + 10.0))
 	_hair_back = _part(_body, tex.hair_back, _rig.head_pivot, neck)
 	_hair_back.scale = Vector2.ONE * (_rig.head_scale as float)
 	_leg_back = _part(_body, tex.thigh, _rig.leg_pivot, Vector2(_rig.leg_x, -leg), BACK_TINT)

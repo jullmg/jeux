@@ -13,7 +13,9 @@ const CAPE_PIVOT := Vector2(120, 14)
 const WINGS_CANVAS := Vector2(260, 200)
 const WINGS_PIVOT := Vector2(130, 46)
 const TAIL_CANVAS := Vector2(170, 160)
-const TAIL_PIVOT := Vector2(26, 44)
+## The root of the tail, at her hip. On the right of the canvas, because the shapes are drawn curling to the
+## right and then mirrored (see `tail`).
+const TAIL_PIVOT := Vector2(144, 44)
 
 ## Every costume: `name` is what the wardrobe shows. The clothing keys are ordinary `CharacterLook` fields; the rest are the
 ## extra pieces. `keep_hair` leaves her own hair showing under the headwear (a hood hides it by itself).
@@ -346,8 +348,19 @@ static func wings(kind: String) -> String:
 	return s
 
 
-## A tail at her hip, drawn behind her. Canvas TAIL_CANVAS, its root at TAIL_PIVOT (it curls away to the right).
+## A tail at her hip, drawn behind her. Canvas TAIL_CANVAS, its root at TAIL_PIVOT.
+## The whole body is flipped by `facing`, so a tail curling to the RIGHT of its root came out in front of her as
+## soon as she walked to the right (Julien saw it on the cat and the dinosaur). The shapes below are still drawn
+## curling right — that is how they read — and the whole thing is mirrored here, so the tail always trails behind.
 static func tail(kind: String, color: String) -> String:
+	var shape := _tail_shape(kind, color)
+	if shape.is_empty():
+		return ""
+	return '<g transform="translate(%s 0) scale(-1 1)">%s</g>' % [TAIL_CANVAS.x, shape]
+
+
+# The tail itself, curling to the right of (26, 44); `tail` mirrors it.
+static func _tail_shape(kind: String, color: String) -> String:
 	match kind:
 		"cat":
 			return ('<path d="M22 44 Q86 54 110 20 Q130 -8 118 -40" stroke="%s" stroke-width="22" fill="none" stroke-linecap="round"/>' % color

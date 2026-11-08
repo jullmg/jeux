@@ -499,8 +499,10 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
      (`Wardrobe.costumes_only`, set from `Quests.active("halloween")`): one tab, "Au hasard" picks a costume and
      "Comme d'habitude" becomes "Sans déguisement". A costume is one
      `look.costume` id: `characters/costume_art.gd` (`CostumeArt.ALL`, 22 of them) dresses a *copy* of her look (clothes,
-     colours, headwear through `CharacterArt._hat()`) and adds its own pieces — cape, wings, tail (behind her) and face paint
-     (over her eyes). **A new costume = one line in `CostumeArt.ALL`**; new patterns ("bones", "bandages") live in `_top()`.
+     colours, headwear through `CharacterArt._hat()`) and adds its own pieces — cape, wings, tail and face paint
+     (over her eyes). A **tail always trails behind her**: the whole body is flipped by `facing`, so the shapes are
+     drawn curling right in `CostumeArt._tail_shape` and `CostumeArt.tail` mirrors the lot (`TAIL_PIVOT` on the right
+     of the canvas), its root set a little behind her hip in `Character._apply_look`. **A new costume = one line in `CostumeArt.ALL`**; new patterns ("bones", "bandages") live in `_top()`.
      `tools/costumes.tscn --page=0|1` is the design sheet. A costume's hat and its face paint share one space (the
      head's: forehead y 96, eyes (94, 130) and (149, 130), nose tip 152, mouth 170, chin 196), and the hat is drawn
      over the hair and the face — which is how the ghost's sheet, the robot's box and the astronaut's bubble really
