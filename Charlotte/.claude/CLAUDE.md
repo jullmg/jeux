@@ -525,7 +525,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
      `tools/halloween_props.tscn` is the design sheet of all of them
      (`Godot --path . --screen 1 res://tools/halloween_props.tscn -- --screenshot=/path/p.png`).
      The other children never go round alone (Julien): they walk in **little groups of two to five**
-     (`HalloweenNight._trick_or_treaters`, `CHILDREN_OUT` 16 children in all), each group **one grown-up, sometimes
+     (`HalloweenNight._trick_or_treaters`, `CHILDREN_OUT` 16 children at most, fewer on a short street), each group **one grown-up, sometimes
      two**, walking behind the children at the same pace and the same way so the troop stays a troop; the children
      are in costume, each with a light of their own, and
      **every one of them carries a bag** — as does Charlotte (`world/candy_bag.gd`, `CandyBag`: it hangs from the hand
@@ -541,6 +541,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
      lanes are closed that night** (Julien: far too dark for a little girl to venture in): their mouths stay unlit, and a
      click or ↑ there only gets a line from her (`StreetScene.DARK_LANE`), so the evening happens on the four streets.
      **Her kitchen's back door is shut the same way** (`house.gd _build_doors`), or she slipped out to the lane
+     **The two dépanneurs are shut that evening too** (Julien): their doors answer with `StreetScene.SHOP_SHUT`
+     through `StreetScene._shop_shut()`, used by `dandurand.gd` (Xin-Xin) and `holt.gd` (Oh Bon!).
      through her own yard.
   3. **Rentrer**: the counting is Maman's, and the game says so three times over — the notebook's hint names her and the
      kitchen, the notice when the bag fills says to go and show her, a "!" sits over Charlotte's own front door on 6e

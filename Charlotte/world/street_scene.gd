@@ -775,6 +775,22 @@ const DARK_LANE := ["Ayoye, c'est ben trop noir là-dedans !\nJe reste sur la ru
 	"Chu pas game d'aller dans la ruelle\nquand il fait noir de même !",
 	"Non non non, la ruelle le soir,\nc'est pas une bonne idée !"]
 
+## What she says at a dépanneur's door on Halloween night: they shut early that evening (Julien).
+const SHOP_SHUT := ["C'est fermé ! Le dépanneur ferme de bonne heure\nle soir de l'Halloween.",
+	"Y'a personne pantoute, pis les lumières sont éteintes.\nC'est fermé à soir !",
+	"Fermé ! Ben tant pis,\nj'ai déjà plein de bonbons."]
+
+
+## True when the dépanneur's door is not to be opened: on Halloween night it is shut, and she says so.
+func _shop_shut() -> bool:
+	if not Halloween.night():
+		return false
+	_charlotte.express("surprised", 2.2)
+	Sfx.play("squeak", _charlotte.position)
+	Bubble.say(self, _charlotte.position + Vector2(0, -210.0), SHOP_SHUT[randi() % SHOP_SHUT.size()], 3.0)
+	return true
+
+
 ## The houses that never hand out candy, whatever the street: her own, the shops, the school, the lane mouths.
 const NO_CANDY := ["duplex_charlotte", "depanneur", "depanneur_front", "ohbon", "ecole", "garages", "ruelle", "ruelle_verte"]
 

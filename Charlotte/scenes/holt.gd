@@ -83,6 +83,9 @@ func _build_doors() -> void:
 	var origin := _house_origin(layout.find("ohbon"))
 	var area := Rect2(origin + Vector2(134.0, 694.0) * HOUSE_SCALE, Vector2(74.0, 195.0) * HOUSE_SCALE)
 	add_child(DoorSpot.make(area, func():
+		# Shut on Halloween night: the dépanneurs close early that evening.
+		if _shop_shut():
+			return
 		_control.enabled = false
 		Transition.street_x = area.get_center().x
 		Sfx.play("bell")

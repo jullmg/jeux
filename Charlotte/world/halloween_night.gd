@@ -10,7 +10,8 @@ extends Node2D
 ## The houses that give also hang their decorations (`HalloweenArt`) and wait with a doorbell and a "!", while the dark
 ## ones are asleep. Other children walk past in little groups, each with a grown-up or two and a light of their own.
 
-## About how many children are out doing the rounds, shared between the little groups of `_trick_or_treaters`.
+## At most how many children are out doing the rounds, shared between the little groups of `_trick_or_treaters`.
+## A short street (Dandurand, Holt) gets fewer, or its troops stand on each other's toes.
 const CHILDREN_OUT := 16
 
 ## The night, as a multiply over the whole canvas: cool and deep, but everything keeps its shape.
@@ -326,14 +327,15 @@ func _trick_or_treaters(scene: Node2D, rng: RandomNumberGenerator) -> void:
 		if scene.get_child(i) is Passerby:
 			after = i
 	# Groups are made up first, so that the whole street still has about as many children out as before.
+	var span: float = maxf(scene._street_width - 400.0, 600.0)
+	var wanted := clampi(int(span / 300.0), 6, CHILDREN_OUT)
 	var groups: Array[Vector2i] = []
 	var children := 0
-	while children < CHILDREN_OUT:
+	while children < wanted:
 		var size := rng.randi_range(2, 5)
 		var grown := 1 if size <= 3 else rng.randi_range(1, 2)
 		groups.append(Vector2i(grown, size - grown))
 		children += size - grown
-	var span: float = maxf(scene._street_width - 400.0, 600.0)
 	for g in groups.size():
 		var way := 1 if rng.randf() < 0.5 else -1
 		# One pace and one direction for the whole troop, so it stays a troop all evening.
