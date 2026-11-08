@@ -521,7 +521,10 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
      "rail"). Each canvas is drawn with its feet on the bottom edge ("anchor": "foot"), or from the top for what hangs.
      `tools/halloween_props.tscn` is the design sheet of all of them
      (`Godot --path . --screen 1 res://tools/halloween_props.tscn -- --screenshot=/path/p.png`).
-     Sixteen other children go past in costumes, spread the length of the street, each with a light of their own, and
+     The other children never go round alone (Julien): they walk in **little groups of two to five**
+     (`HalloweenNight._trick_or_treaters`, `CHILDREN_OUT` 16 children in all), each group **one grown-up, sometimes
+     two**, walking behind the children at the same pace and the same way so the troop stays a troop; the children
+     are in costume, each with a light of their own, and
      **every one of them carries a bag** — as does Charlotte (`world/candy_bag.gd`, `CandyBag`: it hangs from the hand
      (`Character.hand_position()`, `hand_mode` "grip"), swings as they walk, and is a child node of the character so it
      follows them and is drawn over them). Eight sorts (`CandyBag.KINDS`, drawn by `HalloweenArt.bag_texture`, canvases

@@ -8,7 +8,10 @@ extends Node2D
 ## where it belongs: the moon and the stars, the street lamps with their cones on the sidewalk, the lit windows of the
 ## houses that hand out candy, the flame of their jack-o'-lanterns, the lanterns the children carry, and a low mist.
 ## The houses that give also hang their decorations (`HalloweenArt`) and wait with a doorbell and a "!", while the dark
-## ones are asleep. A few other children in costume walk past, each with a light of their own.
+## ones are asleep. Other children walk past in little groups, each with a grown-up or two and a light of their own.
+
+## About how many children are out doing the rounds, shared between the little groups of `_trick_or_treaters`.
+const CHILDREN_OUT := 16
 
 ## The night, as a multiply over the whole canvas: cool and deep, but everything keeps its shape.
 const NIGHT := Color(0.34, 0.38, 0.62)
@@ -312,7 +315,9 @@ func _spots(origin: Vector2, width: float, door_x: float) -> Dictionary:
 	return spots
 
 
-# A few other children doing the rounds, each in a costume of their own and a little lantern of their own.
+# The other children doing the rounds. Nobody goes alone on Halloween night (Julien): they walk in little groups
+# of two to five, each with one grown-up and sometimes two, everyone at the same pace and the same way, the
+# children ahead with their costume, their bag and their own little light, the parents walking behind them.
 func _trick_or_treaters(scene: Node2D, rng: RandomNumberGenerator) -> void:
 	# They walk among the grown-ups, not behind the street: slipped into the child order right after the other
 	# passersby, so the trees, lamps and poles still pass in front of them.
@@ -320,27 +325,41 @@ func _trick_or_treaters(scene: Node2D, rng: RandomNumberGenerator) -> void:
 	for i in scene.get_child_count():
 		if scene.get_child(i) is Passerby:
 			after = i
-	# A good crowd of them, spread the length of the street and often in twos, the way children go round.
-	var how_many := 16
+	# Groups are made up first, so that the whole street still has about as many children out as before.
+	var groups: Array[Vector2i] = []
+	var children := 0
+	while children < CHILDREN_OUT:
+		var size := rng.randi_range(2, 5)
+		var grown := 1 if size <= 3 else rng.randi_range(1, 2)
+		groups.append(Vector2i(grown, size - grown))
+		children += size - grown
 	var span: float = maxf(scene._street_width - 400.0, 600.0)
-	for i in how_many:
-		var kid := Passerby.new()
-		kid.look = CharacterLook.random(rng, "child")
-		kid.look.costume = CostumeArt.ORDER[rng.randi() % CostumeArt.ORDER.size()]
-		kid.walk_speed = rng.randf_range(150.0, 200.0)
-		var along := 200.0 + span * (float(i) + rng.randf_range(0.1, 0.9)) / float(how_many)
-		if i % 3 == 1:
-			along += rng.randf_range(44.0, 70.0)
-		kid.position = Vector2(along, StreetScene.NEIGHBOUR_Y)
-		kid.scale = Vector2.ONE * StreetScene.CHAR_SCALE * 0.94
-		kid.facing = 1 if rng.randf() < 0.5 else -1
-		kid.bounds = Vector2(-140.0, scene._street_width + 140.0)
-		scene.add_child(kid)
-		CandyBag.give(kid, CandyBag.KINDS[rng.randi() % CandyBag.KINDS.size()])
-		if after >= 0:
-			after += 1
-			scene.move_child(kid, after)
-		_lights.walkers.append(kid)
+	for g in groups.size():
+		var way := 1 if rng.randf() < 0.5 else -1
+		# One pace and one direction for the whole troop, so it stays a troop all evening.
+		var pace := rng.randf_range(120.0, 158.0)
+		var at := 200.0 + span * (float(g) + rng.randf_range(0.15, 0.85)) / float(groups.size())
+		for i in groups[g].x + groups[g].y:
+			var is_kid := i < groups[g].y
+			var who := Passerby.new()
+			who.look = CharacterLook.random(rng, "child" if is_kid else "adult")
+			if is_kid:
+				who.look.costume = CostumeArt.ORDER[rng.randi() % CostumeArt.ORDER.size()]
+			who.walk_speed = pace
+			who.position = Vector2(at, StreetScene.NEIGHBOUR_Y)
+			who.scale = Vector2.ONE * StreetScene.CHAR_SCALE * (0.94 if is_kid else 1.0)
+			who.facing = way
+			who.bounds = Vector2(-260.0, scene._street_width + 260.0)
+			scene.add_child(who)
+			if is_kid:
+				CandyBag.give(who, CandyBag.KINDS[rng.randi() % CandyBag.KINDS.size()])
+				# Only the children carry a light: the grown-ups walk in the glow of theirs.
+				_lights.walkers.append(who)
+			if after >= 0:
+				after += 1
+				scene.move_child(who, after)
+			# The next one of the troop a step behind, on the side they came from.
+			at -= float(way) * rng.randf_range(46.0, 82.0)
 
 
 # The moon over the roofs: a cream disc with its craters, under the night like everything else (the light pass adds
