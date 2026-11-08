@@ -22,6 +22,10 @@ func _ready() -> void:
 	rect.size = size
 	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(rect)
+	# No low sun on Halloween night: it sits on its own canvas layer, out of reach of the night's CanvasModulate, and
+	# the grade shader's night bloom turned its corona into a huge pale halo in the corner of the sky.
+	if Halloween.night():
+		return
 	_disc(SUN_POS, 460.0, [Color(1.0, 0.88, 0.6, 0.35), Color(1.0, 0.86, 0.6, 0.14), Color(1.0, 0.82, 0.55, 0.04), Color(1.0, 0.8, 0.55, 0.0)], [0.0, 0.3, 0.65, 1.0])
 	_disc(SUN_POS, 150.0, [Color(1.0, 0.95, 0.8, 0.8), Color(1.0, 0.92, 0.75, 0.25), Color(1.0, 0.9, 0.7, 0.0)], [0.0, 0.45, 1.0])
 	_disc(SUN_POS, 56.0, [Color(1.0, 0.98, 0.9, 1.0), Color(1.0, 0.96, 0.85, 1.0), Color(1.0, 0.95, 0.8, 0.0)], [0.0, 0.8, 1.0])

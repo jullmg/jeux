@@ -353,8 +353,9 @@ func _trick_or_treaters(scene: Node2D, rng: RandomNumberGenerator) -> void:
 			scene.add_child(who)
 			if is_kid:
 				CandyBag.give(who, CandyBag.KINDS[rng.randi() % CandyBag.KINDS.size()])
-				# Only the children carry a light: the grown-ups walk in the glow of theirs.
-				_lights.walkers.append(who)
+			# The children carry the light; the grown-ups walk close enough to catch its glow too, just
+			# dimmer, so a troop's parents don't vanish into the dark between houses.
+			_lights.walkers.append({"who": who, "k": 1.0 if is_kid else 0.4})
 			if after >= 0:
 				after += 1
 				scene.move_child(who, after)
@@ -526,8 +527,9 @@ class _Lights:
 	var pumpkins: Array[Vector2] = []
 	## Charlotte: her own little lantern lights the few steps around her.
 	var lantern: Node2D
-	## The other children out tonight: each carries a smaller light of their own.
-	var walkers: Array[Node2D] = []
+	## The other children out tonight, and the grown-ups walking with them: {"who": Node2D, "k": strength},
+	## a child's own lantern at full strength, a grown-up catching just its spill.
+	var walkers: Array[Dictionary] = []
 	var width := 2000.0
 	var ground_y := StreetScene.CURB_Y
 	var flicker := 0.0
@@ -572,9 +574,11 @@ class _Lights:
 			var flame := 0.86 + 0.14 * sin(flicker * 9.0 + at.x) + 0.06 * sin(flicker * 23.0 + at.y)
 			_glow(at, 52.0 * flame, Color(PUMPKIN_LIGHT, 0.6))
 			_glow(at, 120.0 * flame, Color(PUMPKIN_LIGHT, 0.12))
-		for who in walkers:
+		for entry: Dictionary in walkers:
+			var who: Node2D = entry.who
 			if is_instance_valid(who):
-				_glow(who.position + Vector2(0, -54.0), 90.0, Color(1.0, 0.82, 0.52, 0.22))
+				var k: float = entry.k
+				_glow(who.position + Vector2(0, -54.0), 70.0 + 20.0 * k, Color(1.0, 0.82, 0.52, 0.1 + 0.12 * k))
 		if is_instance_valid(lantern):
 			var hand: Vector2 = lantern.position + Vector2(0, -56.0)
 			var swing := 1.0 + 0.04 * sin(flicker * 5.0)

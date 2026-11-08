@@ -788,6 +788,10 @@ func _build_halloween() -> void:
 	for i in layout.size():
 		var art: String = layout[i]
 		if cross_streets.has(art) or NO_CANDY.has(art):
+			# Her own front door gets a "!" of its own once the bag is full, so she can see where to go home.
+			if art == "duplex_charlotte" and not is_nan(_door_x(art)):
+				add_child(QuestMark.make(Vector2(_door_x(art), HOUSE_BASE_Y - 262.0), func() -> bool:
+					return Halloween.night() and Halloween.step() == 3, 0.62))
 			continue
 		var x := _door_x(art)
 		if is_nan(x):
@@ -831,8 +835,9 @@ func _ring(key: String, gives: bool, door_x: float) -> void:
 		_control.enabled = true
 		if gives and Halloween.enough() and Halloween.step() == 2:
 			Halloween.set_step(3)
-			Notebook.announce("step", "Ton sac est plein ! Rentre à la maison.")
-			Bubble.say(self, _charlotte.position + Vector2(0, -210.0), "Mon sac est plein !\nJe rentre à la maison !", 3.0))
+			Notebook.announce("step", "Ton sac est plein ! Va le montrer à Maman.")
+			Bubble.say(self, _charlotte.position + Vector2(0, -210.0),
+				"Mon sac est plein !\nJe m'en vais montrer ma récolte à maman !", 3.6))
 
 
 # The candy she just got floats up over her head.

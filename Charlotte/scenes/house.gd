@@ -111,6 +111,21 @@ func _ready() -> void:
 	_build_doors()
 	_enter_area(BEDROOM if _charlotte.position.x >= BEDROOM.x else HALL)
 	_finish([[700.0, "plant"], [1900.0, "plant"], [2900.0, "plant"], [5400.0, "plushie"], [6250.0, "plant"]])
+	_mom_calls_for_the_candy()
+
+
+# Home from the rounds with a full bag: Maman calls out from the kitchen as soon as Charlotte comes in, so it is
+# plain that the counting happens with her and not on her own.
+func _mom_calls_for_the_candy() -> void:
+	if Halloween.step() != 3 or GameState.flags.get("halloween_counted", false):
+		return
+	var call := create_tween()
+	call.tween_interval(1.2)
+	call.tween_callback(func() -> void:
+		if not is_instance_valid(_mom):
+			return
+		_mom_routine.pause(4.0, _charlotte.position.x)
+		_say(_mom, "Chachoue ! Viens me montrer ta récolte,\nje suis dans la cuisine !", 380.0, 4.0))
 
 
 # Charlotte's own music at home (audio/music/maison-charlotte.mp3), else the generic house theme or the street's.
@@ -157,7 +172,10 @@ func _build_family() -> void:
 	_mom = _family_member(CharacterLook.mom(), KITCHEN_START + 300.0, -1)
 	_dad = _family_member(CharacterLook.dad(), 1720.0, -1)
 	_mom_routine = _routine(_mom, MOM_TASKS, _talk_to_mom, Vector2(0, -350), func() -> bool:
-		return Quests.available("milk") or Quests.available("menage") or Quests.available("amies") or Quests.active("milk") and Carry.has("milk"))
+		# Back from the rounds, it is Maman who counts the haul: the "!" says so.
+		return Halloween.step() == 3 and not GameState.flags.get("halloween_counted", false) \
+			or Quests.available("milk") or Quests.available("menage") or Quests.available("amies") \
+			or Quests.active("milk") and Carry.has("milk"))
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
 		return Quests.available("hamster") or Quests.available("plants"))
 

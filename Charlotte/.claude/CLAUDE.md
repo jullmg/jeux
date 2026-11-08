@@ -542,7 +542,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
      click or ↑ there only gets a line from her (`StreetScene.DARK_LANE`), so the evening happens on the four streets.
      **Her kitchen's back door is shut the same way** (`house.gd _build_doors`), or she slipped out to the lane
      through her own yard.
-  3. **Rentrer**: Maman counts the haul (`ui/candy_count.gd`, `CandyCount`: each kind with its drawing and the total), then bed.
+  3. **Rentrer**: the counting is Maman's, and the game says so three times over — the notebook's hint names her and the
+     kitchen, the notice when the bag fills says to go and show her, a "!" sits over Charlotte's own front door on 6e
+     and over Maman indoors, and Maman calls out from the kitchen the moment Charlotte comes in. Then Maman counts the
+     haul (`ui/candy_count.gd`, `CandyCount`: each kind drawn as a real little object — twisted wrapper, swirl lollipop,
+     bar half out of its wrapper, stick of gum sliding out of its paper, crimped bag of chips — and the total), then bed.
      Her own little lantern lights the few steps around her all evening, the back lanes go dark too
      (`HalloweenNight.darken`), the notebook counts her sweets, the street asks for a `halloween` music track if there is one,
      and the debug menu's "Effacer" wipes the whole evening.

@@ -22,7 +22,7 @@ const ENOUGH := 18
 const HINTS := {
 	1: "Va te déguiser ! Ouvre les tiroirs de ta commode, dans ta chambre.",
 	2: "Sonne aux portes allumées et décorées de la 6e, de la 5e, de Holt et de Dandurand. Les maisons éteintes dorment déjà !",
-	3: "Rentre à la maison avec tes bonbons, compte-les, et va te coucher.",
+	3: "Rentre chez toi, au 5672, et va montrer ta récolte à Maman dans la cuisine. Après, au lit !",
 }
 
 
