@@ -80,6 +80,10 @@ var lane_width := 0.0
 var lane_walker: Node2D
 var _scene: Node2D
 var _lights: _Lights
+## One per house that gives candy and has a window, a porch light or a pumpkin lit: its own additive glow,
+## slotted into the scene right where that house's own decorations are, so a character walking in front of
+## the house hides the glow exactly as she hides the pumpkin or the lit window behind her.
+var _deco_glows: Array[_DecoGlow] = []
 var _hangs: Array[Sprite2D] = []
 var _time := 0.0
 
@@ -169,6 +173,10 @@ func _process(delta: float) -> void:
 	if _lights:
 		_lights.flicker = _time
 		_lights.queue_redraw()
+	for deco in _deco_glows:
+		if is_instance_valid(deco):
+			deco.flicker = _time
+			deco.queue_redraw()
 
 
 # Every house: the ones that give light their windows and put their decorations out, the others stay dark.
@@ -189,6 +197,10 @@ func _dress_the_houses(scene: Node2D, rng: RandomNumberGenerator) -> void:
 		# still pass in front of the light instead of being covered by it.
 		var dark: Array[Dictionary] = []
 		var warm: Array[Dictionary] = []
+		# This house's own lit windows, kept local (not the shared `_lights` pass): their glow goes in this
+		# house's own `_DecoGlow`, slotted among its sprites, so a character walking in front of the house
+		# still hides the glow the way she already hides the window itself.
+		var window_glows: Array[Rect2] = []
 		for w: Dictionary in panes.get(art, []):
 			var r: Array = w.pane
 			var rect := Rect2(origin + Vector2(float(r[0]), float(r[1])) * s, Vector2(float(r[2]), float(r[3])) * s)
@@ -197,7 +209,7 @@ func _dress_the_houses(scene: Node2D, rng: RandomNumberGenerator) -> void:
 			var pane := {"rect": rect, "bar": bar, "trim": Color(str(w.get("trim", "#FFFFFF")))}
 			if house_gives and rect.position.y < StreetScene.HOUSE_BASE_Y - 40.0:
 				warm.append(pane)
-				_lights.windows.append(rect)
+				window_glows.append(rect)
 			else:
 				dark.append(pane)
 		var facade: Sprite2D = scene._house_sprites.get(i)
@@ -220,7 +232,8 @@ func _dress_the_houses(scene: Node2D, rng: RandomNumberGenerator) -> void:
 		var door_x: float = scene._door_x(art)
 		if is_nan(door_x):
 			door_x = origin.x + scene._tex(art).get_width() * s * 0.5
-		_lights.porches.append(Vector2(door_x, StreetScene.HOUSE_BASE_Y - 158.0))
+		var porch_glow := Vector2(door_x, StreetScene.HOUSE_BASE_Y - 158.0)
+		var pumpkin_glows: Array[Vector2] = []
 		var width: float = scene._tex(art).get_width() * s
 		var spots := _spots(origin, width, door_x)
 		# Three to five pieces, never two of a kind, each where it belongs.
@@ -273,7 +286,7 @@ func _dress_the_houses(scene: Node2D, rng: RandomNumberGenerator) -> void:
 				else:
 					add_child(sprite)
 				for g: Vector2 in piece.get("glow", []):
-					_lights.pumpkins.append(at + (sprite.offset + g) * k)
+					pumpkin_glows.append(at + (sprite.offset + g) * k)
 			if pass_yard and slot >= 0:
 				# Everything the house draws in front of its windows, laid back over the lit glass and the garden.
 				var over: Texture2D = scene.over_tex(art)
@@ -288,6 +301,23 @@ func _dress_the_houses(scene: Node2D, rng: RandomNumberGenerator) -> void:
 					scene.add_child(front)
 					scene.move_child(front, slot)
 					slot += 1
+		# This house's own glow — its windows, its porch light, its pumpkins' flames — goes in last, over all of
+		# its own sprites, but still slotted among them: a child walking in front of the house, added to the
+		# scene later than any of this, still draws over it and hides it, same as she hides the pumpkin itself.
+		if not (window_glows.is_empty() and pumpkin_glows.is_empty()):
+			var deco := _DecoGlow.new()
+			deco.windows = window_glows
+			deco.porch = porch_glow
+			deco.pumpkins = pumpkin_glows
+			var deco_glow := CanvasItemMaterial.new()
+			deco_glow.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+			deco.material = deco_glow
+			_deco_glows.append(deco)
+			if slot >= 0:
+				scene.add_child(deco)
+				scene.move_child(deco, slot)
+			else:
+				add_child(deco)
 
 
 # Where a house can put things. NOTHING GOES ON THE SIDEWALK: the garden is the strip of soil behind the fence, at
@@ -516,17 +546,17 @@ class _Bats:
 			]), Color(0.09, 0.07, 0.13))
 
 
-# Every light of the evening, drawn in one additive pass over the dark: the stars, the moon's halo, the lamps and
-# their cones, the windows, the porch lights, the pumpkins, the lanterns the children carry, and the mist.
+# Every light of the evening that is not tied to one house's own place in the scene, drawn in one additive pass
+# over the dark: the stars, the moon's halo, the street lamps and their cones, the lanterns the children carry,
+# and the mist. A house's own windows, porch light and pumpkin flames are NOT in here — they are each house's
+# own `_DecoGlow`, right where that house's other decorations are, or a character walking in front of the house
+# would still have its light shining in front of her instead of behind (`_dress_the_houses`).
 class _Lights:
 	extends Node2D
 	## x, y, size
 	var stars: Array[Vector3] = []
 	var moon := Vector2.INF
 	var lamps: Array[Vector2] = []
-	var windows: Array[Rect2] = []
-	var porches: Array[Vector2] = []
-	var pumpkins: Array[Vector2] = []
 	## Charlotte: her own little lantern lights the few steps around her.
 	var lantern: Node2D
 	## The other children out tonight, and the grown-ups walking with them: {"who": Node2D, "k": strength},
@@ -563,19 +593,6 @@ class _Lights:
 					Color(LAMP_LIGHT, 0.0), Color(LAMP_LIGHT, 0.0)]))
 			_glow(head, 62.0, Color(LAMP_LIGHT, 0.6))
 			_glow(foot, 110.0, Color(LAMP_LIGHT, 0.16))
-		# Lit windows: the warm pane, and its light spilling onto the brick.
-		for rect in windows:
-			_glow(rect.get_center(), rect.size.length() * 1.0, Color(WINDOW_LIGHT, 0.3))
-			_glow(rect.get_center() + Vector2(0, rect.size.y * 0.7), rect.size.length() * 1.5, Color(WINDOW_LIGHT, 0.09))
-		for at: Vector2 in porches:
-			var pulse := 1.0 + 0.03 * sin(flicker * 2.3 + at.x * 0.01)
-			_glow(at, 46.0 * pulse, Color(1.0, 0.8, 0.45, 0.5))
-			_glow(at + Vector2(0, 70.0), 78.0, Color(1.0, 0.8, 0.45, 0.12))
-		# Jack-o'-lanterns and candles: a flame never burns steady.
-		for at: Vector2 in pumpkins:
-			var flame := 0.86 + 0.14 * sin(flicker * 9.0 + at.x) + 0.06 * sin(flicker * 23.0 + at.y)
-			_glow(at, 52.0 * flame, Color(PUMPKIN_LIGHT, 0.6))
-			_glow(at, 120.0 * flame, Color(PUMPKIN_LIGHT, 0.12))
 		for entry: Dictionary in walkers:
 			var who: Node2D = entry.who
 			if is_instance_valid(who):
@@ -590,3 +607,33 @@ class _Lights:
 		for i in 7:
 			var mx := fmod(flicker * 5.0 + i * 420.0, width + 600.0) - 300.0
 			_glow(Vector2(mx, ground_y + 26.0), 190.0, Color(0.62, 0.70, 0.95, 0.055))
+
+
+# One house's own light, over its own decorations: its lit windows' spill, its porch light, its pumpkins' and
+# candles' flames. Slotted into the scene right after that house's sprites (`_dress_the_houses`), so it shares
+# their place in the painter's order — a passerby added to the scene later, and so drawn over it, hides this
+# glow exactly as she already hides the window or the pumpkin it comes from.
+class _DecoGlow:
+	extends Node2D
+	var windows: Array[Rect2] = []
+	var porch := Vector2.INF
+	var pumpkins: Array[Vector2] = []
+	var flicker := 0.0
+
+	func _glow(at: Vector2, radius: float, color: Color) -> void:
+		draw_texture_rect(HalloweenNight.glow_texture(), Rect2(at - Vector2(radius, radius),
+			Vector2(radius, radius) * 2.0), false, color)
+
+	func _draw() -> void:
+		for rect in windows:
+			_glow(rect.get_center(), rect.size.length() * 1.0, Color(WINDOW_LIGHT, 0.3))
+			_glow(rect.get_center() + Vector2(0, rect.size.y * 0.7), rect.size.length() * 1.5, Color(WINDOW_LIGHT, 0.09))
+		if porch != Vector2.INF:
+			var pulse := 1.0 + 0.03 * sin(flicker * 2.3 + porch.x * 0.01)
+			_glow(porch, 46.0 * pulse, Color(1.0, 0.8, 0.45, 0.5))
+			_glow(porch + Vector2(0, 70.0), 78.0, Color(1.0, 0.8, 0.45, 0.12))
+		# Jack-o'-lanterns and candles: a flame never burns steady.
+		for at: Vector2 in pumpkins:
+			var flame := 0.86 + 0.14 * sin(flicker * 9.0 + at.x) + 0.06 * sin(flicker * 23.0 + at.y)
+			_glow(at, 52.0 * flame, Color(PUMPKIN_LIGHT, 0.6))
+			_glow(at, 120.0 * flame, Color(PUMPKIN_LIGHT, 0.12))
