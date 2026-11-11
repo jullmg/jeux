@@ -369,6 +369,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `Godot --headless --path . --script res://tools/generate_houses.gd`
 - `art/logo.png` is cut out of `art/logo.jpg` by `tools/cutout_logo.gd` (same headless invocation).
 - `reference/` holds real-world reference photos, sorted (see `reference/LISEZMOI.md`): `personnages/`, `maison_charlotte/` (with `interieur/`), `coin_dandurand/`, `coin_holt/`, `ruelle/`, `rue/` (doors, stairs, curb gardens, example houses), `cartes/`, `logo/`. It is gitignored; new pictures go in the matching folder.
+- `reference/streetview/` (once `utils/streetview/capture.py` has run; see its README): Street View pictures of the four streets round the block, about every 10 m. **Start from its `INDEX.md`**: one table per street with each picture's civic number, position and file, Charlotte's side listed in the order the scene's `layout` runs (left to right), and `index.html` pins them on a map. Reference only, never shipped in the game.
 
 ## Interactions and scene changes
 
