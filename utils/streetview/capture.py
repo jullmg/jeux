@@ -28,6 +28,8 @@ SV_META = "https://maps.googleapis.com/maps/api/streetview/metadata"
 
 EARTH = 6371000.0
 SIZE = "640x640"  # the API's maximum
+PANO_RADIUS = 30  # metres: how far from a point on a walk we accept a panorama
+SAME_BUILDING = 4.0  # metres: two civic numbers this close share a facade
 FACADE_OFFSET = 14.0  # metres from the camera to the facade it looks at
 COMPASS = ["nord", "nord-est", "est", "sud-est", "sud", "sud-ouest", "ouest", "nord-ouest"]
 
@@ -200,8 +202,36 @@ class Capture:
 		self.shoot(pano, bearing(at, target), street, part(found, "street_number"), "address", "face",
 			found.get("formatted_address", query), bool(found.get("partial_match")))
 
+	def buildings(self, walk: dict, city: str) -> None:
+		"""Every building of a street between two civic numbers: each number is looked up and photographed from the
+		nearest panorama, the camera turned to its door. Numbers that don't exist (Google would invent a
+		position) and numbers on the same facade as the one before are skipped."""
+		low, high = walk["numbers"]
+		parity = {"even": 0, "pair": 0, "odd": 1, "impair": 1}.get(walk.get("parity", ""))
+		print(f"{walk['name']}")
+		kept: list[tuple[float, float]] = []
+		for number in range(low, high + 1):
+			if parity is not None and number % 2 != parity:
+				continue
+			found = self.google.locate(f"{number} {walk['street']}, {city}")
+			if not found or part(found, "street_number") != str(number) or slug(walk["street"]) not in slug(part(found, "route")):
+				continue
+			target = spot(found)
+			if any(distance(target, other) < SAME_BUILDING for other in kept):
+				continue
+			pano = self.google.panorama(target, 60)
+			if not pano:
+				print(f"  ! no Street View near {number}")
+				continue
+			kept.append(target)
+			at = (pano["location"]["lat"], pano["location"]["lng"])
+			self.shoot(pano, bearing(at, target), part(found, "route") or walk["street"], str(number), "range", "face",
+				found.get("formatted_address", ""), False, walk, 0)
+
 	def walk(self, walk: dict, city: str) -> None:
 		"""Every panorama along a street, looking at both sides (and down the street at its ends)."""
+		if "numbers" in walk:
+			return self.buildings(walk, city)
 		start, end = resolve(self.google, walk["from"], city), resolve(self.google, walk["to"], city)
 		step = float(walk.get("step", self.options.step))
 		length, along = distance(start, end), bearing(start, end)
@@ -210,7 +240,7 @@ class Capture:
 		print(f"{walk['name']}: {length:.0f} m, vers le {compass(along)}")
 		panos: list[dict] = []
 		for i in range(int(length / step) + 1):
-			pano = self.google.panorama(between(start, end, min(1.0, i * step / length)), max(step, 12))
+			pano = self.google.panorama(between(start, end, min(1.0, i * step / length)), max(step, PANO_RADIUS))
 			if pano and pano["pano_id"] not in [p["pano_id"] for p in panos]:
 				panos.append(pano)
 		if not panos:
@@ -222,23 +252,11 @@ class Capture:
 			for side in walk.get("sides", ["left", "right"]):
 				heading = sides[side] % 360
 				seen = self.google.address_at(offset(at, heading, FACADE_OFFSET))
-				if "numbers" in walk and not in_range(walk, seen):
-					continue
 				self.shoot(pano, heading, part(seen, "route") or walk["name"], part(seen, "street_number"),
 					"walk", side, (seen or {}).get("formatted_address", ""), True, walk, distance(start, at))
 		if walk.get("ends", True):
 			self.shoot(panos[0], along, walk["name"], "debut", "walk", "along", f"{walk['name']}, depuis {walk['from']}", False, walk)
 			self.shoot(panos[-1], (along + 180) % 360, walk["name"], "fin", "walk", "along", f"{walk['name']}, depuis {walk['to']}", False, walk, length)
-
-
-def in_range(walk: dict, seen: dict | None) -> bool:
-	"""Is the address the camera looks at on the range's street, between its two numbers, on the wanted side?"""
-	number = "".join(c for c in part(seen, "street_number").split("-")[0] if c.isdigit())
-	if not number or slug(walk["street"]) not in slug(part(seen, "route")):
-		return False
-	low, high = sorted(walk["numbers"])
-	parity = {"even": 0, "pair": 0, "odd": 1, "impair": 1}.get(walk.get("parity", ""), int(number) % 2)
-	return low <= int(number) <= high and int(number) % 2 == parity
 
 
 def range_walk(r: dict) -> dict:

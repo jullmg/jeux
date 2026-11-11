@@ -52,9 +52,10 @@ Every area goes into the same folder and the same index, one section per street 
   `[latitude, longitude]`.
   `game` names the game scene that street is, and `our_side` the side Charlotte's block is on.
 - `ranges`: every building of a street between two civic numbers, anywhere:
-  `{"street": "Rue Masson", "from": 2800, "to": 2990, "parity": "odd"}`. It walks the street between the two
-  addresses and keeps the pictures whose facade is on that street and within those numbers; `parity`
-  (`even` / `odd`) keeps one side, without it both. Takes `game`, `our_side`, `step` like a walk.
+  `{"street": "Rue Masson", "from": 2800, "to": 2990, "parity": "odd"}`. Each number is looked up and
+  photographed from the nearest panorama with the camera turned to its door. Numbers that don't exist and
+  numbers on the same facade as the one before are skipped. `parity` (`even` / `odd`) keeps one side of the
+  street. One geocoding call per number, so a long range costs a little more than a walk.
 - `addresses`: one picture of a given address, the camera turned toward its door.
 
 ## Good to know
