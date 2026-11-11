@@ -22,3 +22,4 @@ How to use it (for an AI agent or a person):
 - **close-ups**: with `--detail`, six sharper pictures of the same facade in `<street>/detail/`, named
   `…_r<row>c<column>.jpg` (row 0 = ground floor, row 1 = upper floors and cornice; columns left to right).
 - The other side of each street and the views down the street (for the cross-street vistas) follow in their own tables.
+- **To draw a building from these pictures in the game, follow `Charlotte/docs/drawing-from-streetview.md`.**

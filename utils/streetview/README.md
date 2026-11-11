@@ -78,5 +78,4 @@ Every area goes into the same folder and the same index, one section per street 
 
 ## Drawing the game from the pictures
 
-Ask the agent, for example: "Read `Charlotte/reference/streetview/INDEX.md`, look at the pictures of 6e Avenue
-on Charlotte's block and make `plex_05` in `tools/generate_houses.gd` match the real building."
+The agent's instructions are in `Charlotte/docs/drawing-from-streetview.md` (INDEX.md points to them). Ask, for example: "Read `Charlotte/docs/drawing-from-streetview.md`, then make 5680 6e Avenue match the real building."

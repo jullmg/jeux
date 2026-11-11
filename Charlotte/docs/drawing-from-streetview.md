@@ -1,0 +1,83 @@
+# Drawing buildings from the Street View pictures
+
+For an AI agent asked to make or improve a building (or its surroundings) in the game from
+`reference/streetview/`. Read `Charlotte/.claude/CLAUDE.md` too: its rules on seasons, random draws and the
+generator still apply. The pictures are private reference (Google's imagery): look at them, draw from them,
+never copy one into the game or commit it.
+
+## 1. Find the real building
+
+1. Open `reference/streetview/INDEX.md`, then the map named at the top of the street's section (`maps/*.png`).
+   It tells you where the building stands: which side of the street, how far from the corner, what is
+   beside it and across from it. North is up.
+2. Take its row: civic number, picture, camera position. "(approx.)" numbers can be one door off: check the
+   number on the door in the photo. For a range of numbers or a missing building, ask for it to be captured
+   (`utils/streetview/README.md`, `--street … --from … --to …`, `--detail` for close-ups of bricks, doors and
+   cornices).
+3. Which building of the game is it? On 6e Avenue the scene's `layout` (`scenes/main.gd`) runs left to right
+   from Rue Dandurand to Rue Holt, and civic numbers grow toward Holt (Charlotte's duplex `duplex_charlotte`
+   is 5672, the twins' `duplex_jumelles` 5716). Each entry in the generator may carry a `"number"`; the
+   other streets' scenes (`holt.gd`, `cinquieme.gd`, `dandurand.gd`) have their own `layout`. A generic
+   `plex_NN` is an invented building that the real one can replace. If the real building isn't in the
+   layout, say so and ask before changing the layout (widths shift everything after it).
+
+## 2. Look before drawing
+
+Open the main picture, then the close-ups if there are any. Write down, from the photo, not from habit:
+
+- Storeys, width against height, roof line (flat parapet, cornice, pediment), chimneys.
+- Brick: colours (several, mixed), mortar colour, any stone or painted base, soffits.
+- Windows: how many per floor, their x positions, style (hung, casement, arched), lintels and sills.
+- Door(s): position, style, surround, lamps, number plate, awning.
+- Balcony / gallery: slab, railing kind, posts, awning; the stair: straight, curved, landing, where it starts
+  and which way it goes down, its rail, its beam.
+- Fence and front garden, trees at the curb, lamp post, hydrant, poles, parked bikes: those belong to the
+  street scene, not to the facade.
+- What the photo can't tell you (the back, the lane, the inside): don't invent it as fact.
+
+## 3. Draw it
+
+Facades are **generated**, never hand-edited: `art/decor/*.svg` come from `tools/generate_houses.gd`.
+
+1. Find the entry (a dictionary in the generator's list: `duplex_charlotte`, `duplex_jumelles` are the best
+   models of an entry made from photos, with comments citing the reference). Edit it, or add one with the
+   data keys the others use (`bricks`, `mortar`, `windows`, `door_cx`, `balcony`, `stair`, `fence`, …).
+   The `DEFAULTS` constant lists every key. Something the generator can't draw yet (a new door style, a
+   railing, a cornice) is a new case in the generator, in the same style as its neighbours.
+2. Regenerate: `/Applications/Godot.app/Contents/MacOS/Godot --headless --path . --script res://tools/generate_houses.gd`
+   (after adding a `class_name` script run `--headless --path . --import` first). It writes every season,
+   the Halloween "over" layers, `windows.json` and `doors.json`.
+3. Put the building in its scene's `layout` if it isn't there, and keep the street's data in line
+   (`trees_after`, `lamps_after`, `hydrants_at`, `racks_at`, `squirrels_at` are indexes or fractions across
+   `layout`; inserting a house shifts them all).
+4. Surroundings seen in the photo that the street doesn't have yet (planted curb extension, tree pit, fence,
+   a stair into the sidewalk) go through the street scene's hooks (`_decorate_house`, `_build_sidewalk_props`,
+   `_build_extra_props`) or the shared builders; a feature that appears in many places becomes a generator
+   or scene option, not a one-off.
+
+Rules that bite:
+
+- **Same random draws in every season**, and new drawing code goes **last** in the generator's `_variant`,
+  so the other houses don't move.
+- Keep the game's look: procedural SVG, light from the upper left, leaves never balls, no photo textures.
+- Real brands and logos are allowed only as in the project's conventions (`art/brands/`), nothing from the pictures.
+- Transcribe numbers and plates exactly (5672, not 5670), in French where there is text.
+- Don't touch the other buildings, and don't break the real photographs already used (`reference/maison_charlotte`,
+  `coin_holt`, …): when two references disagree, keep the one the user chose and mention it.
+
+## 4. Check it
+
+Always `--screen 1` and `-- --no-save` (never overwrite the player's save).
+
+```
+Godot --screen 1 --path . --quit-after 2000 res://scenes/main.tscn -- --screenshot=/path/a.png --x=<x of the building> --wait=2 --no-save
+```
+
+Take it in every season (`--season=winter` …) and the night (`--halloween`), then **compare side by side
+with the Street View picture**: same number of windows, same door and stair side, same colours in the same
+light, same proportions. Fix and repeat until you can't tell what differs; an item you left out on purpose
+goes in the report. The user judges by eye and wants every detail as close to the pictures as possible.
+
+Finally: update `Charlotte/.claude/CLAUDE.md` for what changed (building, new generator option, new
+surrounding), commit one task at a time on `main` (never push unless asked), and list in your report the
+pictures used (file names from INDEX.md) so the user can check.
