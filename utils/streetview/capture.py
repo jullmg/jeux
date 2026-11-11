@@ -31,6 +31,9 @@ SV_META = "https://maps.googleapis.com/maps/api/streetview/metadata"
 EARTH = 6371000.0
 SIZE = "640x640"  # the API's maximum
 PANO_RADIUS = 30  # metres: how far from a point on a walk we accept a panorama
+BLOCK_MARGIN = 10.0  # metres from a crossing's centre line that a block's buildings start
+DETAIL_FOV = 30
+GOOGLE = "Google"  # copyright of the pictures taken by Google's own cars
 SAME_BUILDING = 4.0  # metres: two civic numbers this close share a facade
 FACADE_OFFSET = 14.0  # metres from the camera to the facade it looks at
 COMPASS = ["nord", "nord-est", "est", "sud-est", "sud", "sud-ouest", "ouest", "nord-ouest"]
@@ -56,6 +59,14 @@ def offset(a: tuple[float, float], heading: float, metres: float) -> tuple[float
 	la2 = math.asin(math.sin(la1) * math.cos(d) + math.cos(la1) * math.sin(d) * math.cos(h))
 	lo2 = lo1 + math.atan2(math.sin(h) * math.sin(d) * math.cos(la1), math.cos(d) - math.sin(la1) * math.sin(la2))
 	return (math.degrees(la2), math.degrees(lo2))
+
+
+def project(a: tuple[float, float], b: tuple[float, float], p: tuple[float, float]) -> tuple[float, float]:
+	"""Metres of p along the line a→b and to its right (negative = left). Flat maths, fine over a block."""
+	k = math.cos(math.radians(a[0])) * 111320.0
+	ax, ay, px, py = (b[1] - a[1]) * k, (b[0] - a[0]) * 111320.0, (p[1] - a[1]) * k, (p[0] - a[0]) * 111320.0
+	length = math.hypot(ax, ay) or 1.0
+	return ((px * ax + py * ay) / length, (px * ay - py * ax) / length)
 
 
 def between(a: tuple[float, float], b: tuple[float, float], t: float) -> tuple[float, float]:
@@ -107,11 +118,29 @@ class Google:
 			results = self._json("geocode", GEOCODE, where).get("results", [])
 		return results[0] if results else None
 
-	def panorama(self, point: tuple[float, float], radius: float) -> dict | None:
-		"""The nearest outdoor panorama: {pano_id, location, date}. Free of charge."""
+	def _pano_at(self, point: tuple[float, float], radius: float) -> dict | None:
 		data = self._json("metadata", SV_META, {
 			"location": f"{point[0]:.7f},{point[1]:.7f}", "radius": int(radius), "source": "outdoor"})
 		return data if data.get("status") == "OK" else None
+
+	def panorama(self, point: tuple[float, float], radius: float) -> dict | None:
+		"""The nearest panorama taken by Google's own car: {pano_id, location, date, copyright}. Free of charge.
+
+		Street View also serves pictures contributed by others (the city's SIRR pictures, users' photospheres), dark
+		and from a different camera: they are refused. When the nearest one is such a picture, the surroundings are
+		searched for the nearest Google one."""
+		first = self._pano_at(point, radius)
+		if first and GOOGLE in first.get("copyright", ""):
+			return first
+		found: dict[str, dict] = {}
+		for metres in (15, 30, 50):
+			for heading in range(0, 360, 45):
+				pano = self._pano_at(offset(point, heading, metres), 20)
+				if pano and GOOGLE in pano.get("copyright", ""):
+					found[pano["pano_id"]] = pano
+			if found:
+				break
+		return min(found.values(), key=lambda p: distance(point, (p["location"]["lat"], p["location"]["lng"])), default=None)
 
 	def picture(self, pano: str, heading: float, pitch: float, fov: float, to: Path) -> bool:
 		if to.exists():
@@ -171,17 +200,18 @@ class Capture:
 			return
 		details: list[str] = []
 		if self.options.detail and side != "along":
-			# Six close-ups across and up the facade, for the bricks, doors and cornices.
-			for row, pitch in enumerate((2.0, 26.0)):
-				for column, turn in enumerate((-28.0, 0.0, 28.0)):
+			# Six close-ups across and up the facade, for the bricks, doors and cornices. The API gives 640 px at most
+			# per picture, so detail comes from a narrow view: 30 degrees is three times the pixels per degree of the 90.
+			for row, pitch in enumerate((4.0, 26.0)):
+				for column, turn in enumerate((-14.0, 0.0, 14.0)):
 					close = Path(folder) / "detail" / f"{name}_r{row}c{column}.jpg"
-					if self.google.picture(pano["pano_id"], (heading + turn) % 360, pitch, 42, self.out / close):
+					if self.google.picture(pano["pano_id"], (heading + turn) % 360, pitch, DETAIL_FOV, self.out / close):
 						details.append(close.as_posix())
 		self.shots.append({
 			"file": file.as_posix(), "details": details, "street": street, "number": number,
 			"address": address or f"{number} {street}".strip(), "approx": approx, "mode": mode, "side": side,
 			"lat": round(at[0], 7), "lng": round(at[1], 7), "heading": round(heading, 1),
-			"looking": compass(heading), "pano": pano["pano_id"], "date": pano.get("date", ""),
+			"looking": compass(heading), "pano": pano["pano_id"], "date": pano.get("date", ""), "copyright": pano.get("copyright", ""),
 			# For whoever draws the game from these: which walk, how far along it, which scene, our block or not.
 			"walk": (walk or {}).get("name", ""), "along_m": round(along), "game": (walk or {}).get("game", ""),
 			"our_side": bool(walk) and side == walk.get("our_side"),
@@ -214,6 +244,11 @@ class Capture:
 		parity = {"even": 0, "pair": 0, "odd": 1, "impair": 1}.get(walk.get("parity", ""))
 		print(f"{walk['name']}")
 		kept: list[tuple[float, float]] = []
+		corners = None
+		if walk.get("between"):
+			# Only this block: from one cross street to the next, in that order (the game's left to right).
+			corners = [resolve(self.google, f"{walk['street']} & {cross}", city) for cross in walk["between"]]
+		found_at: list[tuple[int, dict, tuple[float, float], float, float]] = []
 		for number in range(low, high + 1):
 			if parity is not None and number % 2 != parity:
 				continue
@@ -221,6 +256,18 @@ class Capture:
 			if not found or part(found, "street_number") != str(number) or slug(walk["street"]) not in slug(part(found, "route")):
 				continue
 			target = spot(found)
+			along, right = 0.0, 0.0
+			if corners:
+				along, right = project(corners[0], corners[1], target)
+				# Inside the block, between the two crossings' curbs; the geocoder sometimes puts a number on the
+				# far side of a street or on the next block, so also keep to the facades of one side, close to the road.
+				if not BLOCK_MARGIN <= along <= distance(*corners) - BLOCK_MARGIN or not 8 <= abs(right) <= 32:
+					continue
+			found_at.append((number, found, target, along, right))
+		if corners and found_at:
+			side = sorted(f[4] for f in found_at)[len(found_at) // 2] > 0
+			found_at = [f for f in found_at if (f[4] > 0) == side]
+		for number, found, target, along, right in found_at:
 			if any(distance(target, other) < SAME_BUILDING for other in kept):
 				continue
 			pano = self.google.panorama(target, 60)
@@ -229,8 +276,9 @@ class Capture:
 				continue
 			kept.append(target)
 			at = (pano["location"]["lat"], pano["location"]["lng"])
-			self.shoot(pano, bearing(at, target), part(found, "route") or walk["street"], str(number), "range", "face",
-				found.get("formatted_address", ""), False, walk, 0, target)
+			self.shoot(pano, bearing(at, target), part(found, "route") or walk["street"], str(number), "range",
+				("right" if right > 0 else "left") if corners else "face",
+				found.get("formatted_address", ""), False, walk, max(along, 0), target)
 
 	def walk(self, walk: dict, city: str) -> None:
 		"""Every panorama along a street, looking at both sides (and down the street at its ends)."""
@@ -330,13 +378,14 @@ def main() -> None:
 	parser.add_argument("--from", dest="first", type=int, help="…its first civic number…")
 	parser.add_argument("--to", dest="last", type=int, help="…and its last")
 	parser.add_argument("--parity", choices=["even", "odd"], help="one side of the range only")
+	parser.add_argument("--between", nargs=2, metavar=("CROSS1", "CROSS2"), help="keep only the block between these two cross streets, in this order")
 	parser.add_argument("--city", help="the city (default: the one in places.json)")
 	parser.add_argument("--only", help="only the walks and addresses whose name contains this")
 	parser.add_argument("--step", type=float, default=10, help="metres between pictures along a walk")
 	parser.add_argument("--fov", type=float, default=90, help="field of view, degrees (120 at most)")
 	parser.add_argument("--pitch", type=float, default=12, help="camera tilt up, degrees")
 	parser.add_argument("--maps-only", action="store_true", help="redraw the maps, index and INDEX.md from index.json, no Google calls")
-	parser.add_argument("--detail", action="store_true", help="also six close-ups of each facade (7x the pictures)")
+	parser.add_argument("--detail", action="store_true", help="also six narrow-view close-ups of each facade, 3x the resolution (7x the pictures)")
 	options = parser.parse_args()
 
 	if options.maps_only:
@@ -349,6 +398,8 @@ def main() -> None:
 		if options.first is None or options.last is None:
 			parser.error("--street needs --from and --to")
 		one = {"street": options.street, "from": options.first, "to": options.last}
+		if options.between:
+			one["between"] = options.between
 		places = {"walks": [range_walk(one | ({"parity": options.parity} if options.parity else {}))]}
 	options.out.mkdir(parents=True, exist_ok=True)
 	google = Google(api_key(), options.out / "cache.json")

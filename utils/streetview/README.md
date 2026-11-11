@@ -60,10 +60,21 @@ Every area goes into the same folder and the same index, one section per street 
   `{"street": "Rue Masson", "from": 2800, "to": 2990, "parity": "odd"}`. Each number is looked up and
   photographed from the nearest panorama with the camera turned to its door. Numbers that don't exist and
   numbers on the same facade as the one before are skipped. `parity` (`even` / `odd`) keeps one side of the
-  street. One geocoding call per number, so a long range costs a little more than a walk.
+  street. `"between": ["Rue Dandurand", "Rue Holt"]` (or `--between Dandurand Holt`) keeps only that block and
+  orders the pictures along it in that order (the game's left to right), with a wide range of numbers
+  as a net. One geocoding call per number, so a long range costs a little more than a walk.
 - `addresses`: one picture of a given address, the camera turned toward its door.
 
 ## Good to know
+
+- **Resolution**: the Street View Static API caps every picture at 640×640 and has no `scale` option, so a sharper
+  picture means a narrower view, not a bigger file. The main picture (90°) is for context; `--detail` adds six
+  30° close-ups per building (three across, two up), three times the pixels per degree: bricks, number plates, door
+  and railing details are readable. Use `--detail` for anything that will be drawn. (Stitching Google's raw panorama
+  tiles would be sharper still but isn't an official API: not done.)
+- **Only Google's own pictures**: Street View also serves pictures from others (the city's SIRR pictures, users'
+  photospheres): darker, from another camera. The tool checks each panorama's copyright and refuses all but
+  "© Google"; it looks around the spot for a Google one instead.
 
 - The civic number of a walk's picture is the address Google finds nearest to the facade the camera looks
   at (14 m to the side of the car). It can be one door off, and at a corner it may be on the cross street;
