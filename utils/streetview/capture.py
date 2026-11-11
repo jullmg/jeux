@@ -19,6 +19,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+import maps
+
 HERE = Path(__file__).resolve().parent
 DEFAULT_OUT = HERE.parent.parent / "Charlotte" / "reference" / "streetview"
 
@@ -159,7 +161,8 @@ class Capture:
 		self.shots: list[dict] = []
 
 	def shoot(self, pano: dict, heading: float, street: str, number: str, mode: str, side: str,
-			address: str = "", approx: bool = False, walk: dict | None = None, along: float = 0.0) -> None:
+			address: str = "", approx: bool = False, walk: dict | None = None, along: float = 0.0,
+			target: tuple[float, float] | None = None) -> None:
 		at = (pano["location"]["lat"], pano["location"]["lng"])
 		folder = slug(street) or "divers"
 		name = f"{number or 'sn'}_{folder}_{side}_{pano['pano_id'][:8]}"
@@ -182,6 +185,7 @@ class Capture:
 			# For whoever draws the game from these: which walk, how far along it, which scene, our block or not.
 			"walk": (walk or {}).get("name", ""), "along_m": round(along), "game": (walk or {}).get("game", ""),
 			"our_side": bool(walk) and side == walk.get("our_side"),
+			**({"target_lat": round(target[0], 7), "target_lng": round(target[1], 7)} if target else {}),
 			"maps": "https://www.google.com/maps/@?api=1&map_action=pano&pano=%s&heading=%.0f" % (pano["pano_id"], heading),
 		})
 		print(f"  {file}  ({self.shots[-1]['address']}, vers le {compass(heading)}, {pano.get('date', '?')})")
@@ -200,7 +204,7 @@ class Capture:
 		at = (pano["location"]["lat"], pano["location"]["lng"])
 		street = part(found, "route") or query
 		self.shoot(pano, bearing(at, target), street, part(found, "street_number"), "address", "face",
-			found.get("formatted_address", query), bool(found.get("partial_match")))
+			found.get("formatted_address", query), bool(found.get("partial_match")), target=target)
 
 	def buildings(self, walk: dict, city: str) -> None:
 		"""Every building of a street between two civic numbers: each number is looked up and photographed from the
@@ -226,7 +230,7 @@ class Capture:
 			kept.append(target)
 			at = (pano["location"]["lat"], pano["location"]["lng"])
 			self.shoot(pano, bearing(at, target), part(found, "route") or walk["street"], str(number), "range", "face",
-				found.get("formatted_address", ""), False, walk, 0)
+				found.get("formatted_address", ""), False, walk, 0, target)
 
 	def walk(self, walk: dict, city: str) -> None:
 		"""Every panorama along a street, looking at both sides (and down the street at its ends)."""
@@ -253,7 +257,8 @@ class Capture:
 				heading = sides[side] % 360
 				seen = self.google.address_at(offset(at, heading, FACADE_OFFSET))
 				self.shoot(pano, heading, part(seen, "route") or walk["name"], part(seen, "street_number"),
-					"walk", side, (seen or {}).get("formatted_address", ""), True, walk, distance(start, at))
+					"walk", side, (seen or {}).get("formatted_address", ""), True, walk, distance(start, at),
+					offset(at, heading, FACADE_OFFSET))
 		if walk.get("ends", True):
 			self.shoot(panos[0], along, walk["name"], "debut", "walk", "along", f"{walk['name']}, depuis {walk['from']}", False, walk)
 			self.shoot(panos[-1], (along + 180) % 360, walk["name"], "fin", "walk", "along", f"{walk['name']}, depuis {walk['to']}", False, walk, length)
@@ -285,12 +290,14 @@ def write_index(out: Path, shots: list[dict]) -> None:
 	(out / "index.json").write_text(json.dumps(shots, ensure_ascii=False, indent="\t"))
 	page = (HERE / "map_template.html").read_text().replace("/*SHOTS*/[]", json.dumps(shots, ensure_ascii=False))
 	(out / "index.html").write_text(page)
-	(out / "INDEX.md").write_text(guide(shots))
+	(out / "INDEX.md").write_text(guide(shots, maps.make(shots, out, slug)))
 
 
-def guide(shots: list[dict]) -> str:
+def guide(shots: list[dict], maps_made: dict[str, str]) -> str:
 	"""INDEX.md: the same index written for an AI agent (or a person) who will draw the game from the pictures."""
 	lines = (HERE / "index_header.md").read_text().rstrip().splitlines() + [""]
+	if maps_made.get(""):
+		lines += [f"Map of everything: `{maps_made['']}` (look at it first).", ""]
 	groups: dict[tuple, list[dict]] = {}
 	for shot in shots:
 		groups.setdefault((shot["walk"], shot["side"]), []).append(shot)
@@ -300,6 +307,8 @@ def guide(shots: list[dict]) -> str:
 			walk = name
 			scene = f" (game scene: `{group[0]['game']}`)" if group[0]["game"] else ""
 			lines += [f"## {name or 'Adresses demandées'}{scene}", ""]
+			if maps_made.get(name or "Adresses demandées"):
+				lines += [f"Map: `{maps_made[name or 'Adresses demandées']}`: where each building stands in the street and its surroundings.", ""]
 		if name:
 			ours = ", **Charlotte's block: what the game shows, left to right on screen**" if group[0]["our_side"] else ""
 			what = "looking down the street from each end" if side == "along" else f"{side} side, camera facing {group[0]['looking']}"
@@ -326,9 +335,13 @@ def main() -> None:
 	parser.add_argument("--step", type=float, default=10, help="metres between pictures along a walk")
 	parser.add_argument("--fov", type=float, default=90, help="field of view, degrees (120 at most)")
 	parser.add_argument("--pitch", type=float, default=12, help="camera tilt up, degrees")
+	parser.add_argument("--maps-only", action="store_true", help="redraw the maps, index and INDEX.md from index.json, no Google calls")
 	parser.add_argument("--detail", action="store_true", help="also six close-ups of each facade (7x the pictures)")
 	options = parser.parse_args()
 
+	if options.maps_only:
+		write_index(options.out, json.loads((options.out / "index.json").read_text()))
+		return
 	places = json.loads(options.places.read_text())
 	city = options.city or places.get("city", "")
 	places["walks"] = places.get("walks", []) + [range_walk(r) for r in places.get("ranges", [])]

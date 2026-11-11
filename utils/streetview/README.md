@@ -4,7 +4,8 @@ Takes Street View pictures of the neighbourhood, to draw the Charlotte game from
 its civic number, its street and its pin on a map.
 
 It uses Google's official APIs (Street View Static, its metadata endpoint, Geocoding), not screenshots of the
-Google Maps site. Python 3.10+, standard library only.
+Google Maps site. Python 3.10+; Pillow only for the PNG maps. The map tiles come from OpenStreetMap (a few dozen requests,
+cached in `tiles/`).
 
 ## Setup, once
 
@@ -25,6 +26,7 @@ python3 utils/streetview/capture.py                    # everything in places.js
 python3 utils/streetview/capture.py --only "6e Avenue" # one street
 python3 utils/streetview/capture.py --street "Rue Masson" --from 2800 --to 2990 --parity odd  # another area, one side
 python3 utils/streetview/capture.py --street "Main Street" --from 10 --to 80 --city "Burlington, VT, USA"
+python3 utils/streetview/capture.py --maps-only          # redraw maps and index from index.json, no Google calls
 python3 utils/streetview/capture.py --detail           # plus six close-ups of each facade
 ```
 
@@ -39,7 +41,10 @@ Output, in `Charlotte/reference/streetview/` (gitignored, like the rest of `refe
   panorama id, the month Google took it, and a link that opens the same view in Google Maps;
 - `INDEX.md`: the same index written for an AI agent: one table per street, the pictures of Charlotte's
   block in the order the game shows them (left to right), the game scene they belong to, how to read it;
-- `index.html`: the map;
+- `maps/<street>.png`: a map per street or range for an AI agent (it can open a PNG, not `index.html`): OpenStreetMap
+  with a blue dot where each camera stood, a line to a red dot on the facade it looks at and its civic number;
+  `maps/tout.png` shows everything. Needs Pillow (`pip3 install pillow`), else the maps are skipped;
+- `index.html`: the interactive map for a person;
 - `cache.json`: Google's answers, so a second run costs nothing for what is already known.
 
 Every area goes into the same folder and the same index, one section per street or range. Pictures already on disk are not downloaded again. A run with `--only` adds to the index instead of replacing it.

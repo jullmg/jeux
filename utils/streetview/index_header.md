@@ -5,6 +5,10 @@ Private reference only: never copy a picture into the game or commit it.
 
 How to use it (for an AI agent or a person):
 
+- **Start with the map** named at the top of each section (`maps/*.png`, a picture you can open): street names, the
+  buildings' footprints with their civic number ranges, a blue dot where each camera stood, a line to the red dot
+  on the facade it looks at, with that facade's number. North is up. Use it to place a building in its street
+  (corner, which side, neighbours, trees and parking lanes round it) before opening its photo.
 - Each row is one picture. Paths are relative to this folder (`Charlotte/reference/streetview/`). Open the JPEG to
   look at it; `index.json` holds the same rows as data (plus `pano`, `heading`, a `maps` link and the `details` files).
 - One section per street walked, in the direction the game scrolls. **m along** is the distance from the walk's
