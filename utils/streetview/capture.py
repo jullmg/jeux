@@ -222,11 +222,30 @@ class Capture:
 			for side in walk.get("sides", ["left", "right"]):
 				heading = sides[side] % 360
 				seen = self.google.address_at(offset(at, heading, FACADE_OFFSET))
+				if "numbers" in walk and not in_range(walk, seen):
+					continue
 				self.shoot(pano, heading, part(seen, "route") or walk["name"], part(seen, "street_number"),
 					"walk", side, (seen or {}).get("formatted_address", ""), True, walk, distance(start, at))
 		if walk.get("ends", True):
 			self.shoot(panos[0], along, walk["name"], "debut", "walk", "along", f"{walk['name']}, depuis {walk['from']}", False, walk)
 			self.shoot(panos[-1], (along + 180) % 360, walk["name"], "fin", "walk", "along", f"{walk['name']}, depuis {walk['to']}", False, walk, length)
+
+
+def in_range(walk: dict, seen: dict | None) -> bool:
+	"""Is the address the camera looks at on the range's street, between its two numbers, on the wanted side?"""
+	number = "".join(c for c in part(seen, "street_number").split("-")[0] if c.isdigit())
+	if not number or slug(walk["street"]) not in slug(part(seen, "route")):
+		return False
+	low, high = sorted(walk["numbers"])
+	parity = {"even": 0, "pair": 0, "odd": 1, "impair": 1}.get(walk.get("parity", ""), int(number) % 2)
+	return low <= int(number) <= high and int(number) % 2 == parity
+
+
+def range_walk(r: dict) -> dict:
+	"""{"street", "from", "to"[, "parity"]}: every building of a street between two civic numbers, as a walk."""
+	side = {"even": " (pairs)", "pair": " (pairs)", "odd": " (impairs)", "impair": " (impairs)"}.get(r.get("parity", ""), "")
+	return {"ends": False, **r, "name": r.get("name", f"{r['street']} {r['from']}–{r['to']}{side}"),
+		"from": f"{r['from']} {r['street']}", "to": f"{r['to']} {r['street']}", "numbers": [int(r["from"]), int(r["to"])]}
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -280,6 +299,11 @@ def main() -> None:
 	parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
 	parser.add_argument("--places", type=Path, default=HERE / "places.json", help="what to photograph")
 	parser.add_argument("--out", type=Path, default=DEFAULT_OUT, help=f"output folder (default: {DEFAULT_OUT})")
+	parser.add_argument("--street", help="one range, without editing places.json: the street…")
+	parser.add_argument("--from", dest="first", type=int, help="…its first civic number…")
+	parser.add_argument("--to", dest="last", type=int, help="…and its last")
+	parser.add_argument("--parity", choices=["even", "odd"], help="one side of the range only")
+	parser.add_argument("--city", help="the city (default: the one in places.json)")
 	parser.add_argument("--only", help="only the walks and addresses whose name contains this")
 	parser.add_argument("--step", type=float, default=10, help="metres between pictures along a walk")
 	parser.add_argument("--fov", type=float, default=90, help="field of view, degrees (120 at most)")
@@ -288,7 +312,13 @@ def main() -> None:
 	options = parser.parse_args()
 
 	places = json.loads(options.places.read_text())
-	city = places.get("city", "")
+	city = options.city or places.get("city", "")
+	places["walks"] = places.get("walks", []) + [range_walk(r) for r in places.get("ranges", [])]
+	if options.street:
+		if options.first is None or options.last is None:
+			parser.error("--street needs --from and --to")
+		one = {"street": options.street, "from": options.first, "to": options.last}
+		places = {"walks": [range_walk(one | ({"parity": options.parity} if options.parity else {}))]}
 	options.out.mkdir(parents=True, exist_ok=True)
 	google = Google(api_key(), options.out / "cache.json")
 	capture = Capture(google, options.out, options)

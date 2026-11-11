@@ -23,6 +23,8 @@ Google Maps site. Python 3.10+, standard library only.
 ```sh
 python3 utils/streetview/capture.py                    # everything in places.json
 python3 utils/streetview/capture.py --only "6e Avenue" # one street
+python3 utils/streetview/capture.py --street "Rue Masson" --from 2800 --to 2990 --parity odd  # another area, one side
+python3 utils/streetview/capture.py --street "Main Street" --from 10 --to 80 --city "Burlington, VT, USA"
 python3 utils/streetview/capture.py --detail           # plus six close-ups of each facade
 ```
 
@@ -40,7 +42,7 @@ Output, in `Charlotte/reference/streetview/` (gitignored, like the rest of `refe
 - `index.html`: the map;
 - `cache.json`: Google's answers, so a second run costs nothing for what is already known.
 
-Pictures already on disk are not downloaded again. A run with `--only` adds to the index instead of replacing it.
+Every area goes into the same folder and the same index, one section per street or range. Pictures already on disk are not downloaded again. A run with `--only` adds to the index instead of replacing it.
 
 ## What to photograph: `places.json`
 
@@ -49,6 +51,10 @@ Pictures already on disk are not downloaded again. A run with `--only` adds to t
   down the street from each end (`"ends": false` to skip). `from` and `to` are intersections ("A & B") or
   `[latitude, longitude]`.
   `game` names the game scene that street is, and `our_side` the side Charlotte's block is on.
+- `ranges`: every building of a street between two civic numbers, anywhere:
+  `{"street": "Rue Masson", "from": 2800, "to": 2990, "parity": "odd"}`. It walks the street between the two
+  addresses and keeps the pictures whose facade is on that street and within those numbers; `parity`
+  (`even` / `odd`) keeps one side, without it both. Takes `game`, `our_side`, `step` like a walk.
 - `addresses`: one picture of a given address, the camera turned toward its door.
 
 ## Good to know
