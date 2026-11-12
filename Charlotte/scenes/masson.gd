@@ -14,7 +14,8 @@ extends StreetScene
 ## Each side of each block: its layout left to right (the corners across the avenues at both ends), its two avenues (the
 ## gap in the layout, the avenue's name, its width), its trees (shifted clear of the signs) and lamps, where the moon rises
 ## on Halloween night (a fraction across `layout`, over a low building), and the shop signs:
-## {art: [[x on the facade, text, text colour, outline colour, font size], …]} (laid on the sign band, 302 above its foot).
+## {art: [[x on the facade, text, text colour, outline colour, font size], …]} (laid on the sign band, 302 above its foot),
+## `logos` = real logos from art/brands/ on those bands: {art: [[x, file, height], …]}.
 const BLOCKS := {
 	"5e_6e_impair": {
 		"layout": ["masson_2833_cote", "rue_5e", "masson_presbytere", "masson_eglise", "rue_6e", "masson_2901_cote"],
@@ -29,11 +30,12 @@ const BLOCKS := {
 		"trees_after": [3, 6], "tree_shift": {3: 20.0, 6: -110.0}, "lamps_after": [2, 6], "hydrants_at": [6.5], "racks_at": [2.4],
 		"squirrels_at": [5.5], "moon_at": 2.5,
 		"signs": {
-			"masson_2888": [[550.0, "BANQUE NATIONALE", "#C8202A", "#FFFFFF", 14]],
+			"masson_2888": [[600.0, "BANQUE NATIONALE", "#1E1E20", "#E9E5DE", 14]],
 			"masson_2870": [[295.0, "L'OEUFRIER", "#FFFFFF", "#1E1E20", 13]],
 			"masson_2846": [[225.0, "LE POKE STATION", "#FFFFFF", "#4A2E22", 11], [590.0, "FLEURISTE", "#F2E6C8", "#4A2E22", 11],
 				[1005.0, "TABAGIE & VAPESHOP", "#FFFFFF", "#1E1E20", 11], [1460.0, "SIMASSON", "#FFFFFF", "#4A2E22", 12]],
 		},
+		"logos": {"masson_2888": [[300.0, "banque_nationale_symbol.svg", 22.0]]},
 		"panels": {},
 	},
 	"7e_8e_impair": {
@@ -43,9 +45,9 @@ const BLOCKS := {
 		"trees_after": [2, 5], "tree_shift": {2: 30.0, 5: 40.0}, "lamps_after": [2, 6], "hydrants_at": [4.5], "racks_at": [5.4],
 		"squirrels_at": [4.4], "moon_at": 7.5,
 		"signs": {
-			"masson_3003": [[330.0, "PREMIÈRE MOISSON", "#FFFFFF", "#1A1A1A", 13], [700.0, "P", "#FFFFFF", "#1A1A1A", 20],
-				[1080.0, "BOULANGERIE", "#FFFFFF", "#1A1A1A", 13]],
+			"masson_3003": [[700.0, "P", "#FFFFFF", "#1A1A1A", 20], [1080.0, "BOULANGERIE", "#FFFFFF", "#1A1A1A", 13]],
 		},
+		"logos": {"masson_3003": [[330.0, "premiere_moisson_logo_white.svg", 11.0]]},
 		"panels": {},
 	},
 	"7e_8e_pair": {
@@ -57,8 +59,9 @@ const BLOCKS := {
 		"signs": {
 			"masson_3034": [[255.0, "LUNETTERIE MILOT", "#FFFFFF", "#1E1E20", 12], [725.0, "RAPOSO", "#4FB04F", "#FFFFFF", 15]],
 			"masson_3008": [[725.0, "TANDOORI MASSON", "#FFFFFF", "#C8202A", 13]],
-			"masson_3000": [[450.0, "COUCHE-TARD", "#C8202A", "#FFFFFF", 16]],
+			"masson_3000": [[480.0, "COUCHE-TARD", "#E41B12", "#FFFFFF", 16]],
 		},
+		"logos": {"masson_3000": [[250.0, "couche_tard_owl.svg", 26.0]]},
 		"panels": {},
 	},
 	"6e_7e_impair": {
@@ -80,12 +83,12 @@ const BLOCKS := {
 		"avenues": [["rue_7e", "7e Avenue", 540.0], ["rue_6e", "6e Avenue", 560.0]],
 		"trees_after": [2, 3, 4], "tree_shift": {2: -50.0, 3: 73.0}, "lamps_after": [2, 4], "hydrants_at": [3.6], "racks_at": [2.3], "squirrels_at": [3.2], "moon_at": 4.5,
 		"signs": {
-			"masson_2970": [[295.0, "Tim Hortons", "#C8202A", "#3A3A3C", 16]],
 			"masson_2930": [[235.0, "COIFFURE · SPA URBAIN", "#FFFFFF", "#2B2B2E", 10], [590.0, "MÈDZ", "#FFFFFF", "#1E1E20", 12],
 				[935.0, "LA PUCE · BIJOUTERIE", "#F2C230", "#141416", 11], [1535.0, "COMPTABLES", "#2B2B2E", "#E9E5DE", 10]],
-			"masson_2908": [[465.0, "QUINCAILLERIE BÉLANGER", "#FFFFFF", "#3A3E42", 13], [1185.0, "RONA", "#FFFFFF", "#1F4E9A", 16]],
-			"masson_2902": [[945.0, "fido", "#F2C230", "#2B2B2E", 13]],
+			"masson_2908": [[465.0, "QUINCAILLERIE BÉLANGER", "#FFFFFF", "#3A3E42", 13]],
 		},
+		"logos": {"masson_2970": [[295.0, "tim_hortons_logo.svg", 28.0]], "masson_2908": [[1185.0, "rona_logo_white.svg", 17.0]],
+			"masson_2902": [[945.0, "fido_logo.svg", 18.0]]},
 		"panels": {},
 	},
 }
@@ -175,6 +178,15 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 	for s: Array in _data().signs.get(art, []):
 		var at := house.position + Vector2(float(s[0]), tex_h - 302.0) * HOUSE_SCALE
 		_label(s[1], at, Vector2(220, 22), int(s[4]), Color(s[2]), Color(s[3]))
+	# Real logos (art/brands/, SOURCES.md): [x on the facade, file, height in the world], centred on the sign band.
+	for l: Array in _data().get("logos", {}).get(art, []):
+		var tex: Texture2D = load("res://art/brands/%s" % l[1])
+		var logo := Sprite2D.new()
+		logo.texture = tex
+		logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		logo.scale = Vector2.ONE * float(l[2]) / tex.get_height()
+		logo.position = house.position + Vector2(float(l[0]), tex_h - 302.0) * HOUSE_SCALE
+		add_child(logo)
 	for p: Array in _data().panels.get(art, []):
 		var at := house.position + Vector2(float(p[0]), float(p[1])) * HOUSE_SCALE
 		var board := ColorRect.new()

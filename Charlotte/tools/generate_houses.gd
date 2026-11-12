@@ -558,7 +558,7 @@ const HOUSES := [
 		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[90.0, 110.0], [320.0, 110.0], [600.0, 110.0], [860.0, 110.0]],
 		"projecting": [[560.0, 760.0]], "pier": "#2E3236",
 		"shops": [{"x0": 30.0, "x1": 520.0, "sign": "#2B2B2E", "frame": "#2E3236", "door": 440.0},
-			{"x0": 820.0, "x1": 1070.0, "sign": "#2B2B2E", "frame": "#2E3236", "door": 945.0}],
+			{"x0": 820.0, "x1": 1070.0, "sign": "#FFE600", "frame": "#2E3236", "door": 945.0}],
 		"res_doors": [660.0], "basement": [],
 	},
 	# Across 6e from 2902: the corner of the next block, its side.

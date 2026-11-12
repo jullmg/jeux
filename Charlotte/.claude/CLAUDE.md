@@ -92,7 +92,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   avenue on the left), each a `.tscn` (`masson_6e_7e_impair.tscn`, `masson_6e_7e_pair.tscn`), `street_key`
   "masson_<block>_<side>". Its data is `BLOCKS` ("<block>_<side>": layout with the corner across each avenue at both ends,
   `avenues` [gap, name, width], trees with `tree_shift` clear of the signs, lamps…, `moon_at`, `signs` = shop names as labels
-  on the sign band (302 above the facade's foot), `panels` = small boards on a wall): **a new block = one BLOCKS entry per
+  on the sign band (302 above the facade's foot), `logos` = the chains' real logos from `art/brands/` on their bands (Tim Hortons,
+  RONA, Fido, Couche-Tard, Première Moisson, Banque Nationale; SVGs imported at `svg/scale=4.0`), `panels` = small boards on a wall): **a new block = one BLOCKS entry per
   side, its facades in the generator, two .tscn files, and a line each in PlaceLabel, DebugMenu and `TownMap._here`.** The
   crosswalk over Masson at either corner goes to the other side of the block (`_add_across`, keys
   "masson_<block>_<side>_from_<gap>"); the avenues aren't turned into yet, and Masson isn't reached from her block yet (only
