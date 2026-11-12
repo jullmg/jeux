@@ -5843,24 +5843,24 @@ func _plaza() -> void:
 # (`band`, its colour) on the ground floor, trees and red shrubs on the lawn.
 func _setback() -> void:
 	var g := ground_y
-	var lawn_top := g - 150.0
+	var lawn_top := g - 230.0
 	var white: bool = k.get("white", false)
 	var floors := 2 if white else 3
-	var fh := 170.0
+	var fh := 135.0
 	var top := lawn_top - floors * fh - 20.0
 	var x0 := X0
-	var x1 := X1 - 40.0
+	var x1 := X1 - 150.0
 	if white:
 		_rect(x0, top, x1 - x0, lawn_top - top, "#ECEAE4", _stroke("#B9B5AC", 1.5))
 		for f in floors:
 			var wy := top + 30.0 + f * fh
-			_rect(x0 + 20, wy, x1 - x0 - 40, 90, "#3A4048")
-			_rect(x0 + 24, wy + 4, x1 - x0 - 48, 82, "url(#glass)")
+			_rect(x0 + 20, wy, x1 - x0 - 40, 60, "#3A4048")
+			_rect(x0 + 24, wy + 4, x1 - x0 - 48, 52, "url(#glass)")
 			var mx := x0 + 80.0
 			while mx < x1 - 40.0:
-				_rect(mx, wy, 4, 90, "#3A4048")
+				_rect(mx, wy, 4, 60, "#3A4048")
 				mx += 90.0
-			_glass_shine(x0 + 24, wy + 4, x1 - x0 - 48, 82)
+			_glass_shine(x0 + 24, wy + 4, x1 - x0 - 48, 52)
 	else:
 		var keep1 := X1
 		X1 = x1
@@ -5868,18 +5868,18 @@ func _setback() -> void:
 		X1 = keep1
 		for f in floors:
 			var wx := x0 + 50.0
-			while wx < x1 - 100.0:
-				_rect(wx, top + 40.0 + f * fh, 90, 100, "#E8E4DA")
-				_rect(wx + 5, top + 45.0 + f * fh, 80, 90, "url(#glass)")
-				_rect(wx + 42, top + 45.0 + f * fh, 4, 90, "#E8E4DA")
-				wx += 170.0
+			while wx < x1 - 80.0:
+				_rect(wx, top + 34.0 + f * fh, 70, 76, "#E8E4DA")
+				_rect(wx + 4, top + 38.0 + f * fh, 62, 68, "url(#glass)")
+				_rect(wx + 33, top + 38.0 + f * fh, 4, 68, "#E8E4DA")
+				wx += 140.0
 	_rect(x0 - 6, top - 12, x1 - x0 + 12, 14, "#8E8A82")
 	_snow(x0 - 6, x1 - x0 + 12, top - 12)
 	var band: String = k.get("band", "")
 	if band != "":
-		_rect(x0 + 60, lawn_top - fh + 20, (x1 - x0) * 0.55, 40, band)
-		_rect(x0 + 60, lawn_top - fh + 60, (x1 - x0) * 0.55, fh - 60, "#2F3A41")
-		_rect(x0 + 64, lawn_top - fh + 64, (x1 - x0) * 0.55 - 8, fh - 68, "url(#warm)", 'opacity="0.4"')
+		_rect(x0 + 60, lawn_top - fh + 10, (x1 - x0) * 0.55, 36, band)
+		_rect(x0 + 60, lawn_top - fh + 46, (x1 - x0) * 0.55, fh - 46, "#2F3A41")
+		_rect(x0 + 64, lawn_top - fh + 50, (x1 - x0) * 0.55 - 8, fh - 54, "url(#warm)", 'opacity="0.4"')
 	split = out.size()
 	_lawn(X0, X1, lawn_top)
 	_rect(X0 + (X1 - X0) * 0.45, lawn_top, 60, ground_y - lawn_top, "#B9B4AA")

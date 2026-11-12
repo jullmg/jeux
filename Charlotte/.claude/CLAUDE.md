@@ -104,7 +104,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   doors, buttresses, the flight of steps, the grounds; the tower's top isn't in any picture), `presbytere` (over `_building`:
   buff zigzag friezes, copper band, the columned porch), `masson_lot` (the gap at 2876: backs, a painted shed, a tree), plus
   `*_cote` side walls of the corners across the avenues; `_back_row` draws hazy buildings behind open ground so the distant
-  city doesn't show as a grey slab. Built so far: 2e–3e (north: the 1970s commercial block at 2e, new brick condos with a yard between them; south:
+  city doesn't show as a grey slab. Built: the whole street, 1re to 9e, both sides. 1re–2e (north: Bonsoir, Domino's, Le Jardin, a lot, Yoga D.N.A. / Phở /
+  juice bar at 2e; south: after the square across 2e, apartment blocks `lot_style` "setback" behind lawns, TELUS, the low white
+  building at 1re), 2e–3e (north: the 1970s commercial block at 2e, new brick condos with a yard between them; south:
   Place Dollar at 3e, `texts` painted on 2682's wall, Monteiro, a passage of murals, the planted square at 2e, `lot_style` "plaza"),
   3e–4e (north: the old bank at 3e as a `bank`, green-framed windows, a parking lot, the boulangerie, the
   `sky_mural` building at 4e; south: the white bays at 4e, Jean Coutu, the metal-clad corner at 3e over its `mural: "graffiti"`),
