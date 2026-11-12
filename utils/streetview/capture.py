@@ -333,17 +333,33 @@ def api_key() -> str:
 	return key
 
 
-def write_index(out: Path, shots: list[dict]) -> None:
+def area(google: Google, places: dict, out: Path, shots: list[dict]) -> list[str]:
+	"""The zoomed-out maps of the neighbourhood named in places.json's "area"."""
+	spec, city = places.get("area"), places.get("city", "")
+	if not spec or not maps.available():
+		return []
+	corner = lambda a, b: resolve(google, f"{spec[a]} & {spec[b]}", city)
+	corners = {"nw": corner("west", "north"), "ne": corner("east", "north"),
+		"se": corner("east", "south"), "sw": corner("west", "south")}
+	block = [resolve(google, q, city) for q in spec.get("block", [])]
+	home = resolve(google, spec["home"], city) if spec.get("home") else corners["nw"]
+	return maps.area_maps(corners, block, home, shots, {k: spec[k] for k in ("north", "south", "west", "east")}, out)
+
+
+def write_index(out: Path, shots: list[dict], area_made: list[str] | None = None) -> None:
 	shots.sort(key=lambda s: (s["walk"] == "", s["walk"], not s["our_side"], s["side"], s["along_m"], s["number"]))
 	(out / "index.json").write_text(json.dumps(shots, ensure_ascii=False, indent="\t"))
 	page = (HERE / "map_template.html").read_text().replace("/*SHOTS*/[]", json.dumps(shots, ensure_ascii=False))
 	(out / "index.html").write_text(page)
-	(out / "INDEX.md").write_text(guide(shots, maps.make(shots, out, slug)))
+	(out / "INDEX.md").write_text(guide(shots, maps.make(shots, out, slug), area_made or []))
 
 
-def guide(shots: list[dict], maps_made: dict[str, str]) -> str:
+def guide(shots: list[dict], maps_made: dict[str, str], area_made: list[str]) -> str:
 	"""INDEX.md: the same index written for an AI agent (or a person) who will draw the game from the pictures."""
 	lines = (HERE / "index_header.md").read_text().rstrip().splitlines() + [""]
+	if area_made:
+		lines += ["Maps of the whole neighbourhood, Montréal north up as in the game (Charlotte's block in yellow, her house a star): "
+			+ ", ".join(f"`{m}`" for m in area_made) + ". Look at them first to see where a street or a building is.", ""]
 	if maps_made.get(""):
 		lines += [f"Map of everything: `{maps_made['']}` (look at it first).", ""]
 	groups: dict[tuple, list[dict]] = {}
@@ -388,10 +404,12 @@ def main() -> None:
 	parser.add_argument("--detail", action="store_true", help="also six narrow-view close-ups of each facade, 3x the resolution (7x the pictures)")
 	options = parser.parse_args()
 
-	if options.maps_only:
-		write_index(options.out, json.loads((options.out / "index.json").read_text()))
-		return
 	places = json.loads(options.places.read_text())
+	if options.maps_only:
+		shots = json.loads((options.out / "index.json").read_text())
+		google = Google(api_key(), options.out / "cache.json")
+		write_index(options.out, shots, area(google, places, options.out, shots))
+		return
 	city = options.city or places.get("city", "")
 	places["walks"] = places.get("walks", []) + [range_walk(r) for r in places.get("ranges", [])]
 	if options.street:
@@ -419,7 +437,7 @@ def main() -> None:
 	index = options.out / "index.json"
 	fresh = {s["file"] for s in capture.shots}
 	kept = [s for s in json.loads(index.read_text()) if s["file"] not in fresh] if index.exists() else []
-	write_index(options.out, kept + capture.shots)
+	write_index(options.out, kept + capture.shots, area(google, places, options.out, kept + capture.shots))
 	print(f"\n{len(capture.shots)} pictures ({len(kept)} kept from before) → {options.out}")
 	print(f"Map: {options.out / 'index.html'}")
 	print("Calls made: %(geocode)d geocoding, %(metadata)d metadata (free), %(image)d images" % google.calls)

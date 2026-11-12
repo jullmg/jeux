@@ -44,6 +44,8 @@ Output, in `Charlotte/reference/streetview/` (gitignored, like the rest of `refe
 - `maps/<street>.png`: a map per street or range for an AI agent (it can open a PNG, not `index.html`): OpenStreetMap
   with a blue dot where each camera stood, a line to a red dot on the facade it looks at and its civic number;
   `maps/tout.png` shows everything. Needs Pillow (`pip3 install pillow`), else the maps are skipped;
+- `maps/quartier.png`, `maps/quartier_detail.png`: the whole neighbourhood set in `places.json`'s `area` (zoom 16 and
+  17), turned so that Montréal's north is up like the game, with Charlotte's block, her house and the pictures;
 - `index.html`: the interactive map for a person;
 - `cache.json`: Google's answers, so a second run costs nothing for what is already known.
 
@@ -51,6 +53,9 @@ Every area goes into the same folder and the same index, one section per street 
 
 ## What to photograph: `places.json`
 
+- `area`: the neighbourhood of the overview maps: its four bounding streets (`north`, `south`, `west`, `east`, by
+  Montréal's compass), Charlotte's `block` (its four corners) and her `home`. Now Rue D'Iberville to Boulevard
+  Saint-Michel, Rue de Bellechasse to Boulevard Saint-Joseph Est.
 - `walks`: a street between two points. The script takes every panorama along it (about one every 10 m,
   `--step`), looks at both sides (`"sides": ["left"]` for one; left and right of the direction walked) and
   down the street from each end (`"ends": false` to skip). `from` and `to` are intersections ("A & B") or

@@ -7,6 +7,13 @@ never copy one into the game or commit it.
 
 ## 1. Find the real building
 
+0. **Get the lay of the land first**: `reference/streetview/maps/quartier.png` (the whole neighbourhood) and
+   `maps/quartier_detail.png` (the same, zoomed in enough to read street names and civic numbers). They cover
+   Rue D'Iberville to Boulevard Saint-Michel (west to east) and Rue de Bellechasse to Boulevard Saint-Joseph Est
+   (north to south), turned so that **Montréal's north is up** — the north the streets are named by, the game's
+   and its town map's (`ui/town_map.gd`), not true north (both arrows are drawn). Charlotte's block is yellow,
+   her house a star, the photographed facades red dots. Use them for anything beyond one street: which streets
+   and parks lie around, what a cross-street vista looks toward, how far a place is, where a new scene would sit.
 1. Open `reference/streetview/INDEX.md`, then the map named at the top of the street's section (`maps/*.png`).
    It tells you where the building stands: which side of the street, how far from the corner, what is
    beside it and across from it. North is up.

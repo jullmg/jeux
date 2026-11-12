@@ -5,6 +5,8 @@ Private reference only: never copy a picture into the game or commit it.
 
 How to use it (for an AI agent or a person):
 
+- **The neighbourhood first**: `maps/quartier.png` and `maps/quartier_detail.png`, Rue D'Iberville to Boulevard
+  Saint-Michel, Rue de Bellechasse to Boulevard Saint-Joseph Est, Montréal north up (as in the game).
 - **Start with the map** named at the top of each section (`maps/*.png`, a picture you can open): street names, the
   buildings' footprints with their civic number ranges, a blue dot where each camera stood, a line to the red dot
   on the facade it looks at, with that facade's number. North is up. Use it to place a building in its street

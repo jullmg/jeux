@@ -1,10 +1,47 @@
 {
 	"city": "Montréal, QC, Canada",
+	"area": {
+		"north": "Rue de Bellechasse",
+		"south": "Boulevard Saint-Joseph Est",
+		"west": "Rue D'Iberville",
+		"east": "Boulevard Saint-Michel",
+		"block": [
+			"6e Avenue & Rue Holt",
+			"6e Avenue & Rue Dandurand",
+			"5e Avenue & Rue Dandurand",
+			"5e Avenue & Rue Holt"
+		],
+		"home": "5672 6e Avenue"
+	},
 	"walks": [
-		{"name": "6e Avenue", "game": "Charlotte/scenes/main.gd", "our_side": "left", "from": "6e Avenue & Rue Dandurand", "to": "6e Avenue & Rue Holt"},
-		{"name": "Rue Holt", "game": "Charlotte/scenes/holt.gd", "our_side": "left", "from": "Rue Holt & 6e Avenue", "to": "Rue Holt & 5e Avenue"},
-		{"name": "5e Avenue", "game": "Charlotte/scenes/cinquieme.gd", "our_side": "left", "from": "5e Avenue & Rue Holt", "to": "5e Avenue & Rue Dandurand"},
-		{"name": "Rue Dandurand", "game": "Charlotte/scenes/dandurand.gd", "our_side": "left", "from": "Rue Dandurand & 5e Avenue", "to": "Rue Dandurand & 6e Avenue"}
+		{
+			"name": "6e Avenue",
+			"game": "Charlotte/scenes/main.gd",
+			"our_side": "left",
+			"from": "6e Avenue & Rue Dandurand",
+			"to": "6e Avenue & Rue Holt"
+		},
+		{
+			"name": "Rue Holt",
+			"game": "Charlotte/scenes/holt.gd",
+			"our_side": "left",
+			"from": "Rue Holt & 6e Avenue",
+			"to": "Rue Holt & 5e Avenue"
+		},
+		{
+			"name": "5e Avenue",
+			"game": "Charlotte/scenes/cinquieme.gd",
+			"our_side": "left",
+			"from": "5e Avenue & Rue Holt",
+			"to": "5e Avenue & Rue Dandurand"
+		},
+		{
+			"name": "Rue Dandurand",
+			"game": "Charlotte/scenes/dandurand.gd",
+			"our_side": "left",
+			"from": "Rue Dandurand & 5e Avenue",
+			"to": "Rue Dandurand & 6e Avenue"
+		}
 	],
 	"addresses": [
 		"5672 6e Avenue",
