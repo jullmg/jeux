@@ -1979,7 +1979,7 @@
 			"trim": "#F4F1EA"
 		}
 	],
-	"masson_2696_cote": [
+	"masson_2636_cote": [
 		{
 			"bar_y": 739.4,
 			"flower_box": false,
@@ -2032,6 +2032,624 @@
 			"bar_y": 189.4,
 			"flower_box": false,
 			"lit": false,
+			"pane": [
+				118.0,
+				143.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				338.0,
+				143.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		}
+	],
+	"masson_2645_cote": [
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				118.0,
+				418.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				338.0,
+				418.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				118.0,
+				143.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				338.0,
+				143.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		}
+	],
+	"masson_2653": [
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": true,
+			"pane": [
+				68.0,
+				143.0,
+				204.0,
+				144.0
+			],
+			"trim": "#3A3A3C"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				308.0,
+				143.0,
+				204.0,
+				144.0
+			],
+			"trim": "#3A3A3C"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				548.0,
+				143.0,
+				204.0,
+				144.0
+			],
+			"trim": "#3A3A3C"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				788.0,
+				143.0,
+				204.0,
+				144.0
+			],
+			"trim": "#3A3A3C"
+		}
+	],
+	"masson_2661": [
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				88.0,
+				418.0,
+				104.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				328.0,
+				418.0,
+				104.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				568.0,
+				418.0,
+				104.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				88.0,
+				143.0,
+				104.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": true,
+			"pane": [
+				328.0,
+				143.0,
+				104.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				568.0,
+				143.0,
+				104.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		}
+	],
+	"masson_2666": [
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				98.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": true,
+			"pane": [
+				348.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				588.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				98.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				348.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				588.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		}
+	],
+	"masson_2675": [
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				88.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				308.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				548.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				788.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				1048.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				88.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				308.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": true,
+			"pane": [
+				548.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				788.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": true,
+			"pane": [
+				1048.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		}
+	],
+	"masson_2682": [
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": true,
+			"pane": [
+				98.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": true,
+			"pane": [
+				368.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": true,
+			"pane": [
+				628.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": true,
+			"pane": [
+				98.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				368.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				628.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		}
+	],
+	"masson_2685": [
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				88.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				308.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				728.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": true,
+			"pane": [
+				88.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				308.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				728.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#2B2B2E"
+		}
+	],
+	"masson_2692": [
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				88.0,
+				143.0,
+				184.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": true,
+			"pane": [
+				338.0,
+				143.0,
+				184.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				588.0,
+				143.0,
+				184.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				838.0,
+				143.0,
+				184.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		}
+	],
+	"masson_2696_cote": [
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": true,
+			"pane": [
+				118.0,
+				418.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				338.0,
+				418.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": true,
 			"pane": [
 				118.0,
 				143.0,
@@ -2153,6 +2771,56 @@
 			"trim": "#E8E6E0"
 		}
 	],
+	"masson_2702_cote": [
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				118.0,
+				418.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				338.0,
+				418.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				118.0,
+				143.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				338.0,
+				143.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		}
+	],
 	"masson_2703": [
 		{
 			"bar_y": 741.0,
@@ -2201,6 +2869,80 @@
 				172
 			],
 			"trim": "#4E3E2E"
+		}
+	],
+	"masson_2703_cote": [
+		{
+			"bar_y": 739.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				118.0,
+				693.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 739.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				338.0,
+				693.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				118.0,
+				418.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": true,
+			"pane": [
+				338.0,
+				418.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				118.0,
+				143.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				338.0,
+				143.0,
+				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
 		}
 	],
 	"masson_2711": [

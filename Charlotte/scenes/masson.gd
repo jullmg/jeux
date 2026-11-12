@@ -17,6 +17,28 @@ extends StreetScene
 ## {art: [[x on the facade, text, text colour, outline colour, font size], …]} (laid on the sign band, 302 above its foot),
 ## `logos` = real logos from art/brands/ on those bands: {art: [[x, file, height], …]}.
 const BLOCKS := {
+	"2e_3e_impair": {
+		"layout": ["masson_2645_cote", "rue_2e", "masson_2653", "masson_2661", "masson_2671", "masson_2675", "masson_2685",
+			"rue_3e", "masson_2703_cote"],
+		"avenues": [["rue_2e", "2e Avenue", 540.0], ["rue_3e", "3e Avenue", 540.0]],
+		"trees_after": [2, 4], "tree_shift": {2: 0.0, 4: 0.0}, "lamps_after": [2, 5], "hydrants_at": [3.5], "racks_at": [5.5],
+		"squirrels_at": [4.5], "moon_at": 2.5,
+		"signs": {"masson_2653": [[295.0, "FRUITERIE", "#FFFFFF", "#1E6E3E", 13]]},
+		"panels": {},
+	},
+	"2e_3e_pair": {
+		"layout": ["masson_2702_cote", "rue_3e", "masson_2692", "masson_2682", "masson_2666", "masson_2650", "masson_2644",
+			"rue_2e", "masson_2636_cote"],
+		"avenues": [["rue_3e", "3e Avenue", 540.0], ["rue_2e", "2e Avenue", 540.0]],
+		"trees_after": [3, 5], "tree_shift": {3: 0.0, 5: 0.0}, "lamps_after": [2, 5], "hydrants_at": [5.8], "racks_at": [2.5],
+		"squirrels_at": [6.5], "moon_at": 6.5,
+		"signs": {
+			"masson_2692": [[550.0, "PLACE DOLLAR", "#1E7A3E", "#FFFFFF", 17]],
+			"masson_2682": [[640.0, "monteiro", "#FFFFFF", "#1A1A1A", 14]],
+		},
+		"texts": {"masson_2682": [[430.0, 112.0, "LES FLEURS POUSSENT ENCORE", "#F7F3EA", "#5E2A20", 17]]},
+		"panels": {},
+	},
 	"3e_4e_impair": {
 		"layout": ["masson_2697_cote", "rue_3e", "masson_2703", "masson_2711", "masson_2719", "masson_2721", "masson_2731",
 			"masson_2737", "rue_4e", "masson_2801_cote"],
@@ -263,6 +285,9 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 		logo.scale = Vector2.ONE * float(l[2]) / tex.get_height()
 		logo.position = house.position + Vector2(float(l[0]), tex_h - 302.0) * HOUSE_SCALE
 		add_child(logo)
+	# Words painted straight on a wall: [x, y on the facade, text, colour, outline, size].
+	for t: Array in _data().get("texts", {}).get(art, []):
+		_label(t[2], house.position + Vector2(float(t[0]), float(t[1])) * HOUSE_SCALE, Vector2(360, 22), int(t[5]), Color(t[3]), Color(t[4]))
 	for p: Array in _data().panels.get(art, []):
 		var at := house.position + Vector2(float(p[0]), float(p[1])) * HOUSE_SCALE
 		var board := ColorRect.new()

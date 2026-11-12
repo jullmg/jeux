@@ -1006,7 +1006,7 @@ const HOUSES := [
 	# The north side, 3e (left) to 4e (right). Across 3e: the next block's corner, its side.
 	{
 		"name": "masson_2697_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
-		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F"], "mortar": "#CDBFB0",
+		"bricks": ["#A8503E", "#B05A46", "#9A4636", "#B86450"], "mortar": "#D0C4B6",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
 	},
 	# 2701–2705, at 3e: the old bank, buff brick on three floors between tall stone pilasters, on a stone base (2703…, 2711…).
@@ -1095,8 +1095,106 @@ const HOUSES := [
 	},
 	# Across 3e: the next block's corner, its side.
 	{
-		"name": "masson_2696_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
-		"bricks": ["#C8A27A", "#BC966E", "#D4AE86", "#B08A62"], "mortar": "#E6DCCB",
+		"name": "masson_2696_cote", "kind": "side_wall", "width": 560.0, "floors": 2,
+		"bricks": ["#8E8A82", "#9A968E", "#86827A", "#A29E96"], "mortar": "#B9B5AC",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
+	},
+	# ── Rue Masson, 2e to 3e Avenue ──
+	# The north side, 2e (left) to 3e (right). Across 2e: the next block's corner, its side.
+	{
+		"name": "masson_2645_cote", "kind": "side_wall", "width": 560.0, "floors": 2,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F"], "mortar": "#CDBFB0",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
+	},
+	# 2651–2659, at 2e: a low commercial building of the 1970s, two floors, a long band of windows upstairs on pale panels, shops
+	# under a green awning (2653…, 2661…).
+	{
+		"name": "masson_2653", "kind": "commerce", "width": 1100.0, "floors": 2, "upper": "stucco", "stucco": "#D8D6D0",
+		"bricks": ["#D8D6D0"], "mortar": "#B9B5AC", "parapet": "flat", "lintel": "#E8E6E0", "lintel_dark": "#9E968A", "lintel_style": "none",
+		"trim": "#3A3A3C", "trim_dark": "#1E1E20",
+		"windows": [[60.0, 220.0], [300.0, 220.0], [540.0, 220.0], [780.0, 220.0]],
+		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#1E6E3E", "frame": "#2B2B2E", "door": 420.0, "awning": "#1E6E3E"},
+			{"x0": 560.0, "x1": 1070.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 700.0}], "basement": [],
+	},
+	# 2661–2663: new red brick on three floors, recessed balconies with glass rails (2661…, 2663…).
+	{
+		"name": "masson_2661", "kind": "commerce", "width": 800.0, "floors": 3,
+		"bricks": ["#A8473A", "#B4513F", "#9A3F33", "#B85C48"], "mortar": "#CDBFB0", "parapet": "flat",
+		"lintel": "#A8473A", "lintel_dark": "#8E3A2F", "lintel_style": "none", "trim": "#2B2B2E", "trim_dark": "#1E1E20",
+		"windows": [[80.0, 120.0], [320.0, 120.0], [560.0, 120.0]], "projecting": [[500.0, 740.0]], "metal": "#3A3A3C",
+		"shops": [{"x0": 30.0, "x1": 770.0, "sign": "#3A3A3C", "frame": "#2B2B2E", "door": 400.0}], "basement": [],
+	},
+	{
+		"name": "masson_2671", "kind": "masson_lot", "width": 380.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	# 2675–2683: the same new red brick, long, balconies set into the wall, the shop windows hung with bright posters left out
+	# (2675…, 2687…).
+	{
+		"name": "masson_2675", "kind": "commerce", "width": 1300.0, "floors": 3,
+		"bricks": ["#A44A3A", "#B05444", "#984234", "#B85E4C"], "mortar": "#CDBFB0", "parapet": "flat",
+		"lintel": "#A44A3A", "lintel_dark": "#8E3A2F", "lintel_style": "none", "trim": "#2B2B2E", "trim_dark": "#1E1E20",
+		"windows": [[80.0, 110.0], [300.0, 110.0], [540.0, 110.0], [780.0, 110.0], [1040.0, 110.0]],
+		"projecting": [[250.0, 450.0], [740.0, 940.0]], "metal": "#3A3A3C",
+		"shops": [{"x0": 30.0, "x1": 640.0, "sign": "#C8202A", "frame": "#2B2B2E", "door": 560.0},
+			{"x0": 640.0, "x1": 1270.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 700.0}], "basement": [],
+	},
+	# 2685–2697, at 3e: new brick on three floors with a bay of grey panels (2685…).
+	{
+		"name": "masson_2685", "kind": "commerce", "width": 900.0, "floors": 3,
+		"bricks": ["#A8503E", "#B05A46", "#9A4636", "#B86450"], "mortar": "#D0C4B6", "parapet": "flat",
+		"lintel": "#A8503E", "lintel_dark": "#8E3A2F", "lintel_style": "none", "trim": "#2B2B2E", "trim_dark": "#1E1E20",
+		"windows": [[80.0, 110.0], [300.0, 110.0], [720.0, 110.0]], "metal_panels": [[560.0, 680.0]],
+		"shops": [{"x0": 30.0, "x1": 870.0, "sign": "#3A3A3C", "frame": "#2B2B2E", "door": 160.0}], "basement": [],
+	},
+	# Across 3e: the old bank's side, buff stone (2703…).
+	{
+		"name": "masson_2703_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#C9B48E", "#BFAA84", "#D2BE98", "#B8A27C"], "mortar": "#E6DCCB",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
+	},
+	# The south side, 3e (left) to 2e (right). Across 3e: the side of the metal-clad corner (2702…).
+	{
+		"name": "masson_2702_cote", "kind": "side_wall", "width": 560.0, "floors": 2,
+		"bricks": ["#B9BDB6", "#AFB3AC", "#C3C7C0"], "mortar": "#9A9E98",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
+	},
+	# 2690–2696, Place Dollar at 3e: grey brick on two floors, wide windows, its green-and-white sign (2692…, 2694…, 2690…).
+	{
+		"name": "masson_2692", "kind": "commerce", "width": 1100.0, "floors": 2,
+		"bricks": ["#8E8A82", "#9A968E", "#86827A", "#A29E96"], "mortar": "#B9B5AC", "parapet": "flat",
+		"lintel": "#B9B5AC", "lintel_dark": "#7E7A72", "lintel_style": "none",
+		"windows": [[80.0, 200.0], [330.0, 200.0], [580.0, 200.0], [830.0, 200.0]],
+		"shops": [{"x0": 30.0, "x1": 1070.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 980.0}], "basement": [],
+	},
+	# 2682–2686: red brick on three floors, "Les fleurs poussent encore" painted along the top, Monteiro downstairs (2690…).
+	{
+		"name": "masson_2682", "kind": "commerce", "width": 860.0, "floors": 3,
+		"bricks": ["#A44A3A", "#B05444", "#984234", "#B85E4C"], "mortar": "#CDBFB0", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 110.0], [360.0, 110.0], [620.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 450.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 120.0},
+			{"x0": 450.0, "x1": 830.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 760.0}], "basement": [],
+	},
+	# 2658–2668: dark brick on three floors, shops (2656…, 2668…).
+	{
+		"name": "masson_2666", "kind": "commerce", "width": 820.0, "floors": 3,
+		"bricks": ["#5E4A40", "#6A564A", "#544238", "#725E52"], "mortar": "#9A8E84", "parapet": "corbel",
+		"lintel": "#B9B3A8", "lintel_dark": "#7E786E", "windows": [[90.0, 110.0], [340.0, 110.0], [580.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 790.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 400.0}], "basement": [],
+	},
+	{
+		"name": "masson_2650", "kind": "masson_lot", "lot_style": "murals", "width": 420.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	# 2644–2648, at 2e: the little planted square (2644…, 2648…).
+	{
+		"name": "masson_2644", "kind": "masson_lot", "lot_style": "plaza", "width": 900.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	# Across 2e: the next block's corner, its side.
+	{
+		"name": "masson_2636_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F"], "mortar": "#CDBFB0",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
 	},
 	# Across 5e: the side of Dollarama's building, buff brick (2840…).
@@ -5541,6 +5639,9 @@ func _masson_lot() -> void:
 		"murals":
 			_mural_passage()
 			return
+		"plaza":
+			_plaza()
+			return
 		"parking":
 			_parking_lot()
 			return
@@ -5620,6 +5721,41 @@ func _mural_passage() -> void:
 	_rect(X0, g - 120.0, X1 - X0, 6, "#000000", 'opacity="0.2"')
 	_snow(X0, X1 - X0, g - 116.0)
 	split = out.size()
+
+
+# A little public square at a corner (2644…, 2648…): paving, long concrete planters of shrubs and grasses, benches, striped
+# bollards, the brick backs of the buildings round it.
+func _plaza() -> void:
+	var g := ground_y
+	_back_row(X0, X1, g - 560.0, g - 120.0)
+	_rect(X0, g - 120.0, X1 - X0, 120, "#B9B4AA")
+	var px := X0
+	while px < X1:
+		_rect(px, g - 120.0, 1.5, 120, "#8E8A82", 'opacity="0.5"')
+		px += 60.0
+	_snow(X0, X1 - X0, g - 118.0)
+	split = out.size()
+	var shrub_colors := {"winter": "#6A5A4A", "spring": "#4E8A44", "summer": "#3E7A3A"}
+	var c: String = shrub_colors.get(season, "#C04A30")
+	for b in 2:
+		var bx0 := X0 + 30.0 + b * (X1 - X0) * 0.5
+		var bx1 := bx0 + (X1 - X0) * 0.42
+		for i in int((bx1 - bx0) / 46.0):
+			_shrub(bx0 + 20.0 + i * 46.0, 30.0 + rng.randf_range(0.0, 10.0), c if i % 2 == 0 else "#8A9A4A")
+		_rect(bx0, g - 60, bx1 - bx0, 46, "#A8A49C", _stroke("#7E7A72", 1.5))
+		_rect(bx0, g - 60, bx1 - bx0, 5, "#C9C5BC")
+		_rect(bx0 + 10, g - 50, bx1 - bx0 - 20, 4, "#5EC8C0", 'opacity="0.8"')
+		_snow(bx0, bx1 - bx0, g - 60)
+	# A bench, and a striped bollard at each end.
+	var bench := (X0 + X1) / 2.0
+	_rect(bench - 60, g - 52, 120, 8, "#8A6A4A")
+	_rect(bench - 60, g - 72, 120, 6, "#8A6A4A")
+	for lx: float in [bench - 54.0, bench + 50.0]:
+		_rect(lx, g - 72, 4, 72, "#3A3A3A")
+	for bx: float in [X0 + 14.0, X1 - 14.0]:
+		_rect(bx - 4, g - 70, 8, 70, "#1A1A1A")
+		for st in 3:
+			_rect(bx - 4, g - 64 + st * 18.0, 8, 7, "#F2F0EA")
 
 
 # A parking lot behind a low hedge (3021…): asphalt with its painted lines, the brick backs beyond; the cars left out.
