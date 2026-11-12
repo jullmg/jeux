@@ -17,6 +17,29 @@ extends StreetScene
 ## {art: [[x on the facade, text, text colour, outline colour, font size], …]} (laid on the sign band, 302 above its foot),
 ## `logos` = real logos from art/brands/ on those bands: {art: [[x, file, height], …]}.
 const BLOCKS := {
+	"3e_4e_impair": {
+		"layout": ["masson_2697_cote", "rue_3e", "masson_2703", "masson_2711", "masson_2719", "masson_2721", "masson_2731",
+			"masson_2737", "rue_4e", "masson_2801_cote"],
+		"avenues": [["rue_3e", "3e Avenue", 540.0], ["rue_4e", "4e Avenue", 540.0]],
+		"trees_after": [3, 5], "tree_shift": {3: 0.0, 5: 0.0}, "lamps_after": [2, 6], "hydrants_at": [4.5], "racks_at": [3.5],
+		"squirrels_at": [4.4], "moon_at": 4.5,
+		"signs": {
+			"masson_2731": [[420.0, "Boulangerie", "#3A2A1E", "#E8E0D0", 14]],
+			"masson_2737": [[935.0, "SERVICE COMPTANT", "#FFFFFF", "#1F4E9A", 11]],
+		},
+		"panels": {},
+	},
+	"3e_4e_pair": {
+		"layout": ["masson_2802_cote", "rue_4e", "masson_2742", "masson_2734", "masson_2716", "masson_2702", "rue_3e",
+			"masson_2696_cote"],
+		"avenues": [["rue_4e", "4e Avenue", 540.0], ["rue_3e", "3e Avenue", 540.0]],
+		"trees_after": [2, 4], "tree_shift": {2: 0.0, 4: 0.0}, "lamps_after": [2, 4], "hydrants_at": [3.5], "racks_at": [4.3],
+		"squirrels_at": [4.6], "moon_at": 4.5,
+		"signs": {
+			"masson_2716": [[650.0, "Jean Coutu", "#1F3E8E", "#FFD400", 17]],
+		},
+		"panels": {"masson_2716": [[470.0, 398.0, "PJC", "#FFFFFF", "#C8202A", 10]]},
+	},
 	"4e_5e_impair": {
 		"layout": ["masson_2755_cote", "rue_4e", "masson_2801", "masson_2811", "masson_2819", "masson_2823", "masson_2825",
 			"masson_2829", "rue_5e", "masson_2851_cote"],

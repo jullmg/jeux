@@ -38,6 +38,8 @@ const PLACES := [
 	{"name": "Rue Holt : dépanneur Oh Bon!", "scene": "holt"},
 	{"name": "Rue Holt : coin 6e", "scene": "holt", "arrive": "holt_from_6e"},
 	{"name": "Rue Holt : coin 5e", "scene": "holt", "arrive": "holt_from_5e"},
+	{"name": "Rue Masson 3e–4e, côté nord : milieu", "scene": "masson_3e_4e_impair"},
+	{"name": "Rue Masson 3e–4e, côté sud : milieu", "scene": "masson_3e_4e_pair"},
 	{"name": "Rue Masson 4e–5e, côté nord : milieu", "scene": "masson_4e_5e_impair"},
 	{"name": "Rue Masson 4e–5e, côté sud : milieu", "scene": "masson_4e_5e_pair"},
 	{"name": "Rue Masson 5e–6e, côté nord : l'église", "scene": "masson_5e_6e_impair"},

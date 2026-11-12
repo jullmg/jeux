@@ -770,8 +770,8 @@ const HOUSES := [
 	# ── Rue Masson, 4e to 5e Avenue ──
 	# The north side, 4e (left) to 5e (right). Across 4e: the next block's corner, its side.
 	{
-		"name": "masson_2755_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
-		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
+		"name": "masson_2755_cote", "kind": "side_wall", "width": 560.0, "floors": 2,
+		"bricks": ["#C9A47E", "#BE9872", "#D2AE88", "#B48E68", "#CCA882"], "mortar": "#E6DCCB",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
 	},
 	# 2801–2809, at 4e: brown brick on three floors, big windows upstairs, the pawnbroker BANCO under its red signs and a tall
@@ -868,7 +868,7 @@ const HOUSES := [
 	# Across 4e: the next block's corner, its side.
 	{
 		"name": "masson_2790_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
-		"bricks": ["#C8A27A", "#BC966E", "#D4AE86", "#B08A62", "#CCA680"], "mortar": "#E6DCCB",
+		"bricks": ["#7E5440", "#8A5E4A", "#724A38", "#946852", "#7A503C"], "mortar": "#C2B4A4",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
 	},
 	# ── Rue Masson, 8e to 9e Avenue ──
@@ -1000,6 +1000,103 @@ const HOUSES := [
 	{
 		"name": "masson_3038_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
 		"bricks": ["#9A4A3A", "#A85442", "#8E4234", "#B05C48"], "mortar": "#C9BBAC",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
+	},
+	# ── Rue Masson, 3e to 4e Avenue ──
+	# The north side, 3e (left) to 4e (right). Across 3e: the next block's corner, its side.
+	{
+		"name": "masson_2697_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F"], "mortar": "#CDBFB0",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
+	},
+	# 2701–2705, at 3e: the old bank, buff brick on three floors between tall stone pilasters, on a stone base (2703…, 2711…).
+	{
+		"name": "masson_2703", "kind": "bank", "width": 1000.0, "floors": 3, "halloween": false,
+		"stone": "#C9B48E", "pilasters": [260.0, 500.0, 740.0], "windows": [[80.0, 150.0], [320.0, 150.0], [560.0, 150.0], [800.0, 150.0]],
+		"corner_side": -1.0, "basement": [],
+	},
+	# 2707–2715: brown brick on three floors, windows framed in dark green, round windows on the top floor, a shop in green
+	# (2707…, 2711…; the building site in front of it in the pictures left out).
+	{
+		"name": "masson_2711", "kind": "commerce", "width": 900.0, "floors": 3,
+		"bricks": ["#8A5A42", "#96644C", "#7E5038", "#A06C54", "#86563E"], "mortar": "#C2B4A4", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "trim": "#2E5E3E", "trim_dark": "#1E3E28",
+		"windows": [[90.0, 120.0], [360.0, 120.0], [630.0, 120.0]],
+		"shops": [{"x0": 30.0, "x1": 870.0, "sign": "#2E5E3E", "frame": "#1E3E28", "door": 450.0}], "basement": [],
+	},
+	{
+		"name": "masson_2719", "kind": "masson_lot", "lot_style": "parking", "width": 420.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	# 2721–2729: brown brick on three floors, two buildings in one row, a green sign (2721…, 2723…).
+	{
+		"name": "masson_2721", "kind": "commerce", "width": 1100.0, "floors": 3,
+		"bricks": ["#8E5A44", "#9A644E", "#82503C", "#A46C56", "#8A5640"], "mortar": "#C2B4A4", "parapet": "corbel",
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "windows": [[90.0, 110.0], [330.0, 110.0], [600.0, 110.0], [860.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#3E7A4E", "frame": "#2B2B2E", "door": 480.0},
+			{"x0": 560.0, "x1": 1070.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 640.0}], "basement": [],
+	},
+	# 2723–2733: red-brown brick on three floors, balconies, the boulangerie (2723…).
+	{
+		"name": "masson_2731", "kind": "commerce", "width": 880.0, "floors": 3,
+		"bricks": ["#A0563E", "#AC6048", "#944C36", "#B46A52", "#9C523C"], "mortar": "#CDBFB0", "parapet": "flat",
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "windows": [[90.0, 110.0], [340.0, 110.0], [600.0, 110.0]],
+		"projecting": [[560.0, 800.0]],
+		"shops": [{"x0": 30.0, "x1": 850.0, "sign": "#E8E0D0", "frame": "#3A3A3C", "door": 760.0}], "basement": [],
+	},
+	# 2737–2755, at 4e: two floors painted all over with a mural of sky, hills and flowers (2737…, 2755…).
+	{
+		"name": "masson_2737", "kind": "commerce", "width": 1200.0, "floors": 2, "upper": "stucco", "stucco": "#9CC8E0",
+		"bricks": ["#9CC8E0"], "mortar": "#8AB4CC", "parapet": "flat", "lintel": "#E8E6E0", "lintel_dark": "#9E968A",
+		"windows": [[120.0, 150.0], [460.0, 150.0], [800.0, 150.0]], "sky_mural": true,
+		"ground": "painted", "paint": "#C8DCE8", "mural": "lilies", "mural_x0": 30.0,
+		"shops": [{"x0": 700.0, "x1": 1170.0, "sign": "#1F4E9A", "frame": "#2B2B2E", "door": 760.0}], "basement": [],
+	},
+	# Across 4e: the side of BANCO's building, brown brick (2801…).
+	{
+		"name": "masson_2801_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#7E5A44", "#8A6450", "#72503C", "#946E58"], "mortar": "#B9AC9E",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
+	},
+	# The south side, 4e (left) to 3e (right). Across 4e: the side of the corner building there (2802…).
+	{
+		"name": "masson_2802_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#9A4A3A", "#A85442", "#8E4234", "#B05C48"], "mortar": "#C9BBAC",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
+	},
+	# 2740–2752, at 4e: brown brick on three floors, white bays upstairs (2742…, 2740…).
+	{
+		"name": "masson_2742", "kind": "commerce", "width": 900.0, "floors": 3,
+		"bricks": ["#7E5440", "#8A5E4A", "#724A38", "#946852", "#7A503C"], "mortar": "#C2B4A4", "parapet": "corbel",
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "windows": [[90.0, 110.0], [380.0, 140.0], [660.0, 110.0]],
+		"projecting": [[340.0, 560.0]], "slab": "#F2F0EA", "metal": "#F2F0EA",
+		"shops": [{"x0": 30.0, "x1": 870.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 120.0}], "basement": [],
+	},
+	# 2734: brown brick on three floors (2734…).
+	{
+		"name": "masson_2734", "kind": "commerce", "width": 760.0, "floors": 3,
+		"bricks": ["#8A5E48", "#966852", "#7E5440", "#A0725A"], "mortar": "#C2B4A4", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 110.0], [330.0, 110.0], [560.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 730.0, "sign": "#3A3A3C", "frame": "#2B2B2E", "door": 650.0}], "basement": [],
+	},
+	# 2716–2732, Jean Coutu: red-brown brick on two floors, the brick piers between wide windows, its yellow sign (2716…, 2726…).
+	{
+		"name": "masson_2716", "kind": "commerce", "width": 1300.0, "floors": 2, "halloween": false,
+		"bricks": ["#A4553E", "#B05E48", "#984E38", "#B86650", "#A0523C"], "mortar": "#CDBFB0", "parapet": "corbel",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[100.0, 220.0], [420.0, 220.0], [740.0, 220.0], [1020.0, 220.0]],
+		"shops": [{"x0": 30.0, "x1": 1270.0, "sign": "#FFD400", "frame": "#3A3A3C", "door": 640.0}], "basement": [],
+	},
+	# 2700–2714, at 3e: the upper floor clad in grey metal over a ground floor painted with graffiti murals (2700…, 2702…, 2714…).
+	{
+		"name": "masson_2702", "kind": "commerce", "width": 1000.0, "floors": 2, "upper": "siding", "siding": "#B9BDB6",
+		"bricks": ["#B9BDB6"], "mortar": "#9A9E98", "parapet": "flat", "trim": "#E8E6E0",
+		"lintel": "#B9BDB6", "lintel_dark": "#8E928C", "lintel_style": "none", "windows": [[180.0, 110.0], [640.0, 110.0]],
+		"ground": "painted", "paint": "#5E4A8E", "mural": "graffiti", "mural_x0": 30.0, "shops": [], "basement": [],
+	},
+	# Across 3e: the next block's corner, its side.
+	{
+		"name": "masson_2696_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#C8A27A", "#BC966E", "#D4AE86", "#B08A62"], "mortar": "#E6DCCB",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
 	},
 	# Across 5e: the side of Dollarama's building, buff brick (2840…).
@@ -4525,6 +4622,8 @@ func _commerce() -> void:
 				_scroll_parapet(top)
 			_:
 				_cornice(top)
+		if k.get("sky_mural", false):
+			_sky_mural(top, belt)
 		for rw: Array in k.get("round_windows", []):
 			_round_window(rw[0], rw[1], top + 50.0, belt - 30.0)
 		for mp: Array in k.get("metal_panels", []):
@@ -4576,6 +4675,8 @@ func _commerce() -> void:
 			py += 13.0
 		if k.get("mural", "") == "lilies":
 			_lily_mural(k.get("mural_x0", X0), X1, belt + 16.0, ground_y)
+		elif k.get("mural", "") == "graffiti":
+			_graffiti_mural(k.get("mural_x0", X0), X1, belt + 16.0, ground_y)
 	else:
 		_rect(X0, belt + 16, X1 - X0, ground_y - belt - 16, k.get("pier", "#3A3836"))
 	for door_x: float in k.get("res_doors", []):
@@ -4904,6 +5005,46 @@ func _scroll_parapet(top: float) -> void:
 		_circle(sx + side * 3.0, top - 24, 5, "#000000", 'opacity="0.15"')
 	_rect(cx - 50, top - 70, 100, 34, "#" + Color(brick).lightened(0.1).to_html(false), _stroke(k.lintel_dark, 1))
 	_snow(X0 - 4, X1 - X0 + 8, top - 14)
+
+
+# A wall painted from end to end with big bright shapes outlined in black, no lettering (2700…, 2714…): the graffiti murals.
+func _graffiti_mural(x0: float, x1: float, y0: float, y1: float) -> void:
+	var colors := ["#E85FA0", "#3D8BD9", "#F2C230", "#E8812E", "#4FA34A", "#5EC8C0", "#E04A3A", "#8E5FC4"]
+	_clips += 1
+	out.append('<clipPath id="gra%d"><rect x="%s" y="%s" width="%s" height="%s"/></clipPath><g clip-path="url(#gra%d)">' % [_clips, _n(x0), _n(y0), _n(x1 - x0), _n(y1 - y0), _clips])
+	# Slanted fields of colour right across, then big rounded shapes and swooshes over them, black outlines, white highlights.
+	var fx := x0 - 40.0
+	var f := 0
+	while fx < x1:
+		var fw := rng.randf_range(110.0, 190.0)
+		_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(fx + 40), _n(y0), _n(fx + fw + 70), _n(y0), _n(fx + fw), _n(y1), _n(fx - 30), _n(y1)], colors[(f * 3 + 1) % colors.size()])
+		fx += fw
+		f += 1
+	for i in int((x1 - x0) / 120.0):
+		var c: String = colors[(i * 5) % colors.size()]
+		var x := rng.randf_range(x0 + 30.0, x1 - 30.0)
+		var y := rng.randf_range(y0 + 50.0, y1 - 40.0)
+		var r := rng.randf_range(34.0, 64.0)
+		if i % 3 == 0:
+			_path("M%s %s q%s %s %s %s q%s %s %s %s" % [_n(x - r * 1.4), _n(y + r * 0.3), _n(r * 0.7), _n(-r * 1.2), _n(r * 1.6), _n(-r * 0.4), _n(r * 0.8), _n(r * 0.6), _n(r * 1.4), _n(-r * 0.2)], "none", _stroke("#1A1A1A", 18) + ' stroke-linecap="round"')
+			_path("M%s %s q%s %s %s %s q%s %s %s %s" % [_n(x - r * 1.4), _n(y + r * 0.3), _n(r * 0.7), _n(-r * 1.2), _n(r * 1.6), _n(-r * 0.4), _n(r * 0.8), _n(r * 0.6), _n(r * 1.4), _n(-r * 0.2)], "none", _stroke(c, 11) + ' stroke-linecap="round"')
+		else:
+			_path("M%s %s q%s %s %s %s q%s %s %s %s q%s %s %s %s z" % [_n(x - r), _n(y), _n(r * 0.2), _n(-r), _n(r), _n(-r * 0.6), _n(r), _n(r * 0.3), _n(r * 0.7), _n(r), _n(-r * 0.8), _n(r * 0.5), _n(-r * 1.7), _n(-r * 0.4)], c, _stroke("#1A1A1A", 5))
+			_path("M%s %s q%s %s %s %s" % [_n(x - r * 0.6), _n(y - r * 0.1), _n(r * 0.3), _n(-r * 0.4), _n(r * 0.8), _n(-r * 0.2)], "none", _stroke("#FFFFFF", 5) + ' opacity="0.75" stroke-linecap="round"')
+		_circle(x + r * 0.9, y - r * 0.8, 4, "#FFFFFF", 'opacity="0.85"')
+	out.append('</g>')
+
+
+# A mural over a whole upper floor: a sky with clouds over rolling hills (2737…).
+func _sky_mural(top: float, belt: float) -> void:
+	var hill := belt - 60.0
+	for c in 5:
+		var cx := lerpf(X0 + 80.0, X1 - 80.0, c / 4.0) + rng.randf_range(-30.0, 30.0)
+		var cy := top + rng.randf_range(40.0, 110.0)
+		for p in 4:
+			_circle(cx + (p - 1.5) * 26.0, cy + absf(p - 1.5) * 6.0, 26.0 - absf(p - 1.5) * 4.0, "#F4F6F8", 'opacity="0.9"')
+	_path("M%s %s Q%s %s %s %s T%s %s T%s %s V%s H%s Z" % [_n(X0), _n(hill), _n(lerpf(X0, X1, 0.2)), _n(hill - 90), _n(lerpf(X0, X1, 0.4)), _n(hill - 20), _n(lerpf(X0, X1, 0.7)), _n(hill - 40), _n(X1), _n(hill - 70), _n(belt + 4), _n(X0)], "#6EA86A")
+	_path("M%s %s Q%s %s %s %s T%s %s V%s H%s Z" % [_n(X0), _n(hill + 30), _n(lerpf(X0, X1, 0.3)), _n(hill - 20), _n(lerpf(X0, X1, 0.55)), _n(hill + 20), _n(X1), _n(hill + 10), _n(belt + 4), _n(X0)], "#4E8A4E")
 
 
 # Rough rubble stone laid in a wall (3131…): irregular grey and buff stones in thick mortar, the light on their upper left.
