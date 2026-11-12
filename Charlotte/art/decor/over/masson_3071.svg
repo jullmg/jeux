@@ -5,10 +5,17 @@
 <rect x="764.0" y="370.0" width="302.0" height="4.0" fill="#FFFFFF" opacity="0.18"/>
 <rect x="764.0" y="426.0" width="302.0" height="8.0" fill="#000000" opacity="0.35"/>
 <rect x="770.0" y="434.0" width="290.0" height="238.0" fill="#2F3A41" />
-<clipPath id="in1"><rect x="770.0" y="434.0" width="290.0" height="238.0"/></clipPath><g clip-path="url(#in1)">
-<rect x="770.0" y="434.0" width="290.0" height="238.0" fill="#ECE8E0" />
+<clipPath id="in2"><rect x="770.0" y="434.0" width="290.0" height="238.0"/></clipPath><g clip-path="url(#in2)">
+<rect x="770.0" y="434.0" width="290.0" height="238.0" fill="#d0ccc5" />
 <rect x="770.0" y="434.0" width="290.0" height="238.0" fill="url(#warm)" opacity="0.25"/>
-<rect x="770.0" y="658.0" width="290.0" height="14.0" fill="#999792" />
+<rect x="770.0" y="434.0" width="290.0" height="26.0" fill="#1E1A18" opacity="0.55"/>
+<rect x="786.0" y="454.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="800.0" cy="464.0" r="16.0" fill="url(#glow)" />
+<rect x="876.0" y="454.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="890.0" cy="464.0" r="16.0" fill="url(#glow)" />
+<rect x="966.0" y="454.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="980.0" cy="464.0" r="16.0" fill="url(#glow)" />
+<rect x="770.0" y="658.0" width="290.0" height="14.0" fill="#878580" />
 <rect x="780.0" y="480.0" width="270.0" height="3.0" fill="#8E8A82" />
 <path d="M790.0 488.0 l8 -4 l8 4 l4 6 l-4 2 v60.8 h-16 v-0.0 l-4 -2 z" fill="#E85FA0" />
 <path d="M814.8 488.0 l8 -4 l8 4 l4 6 l-4 2 v58.3 h-16 v-0.0 l-4 -2 z" fill="#3A3A3C" />
@@ -32,7 +39,7 @@
 <rect x="972.0" y="534.0" width="56.0" height="5.0" fill="#C9C5BC" />
 <rect x="770.0" y="672.0" width="290.0" height="22.0" fill="#2B2B2E" />
 <rect x="770.0" y="672.0" width="290.0" height="3.0" fill="#FFFFFF" opacity="0.15"/>
-<clipPath id="pane2"><rect x="770.0" y="434.0" width="290.0" height="238.0"/></clipPath><g clip-path="url(#pane2)">
+<clipPath id="pane3"><rect x="770.0" y="434.0" width="290.0" height="238.0"/></clipPath><g clip-path="url(#pane3)">
 <path d="M799.0 672.0 l178.5 -238.0 l71.4 0 l-178.5 238.0 Z" fill="#FFFFFF" opacity="0.12"/>
 <path d="M932.4 672.0 l178.5 -238.0 l33.3 0 l-178.5 238.0 Z" fill="#FFFFFF" opacity="0.08"/>
 <rect x="770.0" y="434.0" width="290.0" height="42.8" fill="#CFE0EC" opacity="0.18"/>

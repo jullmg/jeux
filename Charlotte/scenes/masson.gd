@@ -25,11 +25,12 @@ const BLOCKS := {
 		"squirrels_at": [5.5], "moon_at": 4.5,
 		"signs": {
 			"masson_2605": [[410.0, "Boni-soir", "#FFFFFF", "#C8202A", 17]],
-			"masson_2611": [[350.0, "Domino's", "#0B6EAF", "#FFFFFF", 15]],
+			"masson_2611": [[380.0, "Domino's", "#0B6EAF", "#FFFFFF", 15]],
 			"masson_2615": [[350.0, "Le Jardin de Mathilde", "#FFFFFF", "#1A1A1A", 12]],
 			"masson_2631": [[235.0, "YOGA D.N.A.", "#FFFFFF", "#6E5E7E", 13], [650.0, "Restaurant Phở", "#C8202A", "#F2F0EA", 13],
 				[1065.0, "Jus", "#3E9A3E", "#F2F0EA", 14]],
 		},
+		"logos": {"masson_2611": [[230.0, "dominos_logo.svg", 26.0]]},
 		"panels": {},
 	},
 	"1re_2e_pair": {
@@ -38,7 +39,7 @@ const BLOCKS := {
 		"trees_after": [2, 3], "tree_shift": {2: 0.0, 3: 0.0}, "lamps_after": [2, 4], "hydrants_at": [3.5], "racks_at": [],
 		"squirrels_at": [3.3], "moon_at": 4.5,
 		"signs": {},
-		"texts": {"masson_2620": [[330.0, 638.0, "TELUS", "#FFFFFF", "#4B286D", 16]]},
+		"logos": {"masson_2620": [[330.0, "telus_logo.svg", 18.0, 638.0]]},
 		"panels": {},
 	},
 	"2e_3e_impair": {
@@ -308,7 +309,8 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 		logo.texture = tex
 		logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		logo.scale = Vector2.ONE * float(l[2]) / tex.get_height()
-		logo.position = house.position + Vector2(float(l[0]), tex_h - 302.0) * HOUSE_SCALE
+		# A fourth value is the logo's own height on the facade, for one not on a shop's sign band.
+		logo.position = house.position + Vector2(float(l[0]), float(l[3]) if l.size() > 3 else tex_h - 302.0) * HOUSE_SCALE
 		add_child(logo)
 	# Words painted straight on a wall: [x, y on the facade, text, colour, outline, size].
 	for t: Array in _data().get("texts", {}).get(art, []):

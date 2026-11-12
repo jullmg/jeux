@@ -22,3 +22,5 @@ The Masson logos are SVGs imported at `svg/scale=4.0` (their `.import`) so they 
 (`scenes/masson.gd`, `BLOCKS` … `logos`).
 | `dollarama_logo.svg` | Dollarama, its green band and $1 badge | Wikimedia Commons, `File:Dollarama logo.svg` |
 | `bmo_logo.svg` | BMO (Banque de Montréal), the roundel and wordmark | Wikimedia Commons, `File:BMO Logo.svg` |
+| `dominos_logo.svg` | Domino's Pizza, the domino | Wikimedia Commons, `File:Domino's pizza logo.svg` |
+| `telus_logo.svg` | TELUS, its wordmark and leaf | Wikimedia Commons, `File:Telus-Logo.svg` |

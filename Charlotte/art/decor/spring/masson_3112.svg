@@ -165,9 +165,26 @@
 <rect x="34.0" y="426.0" width="752.0" height="8.0" fill="#000000" opacity="0.35"/>
 <rect x="40.0" y="434.0" width="740.0" height="238.0" fill="#2F3A41" />
 <clipPath id="in1"><rect x="40.0" y="434.0" width="740.0" height="238.0"/></clipPath><g clip-path="url(#in1)">
-<rect x="40.0" y="434.0" width="740.0" height="238.0" fill="#F2EEE6" />
+<rect x="40.0" y="434.0" width="740.0" height="238.0" fill="#d5d1ca" />
 <rect x="40.0" y="434.0" width="740.0" height="238.0" fill="url(#warm)" opacity="0.25"/>
-<rect x="40.0" y="658.0" width="740.0" height="14.0" fill="#9d9b96" />
+<rect x="40.0" y="434.0" width="740.0" height="26.0" fill="#1E1A18" opacity="0.55"/>
+<rect x="56.0" y="454.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="70.0" cy="464.0" r="16.0" fill="url(#glow)" />
+<rect x="146.0" y="454.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="160.0" cy="464.0" r="16.0" fill="url(#glow)" />
+<rect x="236.0" y="454.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="250.0" cy="464.0" r="16.0" fill="url(#glow)" />
+<rect x="326.0" y="454.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="340.0" cy="464.0" r="16.0" fill="url(#glow)" />
+<rect x="416.0" y="454.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="430.0" cy="464.0" r="16.0" fill="url(#glow)" />
+<rect x="506.0" y="454.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="520.0" cy="464.0" r="16.0" fill="url(#glow)" />
+<rect x="596.0" y="454.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="610.0" cy="464.0" r="16.0" fill="url(#glow)" />
+<rect x="686.0" y="454.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="700.0" cy="464.0" r="16.0" fill="url(#glow)" />
+<rect x="40.0" y="658.0" width="740.0" height="14.0" fill="#8a8883" />
 <path d="M80.0 434.0 V464.0" fill="none" stroke="#2A2A2A" stroke-width="1.5"/>
 <path d="M74.0 474.0 l12 0 l-4 -10 l-4 0 z" fill="#2A2A2A" />
 <circle cx="80.0" cy="476.0" r="10.0" fill="#FFE2A0" opacity="0.8"/>
@@ -189,7 +206,7 @@
 <path d="M697.4 434.0 V464.0" fill="none" stroke="#2A2A2A" stroke-width="1.5"/>
 <path d="M691.4 474.0 l12 0 l-4 -10 l-4 0 z" fill="#2A2A2A" />
 <circle cx="697.4" cy="476.0" r="10.0" fill="#FFE2A0" opacity="0.8"/>
-<rect x="40.0" y="598.0" width="740.0" height="60.0" fill="#b6b3ad" />
+<rect x="40.0" y="598.0" width="740.0" height="60.0" fill="#a09d98" />
 <rect x="52.0" y="624.0" width="36.0" height="5.0" fill="#F2F0EA" />
 <rect x="68.0" y="628.0" width="4.0" height="30.0" fill="#2A2A2A" />
 <rect x="41.0" y="614.0" width="4.0" height="44.0" fill="#3A2A20" />

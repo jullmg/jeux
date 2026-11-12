@@ -6,9 +6,24 @@
 <rect x="34.0" y="701.0" width="682.0" height="8.0" fill="#000000" opacity="0.35"/>
 <rect x="40.0" y="709.0" width="670.0" height="246.0" fill="#2F3A41" />
 <clipPath id="in1"><rect x="40.0" y="709.0" width="670.0" height="246.0"/></clipPath><g clip-path="url(#in1)">
-<rect x="40.0" y="709.0" width="670.0" height="246.0" fill="#3A3230" />
+<rect x="40.0" y="709.0" width="670.0" height="246.0" fill="#332c2a" />
 <rect x="40.0" y="709.0" width="670.0" height="246.0" fill="url(#warm)" opacity="0.25"/>
-<rect x="40.0" y="941.0" width="670.0" height="14.0" fill="#26201f" />
+<rect x="40.0" y="709.0" width="670.0" height="26.0" fill="#1E1A18" opacity="0.55"/>
+<rect x="56.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="70.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="146.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="160.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="236.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="250.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="326.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="340.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="416.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="430.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="506.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="520.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="596.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="610.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="40.0" y="941.0" width="670.0" height="14.0" fill="#211d1b" />
 <path d="M80.0 709.0 V739.0" fill="none" stroke="#2A2A2A" stroke-width="1.5"/>
 <path d="M74.0 749.0 l12 0 l-4 -10 l-4 0 z" fill="#2A2A2A" />
 <circle cx="80.0" cy="751.0" r="10.0" fill="#FFE2A0" opacity="0.8"/>
@@ -33,7 +48,7 @@
 <path d="M695.3 709.0 V739.0" fill="none" stroke="#2A2A2A" stroke-width="1.5"/>
 <path d="M689.3 749.0 l12 0 l-4 -10 l-4 0 z" fill="#2A2A2A" />
 <circle cx="695.3" cy="751.0" r="10.0" fill="#FFE2A0" opacity="0.8"/>
-<rect x="40.0" y="881.0" width="670.0" height="60.0" fill="#2c2624" />
+<rect x="40.0" y="881.0" width="670.0" height="60.0" fill="#262120" />
 <rect x="52.0" y="907.0" width="36.0" height="5.0" fill="#F2F0EA" />
 <rect x="68.0" y="911.0" width="4.0" height="30.0" fill="#2A2A2A" />
 <rect x="41.0" y="897.0" width="4.0" height="44.0" fill="#3A2A20" />

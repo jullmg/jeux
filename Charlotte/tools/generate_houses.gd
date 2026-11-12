@@ -535,7 +535,7 @@ const HOUSES := [
 		"lintel": "#C9C3B6", "lintel_dark": "#8E887E",
 		"shops": [{"x0": 30.0, "x1": 440.0, "sign": "#2B2B2E", "door": 380.0, "inside": "salon"},
 			{"x0": 440.0, "x1": 740.0, "sign": "#1E1E20", "door": 700.0, "inside": "salon", "wall": "#E8DCCC", "transom": "none"},
-			{"x0": 740.0, "x1": 1130.0, "sign": "#141416", "frame": "#141416", "door": 1080.0, "inside": "goods", "kick": "tile", "tile": "#C8202A"},
+			{"x0": 740.0, "x1": 1130.0, "sign": "#141416", "frame": "#141416", "door": 1080.0, "inside": "jewellery", "kick": "tile", "tile": "#C8202A"},
 			{"x0": 1130.0, "x1": 1400.0, "sign": "#3A3A3C", "frame": "#3A3A3C", "door": 1265.0, "dark": true, "door_style": "double", "transom": "none"},
 			{"x0": 1400.0, "x1": 1670.0, "sign": "#E9E5DE", "frame": "#4E4E50", "door": 1600.0, "inside": "office"}],
 		"basement": [],
@@ -558,7 +558,7 @@ const HOUSES := [
 		"lintel": "#C9965E", "lintel_dark": "#9A7044", "windows": [[90.0, 110.0], [320.0, 110.0], [600.0, 110.0], [860.0, 110.0]],
 		"projecting": [[560.0, 760.0]], "pier": "#2E3236",
 		"shops": [{"x0": 30.0, "x1": 520.0, "sign": "#2B2B2E", "frame": "#2E3236", "door": 440.0, "inside": "clothes", "kick": "brick"},
-			{"x0": 820.0, "x1": 1070.0, "sign": "#FFE600", "frame": "#2E3236", "door": 945.0, "inside": "goods", "wall": "#F2F0EA", "transom": "none"}],
+			{"x0": 820.0, "x1": 1070.0, "sign": "#FFE600", "frame": "#2E3236", "door": 945.0, "inside": "phones", "transom": "none"}],
 		"res_doors": [660.0], "basement": [],
 	},
 	# Across 6e from 2902: the corner of the next block, its side.
@@ -734,7 +734,7 @@ const HOUSES := [
 		"bricks": ["#A44E3C", "#B05846", "#984434", "#B8604C", "#A04A3A"], "mortar": "#CDBFB0", "parapet": "corbel",
 		"lintel": "#E8E2D6", "lintel_dark": "#A39A8A", "lintel_style": "ears", "window_style": "slider", "frame": "#1E1E20",
 		"windows": [[90.0, 110.0], [320.0, 110.0], [580.0, 110.0], [800.0, 110.0]], "projecting": [[550.0, 940.0]],
-		"shops": [{"x0": 30.0, "x1": 480.0, "sign": "#1E1E20", "frame": "#1E1E20", "door": 250.0, "inside": "clothes", "wall": "#F4F2EE", "transom": "none"},
+		"shops": [{"x0": 30.0, "x1": 480.0, "sign": "#1E1E20", "frame": "#1E1E20", "door": 250.0, "inside": "optician", "transom": "none"},
 			{"x0": 480.0, "x1": 970.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 900.0, "inside": "bakery", "front": "wood", "kick": "tile", "tile": "#3E7A4E"}], "basement": [],
 	},
 	# 3016–3028: buff brick on three floors, the parapet raised in a curved crest with scrolls (3012…, 3034…).
@@ -882,7 +882,7 @@ const HOUSES := [
 		"name": "masson_3071", "kind": "commerce", "width": 1100.0, "floors": 2,
 		"bricks": ["#D2B48A", "#C8A87E", "#DABE94", "#BE9E74"], "mortar": "#EDE3D2", "parapet": "flat",
 		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[120.0, 130.0], [420.0, 130.0], [740.0, 130.0]],
-		"ground": "painted", "paint": "#EBD3CF", "mural": "lilies", "mural_x0": 30.0,
+		"ground": "painted", "paint": "#EBD3CF", "mural": "plants", "mural_x0": 30.0,
 		"shops": [{"x0": 760.0, "x1": 1070.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 1000.0, "inside": "clothes", "transom": "none"}], "basement": [],
 	},
 	# 3103–3105, Méga Vrac: grey-buff brick on three floors, its blue sign (3103…).
@@ -960,7 +960,7 @@ const HOUSES := [
 		"name": "masson_3128", "kind": "commerce", "width": 640.0, "floors": 2, 
 		"bricks": ["#ECEAE4", "#E4E2DC", "#F2F0EA"], "mortar": "#D2CFC8", "parapet": "flat",
 		"lintel": "#E8E6E0", "lintel_dark": "#B9B5AC", "lintel_style": "none", "window_style": "fixed", "frame": "#2B2B2E", "flower_boxes": true, "windows": [[90.0, 200.0], [350.0, 200.0]],
-		"shops": [{"x0": 30.0, "x1": 610.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 300.0, "inside": "clothes", "wall": "#F4F2EE", "transom": "none", "panes": 2}], "basement": [],
+		"shops": [{"x0": 30.0, "x1": 610.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 300.0, "inside": "deli", "transom": "none", "panes": 2}], "basement": [],
 	},
 	# 3126: brick on two floors, a shop under a red sign (3132…).
 	{
@@ -1049,7 +1049,7 @@ const HOUSES := [
 		"name": "masson_2737", "kind": "commerce", "width": 1200.0, "floors": 2, "upper": "stucco", "stucco": "#9CC8E0",
 		"bricks": ["#9CC8E0"], "mortar": "#8AB4CC", "parapet": "flat", "lintel": "#E8E6E0", "lintel_dark": "#9E968A",
 		"windows": [[120.0, 150.0], [460.0, 150.0], [800.0, 150.0]], "sky_mural": true,
-		"ground": "painted", "paint": "#C8DCE8", "mural": "lilies", "mural_x0": 30.0,
+		"ground": "painted", "paint": "#9CC8E0", "mural": "plants", "mural_x0": 30.0,
 		"shops": [{"x0": 700.0, "x1": 1170.0, "sign": "#1F4E9A", "frame": "#2B2B2E", "door": 760.0, "inside": "office", "transom": "none"}], "basement": [],
 	},
 	# Across 4e: the side of BANCO's building, brown brick (2801…).
@@ -1113,7 +1113,7 @@ const HOUSES := [
 		"bricks": ["#D8D6D0"], "mortar": "#B9B5AC", "parapet": "flat", "lintel": "#E8E6E0", "lintel_dark": "#9E968A", "lintel_style": "none",
 		"trim": "#3A3A3C", "trim_dark": "#1E1E20",
 		"windows": [[60.0, 220.0], [300.0, 220.0], [540.0, 220.0], [780.0, 220.0]],
-		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#1E6E3E", "frame": "#2B2B2E", "door": 420.0, "awning": "#1E6E3E", "inside": "goods", "wall": "#F2EEE6", "transom": "none"},
+		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#1E6E3E", "frame": "#2B2B2E", "door": 420.0, "awning": "#1E6E3E", "inside": "books", "transom": "none"},
 			{"x0": 560.0, "x1": 1070.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 700.0, "inside": "goods", "kick": "panel"}], "basement": [],
 	},
 	# 2661–2663: new red brick on three floors, recessed balconies with glass rails (2661…, 2663…).
@@ -1244,7 +1244,7 @@ const HOUSES := [
 		"bricks": ["#8E4A3A", "#9A5242", "#844436", "#A0584A"], "mortar": "#B9AC9E", "parapet": "corbel",
 		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "lintel_style": "arch", "window_style": "hung", "hung_frame": "#F2F0EA", "juliets": true, "windows": [[90.0, 120.0], [360.0, 120.0], [640.0, 120.0], [920.0, 120.0], [1150.0, 100.0]],
 		"projecting": [[60.0, 260.0]],
-		"shops": [{"x0": 30.0, "x1": 440.0, "sign": "#9C8EA8", "frame": "#2B2B2E", "door": 380.0, "inside": "salon", "wall": "#EDE6F2", "transom": "none"},
+		"shops": [{"x0": 30.0, "x1": 440.0, "sign": "#9C8EA8", "frame": "#2B2B2E", "door": 380.0, "inside": "salon", "wall": "#A898B4", "transom": "none"},
 			{"x0": 440.0, "x1": 860.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 800.0, "inside": "restaurant", "front": "wood", "kick": "tile", "tile": "#8E2020"},
 			{"x0": 860.0, "x1": 1270.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 1200.0, "inside": "cafe", "wall": "#E8F4DA", "transom": "none"}], "basement": [],
 	},
@@ -1262,7 +1262,7 @@ const HOUSES := [
 	},
 	{
 		"name": "masson_2620", "kind": "masson_lot", "lot_style": "setback", "width": 1100.0, "floors": 3, "halloween": false,
-		"bricks": ["#A04A3A", "#AE5442", "#943F31", "#B85E4A"], "mortar": "#CDBFB0", "band": "#4B286D",
+		"bricks": ["#A04A3A", "#AE5442", "#943F31", "#B85E4A"], "mortar": "#CDBFB0", "band": "#F2F0EA",
 	},
 	{
 		"name": "masson_2606", "kind": "masson_lot", "lot_style": "setback", "white": true, "width": 1100.0, "floors": 3,
@@ -4883,6 +4883,8 @@ func _commerce() -> void:
 				sx += 150.0
 		if k.get("mural", "") == "lilies":
 			_lily_mural(k.get("mural_x0", X0), X1, belt + 16.0, ground_y)
+		elif k.get("mural", "") == "plants":
+			_plants_mural(k.get("mural_x0", X0), X1, belt + 16.0, ground_y)
 		elif k.get("mural", "") == "graffiti":
 			_graffiti_mural(k.get("mural_x0", X0), X1, belt + 16.0, ground_y)
 	else:
@@ -5053,10 +5055,18 @@ func _shop_inside(kind: String, x: float, y: float, w: float, h: float, seed_val
 	out.append('<clipPath id="in%d"><rect x="%s" y="%s" width="%s" height="%s"/></clipPath><g clip-path="url(#in%d)">' % [_clips, _n(x), _n(y), _n(w), _n(h), _clips])
 	var walls := {"cafe": "#C99A6A", "restaurant": "#B5664A", "clothes": "#ECE8E0", "fruit": "#E8E0C8", "bank": "#E4E2DC",
 		"salon": "#F0EEE8", "office": "#D8D4CC", "florist": "#DDE6D2", "bakery": "#E8D2A8", "hardware": "#D2C8B4", "pharmacy": "#F4F4F2"}
-	var wall: String = wall_color if wall_color != "" else walls.get(kind, "#D8CDBA")
+	walls.merge({"deli": "#E2D2B4", "books": "#C9A27A", "optician": "#E4E0D8", "jewellery": "#3A2E2A", "phones": "#ECEAE6"})
+	var wall: String = "#" + Color(wall_color if wall_color != "" else walls.get(kind, "#D8CDBA")).darkened(0.12).to_html(false)
 	var floor_y := y + h - 14.0
+	# Depth, the same for every shop: the back wall, its warm light, the dark of the ceiling at the top, a row of lights.
 	_rect(x, y, w, h, wall)
 	_rect(x, y, w, h, "url(#warm)", 'opacity="0.25"')
+	_rect(x, y, w, 26, "#1E1A18", 'opacity="0.55"')
+	var lamp_x := x + 30.0
+	while lamp_x < x + w - 10.0:
+		_rect(lamp_x - 14, y + 20, 28, 4, "#FFF2D0")
+		_circle(lamp_x, y + 30, 16, "url(#glow)")
+		lamp_x += 90.0
 	_rect(x, floor_y, w, 14, "#" + Color(wall).darkened(0.35).to_html(false))
 	match kind:
 		"cafe", "restaurant":
@@ -5122,7 +5132,7 @@ func _shop_inside(kind: String, x: float, y: float, w: float, h: float, seed_val
 				_rect(sx - 3, floor_y - 18, 6, 18, "#8E8A82")
 				sx += 110.0
 		"office":
-			_rect(x, y, w, h, "#E8E4DA")
+			_rect(x, y + 26, w, h - 26, "#C9C2B4")
 			var by := y + 4.0
 			while by < y + h * 0.8:
 				_rect(x, by, w, 3, "#B9B5AC")
@@ -5155,8 +5165,60 @@ func _shop_inside(kind: String, x: float, y: float, w: float, h: float, seed_val
 			while cx2 < x + w - 20.0:
 				_rect(cx2, floor_y - 26, 18, 24, ["#E8E4DA", "#3D8BD9", "#4FA34A", "#E8812E"][r.randi_range(0, 3)], _stroke("#5E5A54", 1))
 				cx2 += 22.0
-		"pharmacy":
+		"pharmacy", "phones":
 			_shop_glass_goods(x + 4, y + 30, w - 8, h - 40, seed_value, 3)
+		"deli":
+			# A sandwich counter: menu boards high up, the glass case of breads and fillings, a cutting board, a coffee machine.
+			var mx := x + 20.0
+			while mx < x + w - 70.0:
+				_rect(mx, y + 34, 70, 44, "#1E1E20", _stroke("#8A6A4A", 2))
+				for l in 4:
+					_rect(mx + 8, y + 42 + l * 9, r.randf_range(30.0, 54.0), 2, "#F2F0EA")
+				mx += 90.0
+			_rect(x, floor_y - 56, w, 56, "#8A5A3A")
+			_rect(x + 10, floor_y - 92, w - 20, 38, "#CFE6EE", 'opacity="0.55"')
+			var bx := x + 24.0
+			while bx < x + w - 24.0:
+				out.append('<ellipse cx="%s" cy="%s" rx="16" ry="6" fill="#D49A50" stroke="#8A5A2A" stroke-width="1"/>' % [_n(bx), _n(floor_y - 62)])
+				_rect(bx - 12, floor_y - 80, 24, 8, ["#C8202A", "#4FA34A", "#F2E6C8"][r.randi_range(0, 2)])
+				bx += 40.0
+			_rect(x + w - 60, floor_y - 120, 36, 30, "#3A3A3C", _stroke("#1E1E20", 1.5))
+		"books":
+			for row in 4:
+				var ry := y + 40.0 + row * 34.0
+				_rect(x, ry + 28, w, 4, "#5A3A24")
+				var bk := x + 4.0
+				while bk < x + w - 6.0:
+					var bw := r.randf_range(5.0, 10.0)
+					var bh := r.randf_range(18.0, 27.0)
+					_rect(bk, ry + 28 - bh, bw, bh, ["#C8202A", "#1F4E9A", "#F2C230", "#3E7A4E", "#E8E4DA", "#5E3A7E"][r.randi_range(0, 5)])
+					bk += bw + 1.0
+			_rect(x + w * 0.3, floor_y - 40, w * 0.4, 40, "#8A5A3A")
+		"optician":
+			# Frames on lit shelves along the wall, a mirror, a little desk.
+			for row in 3:
+				var ry := y + 44.0 + row * 36.0
+				_rect(x + 8, ry + 14, w - 16, 3, "#B9B5AC")
+				var fx := x + 18.0
+				while fx < x + w - 24.0:
+					var fc: String = ["#1E1E20", "#8A3A2A", "#2E4E7E", "#C9A040"][r.randi_range(0, 3)]
+					for side in 2:
+						out.append('<ellipse cx="%s" cy="%s" rx="6" ry="4.5" fill="none" stroke="%s" stroke-width="2"/>' % [_n(fx + side * 14.0), _n(ry + 8), fc])
+					_rect(fx + 5, ry + 7, 4, 1.5, fc)
+					fx += 36.0
+			_rect(x + w - 50, floor_y - 110, 34, 70, "#DDE6EC", _stroke("#B9B5AC", 2))
+			_rect(x + 20, floor_y - 34, 70, 34, "#F2F0EA", _stroke("#B9B5AC", 1.5))
+		"jewellery":
+			# Lit glass cases on a dark wall, rings and chains sparkling.
+			for c in 2:
+				var cy := y + 50.0 + c * 50.0
+				_rect(x + 10, cy, w - 20, 34, "#F2EEE6", 'opacity="0.85"')
+				var jx := x + 20.0
+				while jx < x + w - 20.0:
+					_circle(jx, cy + 20, 4, "none", _stroke("#E8C24A", 2))
+					_circle(jx + 2, cy + 18, 1.2, "#FFFFFF")
+					jx += 22.0
+			_rect(x, floor_y - 40, w, 40, "#5A4A3A")
 	out.append('</g>')
 
 
@@ -5435,6 +5497,36 @@ func _graffiti_mural(x0: float, x1: float, y0: float, y1: float) -> void:
 			_path("M%s %s q%s %s %s %s q%s %s %s %s q%s %s %s %s z" % [_n(x - r), _n(y), _n(r * 0.2), _n(-r), _n(r), _n(-r * 0.6), _n(r), _n(r * 0.3), _n(r * 0.7), _n(r), _n(-r * 0.8), _n(r * 0.5), _n(-r * 1.7), _n(-r * 0.4)], c, _stroke("#1A1A1A", 5))
 			_path("M%s %s q%s %s %s %s" % [_n(x - r * 0.6), _n(y - r * 0.1), _n(r * 0.3), _n(-r * 0.4), _n(r * 0.8), _n(-r * 0.2)], "none", _stroke("#FFFFFF", 5) + ' opacity="0.75" stroke-linecap="round"')
 		_circle(x + r * 0.9, y - r * 0.8, 4, "#FFFFFF", 'opacity="0.85"')
+	out.append('</g>')
+
+
+# A mural of big leaves and flowers painted across a wall (3071…, 2737…): broad green leaves of several greens with their
+# veins, round blossoms, a few doves, over the wall's own paint.
+func _plants_mural(x0: float, x1: float, y0: float, y1: float) -> void:
+	_clips += 1
+	out.append('<clipPath id="pl%d"><rect x="%s" y="%s" width="%s" height="%s"/></clipPath><g clip-path="url(#pl%d)">' % [_clips, _n(x0), _n(y0), _n(x1 - x0), _n(y1 - y0), _clips])
+	var greens := ["#2E7A4E", "#4FA34A", "#1E5E3E", "#6EB85A", "#3E8A6E"]
+	var x := x0 + 20.0
+	var i := 0
+	while x < x1:
+		var base := Vector2(x, y1 + 10.0)
+		for l in 3:
+			var ang := -PI / 2.0 + (l - 1) * 0.55 + rng.randf_range(-0.2, 0.2)
+			var length := (y1 - y0) * rng.randf_range(0.55, 0.95)
+			var tip := base + Vector2(cos(ang), sin(ang)) * length
+			var side := Vector2(-sin(ang), cos(ang)) * length * 0.22
+			var mid := (base + tip) / 2.0
+			_path("M%s %s Q%s %s %s %s Q%s %s %s %s Z" % [_n(base.x), _n(base.y), _n(mid.x + side.x), _n(mid.y + side.y), _n(tip.x), _n(tip.y), _n(mid.x - side.x), _n(mid.y - side.y), _n(base.x), _n(base.y)], greens[(i + l) % greens.size()], _stroke("#143A28", 2))
+			_path("M%s %s L%s %s" % [_n(base.x), _n(base.y), _n(tip.x), _n(tip.y)], "none", _stroke("#B8E0A0", 2) + ' opacity="0.7"')
+		if i % 2 == 0:
+			var fy := y0 + rng.randf_range(30.0, (y1 - y0) * 0.5)
+			var fc: String = ["#E85FA0", "#F2C230", "#E8812E", "#F2F0EA"][i % 4]
+			for pet in 6:
+				var a := TAU * pet / 6.0
+				_circle(x + 40 + cos(a) * 14.0, fy + sin(a) * 14.0, 10, fc, _stroke("#5A2A3A", 1.2))
+			_circle(x + 40, fy, 8, "#F2C230")
+		x += rng.randf_range(90.0, 130.0)
+		i += 1
 	out.append('</g>')
 
 

@@ -1877,9 +1877,22 @@
 <rect x="34.0" y="701.0" width="522.0" height="8.0" fill="#000000" opacity="0.35"/>
 <rect x="40.0" y="709.0" width="510.0" height="238.0" fill="#2F3A41" />
 <clipPath id="in1"><rect x="40.0" y="709.0" width="510.0" height="238.0"/></clipPath><g clip-path="url(#in1)">
-<rect x="40.0" y="709.0" width="510.0" height="238.0" fill="#F4F4F2" />
+<rect x="40.0" y="709.0" width="510.0" height="238.0" fill="#d7d7d5" />
 <rect x="40.0" y="709.0" width="510.0" height="238.0" fill="url(#warm)" opacity="0.25"/>
-<rect x="40.0" y="933.0" width="510.0" height="14.0" fill="#9f9f9d" />
+<rect x="40.0" y="709.0" width="510.0" height="26.0" fill="#1E1A18" opacity="0.55"/>
+<rect x="56.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="70.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="146.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="160.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="236.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="250.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="326.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="340.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="416.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="430.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="506.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="520.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="40.0" y="933.0" width="510.0" height="14.0" fill="#8c8c8a" />
 <rect x="51.0" y="783.4" width="7.0" height="15.0" fill="#E07A9A" opacity="0.9" rx="2"/>
 <rect x="53.0" y="778.4" width="3.0" height="6.0" fill="#E07A9A" opacity="0.8"/>
 <rect x="61.0" y="783.4" width="7.0" height="15.0" fill="#F2C230" opacity="0.9" rx="2"/>
@@ -2202,9 +2215,20 @@
 <rect x="564.0" y="701.0" width="502.0" height="8.0" fill="#000000" opacity="0.35"/>
 <rect x="570.0" y="709.0" width="490.0" height="196.0" fill="#2F3A41" />
 <clipPath id="in3"><rect x="570.0" y="709.0" width="490.0" height="196.0"/></clipPath><g clip-path="url(#in3)">
-<rect x="570.0" y="709.0" width="490.0" height="196.0" fill="#B5664A" />
+<rect x="570.0" y="709.0" width="490.0" height="196.0" fill="#9f5a41" />
 <rect x="570.0" y="709.0" width="490.0" height="196.0" fill="url(#warm)" opacity="0.25"/>
-<rect x="570.0" y="891.0" width="490.0" height="14.0" fill="#764230" />
+<rect x="570.0" y="709.0" width="490.0" height="26.0" fill="#1E1A18" opacity="0.55"/>
+<rect x="586.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="600.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="676.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="690.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="766.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="780.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="856.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="870.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="946.0" y="729.0" width="28.0" height="4.0" fill="#FFF2D0" />
+<circle cx="960.0" cy="739.0" r="16.0" fill="url(#glow)" />
+<rect x="570.0" y="891.0" width="490.0" height="14.0" fill="#673b2a" />
 <path d="M610.0 709.0 V739.0" fill="none" stroke="#2A2A2A" stroke-width="1.5"/>
 <path d="M604.0 749.0 l12 0 l-4 -10 l-4 0 z" fill="#2A2A2A" />
 <circle cx="610.0" cy="751.0" r="10.0" fill="#FFE2A0" opacity="0.8"/>
@@ -2223,7 +2247,7 @@
 <path d="M1049.0 709.0 V739.0" fill="none" stroke="#2A2A2A" stroke-width="1.5"/>
 <path d="M1043.0 749.0 l12 0 l-4 -10 l-4 0 z" fill="#2A2A2A" />
 <circle cx="1049.0" cy="751.0" r="10.0" fill="#FFE2A0" opacity="0.8"/>
-<rect x="570.0" y="831.0" width="490.0" height="60.0" fill="#884d38" />
+<rect x="570.0" y="831.0" width="490.0" height="60.0" fill="#774431" />
 <rect x="582.0" y="857.0" width="36.0" height="5.0" fill="#F2F0EA" />
 <rect x="598.0" y="861.0" width="4.0" height="30.0" fill="#2A2A2A" />
 <rect x="571.0" y="847.0" width="4.0" height="44.0" fill="#3A2A20" />
