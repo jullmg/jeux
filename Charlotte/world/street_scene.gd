@@ -1039,49 +1039,6 @@ func _build_utility_poles() -> void:
 	add_child(birds)
 
 
-# Winter: smoke rising from the chimneys, from its own random numbers.
-func _build_life() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_value + 37
-	if Season.is_winter():
-		for i in layout.size():
-			if cross_streets.has(layout[i]) or layout[i].begins_with("ruelle") or rng.randf() < 0.5:
-				continue
-			var top := _house_top(layout[i])
-			var cx := _house_origin(i).x + _tex(layout[i]).get_width() * HOUSE_SCALE * rng.randf_range(0.6, 0.85)
-			var stub := ColorRect.new()
-			stub.color = Color("#8A4A3A")
-			stub.size = Vector2(16, 22)
-			stub.position = Vector2(cx - 8.0, top - 26.0)
-			add_child(stub)
-			add_child(_smoke(Vector2(cx, top - 28.0)))
-
-
-func _smoke(at: Vector2) -> CPUParticles2D:
-	var p := CPUParticles2D.new()
-	p.position = at
-	p.texture = PropArt.flake()
-	p.amount = 7
-	p.lifetime = 5.0
-	p.preprocess = 5.0
-	p.gravity = Vector2(10, -16)
-	p.initial_velocity_min = 6.0
-	p.initial_velocity_max = 14.0
-	p.direction = Vector2(0.2, -1)
-	p.spread = 15.0
-	p.scale_amount_min = 1.8
-	p.scale_amount_max = 2.6
-	var grow := Curve.new()
-	grow.add_point(Vector2(0, 0.5))
-	grow.add_point(Vector2(1, 2.6))
-	p.scale_amount_curve = grow
-	var fade := Gradient.new()
-	fade.offsets = PackedFloat32Array([0.0, 0.2, 1.0])
-	fade.colors = PackedColorArray([Color(0.62, 0.62, 0.68, 0.0), Color(0.62, 0.62, 0.68, 0.7), Color(0.75, 0.75, 0.8, 0.0)])
-	p.color_ramp = fade
-	return p
-
-
 # The planted curb extensions at every corner (CurbGarden): our curb bulges into the parking lane on both sides
 # of each cross street, in front of the people.
 func _build_curb_gardens() -> void:
@@ -1365,7 +1322,6 @@ func _build_props() -> void:
 	_build_extra_props()
 	_build_utility_poles()
 	_build_curb_gardens()
-	_build_life()
 	_traffic = Node2D.new()
 	add_child(_traffic)
 	_bike_rng.seed = seed_value + 53

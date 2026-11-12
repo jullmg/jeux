@@ -993,7 +993,7 @@ class _Art:
 		for i in 5:
 			draw_circle(at + Vector2(-20 + i * 10, -12), 5, [Color("#E74C3C"), Color("#3498DB"), Color("#F1C40F"), Color("#2ECC71"), Color("#9B59B6")][i])
 
-	# The roofs of the avenue at night: cornices, chimneys and a lit window here and there.
+	# The roofs of the avenue at night: cornices and a lit window here and there.
 	func _roof_line(w: float, horizon: float) -> void:
 		var x := 6.0
 		var i := 0
@@ -1003,11 +1003,7 @@ class _Art:
 			var wall := Color("#4A4458") if i % 2 == 0 else Color("#5A5268")
 			draw_rect(Rect2(x, top, ww, horizon + 16.0 - top), wall)
 			draw_rect(Rect2(x, top, ww * 0.26, horizon + 16.0 - top), wall.lightened(0.07))
-			# The chimney, then the cornice over it all.
-			if i % 3 != 1:
-				draw_rect(Rect2(x + ww * 0.62, top - 22, 16, 24), wall.darkened(0.2))
-				draw_rect(Rect2(x + ww * 0.62, top - 22, 16, 24), INK, false, 2.0)
-				draw_rect(Rect2(x + ww * 0.6 - 2, top - 26, 22, 6), wall.darkened(0.35))
+			# The cornice over it all (no chimneys: Julien).
 			draw_rect(Rect2(x - 3, top - 7, ww + 6, 9), wall.darkened(0.3))
 			draw_rect(Rect2(x - 3, top - 7, ww + 6, 9), INK, false, 2.0)
 			draw_rect(Rect2(x, top, ww, horizon + 16.0 - top), INK, false, 2.0)

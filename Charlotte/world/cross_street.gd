@@ -544,14 +544,6 @@ func _walls(walls: Array, front_x: float, side: float) -> void:
 				_wall_quad(front_x, top - 6.0, top + 2.0, d0, d1, col.lightened(0.2))
 				# Where one building ends and the next begins.
 				draw_line(_at(Vector2(front_x, top), d0), _at(Vector2(front_x, FACADE_Y), d0), col.darkened(0.5), maxf(1.0, 2.5 / (1.0 + d0)))
-				# A chimney or a vent box on the near roofs, set back from the edge.
-				if d0 < 4.0 and w.kind == "plex" and not w.has("tex"):
-					var cd := d0 + (d1 - d0) * 0.3
-					var cx := front_x + side * 70.0
-					var chim := PackedVector2Array([_at(Vector2(cx, top - 34.0), cd), _at(Vector2(cx + side * 26.0, top - 34.0), cd),
-						_at(Vector2(cx + side * 26.0, top), cd), _at(Vector2(cx, top), cd)])
-					draw_colored_polygon(chim, col.darkened(0.2))
-					draw_colored_polygon(PackedVector2Array([chim[0] + Vector2(0, -3), chim[1] + Vector2(0, -3), chim[1], chim[0]]), Color("#5A5E62"))
 				if not w.has("tex"):
 					_wall_details(w, front_x, top, d0, d1)
 		d0 = d1

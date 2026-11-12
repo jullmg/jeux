@@ -80,9 +80,9 @@ static func _rooftops(layer: Parallax2D, span: float, rng: RandomNumberGenerator
 		var col := Color("#8E9FB4").lerp(Color("#A88F86"), rng.randf_range(0.0, 0.5))
 		_poly(layer, [Vector2(x, top), Vector2(x + w, top), Vector2(x + w, 560), Vector2(x, 560)], col)
 		_poly(layer, [Vector2(x - 3, top - 6), Vector2(x + w + 3, top - 6), Vector2(x + w + 3, top), Vector2(x - 3, top)], col.darkened(0.12))
+		# No chimneys (Julien): the draws that placed them are still made, so the rest of the skyline doesn't move.
 		if rng.randf() < 0.6:
-			var cx := x + rng.randf_range(20, w - 30)
-			_poly(layer, [Vector2(cx, top - 26), Vector2(cx + 14, top - 26), Vector2(cx + 14, top), Vector2(cx, top)], col.darkened(0.08))
+			rng.randf_range(20, w - 30)
 		for wx in range(int(x) + 20, int(x + w) - 20, 44):
 			_poly(layer, [Vector2(wx, top + 22), Vector2(wx + 18, top + 22), Vector2(wx + 18, top + 50), Vector2(wx, top + 50)], col.lerp(Color("#FFE2B0"), 0.25 if rng.randf() < 0.2 else 0.0).darkened(0.05))
 		x += w
