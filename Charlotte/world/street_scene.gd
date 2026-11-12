@@ -300,7 +300,7 @@ func _add_crossing(cs: CrossStreet) -> void:
 
 
 func _cross(cs: CrossStreet) -> void:
-	if GameState.age < CROSS_AGE:
+	if DebugMenu.blocked(GameState.age < CROSS_AGE):
 		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je n'ai pas le droit de traverser\ntoute seule !", 2.6)
 		return
 	var curbs := cs.road_x(CHARLOTTE_Y)
@@ -342,7 +342,7 @@ func _add_lane(art: String) -> void:
 	var area := Rect2(_house_origin(i) + Vector2(70.0, 330.0) * HOUSE_SCALE, Vector2(w - 140.0, 370.0) * HOUSE_SCALE)
 	add_child(DoorSpot.make(area, func():
 		# Not on Halloween night: a back lane after dark is no place for a little girl, and she knows it.
-		if Halloween.night():
+		if DebugMenu.blocked(Halloween.night()):
 			_charlotte.express("worry", 2.2)
 			Sfx.play("squeak", _charlotte.position)
 			Bubble.say(self, _charlotte.position + Vector2(0, -210.0), DARK_LANE[randi() % DARK_LANE.size()], 3.0)
@@ -783,7 +783,7 @@ const SHOP_SHUT := ["C'est fermé ! Le dépanneur ferme de bonne heure\nle soir 
 
 ## True when the dépanneur's door is not to be opened: on Halloween night it is shut, and she says so.
 func _shop_shut() -> bool:
-	if not Halloween.night():
+	if not DebugMenu.blocked(Halloween.night()):
 		return false
 	_charlotte.express("surprised", 2.2)
 	Sfx.play("squeak", _charlotte.position)

@@ -514,7 +514,7 @@ func _build_doors() -> void:
 	# The kitchen's back door: out to the yard and the lane behind the house. Shut on Halloween night like every
 	# other way into a lane — the evening happens on the four streets, not out the back in the dark.
 	add_child(DoorSpot.make(Rect2(KITCHEN_START + 300.0, 250, 120, 350), func():
-		if Halloween.night():
+		if DebugMenu.blocked(Halloween.night()):
 			_charlotte.express("worry", 2.2)
 			Sfx.play("squeak", _charlotte.position)
 			_say(_charlotte, StreetScene.DARK_LANE[randi() % StreetScene.DARK_LANE.size()], 280.0, 3.0)

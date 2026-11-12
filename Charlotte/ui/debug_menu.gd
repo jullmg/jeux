@@ -6,6 +6,11 @@ extends CanvasLayer
 ## listed shows up on its own under "Autres lieux" so it can never be forgotten.
 
 const ALIASES := {"printemps": "spring", "ete": "summer", "été": "summer", "automne": "autumn", "hiver": "winter"}
+## Debug: everywhere is open. Charlotte crosses the streets whatever her age, the back lanes and the two dépanneurs
+## take her in even on Halloween night, and her map is no longer greyed over. Set from the menu, kept for the session
+## only (never saved), and off in a release build since the menu cannot be opened there. Gates ask it through
+## `blocked()`, never by reading it.
+var no_limits := false
 ## The story flags each quest leaves behind, cleared with it.
 ## Story flags that belong to no quest, cleared by "Tout effacer".
 const OTHER_FLAGS := ["met_twins", "met_billie_auguste", "devoirs", "candy_bag_kind"]
@@ -59,6 +64,19 @@ const PLACES := [
 const NOT_PLACES: Array[String] = []
 
 var _panel: PanelContainer
+
+
+## **THE one way to stop Charlotte going somewhere.** `rule` is why she may not (too young to cross, a lane in the
+## dark, a shop that has closed…): this returns true when she really is stopped, and false while "Sans limites" is on.
+##
+##     if DebugMenu.blocked(GameState.age < CROSS_AGE):
+##         Bubble.say(...)   # she says why and stays where she is
+##         return
+##
+## **Every new gate goes through it**, so the debug switch opens that place too without anyone having to remember it.
+## A limit that is not a yes-or-no refusal (the grey crayon on the map) reads `no_limits` instead.
+func blocked(rule: bool) -> bool:
+	return rule and not no_limits
 
 
 func _ready() -> void:
@@ -135,6 +153,7 @@ func _places_list(parent: Control) -> void:
 	title.add_theme_color_override("font_color", Color("#FFD23F"))
 	title.add_theme_font_size_override("font_size", 20)
 	list.add_child(title)
+	list.add_child(_no_limits_button())
 	var known := {}
 	for place: Dictionary in PLACES:
 		if place.has("group"):
@@ -161,6 +180,23 @@ func _places_list(parent: Control) -> void:
 		list.add_child(head)
 		for id in lost:
 			list.add_child(_place_button(id, {"scene": id}))
+
+
+# The switch that opens the whole neighbourhood: no age to cross a street, no door shut on Halloween night, no grey
+# crayon on the map. Nothing is rebuilt, every gate asks on the spot, so the menu just redraws itself.
+func _no_limits_button() -> Button:
+	var b := Button.new()
+	b.text = "▶ Sans limites : OUI" if no_limits else "Sans limites : non"
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.tooltip_text = ("Traverser les rues à tout âge, entrer dans les ruelles et les dépanneurs même le soir de\n"
+		+ "l'Halloween, et la carte n'est plus grisée. Pour l'essai seulement : rien n'est sauvegardé.")
+	b.add_theme_font_size_override("font_size", 15)
+	b.add_theme_color_override("font_color", Color("#9AE6A1") if no_limits else Color("#CFCFD8"))
+	b.pressed.connect(func() -> void:
+		no_limits = not no_limits
+		_close()
+		_open())
+	return b
 
 
 func _place_button(text: String, place: Dictionary) -> Button:

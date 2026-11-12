@@ -275,7 +275,7 @@ class _Sheet:
 		_labels()
 		_decor()
 		_frame()
-		if GameState.age < StreetScene.CROSS_AGE:
+		if DebugMenu.blocked(GameState.age < StreetScene.CROSS_AGE):
 			_stop_sign()
 
 	# ── Paper and frame ──
@@ -567,6 +567,8 @@ class _Sheet:
 		var right := SIX_X + AVE_W / 2.0
 		var top := HOLT_Y - ST_W / 2.0
 		var bottom := DAND_Y + ST_W / 2.0
+		if DebugMenu.no_limits:
+			return Rect2(0.0, 0.0, size.x, size.y)
 		if GameState.age >= StreetScene.CROSS_AGE:
 			return Rect2(left - 70.0, 0.0, right - left + 140.0, size.y)
 		return Rect2(left, top, right - left, bottom - top)

@@ -86,7 +86,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   The first wall is the corner building's side, so it takes our own corner facade's height and brick (`ours`). Only the side across the street
   (another block) is still hand-written.
 - Before 8 (`StreetScene.CROSS_AGE`, `GameState.age`) Charlotte can't cross a street ("Je n'ai pas le droit de traverser
-  toute seule !"), so her world is the block: its four corners and the lane.
+  toute seule !"), so her world is the block: its four corners and the lane. It goes through `DebugMenu.blocked()` like
+  every other limit (see **Limits on where she may go** under the debug menu).
 - The back lanes, `scenes/ruelle.gd` (extends `StreetScene` but builds its own `_ready`; art in `world/lane_art.gd`,
   `LaneArt`, from `reference/ruelle/`). The block's lanes make an H (map): one script, three scenes by `@export lane`:
   `ruelle_dandurand.tscn` (the green cross lane, 6e → 5e, parallel to Dandurand, seen looking north: 5e left, 6e right),
@@ -622,6 +623,19 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   in the same order** in every season (only colours/visibility change), so the street stays the same people and places.
 - Facades: the generator writes autumn to `art/decor/*.svg` and the other seasons to `art/decor/<season>/*.svg` (snow on
   ledges, wreaths on 17 % of the doors (`WREATH_PERCENT`), Christmas lights in winter; tulips/geraniums instead of pumpkins; ghosts/cobwebs/bats autumn only).
+- **Limits on where she may go** (crossing a street before 8, the back lanes and the two dépanneurs on Halloween night,
+  and whatever we gate next) **all go through one call**, `DebugMenu.blocked(rule)`:
+
+  ```gdscript
+  if DebugMenu.blocked(GameState.age < CROSS_AGE):
+      Bubble.say(...)   # she says why, and stays where she is
+      return
+  ```
+
+  It is `rule` as usual, except that the debug menu's **"Sans limites"** switch (`DebugMenu.no_limits`, top of the
+  "Aller à…" column, this session only, never saved) turns it off and opens the whole neighbourhood. **Write every new
+  limit this way** and that switch covers it without anyone remembering to wire it. A limit that is not a yes-or-no
+  refusal — the grey crayon over `TownMap._reachable` — reads `DebugMenu.no_limits` instead.
 - `ui/debug_menu.gd` is the `DebugMenu` autoload: reads `--season=` and `--halloween` (the evening of the Halloween
   quest, step 2, for a screenshot or a test run), and in debug builds F1 opens a "Saisons" menu that
   switches season while playing (reloads the scene; Charlotte keeps her x via `Transition.street_x` / `Transition.inside_x`),
