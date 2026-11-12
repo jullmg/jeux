@@ -23,6 +23,10 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Godot binary: `/Applications/Godot.app/Contents/MacOS/Godot` (not on PATH).
 - Main scene: `res://scenes/intro.tscn` (title screen) → "Démarrer" / Enter → `res://scenes/main.tscn` (street)
   ⇄ `res://scenes/house.tscn` (inside, through her front door).
+- **Every window run is muted and in the background (Julien)**: launch Godot with `--audio-driver Dummy` (no sound; `Music`
+  then plays nothing, `Music._silent`) and through `open -W -g -n -a /Applications/Godot.app --stdout F --stderr F --args …`
+  so the window never takes the focus (`-g`), then read F. Headless runs (`--headless`: generator, import) need neither.
+- Temporary test scenes and scripts go in `zz_*` files at the project root (ignored by git) and are deleted when done.
 - Screenshots (use them to check visual changes). Julien's main display is an HDMI monitor: add `--screen 1` (engine arg, before `--`) so the window opens on the MacBook's built-in screen and doesn't interrupt their work:
   - `Godot --path . res://scenes/intro.tscn -- --screenshot=/path/intro.png`
   - `Godot --path . res://scenes/main.tscn -- --screenshot=/path/main.png [--x=1234] [--wait=6]` (`--x` = Charlotte's start x, `--wait` = seconds before the shot)

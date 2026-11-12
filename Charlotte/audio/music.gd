@@ -30,6 +30,10 @@ func _ready() -> void:
 ## Plays the first of `names` that has a file, crossfading from the current track (nothing if it's already playing, or if it
 ## is in the same playlist). With none found: the title theme, or, with `keep_if_missing`, whatever is playing.
 func play(names: Array, keep_if_missing := false) -> void:
+	# Run without sound (`--audio-driver Dummy`, how the test and screenshot runs are launched): no music at all, or the dummy
+	# driver keeps the track's playback alive and Godot reports it as leaked at exit.
+	if _silent:
+		return
 	var tracks := names.duplicate()
 	if not keep_if_missing:
 		tracks.append(DEFAULT_TRACK)
@@ -89,6 +93,9 @@ func _advance() -> void:
 
 
 ## At exit: nothing is left playing, so the track is let go before the audio server shuts down.
+static var _silent: bool = OS.get_cmdline_args().has("Dummy")
+
+
 func _exit_tree() -> void:
 	for player in _players:
 		player.stop()

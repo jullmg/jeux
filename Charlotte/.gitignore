@@ -2,3 +2,6 @@ reference/
 .godot/
 # Godot imports the backed-up drawings as textures; those .import files are not part of the save.
 sauvegardes/**/*.import
+
+# Temporary test scenes and scripts made while working (never committed)
+zz_*
