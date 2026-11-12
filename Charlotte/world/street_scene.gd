@@ -991,6 +991,14 @@ func _build_utility_poles() -> void:
 	var blocked: Array[Vector2] = []
 	for cs in _cross_streets:
 		blocked.append(Vector2(cs.x0 - 40.0, cs.x1 + 40.0))
+		# Nor on the dropped curb of the crosswalk over our own street.
+		var ground: CrossStreet = _grounds.get(cs)
+		if ground != null and ground.own_crosswalk != 0.0:
+			var side := ground.own_crosswalk
+			if side < 0.0:
+				blocked.append(Vector2(minf(cs.x0 - 40.0, ground.own_clear(side) - 30.0), cs.x1 + 40.0))
+			else:
+				blocked.append(Vector2(cs.x0 - 40.0, maxf(cs.x1 + 40.0, ground.own_clear(side) + 30.0)))
 	# A pole is tall, so it keeps clear of a tree's whole canopy, not only its pit.
 	for i in trees_after.size():
 		var reach := 130.0 * _tree_scales[i] + 35.0
@@ -1082,6 +1090,12 @@ func _build_curb_gardens() -> void:
 			garden.corner = -side
 			garden.width = 250.0
 			garden.position = Vector2(cs.x0 - 10.0 - garden.width if side < 0.0 else cs.x1 + 10.0 + garden.width, CURB_Y + 1.0)
+			# Where the crosswalk over our own street leaves this corner, the bed starts beyond it, so the crosswalk stays in
+			# line with the cross street's sidewalk.
+			var ground: CrossStreet = _grounds.get(cs)
+			if ground != null and ground.own_crosswalk == side:
+				var clear := ground.own_clear(side)
+				garden.position.x = maxf(garden.position.x, clear + garden.width) if side > 0.0 else minf(garden.position.x, clear - garden.width)
 			garden.seed_value = seed_value * 13 + i
 			add_child(garden)
 			i += 1

@@ -104,20 +104,38 @@ func _fan(x: float, y: float) -> float:
 	return vp.x + (x - vp.x) * (y - vp.y) / (FACADE_Y - vp.y)
 
 
-## The crosswalk over our own street, at the curb: its two ends, from the nose of the planted curb extension into the corner of
-## the intersection. Below the curb both its edges run toward the vanishing point, like the cross street's own lines, so it
-## widens as it comes toward us.
+## The crosswalk over our own street, at the curb: its two ends, in line with the cross street's sidewalk (Julien), from that
+## sidewalk's curb outward over the corner. Below the curb both its edges run toward the vanishing point, the very lines of the
+## cross street's curb and sidewalk carried on, so it widens as it comes toward us; the planted curb extension beside it is
+## moved out of its way (`own_clear`).
 func _own_ends() -> Vector2:
+	var curbs := road_x(OWN_CROSSWALK_TOP)
 	if own_crosswalk < 0.0:
-		return Vector2(x0 + 18.0, x0 + 18.0 + OWN_CROSSWALK_W)
-	return Vector2(x1 - 18.0 - OWN_CROSSWALK_W, x1 - 18.0)
+		return Vector2(curbs.x - OWN_CROSSWALK_W, curbs.x)
+	return Vector2(curbs.y, curbs.y + OWN_CROSSWALK_W)
 
 
-## x of the line from (x, OWN_CROSSWALK_TOP) toward the vanishing point, at height y. It leans only half as much as the cross
-## street's own lines, or the nearest bars would slide in under the planted curb extension beside it.
+## x of the line from (x, OWN_CROSSWALK_TOP) toward the vanishing point, at height y.
 func _own_edge(x: float, y: float) -> float:
-	var vp := _vp() - Vector2(0.0, 200.0)
+	var vp := _vp()
 	return vp.x + (x - vp.x) * (y - vp.y) / (OWN_CROSSWALK_TOP - vp.y)
+
+
+## How far the crosswalk over our own street reaches along the curb on `side` (-1 the gap's left, 1 its right), down to the
+## bottom of the view, plus a little room: a planted curb extension on that side starts beyond it.
+func own_clear(side: float) -> float:
+	var e := _own_ends_for(side)
+	if side < 0.0:
+		return minf(e.x, _own_edge(e.x, VIEW_BOTTOM)) - 14.0
+	return maxf(e.y, _own_edge(e.y, VIEW_BOTTOM)) + 14.0
+
+
+func _own_ends_for(side: float) -> Vector2:
+	var keep := own_crosswalk
+	own_crosswalk = side
+	var e := _own_ends()
+	own_crosswalk = keep
+	return e
 
 
 ## Where the crosswalk over our own street lies (world rectangle, from the corner's dropped curb to the bottom of the view).
