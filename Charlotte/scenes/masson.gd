@@ -36,6 +36,31 @@ const BLOCKS := {
 		},
 		"panels": {},
 	},
+	"7e_8e_impair": {
+		"layout": ["masson_2933_cote", "rue_7e", "masson_3003", "masson_3021", "masson_3019", "masson_3025", "masson_3039",
+			"masson_3043", "rue_8e", "masson_3071_cote"],
+		"avenues": [["rue_7e", "7e Avenue", 540.0], ["rue_8e", "8e Avenue", 540.0]],
+		"trees_after": [2, 5], "tree_shift": {2: 30.0, 5: 40.0}, "lamps_after": [2, 6], "hydrants_at": [4.5], "racks_at": [5.4],
+		"squirrels_at": [4.4], "moon_at": 7.5,
+		"signs": {
+			"masson_3003": [[330.0, "PREMIÈRE MOISSON", "#FFFFFF", "#1A1A1A", 13], [700.0, "P", "#FFFFFF", "#1A1A1A", 20],
+				[1080.0, "BOULANGERIE", "#FFFFFF", "#1A1A1A", 13]],
+		},
+		"panels": {},
+	},
+	"7e_8e_pair": {
+		"layout": ["masson_3070_cote", "rue_8e", "masson_3038", "masson_3036", "masson_3034", "masson_3028", "masson_3008",
+			"masson_3000", "rue_7e", "masson_2970_cote"],
+		"avenues": [["rue_8e", "8e Avenue", 540.0], ["rue_7e", "7e Avenue", 540.0]],
+		"trees_after": [3, 5], "tree_shift": {3: -150.0, 5: 0.0}, "lamps_after": [2, 6], "hydrants_at": [6.6], "racks_at": [4.3],
+		"squirrels_at": [3.5], "moon_at": 6.5,
+		"signs": {
+			"masson_3034": [[255.0, "LUNETTERIE MILOT", "#FFFFFF", "#1E1E20", 12], [725.0, "RAPOSO", "#4FB04F", "#FFFFFF", 15]],
+			"masson_3008": [[725.0, "TANDOORI MASSON", "#FFFFFF", "#C8202A", 13]],
+			"masson_3000": [[450.0, "COUCHE-TARD", "#C8202A", "#FFFFFF", 16]],
+		},
+		"panels": {},
+	},
 	"6e_7e_impair": {
 		"layout": ["masson_eglise_cote", "rue_6e", "masson_2901", "masson_2903", "masson_2909", "masson_2925", "masson_2933",
 			"rue_7e", "masson_3001_cote"],

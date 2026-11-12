@@ -18,6 +18,8 @@ const NAMES := {
 	"ohbon": "Dépanneur Oh Bon!, rue Holt",
 	"masson_5e_6e_impair": "Rue Masson, entre la 5e et la 6e",
 	"masson_5e_6e_pair": "Rue Masson, entre la 5e et la 6e (côté sud)",
+	"masson_7e_8e_impair": "Rue Masson, entre la 7e et la 8e",
+	"masson_7e_8e_pair": "Rue Masson, entre la 7e et la 8e (côté sud)",
 	"masson_6e_7e_impair": "Rue Masson, entre la 6e et la 7e",
 	"masson_6e_7e_pair": "Rue Masson, entre la 6e et la 7e (côté sud)",
 }
