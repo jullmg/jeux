@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000.0" height="975.0" viewBox="0 0 1000.0 975.0">
 <defs><linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4E0EC"/><stop offset="1" stop-color="#557A90"/></linearGradient><linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.1"/><stop offset="1" stop-color="#000000" stop-opacity="0.16"/></linearGradient><radialGradient id="glow"><stop offset="0" stop-color="#FFE9A8" stop-opacity="0.75"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient><linearGradient id="warm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7B5"/><stop offset="1" stop-color="#D98E4A"/></linearGradient><linearGradient id="drop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1408" stop-opacity="0.3"/><stop offset="1" stop-color="#2A1408" stop-opacity="0"/></linearGradient><linearGradient id="sun" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE6B8" stop-opacity="0.14"/><stop offset="0.5" stop-color="#FFE6B8" stop-opacity="0"/><stop offset="1" stop-color="#1A0C14" stop-opacity="0.12"/></linearGradient><radialGradient id="pumpkin_glow"><stop offset="0" stop-color="#FFB347" stop-opacity="0.6"/><stop offset="1" stop-color="#FFB347" stop-opacity="0"/></radialGradient></defs>
-<rect x="54.0" y="645.0" width="92.0" height="330.0" fill="#b5a280" stroke="#8E887E" stroke-width="1.5"/>
+<rect x="54.0" y="645.0" width="92.0" height="330.0" fill="#d1cdc4" stroke="#8E887E" stroke-width="1.5"/>
 <rect x="64.0" y="659.0" width="72.0" height="310.0" fill="#3A3028" />
 <rect x="70.0" y="665.0" width="60.0" height="110.0" fill="url(#glass)" />
-<path d="M44.0 645.0 L100.0 605.0 L156.0 645.0 Z" fill="#C9B48E" stroke="#8E887E" stroke-width="1.5"/>
+<path d="M44.0 645.0 L100.0 605.0 L156.0 645.0 Z" fill="#E8E4DA" stroke="#8E887E" stroke-width="1.5"/>
 <rect x="189.0" y="725.0" width="6.0" height="250.0" fill="#1A1A1A" />
 <rect x="183.0" y="693.0" width="18.0" height="32.0" fill="#ECE7DA" stroke="#1A1A1A" stroke-width="2.0"/>
 <path d="M180.0 693.0 l12 -10 l12 10 z" fill="#1A1A1A" />

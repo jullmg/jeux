@@ -1012,7 +1012,7 @@ const HOUSES := [
 	# 2701–2705, at 3e: the old bank, buff brick on three floors between tall stone pilasters, on a stone base (2703…, 2711…).
 	{
 		"name": "masson_2703", "kind": "bank", "width": 1000.0, "floors": 3, "halloween": false,
-		"stone": "#C9B48E", "pilasters": [260.0, 500.0, 740.0], "windows": [[80.0, 150.0], [320.0, 150.0], [560.0, 150.0], [800.0, 150.0]],
+		"stone": "#E8E4DA", "bank_brick": true, "pilaster": "#F2EFE8", "bricks": ["#8A5E44", "#966850", "#7E5440", "#A0725A"], "mortar": "#C2B4A4", "pilasters": [260.0, 500.0, 740.0], "windows": [[80.0, 150.0], [320.0, 150.0], [560.0, 150.0], [800.0, 150.0]],
 		"corner_side": -1.0, "basement": [],
 	},
 	# 2707–2715: brown brick on three floors, windows framed in dark green, round windows on the top floor, a shop in green
@@ -1020,7 +1020,7 @@ const HOUSES := [
 	{
 		"name": "masson_2711", "kind": "commerce", "width": 900.0, "floors": 3,
 		"bricks": ["#8A5A42", "#96644C", "#7E5038", "#A06C54", "#86563E"], "mortar": "#C2B4A4", "parapet": "flat",
-		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "trim": "#2E5E3E", "trim_dark": "#1E3E28",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "trim": "#2B2B2E", "trim_dark": "#1A1A1C", "window_style": "slider", "frame": "#2B2B2E",
 		"windows": [[90.0, 120.0], [360.0, 120.0], [630.0, 120.0]],
 		"shops": [{"x0": 30.0, "x1": 870.0, "sign": "#2E5E3E", "frame": "#1E3E28", "door": 450.0, "inside": "florist", "front": "wood", "kick": "wood"}], "basement": [],
 	},
@@ -1032,9 +1032,9 @@ const HOUSES := [
 	{
 		"name": "masson_2721", "kind": "commerce", "width": 1100.0, "floors": 3,
 		"bricks": ["#8E5A44", "#9A644E", "#82503C", "#A46C56", "#8A5640"], "mortar": "#C2B4A4", "parapet": "corbel",
-		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "windows": [[90.0, 110.0], [330.0, 110.0], [600.0, 110.0], [860.0, 110.0]],
+		"lintel": "#ECE8E0", "lintel_dark": "#A39A8A", "lintel_style": "ears", "window_style": "hung", "hung_frame": "#F2F0EA", "windows": [[90.0, 110.0], [330.0, 110.0], [600.0, 110.0], [860.0, 110.0]],
 		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#3E7A4E", "frame": "#2B2B2E", "door": 480.0, "inside": "pharmacy", "kick": "brick"},
-			{"x0": 560.0, "x1": 1070.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 640.0, "inside": "restaurant", "front": "wood", "kick": "wood"}], "basement": [],
+			{"x0": 560.0, "x1": 1070.0, "sign": "#C9A040", "frame": "#3A2E20", "door": 640.0, "inside": "restaurant", "front": "wood", "kick": "wood"}], "basement": [],
 	},
 	# 2723–2733: red-brown brick on three floors, balconies, the boulangerie (2723…).
 	{
@@ -1069,7 +1069,7 @@ const HOUSES := [
 		"name": "masson_2742", "kind": "commerce", "width": 900.0, "floors": 3,
 		"bricks": ["#7E5440", "#8A5E4A", "#724A38", "#946852", "#7A503C"], "mortar": "#C2B4A4", "parapet": "corbel",
 		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "windows": [[90.0, 110.0], [380.0, 140.0], [660.0, 110.0]],
-		"projecting": [[340.0, 560.0]], "slab": "#F2F0EA", "metal": "#F2F0EA",
+		"projecting": [[340.0, 560.0]], "window_style": "hung", "hung_frame": "#F2F0EA", "slab": "#F2F0EA", "metal": "#F2F0EA",
 		"shops": [{"x0": 30.0, "x1": 870.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 120.0, "inside": "cafe", "kick": "brick"}], "basement": [],
 	},
 	# 2734: brown brick on three floors (2734…).
@@ -5329,8 +5329,12 @@ func _bank() -> void:
 		x += 22.0
 	_snow(X0 - 8, X1 - X0 + 16, top - 32)
 	# Pilasters, fluted, between the bays.
+	# The wall itself may be brick between the stone (`bank_brick`, 2703…), the pilasters in their own stone (`pilaster`).
+	if k.get("bank_brick", false):
+		_bricks(top, ground_y - 6.0)
+	var pil: String = k.get("pilaster", "#" + Color(stone).lightened(0.06).to_html(false))
 	for p: float in k.get("pilasters", []):
-		_rect(p - 18, top, 36, ground_y - top - 10, "#" + Color(stone).lightened(0.06).to_html(false), _stroke("#8E887E", 1.5))
+		_rect(p - 18, top, 36, ground_y - top - 10, pil, _stroke("#8E887E", 1.5))
 		for fl in 4:
 			_rect(p - 12 + fl * 7.0, top + 30, 2, ground_y - top - 70, "#" + Color(stone).darkened(0.2).to_html(false))
 		_rect(p - 24, top, 48, 16, stone, _stroke("#8E887E", 1))
