@@ -20,3 +20,5 @@ To add one: put the file here, add a row below, and stamp it on the drawn art wi
 
 The Masson logos are SVGs imported at `svg/scale=4.0` (their `.import`) so they stay sharp on the sign bands
 (`scenes/masson.gd`, `BLOCKS` … `logos`).
+| `dollarama_logo.svg` | Dollarama, its green band and $1 badge | Wikimedia Commons, `File:Dollarama logo.svg` |
+| `bmo_logo.svg` | BMO (Banque de Montréal), the roundel and wordmark | Wikimedia Commons, `File:BMO Logo.svg` |

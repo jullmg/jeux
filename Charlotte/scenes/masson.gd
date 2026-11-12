@@ -17,6 +17,34 @@ extends StreetScene
 ## {art: [[x on the facade, text, text colour, outline colour, font size], …]} (laid on the sign band, 302 above its foot),
 ## `logos` = real logos from art/brands/ on those bands: {art: [[x, file, height], …]}.
 const BLOCKS := {
+	"4e_5e_impair": {
+		"layout": ["masson_2755_cote", "rue_4e", "masson_2801", "masson_2811", "masson_2819", "masson_2823", "masson_2825",
+			"masson_2829", "rue_5e", "masson_2851_cote"],
+		"avenues": [["rue_4e", "4e Avenue", 540.0], ["rue_5e", "5e Avenue", 540.0]],
+		"trees_after": [3, 6], "tree_shift": {3: 0.0, 6: -260.0}, "lamps_after": [2, 6], "hydrants_at": [5.5], "racks_at": [3.5],
+		"squirrels_at": [6.4], "moon_at": 7.5,
+		"signs": {
+			"masson_2801": [[450.0, "BANCO · ACHETONS OR", "#FFFFFF", "#9A141A", 13]],
+			"masson_2811": [[380.0, "pattes & griffes", "#FFFFFF", "#3E9A3E", 14]],
+			"masson_2819": [[430.0, "pizza pizza · 737-1111", "#FFFFFF", "#9A141A", 13]],
+			"masson_2823": [[380.0, "CAFÉ", "#FFFFFF", "#1A1A1A", 13]],
+
+		},
+		"logos": {"masson_2829": [[170.0, "bmo_logo.svg", 24.0]]},
+		"panels": {},
+	},
+	"4e_5e_pair": {
+		"layout": ["masson_2846_cote", "rue_5e", "masson_2836", "masson_2818", "masson_2816", "masson_2812", "masson_2802",
+			"rue_4e", "masson_2790_cote"],
+		"avenues": [["rue_5e", "5e Avenue", 540.0], ["rue_4e", "4e Avenue", 540.0]],
+		"trees_after": [3, 5], "tree_shift": {3: 0.0, 5: 0.0}, "lamps_after": [2, 5], "hydrants_at": [4.5], "racks_at": [5.5],
+		"squirrels_at": [4.5], "moon_at": 4.5,
+		"signs": {
+			"masson_2812": [[335.0, "CAFÉ · BOULANGERIE", "#FFFFFF", "#2B2B2E", 11]],
+		},
+		"logos": {"masson_2836": [[650.0, "dollarama_logo.svg", 30.0]]},
+		"panels": {},
+	},
 	"5e_6e_impair": {
 		"layout": ["masson_2833_cote", "rue_5e", "masson_presbytere", "masson_eglise", "rue_6e", "masson_2901_cote"],
 		"avenues": [["rue_5e", "5e Avenue", 540.0], ["rue_6e", "6e Avenue", 560.0]],

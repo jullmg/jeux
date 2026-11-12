@@ -16,6 +16,8 @@ const NAMES := {
 	"ruelle_holt": "Ruelle près de Holt, entre la 5e et la 6e Avenue",
 	"depanneur": "Dépanneur Xin-Xin, rue Dandurand",
 	"ohbon": "Dépanneur Oh Bon!, rue Holt",
+	"masson_4e_5e_impair": "Rue Masson, entre la 4e et la 5e",
+	"masson_4e_5e_pair": "Rue Masson, entre la 4e et la 5e (côté sud)",
 	"masson_5e_6e_impair": "Rue Masson, entre la 5e et la 6e",
 	"masson_5e_6e_pair": "Rue Masson, entre la 5e et la 6e (côté sud)",
 	"masson_7e_8e_impair": "Rue Masson, entre la 7e et la 8e",

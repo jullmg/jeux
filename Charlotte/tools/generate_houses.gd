@@ -767,6 +767,110 @@ const HOUSES := [
 		"bricks": ["#D8CDB8", "#D2C7B2", "#DED3BE", "#CFC4AF"], "mortar": "#C2B8A4",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
 	},
+	# ── Rue Masson, 4e to 5e Avenue ──
+	# The north side, 4e (left) to 5e (right). Across 4e: the next block's corner, its side.
+	{
+		"name": "masson_2755_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
+	},
+	# 2801–2809, at 4e: brown brick on three floors, big windows upstairs, the pawnbroker BANCO under its red signs and a tall
+	# vertical sign (2801…, 2803…).
+	{
+		"name": "masson_2801", "kind": "commerce", "width": 900.0, "floors": 3,
+		"bricks": ["#7E5A44", "#8A6450", "#72503C", "#946E58", "#7A5640"], "mortar": "#B9AC9E", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 160.0], [380.0, 160.0], [660.0, 160.0]],
+		"shops": [{"x0": 30.0, "x1": 870.0, "sign": "#D8202A", "frame": "#B01A22", "door": 160.0}], "basement": [],
+	},
+	# 2811–2817: red brick on two floors, the parapet stepped up in the middle; Pattes & Griffes, the pet shop, its green sign
+	# (2803…, 2815…).
+	{
+		"name": "masson_2811", "kind": "commerce", "width": 760.0, "floors": 2,
+		"bricks": ["#B04E3A", "#BC5844", "#A44632", "#C4624C", "#AA4A36"], "mortar": "#D0C4B6", "parapet": "corbel",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[100.0, 100.0], [330.0, 100.0], [560.0, 100.0]],
+		"shops": [{"x0": 30.0, "x1": 730.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 640.0}], "basement": [],
+	},
+	# 2819–2821: brown brick on three floors, balconies; Pizza Pizza under its red sign (2819…).
+	{
+		"name": "masson_2819", "kind": "commerce", "width": 860.0, "floors": 3,
+		"bricks": ["#8A5E48", "#966852", "#7E5440", "#A0725A", "#865A44"], "mortar": "#C2B4A4", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 110.0], [370.0, 110.0], [640.0, 110.0]],
+		"projecting": [[330.0, 520.0]],
+		"shops": [{"x0": 30.0, "x1": 830.0, "sign": "#D8202A", "frame": "#2B2B2E", "door": 760.0}], "basement": [],
+	},
+	# 2823: red brick on three floors, a café downstairs under its black sign (2819…, 2829…).
+	{
+		"name": "masson_2823", "kind": "commerce", "width": 760.0, "floors": 3,
+		"bricks": ["#A44A3A", "#B05444", "#984234", "#B85E4C", "#9E4838"], "mortar": "#CDBFB0", "parapet": "corbel",
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "windows": [[90.0, 110.0], [320.0, 110.0], [550.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 730.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 120.0}], "basement": [],
+	},
+	{
+		"name": "masson_2825", "kind": "masson_lot", "width": 440.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	# 2829–2833, BMO at 5e: red brick on two floors over a stone base, a cornice, wide windows in stone surrounds (2829…, 2833…).
+	{
+		"name": "masson_2829", "kind": "commerce", "width": 1100.0, "floors": 2, "halloween": false,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0", "parapet": "",
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "belt": "#D8D2C6", "windows": [[110.0, 150.0], [420.0, 150.0], [760.0, 150.0]],
+		"shops": [{"x0": 30.0, "x1": 1070.0, "sign": "#0079C1", "frame": "#D8D2C6", "door": 980.0}],
+		"piers": [330.0, 640.0], "pier_stone": "#D8D2C6", "basement": [],
+	},
+	# Across 5e: the presbytery's side, red brick on three floors.
+	{
+		"name": "masson_2851_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#9A3E30", "#A8473A", "#8E382C", "#B04E3E", "#94402F"], "mortar": "#C9BBAC",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
+	},
+	# The south side, 5e (left) to 4e (right). Across 5e: the side of the grey stone row (2846…).
+	{
+		"name": "masson_2846_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#B5B1A9", "#ABA79F", "#BDB9B1", "#A39F97"], "mortar": "#8E8A82",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
+	},
+	# 2826–2840, Dollarama at 5e: buff brick on three floors, white-framed windows, a cornice, the long sign band (2836…, 2840…).
+	{
+		"name": "masson_2836", "kind": "commerce", "width": 1300.0, "floors": 3, "halloween": false,
+		"bricks": ["#D6B98C", "#CDB082", "#DEC296", "#C4A678", "#D2B488"], "mortar": "#EDE3D2", "parapet": "",
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[90.0, 110.0], [330.0, 110.0], [580.0, 110.0], [830.0, 110.0], [1070.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 1270.0, "sign": "#00704A", "frame": "#2B2B2E", "door": 1150.0}], "basement": [],
+	},
+	# 2818–2824: buff brick on two floors, a shop downstairs (2826…).
+	{
+		"name": "masson_2818", "kind": "commerce", "width": 760.0, "floors": 2,
+		"bricks": ["#C9A87A", "#BE9C6E", "#D2B084", "#B49266", "#CCAA7C"], "mortar": "#E6DCCB", "parapet": "flat",
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[100.0, 130.0], [330.0, 130.0], [560.0, 130.0]],
+		"projecting": [[300.0, 480.0]],
+		"shops": [{"x0": 30.0, "x1": 730.0, "sign": "#3A3A3C", "frame": "#2B2B2E", "door": 400.0}], "basement": [],
+	},
+	{
+		"name": "masson_2816", "kind": "masson_lot", "lot_style": "parking", "width": 420.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	# 2806–2814: buff brick on three floors, white balconies, shops under their bands (2812…, 2802…).
+	{
+		"name": "masson_2812", "kind": "commerce", "width": 1300.0, "floors": 3,
+		"bricks": ["#CDAE80", "#C2A274", "#D6B88A", "#B8986C", "#D0B084"], "mortar": "#E6DCCB", "parapet": "corbel",
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "metal": "#F2F0EA",
+		"windows": [[80.0, 100.0], [300.0, 100.0], [560.0, 100.0], [780.0, 100.0], [1040.0, 100.0]],
+		"projecting": [[260.0, 500.0], [760.0, 1000.0]],
+		"shops": [{"x0": 30.0, "x1": 640.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 560.0},
+			{"x0": 640.0, "x1": 1270.0, "sign": "#E8812E", "frame": "#2B2B2E", "door": 700.0}], "basement": [],
+	},
+	# 2800–2804, at 4e: red brick on three floors, a café on the corner (2804…, 2800…).
+	{
+		"name": "masson_2802", "kind": "commerce", "width": 860.0, "floors": 3,
+		"bricks": ["#9A4A3A", "#A85442", "#8E4234", "#B05C48", "#9E4E3C"], "mortar": "#C9BBAC", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 110.0], [360.0, 110.0], [620.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 830.0, "sign": "#1E1E20", "frame": "#1E1E20", "door": 760.0}], "basement": [],
+	},
+	# Across 4e: the next block's corner, its side.
+	{
+		"name": "masson_2790_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#C8A27A", "#BC966E", "#D4AE86", "#B08A62", "#CCA680"], "mortar": "#E6DCCB",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
+	},
 	# Across 5e: the side of Dollarama's building, buff brick (2840…).
 	{
 		"name": "masson_2840_cote", "kind": "side_wall", "width": 560.0, "floors": 3,

@@ -104,7 +104,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   doors, buttresses, the flight of steps, the grounds; the tower's top isn't in any picture), `presbytere` (over `_building`:
   buff zigzag friezes, copper band, the columned porch), `masson_lot` (the gap at 2876: backs, a painted shed, a tree), plus
   `*_cote` side walls of the corners across the avenues; `_back_row` draws hazy buildings behind open ground so the distant
-  city doesn't show as a grey slab. Built so far: 5e–6e (north: the presbytery and the church; south: 2846–2888, the grey
+  city doesn't show as a grey slab. Built so far: 4e–5e (north: BANCO, Pattes & Griffes, Pizza Pizza, a café, a lot, BMO; south: Dollarama, a
+  parking lot, the buff row with white balconies, the corner at 4e), 5e–6e (north: the presbytery and the church; south: 2846–2888, the grey
   stone row, L'Oeufrier, the lot, the Banque Nationale), 6e–7e (2901–2933 north; 2902–2970 south) and 7e–8e (north: Première
   Moisson, a parking lot (`lot_style` "parking"), the stucco 3039 with `quoins`, the painted wall `mural_wall`; south: the
   passage of murals (`lot_style` "murals"), Milot and Raposo, the `scroll` parapet, Tandoori Masson, the pink Couche-Tard). `TownMap._here` reads
