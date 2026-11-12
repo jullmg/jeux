@@ -16,6 +16,26 @@ extends StreetScene
 ## on Halloween night (a fraction across `layout`, over a low building), and the shop signs:
 ## {art: [[x on the facade, text, text colour, outline colour, font size], …]} (laid on the sign band, 302 above its foot).
 const BLOCKS := {
+	"5e_6e_impair": {
+		"layout": ["masson_2833_cote", "rue_5e", "masson_presbytere", "masson_eglise", "rue_6e", "masson_2901_cote"],
+		"avenues": [["rue_5e", "5e Avenue", 540.0], ["rue_6e", "6e Avenue", 560.0]],
+		"trees_after": [2], "tree_shift": {2: 150.0}, "lamps_after": [1, 3], "hydrants_at": [2.9], "racks_at": [], "squirrels_at": [3.3],
+		"moon_at": 3.85, "signs": {}, "panels": {},
+	},
+	"5e_6e_pair": {
+		"layout": ["masson_2902_cote", "rue_6e", "masson_2888", "masson_2884", "masson_2878", "masson_2876", "masson_2870",
+			"masson_2846", "rue_5e", "masson_2840_cote"],
+		"avenues": [["rue_6e", "6e Avenue", 560.0], ["rue_5e", "5e Avenue", 540.0]],
+		"trees_after": [3, 6], "tree_shift": {3: 20.0, 6: -110.0}, "lamps_after": [2, 6], "hydrants_at": [6.5], "racks_at": [2.4],
+		"squirrels_at": [5.5], "moon_at": 2.5,
+		"signs": {
+			"masson_2888": [[550.0, "BANQUE NATIONALE", "#C8202A", "#FFFFFF", 14]],
+			"masson_2870": [[295.0, "L'OEUFRIER", "#FFFFFF", "#1E1E20", 13]],
+			"masson_2846": [[225.0, "LE POKE STATION", "#FFFFFF", "#4A2E22", 11], [590.0, "FLEURISTE", "#F2E6C8", "#4A2E22", 11],
+				[1005.0, "TABAGIE & VAPESHOP", "#FFFFFF", "#1E1E20", 11], [1460.0, "SIMASSON", "#FFFFFF", "#4A2E22", 12]],
+		},
+		"panels": {},
+	},
 	"6e_7e_impair": {
 		"layout": ["masson_eglise_cote", "rue_6e", "masson_2901", "masson_2903", "masson_2909", "masson_2925", "masson_2933",
 			"rue_7e", "masson_3001_cote"],

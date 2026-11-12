@@ -98,11 +98,16 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   "masson_<block>_<side>_from_<gap>"); the avenues aren't turned into yet, and Masson isn't reached from her block yet (only
   the debug menu). Facades: the generator's "Rue Masson" section, kinds `commerce` (`_commerce`: brick or `upper: "frame"`
   flats over a row of `_shopfront`s with sign bands, awnings, gooseneck lamps, fruit crates, a residential door, the lily
-  mural) and `bank` (stone), plus `*_cote` side walls of the corners across the avenues. Built so far: 6e–7e (2901–2933
-  north with the Église Saint-Esprit's side and 3001's across 7e; 2902–2970 south with 2892 and 3000 across). The map
-  puts her at its foot, between the avenues. On Halloween night the shops are shut (`StreetScene.gives_candy = false`: dark
-  windows, no decorations, no doorbells) and the moon rises over the lowest building (`StreetScene._moon_x()`, which
-  `HalloweenNight` reads; the middle of the street by default).
+  mural; options `upper: "stone"` rusticated grey stone, shop `ribs` a corrugated sign band, `stone_frame` pale stone piers and
+  coping, `roof_rail` a terrace's wooden rail) and `bank` (stone), `church` (`_church`: Église Saint-Esprit, its tower, three
+  doors, buttresses, the flight of steps, the grounds; the tower's top isn't in any picture), `presbytere` (over `_building`:
+  buff zigzag friezes, copper band, the columned porch), `masson_lot` (the gap at 2876: backs, a painted shed, a tree), plus
+  `*_cote` side walls of the corners across the avenues; `_back_row` draws hazy buildings behind open ground so the distant
+  city doesn't show as a grey slab. Built so far: 5e–6e (north: the presbytery and the church; south: 2846–2888, the grey
+  stone row, L'Oeufrier, the lot, the Banque Nationale) and 6e–7e (2901–2933 north; 2902–2970 south). `TownMap._here` reads
+  the block from the key and puts her at the sheet's foot between its avenues. **Halloween won't be played on Masson
+  (Julien): don't spend time checking it there**; it is only kept from breaking (`StreetScene.gives_candy = false`, and
+  `StreetScene._moon_x()` so the moon isn't drawn over a tall facade).
 - The 6e/Holt corner follows `reference/coin_holt/6eme_coin_holt.png`, `reference/coin_holt/holt_coin_6eme.png` and `reference/ruelle/entree_ruelle_6eme_coin_holt.png`:
   generator kinds `corner_holt` (`coin_holt`: long brown three-storey, stepped white lintels, diamonds, the beige
   corrugated annex with its shingle awning, the red corner window), `ohbon` (dépanneur Oh Bon! on Holt: red storefront,

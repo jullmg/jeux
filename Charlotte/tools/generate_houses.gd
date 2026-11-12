@@ -567,6 +567,97 @@ const HOUSES := [
 		"bricks": ["#7E4436", "#8A4A3A", "#6E3A2E", "#94543F", "#743F33"], "mortar": "#BFB2A3",
 		"parapet": "flat", "windows": [[100.0, 90.0], [320.0, 90.0]], "basement": [], "downspout": 40.0,
 	},
+	# ── Rue Masson, 5e to 6e Avenue ──
+	# The north side: the church grounds, the presbytery at 5e then Église Saint-Esprit (rue-masson/2851…, 2863…, captured for it).
+	# Across 5e: BMO's side, red brick over a stone base (2833…, 2831…).
+	{
+		"name": "masson_2833_cote", "kind": "side_wall", "width": 560.0, "floors": 2, "lower_stone": true,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
+		"parapet": "", "windows": [[110.0, 110.0], [330.0, 110.0]], "basement": [], "downspout": 520.0,
+	},
+	{
+		"name": "masson_presbytere", "kind": "presbytere", "width": 1200.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A3E30", "#A8473A", "#8E382C", "#B04E3E", "#94402F"], "mortar": "#C9BBAC", "parapet": "flat",
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "lintel_style": "arch", "door_cx": 600.0,
+		"windows": [[130.0, 100.0], [330.0, 100.0], [800.0, 100.0], [990.0, 100.0]], "basement": [], "downspout": 1150.0,
+	},
+	{
+		"name": "masson_eglise", "kind": "church", "width": 2900.0, "floors": 4, "halloween": false,
+		"stone": "#C9C7C0", "church_cx": 1250.0,
+	},
+	# Across 6e: 2901's side, red brick over its grey stone ground floor.
+	{
+		"name": "masson_2901_cote", "kind": "side_wall", "width": 560.0, "floors": 3, "lower_stone": true,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844", "#94422F"], "mortar": "#CFC2B4",
+		"parapet": "flat", "windows": [[110.0, 90.0], [330.0, 90.0]], "basement": [], "downspout": 40.0,
+	},
+	# The south side, 6e (left) to 5e (right). Across 6e: the side of 2902, buff brick in corbelled bands.
+	{
+		"name": "masson_2902_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#D4A774", "#C99C6A", "#DDB07E", "#BE9262", "#D8AC78"], "mortar": "#EFE2CC", "lintel": "#E8E0D0",
+		"lintel_dark": "#B9AE98", "parapet": "corbel", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
+	},
+	# 2888–2892, the Banque Nationale at 6e: two floors of red-brown brick in a frame of pale stone, big windows (2888…, 2892…).
+	{
+		"name": "masson_2888", "kind": "commerce", "width": 1100.0, "floors": 2, "halloween": false,
+		"bricks": ["#8E4A3A", "#9A5242", "#844436", "#A0584A", "#8A4838"], "mortar": "#B9AC9E", "parapet": "flat",
+		"lintel": "#D8CFBF", "lintel_dark": "#A89E8C", "lintel_style": "none", "stone_frame": "#D8CFBF", "belt": "#D8CFBF",
+		"windows": [[150.0, 120.0], [330.0, 120.0], [510.0, 120.0], [690.0, 120.0], [870.0, 120.0]],
+		"shops": [{"x0": 100.0, "x1": 1000.0, "sign": "#E9E5DE", "frame": "#6E6A64", "door": 820.0}], "basement": [],
+	},
+	# 2884–2886: red brick on two floors under a roof terrace's wooden rail, a shingle awning over its door (2884…; the graffiti on
+	# the door left out).
+	{
+		"name": "masson_2884", "kind": "commerce", "width": 560.0, "floors": 2,
+		"bricks": ["#A8503E", "#B05A46", "#9A4636", "#B86450", "#A04A3A"], "mortar": "#D0C4B6", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 220.0], [380.0, 120.0]], "roof_rail": "#A8865E",
+		"shops": [{"x0": 30.0, "x1": 530.0, "sign": "#5E4A3E", "frame": "#3A2E28", "door": 420.0, "dark": true, "awning": "#6E5A4A"}],
+		"basement": [],
+	},
+	# 2878–2882: brown brick on three floors, the parapet stepped up at each end, iron balconies; a café downstairs (2878… close-ups).
+	{
+		"name": "masson_2878", "kind": "commerce", "width": 820.0, "floors": 3,
+		"bricks": ["#7A5040", "#86594A", "#6E4838", "#8E6050", "#744C3C"], "mortar": "#B9AC9E", "parapet": "corbel",
+		"lintel": "#C9BFAE", "lintel_dark": "#8E8474", "windows": [[90.0, 110.0], [330.0, 110.0], [580.0, 110.0]],
+		"projecting": [[300.0, 470.0]],
+		"shops": [{"x0": 30.0, "x1": 790.0, "sign": "#E2D6BE", "frame": "#C9BCA2", "door": 200.0, "lamps": 3}], "basement": [],
+	},
+	{
+		"name": "masson_2876", "kind": "masson_lot", "width": 480.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	# 2862–2872: the grey stone row goes on, L'Oeufrier at its 6e end (2870…, 2862…, 2872… close-ups).
+	{
+		"name": "masson_2870", "kind": "commerce", "width": 1000.0, "floors": 3, "upper": "stone", "upper_stone": "#B2AEA6",
+		"bricks": ["#A9A59D", "#B2AEA6", "#A09C94"], "mortar": "#8E8A82", "parapet": "corbel",
+		"lintel": "#C9C5BC", "lintel_dark": "#8E8A82", "metal": "#1F1F1F",
+		"windows": [[80.0, 100.0], [190.0, 100.0], [430.0, 100.0], [540.0, 100.0], [780.0, 100.0], [890.0, 100.0]],
+		"projecting": [[410.0, 660.0]],
+		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#1E1E20", "frame": "#F2F0EA", "door": 110.0},
+			{"x0": 560.0, "x1": 970.0, "sign": "#8A4A30", "ribs": true, "frame": "#4A2E22", "door": 900.0}],
+		"basement": [],
+	},
+	# 2846–2858: rusticated grey stone on three floors, windows in pairs, balconies on dark slabs, the parapet raised in shallow
+	# curves; the rust-red corrugated band over its shops: Le Poke Station, a florist's, Tabagie & Vapeshop, Simasson (2858…, 2862…).
+	{
+		"name": "masson_2846", "kind": "commerce", "width": 1700.0, "floors": 3, "upper": "stone", "upper_stone": "#B5B1A9",
+		"bricks": ["#A9A59D", "#B2AEA6", "#A09C94"], "mortar": "#8E8A82", "parapet": "corbel",
+		"lintel": "#C9C5BC", "lintel_dark": "#8E8A82", "metal": "#1F1F1F",
+		"windows": [[80.0, 100.0], [190.0, 100.0], [420.0, 100.0], [530.0, 100.0], [760.0, 100.0], [870.0, 100.0],
+			[1100.0, 100.0], [1210.0, 100.0], [1440.0, 100.0], [1550.0, 100.0]],
+		"projecting": [[400.0, 650.0], [1080.0, 1330.0]],
+		"shops": [{"x0": 30.0, "x1": 420.0, "sign": "#8A4A30", "ribs": true, "frame": "#4A2E22", "door": 90.0},
+			{"x0": 420.0, "x1": 760.0, "sign": "#8A4A30", "ribs": true, "frame": "#4A2E22", "door": 700.0},
+			{"x0": 760.0, "x1": 1250.0, "sign": "#8A4A30", "ribs": true, "frame": "#1E1E20", "door": 1190.0},
+			{"x0": 1250.0, "x1": 1670.0, "sign": "#8A4A30", "ribs": true, "frame": "#4A2E22", "door": 1310.0}],
+		"res_doors": [], "basement": [],
+	},
+	# Across 5e: the side of Dollarama's building, buff brick (2840…).
+	{
+		"name": "masson_2840_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#D6B98C", "#CDB082", "#DEC296", "#C4A678", "#D2B488"], "mortar": "#EDE3D2",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
+	},
 ]
 
 var k: Dictionary
@@ -621,6 +712,7 @@ func _generate(configs: Array) -> void:
 			doors[k.name] = k.get("door_x", k.door_cx)
 		out = PackedStringArray()
 		split = 0
+		_clips = 0
 		_svg()
 		if night:
 			# Only what is drawn in front of the windows, on its own transparent sheet.
@@ -751,6 +843,13 @@ func _svg() -> void:
 			_commerce()
 		"bank":
 			_bank()
+		"church":
+			_church()
+		"presbytere":
+			_building()
+			_presbytere()
+		"masson_lot":
+			_masson_lot()
 		_:
 			_building()
 	out.append('</svg>')
@@ -4039,7 +4138,10 @@ func _commerce() -> void:
 	if k.get("upper", "brick") == "frame":
 		_frame_upper(top, belt)
 	else:
-		_bricks(top, belt + 4.0)
+		if k.get("upper", "brick") == "stone":
+			_ashlar(top, belt + 4.0, k.get("upper_stone", "#B5B2AA"))
+		else:
+			_bricks(top, belt + 4.0)
 		_wall_shading(top)
 		match k.parapet:
 			"flat":
@@ -4057,6 +4159,16 @@ func _commerce() -> void:
 			for f in range(1, floors):
 				_balcony(bal[0], bal[1], _fb(f), [])
 				_rect(bal[0] - 6, _fb(f) + 16, bal[1] - bal[0] + 12, 34, k.slab_dark)
+		# A wooden rail round a roof terrace.
+		if k.get("roof_rail", "") != "":
+			var rail: String = k.roof_rail
+			_rect(X0, top - 74, X1 - X0, 6, rail)
+			_rect(X0, top - 40, X1 - X0, 4, rail)
+			var post := X0
+			while post <= X1:
+				_rect(post, top - 74, 7, 64, rail)
+				post += 34.0
+			_snow(X0, X1 - X0, top - 74)
 	# The belt between the shops and the flats: stone, or a dark cornice band.
 	_rect(X0 - 4, belt, X1 - X0 + 8, 16, k.get("belt", "#B9B3A8"), _stroke("#8E887E", 1.5))
 	_rect(X0 - 4, belt, X1 - X0 + 8, 3, "#FFFFFF", 'opacity="0.3"')
@@ -4088,6 +4200,19 @@ func _commerce() -> void:
 	for p: float in k.get("piers", []):
 		_rect(p - 10, belt + 16, 20, ground_y - belt - 16, k.get("pier_stone", "#B9B3A8"), _stroke("#8E887E", 1))
 		_rect(p - 10, belt + 16, 5, ground_y - belt - 16, "#FFFFFF", 'opacity="0.25"')
+	# A frame of pale stone: a pier up each end and a coping along the top (the Banque Nationale at 6e).
+	var frame_stone: String = k.get("stone_frame", "")
+	if frame_stone != "":
+		for fx: float in [X0, X1 - 70.0]:
+			_rect(fx, top - 20, 70, ground_y - top + 14, frame_stone, _stroke("#A89E8C", 1.5))
+			_rect(fx, top - 20, 8, ground_y - top + 14, "#FFFFFF", 'opacity="0.25"')
+			var jy := top + 40.0
+			while jy < ground_y - 20.0:
+				_rect(fx, jy, 70, 1.5, "#A89E8C")
+				jy += 64.0
+		_rect(X0, top - 30, X1 - X0, 34, frame_stone, _stroke("#A89E8C", 1.5))
+		_rect(X0, top - 30, X1 - X0, 4, "#FFFFFF", 'opacity="0.3"')
+		_snow(X0, X1 - X0, top - 30)
 	_rect(X0, ground_y - 6, X1 - X0, 6, "#8E8A82")
 
 
@@ -4105,6 +4230,13 @@ func _shopfront(shop: Dictionary, top: float) -> void:
 	_rect(x0 + 4, top + 4, x1 - x0 - 8, sign_h, shop.get("sign", "#1E1E20"), _stroke("#000000", 1) + ' opacity="0.95"')
 	_rect(x0 + 4, top + 4, x1 - x0 - 8, 4, "#FFFFFF", 'opacity="0.18"')
 	_rect(x0 + 4, top + sign_h + 4, x1 - x0 - 8, 8, "#000000", 'opacity="0.35"')
+	# A band of corrugated metal instead of a flat sign board (2846…: rust-red, ribbed).
+	if shop.get("ribs", false):
+		var rx := x0 + 8.0
+		while rx < x1 - 8.0:
+			_rect(rx, top + 6, 3, sign_h - 4, "#000000", 'opacity="0.24"')
+			_rect(rx + 3, top + 6, 1.5, sign_h - 4, "#FFFFFF", 'opacity="0.16"')
+			rx += 9.0
 	var gx0 := x0 + 10.0
 	var gx1 := x1 - 10.0
 	var seed_value := int(hash(k.name) % 997) + int(x0)
@@ -4346,6 +4478,398 @@ func _bank() -> void:
 	_rect(lx - 9, ground_y - 282, 18, 32, "#ECE7DA", _stroke("#1A1A1A", 2))
 	_path("M%s %s l12 -10 l12 10 z" % [_n(lx - 12), _n(ground_y - 282)], "#1A1A1A")
 	_circle(lx, ground_y - 266, 26, "url(#glow)")
+
+
+# ── Rue Masson, 5e to 6e: the church and its presbytery ──────────────────────
+# From rue-masson/2851… (AteR4eKT, usCf6EmL, krau45Tn, j7kmhWm0) and 2863… and their close-ups: Église Saint-Esprit de Rosemont
+# set back behind its wide flight of steps, pale grey stone, its tower in the middle, three arched doors of brown wood under
+# tracery, buttresses with pinnacles, a low aisle each side; the grounds round it with their trees, cedars and iron fence.
+# The tower's top is above every picture: drawn as a short copper pyramid with its cross, over a belfry stage.
+
+# Rough-faced stone in courses over a rectangle, each block its own tone (`_ashlar` for any part of a facade).
+func _stone_courses(x0: float, y0: float, x1: float, y1: float, stone: String, course := 40.0, block := 96.0) -> void:
+	_rect(x0, y0, x1 - x0, y1 - y0, "#" + Color(stone).darkened(0.22).to_html(false))
+	var y := y0
+	var row := 0
+	while y < y1:
+		var h := minf(course - 2.0, y1 - y)
+		var x := x0 - (block / 2.0 if row % 2 == 1 else 0.0)
+		while x < x1:
+			var bx := maxf(x, x0)
+			var bw := minf(x + block - 2.0, x1) - bx
+			if bw > 2.0 and h > 1.0:
+				var tone := Color(stone).lightened(rng.randf_range(-0.05, 0.07))
+				_rect(bx + 1.0, y + 1.0, bw - 2.0, h - 2.0, "#" + tone.to_html(false))
+				_rect(bx + 1.0, y + 1.0, bw - 2.0, 2.5, "#FFFFFF", 'opacity="0.2"')
+			x += block
+		y += course
+		row += 1
+
+
+# A pointed (lancet) window in a stone surround, its stained glass in small leaded panes: x its middle, y0 the arch's tip.
+func _lancet(x: float, y0: float, y1: float, w: float, trim: String) -> void:
+	var r := w / 2.0
+	var spring := y0 + w * 0.85
+	var outer := "M%s %s V%s Q%s %s %s %s Q%s %s %s %s V%s Z" % [_n(x - r - 12), _n(y1), _n(spring), _n(x - r - 12), _n(y0 - 6), _n(x), _n(y0 - 22), _n(x + r + 12), _n(y0 - 6), _n(x + r + 12), _n(spring), _n(y1)]
+	_path(outer, trim, _stroke("#8A867E", 1.5))
+	var glass := "M%s %s V%s Q%s %s %s %s Q%s %s %s %s V%s Z" % [_n(x - r), _n(y1), _n(spring), _n(x - r), _n(y0 + 8), _n(x), _n(y0), _n(x + r), _n(y0 + 8), _n(x + r), _n(spring), _n(y1)]
+	_path(glass, "#2C3646")
+	# The leaded panes, a little colour in them, catching the light low down.
+	var colors := ["#3E5E8E", "#8E3E3E", "#C9A23A", "#3E7A5E", "#5E4A8E"]
+	var py := spring - 10.0
+	var row := 0
+	while py < y1 - 8.0:
+		for i in 3:
+			var px := x - r + 4.0 + i * (w - 8.0) / 3.0
+			_rect(px + 1, py + 1, (w - 8.0) / 3.0 - 2.0, 20, colors[(row + i * 2) % colors.size()], 'opacity="0.55"')
+		py += 24.0
+		row += 1
+	_path(glass, "url(#glass)", 'opacity="0.35"')
+	_rect(x - 1.5, spring - 20, 3, y1 - spring + 20, "#8A867E")
+	_path("M%s %s Q%s %s %s %s Q%s %s %s %s" % [_n(x - r + 6), _n(spring + 6), _n(x - r * 0.4), _n(spring - 30), _n(x), _n(spring - 4), _n(x + r * 0.4), _n(spring - 30), _n(x + r - 6), _n(spring + 6)], "none", _stroke("#8A867E", 3))
+	_rect(x - r - 16, y1, w + 32, 10, trim, _stroke("#8A867E", 1))
+	_snow(x - r - 16, w + 32, y1)
+
+
+# A stepped buttress up a facade, with its pinnacle: x its middle, from y0 (the pinnacle's foot) down to y1.
+func _buttress(x: float, y0: float, y1: float, w: float, stone: String, trim: String) -> void:
+	_stone_courses(x - w / 2.0, y0, x + w / 2.0, y1, stone, 40.0, w)
+	_rect(x - w / 2.0, y0, 6, y1 - y0, "#FFFFFF", 'opacity="0.18"')
+	_rect(x + w / 2.0 - 8, y0, 8, y1 - y0, "#000000", 'opacity="0.14"')
+	for t: float in [0.35, 0.7]:
+		var sy := lerpf(y0, y1, t)
+		_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(x - w / 2.0 - 6), _n(sy + 14), _n(x - w / 2.0 - 6), _n(sy + 4), _n(x + w / 2.0 + 6), _n(sy - 10), _n(x + w / 2.0 + 6), _n(sy + 14)], trim, _stroke("#8A867E", 1))
+		_snow(x - w / 2.0 - 6, w + 12, sy - 4)
+	# The pinnacle: a little shaft, its gable faces and a spike with a finial.
+	_rect(x - w / 2.0 + 4, y0 - 46, w - 8, 46, trim, _stroke("#8A867E", 1))
+	_path("M%s %s L%s %s L%s %s Z" % [_n(x - w / 2.0 + 2), _n(y0 - 46), _n(x), _n(y0 - 118), _n(x + w / 2.0 - 2), _n(y0 - 46)], trim, _stroke("#8A867E", 1.2))
+	_path("M%s %s L%s %s L%s %s Z" % [_n(x), _n(y0 - 118), _n(x + w / 2.0 - 2), _n(y0 - 46), _n(x + 4), _n(y0 - 46)], "#000000", 'opacity="0.12"')
+	_circle(x, y0 - 122, 5, trim, _stroke("#8A867E", 1))
+
+
+# One of the church's doors: brown wood in planks under a tracery fanlight, deep in its stepped arch.
+func _church_door(x: float, w: float, floor_y: float, h: float, trim: String, stone: String) -> void:
+	var r := w / 2.0
+	var spring := floor_y - h + r
+	for order: Array in [[r + 34.0, trim], [r + 20.0, "#" + Color(stone).darkened(0.1).to_html(false)], [r + 8.0, "#" + Color(stone).darkened(0.25).to_html(false)]]:
+		var a: float = order[0]
+		_path("M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(x - a), _n(floor_y), _n(spring), _n(a), _n(a), _n(x + a), _n(spring), _n(floor_y)], order[1], _stroke("#8A867E", 1.2))
+	_path("M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(x - r), _n(floor_y), _n(spring), _n(r), _n(r), _n(x + r), _n(spring), _n(floor_y)], "#6E4226", _stroke("#3E2414", 2))
+	# The fanlight: dark glass in the arch, its iron tracery in rays and a ring.
+	_path("M%s %s A%s %s 0 0 1 %s %s Z" % [_n(x - r + 4), _n(spring + 6), _n(r - 4), _n(r - 4), _n(x + r - 4), _n(spring + 6)], "#232A33")
+	for i in 7:
+		var a := PI + PI * (i + 0.5) / 7.0
+		_path("M%s %s L%s %s" % [_n(x), _n(spring + 6), _n(x + cos(a) * (r - 6)), _n(spring + 6 + sin(a) * (r - 6))], "none", _stroke("#C9C5BC", 1.6) + ' opacity="0.7"')
+	_path("M%s %s A%s %s 0 0 1 %s %s" % [_n(x - r * 0.45), _n(spring + 6), _n(r * 0.45), _n(r * 0.45), _n(x + r * 0.45), _n(spring + 6)], "none", _stroke("#C9C5BC", 1.6) + ' opacity="0.7"')
+	_rect(x - r, spring + 6, w, 8, "#4A2C18")
+	# Two leaves of vertical planks, their iron studs and handles.
+	var py := spring + 14.0
+	var px := x - r + 6.0
+	while px < x + r - 6.0:
+		_rect(px, py, 1.5, floor_y - py, "#3E2414", 'opacity="0.6"')
+		_rect(px + 1.5, py, 2, floor_y - py, "#FFFFFF", 'opacity="0.08"')
+		px += 16.0
+	_rect(x - 1.5, py, 3, floor_y - py, "#2A160A")
+	for sy in [py + 40.0, floor_y - 60.0]:
+		_rect(x - r + 6, sy, w - 12, 5, "#2A2A2A", 'opacity="0.7"')
+	_rect(x - 10, lerpf(py, floor_y, 0.5), 6, 22, "#C9A23A")
+	_rect(x + 4, lerpf(py, floor_y, 0.5), 6, 22, "#C9A23A")
+
+
+# A row of brick buildings further back (behind a churchyard or a lot): plain walls of a few tones, their windows, flat roofs,
+# veiled in the haze of the distance.
+func _back_row(x0: float, x1: float, top: float, bottom: float) -> void:
+	var tones := ["#9A5A48", "#A8664E", "#8E5040", "#B07A5E", "#946050"]
+	var x := x0
+	var i := 0
+	while x < x1:
+		var w := minf(rng.randf_range(260.0, 380.0), x1 - x)
+		var t := top + rng.randf_range(-40.0, 60.0)
+		_rect(x, t, w, bottom - t, tones[i % tones.size()])
+		_rect(x, t - 8, w, 10, "#6E6A64")
+		var wy := t + 40.0
+		while wy < bottom - 90.0:
+			var wx := x + 30.0
+			while wx < x + w - 70.0:
+				_rect(wx, wy, 50, 74, "#E2DCCF")
+				_rect(wx + 4, wy + 4, 42, 66, "#5A6E7E")
+				wx += 100.0
+			wy += 150.0
+		_snow(x, w, t - 8)
+		x += w
+		i += 1
+	_rect(x0, top - 120, x1 - x0, bottom - top + 120, "#C9D6E2", 'opacity="0.38"')
+
+
+# The grass of a churchyard or a lot, the season's.
+func _lawn(x0: float, x1: float, y0: float) -> void:
+	var c: String = {"winter": "#EEF2F5", "spring": "#6FA04A", "summer": "#5E9440"}.get(season, "#7E8A4A")
+	_rect(x0, y0, x1 - x0, ground_y - y0, c)
+	_rect(x0, y0, x1 - x0, 4, "#000000", 'opacity="0.1"')
+	if season != "winter":
+		for i in int((x1 - x0) / 9.0):
+			var gx := x0 + 4.0 + i * 9.0 + rng.randf_range(-3.0, 3.0)
+			_path("M%s %s l%s %s" % [_n(gx), _n(ground_y - 2), _n(rng.randf_range(-3.0, 3.0)), _n(-rng.randf_range(6.0, 14.0))], "none", _stroke("#" + Color(c).darkened(0.25).to_html(false), 1.5))
+
+
+# A black iron fence along the sidewalk from x0 to x1, spear-topped bars between square posts.
+func _iron_fence(x0: float, x1: float) -> void:
+	var top := ground_y - 64.0
+	var bar := x0 + 6.0
+	while bar < x1 - 4.0:
+		_rect(bar, top + 6, 2.5, ground_y - top - 8, "#1F1F1F")
+		_path("M%s %s l3.5 -9 l3.5 9 z" % [_n(bar - 2.25), _n(top + 7)], "#1F1F1F")
+		bar += 12.0
+	_rect(x0, top + 12, x1 - x0, 3, "#1F1F1F")
+	_rect(x0, ground_y - 12, x1 - x0, 3, "#1F1F1F")
+	_snow(x0, x1 - x0, top + 12)
+	var post := x0
+	while post <= x1:
+		_rect(post - 4, top - 4, 8, ground_y - top + 4, "#1F1F1F")
+		_circle(post, top - 6, 5, "#1F1F1F")
+		post += 240.0
+
+
+func _church() -> void:
+	var stone: String = k.get("stone", "#C9C6BE")
+	var trim := "#" + Color(stone).lightened(0.12).to_html(false)
+	var cx: float = k.church_cx
+	var g := ground_y
+	var floor_y := g - 100.0
+	var half := 560.0
+	var aisle := 300.0
+	var tw := 190.0
+	var bay_top := g - 690.0
+	var tower_top := g - 840.0
+	var belfry_top := g - 955.0
+	var spire_top := g - 1010.0
+	var aisle_top := g - 420.0
+	# Behind the grounds, across the yards: the plexes of the avenue beyond, a little hazy with the distance.
+	_back_row(X0, X1, g - 600.0, g - 100.0)
+	# The grounds, in front of everything and round the church.
+	_lawn(X0, X1, g - 110.0)
+	# The aisles, low, under their slate roofs.
+	for side: float in [-1.0, 1.0]:
+		var a0: float = cx + side * half
+		var a1: float = cx + side * (half + aisle)
+		_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(minf(a0, a1)), _n(aisle_top - (90.0 if side > 0 else 0.0)), _n(maxf(a0, a1)), _n(aisle_top - (0.0 if side > 0 else 90.0)), _n(maxf(a0, a1)), _n(aisle_top + 10), _n(minf(a0, a1)), _n(aisle_top + 10)], "#5E6266")
+		_stone_courses(minf(a0, a1), aisle_top, maxf(a0, a1), floor_y, stone)
+		_rect(minf(a0, a1) - 4, aisle_top - 6, aisle + 8, 14, trim, _stroke("#8A867E", 1))
+		_snow(minf(a0, a1) - 4, aisle + 8, aisle_top - 6)
+		_lancet(cx + side * (half + aisle / 2.0), aisle_top + 70.0, aisle_top + 250.0, 56.0, trim)
+	# The front: its two bays either side of the tower, crenellated along the top.
+	_stone_courses(cx - half, bay_top, cx + half, floor_y, stone)
+	_rect(cx - half, bay_top, 2 * half, floor_y - bay_top, "url(#sun)")
+	for side: float in [-1.0, 1.0]:
+		var m := cx + side * tw
+		var e := cx + side * half
+		var mx := minf(m, e)
+		var ex := maxf(m, e)
+		_rect(mx, bay_top - 10, ex - mx, 14, trim, _stroke("#8A867E", 1))
+		var cren := mx + 20.0
+		while cren < ex - 30.0:
+			_rect(cren, bay_top - 34, 26, 26, trim, _stroke("#8A867E", 1))
+			_snow(cren, 26, bay_top - 34)
+			cren += 46.0
+		_lancet(cx + side * (tw + half) / 2.0, g - 610.0, g - 430.0, 84.0, trim)
+	# The tower, up through the middle, its belfry with tall louvred openings, a copper pyramid and its cross.
+	_stone_courses(cx - tw, tower_top, cx + tw, floor_y, stone)
+	_rect(cx - tw, tower_top, 8, floor_y - tower_top, "#FFFFFF", 'opacity="0.16"')
+	_rect(cx + tw - 10, tower_top, 10, floor_y - tower_top, "#000000", 'opacity="0.12"')
+	_rect(cx - tw - 8, tower_top - 12, 2 * tw + 16, 16, trim, _stroke("#8A867E", 1))
+	_snow(cx - tw - 8, 2 * tw + 16, tower_top - 12)
+	_stone_courses(cx - tw + 24, belfry_top, cx + tw - 24, tower_top - 12, stone)
+	for side: float in [-1.0, 1.0]:
+		var bx := cx + side * 62.0
+		_path("M%s %s V%s Q%s %s %s %s Q%s %s %s %s V%s Z" % [_n(bx - 26), _n(tower_top - 26), _n(belfry_top + 50), _n(bx - 26), _n(belfry_top + 16), _n(bx), _n(belfry_top + 8), _n(bx + 26), _n(belfry_top + 16), _n(bx + 26), _n(belfry_top + 50), _n(tower_top - 26)], "#2A2E34", _stroke(trim, 4))
+		var ly := belfry_top + 40.0
+		while ly < tower_top - 30.0:
+			_rect(bx - 24, ly, 48, 4, "#8E8A82")
+			ly += 11.0
+	_rect(cx - tw + 14, belfry_top - 10, 2 * tw - 28, 14, trim, _stroke("#8A867E", 1))
+	_path("M%s %s L%s %s L%s %s Z" % [_n(cx - tw + 18), _n(belfry_top - 10), _n(cx), _n(spire_top), _n(cx + tw - 18), _n(belfry_top - 10)], "#6E9A86", _stroke("#4E7A66", 1.5))
+	_path("M%s %s L%s %s L%s %s Z" % [_n(cx), _n(spire_top), _n(cx + tw - 18), _n(belfry_top - 10), _n(cx + 10), _n(belfry_top - 10)], "#000000", 'opacity="0.14"')
+	if season == "winter":
+		_path("M%s %s L%s %s L%s %s Z" % [_n(cx - 40), _n(spire_top + 30), _n(cx), _n(spire_top + 4), _n(cx + 30), _n(spire_top + 26)], "#F7F9FB")
+	_rect(cx - 3, spire_top - 46, 6, 50, "#3A3A3A")
+	_rect(cx - 16, spire_top - 34, 32, 6, "#3A3A3A")
+	for side: float in [-1.0, 1.0]:
+		var px := cx + side * (tw - 6.0)
+		_rect(px - 12, tower_top - 52, 24, 40, trim, _stroke("#8A867E", 1))
+		_path("M%s %s L%s %s L%s %s Z" % [_n(px - 14), _n(tower_top - 52), _n(px), _n(tower_top - 104), _n(px + 14), _n(tower_top - 52)], trim, _stroke("#8A867E", 1))
+	# Its tall window over the great door, and a carved band of little blind arches right across the front.
+	_lancet(cx, g - 700.0, g - 470.0, 120.0, trim)
+	var band := g - 450.0
+	_rect(cx - half, band, 2 * half, 26, trim, _stroke("#8A867E", 1))
+	var arch := cx - half + 8.0
+	while arch < cx + half - 20.0:
+		_path("M%s %s V%s A7 7 0 0 1 %s %s V%s" % [_n(arch), _n(band + 22), _n(band + 11), _n(arch + 14), _n(band + 11), _n(band + 22)], "none", _stroke("#8A867E", 1.4))
+		arch += 20.0
+	# The buttresses: at the front's corners and either side of the tower.
+	for bx: float in [cx - half, cx - tw, cx + tw, cx + half]:
+		var top := tower_top + 60.0 if absf(bx - cx) < tw + 1.0 else bay_top + 20.0
+		_buttress(bx, top, floor_y, 54.0, stone, trim)
+	# The three doors, the great one in the middle.
+	_church_door(cx, 150.0, floor_y, 320.0, trim, stone)
+	for side: float in [-1.0, 1.0]:
+		_church_door(cx + side * (tw + half) / 2.0, 118.0, floor_y, 262.0, trim, stone)
+	split = out.size()
+	# The flight of steps right across, its cheek walls, the handrails and the lamps on their posts.
+	var s0 := cx - half - 40.0
+	var s1 := cx + half + 40.0
+	for i in 8:
+		var sy := floor_y + i * 12.5
+		var inset := 0.0
+		_rect(s0 + inset, sy, s1 - s0 - 2 * inset, 12.5, "#C2BEB6" if i % 2 == 0 else "#BAB6AE")
+		_rect(s0 + inset, sy, s1 - s0 - 2 * inset, 3, "#E2DED6")
+		_rect(s0 + inset, sy + 10.5, s1 - s0 - 2 * inset, 2, "#8A867E", 'opacity="0.6"')
+		_snow(s0, s1 - s0, sy)
+	for side: float in [-1.0, 1.0]:
+		var wx: float = cx + side * (half + 40.0)
+		_stone_courses(minf(wx, wx - side * 70.0), floor_y - 30.0, maxf(wx, wx - side * 70.0), g, stone, 34.0, 70.0)
+		_rect(minf(wx, wx - side * 70.0) - 4, floor_y - 38.0, 78, 10, trim, _stroke("#8A867E", 1))
+		_snow(minf(wx, wx - side * 70.0) - 4, 78, floor_y - 38.0)
+		for mid: float in [tw * 0.55, (tw + half) / 2.0 + 90.0]:
+			var hx: float = cx + side * mid
+			_path("M%s %s L%s %s M%s %s L%s %s M%s %s L%s %s" % [_n(hx), _n(floor_y - 40), _n(hx), _n(g - 6), _n(hx - 3), _n(floor_y - 40), _n(hx - 3), _n(g - 40), _n(hx), _n(floor_y - 40), _n(hx + 26 * side), _n(floor_y - 40)], "none", _stroke("#9A9C9E", 3.5) + ' stroke-linecap="round"')
+		# The lamp post at each end of the steps: a black post with its cluster of lanterns.
+		var lx: float = cx + side * (half + 5.0)
+		_rect(lx - 5, floor_y - 290, 10, 260, "#1A1A1A")
+		_rect(lx - 9, floor_y - 40, 18, 12, "#1A1A1A")
+		for lo: float in [-22.0, 0.0, 22.0]:
+			var lly := floor_y - 300.0 - (14.0 if lo == 0.0 else 0.0)
+			_circle(lx + lo, lly - 12, 22, "url(#glow)")
+			_rect(lx + lo - 7, lly - 26, 14, 26, "#ECE7DA", _stroke("#1A1A1A", 2))
+			_path("M%s %s l9 -9 l9 9 z" % [_n(lx + lo - 9), _n(lly - 26)], "#1A1A1A")
+		_rect(lx - 26, floor_y - 288, 52, 4, "#1A1A1A")
+	# The grounds either side: cedars along the left, a big tree on the right, the iron fence along the sidewalk.
+	var left_end := cx - half - aisle
+	var right_start := cx + half + aisle
+	var cedar := X0 + 50.0
+	while cedar < left_end - 30.0:
+		_cedar(cedar, g - 260.0 - rng.randf_range(0.0, 60.0))
+		cedar += 70.0
+	_fine_tree(Vector2(lerpf(right_start, X1, 0.3), g - 70.0), g - 300.0, -PI * 0.62, 1.35, ["#E3A33A", "#D9682B", "#C9562E", "#E8B54A", "#D9A23A"])
+	_fine_tree(Vector2(lerpf(right_start, X1, 0.78), g - 66.0), g - 280.0, -PI * 0.4, 1.25, ["#D9A23A", "#C9562E", "#E3A33A", "#B5442E"])
+	for i in 4:
+		_shrub(right_start + 60.0 + i * 120.0, 30.0 + rng.randf_range(0.0, 10.0), "#3E6A3A")
+	_iron_fence(X0, s0 - 72.0)
+	_iron_fence(s1 + 72.0, X1)
+
+
+# The presbytery beside it, from the close-ups of 2851… (AteR4eKT, usCf6EmL): red brick on three floors, buff brick laid in
+# zigzag friezes, a band of green copper along the roof with a raised curved gable and its cross in the middle, white
+# globes on posts, segmental arches over the windows, the porch on four grey columns under its own curved gable; junipers and
+# an iron fence in front. Drawn over `_building()` (bricks, windows, foundation).
+func _zigzag_frieze(x0: float, x1: float, y: float, h: float) -> void:
+	var buff := "#E2C98E"
+	var cell := 9.0
+	var rows := int(h / cell)
+	var x := x0
+	var col := 0
+	while x < x1 - cell:
+		for r in rows:
+			var zig := absi((col % (rows * 2 - 2)) - (rows - 1)) if rows > 1 else 0
+			if r == zig or r == (zig + rows / 2) % rows:
+				_rect(x + 1, y + r * cell + 1, cell - 2, cell - 2, buff)
+		x += cell
+		col += 1
+
+
+func _presbytere() -> void:
+	var top := _top()
+	var cx: float = k.door_cx
+	var copper := "#5E8E76"
+	_zigzag_frieze(X0, X1, top + 20.0, 45.0)
+	# The copper band along the roof, a lattice pressed into it.
+	_rect(X0 - 8, top - 40, X1 - X0 + 16, 50, copper, _stroke("#3E6E56", 1.5))
+	var lx := X0
+	while lx < X1:
+		_path("M%s %s l14 22 l14 -22 M%s %s l14 -22 l14 22" % [_n(lx), _n(top - 30), _n(lx), _n(top + 2)], "none", _stroke("#8EBEA6", 1.4) + ' opacity="0.7"')
+		lx += 28.0
+	_rect(X0 - 8, top - 44, X1 - X0 + 16, 8, "#4E7E66")
+	_snow(X0 - 8, X1 - X0 + 16, top - 44)
+	# The raised gable over the middle, curved, its cross in buff brick, a globe at each shoulder.
+	var gw := 170.0
+	_path("M%s %s V%s Q%s %s %s %s Q%s %s %s %s V%s Z" % [_n(cx - gw), _n(top - 40), _n(top - 60), _n(cx - gw * 0.6), _n(top - 130), _n(cx), _n(top - 132), _n(cx + gw * 0.6), _n(top - 130), _n(cx + gw), _n(top - 60), _n(top - 40)], k.bricks[0], _stroke(k.lintel_dark, 1.5))
+	_path("M%s %s Q%s %s %s %s Q%s %s %s %s" % [_n(cx - gw - 6), _n(top - 58), _n(cx - gw * 0.6), _n(top - 138), _n(cx), _n(top - 140), _n(cx + gw * 0.6), _n(top - 138), _n(cx + gw + 6), _n(top - 58)], "none", _stroke("#D8D2C6", 9) + ' stroke-linecap="round"')
+	_zigzag_frieze(cx - gw + 20, cx + gw - 20, top - 70.0, 27.0)
+	_rect(cx - 5, top - 118, 10, 40, "#E2C98E")
+	_rect(cx - 16, top - 106, 32, 10, "#E2C98E")
+	for side: float in [-1.0, 1.0]:
+		var gx := cx + side * (gw + 4.0)
+		_rect(gx - 9, top - 82, 18, 26, "#D8D2C6", _stroke("#9E968A", 1))
+		_circle(gx, top - 92, 12, "#F2EFE8", _stroke("#9E968A", 1))
+	# Buff friezes between the floors too.
+	_zigzag_frieze(X0, X1, _fb(1) + 8.0, 27.0)
+	split = out.size()
+	# The porch: steps up, four grey columns, the curved gable with its cross and two globes.
+	var pw := 150.0
+	var porch := _fb(0)
+	for i in 7:
+		var sy := porch + i * ((ground_y - porch) / 7.0)
+		_rect(cx - 70 - i * 3.0, sy, 140 + i * 6.0, (ground_y - porch) / 7.0, "#9C968C" if i % 2 == 0 else "#A9A398")
+		_rect(cx - 70 - i * 3.0, sy, 140 + i * 6.0, 2, "#C9C3B8")
+	_rect(cx - 52, _door_top(0), 104, porch - _door_top(0), "#5E3A22", _stroke("#3E2414", 2))
+	_rect(cx - 40, _door_top(0) + 14, 80, 90, "url(#glass)")
+	_rect(cx - 40, _door_top(0) + 120, 80, 4, "#3E2414")
+	var col_top := porch - 250.0
+	for p: float in [-pw, -pw + 52.0, pw - 52.0, pw]:
+		var px: float = cx + p
+		_rect(px - 13, col_top, 26, porch - col_top, "#C9C5BC", _stroke("#8E8A82", 1.2))
+		_rect(px - 13, col_top, 7, porch - col_top, "#FFFFFF", 'opacity="0.25"')
+		_rect(px - 18, col_top - 10, 36, 12, "#D8D4CC", _stroke("#8E8A82", 1))
+		_rect(px - 18, porch - 14, 36, 14, "#B9B5AC", _stroke("#8E8A82", 1))
+	_rect(cx - pw - 26, col_top - 34, 2 * pw + 52, 26, "#D8D4CC", _stroke("#8E8A82", 1.2))
+	_path("M%s %s Q%s %s %s %s" % [_n(cx - pw - 20), _n(col_top - 34), _n(cx), _n(col_top - 130), _n(cx + pw + 20), _n(col_top - 34)], k.bricks[1], _stroke("#D8D2C6", 7))
+	_zigzag_frieze(cx - 80, cx + 80, col_top - 74.0, 27.0)
+	_rect(cx - 4, col_top - 112, 8, 34, "#E2C98E")
+	_rect(cx - 13, col_top - 102, 26, 8, "#E2C98E")
+	for side: float in [-1.0, 1.0]:
+		_circle(cx + side * (pw + 20.0), col_top - 48, 11, "#F2EFE8", _stroke("#9E968A", 1))
+	_snow(cx - pw - 26, 2 * pw + 52, col_top - 34)
+	# The junipers in front and the iron fence along the sidewalk.
+	for jx: float in [X0 + 60.0, X0 + 170.0, cx - 230.0, cx + 230.0, X1 - 170.0, X1 - 60.0]:
+		_shrub(jx, 44.0 + rng.randf_range(0.0, 10.0), "#3A6A44")
+	_iron_fence(X0, cx - 80.0)
+	_iron_fence(cx + 80.0, X1)
+
+
+# The lot between the shops at 2876 (rue-masson/2876…): a gap in the row, asphalt, the backs of the plexes beyond with their
+# black iron stair, a teal shed painted with leaves and flowers, a big tree; the bins, crates and cars of the picture left out.
+func _masson_lot() -> void:
+	var g := ground_y
+	var back := g - 160.0
+	# The plexes behind, across their yards: brick, windows, the iron stair zigzagging down.
+	_bricks(g - 720.0, back)
+	_rect(X0, g - 720.0, X1 - X0, back - g + 720.0, "#1A1428", 'opacity="0.18"')
+	for wx: float in [X0 + 40.0, X0 + 230.0]:
+		for f in 2:
+			_rect(wx, g - 680.0 + f * 250.0, 80, 120, "#E9E3D6")
+			_rect(wx + 6, g - 674.0 + f * 250.0, 68, 108, "url(#glass)")
+	for i in 3:
+		var sy := g - 470.0 + i * 120.0
+		_path("M%s %s L%s %s" % [_n(X0 + 150), _n(sy), _n(X0 + 330), _n(sy + 110)], "none", _stroke("#1A1A1A", 6))
+		_rect(X0 + 140, sy - 6, 200, 6, "#1A1A1A")
+	# The ground: old asphalt, a patch, the edge of the sidewalk.
+	_rect(X0, back, X1 - X0, g - back, "#7E7C78")
+	_rect(X0, back, X1 - X0, 6, "#000000", 'opacity="0.2"')
+	out.append('<ellipse cx="%s" cy="%s" rx="60" ry="10" fill="#6A6864" opacity="0.6"/>' % [_n(X0 + 140), _n(g - 60)])
+	_snow(X0, X1 - X0, back + 2)
+	split = out.size()
+	# The teal shed with its painted leaves and flowers, and a board fence beside it.
+	var sx0 := X1 - 230.0
+	_rect(sx0, g - 230.0, 200, 200, "#5EB8B0", _stroke("#3E8A84", 2))
+	_path("M%s %s L%s %s L%s %s Z" % [_n(sx0 - 8), _n(g - 228), _n(sx0 + 100), _n(g - 262), _n(sx0 + 208), _n(g - 228)], "#4E5256")
+	_snow(sx0 - 8, 216, g - 236)
+	for i in 6:
+		var p := Vector2(sx0 + 30 + i * 30, g - 80 - (i % 3) * 40.0)
+		_plant_leaf(p, 30.0, -30.0 + i * 25.0, ["#3E8A4E", "#2E6E3E", "#6EA84E"][i % 3])
+	for i in 3:
+		_bloom(sx0 + 50 + i * 55, g - 170 + (i % 2) * 30.0, 12.0, ["#F2C230", "#E8812E", "#E85FA0"][i])
+	_circle(sx0 + 150, g - 190, 18, "#F2C230")
+	_wood_fence([[X0, sx0 - 170.0], [sx0, X1]])
+	_fine_tree(Vector2(sx0 - 40, g - 40), g - 380.0, -PI * 0.55, 1.0, ["#E3A33A", "#D9A23A", "#C9562E", "#E8B54A"])
 
 
 # ── What every lane entrance seen from the street gets ───────────────────────

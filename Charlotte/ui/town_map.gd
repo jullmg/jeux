@@ -126,10 +126,6 @@ func _here() -> Dictionary:
 				"say": "Je suis en face de chez moi !"}
 		"holt":
 			return {"at": Vector2(lerpf(WALK_E, WALK_W, f), WALK_N), "say": "Je suis ici !"}
-		"masson_6e_7e_impair", "masson_6e_7e_pair":
-			# Rue Masson lies south of the sheet: at its foot, between 6e and 7e (the odd side's view has 6e on the left).
-			var x := lerpf(SIX_X, SEVEN_X, f if key.ends_with("_impair") else 1.0 - f)
-			return {"at": Vector2(x, SHEET.y - 20.0), "say": "Je suis sur la rue Masson !"}
 		"cinquieme":
 			return {"at": Vector2(WALK_W, lerpf(WALK_N, WALK_S, f)), "say": "Je suis ici !"}
 		"dandurand":
@@ -146,6 +142,14 @@ func _here() -> Dictionary:
 			return {"at": Vector2(SHOP_X, DAND_Y - 30.0), "say": "Je suis chez Xin-Xin !"}
 		"ohbon":
 			return {"at": Vector2(SHOP_X, HOLT_Y + 50.0), "say": "Je suis chez Oh Bon !"}
+	if key.begins_with("masson_"):
+		# Rue Masson lies south of the sheet: at its foot, between the block's two avenues ("masson_6e_7e_impair"; the odd side's
+		# view has the lower avenue on the left). The avenues are 153 apart, 4e at FOUR_X.
+		var parts := key.split("_")
+		var a := FOUR_X + (parts[1].to_int() - 4) * (FIVE_X - FOUR_X)
+		var b := FOUR_X + (parts[2].to_int() - 4) * (FIVE_X - FOUR_X)
+		var x := lerpf(a, b, f if key.ends_with("_impair") else 1.0 - f)
+		return {"at": Vector2(clampf(x, SIDE + 20.0, SHEET.x - 20.0), SHEET.y - 20.0), "say": "Je suis sur la rue Masson !"}
 	return {"at": Vector2(HOUSE_X, HOUSE_Y - 10.0), "say": "Je suis ici !"}
 
 
