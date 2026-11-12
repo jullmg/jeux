@@ -170,6 +170,7 @@ const BLOCKS := {
 		"signs": {
 			"masson_3103": [[380.0, "Méga Vrac", "#FFFFFF", "#1F4E9A", 15]],
 			"masson_3115": [[400.0, "QUINCAILLERIE A. LALONDE", "#1E1E20", "#F2F0EA", 12]],
+			"masson_3107": [[300.0, "PEINTURE SICO", "#FFFFFF", "#C8202A", 12]],
 			"masson_3131": [[340.0, "PUB", "#E8C46A", "#1E1E20", 14]],
 		},
 		"panels": {},

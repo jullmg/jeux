@@ -889,21 +889,21 @@ const HOUSES := [
 	{
 		"name": "masson_3103", "kind": "commerce", "width": 760.0, "floors": 3,
 		"bricks": ["#B9AE9A", "#AFA490", "#C3B8A4", "#A69B88"], "mortar": "#DCD4C6", "parapet": "flat",
-		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "windows": [[90.0, 120.0], [330.0, 120.0], [560.0, 120.0]],
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "lintel_style": "none", "window_style": "slider", "frame": "#F2F0EA", "windows": [[90.0, 120.0], [330.0, 120.0], [560.0, 120.0]],
 		"shops": [{"x0": 30.0, "x1": 730.0, "sign": "#1F4E9A", "frame": "#1E1E20", "door": 120.0, "inside": "fruit", "wall": "#E8E0CC", "kick": "wood", "front": "wood"}], "basement": [],
 	},
 	# 3107–3109: buff brick on three floors, a tall red sign hung out at the corner (3103…, 3107…).
 	{
 		"name": "masson_3107", "kind": "commerce", "width": 620.0, "floors": 3,
 		"bricks": ["#CDB088", "#C2A47C", "#D6BA92", "#B89A72"], "mortar": "#E6DCCB", "parapet": "flat",
-		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[90.0, 110.0], [380.0, 110.0]],
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "lintel_style": "none", "window_style": "hung", "hung_frame": "#F2F0EA", "quoins": true, "windows": [[90.0, 110.0], [380.0, 110.0]],
 		"shops": [{"x0": 30.0, "x1": 590.0, "sign": "#C8202A", "frame": "#2B2B2E", "door": 300.0, "inside": "goods", "kick": "brick"}], "basement": [],
 	},
 	# 3115–3121, Quincaillerie A. Lalonde: brown brick on three floors, its white sign (3107…, 3115…).
 	{
 		"name": "masson_3115", "kind": "commerce", "width": 800.0, "floors": 3,
-		"bricks": ["#8E6448", "#9A6E52", "#825A40", "#A2765A"], "mortar": "#C9B89E", "parapet": "corbel",
-		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "windows": [[90.0, 110.0], [340.0, 110.0], [580.0, 110.0]],
+		"bricks": ["#C9AE88", "#BFA47E", "#D2B892", "#B49A74"], "mortar": "#E6DCCB", "parapet": "flat", "quoins": true,
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "lintel_style": "none", "window_style": "hung", "hung_frame": "#F2F0EA", "windows": [[90.0, 110.0], [340.0, 110.0], [580.0, 110.0]],
 		"shops": [{"x0": 30.0, "x1": 770.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 400.0, "lamps": 2, "inside": "hardware", "front": "wood", "kick": "wood"}], "basement": [],
 	},
 	# 3125: grey stone on three floors (3127…).
@@ -917,7 +917,7 @@ const HOUSES := [
 	{
 		"name": "masson_3127", "kind": "commerce", "width": 600.0, "floors": 2,
 		"bricks": ["#A04A3A", "#AE5442", "#943F31", "#B85E4A"], "mortar": "#CDBFB0", "parapet": "flat",
-		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 130.0], [360.0, 130.0]],
+		"lintel": "#8E887E", "lintel_dark": "#5E5A54", "lintel_style": "none", "window_style": "slider", "frame": "#2B2B2E", "windows": [[90.0, 130.0], [360.0, 130.0]],
 		"shops": [{"x0": 30.0, "x1": 570.0, "sign": "#F2C230", "frame": "#2B2B2E", "door": 500.0, "inside": "restaurant", "wall": "#F2E6C8", "transom": "none"}], "basement": [],
 	},
 	# 3131–3135: the pub, its front of rough rubble stone on two floors, black frames (3127…, 3131…).
@@ -932,7 +932,7 @@ const HOUSES := [
 	{
 		"name": "masson_3139", "kind": "commerce", "width": 860.0, "floors": 2,
 		"bricks": ["#A4553E", "#B05E48", "#984E38", "#B86650"], "mortar": "#CDBFB0", "parapet": "flat",
-		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 110.0], [330.0, 110.0], [580.0, 110.0]],
+		"lintel": "#B9B3A8", "lintel_dark": "#7E786E", "lintel_style": "none", "window_style": "slider", "frame": "#4A3426", "windows": [[90.0, 110.0], [330.0, 110.0], [580.0, 110.0]],
 		"shops": [{"x0": 30.0, "x1": 830.0, "sign": "#1E1E20", "frame": "#1E1E20", "door": 120.0, "inside": "cafe", "transom": "none", "panes": 4}], "basement": [],
 	},
 	# Across 9e: the next block's corner, its side.
@@ -957,9 +957,9 @@ const HOUSES := [
 	},
 	# 3128–3130, Bossa: two floors clad in white, wide windows, its black sign (3132…).
 	{
-		"name": "masson_3128", "kind": "commerce", "width": 640.0, "floors": 2, "upper": "siding", "siding": "#F0EFEA",
-		"bricks": ["#E8E6E0"], "mortar": "#C9C5BC", "parapet": "flat",
-		"lintel": "#E8E6E0", "lintel_dark": "#B9B5AC", "lintel_style": "none", "windows": [[90.0, 200.0], [350.0, 200.0]],
+		"name": "masson_3128", "kind": "commerce", "width": 640.0, "floors": 2, 
+		"bricks": ["#ECEAE4", "#E4E2DC", "#F2F0EA"], "mortar": "#D2CFC8", "parapet": "flat",
+		"lintel": "#E8E6E0", "lintel_dark": "#B9B5AC", "lintel_style": "none", "window_style": "fixed", "frame": "#2B2B2E", "flower_boxes": true, "windows": [[90.0, 200.0], [350.0, 200.0]],
 		"shops": [{"x0": 30.0, "x1": 610.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 300.0, "inside": "clothes", "wall": "#F4F2EE", "transom": "none", "panes": 2}], "basement": [],
 	},
 	# 3126: brick on two floors, a shop under a red sign (3132…).
