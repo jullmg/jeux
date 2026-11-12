@@ -4729,7 +4729,8 @@ func _stone_courses(x0: float, y0: float, x1: float, y1: float, stone: String, c
 
 
 # A pointed (lancet) window in a stone surround, its stained glass in small leaded panes: x its middle, y0 the arch's tip.
-func _lancet(x: float, y0: float, y1: float, w: float, trim: String) -> void:
+const CHURCH_GLASS := ["#2E4A78", "#3A5A8E", "#26406A", "#44689E"]
+func _lancet(x: float, y0: float, y1: float, w: float, trim: String, palette: Array = []) -> void:
 	var r := w / 2.0
 	var spring := y0 + w * 0.85
 	var outer := "M%s %s V%s Q%s %s %s %s Q%s %s %s %s V%s Z" % [_n(x - r - 12), _n(y1), _n(spring), _n(x - r - 12), _n(y0 - 6), _n(x), _n(y0 - 22), _n(x + r + 12), _n(y0 - 6), _n(x + r + 12), _n(spring), _n(y1)]
@@ -4737,7 +4738,7 @@ func _lancet(x: float, y0: float, y1: float, w: float, trim: String) -> void:
 	var glass := "M%s %s V%s Q%s %s %s %s Q%s %s %s %s V%s Z" % [_n(x - r), _n(y1), _n(spring), _n(x - r), _n(y0 + 8), _n(x), _n(y0), _n(x + r), _n(y0 + 8), _n(x + r), _n(spring), _n(y1)]
 	_path(glass, "#2C3646")
 	# The leaded panes, a little colour in them, catching the light low down.
-	var colors := ["#3E5E8E", "#8E3E3E", "#C9A23A", "#3E7A5E", "#5E4A8E"]
+	var colors: Array = palette if not palette.is_empty() else ["#3E5E8E", "#8E3E3E", "#C9A23A", "#3E7A5E", "#5E4A8E"]
 	var py := spring - 10.0
 	var row := 0
 	while py < y1 - 8.0:
@@ -4747,10 +4748,50 @@ func _lancet(x: float, y0: float, y1: float, w: float, trim: String) -> void:
 		py += 24.0
 		row += 1
 	_path(glass, "url(#glass)", 'opacity="0.35"')
+	if not palette.is_empty():
+		_rect(x - r + 5, y1 - (y1 - spring) * 0.45, w - 10, (y1 - spring) * 0.45 - 6, "none", _stroke("#C9A84A", 2) + ' opacity="0.8"')
 	_rect(x - 1.5, spring - 20, 3, y1 - spring + 20, "#8A867E")
 	_path("M%s %s Q%s %s %s %s Q%s %s %s %s" % [_n(x - r + 6), _n(spring + 6), _n(x - r * 0.4), _n(spring - 30), _n(x), _n(spring - 4), _n(x + r * 0.4), _n(spring - 30), _n(x + r - 6), _n(spring + 6)], "none", _stroke("#8A867E", 3))
 	_rect(x - r - 16, y1, w + 32, 10, trim, _stroke("#8A867E", 1))
 	_snow(x - r - 16, w + 32, y1)
+
+
+# A carved Art Deco band (2851… close-ups): a row of upright triangles between two fillets, each with a smaller one inside.
+func _deco_band(x0: float, x1: float, y: float, h: float, trim: String) -> void:
+	_rect(x0, y, x1 - x0, h, trim, _stroke("#8A867E", 1))
+	_rect(x0, y + 3, x1 - x0, 1.2, "#8A867E", 'opacity="0.8"')
+	_rect(x0, y + h - 4, x1 - x0, 1.2, "#8A867E", 'opacity="0.8"')
+	var tx := x0 + 4.0
+	var tw := h * 0.9
+	while tx + tw < x1 - 2.0:
+		_path("M%s %s L%s %s L%s %s Z" % [_n(tx), _n(y + h - 6), _n(tx + tw / 2.0), _n(y + 6), _n(tx + tw), _n(y + h - 6)], "none", _stroke("#8A867E", 1.4))
+		_path("M%s %s L%s %s L%s %s Z" % [_n(tx + tw * 0.3), _n(y + h - 8), _n(tx + tw / 2.0), _n(y + h * 0.45), _n(tx + tw * 0.7), _n(y + h - 8)], "#000000", 'opacity="0.12"')
+		tx += tw + 3.0
+
+
+# A small carved lozenge.
+func _lozenge(x: float, y: float, r: float, trim: String) -> void:
+	_path("M%s %s l%s %s l%s %s l%s %s z" % [_n(x), _n(y - r), _n(r), _n(r), _n(-r), _n(r), _n(-r), _n(-r)], trim, _stroke("#8A867E", 1.3))
+	_path("M%s %s l%s %s l%s %s l%s %s z" % [_n(x), _n(y - r * 0.5), _n(r * 0.5), _n(r * 0.5), _n(-r * 0.5), _n(r * 0.5), _n(-r * 0.5), _n(-r * 0.5)], "#000000", 'opacity="0.12"')
+
+
+# An angel carved in the stone, standing on its pedestal under a little spire, hands joined, wings folded (2851… close-ups).
+func _angel(x: float, foot: float, h: float, trim: String) -> void:
+	var line := _stroke("#8A867E", 1.2)
+	_rect(x - 16, foot, 32, 20, trim, line)
+	_rect(x - 20, foot + 20, 40, 8, trim, line)
+	# The wings behind, the robe, the head, the joined hands.
+	_path("M%s %s Q%s %s %s %s L%s %s Z" % [_n(x - 4), _n(foot - h * 0.78), _n(x - 22), _n(foot - h * 0.7), _n(x - 16), _n(foot - h * 0.2), _n(x - 6), _n(foot - h * 0.3)], trim, line)
+	_path("M%s %s Q%s %s %s %s L%s %s Z" % [_n(x + 4), _n(foot - h * 0.78), _n(x + 22), _n(foot - h * 0.7), _n(x + 16), _n(foot - h * 0.2), _n(x + 6), _n(foot - h * 0.3)], trim, line)
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(x - 9), _n(foot - h * 0.74), _n(x + 9), _n(foot - h * 0.74), _n(x + 13), _n(foot), _n(x - 13), _n(foot)], trim, line)
+	for f in 3:
+		_rect(x - 6 + f * 5.0, foot - h * 0.5, 1.2, h * 0.48, "#8A867E", 'opacity="0.6"')
+	_circle(x, foot - h * 0.84, h * 0.09, trim, line)
+	_path("M%s %s l4 -8 l4 8 z" % [_n(x - 4), _n(foot - h * 0.5)], "#8A867E", 'opacity="0.6"')
+	_rect(x + 8, foot - h * 0.74, 5, h * 0.74, "#000000", 'opacity="0.12"')
+	# Its canopy: a small hood and spire over the head.
+	_path("M%s %s L%s %s L%s %s Z" % [_n(x - 14), _n(foot - h - 2), _n(x), _n(foot - h - 40), _n(x + 14), _n(foot - h - 2)], trim, line)
+	_rect(x - 15, foot - h - 4, 30, 6, trim, line)
 
 
 # A stepped buttress up a facade, with its pinnacle: x its middle, from y0 (the pinnacle's foot) down to y1.
@@ -4874,11 +4915,11 @@ func _church() -> void:
 	for side: float in [-1.0, 1.0]:
 		var a0: float = cx + side * half
 		var a1: float = cx + side * (half + aisle)
-		_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(minf(a0, a1)), _n(aisle_top - (90.0 if side > 0 else 0.0)), _n(maxf(a0, a1)), _n(aisle_top - (0.0 if side > 0 else 90.0)), _n(maxf(a0, a1)), _n(aisle_top + 10), _n(minf(a0, a1)), _n(aisle_top + 10)], "#5E6266")
 		_stone_courses(minf(a0, a1), aisle_top, maxf(a0, a1), floor_y, stone)
 		_rect(minf(a0, a1) - 4, aisle_top - 6, aisle + 8, 14, trim, _stroke("#8A867E", 1))
 		_snow(minf(a0, a1) - 4, aisle + 8, aisle_top - 6)
-		_lancet(cx + side * (half + aisle / 2.0), aisle_top + 70.0, aisle_top + 250.0, 56.0, trim)
+		_deco_band(minf(a0, a1) + 10, maxf(a0, a1) - 10, aisle_top + 26.0, 26.0, trim)
+		_lancet(cx + side * (half + aisle / 2.0), aisle_top + 90.0, aisle_top + 270.0, 44.0, trim, CHURCH_GLASS)
 	# The front: its two bays either side of the tower, crenellated along the top.
 	_stone_courses(cx - half, bay_top, cx + half, floor_y, stone)
 	_rect(cx - half, bay_top, 2 * half, floor_y - bay_top, "url(#sun)")
@@ -4887,13 +4928,14 @@ func _church() -> void:
 		var e := cx + side * half
 		var mx := minf(m, e)
 		var ex := maxf(m, e)
-		_rect(mx, bay_top - 10, ex - mx, 14, trim, _stroke("#8A867E", 1))
-		var cren := mx + 20.0
-		while cren < ex - 30.0:
-			_rect(cren, bay_top - 34, 26, 26, trim, _stroke("#8A867E", 1))
-			_snow(cren, 26, bay_top - 34)
-			cren += 46.0
-		_lancet(cx + side * (tw + half) / 2.0, g - 610.0, g - 430.0, 84.0, trim)
+		_rect(mx - 6, bay_top - 16, ex - mx + 12, 18, trim, _stroke("#8A867E", 1))
+		_rect(mx - 6, bay_top - 16, ex - mx + 12, 3, "#FFFFFF", 'opacity="0.3"')
+		_snow(mx - 6, ex - mx + 12, bay_top - 16)
+		_deco_band(mx + 30, ex - 30, bay_top + 30.0, 28.0, trim)
+		var wx := cx + side * (tw + half) / 2.0
+		_lancet(wx, g - 640.0, g - 470.0, 62.0, trim, CHURCH_GLASS)
+		_lozenge(wx, g - 690.0 + 26.0, 13.0, trim)
+		_lozenge(wx, g - 428.0, 11.0, trim)
 	# The tower, up through the middle, its belfry with tall louvred openings, a copper pyramid and its cross.
 	_stone_courses(cx - tw, tower_top, cx + tw, floor_y, stone)
 	_rect(cx - tw, tower_top, 8, floor_y - tower_top, "#FFFFFF", 'opacity="0.16"')
@@ -4920,13 +4962,9 @@ func _church() -> void:
 		_rect(px - 12, tower_top - 52, 24, 40, trim, _stroke("#8A867E", 1))
 		_path("M%s %s L%s %s L%s %s Z" % [_n(px - 14), _n(tower_top - 52), _n(px), _n(tower_top - 104), _n(px + 14), _n(tower_top - 52)], trim, _stroke("#8A867E", 1))
 	# Its tall window over the great door, and a carved band of little blind arches right across the front.
-	_lancet(cx, g - 700.0, g - 470.0, 120.0, trim)
-	var band := g - 450.0
-	_rect(cx - half, band, 2 * half, 26, trim, _stroke("#8A867E", 1))
-	var arch := cx - half + 8.0
-	while arch < cx + half - 20.0:
-		_path("M%s %s V%s A7 7 0 0 1 %s %s V%s" % [_n(arch), _n(band + 22), _n(band + 11), _n(arch + 14), _n(band + 11), _n(band + 22)], "none", _stroke("#8A867E", 1.4))
-		arch += 20.0
+	_lancet(cx, g - 760.0, g - 480.0, 74.0, trim, CHURCH_GLASS)
+	_deco_band(cx - tw + 30, cx + tw - 30, g - 456.0, 30.0, trim)
+	_lozenge(cx, g - 412.0, 12.0, trim)
 	# The buttresses: at the front's corners and either side of the tower.
 	for bx: float in [cx - half, cx - tw, cx + tw, cx + half]:
 		var top := tower_top + 60.0 if absf(bx - cx) < tw + 1.0 else bay_top + 20.0
@@ -4935,6 +4973,9 @@ func _church() -> void:
 	_church_door(cx, 150.0, floor_y, 320.0, trim, stone)
 	for side: float in [-1.0, 1.0]:
 		_church_door(cx + side * (tw + half) / 2.0, 118.0, floor_y, 262.0, trim, stone)
+	# The angels standing on the buttresses either side of the great door and at the front's corners, under little spires.
+	for bx: float in [cx - half, cx - tw, cx + tw, cx + half]:
+		_angel(bx, floor_y - 250.0, 110.0, trim)
 	split = out.size()
 	# The flight of steps right across, its cheek walls, the handrails and the lamps on their posts.
 	var s0 := cx - half - 40.0
@@ -4958,12 +4999,11 @@ func _church() -> void:
 		var lx: float = cx + side * (half + 5.0)
 		_rect(lx - 5, floor_y - 290, 10, 260, "#1A1A1A")
 		_rect(lx - 9, floor_y - 40, 18, 12, "#1A1A1A")
-		for lo: float in [-22.0, 0.0, 22.0]:
-			var lly := floor_y - 300.0 - (14.0 if lo == 0.0 else 0.0)
-			_circle(lx + lo, lly - 12, 22, "url(#glow)")
-			_rect(lx + lo - 7, lly - 26, 14, 26, "#ECE7DA", _stroke("#1A1A1A", 2))
-			_path("M%s %s l9 -9 l9 9 z" % [_n(lx + lo - 9), _n(lly - 26)], "#1A1A1A")
-		_rect(lx - 26, floor_y - 288, 52, 4, "#1A1A1A")
+		_circle(lx, floor_y - 310, 26, "url(#glow)")
+		_rect(lx - 10, floor_y - 334, 20, 40, "#ECE7DA", _stroke("#1A1A1A", 2.5))
+		_rect(lx - 1, floor_y - 334, 2, 40, "#1A1A1A")
+		_path("M%s %s l13 -12 l13 12 z" % [_n(lx - 13), _n(floor_y - 334)], "#1A1A1A")
+		_rect(lx - 8, floor_y - 294, 16, 6, "#1A1A1A")
 	# The grounds either side: cedars along the left, a big tree on the right, the iron fence along the sidewalk.
 	var left_end := cx - half - aisle
 	var right_start := cx + half + aisle
