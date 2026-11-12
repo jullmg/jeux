@@ -1113,14 +1113,14 @@ const HOUSES := [
 		"bricks": ["#D8D6D0"], "mortar": "#B9B5AC", "parapet": "flat", "lintel": "#E8E6E0", "lintel_dark": "#9E968A", "lintel_style": "none",
 		"trim": "#3A3A3C", "trim_dark": "#1E1E20",
 		"windows": [[60.0, 220.0], [300.0, 220.0], [540.0, 220.0], [780.0, 220.0]],
-		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#1E6E3E", "frame": "#2B2B2E", "door": 420.0, "awning": "#1E6E3E", "inside": "fruit", "transom": "none"},
+		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#1E6E3E", "frame": "#2B2B2E", "door": 420.0, "awning": "#1E6E3E", "inside": "goods", "wall": "#F2EEE6", "transom": "none"},
 			{"x0": 560.0, "x1": 1070.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 700.0, "inside": "goods", "kick": "panel"}], "basement": [],
 	},
 	# 2661–2663: new red brick on three floors, recessed balconies with glass rails (2661…, 2663…).
 	{
 		"name": "masson_2661", "kind": "commerce", "width": 800.0, "floors": 3,
 		"bricks": ["#A8473A", "#B4513F", "#9A3F33", "#B85C48"], "mortar": "#CDBFB0", "parapet": "flat",
-		"lintel": "#A8473A", "lintel_dark": "#8E3A2F", "lintel_style": "none", "trim": "#2B2B2E", "trim_dark": "#1E1E20",
+		"lintel": "#A8473A", "lintel_dark": "#8E3A2F", "lintel_style": "none", "window_style": "slider", "frame": "#1E1E20", "trim": "#2B2B2E", "trim_dark": "#1E1E20",
 		"windows": [[80.0, 120.0], [320.0, 120.0], [560.0, 120.0]], "projecting": [[500.0, 740.0]], "metal": "#3A3A3C",
 		"shops": [{"x0": 30.0, "x1": 770.0, "sign": "#3A3A3C", "frame": "#2B2B2E", "door": 400.0, "inside": "salon", "transom": "none", "panes": 2}], "basement": [],
 	},
@@ -1133,7 +1133,7 @@ const HOUSES := [
 	{
 		"name": "masson_2675", "kind": "commerce", "width": 1300.0, "floors": 3,
 		"bricks": ["#A44A3A", "#B05444", "#984234", "#B85E4C"], "mortar": "#CDBFB0", "parapet": "flat",
-		"lintel": "#A44A3A", "lintel_dark": "#8E3A2F", "lintel_style": "none", "trim": "#2B2B2E", "trim_dark": "#1E1E20",
+		"lintel": "#A44A3A", "lintel_dark": "#8E3A2F", "lintel_style": "none", "window_style": "slider", "frame": "#1E1E20", "trim": "#2B2B2E", "trim_dark": "#1E1E20",
 		"windows": [[80.0, 110.0], [300.0, 110.0], [540.0, 110.0], [780.0, 110.0], [1040.0, 110.0]],
 		"projecting": [[250.0, 450.0], [740.0, 940.0]], "metal": "#3A3A3C",
 		"shops": [{"x0": 30.0, "x1": 640.0, "sign": "#C8202A", "frame": "#2B2B2E", "door": 560.0, "inside": "restaurant", "transom": "none"},
@@ -1143,7 +1143,7 @@ const HOUSES := [
 	{
 		"name": "masson_2685", "kind": "commerce", "width": 900.0, "floors": 3,
 		"bricks": ["#A8503E", "#B05A46", "#9A4636", "#B86450"], "mortar": "#D0C4B6", "parapet": "flat",
-		"lintel": "#A8503E", "lintel_dark": "#8E3A2F", "lintel_style": "none", "trim": "#2B2B2E", "trim_dark": "#1E1E20",
+		"lintel": "#A8503E", "lintel_dark": "#8E3A2F", "lintel_style": "none", "window_style": "slider", "frame": "#1E1E20", "trim": "#2B2B2E", "trim_dark": "#1E1E20",
 		"windows": [[80.0, 110.0], [300.0, 110.0], [720.0, 110.0]], "metal_panels": [[560.0, 680.0]],
 		"shops": [{"x0": 30.0, "x1": 870.0, "sign": "#3A3A3C", "frame": "#2B2B2E", "door": 160.0, "inside": "cafe", "transom": "none", "panes": 4}], "basement": [],
 	},
@@ -1163,9 +1163,9 @@ const HOUSES := [
 	{
 		"name": "masson_2692", "kind": "commerce", "width": 1100.0, "floors": 2,
 		"bricks": ["#8E8A82", "#9A968E", "#86827A", "#A29E96"], "mortar": "#B9B5AC", "parapet": "flat",
-		"lintel": "#B9B5AC", "lintel_dark": "#7E7A72", "lintel_style": "none",
+		"lintel": "#B9B5AC", "lintel_dark": "#7E7A72", "lintel_style": "none", "window_style": "fixed", "frame": "#2B2B2E",
 		"windows": [[80.0, 200.0], [330.0, 200.0], [580.0, 200.0], [830.0, 200.0]],
-		"shops": [{"x0": 30.0, "x1": 1070.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 980.0, "inside": "goods", "transom": "none", "panes": 6}], "basement": [],
+		"shops": [{"x0": 30.0, "x1": 1070.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 980.0, "awning": "#F2F0EA", "inside": "goods", "transom": "none", "panes": 6}], "basement": [],
 	},
 	# 2682–2686: red brick on three floors, "Les fleurs poussent encore" painted along the top, Monteiro downstairs (2690…).
 	{
@@ -1207,15 +1207,15 @@ const HOUSES := [
 	# 2601–2607, at 1re: pale grey brick on three floors, the dépanneur Bonsoir under its red sign (2605…).
 	{
 		"name": "masson_2605", "kind": "commerce", "width": 820.0, "floors": 3,
-		"bricks": ["#C9C7C0", "#BFBDB6", "#D2D0C9", "#B8B6AF"], "mortar": "#E6E4DE", "parapet": "flat",
-		"lintel": "#E8E6E0", "lintel_dark": "#9E9A92", "windows": [[90.0, 130.0], [330.0, 130.0], [570.0, 130.0]],
+		"bricks": ["#ECEAE4", "#E4E2DC", "#F2F0EA", "#DEDCD6"], "mortar": "#C9C7C0", "parapet": "flat",
+		"lintel": "#E8E6E0", "lintel_dark": "#9E9A92", "lintel_style": "none", "window_style": "slider", "frame": "#F2F0EA", "windows": [[90.0, 130.0], [330.0, 130.0], [570.0, 130.0]],
 		"shops": [{"x0": 30.0, "x1": 790.0, "sign": "#D8202A", "frame": "#B01A22", "door": 160.0, "inside": "goods", "transom": "none"}], "basement": [],
 	},
 	# 2609–2611: charcoal brick on three floors, black balconies, Domino's (2605…, 2613…).
 	{
 		"name": "masson_2611", "kind": "commerce", "width": 700.0, "floors": 3,
 		"bricks": ["#3E3C3A", "#4A4846", "#363432", "#52504C"], "mortar": "#6A6864", "parapet": "flat",
-		"lintel": "#5E5C58", "lintel_dark": "#2E2C2A", "lintel_style": "none", "windows": [[90.0, 110.0], [450.0, 110.0]],
+		"lintel": "#5E5C58", "lintel_dark": "#2E2C2A", "lintel_style": "none", "window_style": "hung", "hung_frame": "#2B2B2E", "windows": [[90.0, 110.0], [450.0, 110.0]],
 		"projecting": [[250.0, 420.0]],
 		"shops": [{"x0": 30.0, "x1": 670.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 560.0, "inside": "restaurant", "wall": "#E8E4DA", "transom": "none"}], "basement": [],
 	},
@@ -1223,7 +1223,7 @@ const HOUSES := [
 	{
 		"name": "masson_2615", "kind": "commerce", "width": 700.0, "floors": 3,
 		"bricks": ["#E8E6E0", "#DEDCD6", "#F0EEE8", "#D6D4CE"], "mortar": "#C9C7C0", "parapet": "flat",
-		"lintel": "#E8E6E0", "lintel_dark": "#9E9A92", "lintel_style": "none", "windows": [[90.0, 130.0], [400.0, 130.0]],
+		"lintel": "#E8E6E0", "lintel_dark": "#9E9A92", "lintel_style": "none", "window_style": "slider", "frame": "#F2F0EA", "windows": [[90.0, 130.0], [400.0, 130.0]],
 		"shops": [{"x0": 30.0, "x1": 670.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 120.0, "inside": "florist", "front": "wood", "kick": "wood"}], "basement": [],
 	},
 	{
@@ -1234,7 +1234,7 @@ const HOUSES := [
 	{
 		"name": "masson_2629", "kind": "commerce", "width": 900.0, "floors": 3,
 		"bricks": ["#E2E0DA", "#D8D6D0", "#EAE8E2", "#D0CEC8"], "mortar": "#C9C7C0", "parapet": "flat",
-		"lintel": "#E8E6E0", "lintel_dark": "#9E9A92", "lintel_style": "none", "windows": [[90.0, 130.0], [380.0, 130.0], [640.0, 130.0]],
+		"lintel": "#E8E6E0", "lintel_dark": "#9E9A92", "lintel_style": "none", "window_style": "slider", "frame": "#F2F0EA", "windows": [[90.0, 130.0], [380.0, 130.0], [640.0, 130.0]],
 		"shops": [{"x0": 30.0, "x1": 450.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 380.0, "inside": "clothes", "kick": "brick"},
 			{"x0": 450.0, "x1": 870.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 520.0, "inside": "cafe", "front": "wood", "kick": "wood"}], "basement": [],
 	},
@@ -1242,9 +1242,9 @@ const HOUSES := [
 	{
 		"name": "masson_2631", "kind": "commerce", "width": 1300.0, "floors": 2,
 		"bricks": ["#8E4A3A", "#9A5242", "#844436", "#A0584A"], "mortar": "#B9AC9E", "parapet": "corbel",
-		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 120.0], [360.0, 120.0], [640.0, 120.0], [920.0, 120.0], [1150.0, 100.0]],
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "lintel_style": "arch", "window_style": "hung", "hung_frame": "#F2F0EA", "juliets": true, "windows": [[90.0, 120.0], [360.0, 120.0], [640.0, 120.0], [920.0, 120.0], [1150.0, 100.0]],
 		"projecting": [[60.0, 260.0]],
-		"shops": [{"x0": 30.0, "x1": 440.0, "sign": "#5E3A7E", "frame": "#2B2B2E", "door": 380.0, "inside": "salon", "wall": "#EDE6F2", "transom": "none"},
+		"shops": [{"x0": 30.0, "x1": 440.0, "sign": "#9C8EA8", "frame": "#2B2B2E", "door": 380.0, "inside": "salon", "wall": "#EDE6F2", "transom": "none"},
 			{"x0": 440.0, "x1": 860.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 800.0, "inside": "restaurant", "front": "wood", "kick": "tile", "tile": "#8E2020"},
 			{"x0": 860.0, "x1": 1270.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 1200.0, "inside": "cafe", "wall": "#E8F4DA", "transom": "none"}], "basement": [],
 	},

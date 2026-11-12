@@ -24,10 +24,10 @@ const BLOCKS := {
 		"trees_after": [3, 5], "tree_shift": {3: 0.0, 5: 0.0}, "lamps_after": [2, 6], "hydrants_at": [4.5], "racks_at": [5.6],
 		"squirrels_at": [5.5], "moon_at": 4.5,
 		"signs": {
-			"masson_2605": [[410.0, "Bonsoir", "#FFFFFF", "#9A141A", 17]],
+			"masson_2605": [[410.0, "Boni-soir", "#FFFFFF", "#C8202A", 17]],
 			"masson_2611": [[350.0, "Domino's", "#0B6EAF", "#FFFFFF", 15]],
-			"masson_2615": [[350.0, "Le Jardin", "#FFFFFF", "#1A1A1A", 14]],
-			"masson_2631": [[235.0, "YOGA D.N.A.", "#FFFFFF", "#5E3A7E", 13], [650.0, "Restaurant Phở", "#C8202A", "#F2F0EA", 13],
+			"masson_2615": [[350.0, "Le Jardin de Mathilde", "#FFFFFF", "#1A1A1A", 12]],
+			"masson_2631": [[235.0, "YOGA D.N.A.", "#FFFFFF", "#6E5E7E", 13], [650.0, "Restaurant Phở", "#C8202A", "#F2F0EA", 13],
 				[1065.0, "Jus", "#3E9A3E", "#F2F0EA", 14]],
 		},
 		"panels": {},
@@ -47,7 +47,7 @@ const BLOCKS := {
 		"avenues": [["rue_2e", "2e Avenue", 540.0], ["rue_3e", "3e Avenue", 540.0]],
 		"trees_after": [2, 4], "tree_shift": {2: 0.0, 4: 0.0}, "lamps_after": [2, 5], "hydrants_at": [3.5], "racks_at": [5.5],
 		"squirrels_at": [4.5], "moon_at": 2.5,
-		"signs": {"masson_2653": [[295.0, "FRUITERIE", "#FFFFFF", "#1E6E3E", 13]]},
+		"signs": {"masson_2653": [[295.0, "Paulines", "#FFFFFF", "#1E5E3A", 15]]},
 		"panels": {},
 	},
 	"2e_3e_pair": {
