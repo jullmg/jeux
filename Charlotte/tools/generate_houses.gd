@@ -524,8 +524,8 @@ const HOUSES := [
 	{
 		"name": "masson_2970", "kind": "commerce", "width": 1500.0, "floors": 4, "upper": "frame", "juliets": true,
 		"concrete": "#D8CDB8", "frame_piers": [30.0, 380.0, 740.0, 1100.0, 1440.0], "metal": "#2B3A6E",
-		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "ground": "painted", "paint": "#E6E4DE", "mural": "lilies", "mural_x0": 600.0,
-		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#3A3A3C", "door": 130.0}], "basement": [],
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "ground": "painted", "paint": "#B9BCBE", "mural_stripes": true, "mural": "lilies", "mural_x0": 600.0,
+		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#3A3A3C", "door": 130.0, "inside": "cafe", "transom": "none", "panes": 3}], "basement": [],
 	},
 	# 2930–2958: four floors in a pale concrete frame with Juliet rails; downstairs a hair salon, Mèdz, La Puce the jeweller's, the
 	# building's lobby and an accountant's (2930…, 2940…, 2950… and close-ups).
@@ -533,32 +533,32 @@ const HOUSES := [
 		"name": "masson_2930", "kind": "commerce", "width": 1700.0, "floors": 4, "upper": "frame", "juliets": true,
 		"concrete": "#D9D0BE", "frame_piers": [30.0, 440.0, 850.0, 1260.0, 1640.0], "metal": "#1F1F1F",
 		"lintel": "#C9C3B6", "lintel_dark": "#8E887E",
-		"shops": [{"x0": 30.0, "x1": 440.0, "sign": "#2B2B2E", "door": 380.0},
-			{"x0": 440.0, "x1": 740.0, "sign": "#1E1E20", "door": 700.0},
-			{"x0": 740.0, "x1": 1130.0, "sign": "#141416", "frame": "#141416", "door": 1080.0},
-			{"x0": 1130.0, "x1": 1400.0, "sign": "#3A3A3C", "frame": "#3A3A3C", "door": 1265.0, "dark": true},
-			{"x0": 1400.0, "x1": 1670.0, "sign": "#E9E5DE", "frame": "#4E4E50", "door": 1600.0}],
+		"shops": [{"x0": 30.0, "x1": 440.0, "sign": "#2B2B2E", "door": 380.0, "inside": "salon"},
+			{"x0": 440.0, "x1": 740.0, "sign": "#1E1E20", "door": 700.0, "inside": "salon", "wall": "#E8DCCC", "transom": "none"},
+			{"x0": 740.0, "x1": 1130.0, "sign": "#141416", "frame": "#141416", "door": 1080.0, "inside": "goods", "kick": "tile", "tile": "#C8202A"},
+			{"x0": 1130.0, "x1": 1400.0, "sign": "#3A3A3C", "frame": "#3A3A3C", "door": 1265.0, "dark": true, "door_style": "double", "transom": "none"},
+			{"x0": 1400.0, "x1": 1670.0, "sign": "#E9E5DE", "frame": "#4E4E50", "door": 1600.0, "inside": "office"}],
 		"basement": [],
 	},
 	# 2908–2928, the hardware store, Quincaillerie Bélanger (RONA): two floors of grey stone panels, the long dark sign band,
 	# its display windows (2930…, 2940… right side, and the RONA's pictures 2908…, 2916…).
 	{
-		"name": "masson_2908", "kind": "commerce", "width": 1500.0, "floors": 2, "halloween": false,
-		"bricks": ["#BDB8AE", "#B3AEA4", "#C6C1B7", "#ADA89E", "#C0BBB1"], "mortar": "#9A958C", "parapet": "flat",
+		"name": "masson_2908", "kind": "commerce", "width": 1500.0, "floors": 2, "halloween": false, "upper": "siding", "siding": "#C2452E", "siding_dir": "h",
+		"bricks": ["#4E3A3E", "#5A4448", "#463438", "#62484C"], "mortar": "#8E8486", "parapet": "flat",
 		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [], "belt": "#3A3E42",
-		"shops": [{"x0": 30.0, "x1": 900.0, "sign": "#3A3E42", "frame": "#2B2E32", "door": 300.0, "lamps": 4},
-			{"x0": 900.0, "x1": 1470.0, "sign": "#1F4E9A", "frame": "#2B2E32", "door": 1180.0}],
+		"shops": [{"x0": 30.0, "x1": 900.0, "sign": "#3A3E42", "frame": "#2B2E32", "door": 300.0, "lamps": 4, "inside": "hardware", "kick": "brick"},
+			{"x0": 900.0, "x1": 1470.0, "sign": "#1F4E9A", "frame": "#2B2E32", "door": 1180.0, "inside": "hardware", "kick": "brick", "door_style": "double"}],
 		"basement": [],
 	},
 	# 2902–2904, at 6e: buff brick laid in corbelled bands, an arched doorway under a balcony, the dark tiled front of Fido at the
 	# corner (2902…, 2904… and close-ups).
 	{
 		"name": "masson_2902", "kind": "commerce", "width": 1100.0, "floors": 3,
-		"bricks": ["#D4A774", "#C99C6A", "#DDB07E", "#BE9262", "#D8AC78"], "mortar": "#EFE2CC", "parapet": "corbel",
-		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[90.0, 110.0], [320.0, 110.0], [600.0, 110.0], [860.0, 110.0]],
+		"bricks": ["#D4A774", "#C99C6A", "#DDB07E", "#BE9262", "#D8AC78"], "mortar": "#EFE2CC", "parapet": "corbel", "window_style": "hung", "lintel_style": "arch",
+		"lintel": "#C9965E", "lintel_dark": "#9A7044", "windows": [[90.0, 110.0], [320.0, 110.0], [600.0, 110.0], [860.0, 110.0]],
 		"projecting": [[560.0, 760.0]], "pier": "#2E3236",
-		"shops": [{"x0": 30.0, "x1": 520.0, "sign": "#2B2B2E", "frame": "#2E3236", "door": 440.0},
-			{"x0": 820.0, "x1": 1070.0, "sign": "#FFE600", "frame": "#2E3236", "door": 945.0}],
+		"shops": [{"x0": 30.0, "x1": 520.0, "sign": "#2B2B2E", "frame": "#2E3236", "door": 440.0, "inside": "clothes", "kick": "brick"},
+			{"x0": 820.0, "x1": 1070.0, "sign": "#FFE600", "frame": "#2E3236", "door": 945.0, "inside": "goods", "wall": "#F2F0EA", "transom": "none"}],
 		"res_doors": [660.0], "basement": [],
 	},
 	# Across 6e from 2902: the corner of the next block, its side.
@@ -4876,6 +4876,11 @@ func _commerce() -> void:
 		while py < ground_y:
 			_rect(X0, py, X1 - X0, 1.2, "#C9C5BC", 'opacity="0.7"')
 			py += 13.0
+		if k.get("mural_stripes", false):
+			var sx := X0 - 200.0
+			while sx < X1:
+				_path("M%s %s L%s %s" % [_n(sx), _n(ground_y - 6), _n(sx + 160), _n(belt + 16)], "none", _stroke("#F4F2EE", 6))
+				sx += 150.0
 		if k.get("mural", "") == "lilies":
 			_lily_mural(k.get("mural_x0", X0), X1, belt + 16.0, ground_y)
 		elif k.get("mural", "") == "graffiti":
@@ -5469,6 +5474,15 @@ func _siding(y0: float, y1: float, color: String) -> void:
 
 func _siding_panel(x0: float, x1: float, y0: float, y1: float, color := "#B9BDC1") -> void:
 	_rect(x0, y0, x1 - x0, y1 - y0, color)
+	# Ribbed across (`siding_dir` "h": the red corrugated band of the RONA, 2908…), or up and down.
+	if k.get("siding_dir", "v") == "h":
+		var y := y0 + 4.0
+		while y < y1 - 2.0:
+			_rect(x0, y, x1 - x0, 3, "#000000", 'opacity="0.16"')
+			_rect(x0, y + 3, x1 - x0, 1.5, "#FFFFFF", 'opacity="0.22"')
+			y += 11.0
+		_rect(x0, y0, x1 - x0, 6, "#000000", 'opacity="0.12"')
+		return
 	var x := x0 + 4.0
 	while x < x1 - 2.0:
 		_rect(x, y0, 2.5, y1 - y0, "#000000", 'opacity="0.1"')
