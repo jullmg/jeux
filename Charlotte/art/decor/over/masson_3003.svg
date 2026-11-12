@@ -143,10 +143,13 @@
 <ellipse cx="1318.0" cy="548.0" rx="13" ry="6" fill="#C98A3A" stroke="#8A5A2A" stroke-width="1"/>
 <rect x="40.0" y="576.0" width="1320.0" height="40.0" fill="#E8E4DA" stroke="#B9B5AC" stroke-width="1.5"/>
 </g>
-<rect x="662.0" y="432.0" width="76.0" height="262.0" fill="#2A2A2A" />
-<rect x="668.0" y="438.0" width="64.0" height="250.0" fill="#33404A" />
-<rect x="668.0" y="438.0" width="64.0" height="250.0" fill="url(#warm)" opacity="0.55"/>
-<rect x="672.0" y="534.0" width="56.0" height="5.0" fill="#C9C5BC" />
+<rect x="630.0" y="432.0" width="140.0" height="262.0" fill="#2A2A2A" />
+<rect x="636.0" y="438.0" width="60.0" height="250.0" fill="#33404A" />
+<rect x="636.0" y="438.0" width="60.0" height="250.0" fill="url(#warm)" opacity="0.55"/>
+<rect x="668.0" y="524.0" width="4.0" height="50.0" fill="#C9C5BC" />
+<rect x="704.0" y="438.0" width="60.0" height="250.0" fill="#33404A" />
+<rect x="704.0" y="438.0" width="60.0" height="250.0" fill="url(#warm)" opacity="0.55"/>
+<rect x="728.0" y="524.0" width="4.0" height="50.0" fill="#C9C5BC" />
 <rect x="200.0" y="434.0" width="10.0" height="196.0" fill="#2A2A2A" />
 <rect x="365.0" y="434.0" width="10.0" height="196.0" fill="#2A2A2A" />
 <rect x="530.0" y="434.0" width="10.0" height="196.0" fill="#2A2A2A" />
@@ -189,13 +192,13 @@
 <path d="M1274.3 370.0 q0 -22 14 -22 q14 0 14 14" fill="none" stroke="#1A1A1A" stroke-width="3.0"/>
 <path d="M1295.3 362.0 l14 0 l-4 9 l-6 0 z" fill="#1A1A1A" stroke="#8E8A82" stroke-width="0.8"/>
 <rect x="1271.3" y="368.0" width="6.0" height="8.0" fill="#1A1A1A" />
-<rect x="250.0" y="366.0" width="20.0" height="334.0" fill="#D8D2C6" stroke="#8E887E" stroke-width="1.0"/>
+<rect x="250.0" y="366.0" width="20.0" height="334.0" fill="#ECE8E0" stroke="#8E887E" stroke-width="1.0"/>
 <rect x="250.0" y="366.0" width="5.0" height="334.0" fill="#FFFFFF" opacity="0.25"/>
-<rect x="510.0" y="366.0" width="20.0" height="334.0" fill="#D8D2C6" stroke="#8E887E" stroke-width="1.0"/>
+<rect x="510.0" y="366.0" width="20.0" height="334.0" fill="#ECE8E0" stroke="#8E887E" stroke-width="1.0"/>
 <rect x="510.0" y="366.0" width="5.0" height="334.0" fill="#FFFFFF" opacity="0.25"/>
-<rect x="870.0" y="366.0" width="20.0" height="334.0" fill="#D8D2C6" stroke="#8E887E" stroke-width="1.0"/>
+<rect x="870.0" y="366.0" width="20.0" height="334.0" fill="#ECE8E0" stroke="#8E887E" stroke-width="1.0"/>
 <rect x="870.0" y="366.0" width="5.0" height="334.0" fill="#FFFFFF" opacity="0.25"/>
-<rect x="1130.0" y="366.0" width="20.0" height="334.0" fill="#D8D2C6" stroke="#8E887E" stroke-width="1.0"/>
+<rect x="1130.0" y="366.0" width="20.0" height="334.0" fill="#ECE8E0" stroke="#8E887E" stroke-width="1.0"/>
 <rect x="1130.0" y="366.0" width="5.0" height="334.0" fill="#FFFFFF" opacity="0.25"/>
 <rect x="30.0" y="694.0" width="1340.0" height="6.0" fill="#8E8A82" />
 </svg>

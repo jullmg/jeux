@@ -666,15 +666,15 @@ const HOUSES := [
 		"bricks": ["#9C7A52", "#A8845A", "#8E6E4A", "#B08C62", "#A07E56"], "mortar": "#C9B89E", "parapet": "flat",
 		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "lintel_style": "plain", "belt": "#E2DCD0",
 		"windows": [[330.0, 62.0], [410.0, 62.0], [490.0, 62.0], [570.0, 62.0], [650.0, 62.0], [730.0, 62.0], [810.0, 62.0],
-			[890.0, 62.0], [970.0, 62.0], [1050.0, 62.0]], "win_h": 84.0, "win_dy": 46.0, "ribbon_sill": true,
-		"shops": [{"x0": 30.0, "x1": 1370.0, "sign": "#1A1A1A", "frame": "#2A2A2A", "door": 700.0, "lamps": 7, "inside": "bakery", "front": "wood", "kick": "stone", "transom": "none"}],
-		"piers": [260.0, 520.0, 880.0, 1140.0], "pier_stone": "#D8D2C6", "basement": [],
+			[890.0, 62.0], [970.0, 62.0], [1050.0, 62.0]], "win_h": 84.0, "win_dy": 46.0, "ribbon_sill": true, "window_style": "fixed", "frame": "#2E2A26",
+		"shops": [{"x0": 30.0, "x1": 1370.0, "sign": "#1A1A1A", "frame": "#2A2A2A", "door": 700.0, "lamps": 7, "door_style": "double", "inside": "bakery", "front": "wood", "kick": "stone", "transom": "none"}],
+		"piers": [260.0, 520.0, 880.0, 1140.0], "pier_stone": "#ECE8E0", "basement": [],
 	},
 	# 3017–3021: red brick on three floors, a balcony on the right (3011…).
 	{
 		"name": "masson_3021", "kind": "commerce", "width": 760.0, "floors": 3,
 		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0", "parapet": "flat",
-		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 110.0], [300.0, 110.0], [530.0, 110.0]],
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "window_style": "hung", "hung_frame": "#F2F0EA", "windows": [[90.0, 110.0], [300.0, 110.0], [530.0, 110.0]],
 		"projecting": [[480.0, 700.0]],
 		"shops": [{"x0": 30.0, "x1": 730.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 640.0, "inside": "clothes", "kick": "brick"}], "basement": [],
 	},
@@ -693,9 +693,9 @@ const HOUSES := [
 	},
 	# 3039: three floors of pinkish stucco with stone quoins at its corners, a black storefront (3039…, 3043…).
 	{
-		"name": "masson_3039", "kind": "commerce", "width": 720.0, "floors": 3, "upper": "stucco", "stucco": "#D9C4B6",
+		"name": "masson_3039", "kind": "commerce", "width": 720.0, "floors": 3, "upper": "stucco", "stucco": "#C9B0A4",
 		"bricks": ["#D9C4B6"], "mortar": "#C9B4A6", "parapet": "flat", "quoins": true,
-		"lintel": "#E8E0D4", "lintel_dark": "#B5AA98", "windows": [[110.0, 100.0], [320.0, 100.0], [520.0, 100.0]],
+		"lintel": "#E8E0D4", "lintel_dark": "#B5AA98", "window_style": "hung", "hung_frame": "#F2F0EA", "windows": [[110.0, 100.0], [320.0, 100.0], [520.0, 100.0]],
 		"shops": [{"x0": 30.0, "x1": 690.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 600.0, "inside": "cafe", "wall": "#3A3230", "transom": "none", "panes": 2}], "basement": [],
 	},
 	# 3043–3053, to 8e: a low wall painted with flowers, smiling faces and two round medallions, the lot behind it.
