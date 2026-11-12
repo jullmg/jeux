@@ -521,8 +521,10 @@ const RACK_LEFT := 35.0
 func _separate_props() -> void:
 	_rack_w = PropArt.rack().get_width() * 0.8 + 30.0
 	var fixed: Array[Vector2] = []
+	# Clear of each cross street and of the crosswalk over our own street at either of its corners (with its dropped curb):
+	# a hydrant or a lamp never stands on it.
 	for cs in _cross_streets:
-		fixed.append(Vector2(cs.x0 - 30.0, cs.x1 + 30.0))
+		fixed.append(Vector2(minf(cs.x0 - 30.0, cs.own_clear(-1.0) - 10.0), maxf(cs.x1 + 30.0, cs.own_clear(1.0) + 10.0)))
 	for i in trees_after.size():
 		var x := _tree_x(i)
 		fixed.append(Vector2(x - TRUNK_CLEAR, x + TRUNK_CLEAR))
@@ -1322,8 +1324,6 @@ func _build_props() -> void:
 	_build_extra_props()
 	_build_utility_poles()
 	_build_curb_gardens()
-	_traffic = Node2D.new()
-	add_child(_traffic)
 	_bike_rng.seed = seed_value + 53
 	for cs in _cross_streets:
 		add_child(CrossStreet.make(CrossStreet.Part.SIGNS, cs))
@@ -1347,6 +1347,9 @@ func _build_props() -> void:
 				bike.position = Vector2(rack.position.x + hoop * 0.8 - 75.0 * 0.85, CURB_Y + 2.0 - 90.0 * 0.85)
 				bike.flip_h = _rng.randf() < 0.5
 				add_child(bike)
+	# The cyclists ride in the road, nearer than the curb: over the lamps, hydrants, racks, poles and curb gardens.
+	_traffic = Node2D.new()
+	add_child(_traffic)
 
 
 # ── Helpers ─────────────────────────────────────────────────────
