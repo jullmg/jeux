@@ -93,7 +93,7 @@ func _advance() -> void:
 
 
 ## At exit: nothing is left playing, so the track is let go before the audio server shuts down.
-static var _silent: bool = OS.get_cmdline_args().has("Dummy")
+static var _silent: bool = AudioServer.get_driver_name() == "Dummy"
 
 
 func _exit_tree() -> void:
