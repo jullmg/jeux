@@ -68,8 +68,8 @@ var from_lane := false
 ## intersection on the block's side: -1 = along the gap's left edge, 1 = its right edge, 0 = none. Set on the GROUND
 ## part by `StreetScene._add_corner`, which also makes it clickable (`own_crosswalk_rect`).
 var own_crosswalk := 0.0
-const OWN_CROSSWALK_W := 92.0
-const OWN_CROSSWALK_TOP := 668.0
+const OWN_CROSSWALK_W := 88.0
+const OWN_CROSSWALK_TOP := 664.0
 
 var _rng := RandomNumberGenerator.new()
 var _tree_tex: Array[Texture2D] = []
@@ -104,11 +104,28 @@ func _fan(x: float, y: float) -> float:
 	return vp.x + (x - vp.x) * (y - vp.y) / (FACADE_Y - vp.y)
 
 
-## Where the crosswalk over our own street lies (world rectangle, from the gutter to the bottom of the view).
+## The crosswalk over our own street, at the curb: its two ends, from the nose of the planted curb extension into the corner of
+## the intersection. Below the curb both its edges run toward the vanishing point, like the cross street's own lines, so it
+## widens as it comes toward us.
+func _own_ends() -> Vector2:
+	if own_crosswalk < 0.0:
+		return Vector2(x0 + 18.0, x0 + 18.0 + OWN_CROSSWALK_W)
+	return Vector2(x1 - 18.0 - OWN_CROSSWALK_W, x1 - 18.0)
+
+
+## x of the line from (x, OWN_CROSSWALK_TOP) toward the vanishing point, at height y. It leans only half as much as the cross
+## street's own lines, or the nearest bars would slide in under the planted curb extension beside it.
+func _own_edge(x: float, y: float) -> float:
+	var vp := _vp() - Vector2(0.0, 200.0)
+	return vp.x + (x - vp.x) * (y - vp.y) / (OWN_CROSSWALK_TOP - vp.y)
+
+
+## Where the crosswalk over our own street lies (world rectangle, from the corner's dropped curb to the bottom of the view).
 func own_crosswalk_rect() -> Rect2:
-	var road := road_x(OWN_CROSSWALK_TOP)
-	var left := road.x + 8.0 if own_crosswalk < 0.0 else road.y - 8.0 - OWN_CROSSWALK_W
-	return Rect2(left, OWN_CROSSWALK_TOP - 4.0, OWN_CROSSWALK_W, VIEW_BOTTOM - OWN_CROSSWALK_TOP + 4.0)
+	var e := _own_ends()
+	var l := minf(e.x, _own_edge(e.x, VIEW_BOTTOM))
+	var r := maxf(e.y, _own_edge(e.y, VIEW_BOTTOM))
+	return Rect2(l - 4.0, OWN_CROSSWALK_TOP - 14.0, r - l + 8.0, VIEW_BOTTOM - OWN_CROSSWALK_TOP + 14.0)
 
 
 ## The road between the curbs at height y: x range Charlotte can't step into (yet).
@@ -729,17 +746,32 @@ func _draw_ground() -> void:
 		var b := lerpf(l, r, (i + 0.75) / n)
 		draw_colored_polygon(PackedVector2Array([Vector2(_fan(a, 606.0), 606.0), Vector2(_fan(b, 606.0), 606.0),
 			Vector2(_fan(b, 654.0), 654.0), Vector2(_fan(a, 654.0), 654.0)]), bar)
-	# The other crosswalk of the corner, over our own street: it leaves the corner toward us, so its bars lie across
-	# the view, each a little bigger than the one before as it comes nearer, and it runs off the bottom.
+	# The other crosswalk of the corner, over our own street: it leaves the corner toward us. It starts at a dropped curb
+	# with its warning dots, like the ramps of the crosswalk above; its edges run to the vanishing point like the cross
+	# street's, so it widens as it comes nearer; and its bars lie along the curb, each thicker and further from the last
+	# as the road comes toward us, until it runs off the bottom of the view.
 	if own_crosswalk != 0.0:
-		var band := own_crosswalk_rect()
-		var top := OWN_CROSSWALK_TOP
-		var step := 9.0
-		while top < VIEW_BOTTOM:
-			var grow := (top - OWN_CROSSWALK_TOP) * 0.16
-			draw_rect(Rect2(band.position.x - grow, top, band.size.x + grow * 2.0, step * 0.6), bar)
-			top += step
-			step += 2.6
+		var e := _own_ends()
+		var ramp_top := OWN_CROSSWALK_TOP - 12.0
+		draw_colored_polygon(PackedVector2Array([Vector2(e.x + 6.0, ramp_top), Vector2(e.y - 6.0, ramp_top),
+			Vector2(e.y, OWN_CROSSWALK_TOP + 1.0), Vector2(e.x, OWN_CROSSWALK_TOP + 1.0)]), Color("#BDB7AD"))
+		draw_line(Vector2(e.x + 6.0, ramp_top), Vector2(e.y - 6.0, ramp_top), Color("#A39D93"), 1.5)
+		var dots := int((e.y - e.x - 24.0) / 7.0)
+		for row in 2:
+			for i in dots:
+				draw_circle(Vector2(e.x + 14.0 + i * 7.0 + row * 3.5, ramp_top + 4.0 + row * 4.5), 1.4, Color("#8E5A4A"))
+		var by := OWN_CROSSWALK_TOP + 3.0
+		var thick := 6.0
+		while by < VIEW_BOTTOM:
+			var by1 := minf(by + thick, VIEW_BOTTOM)
+			draw_colored_polygon(PackedVector2Array([Vector2(_own_edge(e.x, by), by), Vector2(_own_edge(e.y, by), by),
+				Vector2(_own_edge(e.y, by1), by1), Vector2(_own_edge(e.x, by1), by1)]), bar)
+			# Worn by the tyres: two greyer patches across each bar, where the wheels of the cars go.
+			for wear in [0.3, 0.72]:
+				var wx := lerpf(_own_edge(e.x, by), _own_edge(e.y, by), wear)
+				draw_rect(Rect2(wx - 5.0, by, 10.0, by1 - by), Color(0.42, 0.42, 0.44, 0.35))
+			by = by1 + thick * 0.85
+			thick *= 1.35
 	# Leaves blown over the intersection, and above all the street's line of them along the gutter, which has to carry on
 	# across the gap instead of stopping dead at the corner: thinner in the middle, where the cars sweep it.
 	for i in 22:

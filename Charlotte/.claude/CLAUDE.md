@@ -141,8 +141,10 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   says "Je regarde des deux côtés !" and looks both ways, then walks across on her own (`PlayerControl.hands_off`) to the
   other stretch. **A corner has two crosswalks and both work (Julien)**: the one over the cross street (above), and the
   one over the street she is on, which leaves toward the camera so this view cannot show her walking it. It is painted
-  at the block's corner of each gap (`CrossStreet.own_crosswalk`, bars lying across the view and running off the bottom,
-  set on the GROUND part kept in `StreetScene._grounds`) and made clickable by `_add_corner` (`own_crosswalk_rect`): a
+  at the block's corner of each gap (`CrossStreet.own_crosswalk`, set on the GROUND part kept in `StreetScene._grounds`):
+  a dropped curb with its warning dots, just beside the planted curb extension (`_own_ends`), then bars lying along the
+  curb, each thicker and further from the last as the road comes toward us, its edges running toward the vanishing point
+  (`_own_edge`, half the cross street's lean, or the nearest bars slide under the curb extension), yellow in the school zone and made clickable by `_add_corner` (`own_crosswalk_rect`): a
   click takes her round into the cross street's scene with `Transition.crossing` = the arrive key, and that scene walks
   her straight over its gap for our street (`_cross_on_arrival`, looking both ways as usual) — one click for what used
   to be "turn the corner, then cross". Same age rule as any crosswalk (`CANT_CROSS`, through `DebugMenu.blocked`).
