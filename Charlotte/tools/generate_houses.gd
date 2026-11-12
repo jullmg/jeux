@@ -718,8 +718,8 @@ const HOUSES := [
 	# 3038–3040, at 8e: red brick on three floors (3040…, 3038…).
 	{
 		"name": "masson_3038", "kind": "commerce", "width": 820.0, "floors": 3,
-		"bricks": ["#9A4A3A", "#A85442", "#8E4234", "#B05C48", "#9E4E3C"], "mortar": "#C9BBAC", "parapet": "flat",
-		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 110.0], [330.0, 110.0], [570.0, 110.0]],
+		"bricks": ["#7E3A30", "#8A4236", "#72342A", "#94483A", "#82382E"], "mortar": "#C9BBAC", "parapet": "flat",
+		"lintel": "#D8D0C0", "lintel_dark": "#9E968A", "lintel_style": "ears", "window_style": "slider", "frame": "#1E1E20", "windows": [[90.0, 110.0], [330.0, 110.0], [570.0, 110.0]],
 		"shops": [{"x0": 30.0, "x1": 790.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 160.0, "inside": "restaurant", "kick": "brick"}], "basement": [],
 	},
 	# The passage of murals between the buildings (3016…, 3022…, 3026…): the tags and lettering left out, the colours kept.
@@ -732,7 +732,7 @@ const HOUSES := [
 	{
 		"name": "masson_3034", "kind": "commerce", "width": 1000.0, "floors": 3,
 		"bricks": ["#A44E3C", "#B05846", "#984434", "#B8604C", "#A04A3A"], "mortar": "#CDBFB0", "parapet": "corbel",
-		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "lintel_style": "arch",
+		"lintel": "#E8E2D6", "lintel_dark": "#A39A8A", "lintel_style": "ears", "window_style": "slider", "frame": "#1E1E20",
 		"windows": [[90.0, 110.0], [320.0, 110.0], [580.0, 110.0], [800.0, 110.0]], "projecting": [[550.0, 940.0]],
 		"shops": [{"x0": 30.0, "x1": 480.0, "sign": "#1E1E20", "frame": "#1E1E20", "door": 250.0, "inside": "clothes", "wall": "#F4F2EE", "transom": "none"},
 			{"x0": 480.0, "x1": 970.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 900.0, "inside": "bakery", "front": "wood", "kick": "tile", "tile": "#3E7A4E"}], "basement": [],
@@ -749,15 +749,15 @@ const HOUSES := [
 	# 3004–3014: grey-beige brick on two floors, wide windows; a bar and Tandoori Masson under its red awning (3002…, 3012…).
 	{
 		"name": "masson_3008", "kind": "commerce", "width": 1000.0, "floors": 2,
-		"bricks": ["#9E968A", "#A89F92", "#948C80", "#B0A89A", "#9A9286"], "mortar": "#C9C1B4", "parapet": "flat",
-		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 150.0], [330.0, 150.0], [590.0, 150.0], [810.0, 150.0]],
+		"bricks": ["#7E7466", "#8A8072", "#72685C", "#948A7C", "#6E6458"], "mortar": "#C9C1B4", "parapet": "flat",
+		"lintel": "#9A9286", "lintel_dark": "#6E665A", "lintel_style": "none", "window_style": "fixed", "frame": "#1E1E20", "windows": [[90.0, 150.0], [330.0, 150.0], [590.0, 150.0], [810.0, 150.0]],
 		"shops": [{"x0": 30.0, "x1": 480.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 420.0, "inside": "cafe", "wall": "#2E2A28", "front": "wood"},
 			{"x0": 480.0, "x1": 970.0, "sign": "#C8202A", "frame": "#2B2B2E", "door": 900.0, "awning": "#C8202A", "inside": "restaurant", "kick": "tile", "tile": "#8E2020"}], "basement": [],
 	},
 	# 3000, at 7e: two floors painted pink over the brick, the Couche-Tard downstairs (3000…, 3002…).
 	{
-		"name": "masson_3000", "kind": "commerce", "width": 900.0, "floors": 2, "upper": "stucco", "stucco": "#D9B8B0",
-		"bricks": ["#D9B8B0"], "mortar": "#C9A89E", "parapet": "flat", "lintel": "#E8E0D4", "lintel_dark": "#B5AA98",
+		"name": "masson_3000", "kind": "commerce", "width": 900.0, "floors": 2, "upper": "stucco", "stucco": "#CDB4AE",
+		"bricks": ["#D9B8B0"], "mortar": "#C9A89E", "parapet": "flat", "lintel": "#E8E0D4", "lintel_dark": "#B5AA98", "lintel_style": "none", "window_style": "slider", "frame": "#2B2B2E",
 		"windows": [[120.0, 110.0], [380.0, 110.0], [640.0, 110.0]],
 		"shops": [{"x0": 30.0, "x1": 870.0, "sign": "#F2EFE8", "frame": "#C8202A", "door": 200.0, "inside": "goods", "transom": "none", "panes": 5}], "basement": [],
 	},
