@@ -108,7 +108,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   parking lot, the buff row with white balconies, the corner at 4e), 5e–6e (north: the presbytery and the church; south: 2846–2888, the grey
   stone row, L'Oeufrier, the lot, the Banque Nationale), 6e–7e (2901–2933 north; 2902–2970 south) and 7e–8e (north: Première
   Moisson, a parking lot (`lot_style` "parking"), the stucco 3039 with `quoins`, the painted wall `mural_wall`; south: the
-  passage of murals (`lot_style` "murals"), Milot and Raposo, the `scroll` parapet, Tandoori Masson, the pink Couche-Tard). `TownMap._here` reads
+  passage of murals (`lot_style` "murals"), Milot and Raposo, the `scroll` parapet, Tandoori Masson, the pink Couche-Tard) and 8e–9e (north: the pink painted corner, Méga Vrac, Quincaillerie A. Lalonde, grey
+  stone, the pub's `upper: "rubble"`, the café at 9e; south: `round_windows` and `metal_panels` at 8e, the murals, Poke Monster
+  and Bossa under `upper: "siding"`). `TownMap._here` reads
   the block from the key and puts her at the sheet's foot between its avenues. **Halloween won't be played on Masson
   (Julien): don't spend time checking it there**; it is only kept from breaking (`StreetScene.gives_candy = false`, and
   `StreetScene._moon_x()` so the moon isn't drawn over a tall facade).
