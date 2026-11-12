@@ -395,7 +395,7 @@ const HOUSES := [
 		"name": "impair_5641", "kind": "modern", "width": 700.0, "door_x": 240.0,
 		"bricks": ["#B4513F", "#A8473A", "#B85C48", "#9A3F33", "#C0624A"], "mortar": "#D2C4B4",
 		"lintel": "#D8D2C6", "lintel_dark": "#A39D93", "step": "#9A968E", "step_dark": "#6E6A62", "metal": "#2B2B2E",
-		"windows": [[80.0, 220.0], [380.0, 220.0]], "ground_window": [420.0, 120.0], "door_cx": 240.0, "basement": [],
+		"windows": [[80.0, 220.0], [380.0, 220.0]], "ground_window": [420.0, 120.0], "door_cx": 240.0, "basement": [], "upper_frame": "#232326", "mullions": 3, "roof_rail": true,
 	},
 	# 5637, the little white one-storey house (5635…, 5647… and close-ups).
 	{
@@ -943,7 +943,7 @@ func _window(x: float, y: float, w: float, h: float) -> void:
 	if k.get("muntins", "") == "x" and y < _win_y(0) - 20.0:
 		var parts := PackedStringArray()
 		var cell := (w - 16.0) / 3.0
-		for i in 4:
+		for i in 3:
 			var gx := x + 8.0 + i * cell
 			parts.append("M%s %s L%s %s M%s %s L%s %s" % [_n(gx), _n(y + 8), _n(gx + cell), _n(ty), _n(gx + cell), _n(y + 8), _n(gx), _n(ty)])
 		_path(" ".join(parts), "none", _stroke(k.trim, 3.5))
@@ -1737,10 +1737,24 @@ func _modern() -> void:
 	_rect(X0, top, X1 - X0, mid - top, "#ECEAE4")
 	_rect(X0, top, X1 - X0, mid - top, "url(#shade)")
 	_rect(X0 - 4, top - 10, X1 - X0 + 8, 10, "#D9D6CF", _stroke("#B5B1A8", 1.5))
+	if k.get("roof_rail", false):
+		# A roof terrace: its glass rail set back from the front, catching the sky.
+		var ry := top - 10.0
+		_rect(X0 + 60, ry - 46, X1 - X0 - 120, 46, "#CFE4EC", 'opacity="0.4"')
+		var gx := X0 + 60.0
+		while gx <= X1 - 60.0:
+			_rect(gx - 1.5, ry - 48, 3, 48, "#2B2B2E")
+			gx += (X1 - X0 - 120.0) / 4.0
+		_rect(X0 + 58, ry - 50, X1 - X0 - 116, 4, "#2B2B2E")
 	for w in k.windows:
 		var wy := _win_y(1) + 10.0
-		_rect(w[0] - 4, wy - 4, w[1] + 8, 128, "#5E5A54")
+		_rect(w[0] - 4, wy - 4, w[1] + 8, 128, k.get("upper_frame", "#5E5A54"))
 		_rect(w[0] + 3, wy + 3, w[1] - 6, 114, "url(#glass)")
+		var panes: int = k.get("mullions", 0)
+		for m in range(1, panes):
+			_rect(w[0] + 3 + (w[1] - 6) * m / float(panes) - 2.5, wy + 3, 5, 114, k.get("upper_frame", "#5E5A54"))
+		if panes > 0:
+			_path("M%s %s l%s 0 l%s %s l%s 0 z" % [_n(w[0] + w[1] * 0.2), _n(wy + 3), _n(w[1] * 0.08), _n(-w[1] * 0.1), _n(114), _n(-w[1] * 0.08)], "#FFFFFF", 'opacity="0.2"')
 		if k.curtains:
 			_path("M%s %s h24 q-8 57 2 114 h-26 z" % [_n(w[0] + 3), _n(wy + 3)], "#F3E9D8", 'opacity="0.92"')
 		_rect(w[0] - 8, wy + 122, w[1] + 16, 8, "#CFCBC2")
@@ -3350,7 +3364,7 @@ func _alu_canopy(x0: float, x1: float, y: float) -> void:
 	_rect(l, y + 13, r - l, 4, dark, 'opacity="0.45"')
 	for side: float in [-1.0, 1.0]:
 		var bx := x0 - 2.0 if side < 0.0 else x1 + 2.0
-		_path("M%s %s L%s %s" % [_n(bx), _n(y + 16 + deep + 52), _n(bx + side * 22.0), _n(y + 17)], "none", _stroke(k.metal, 3) + ' stroke-linecap="round"')
+		_path("M%s %s L%s %s" % [_n(bx), _n(y + 16 + deep + 14), _n(bx + side * 20.0), _n(y + 17)], "none", _stroke(k.metal, 3) + ' stroke-linecap="round"')
 	_snow(l, r - l, y)
 
 
@@ -3450,12 +3464,18 @@ func _hydrangea(x: float, r: float) -> void:
 		if heads.is_empty():
 			continue
 		var c: String = heads[i % heads.size()]
-		_circle(hx + 2, hy + 2, hr, "#000000", 'opacity="0.15"')
-		_circle(hx, hy, hr, c)
-		for j in 6:
-			var a := TAU * j / 6.0
-			_circle(hx + cos(a) * hr * 0.5, hy + sin(a) * hr * 0.5, hr * 0.32, "#" + Color(c).darkened(0.08).to_html(false), 'opacity="0.6"')
-		_circle(hx - hr * 0.3, hy - hr * 0.3, hr * 0.35, "#FFFFFF", 'opacity="0.35"')
+		_circle(hx + 2, hy + 3, hr * 0.95, "#000000", 'opacity="0.14"')
+		_circle(hx, hy, hr * 0.8, "#" + Color(c).darkened(0.18).to_html(false))
+		for j in 14:
+			var a := TAU * j / 14.0 + j * 0.7
+			var d := hr * (0.15 + 0.62 * float(j % 5) / 4.0)
+			var f := Vector2(hx + cos(a) * d, hy + sin(a) * d * 0.9)
+			var lit := (hx - f.x + hy - f.y) / (hr * 2.0)
+			var tone := Color(c).lightened(clampf(lit, 0.0, 1.0) * 0.25) if lit > 0.0 else Color(c).darkened(clampf(-lit, 0.0, 1.0) * 0.2)
+			for petal in 4:
+				var pa := petal * PI / 2.0 + a
+				_circle(f.x + cos(pa) * hr * 0.11, f.y + sin(pa) * hr * 0.11, hr * 0.12, "#" + tone.to_html(false))
+			_circle(f.x, f.y, hr * 0.05, "#" + Color(c).darkened(0.35).to_html(false))
 
 
 # A glass balcony rail: clear panels with the sky in them between thin black posts, a black cap rail (6e-avenue/5725…, 5729…).
@@ -3663,7 +3683,7 @@ func _corner_yard() -> void:
 	# The yard's tree, behind the fence.
 	rng.seed = hash(k.name) + 7
 	# Kept inside the drawing: its crown stops short of the lane, which is drawn as a picture of its own.
-	_fine_tree(Vector2(830, ground_y - 60), 360.0, -PI * 0.55, 1.4, ["#E3A33A", "#D9A23A", "#C9562E", "#E8B54A", "#D9682B"])
+	_fine_tree(Vector2(830, ground_y - 60), 420.0, -PI * 0.55, 1.25, ["#E3A33A", "#D9A23A", "#C9562E", "#E8B54A", "#D9682B"])
 	# The low terracotta wall along the sidewalk.
 	_rect(X0, ground_y - 46, X1 - X0, 46, "#B8553C", _stroke("#8E3F2C", 1.5))
 	_rect(X0, ground_y - 46, X1 - X0, 4, "#D27A5E")
