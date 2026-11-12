@@ -71,6 +71,33 @@ there is one): what is in all of them is the building, what appears in one is an
 Mention in your report what you left out on purpose (for example "5671: pumpkins on the stair, a bike, a
 parked car: not drawn"), so the user can overrule you.
 
+## Reuse what is identical or similar
+
+Montréal's plexes were often built in rows by one builder: neighbours (and buildings across the street or on the
+next block) are frequently the same design, a mirror image of it, or the same with one change (another door, a
+bricked-up window, a different railing, a painted base). Don't draw each one from nothing:
+
+- **Compare the pictures** of the building with those of its neighbours and of the existing generator entries
+  (`duplex_charlotte`, `duplex_jumelles`, the numbered `plex_NN` … ). Same storeys, window rhythm, door and stair
+  position, cornice and lintels = same design.
+- **Identical**: don't add a second copy of the data. Point the second building at the same design: the layout
+  can list the same SVG name twice, or the generator can write the second name from the same entry. The number plate,
+  the brick tone (when the bricks really differ) and what makes it different are the only things to override.
+- **Mirror image**: the generator already has `_mirror(cfg)`, which flips the door, windows, balcony, porch, stair
+  and basement across the facade. It doesn't know the other side-dependent keys (`steps_side`, `downspout`,
+  `awning_posts`, `iron_posts`, `rail_up`/`rail_down`, a fence gate…): flip those yourself and check the result in a screenshot.
+- **Similar**: copy the entry's keys with `k.merge(cfg, true)` semantics in mind: start from the closest entry and
+  override only what the pictures show differently, with a comment naming the building it is based on and the
+  pictures used. A difference seen on one picture only is probably an object (see above), not a design difference.
+- **Parts**: a part that recurs across different buildings (a door style, a stair kind, a lamp, a railing, a fence, a
+  lintel, a window style, a cornice, a base) is one case in the generator, chosen by a key, not code pasted into
+  each house. If the real part isn't there yet, add it once, as a new option, and use it everywhere it applies; check
+  that the buildings that already use the old option don't change (same random draws).
+- **Surroundings**: the same goes for trees in their pits, fences, curb extensions, lamps and poles: one shared
+  builder, parameterised, never a hand-placed copy for one house.
+- Tell the user what you reused and from where ("5665 and 5669 are the same design as 5661, mirrored, 5669's door
+  repainted"), and when you aren't sure two buildings are the same design, say so instead of merging them.
+
 ## 3. Draw it
 
 Facades are **generated**, never hand-edited: `art/decor/*.svg` come from `tools/generate_houses.gd`.
