@@ -331,7 +331,7 @@ func _build_props() -> void:
 	# Hydrant in front of Charlotte's house
 	var hydrant := _sprite(PropArt.hydrant(), 0.62)
 	var char_idx := LAYOUT.find("duplex_charlotte")
-	hydrant.position = Vector2(_starts[char_idx] + 60.0, CURB_Y - 82.0 * 0.62)
+	hydrant.position = Vector2(_starts[char_idx] + 60.0 + 30.0 * 0.62, CURB_Y) - PropArt.HYDRANT_FOOT * 0.62
 	add_child(hydrant)
 
 

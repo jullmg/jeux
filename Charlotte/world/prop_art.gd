@@ -282,16 +282,41 @@ static func lamppost() -> ImageTexture:
 
 
 # Canvas 60x84, ground at y 82.
+## A Montréal fire hydrant (rue-masson/2901…): a tall red body with its paint chipped, flanges at the foot with a bit of rust,
+## a domed bonnet and its nut, black outlet caps (the big one facing the street), and the yellow marker rod clamped on top so
+## the snowplough finds it in winter. Its foot is at (30, 118) of the 60×120 canvas (`HYDRANT_FOOT`).
+const HYDRANT_FOOT := Vector2(30, 118)
 static func hydrant() -> ImageTexture:
-	var s := '<ellipse cx="30" cy="80" rx="22" ry="4" fill="#000000" opacity="0.2"/>'
-	s += '<rect x="16" y="28" width="28" height="50" rx="6" fill="#C0392B" stroke="#7B241C" stroke-width="2.5"/>'
-	s += '<path d="M14 30 Q30 4 46 30 Z" fill="#E8E6E1" stroke="#9A9890" stroke-width="2.5"/>'
-	s += '<rect x="26" y="4" width="8" height="10" rx="2" fill="#E8E6E1" stroke="#9A9890" stroke-width="2"/>'
-	s += '<rect x="4" y="42" width="14" height="12" rx="3" fill="#E8E6E1" stroke="#9A9890" stroke-width="2"/>'
-	s += '<rect x="42" y="42" width="14" height="12" rx="3" fill="#E8E6E1" stroke="#9A9890" stroke-width="2"/>'
-	s += '<rect x="12" y="74" width="36" height="8" rx="2" fill="#7B241C"/>'
-	s += '<path d="M22 34 V70" stroke="#FFFFFF" stroke-width="3" opacity="0.3" stroke-linecap="round"/>'
-	return tex(_svg(60, 84, s))
+	var s := '<defs><linearGradient id="hb" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#E05A44"/><stop offset="0.35" stop-color="#C8352A"/><stop offset="1" stop-color="#7E1E18"/></linearGradient></defs>'
+	s += '<ellipse cx="32" cy="117" rx="20" ry="3.5" fill="#000000" opacity="0.22"/>'
+	# The marker rod: yellow, a band of red tape near its top, clamped to the bonnet.
+	s += '<rect x="38" y="4" width="4" height="54" fill="#F2C230" stroke="#9A7A10" stroke-width="1"/>'
+	s += '<rect x="38" y="8" width="4" height="6" fill="#C8352A"/>'
+	s += '<rect x="35" y="52" width="10" height="5" rx="1" fill="#3A3A3A"/>'
+	# The foot: two flanges, the lower one rusting into the sidewalk.
+	s += '<rect x="14" y="106" width="32" height="10" rx="2" fill="#8E2A20" stroke="#5A1A14" stroke-width="2"/>'
+	s += '<rect x="14" y="110" width="32" height="6" fill="#7A4A2A" opacity="0.6"/>'
+	s += '<rect x="16" y="98" width="28" height="9" rx="2" fill="#B02E24" stroke="#5A1A14" stroke-width="2"/>'
+	for bx in [18, 26, 34, 41]:
+		s += '<circle cx="%d" cy="111" r="1.6" fill="#3A1A10"/>' % bx
+	# The barrel, slightly narrower at the top, lit from the left.
+	s += '<path d="M18 99 L19 52 Q30 47 41 52 L42 99 Z" fill="url(#hb)" stroke="#5A1A14" stroke-width="2.5"/>'
+	# Its bonnet: a collar, the dome and the pentagon nut.
+	s += '<rect x="16" y="46" width="28" height="8" rx="2" fill="#B02E24" stroke="#5A1A14" stroke-width="2"/>'
+	s += '<path d="M18 47 Q30 26 42 47 Z" fill="url(#hb)" stroke="#5A1A14" stroke-width="2.5"/>'
+	s += '<rect x="26" y="26" width="8" height="8" rx="1.5" fill="#B02E24" stroke="#5A1A14" stroke-width="2"/>'
+	# The outlets: the big steamer cap facing us, a small hose cap each side, all black, with their chains.
+	s += '<rect x="5" y="64" width="14" height="12" rx="2" fill="#2A2A2A" stroke="#111111" stroke-width="2"/>'
+	s += '<rect x="41" y="64" width="14" height="12" rx="2" fill="#2A2A2A" stroke="#111111" stroke-width="2"/>'
+	s += '<circle cx="30" cy="74" r="9" fill="#2A2A2A" stroke="#111111" stroke-width="2.5"/>'
+	s += '<path d="M27 70 h6 l2 4 l-2 4 h-6 l-2 -4 z" fill="#4A4A4A"/>'
+	s += '<path d="M19 78 Q24 86 23 92" fill="none" stroke="#3A3A3A" stroke-width="1.2"/>'
+	# Light down its left side, and the chipped paint: pale nicks and scratches.
+	s += '<path d="M22 54 V96" stroke="#FFFFFF" stroke-width="3" opacity="0.28" stroke-linecap="round"/>'
+	for n in [[25, 60, 4], [33, 86, 6], [23, 92, 3], [36, 58, 3], [28, 96, 5], [37, 92, 2]]:
+		s += '<path d="M%d %d l%d %d" stroke="#F2E6DA" stroke-width="1.3" opacity="0.8" stroke-linecap="round"/>' % [n[0], n[1], n[2], -n[2] / 2]
+	s += '<circle cx="31" cy="40" r="1.5" fill="#F2E6DA" opacity="0.7"/>'
+	return tex(_svg(60, 120, s))
 
 
 ## Colours of what drifts from the trees this season (leaves, petals, snow).

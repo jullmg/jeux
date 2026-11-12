@@ -1,7 +1,7 @@
 class_name Street
 extends Node2D
 ## Sidewalk, curb, gutter (full of fallen leaves in autumn, snowbanks in winter) and asphalt (patches, cracks,
-## manholes, puddles), drawn once.
+## manholes, catch basins), drawn once.
 ## The thousands of leaves and grit specks go into vertex-coloured meshes: drawn one by one they cost
 ## thousands of draw calls every frame (the whole street is a single canvas item, never culled).
 
@@ -44,9 +44,7 @@ func _draw() -> void:
 		grit.rect(Rect2(rng.randf_range(0, width), rng.randf_range(ROAD + 6, BOTTOM), 2, 2), Color("#6E6D6A") if rng.randf() < 0.5 else Color("#4F4E4C"))
 	_keep(grit.draw(self))
 	for gx in range(400, int(width), 900):
-		draw_rect(Rect2(gx, ROAD + 1, 46, 9), Color("#3A3938"))
-		for k in 6:
-			draw_line(Vector2(gx + 4 + k * 7, ROAD + 2), Vector2(gx + 4 + k * 7, ROAD + 9), Color("#6E6D6A"), 1.5)
+		_catch_basin(float(gx))
 	if Season.is_winter():
 		_snow_on_sidewalk(rng)
 	var leaves := _Batch.new()
@@ -145,27 +143,71 @@ func _road_details(rng: RandomNumberGenerator) -> void:
 		var seg := rng.randf_range(40, 160)
 		draw_line(Vector2(lx, 703), Vector2(lx + seg, 703), Color("#E8E4D8", rng.randf_range(0.25, 0.55)), 3.0)
 		lx += seg + rng.randf_range(0, 14)
-	# Manhole covers and puddles reflecting the sky.
+	# Manhole covers in the road, Montréal's cast iron "ÉGOUT" lids. No puddles any more (Julien): their random draws are still
+	# made, so the rest of the street doesn't move.
 	var mx := rng.randf_range(300, 700)
 	while mx < width:
-		draw_set_transform(Vector2(mx, 692), 0.0, Vector2(1.0, 0.3))
-		draw_circle(Vector2.ZERO, 24, Color("#3A3938"))
-		draw_circle(Vector2.ZERO, 21, Color("#5A5753"))
-		for r in [7.0, 14.0]:
-			draw_arc(Vector2.ZERO, r, 0, TAU, 24, Color("#3E3C39"), 2.0)
-		draw_set_transform(Vector2.ZERO)
+		_manhole(Vector2(mx, 692))
 		mx += rng.randf_range(900, 1500)
 	var px := rng.randf_range(500, 900)
 	while px < width:
-		var p := Vector2(px, rng.randf_range(ROAD + 14, BOTTOM - 10))
-		var r := rng.randf_range(26, 46)
-		draw_set_transform(p, 0.0, Vector2(1.0, 0.22))
-		draw_circle(Vector2.ZERO, r + 3, Color("#4A4947"))
-		draw_circle(Vector2.ZERO, r, Color("#7E9FC2"))
-		draw_circle(Vector2(-r * 0.25, -r * 0.3), r * 0.55, Color("#B9D0E6", 0.7))
-		draw_circle(Vector2(r * 0.3, r * 0.1), r * 0.3, Color("#F4D9B8", 0.45))
-		draw_set_transform(Vector2.ZERO)
+		rng.randf_range(ROAD + 14, BOTTOM - 10)
+		rng.randf_range(26, 46)
 		px += rng.randf_range(700, 1300)
+
+
+## A Montréal sewer manhole cover, seen at a low angle: the iron frame set in a ring of patched asphalt, the round lid with its
+## raised grid of squares inside two rings, "ÉGOUT" pressed into a band across it, the two pick holes, the shine of wear.
+func _manhole(at: Vector2) -> void:
+	draw_set_transform(at, 0.0, Vector2(1.0, 0.3))
+	draw_circle(Vector2.ZERO, 31, Color("#4A4947"))
+	draw_circle(Vector2.ZERO, 26, Color("#2E2D2B"))
+	draw_circle(Vector2.ZERO, 23, Color("#4E4C48"))
+	for gx in range(-18, 19, 6):
+		for gy in range(-18, 19, 6):
+			if Vector2(gx, gy).length() < 17.0 and absf(gy) > 4.0:
+				draw_rect(Rect2(gx - 2, gy - 2, 4, 4), Color("#5E5B56"))
+	draw_arc(Vector2.ZERO, 19.5, 0, TAU, 32, Color("#3A3936"), 1.6)
+	draw_arc(Vector2.ZERO, 23, 0, TAU, 32, Color("#5E5B56"), 1.4)
+	draw_rect(Rect2(-17, -3.5, 34, 7), Color("#45433F"))
+	for k in 5:
+		draw_rect(Rect2(-13 + k * 6.2, -2, 3.6, 4), Color("#6E6B65"))
+	draw_circle(Vector2(-11, -12), 1.8, Color("#1E1D1C"))
+	draw_circle(Vector2(11, 12), 1.8, Color("#1E1D1C"))
+	draw_arc(Vector2.ZERO, 21, PI * 1.05, PI * 1.45, 10, Color(1, 1, 1, 0.18), 3.0)
+	draw_set_transform(Vector2.ZERO)
+
+
+## A Montréal catch basin at the curb: the opening in the curb's face under its iron lip, and in the gutter the cast iron grate
+## with its slots across the flow, its frame, rust at the edges and the leaves caught in it.
+func _catch_basin(x: float) -> void:
+	var w := 58.0
+	# The inlet in the curb: a dark slot under an iron lip.
+	draw_rect(Rect2(x - 4, CURB + 1, w + 8, ROAD - CURB - 1), Color("#8E8A82"))
+	draw_rect(Rect2(x, CURB + 2.5, w, ROAD - CURB - 3.5), Color("#1E1D1C"))
+	draw_line(Vector2(x - 4, CURB + 1.5), Vector2(x + w + 4, CURB + 1.5), Color("#5E5B56"), 2.0)
+	# The grate in the gutter, a little in perspective: its frame, the bars, rust and the shine of the iron.
+	var top := ROAD + 1.0
+	var bottom := ROAD + 13.0
+	draw_colored_polygon(PackedVector2Array([Vector2(x - 3, top), Vector2(x + w + 3, top), Vector2(x + w + 6, bottom + 2), Vector2(x - 6, bottom + 2)]), Color("#3E3C39"))
+	draw_colored_polygon(PackedVector2Array([Vector2(x, top + 1.5), Vector2(x + w, top + 1.5), Vector2(x + w + 2.5, bottom), Vector2(x - 2.5, bottom)]), Color("#141312"))
+	for k in 9:
+		var t := (k + 0.5) / 9.0
+		var a := Vector2(lerpf(x, x + w, t), top + 1.5)
+		var b := Vector2(lerpf(x - 2.5, x + w + 2.5, t), bottom)
+		draw_line(a, b, Color("#5A5752"), 2.4)
+		draw_line(a + Vector2(-0.8, 0), b + Vector2(-0.8, 0), Color(1, 1, 1, 0.12), 0.8)
+	draw_line(Vector2(x - 2.5, (top + bottom) / 2.0 + 0.8), Vector2(x + w + 2.5, (top + bottom) / 2.0 + 0.8), Color("#4A4743"), 1.6)
+	draw_line(Vector2(x - 6, bottom + 2), Vector2(x + w + 6, bottom + 2), Color("#6E4A32", 0.55), 1.6)
+	if not Season.is_winter():
+		var lc := _litter_color(int(x) % LEAVES_COUNT)
+		draw_set_transform(Vector2(x + w * 0.3, top + 5), 0.4, Vector2(1.0, 0.5))
+		draw_circle(Vector2.ZERO, 4.0, lc)
+		draw_set_transform(Vector2(x + w * 0.72, top + 8), -0.6, Vector2(1.0, 0.5))
+		draw_circle(Vector2.ZERO, 3.5, lc.darkened(0.15))
+		draw_set_transform(Vector2.ZERO)
+	else:
+		draw_rect(Rect2(x - 4, CURB - 1, w + 8, 3), Color("#F4F6F8"))
 
 
 # Triangles with per-vertex colours, drawn as one mesh.

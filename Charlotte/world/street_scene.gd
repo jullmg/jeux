@@ -1334,7 +1334,7 @@ func _build_props() -> void:
 	var hydrant_tex := PropArt.hydrant()
 	for at in hydrants_at:
 		var hydrant := _sprite(hydrant_tex, 0.62)
-		hydrant.position = Vector2(_street_x(at) - 30.0 * 0.62, CURB_Y - 82.0 * 0.62)
+		hydrant.position = Vector2(_street_x(at), CURB_Y) - PropArt.HYDRANT_FOOT * 0.62
 		add_child(hydrant)
 	var rack_tex := PropArt.rack()
 	for at in racks_at:

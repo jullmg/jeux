@@ -316,8 +316,11 @@ func _street_details() -> void:
 	var mh := _at(Vector2((x0 + x1) / 2.0 + 30.0, FACADE_Y), 2.5)
 	var r := 22.0 / 3.5
 	draw_set_transform(mh, 0.0, Vector2(1.0, 0.3))
-	draw_circle(Vector2.ZERO, r, Color("#4A4946"))
-	draw_arc(Vector2.ZERO, r, 0, TAU, 16, Color("#6E6D68"), 1.0)
+	draw_circle(Vector2.ZERO, r * 1.25, Color("#4A4946"))
+	draw_circle(Vector2.ZERO, r, Color("#2E2D2B"))
+	draw_circle(Vector2.ZERO, r * 0.86, Color("#4E4C48"))
+	draw_arc(Vector2.ZERO, r * 0.7, 0, TAU, 16, Color("#3A3936"), 1.0)
+	draw_rect(Rect2(-r * 0.7, -r * 0.14, r * 1.4, r * 0.28), Color("#45433F"))
 	draw_set_transform(Vector2.ZERO)
 
 

@@ -5911,7 +5911,7 @@ func _parking_lot() -> void:
 
 # ── What every lane entrance seen from the street gets ───────────────────────
 # Three layers over the entrance's own art, so both lanes (`_ruelle_verte`, `_ruelle`) read as a real lane: the ground
-# (its crack of weeds, patches, a puddle, tyre tracks), the walls (windows, creeper, the sun on the left wall and the
+# (its crack of weeds, patches, tyre tracks), the walls (windows, creeper, the sun on the left wall and the
 # shade on the right) and the air (wires and a clothesline across the gap). Their own RNG, and the same draws in every
 # season, so adding them doesn't move anything else.
 
@@ -5919,7 +5919,7 @@ func _lane_at(vp: Vector2, p: Vector2, d: float) -> Vector2:
 	return vp + (p - vp) * (1.0 - d)
 
 
-# Weeds, patches, a puddle and tyre tracks on the concrete; snow instead in winter. Drawn right after the ground.
+# Weeds, patches and tyre tracks on the concrete; snow instead in winter. Drawn right after the ground.
 func _lane_ground_detail(vp: Vector2, far: float) -> void:
 	var r := RandomNumberGenerator.new()
 	r.seed = 9241
@@ -5950,16 +5950,12 @@ func _lane_ground_detail(vp: Vector2, far: float) -> void:
 				var a := lerpf(-2.5, -0.6, b / 4.0) + r.randf_range(-0.2, 0.2)
 				_path("M%s %s q%s %s %s %s" % [_n(w.x), _n(w.y), _n(cos(a) * h * 0.3 * scale), _n(sin(a) * h * scale), _n(cos(a) * h * 0.8 * scale), _n(sin(a) * h * 0.8 * scale)],
 					"none", _stroke(_bush("#6E8A3A"), maxf(1.8 * scale, 0.7)) + ' stroke-linecap="round"')
-	# Worn patches of old asphalt and, near the mouth, a puddle with the sky in it.
+	# Worn patches of old asphalt (no puddle: Julien).
 	for i in 5:
 		var d := r.randf_range(0.05, far * 0.9)
 		var p := _lane_at(vp, Vector2(lerpf(X0 + 20.0, X1 - 20.0, r.randf()), ground_y), d)
 		var rx: float = r.randf_range(22.0, 48.0) * (1.0 - d)
 		out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="%s" opacity="0.5"/>' % [_n(p.x), _n(p.y), _n(rx), _n(rx * 0.26), "#EFF2F4" if snowy else "#9C978D"])
-	var pud := _lane_at(vp, Vector2(lerpf(X0, X1, 0.36), ground_y - 6.0), 0.12)
-	out.append('<ellipse cx="%s" cy="%s" rx="34" ry="8" fill="%s" opacity="0.75"/>' % [_n(pud.x), _n(pud.y), "#E8EDF0" if snowy else "#8FA6B4"])
-	if not snowy:
-		out.append('<ellipse cx="%s" cy="%s" rx="22" ry="4" fill="#C7DCE8" opacity="0.7"/>' % [_n(pud.x - 4), _n(pud.y - 1)])
 
 
 # Windows up the side walls, creeper over them, and the light: the left wall catches the low sun, the right one is in shade
