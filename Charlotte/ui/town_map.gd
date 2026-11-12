@@ -120,6 +120,10 @@ func _here() -> Dictionary:
 	match key:
 		"main":
 			return {"at": Vector2(WALK_E, lerpf(WALK_S, WALK_N, f)), "say": "Je suis ici !"}
+		"sixieme_est":
+			# The other side of 6e Avenue, the odd numbers: Holt on the left of the view, Dandurand on the right.
+			return {"at": Vector2(SIX_X + AVE_W / 2.0 + 8.0, lerpf(HOLT_Y + ST_W / 2.0 + 6.0, DAND_Y - ST_W / 2.0 - 6.0, f)),
+				"say": "Je suis en face de chez moi !"}
 		"holt":
 			return {"at": Vector2(lerpf(WALK_E, WALK_W, f), WALK_N), "say": "Je suis ici !"}
 		"cinquieme":

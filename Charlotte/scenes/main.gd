@@ -32,9 +32,9 @@ func _init() -> void:
 
 # In front of her duplex, back where she left the street (from her flat), at a corner or out of the lane.
 func _start_x() -> float:
-	if _arriving("6e_from_dandurand"):
+	if _arriving("6e_from_dandurand") or _arriving("6e_from_6e_est_dandurand"):
 		return _starts[layout.find("depanneur")] + 60.0
-	if _arriving("6e_from_holt"):
+	if _arriving("6e_from_holt") or _arriving("6e_from_6e_est_holt"):
 		return _starts[layout.find("rue_holt")] - 40.0
 	var lane := _from_lane()
 	if not is_nan(lane):
@@ -92,8 +92,11 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 # to turn the corner, the lane entrances to go into the lane.
 func _build_doors() -> void:
 	_window_neighbour.charlotte = _charlotte
-	_add_corner(_cross_streets[0], "res://scenes/dandurand.tscn", "dandurand_from_6e")
-	_add_corner(_cross_streets[1], "res://scenes/holt.tscn", "holt_from_6e")
+	_add_corner(_cross_streets[0], "res://scenes/dandurand.tscn", "dandurand_from_6e", false)
+	_add_corner(_cross_streets[1], "res://scenes/holt.tscn", "holt_from_6e", false)
+	# Over 6e Avenue itself, to the other side of the street (the odd numbers, sixieme_est).
+	_add_across(_cross_streets[0], "res://scenes/sixieme_est.tscn", "6e_est_from_6e_dandurand")
+	_add_across(_cross_streets[1], "res://scenes/sixieme_est.tscn", "6e_est_from_6e_holt")
 	_add_lane("ruelle_verte")
 	_add_lane("ruelle")
 	var origin := _house_origin(layout.find("duplex_charlotte"))

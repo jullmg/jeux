@@ -46,11 +46,8 @@ func _build_cross_streets() -> void:
 	# 6e Avenue runs north from here: no mountain that way, just sky.
 	sixth.facing = "north"
 	sixth.left_walls = _walls_along("res://scenes/main.gd", "rue_dandurand", 1, "depanneur_front")
-	sixth.right_walls = [
-		{"to": 0.7, "top": _house_top("dandurand_nord"), "kind": "plex", "color": Color("#C2A07A")},
-		{"to": 2.4, "top": 280.0, "kind": "plex", "color": Color("#9C5A44")},
-		{"to": CrossStreet.FAR, "top": 310.0, "kind": "plex", "color": Color("#B5603F")},
-	]
+	# The odd side of 6e Avenue, from the Street View pictures (sixieme_est).
+	sixth.right_walls = _walls_along("res://scenes/sixieme_est.gd", "rue_dandurand", -1, "dandurand_nord")
 
 
 # The shop sign's words on the blue board.

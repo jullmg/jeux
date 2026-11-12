@@ -7,6 +7,7 @@ extends CanvasLayer
 const BLUE := Color("#1D4F91")
 const NAMES := {
 	"main": "6e Avenue",
+	"sixieme_est": "6e Avenue, de l'autre côté",
 	"holt": "Rue Holt",
 	"cinquieme": "5e Avenue",
 	"dandurand": "Rue Dandurand",

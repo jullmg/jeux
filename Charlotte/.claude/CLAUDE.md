@@ -60,6 +60,29 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   Cross-street `facing` by Montreal's compass: from 6e they run west (Mount Royal), from Dandurand north, from 5e east,
   from Holt south. New corner/side walls in the generator: `holt_nord`, `holt_sud`, `cinq_holt_ouest`, `coin_5e_holt`,
   `coin_5e_dandurand`, `dandurand_sud` (`VARIANTS` is 36: plex_27 on Dandurand, plex_28 on Holt, plex_29–36 on 5e, counted from the Google map).
+- **The other side of 6e Avenue**, the odd numbers facing her block (`scenes/sixieme_est.gd`, `street_key` "6e_est"; plate "6e
+  Avenue, de l'autre côté"), drawn from the Street View pictures (`reference/streetview/`, `docs/drawing-from-streetview.md`).
+  Seen from her own sidewalk across the street, so Holt is on the LEFT and Dandurand on the right; left to right: the corner
+  across Holt (`impair_holt_nord`, a side wall), Rue Holt, the corner house with its fenced yard (`impair_coin_holt`, kind
+  `corner_yard`: terracotta base, white pickets between brick piers, a gate under two lanterns, a red board fence with a
+  lattice top, the yard's big tree, cedars), the lane near Holt (`ruelle_impair_holt`, kind `lane_odd` "holt": gravel, that
+  board fence, the yellow children's sign), then 5713, 5707, 5699, 5689 (kind `modern`), 5685, 5679, 5677, 5669, 5661, 5655
+  (the mansard), 5649, 5641 (kind `modern`), 5637 (the white bungalow, kind `bungalow`), 5631 (striped awnings), 5621 (cream,
+  pressed cornice), 5615, the lane near Dandurand (`ruelle_impair_dandurand`, kind `lane_odd` "dandurand": asphalt, the one-way
+  sign, a chain-link fence), 5601 (the gabled block of the 1990s, kind `gables`), Rue Dandurand and the corner across it
+  (`impair_dandurand_sud`). Each `impair_*` entry of the generator names its pictures. She gets there by the crosswalk over
+  6e Avenue at either corner of `main.tscn` (`_add_across`) and comes back the same way; her lanes are on the other side,
+  so these two only get a line from her (`NOT_OUR_LANE`), and the cross streets don't turn (nothing is built east of
+  6e yet). The vistas down 6e from Holt and from Dandurand show these real facades (`_walls_along("res://scenes/sixieme_est.gd", …)`).
+  **What the odd side shares is generator options any plex can take** (all off by default, so no other house moves):
+  `parapet: "mansard"` (`_mansard`: slate face between two brick fire walls) and `"corbel"` (`_corbel_parapet`: brick
+  dentils, raised middle), `canopy` (`_alu_canopy`: the deep white aluminium canopy over a top balcony, on brackets, no
+  posts), `stripe_awnings` / `stripe_color` (`_stripe_awning`: red-and-white canvas over each balcony) and `door_awning`
+  (one over the street door), `balconies` (one span per flat instead of one gallery), `balcony_floors`, `door_floors`,
+  `stair: []` (no outdoor stair), `pilasters` (stone strips up the front), `muntins: "x"` (diagonal lattice in the upper panes),
+  `fence: "wood"` / `"chain"` (`_wood_fence`, `_chain_fence`), `frame` (the colour of `_casement` windows), and `door_x`
+  (any kind of building can name its door for `doors.json`, so it gets its doorbell on Halloween night). Helpers: `_casement`,
+  `_glass_rail`, `_hydrangea`, `_cedar`, `_lantern_post`.
 - The 6e/Holt corner follows `reference/coin_holt/6eme_coin_holt.png`, `reference/coin_holt/holt_coin_6eme.png` and `reference/ruelle/entree_ruelle_6eme_coin_holt.png`:
   generator kinds `corner_holt` (`coin_holt`: long brown three-storey, stepped white lintels, diamonds, the beige
   corrugated annex with its shingle awning, the red corner window), `ohbon` (dépanneur Oh Bon! on Holt: red storefront,
@@ -123,6 +146,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   click takes her round into the cross street's scene with `Transition.crossing` = the arrive key, and that scene walks
   her straight over its gap for our street (`_cross_on_arrival`, looking both ways as usual) — one click for what used
   to be "turn the corner, then cross". Same age rule as any crosswalk (`CANT_CROSS`, through `DebugMenu.blocked`).
+  Where another scene shows the far side of our own street (6e Avenue and `sixieme_est`), that second crosswalk leads there
+  instead: `_add_corner(cs, scene, key, false)` (the turn only) plus `_add_across(cs, scene, key)` — she looks both ways at the
+  curb and the far side loads with her at its matching corner (keys "6e_est_from_6e_holt", "6e_from_6e_est_dandurand", …).
   `CrossStreet.guard = true` (the school's crosswalk on Dandurand) adds a `CrossingGuard`
   (`world/crossing_guard.gd`, neon-yellow coat and cap) who steps out with her ARRÊT paddle while Charlotte crosses.
   `Bubble.say(parent, at, text)` shows a speech bubble anywhere (same speaker = replaces, others stack above; it stays at least its `seconds` but always long enough to be read, `Bubble.reading_time`: about twelve letters a second, up to 10 s, because Charlotte's age reads slowly); `DoorSpot` takes an optional `approach` and `condition`.

@@ -261,6 +261,198 @@ const HOUSES := [
 		"trim": "#ECE8E0", "trim_dark": "#A9A398", "lintel": "#D8CFC0", "lintel_dark": "#A39A8A",
 		"basement": [120.0, 420.0, 720.0], "fence": "black", "halloween": false,
 	},
+	# ── Across 6e Avenue, the odd numbers, Holt (left) to Dandurand (right) ──
+	# From reference/streetview/6e-avenue/ (INDEX.md "6e Avenue 5600–5800 (impairs)"): each entry names its pictures. Seasonal
+	# decorations, parked cars, bikes, bins, the plywood boarding up 5685's balcony and the children's mural on 5713's side wall
+	# are left out on purpose (docs/drawing-from-streetview.md).
+	# Across Rue Holt from the corner: the next block's corner building, its side.
+	{
+		"name": "impair_holt_nord", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#8E4A3A", "#9A5444", "#7E4234", "#A45C4A", "#86463A"], "mortar": "#C8BBAA",
+		"parapet": "flat", "windows": [[100.0, 90.0], [320.0, 90.0]], "basement": [], "downspout": 500.0,
+	},
+	# 5721–5733, the corner (5721…, 5725…, 5729…, 5733… and close-ups).
+	{
+		"name": "impair_coin_holt", "kind": "corner_yard", "width": 1100.0, "door_x": 500.0,
+		"bricks": ["#A8473A", "#B4513F", "#9A3F33", "#B85C48", "#8E3A2F"], "mortar": "#CFC2B4",
+		"lintel": "#D9D4C8", "lintel_dark": "#A39D93", "frame": "#2B2B2E", "slab": "#E9E6DF", "slab_dark": "#B9B5AC",
+		"door": "#2B2B2E", "door_dark": "#111111", "basement": [],
+	},
+	# The lane near Holt (5713…, 5717…).
+	{"name": "ruelle_impair_holt", "kind": "lane_odd", "width": 640.0, "lane_style": "holt"},
+	# 5713, beige brick duplex, the white stair up its lane side, French doors, a white canopy (5713…, 5717… and close-ups).
+	{
+		"name": "impair_5713", "number": "5713",
+		"bricks": ["#D9CBB0", "#CFC0A3", "#E2D5BC", "#C7B697", "#DCCFB5"], "mortar": "#EDE6D8",
+		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#E8E0D0", "lintel_dark": "#B9AE98",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "double", "door_surround": "lintel",
+		"metal": "#F5F5F2", "metal_light": true, "tread": "#C8C8C4", "tread_dark": "#8C8C88", "canopy": "#F2F0EA",
+		"parapet": "flat", "windows": [[440.0, 150.0]], "door_cx": 300.0, "balcony": [110.0, 640.0], "porch": [190.0, 410.0],
+		"stair": [Vector2(180, 336), Vector2(133, 456), Vector2(87, 576), Vector2(40, 696)],
+		"fence": "", "halloween": false, "basement": [450.0],
+	},
+	# 5707, red brick duplex, a black stair curling down to the left, a white canopy (5707…, 5709… and close-ups).
+	{
+		"name": "impair_5707", "number": "5707",
+		"bricks": ["#9E4A36", "#A85440", "#8E4030", "#B25C46", "#94462F"], "mortar": "#CFC2B4",
+		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel", "canopy": "#F2F0EA", "parapet": "flat",
+		"windows": [[80.0, 140.0], [500.0, 140.0]], "door_cx": 340.0, "balcony": [180.0, 470.0], "porch": [250.0, 430.0],
+		"stair": [Vector2(190, 336), Vector2(60, 380), Vector2(10, 520), Vector2(90, 696)],
+		"fence": "black", "basement": [520.0],
+	},
+	# 5699, three floors, red brick over a ground floor of grey brick, a canvas awning over its door (5699…, 5703… and close-ups).
+	{
+		"name": "impair_5699", "number": "5699", "floors": 3,
+		"bricks": ["#9A3F33", "#A8473A", "#8E3A2F", "#B4513F", "#94402F"], "mortar": "#CDBFB0",
+		"lower_stone": true, "stones": ["#B8B2A6", "#C4BEB2", "#A8A296", "#BEB8AC"], "stone_mortar": "#8E887E",
+		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D2C6", "lintel_dark": "#A39D93",
+		"door": "#3A3A3C", "door_dark": "#1A1A1C", "door_style": "grid", "door_awning": "#8E9AA6", "canopy": "#F2F0EA",
+		"parapet": "flat", "windows": [[400.0, 130.0], [550.0, 100.0]], "door_cx": 210.0, "balcony": [90.0, 330.0], "porch": [130.0, 290.0],
+		"stair": [Vector2(320, 336), Vector2(380, 420), Vector2(370, 560), Vector2(330, 696)],
+		"fence": "black", "basement": [],
+	},
+	# 5689, the newer two-storey one: red brick, a band of white bricks, a white upper floor (5689…, 5691…, 5699… and close-ups).
+	{
+		"name": "impair_5689", "kind": "modern", "width": 640.0, "door_x": 220.0,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
+		"lintel": "#D8D2C6", "lintel_dark": "#A39D93", "step": "#B08F6A", "step_dark": "#7E6446", "metal": "#6B5442",
+		"windows": [[150.0, 100.0], [400.0, 110.0]], "ground_window": [400.0, 110.0], "door_cx": 220.0, "basement": [],
+	},
+	# 5685, painted white, a balcony on the first floor only, no outdoor stair (5679…, 5685…, 5691… and close-ups).
+	{
+		"name": "impair_5685", "number": "5685", "floors": 3,
+		"bricks": ["#ECEAE4", "#E4E1DA", "#F2F0EB", "#DEDAD2", "#E8E5DF"], "mortar": "#CFCAC0",
+		"trim": "#4A3E34", "trim_dark": "#2E261F", "lintel": "#E6E3DC", "lintel_dark": "#B9B5AC", "lintel_style": "none",
+		"door": "#3A332C", "door_dark": "#1E1A16", "door_style": "slit", "parapet": "flat",
+		"windows": [[90.0, 120.0], [440.0, 130.0]], "door_cx": 260.0, "balcony": [140.0, 380.0], "porch": [190.0, 330.0],
+		"door_floors": [0, 1], "balcony_floors": [1], "stair": [], "fence": "", "basement": [], "halloween": false,
+	},
+	# 5679, tan brick, its balconies on the right under a dark metal canopy (5677…, 5679… and close-ups).
+	{
+		"name": "impair_5679", "number": "5679", "floors": 3,
+		"bricks": ["#B08A62", "#A47E58", "#BC966E", "#9A7650", "#C29C74"], "mortar": "#D8CDBE",
+		"trim": "#3A3A3C", "trim_dark": "#1E1E20", "lintel": "#C9BBA6", "lintel_dark": "#9A8C76",
+		"door": "#2B2B2E", "door_dark": "#111111", "door_style": "slit", "canopy": "#3A3A3C", "parapet": "flat",
+		"windows": [[80.0, 140.0], [530.0, 110.0]], "door_cx": 360.0, "balcony": [250.0, 480.0], "porch": [280.0, 440.0], "muntins": "x",
+		"stair": [], "fence": "black", "basement": [70.0],
+	},
+	# 5677, red-brown brick, a white door between its two windows, the stair curling down to the right (5677… and close-ups).
+	{
+		"name": "impair_5677", "number": "5677", "floors": 3,
+		"bricks": ["#8E5640", "#9A6048", "#7E4A36", "#A46A50", "#86503C"], "mortar": "#CFC2B0",
+		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D9D2C4", "lintel_dark": "#A39A8A",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "double", "canopy": "#F2F0EA", "parapet": "flat",
+		"windows": [[70.0, 160.0], [540.0, 100.0]], "door_cx": 380.0, "balcony": [270.0, 650.0], "porch": [300.0, 460.0],
+		"stair": [Vector2(480, 336), Vector2(580, 400), Vector2(620, 540), Vector2(590, 696)],
+		"fence": "black", "basement": [100.0],
+	},
+	# 5669, red brick, a dark door under its iron balconies and their canopy, the stair down to the left (5669…, 5671… and close-ups).
+	{
+		"name": "impair_5669", "number": "5669", "floors": 3,
+		"bricks": ["#A0503A", "#AA5A42", "#924632", "#B4624A", "#9A4C36"], "mortar": "#C8BBAA",
+		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D9D2C4", "lintel_dark": "#A39A8A",
+		"door": "#2B2B2E", "door_dark": "#111111", "door_style": "grille", "canopy": "#F2F0EA", "parapet": "flat",
+		"windows": [[70.0, 130.0], [500.0, 130.0]], "door_cx": 340.0, "balcony": [230.0, 460.0], "porch": [260.0, 420.0],
+		"stair": [Vector2(240, 336), Vector2(120, 400), Vector2(90, 540), Vector2(150, 696)],
+		"fence": "black", "basement": [520.0],
+	},
+	# 5661, buff brick under a corbelled parapet, black iron balconies, a white door with an oval light under a fanlight
+	# (5661…, 5665…, 5671… and close-ups).
+	{
+		"name": "impair_5661", "number": "5661", "floors": 3,
+		"bricks": ["#B8946E", "#C4A07A", "#AA8862", "#CFAB86", "#B08C66"], "mortar": "#E2D6C4",
+		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#E4DCCB", "lintel_dark": "#B3A88F",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "oval", "door_surround": "lintel", "canopy": "#F2F0EA",
+		"parapet": "corbel", "windows": [[450.0, 150.0]], "door_cx": 290.0, "balcony": [60.0, 420.0], "porch": [200.0, 380.0],
+		"stair": [Vector2(170, 336), Vector2(70, 400), Vector2(40, 540), Vector2(100, 696)],
+		"fence": "black", "basement": [460.0],
+	},
+	# 5655, red brick under a mansard of dark slate, a white balcony at each window, a white stone pilaster down the middle, no
+	# outdoor stair (5649…, 5653…, 5665… and close-ups).
+	{
+		"name": "impair_5655", "floors": 3,
+		"bricks": ["#A84E38", "#B25840", "#9A4632", "#BC6248", "#A04A34"], "mortar": "#D8CABA",
+		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#F2F0EA", "lintel_dark": "#C2BDB2",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "oval", "metal": "#F5F5F2", "metal_light": true,
+		"parapet": "mansard", "pilasters": [350.0], "windows": [[90.0, 160.0], [440.0, 160.0]], "door_cx": 340.0,
+		"balcony": [60.0, 640.0], "balconies": [[64.0, 276.0], [414.0, 626.0]], "porch": [60.0, 280.0],
+		"door_floors": [0], "stair": [], "fence": "white", "halloween": false, "basement": [],
+	},
+	# 5649, red-brown brick, iron balconies under a white canopy, an iron stair curling down to the left (5649…, 5653… and close-ups).
+	{
+		"name": "impair_5649", "number": "5649", "floors": 3,
+		"bricks": ["#9A5440", "#A65E48", "#8C4C38", "#B06850", "#945038"], "mortar": "#D2C4B2",
+		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#E8E2D6", "lintel_dark": "#B3AA9A",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "leaded", "canopy": "#F2F0EA", "parapet": "flat", "ornate": true,
+		"windows": [[90.0, 140.0], [520.0, 120.0]], "door_cx": 390.0, "balcony": [270.0, 500.0], "porch": [300.0, 470.0],
+		"stair": [Vector2(280, 336), Vector2(160, 400), Vector2(130, 540), Vector2(190, 696)],
+		"fence": "black", "basement": [100.0],
+	},
+	# 5641, the newer one: red brick and its white band below, a white upper floor with wide black-framed windows (5641…, 5643…,
+	# 5647… and close-ups).
+	{
+		"name": "impair_5641", "kind": "modern", "width": 700.0, "door_x": 240.0,
+		"bricks": ["#B4513F", "#A8473A", "#B85C48", "#9A3F33", "#C0624A"], "mortar": "#D2C4B4",
+		"lintel": "#D8D2C6", "lintel_dark": "#A39D93", "step": "#9A968E", "step_dark": "#6E6A62", "metal": "#2B2B2E",
+		"windows": [[80.0, 220.0], [380.0, 220.0]], "ground_window": [420.0, 120.0], "door_cx": 240.0, "basement": [],
+	},
+	# 5637, the little white one-storey house (5635…, 5647… and close-ups).
+	{
+		"name": "impair_5637", "kind": "bungalow", "width": 640.0, "door_x": 320.0, "number": "5637",
+		"trim": "#F2F0EA", "trim_dark": "#B9B5AC", "lintel": "#E4E1DA", "lintel_dark": "#B9B5AC", "lintel_style": "none",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "slots", "stripe_color": "#5E86B5",
+		"windows": [[80.0, 150.0], [410.0, 150.0]], "door_cx": 320.0, "fence": "black", "basement": [],
+	},
+	# 5631, red brick, red and white striped awnings over its balconies, the stair down to the left (5623…, 5631…, 5635… and close-ups).
+	{
+		"name": "impair_5631", "number": "5631", "floors": 3,
+		"bricks": ["#A85238", "#B25C42", "#9A4A32", "#BC664A", "#A24E36"], "mortar": "#D4C6B4",
+		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#E4DCCB", "lintel_dark": "#B3A88F",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel", "stripe_awnings": true, "parapet": "flat",
+		"windows": [[80.0, 150.0], [480.0, 120.0]], "door_cx": 380.0, "balcony": [310.0, 620.0], "porch": [320.0, 440.0],
+		"stair": [Vector2(320, 336), Vector2(200, 400), Vector2(170, 540), Vector2(230, 696)],
+		"fence": "black", "basement": [100.0],
+	},
+	# 5621, cream brick under a pressed cornice with its little pediment, black balconies the width of the front, a steel stair with
+	# wooden treads (5623…, 5631… and close-ups).
+	{
+		"name": "impair_5621", "number": "5621", "floors": 3, "width": 760.0,
+		"bricks": ["#E8DCC4", "#E2D4BA", "#EEE4D0", "#DCCDB2", "#E6D9BF"], "mortar": "#F2ECE0",
+		"cornice": "#ECE3CF", "cornice_dark": "#B9AA8C", "pediment": true,
+		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#F0E8D8", "lintel_dark": "#C2B49A",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel", "tread": "#8A5A3A", "tread_dark": "#5E3B24",
+		"windows": [[90.0, 120.0], [470.0, 150.0]], "door_cx": 320.0, "balcony": [50.0, 700.0], "porch": [220.0, 420.0],
+		"stair": [Vector2(210, 336), Vector2(160, 456), Vector2(110, 576), Vector2(60, 696)],
+		"fence": "wood", "basement": [],
+	},
+	# 5615, pale brick, concrete balconies the width of the front, a steel stair with wooden treads; its dark brick side runs along
+	# the lane (5609…, 5615…, 5617… and close-ups).
+	{
+		"name": "impair_5615", "number": "5615", "floors": 3, "width": 760.0,
+		"bricks": ["#E2D2B4", "#D8C8A8", "#EADCC0", "#CFBF9E", "#E6D7BA"], "mortar": "#EFE7DA",
+		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "lintel_style": "none",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel", "tread": "#8A5A3A", "tread_dark": "#5E3B24",
+		"slab": "#D9D4CA", "slab_dark": "#A9A398", "flower_boxes": true, "parapet": "flat",
+		"windows": [[60.0, 120.0], [440.0, 120.0], [596.0, 110.0]], "door_cx": 300.0, "balcony": [40.0, 720.0], "porch": [220.0, 400.0],
+		"stair": [Vector2(170, 336), Vector2(127, 456), Vector2(83, 576), Vector2(40, 696)],
+		"fence": "wood", "halloween": false, "basement": [],
+	},
+	# The lane near Dandurand (5609…, 5617…).
+	{"name": "ruelle_impair_dandurand", "kind": "lane_odd", "width": 600.0, "lane_style": "dandurand"},
+	# 5601–5609, the gabled block at the corner (5601…, 5605…, 5609… and close-ups).
+	{
+		"name": "impair_5601", "kind": "gables", "width": 1400.0, "floors": 3, "top": 48.0, "door_x": 700.0, "number": "5601",
+		"bricks": ["#C98A64", "#D0936C", "#BF805A", "#D69C74", "#C4865F"], "mortar": "#E8D9C6",
+		"lintel": "#E4DCCD", "lintel_dark": "#B5AC9C", "siding": "#B98656", "door_cx": 700.0,
+		"metal": "#1F1F1F", "tread": "#5A5A5A", "tread_dark": "#3A3A3A", "fence": "chain", "halloween": false, "basement": [180.0, 1124.0],
+	},
+	# Across Rue Dandurand: the next block's corner building, its side.
+	{
+		"name": "impair_dandurand_sud", "kind": "side_wall", "width": 580.0, "floors": 3,
+		"bricks": ["#B5603F", "#A85536", "#C26B48", "#9C4D31", "#C77650"], "mortar": "#D6C9B9",
+		"parapet": "flat", "windows": [[110.0, 90.0], [320.0, 90.0]], "basement": [], "downspout": 40.0,
+	},
 ]
 
 var k: Dictionary
@@ -311,8 +503,8 @@ func _generate(configs: Array) -> void:
 		base_y = BASE + oy
 		ground_y = GROUND + oy
 		rng.seed = hash(k.name)
-		if k.kind == "plex":
-			doors[k.name] = k.door_cx
+		if k.kind == "plex" or k.has("door_x"):
+			doors[k.name] = k.get("door_x", k.door_cx)
 		out = PackedStringArray()
 		split = 0
 		_svg()
@@ -433,6 +625,14 @@ func _svg() -> void:
 			_modern()
 		"school":
 			_school()
+		"gables":
+			_gables()
+		"bungalow":
+			_bungalow()
+		"corner_yard":
+			_corner_yard()
+		"lane_odd":
+			_lane_odd()
 		_:
 			_building()
 	out.append('</svg>')
@@ -449,14 +649,23 @@ func _building() -> void:
 		_bricks(top, base_y)
 	_wall_shading(top)
 	_foundation()
+	for px: float in k.get("pilasters", []):
+		_rect(px - 13, top, 26, base_y - top, k.lintel, _stroke(k.lintel_dark, 1.5))
+		_rect(px - 13, top, 5, base_y - top, "#FFFFFF", 'opacity="0.3"')
+		_rect(px + 8, top, 5, base_y - top, "#000000", 'opacity="0.12"')
 	if k.downspout >= 0.0:
 		_downspout(k.downspout, top)
 	if k.get("downspout2", -1.0) >= 0.0:
 		_downspout(k.downspout2, top)
-	if k.parapet == "flat":
-		_flat_parapet(top)
-	else:
-		_cornice(top)
+	match k.parapet:
+		"flat":
+			_flat_parapet(top)
+		"mansard":
+			_mansard(top)
+		"corbel":
+			_corbel_parapet(top)
+		_:
+			_cornice(top)
 	if k.crest:
 		_crest(k.door_cx, top + 6.0)
 	var first_floor := 1 if k.kind == "shop" else 0
@@ -483,8 +692,10 @@ func _wall_shading(top: float) -> void:
 func _plex_front() -> void:
 	var floors: int = k.floors
 	var cx: float = k.door_cx
-	for f in floors:
+	for f: int in k.get("door_floors", range(floors)):
 		_door(cx, _door_top(f), _fb(f))
+	if k.get("door_awning", "") != "":
+		_stripe_awning(cx - 74, cx + 74, _door_top(0) - 46.0, k.door_awning)
 	# (Charlotte's doors carry their own little plates: see _wood_door.)
 	if k.number != "" and k.get("door_style", "") != "wood_glass":
 		_plaque(cx, _door_top(0) + 14.0, k.number)
@@ -497,11 +708,22 @@ func _plex_front() -> void:
 		for lx in [mx - 8.0, mx + 8.0]:
 			_rect(lx, my + 21, 2.5, 9, "#1B2233")
 	var b: Array = k.balcony
+	# Most of the plexes across 6e Avenue have a balcony per flat rather than one gallery (`balconies`: one span each).
+	var spans: Array = k.get("balconies", [b])
 	if k.awning != "":
 		_awning(b[0], b[1], _door_top(floors - 1) - 26.0, _fb(floors - 1) - RAIL_H)
+	if k.get("canopy", "") != "":
+		for span: Array in spans:
+			_alu_canopy(span[0], span[1], _door_top(floors - 1) - 56.0)
 	var slab_h: float = k.get("slab_h", 16.0)
 	for f in range(floors - 1, 0, -1):
-		_rect(b[0], _fb(f) + 16, b[1] - b[0], 14, "#000000", 'opacity="0.15"')
+		if not f in k.get("balcony_floors", range(1, floors)):
+			continue
+		if k.get("stripe_awnings", false):
+			for span: Array in spans:
+				_stripe_awning(span[0], span[1], _door_top(f) - 30.0)
+		for span: Array in spans:
+			_rect(span[0], _fb(f) + 16, span[1] - span[0], 14, "#000000", 'opacity="0.15"')
 		if k.columns:
 			_column(b[0] + 4, 1.0, _fb(f) + 16, _fb(f - 1))
 			_column(b[1] - 11, -1.0, _fb(f) + 16, _fb(f - 1))
@@ -511,7 +733,8 @@ func _plex_front() -> void:
 				_iron_post(px, _fb(f) + slab_h + 8.0, _fb(f - 1))
 				_rect(px + 10.0, _fb(0) + slab_h, 5, ground_y - _fb(0) - slab_h - 30.0, "#9AA0A6", _stroke("#6E7277", 1))
 		else:
-			_balcony(b[0], b[1], _fb(f), [])
+			for span: Array in spans:
+				_balcony(span[0], span[1], _fb(f), [])
 	var p: Array = k.porch
 	if k.halloween:
 		_cobweb(p[0] + 4.0, _fb(1) + 16.0, 1.0)
@@ -538,6 +761,12 @@ func _plex_front() -> void:
 		_pumpkin(cx + 78, base_y + 2.0, 0.75, rng.randf() < 0.5)
 		_mums(cx + 96, ground_y)
 	var s: Array = k.stair
+	if s.is_empty():
+		# No outdoor stair (the upper flats go in by an inside one): only the front door's gap in the fence.
+		var inside := [[cx - 66, cx + 66]]
+		_garden(inside)
+		_fence(inside)
+		return
 	var p3 := Vector2(s[3].x, s[3].y + oy)
 	var p0 := Vector2(s[0].x, _fb(1) + 6.0)
 	if k.get("stair_kind", "curve") == "landing":
@@ -711,6 +940,13 @@ func _window(x: float, y: float, w: float, h: float) -> void:
 		_n(x + w * 0.55), _n(y + 8), _n(x + w * 0.55 + 16), _n(y + 8),
 		_n(x + 24), _n(y + h * 0.55), _n(x + 8), _n(y + h * 0.55)], "#FFFFFF", 'opacity="0.22"')
 	var ty := y + h * 0.34
+	if k.get("muntins", "") == "x" and y < _win_y(0) - 20.0:
+		var parts := PackedStringArray()
+		var cell := (w - 16.0) / 3.0
+		for i in 4:
+			var gx := x + 8.0 + i * cell
+			parts.append("M%s %s L%s %s M%s %s L%s %s" % [_n(gx), _n(y + 8), _n(gx + cell), _n(ty), _n(gx + cell), _n(y + 8), _n(gx), _n(ty)])
+		_path(" ".join(parts), "none", _stroke(k.trim, 3.5))
 	_rect(x + 4, ty - 3, w - 8, 6, k.trim)
 	_rect(x + w / 2 - 3, ty, 6, y + h - ty - 4, k.trim)
 	# Recess: the lintel and the left jamb shade the glass.
@@ -1443,6 +1679,12 @@ func _garden(gaps: Array) -> void:
 
 func _fence(gaps: Array) -> void:
 	if k.fence == "":
+		return
+	if k.fence == "wood":
+		_wood_fence(gaps)
+		return
+	if k.fence == "chain":
+		_chain_fence(gaps)
 		return
 	var light: bool = k.fence == "white"
 	var col := "#F5F5F2" if light else "#1F1F1F"
@@ -2997,6 +3239,649 @@ func _circle(x: float, y: float, r: float, fill: String, extra := "") -> void:
 
 func _path(d: String, fill: String, extra := "") -> void:
 	out.append('<path d="%s" fill="%s" %s/>' % [d, fill, extra])
+
+
+# ── Across 6e Avenue: the odd side, from Street View ─────────────────────────
+# The buildings facing Charlotte's block, 5601 to 5733 (reference/streetview/INDEX.md, "6e Avenue 5600–5800 (impairs)"), drawn as
+# docs/drawing-from-streetview.md says. What they share goes into options any plex can take (a mansard, a corbelled parapet, flat
+# aluminium canopies, striped canvas awnings, one balcony per flat, wooden and chain-link fences); the few that are like nothing
+# else on the street are kinds of their own (`_gables`, `_bungalow`, `_corner_yard`, `_lane_odd`).
+
+
+# A mansard front over the top floor (6e-avenue/5649…, 5653…, 5665…): a steep face of dark slate shingles from a white fascia
+# just over the windows up to its ridge, between two brick fire walls capped in stone that stand a little proud of it.
+func _mansard(top: float) -> void:
+	var slate: String = k.get("slate", "#4B4F57")
+	var slate_dark := "#" + Color(slate).darkened(0.38).to_html(false)
+	var slate_light := "#" + Color(slate).lightened(0.22).to_html(false)
+	var wall := 26.0
+	var ridge := top - 16.0
+	var eave := top + 54.0
+	var a := X0 + wall
+	var b := X1 - wall
+	# The face leans back, so it is a little narrower at the ridge; light from the upper left fades across it.
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(a), _n(eave), _n(a + 6), _n(ridge), _n(b - 6), _n(ridge), _n(b), _n(eave)], slate, _stroke(slate_dark, 2))
+	var y := ridge + 7.0
+	var row := 0
+	while y < eave - 3.0:
+		var lean := lerpf(6.0, 0.0, (y - ridge) / (eave - ridge))
+		_path("M%s %s H%s" % [_n(a + lean), _n(y), _n(b - lean)], "none", _stroke(slate_dark, 1.3))
+		_path("M%s %s H%s" % [_n(a + lean), _n(y - 1.5), _n(b - lean)], "none", _stroke(slate_light, 0.8) + ' opacity="0.45"')
+		var x := a + lean + (10.0 if row % 2 == 1 else 0.0)
+		while x < b - lean - 4.0:
+			_path("M%s %s v%s" % [_n(x), _n(y - 7.0), _n(7.0)], "none", _stroke(slate_dark, 1.0) + ' opacity="0.65"')
+			x += 20.0
+		y += 8.0
+		row += 1
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(a), _n(eave), _n(a + 6), _n(ridge), _n(b - 6), _n(ridge), _n(b), _n(eave)], "url(#sun)")
+	_rect(a + 4, ridge - 5, b - a - 8, 6, slate_light, _stroke(slate_dark, 1))
+	# The fascia at the eave, its gutter, the shade it throws on the bricks.
+	_rect(a - 6, eave, b - a + 12, 10, "#F4F2EC", _stroke("#B9B5AC", 1.5))
+	_rect(a - 6, eave + 10, b - a + 12, 4, "#C9C5BC")
+	_rect(a - 2, eave + 14, b - a + 4, 18, "url(#drop)")
+	# The two fire walls, brick, under a stone cap each.
+	for side: float in [X0, b]:
+		var y0 := ridge - 12.0
+		_rect(side, y0, wall, eave - y0 + 14.0, k.bricks[0])
+		var by := y0 + 4.0
+		while by < eave + 12.0:
+			_rect(side, by, wall, 1.5, k.mortar)
+			by += 13.0
+		_rect(side, y0, wall, eave - y0 + 14.0, "url(#shade)")
+		_rect(side - 3, y0 - 8, wall + 6, 9, k.lintel, _stroke(k.lintel_dark, 1.5))
+		_rect(side - 3, y0 - 8, wall + 6, 2, "#FFFFFF", 'opacity="0.35"')
+		_snow(side - 3, wall + 6, y0 - 8)
+	_snow(a + 4, b - a - 8, ridge - 5)
+	_snow(a - 6, b - a + 12, eave)
+
+
+# A corbelled brick parapet (6e-avenue/5661…, 5671…): two courses of brick dentils standing out under a stone coping, its middle
+# third raised a few courses under its own coping, a short pier at each end.
+func _corbel_parapet(top: float) -> void:
+	var brick: String = k.bricks[0]
+	var dark := "#" + Color(brick).darkened(0.25).to_html(false)
+	var mid0 := lerpf(X0, X1, 0.33)
+	var mid1 := lerpf(X0, X1, 0.67)
+	_rect(mid0, top - 22, mid1 - mid0, 24, brick)
+	_rect(mid0, top - 9, mid1 - mid0, 1.5, k.mortar)
+	for px: float in [X0 - 2.0, X1 - 26.0]:
+		_rect(px, top - 26, 28, 30, brick)
+		_rect(px, top - 13, 28, 1.5, k.mortar)
+	_rect(X0 - 4, top - 10, X1 - X0 + 8, 10, k.lintel, _stroke(k.lintel_dark, 1.5))
+	_rect(X0 - 4, top - 10, X1 - X0 + 8, 2, "#FFFFFF", 'opacity="0.35"')
+	_rect(mid0 - 6, top - 32, mid1 - mid0 + 12, 10, k.lintel, _stroke(k.lintel_dark, 1.5))
+	_rect(mid0 - 6, top - 32, mid1 - mid0 + 12, 2, "#FFFFFF", 'opacity="0.35"')
+	for px: float in [X0 - 2.0, X1 - 26.0]:
+		_rect(px - 3, top - 33, 34, 8, k.lintel, _stroke(k.lintel_dark, 1.5))
+	# The dentils: every other brick standing out, each with its shadow under it and to the right.
+	for course in 2:
+		var y := top + 16.0 + course * 13.0
+		var x := X0 + 4.0 + course * 9.0
+		while x < X1 - 12.0:
+			_rect(x + 2, y + 2, 12, 10, "#000000", 'opacity="0.22"')
+			_rect(x, y, 12, 10, dark if course == 0 else brick, _stroke(dark, 0.8))
+			_rect(x, y, 12, 2, "#FFFFFF", 'opacity="0.18"')
+			x += 18.0
+	_rect(X0, top + 44, X1 - X0, 5, dark)
+	_rect(X0, top + 49, X1 - X0, 12, "url(#drop)")
+	_snow(X0 - 4, X1 - X0 + 8, top - 10)
+	_snow(mid0 - 6, mid1 - mid0 + 12, top - 32)
+
+
+# The flat aluminium canopy over a top balcony (6e-avenue/5649…, 5661…, 5669…, 5677…): a white fascia on a ribbed soffit seen from
+# below, its shade on the wall, a thin bracket back to the wall at each end. It stands on no posts.
+func _alu_canopy(x0: float, x1: float, y: float) -> void:
+	var col: String = k.canopy
+	var dark := "#" + Color(col).darkened(0.32).to_html(false)
+	var under := "#" + Color(col).darkened(0.14).to_html(false)
+	var l := x0 - 26.0
+	var r := x1 + 26.0
+	var deep := 34.0
+	_rect(x0 - 6, y + 16 + deep, x1 - x0 + 12, 46, "url(#drop)")
+	_path("M%s %s H%s L%s %s H%s Z" % [_n(x0 - 6), _n(y + 16 + deep), _n(x1 + 6), _n(r), _n(y + 16), _n(l)], under, _stroke(dark, 1))
+	var x := l + 10.0
+	while x < r - 4.0:
+		var wx := lerpf(x0 - 6, x1 + 6, (x - l) / (r - l))
+		_path("M%s %s L%s %s" % [_n(x), _n(y + 16), _n(wx), _n(y + 16 + deep)], "none", _stroke(dark, 0.9) + ' opacity="0.5"')
+		x += 12.0
+	_path("M%s %s H%s L%s %s H%s Z" % [_n(x0 - 6), _n(y + 16 + deep), _n(x1 + 6), _n(r), _n(y + 16), _n(l)], "url(#drop)", 'opacity="0.6"')
+	_rect(l, y, r - l, 17, col, _stroke(dark, 1.5))
+	_rect(l, y, r - l, 4, "#FFFFFF", 'opacity="0.6"')
+	_rect(l, y + 13, r - l, 4, dark, 'opacity="0.45"')
+	for side: float in [-1.0, 1.0]:
+		var bx := x0 - 2.0 if side < 0.0 else x1 + 2.0
+		_path("M%s %s L%s %s" % [_n(bx), _n(y + 16 + deep + 52), _n(bx + side * 22.0), _n(y + 17)], "none", _stroke(k.metal, 3) + ' stroke-linecap="round"')
+	_snow(l, r - l, y)
+
+
+# A canvas awning in red and white stripes over a balcony door and window (6e-avenue/5623…, 5631…, 5635…): along the wall at the
+# top, sloping out and down to a scalloped valance, on two thin arms, its shade on the bricks under it.
+func _stripe_awning(x0: float, x1: float, y: float, colour := "") -> void:
+	var red: String = colour if colour != "" else k.get("stripe_color", "#C8343A")
+	var pale := "#F4F1EA"
+	var drop := 44.0
+	var reach := 14.0
+	_rect(x0 - 4, y + drop + 6, x1 - x0 + 8, 30, "url(#drop)")
+	var n := maxi(int((x1 - x0) / 15.0), 4)
+	for i in n:
+		var t0 := float(i) / n
+		var t1 := float(i + 1) / n
+		var a0 := lerpf(x0, x1, t0)
+		var a1 := lerpf(x0, x1, t1)
+		var b0 := lerpf(x0 - reach, x1 + reach, t0)
+		var b1 := lerpf(x0 - reach, x1 + reach, t1)
+		_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(a0), _n(y), _n(a1), _n(y), _n(b1), _n(y + drop), _n(b0), _n(y + drop)], red if i % 2 == 0 else pale)
+		# The scalloped valance hanging from its edge.
+		_path("M%s %s H%s V%s Q%s %s %s %s Z" % [_n(b0), _n(y + drop), _n(b1), _n(y + drop + 8), _n((b0 + b1) / 2.0), _n(y + drop + 16), _n(b0), _n(y + drop + 8)], red if i % 2 == 0 else pale)
+	# The canvas curves away from the light toward its edge.
+	_path("M%s %s H%s L%s %s H%s Z" % [_n(x0 - reach * 0.5), _n(y + drop * 0.5), _n(x1 + reach * 0.5), _n(x1 + reach), _n(y + drop), _n(x0 - reach)], "#000000", 'opacity="0.1"')
+	_path("M%s %s H%s" % [_n(x0), _n(y), _n(x1)], "none", _stroke("#" + Color(red).darkened(0.35).to_html(false), 3))
+	_path("M%s %s H%s" % [_n(x0 - reach), _n(y + drop), _n(x1 + reach)], "none", _stroke("#" + Color(red).darkened(0.35).to_html(false), 1.5))
+	for side: float in [-1.0, 1.0]:
+		var ax := x0 + 4.0 if side < 0.0 else x1 - 4.0
+		_path("M%s %s L%s %s" % [_n(ax), _n(y + drop + 30), _n(ax + side * reach), _n(y + drop)], "none", _stroke("#5E6266", 2))
+	_snow(x0, x1 - x0, y)
+
+
+# A low fence of wooden pickets, the wood left its own warm colour (6e-avenue/5615…, 5631…).
+func _wood_fence(gaps: Array) -> void:
+	var wood: String = k.get("fence_wood", "#C98A62")
+	var dark := "#" + Color(wood).darkened(0.3).to_html(false)
+	var top := ground_y - 44.0
+	for seg in _segments(X0, X1, gaps):
+		var a: float = seg[0]
+		var b: float = seg[1]
+		_rect(a, top + 10, b - a, 6, dark)
+		_rect(a, ground_y - 14, b - a, 6, dark)
+		var x := a + 4.0
+		var i := 0
+		while x < b - 8.0:
+			var h := 4.0 if i % 2 == 0 else 0.0
+			_path("M%s %s V%s L%s %s L%s %s V%s Z" % [_n(x), _n(ground_y - 2), _n(top + 4 - h), _n(x + 5), _n(top - 2 - h), _n(x + 10), _n(top + 4 - h), _n(ground_y - 2)], wood, _stroke(dark, 1))
+			_rect(x + 1, top + 2 - h, 2.5, ground_y - top - 6 + h, "#FFFFFF", 'opacity="0.22"')
+			x += 15.0
+			i += 1
+		_snow(a, b - a, top - 2)
+
+
+# A chain-link fence on galvanised posts (6e-avenue/5601…, 5605…, 5617…): the mesh in two crossing sets of fine wires, a top rail.
+func _chain_fence(gaps: Array) -> void:
+	var top := ground_y - 58.0
+	var wire := _stroke("#B9BDC1", 1.1) + ' opacity="0.75"'
+	for seg in _segments(X0, X1, gaps):
+		var a: float = seg[0]
+		var b: float = seg[1]
+		var parts := PackedStringArray()
+		var x := a - (ground_y - top)
+		while x < b:
+			# One wire down to the right and one down to the left from every point along the top, clipped to the panel.
+			var x0 := maxf(x, a)
+			var y0 := top + (x0 - x)
+			var x1 := minf(x + (ground_y - top), b)
+			var y1 := top + (x1 - x)
+			if x1 > x0:
+				parts.append("M%s %s L%s %s" % [_n(x0), _n(y0), _n(x1), _n(y1)])
+			var u0 := maxf(x, a)
+			var v0 := ground_y - (u0 - x)
+			var u1 := minf(x + (ground_y - top), b)
+			var v1 := ground_y - (u1 - x)
+			if u1 > u0:
+				parts.append("M%s %s L%s %s" % [_n(u0), _n(v0), _n(u1), _n(v1)])
+			x += 9.0
+		_path(" ".join(parts), "none", wire)
+		_rect(a, top - 2, b - a, 4, "#A9AEB3", _stroke("#7E8388", 0.8))
+		var px := a
+		while px <= b:
+			_rect(px - 2.5, top - 6, 5, ground_y - top + 6, "#A9AEB3", _stroke("#7E8388", 0.8))
+			_rect(px - 4, top - 9, 8, 4, "#8E9398")
+			px += maxf((b - a) / maxf(roundf((b - a) / 120.0), 1.0), 40.0)
+		_snow(a, b - a, top - 2)
+
+
+# A hydrangea bush: leaves, and big round heads of flowers, white in summer, gone pink and papery in autumn, bare and snowy in
+# winter. The same random draws in every season.
+func _hydrangea(x: float, r: float) -> void:
+	_shrub(x, r, "#5E8A3A")
+	var heads: Array = {"spring": [], "summer": ["#F4F3EE", "#E9EEF2", "#F7F1E6"], "autumn": ["#D9B5A0", "#E3C6B2", "#C99C8A", "#E8D5C0"], "winter": []}[season]
+	for i in 4:
+		var hx := x + rng.randf_range(-r * 0.7, r * 0.7)
+		var hy := ground_y - r * rng.randf_range(0.7, 1.35)
+		var hr := r * rng.randf_range(0.28, 0.4)
+		if heads.is_empty():
+			continue
+		var c: String = heads[i % heads.size()]
+		_circle(hx + 2, hy + 2, hr, "#000000", 'opacity="0.15"')
+		_circle(hx, hy, hr, c)
+		for j in 6:
+			var a := TAU * j / 6.0
+			_circle(hx + cos(a) * hr * 0.5, hy + sin(a) * hr * 0.5, hr * 0.32, "#" + Color(c).darkened(0.08).to_html(false), 'opacity="0.6"')
+		_circle(hx - hr * 0.3, hy - hr * 0.3, hr * 0.35, "#FFFFFF", 'opacity="0.35"')
+
+
+# A glass balcony rail: clear panels with the sky in them between thin black posts, a black cap rail (6e-avenue/5725…, 5729…).
+func _glass_rail(x0: float, x1: float, floor_y: float) -> void:
+	var top := floor_y - 52.0
+	_rect(x0 - 6, floor_y, x1 - x0 + 12, 14, k.slab, _stroke(k.slab_dark, 1.5))
+	_rect(x0 - 2, floor_y + 14, x1 - x0 + 4, 26, "url(#drop)")
+	_rect(x0, top, x1 - x0, floor_y - top, "#CFE4EC", 'opacity="0.35"')
+	var x := x0
+	while x < x1 - 2.0:
+		_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(x + 10), _n(top + 4), _n(x + 22), _n(top + 4), _n(x + 8), _n(floor_y - 4), _n(x - 4), _n(floor_y - 4)], "#FFFFFF", 'opacity="0.25"')
+		x += 44.0
+	var px := x0
+	while px <= x1 + 0.5:
+		_rect(px - 1.5, top, 3, floor_y - top, "#1F1F1F")
+		px += maxf((x1 - x0) / maxf(roundf((x1 - x0) / 90.0), 1.0), 30.0)
+	_rect(x0 - 2, top - 3, x1 - x0 + 4, 4, "#1F1F1F")
+	_snow(x0 - 6, x1 - x0 + 12, floor_y - 2)
+
+
+# 5601–5609, at the Dandurand corner (6e-avenue/5601…, 5605…, 5609… and their close-ups): a block of the 1990s in salmon brick,
+# three floors and a half. Two bays faced in tan siding come forward under their own gables; between them the way in: a gabled
+# porch on two thin posts over a landing a few steps up, two white doors side by side, a black railing and its stair down to the
+# left; small white windows high in the brick. A chain-link fence along the sidewalk, hydrangeas behind it.
+func _gables() -> void:
+	var top := _top()
+	_bricks(top, base_y)
+	_wall_shading(top)
+	_foundation()
+	_flat_parapet(top)
+	var cx: float = k.door_cx
+	var siding: String = k.get("siding", "#B9875A")
+	var siding_dark := "#" + Color(siding).darkened(0.3).to_html(false)
+	var trim := "#3E4146"
+	var eave := 420.0
+	var peak := 330.0
+	# Small white windows high in the brick, and narrow ones each side of the porch (the photos).
+	for w: Array in [[cx - 34.0, 96.0, 68.0, 92.0], [cx - 40.0, 300.0, 80.0, 150.0], [500.0, 300.0, 56.0, 150.0],
+			[k.width - 556.0, 300.0, 56.0, 150.0], [512.0, 560.0, 56.0, 140.0], [k.width - 568.0, 560.0, 56.0, 140.0],
+			[244.0, 180.0, 62.0, 92.0], [k.width - 306.0, 180.0, 62.0, 92.0]]:
+		_casement(w[0], w[1], w[2], w[3])
+	# The two bays.
+	for bay: Array in [[110.0, 440.0], [k.width - 440.0, k.width - 110.0]]:
+		var a: float = bay[0]
+		var b: float = bay[1]
+		var mid := (a + b) / 2.0
+		var bottom := _fb(0) - 6.0
+		_rect(a + 10, eave, b - a, bottom - eave + 10, "#000000", 'opacity="0.18"')
+		_rect(a, eave, b - a, bottom - eave, siding)
+		var y := eave + 12.0
+		while y < bottom:
+			_rect(a, y, b - a, 1.6, siding_dark, 'opacity="0.55"')
+			_rect(a, y + 1.6, b - a, 1.2, "#FFFFFF", 'opacity="0.12"')
+			y += 13.0
+		_rect(a, eave, b - a, bottom - eave, "url(#sun)")
+		_rect(b - 6, eave, 6, bottom - eave, "#000000", 'opacity="0.15"')
+		# Its gable: the same siding, a dark fascia, the eaves turning back at the ends.
+		_path("M%s %s L%s %s L%s %s Z" % [_n(a), _n(eave), _n(mid), _n(peak), _n(b), _n(eave)], siding)
+		var gy := eave - 12.0
+		while gy > peak + 6.0:
+			var half := (b - a) / 2.0 * (gy - peak) / (eave - peak)
+			_rect(mid - half, gy, half * 2.0, 1.6, siding_dark, 'opacity="0.55"')
+			gy -= 13.0
+		_path("M%s %s L%s %s L%s %s" % [_n(a - 18), _n(eave + 8), _n(mid), _n(peak - 10), _n(b + 18), _n(eave + 8)], "none", _stroke(trim, 9) + ' stroke-linejoin="miter"')
+		_path("M%s %s L%s %s L%s %s" % [_n(a - 18), _n(eave + 15), _n(mid), _n(peak - 3), _n(b + 18), _n(eave + 15)], "none", _stroke("#F2F0EA", 3) + ' opacity="0.8"')
+		for e: float in [a - 18.0, b - 4.0]:
+			_rect(e, eave + 8, 22, 8, trim)
+		_snow(a - 18, mid - a + 18, peak - 14)
+		# Its two windows, one over the other.
+		_casement(mid - 72, 470.0, 144, 150)
+		_casement(mid - 72, 676.0, 144, 150)
+		_rect(a, bottom, b - a, 8, "#8E8A82")
+	split = out.size()
+	# The porch: landing a few steps up, its roof on two thin posts, the doors under it.
+	var land := _fb(0)
+	var l0 := cx - 150.0
+	var l1 := cx + 150.0
+	var roof := land - 250.0
+	var rpeak := roof - 92.0
+	for dx: float in [-48.0, 48.0]:
+		_rect(cx + dx - 40, land - 196, 80, 196, "#E9E6DF", _stroke("#B9B5AC", 2))
+		_rect(cx + dx - 34, land - 190, 68, 190, "#F7F5F0", _stroke("#C9C5BC", 1.5))
+		_rect(cx + dx - 24, land - 172, 48, 54, "url(#glass)", _stroke("#B9B5AC", 1.5))
+		_raised(cx + dx - 24, land - 104, 48, 84)
+		_circle(cx + dx + (24.0 if dx < 0.0 else -24.0), land - 98, 3, "#C9C5BC")
+	_door_lamps(cx, land - 196, 160)
+	_rect(l0 - 6, roof + 2, l1 - l0 + 12, 22, "#3A2E28")
+	for px: float in [l0 + 4.0, l1 - 10.0]:
+		_rect(px, roof + 14, 6, land - roof - 14, "#2B2B2E")
+	_path("M%s %s L%s %s L%s %s Z" % [_n(l0 + 4), _n(roof + 4), _n(cx), _n(rpeak + 12), _n(l1 - 4), _n(roof + 4)], "#ECE7DC")
+	var gy2 := roof - 4.0
+	while gy2 > rpeak + 16.0:
+		var half2 := (l1 - l0 - 8.0) / 2.0 * (gy2 - rpeak - 12.0) / (roof - rpeak - 8.0)
+		_rect(cx - half2, gy2, half2 * 2.0, 1.4, "#C9C1B0")
+		gy2 -= 11.0
+	_path("M%s %s L%s %s L%s %s" % [_n(l0 - 14), _n(roof + 10), _n(cx), _n(rpeak), _n(l1 + 14), _n(roof + 10)], "none", _stroke(trim, 9))
+	_circle(cx, roof + 12, 4, "#FFE9A8")
+	_snow(l0 - 14, cx - l0 + 14, rpeak - 4)
+	# The landing, its railing, and the stair down to the left.
+	_rect(l0 - 6, land, l1 - l0 + 12, 14, "#8E8A82", _stroke("#6E6A62", 1.5))
+	_balcony(l0, l1, land, [[l0 - 8.0, l0 + 44.0]])
+	_stairs(Vector2(l0 + 18, land + 6), Vector2(l0 - 20, land + 36), Vector2(l0 - 60, land + 66), Vector2(l0 - 100, ground_y))
+	# Hydrangeas and the chain-link fence along the sidewalk.
+	for hx: float in [80.0, 200.0, 340.0, 470.0, cx + 200.0, cx + 330.0, k.width - 300.0, k.width - 150.0]:
+		_hydrangea(hx, rng.randf_range(28.0, 40.0))
+	_chain_fence([[l0 - 140.0, l0 - 60.0]])
+	if k.halloween:
+		_pumpkin(cx - 60, land, 0.9, true)
+		_pumpkin(cx + 70, land, 0.7, false)
+
+
+# A white casement window in a plain opening: two tall sashes and a stone sill (the 1990s blocks and the renovated plexes).
+func _casement(x: float, y: float, w: float, h: float) -> void:
+	var frame: String = k.get("frame", "#F7F5F0")
+	_rect(x - 3, y - 3, w + 6, h + 6, "#000000", 'opacity="0.25"')
+	_rect(x, y, w, h, frame)
+	var lit := rng.randf() < 0.2
+	var half := (w - 18.0) / 2.0
+	for i in 2:
+		var gx := x + 6.0 + i * (half + 6.0)
+		_rect(gx, y + 6, half, h - 12, "url(#warm)" if lit else "url(#glass)")
+		_path("M%s %s l%s 0 l%s %s l%s 0 z" % [_n(gx + half * 0.55), _n(y + 6), _n(half * 0.25), _n(-half * 0.45), _n((h - 12) * 0.5), _n(-half * 0.25)], "#FFFFFF", 'opacity="0.22"')
+		_rect(gx, y + 6, half, 8, "url(#drop)")
+	if season == "autumn" and not night:
+		if not windows.has(k.name):
+			windows[k.name] = []
+		windows[k.name].append({"pane": [x + 6, y + 6, w - 12, h - 12], "bar_y": y + h * 0.5, "trim": frame, "lit": lit, "flower_box": false})
+	_rect(x - 8, y + h + 2, w + 16, 8, k.lintel, _stroke(k.lintel_dark, 1))
+	_rect(x - 4, y + h + 10, w + 8, 4, "#000000", 'opacity="0.15"')
+	_snow(x - 8, w + 16, y + h + 2)
+
+
+# 5637, the little one-storey house between the plexes (6e-avenue/5635…, 5647…): white siding under a flat roof, a white door in
+# the middle under a small aluminium awning, a window each side, a narrow black iron fence along the sidewalk with its gate.
+func _bungalow() -> void:
+	var top := 404.0
+	var cx: float = k.door_cx
+	var siding: String = k.get("siding", "#F1EFE9")
+	_rect(X0, top, X1 - X0, base_y - top, siding)
+	var y := top + 14.0
+	while y < base_y:
+		_rect(X0, y, X1 - X0, 1.6, "#C9C5BC")
+		_rect(X0, y + 1.6, X1 - X0, 1, "#FFFFFF", 'opacity="0.5"')
+		y += 14.0
+	_wall_shading(top)
+	_rect(X0 - 10, top - 18, X1 - X0 + 20, 18, "#ECEAE4", _stroke("#B9B5AC", 1.5))
+	_rect(X0 - 10, top - 23, X1 - X0 + 20, 5, "#9AA0A6")
+	_rect(X0, top, X1 - X0, 12, "url(#drop)")
+	for cap_x: float in [X0 - 10.0, X1 + 4.0]:
+		_rect(cap_x, top - 18, 6, base_y - top + 18, "#E4E1DA", _stroke("#B9B5AC", 1))
+	_snow(X0 - 10, X1 - X0 + 20, top - 23)
+	_foundation()
+	for w in k.windows:
+		_window(w[0], 446.0, w[1], 126.0)
+	var dw := 82.0
+	_rect(cx - dw / 2 - 6, 452, dw + 12, _fb(0) - 452, "#D9D6CE", _stroke("#B9B5AC", 1.5))
+	_door_leaf(k.get("door_style", "slots"), Rect2(cx - dw / 2, 458, dw, _fb(0) - 458))
+	_stripe_awning(cx - 64, cx + 64, 404.0)
+	_door_lamps(cx, 458, dw)
+	_door_wreath(cx, 458, 518)
+	split = out.size()
+	_rect(cx - 62, _fb(0), 124, 14, k.step, _stroke(k.step_dark, 1.5))
+	_front_steps(cx)
+	var gaps := [[cx - 66, cx + 66]]
+	_garden(gaps)
+	_fence(gaps)
+	if k.halloween:
+		_pumpkin(cx - 52, _fb(0), 0.9, true)
+
+
+# The corner of 6e and Holt across the street (6e-avenue/5721…5733 and their close-ups): a two-storey house in red brick on a base
+# painted terracotta, at the corner, and beside it its big yard. Along the sidewalk a low terracotta wall: in front of the house a
+# white picket fence between brick piers, then a wooden gate between two piers with a black lantern on each, then a tall fence of
+# red-stained boards with a lattice along its top, the yard's big old tree rising behind it. Cedars by the corner.
+func _corner_yard() -> void:
+	var house := 620.0
+	var top := 170.0
+	var keep := X1
+	X1 = house
+	_bricks(top, base_y)
+	_wall_shading(top)
+	_flat_parapet(top)
+	X1 = keep
+	# The terracotta base all along the house.
+	_rect(X0, base_y - 46, house - X0, ground_y - base_y + 46, "#B8553C", _stroke("#8E3F2C", 1.5))
+	_rect(X0, base_y - 46, house - X0, 4, "#D27A5E")
+	for w: Array in [[70.0, 120.0], [250.0, 120.0]]:
+		_casement(w[0], 214.0, w[1], 140.0)
+		_casement(w[0], 432.0, w[1], 140.0)
+	# The way in at the right of the house: a door under a flat white canopy, a balcony with a glass rail over it.
+	var dx := 500.0
+	_rect(dx - 52, 408, 104, _fb(0) - 408, "#2B2B2E")
+	_door_leaf("slit", Rect2(dx - 44, 416, 88, _fb(0) - 416))
+	_rect(dx - 70, 392, 140, 12, "#F2F0EA", _stroke("#B9B5AC", 1.5))
+	_rect(dx - 66, 404, 132, 14, "url(#drop)")
+	_casement(dx - 50, 214, 100, 150)
+	_glass_rail(house - 220, house - 6, 372.0)
+	_door_wreath(dx, 416, 476)
+	split = out.size()
+	# Cedars by the corner, evergreen, snow on them in winter.
+	for c: Array in [[58.0, 300.0], [104.0, 330.0]]:
+		_cedar(c[0], c[1])
+	for s: Array in [[150.0, 30.0], [262.0, 26.0], [372.0, 32.0], [560.0, 28.0]]:
+		_shrub(s[0], s[1], _bush(_pick(AUTUMN_BUSHES)))
+	# The yard's tree, behind the fence.
+	rng.seed = hash(k.name) + 7
+	# Kept inside the drawing: its crown stops short of the lane, which is drawn as a picture of its own.
+	_fine_tree(Vector2(830, ground_y - 60), 360.0, -PI * 0.55, 1.4, ["#E3A33A", "#D9A23A", "#C9562E", "#E8B54A", "#D9682B"])
+	# The low terracotta wall along the sidewalk.
+	_rect(X0, ground_y - 46, X1 - X0, 46, "#B8553C", _stroke("#8E3F2C", 1.5))
+	_rect(X0, ground_y - 46, X1 - X0, 4, "#D27A5E")
+	_snow(X0, X1 - X0, ground_y - 46)
+	var piers := [X0, 220.0, 420.0, 610.0, 700.0]
+	# White pickets in front of the house, between the piers.
+	for i in 3:
+		var a: float = piers[i] + 30.0
+		var b: float = piers[i + 1]
+		_rect(a, ground_y - 86, b - a, 5, "#F4F2EC", _stroke("#B9B5AC", 0.8))
+		_rect(a, ground_y - 62, b - a, 5, "#F4F2EC", _stroke("#B9B5AC", 0.8))
+		var x := a + 4.0
+		while x < b - 8.0:
+			_path("M%s %s V%s L%s %s L%s %s V%s Z" % [_n(x), _n(ground_y - 46), _n(ground_y - 92), _n(x + 4.5), _n(ground_y - 100), _n(x + 9), _n(ground_y - 92), _n(ground_y - 46)], "#F7F5F0", _stroke("#B9B5AC", 0.8))
+			x += 15.0
+		_snow(a, b - a, ground_y - 86)
+	# The wooden gate, its arched top, between the last two piers.
+	var g0: float = piers[3] + 30.0
+	var g1: float = piers[4]
+	_path("M%s %s V%s Q%s %s %s %s V%s Z" % [_n(g0), _n(ground_y - 4), _n(ground_y - 140), _n((g0 + g1) / 2.0), _n(ground_y - 162), _n(g1), _n(ground_y - 140), _n(ground_y - 4)], "#9A4A34", _stroke("#6A3022", 1.5))
+	var bx := g0 + 6.0
+	while bx < g1 - 4.0:
+		_rect(bx, ground_y - 150, 1.5, 146, "#6A3022", 'opacity="0.6"')
+		bx += 10.0
+	_rect(g0, ground_y - 96, g1 - g0, 6, "#6A3022")
+	# The tall board fence in front of the yard, a lattice along its top, posts every so often.
+	var f0: float = piers[4] + 30.0
+	var ftop := ground_y - 196.0
+	_rect(f0, ftop + 30, X1 - f0, ground_y - 46 - ftop - 30, "#9A4A34")
+	var x2 := f0
+	while x2 < X1:
+		_rect(x2, ftop + 30, 1.6, ground_y - 46 - ftop - 30, "#6A3022", 'opacity="0.55"')
+		_rect(x2 + 2, ftop + 30, 2, ground_y - 46 - ftop - 30, "#C2664A", 'opacity="0.35"')
+		x2 += 13.0
+	_rect(f0, ftop + 24, X1 - f0, 6, "#6A3022")
+	_rect(f0, ftop, X1 - f0, 24, "#9A4A34", 'opacity="0.35"')
+	var parts := PackedStringArray()
+	var lx := f0 - 24.0
+	while lx < X1:
+		parts.append("M%s %s L%s %s M%s %s L%s %s" % [_n(maxf(lx, f0)), _n(ftop + 24 - (maxf(lx, f0) - lx)), _n(minf(lx + 24, X1)), _n(ftop + 24 - (minf(lx + 24, X1) - lx)),
+			_n(maxf(lx, f0)), _n(ftop + (maxf(lx, f0) - lx)), _n(minf(lx + 24, X1)), _n(ftop + (minf(lx + 24, X1) - lx))])
+		lx += 12.0
+	_path(" ".join(parts), "none", _stroke("#9A4A34", 3))
+	_rect(f0, ftop - 4, X1 - f0, 6, "#7E3A28")
+	var px := f0
+	while px < X1:
+		_rect(px, ftop - 10, 10, ground_y - 46 - ftop + 10, "#7E3A28")
+		px += 150.0
+	_snow(f0, X1 - f0, ftop - 4)
+	# The piers last, over the panels, each brick with a stone cap; a lantern on the two by the gate.
+	for i in piers.size():
+		var p: float = piers[i]
+		_rect(p, ground_y - 120, 30, 120, k.bricks[1])
+		var py := ground_y - 116.0
+		while py < ground_y:
+			_rect(p, py, 30, 1.5, k.mortar)
+			py += 13.0
+		_rect(p, ground_y - 120, 30, 120, "url(#shade)")
+		_rect(p - 4, ground_y - 128, 38, 9, "#D9D4C8", _stroke("#A39D93", 1))
+		_snow(p - 4, 38, ground_y - 128)
+		if i >= 3:
+			_lantern_post(p + 15.0, ground_y - 128.0)
+
+
+# A narrow evergreen (a cedar hedge tree): a tall rounded cone of dark sprays, the sun on its left, snow on it in winter.
+func _cedar(x: float, top: float) -> void:
+	var bottom := ground_y - 40.0
+	var w := 46.0
+	_path("M%s %s Q%s %s %s %s Q%s %s %s %s Z" % [_n(x - w / 2), _n(bottom), _n(x - w * 0.6), _n(top + 60), _n(x), _n(top), _n(x + w * 0.6), _n(top + 60), _n(x + w / 2), _n(bottom)], "#2F4E2C")
+	for i in 40:
+		var t := rng.randf()
+		var y := lerpf(top + 10.0, bottom - 6.0, t)
+		var half := w * 0.5 * clampf(sqrt(t) * 1.15, 0.2, 1.0)
+		var sx := x + rng.randf_range(-half, half)
+		var c := "#4E7A3E" if sx < x else "#3A5E34"
+		_path("M%s %s q%s %s %s %s" % [_n(sx), _n(y), _n(-6), _n(-4), _n(-10), _n(4)], "none", _stroke(c, 3) + ' stroke-linecap="round"')
+	if season == "winter":
+		for i in 6:
+			var y := lerpf(top + 20.0, bottom - 20.0, i / 5.0)
+			out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="5" fill="#F7F9FB"/>' % [_n(x - 4), _n(y), _n(w * 0.25 * clampf(float(i + 1) / 5.0, 0.3, 1.0))])
+
+
+# A black lantern on top of a gate pier.
+func _lantern_post(x: float, y: float) -> void:
+	_circle(x, y - 22, 18, "url(#glow)")
+	_rect(x - 8, y - 4, 16, 4, "#1A1A1A")
+	_rect(x - 7, y - 32, 14, 28, "#ECE7DA", _stroke("#1A1A1A", 2))
+	_path("M%s %s h14 v28 h-14 z M%s %s v28" % [_n(x - 7), _n(y - 32), _n(x), _n(y - 32)], "none", _stroke("#1A1A1A", 1.5))
+	_path("M%s %s l9 -9 l9 9 z" % [_n(x - 9), _n(y - 32)], "#1A1A1A")
+
+
+# The lane entrances across 6e Avenue (k.lane_style). "holt", near Holt (6e-avenue/5713…, 5717…): wide and gravelled, the corner
+# yard's red board fence on its terracotta wall running in along its left, the beige brick side of 5713 on its right, a yellow
+# diamond sign for the children on a pole. "dandurand", near Dandurand (6e-avenue/5609…, 5617…): asphalt, the dark brick side of
+# 5615 on its left, a chain-link fence on its right with 5601's salmon brick beyond, the one-way sign on its pole.
+func _lane_odd() -> void:
+	var holt: bool = k.get("lane_style", "holt") == "holt"
+	var cx: float = k.width / 2.0
+	var vp := Vector2(cx + (14.0 if holt else -10.0), 470.0)
+	var far := 0.7
+	var at := func(p: Vector2, d: float) -> Vector2: return vp + (p - vp) * (1.0 - d)
+	var poly := func(pts: Array, fill: String, extra := "") -> void:
+		var parts := PackedStringArray()
+		for i in pts.size():
+			parts.append("%s%s %s" % ["M" if i == 0 else "L", _n(pts[i].x), _n(pts[i].y)])
+		_path(" ".join(parts) + " Z", fill, extra)
+	var gl := Vector2(X0, ground_y)
+	var gr := Vector2(X1, ground_y)
+	_lane_through(vp, 1.0 - far)
+	var r := RandomNumberGenerator.new()
+	r.seed = hash(k.name) + 3
+	if holt:
+		# Pale gravel, two darker ruts worn in it, pebbles thickest near the mouth.
+		poly.call([gl, gr, at.call(gr, far), at.call(gl, far)], "#E6EBEE" if season == "winter" else "#CDBFA2")
+		for side: float in [-1.0, 1.0]:
+			var a0: Vector2 = at.call(Vector2(cx + side * 120.0, ground_y), 0.0)
+			var a1: Vector2 = at.call(Vector2(cx + side * 120.0, ground_y), far)
+			_path("M%s %s L%s %s" % [_n(a0.x), _n(a0.y), _n(a1.x), _n(a1.y)], "none", _stroke("#B3A486", 26) + ' opacity="0.5"')
+		for i in 260:
+			var d := pow(r.randf(), 1.8) * far
+			var p: Vector2 = at.call(Vector2(lerpf(X0, X1, r.randf()), ground_y), d)
+			var s: float = 2.6 * (1.0 - d)
+			if season != "winter":
+				_circle(p.x, p.y - s, s, ["#B8A98C", "#DDD2BA", "#A39477", "#E8DFCC"][i % 4])
+	else:
+		poly.call([gl, gr, at.call(gr, far), at.call(gl, far)], "#E6EBEE" if season == "winter" else "#77777A")
+		for i in 4:
+			var d := r.randf_range(0.05, far * 0.85)
+			var p: Vector2 = at.call(Vector2(lerpf(X0 + 30.0, X1 - 30.0, r.randf()), ground_y), d)
+			var w: float = r.randf_range(50.0, 110.0) * (1.0 - d)
+			_rect(p.x - w / 2.0, p.y - w * 0.12, w, w * 0.24, "#8A8A8C" if season != "winter" else "#F2F4F6", 'opacity="0.6"')
+		_lane_ground_detail(vp, far)
+	# The left side.
+	if holt:
+		var base_top := ground_y - 46.0
+		var ftop := ground_y - 196.0
+		poly.call([Vector2(X0, base_top), at.call(Vector2(X0, base_top), far), at.call(gl, far), gl], "#B8553C")
+		poly.call([Vector2(X0, ftop), at.call(Vector2(X0, ftop), far), at.call(Vector2(X0, base_top), far), Vector2(X0, base_top)], "#9A4A34")
+		for i in 26:
+			var d := far * i / 26.0
+			var a: Vector2 = at.call(Vector2(X0, ftop + 30.0), d)
+			var b: Vector2 = at.call(Vector2(X0, base_top), d)
+			_path("M%s %s L%s %s" % [_n(a.x), _n(a.y), _n(b.x), _n(b.y)], "none", _stroke("#6A3022", maxf(1.6 * (1.0 - d), 0.5)) + ' opacity="0.55"')
+		var l0: Vector2 = at.call(Vector2(X0, ftop + 24.0), 0.0)
+		var l1: Vector2 = at.call(Vector2(X0, ftop + 24.0), far)
+		_path("M%s %s L%s %s" % [_n(l0.x), _n(l0.y), _n(l1.x), _n(l1.y)], "none", _stroke("#6A3022", 5))
+		var c0: Vector2 = at.call(Vector2(X0, ftop - 2.0), 0.0)
+		var c1: Vector2 = at.call(Vector2(X0, ftop - 2.0), far)
+		_path("M%s %s L%s %s" % [_n(c0.x), _n(c0.y), _n(c1.x), _n(c1.y)], "none", _stroke("#7E3A28", 6))
+	else:
+		var wtop := 70.0
+		poly.call([Vector2(X0, wtop), at.call(Vector2(X0, wtop), far), at.call(gl, far), gl], "#6E3A2E")
+		var y := wtop + 10.0
+		while y < ground_y - 6.0:
+			var a := Vector2(X0, y)
+			var b: Vector2 = at.call(a, far)
+			_path("M%s %s L%s %s" % [_n(a.x), _n(a.y), _n(b.x), _n(b.y)], "none", _stroke("#4E2A22", 0.8) + ' opacity="0.55"')
+			y += 11.0
+		poly.call([Vector2(X0, ground_y - 54), at.call(Vector2(X0, ground_y - 54), far), at.call(gl, far), gl], "#A8A49C")
+	# The right side.
+	if holt:
+		var wtop := 300.0
+		poly.call([Vector2(X1, wtop), at.call(Vector2(X1, wtop), far), at.call(gr, far), gr], "#D6C6A6")
+		var y := wtop + 10.0
+		while y < ground_y - 6.0:
+			var a := Vector2(X1, y)
+			var b: Vector2 = at.call(a, far)
+			_path("M%s %s L%s %s" % [_n(a.x), _n(a.y), _n(b.x), _n(b.y)], "none", _stroke("#B3A07E", 0.8) + ' opacity="0.6"')
+			y += 11.0
+		poly.call([Vector2(X1, ground_y - 40), at.call(Vector2(X1, ground_y - 40), far), at.call(gr, far), gr], "#A8A49C")
+		_lane_wall_detail(vp, far, 0.9, 0.12)
+	else:
+		poly.call([Vector2(X1, 120.0), at.call(Vector2(X1, 120.0), far), at.call(gr, far), gr], "#C08A68")
+		var y := 130.0
+		while y < ground_y - 6.0:
+			var a := Vector2(X1, y)
+			var b: Vector2 = at.call(a, far)
+			_path("M%s %s L%s %s" % [_n(a.x), _n(a.y), _n(b.x), _n(b.y)], "none", _stroke("#9C6A4E", 0.8) + ' opacity="0.55"')
+			y += 11.0
+		_lane_wall_detail(vp, far, 0.14, 0.3)
+		# The chain-link fence in front of 5601's side yard, coming out to the sidewalk.
+		var ftop := ground_y - 64.0
+		var parts := PackedStringArray()
+		for i in 30:
+			var d0 := far * 0.5 * i / 30.0
+			var d1 := far * 0.5 * (i + 1) / 30.0
+			var a: Vector2 = at.call(Vector2(X1 - 30.0, ftop), d0)
+			var b: Vector2 = at.call(Vector2(X1 - 30.0, ground_y), d1)
+			var c: Vector2 = at.call(Vector2(X1 - 30.0, ground_y), d0)
+			var e: Vector2 = at.call(Vector2(X1 - 30.0, ftop), d1)
+			parts.append("M%s %s L%s %s M%s %s L%s %s" % [_n(a.x), _n(a.y), _n(b.x), _n(b.y), _n(c.x), _n(c.y), _n(e.x), _n(e.y)])
+		_path(" ".join(parts), "none", _stroke("#B9BDC1", 0.9) + ' opacity="0.7"')
+		for d: float in [0.0, 0.12, 0.24, 0.35]:
+			var a: Vector2 = at.call(Vector2(X1 - 30.0, ftop - 4.0), d)
+			var b: Vector2 = at.call(Vector2(X1 - 30.0, ground_y), d)
+			_path("M%s %s L%s %s" % [_n(a.x), _n(a.y), _n(b.x), _n(b.y)], "none", _stroke("#A9AEB3", maxf(5.0 * (1.0 - d), 1.5)))
+		var t0: Vector2 = at.call(Vector2(X1 - 30.0, ftop), 0.0)
+		var t1: Vector2 = at.call(Vector2(X1 - 30.0, ftop), 0.35)
+		_path("M%s %s L%s %s" % [_n(t0.x), _n(t0.y), _n(t1.x), _n(t1.y)], "none", _stroke("#A9AEB3", 3.5))
+	_lane_air_detail(vp, far)
+	# The signs at the mouth.
+	if holt:
+		var px := X0 + 70.0
+		_rect(px - 2.5, ground_y - 250, 5, 248, "#2B2B2E")
+		var sc := Vector2(px, ground_y - 268)
+		_path("M%s %s l26 26 l-26 26 l-26 -26 z" % [_n(sc.x), _n(sc.y - 26)], "#F2C230", _stroke("#1E1E1E", 2.5))
+		_path("M%s %s l26 26 l-26 26 l-26 -26 z" % [_n(sc.x), _n(sc.y - 26)], "none", _stroke("#F2C230", 1) + ' transform="translate(0 0)"')
+		for kid: float in [-7.0, 7.0]:
+			_circle(sc.x + kid, sc.y - 8, 3.2, "#1E1E1E")
+			_path("M%s %s v12 m-5 -8 h10 m-8 18 l3 -10 l3 10" % [_n(sc.x + kid), _n(sc.y - 4)], "none", _stroke("#1E1E1E", 2.2) + ' stroke-linecap="round"')
+		rng.seed = hash(k.name) + 11
+		_fine_tree(Vector2(X0 - 90, ground_y - 120), 260.0, -PI * 0.3, 1.0, ["#E3A33A", "#D9A23A", "#C9562E", "#E8B54A"])
+	else:
+		var px := X1 - 64.0
+		_rect(px - 3, ground_y - 260, 6, 258, "#8E9399")
+		out.append('<ellipse cx="%s" cy="%s" rx="7" ry="2.5" fill="#000000" opacity="0.25"/>' % [_n(px + 2), _n(ground_y - 3)])
+		_rect(px - 44, ground_y - 282, 88, 28, "#1E1E1E", 'rx="2"')
+		_path("M%s %s h-60 m12 -9 l-12 9 l12 9" % [_n(px + 32), _n(ground_y - 268)], "none", _stroke("#FFFFFF", 5) + ' stroke-linecap="round" stroke-linejoin="round"')
 
 
 # ── What every lane entrance seen from the street gets ───────────────────────

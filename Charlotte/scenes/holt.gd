@@ -35,11 +35,8 @@ func _build_cross_streets() -> void:
 	var sixth := _cross_street("rue_6e", "6e Avenue", 1.0)
 	sixth.along_name = "Rue Holt"
 	sixth.facing = "south"
-	sixth.left_walls = [
-		{"to": 0.7, "top": _house_top("holt_nord"), "kind": "plex", "color": Color("#A8473A")},
-		{"to": 2.4, "top": 300.0, "kind": "plex", "color": Color("#C2A07A")},
-		{"to": CrossStreet.FAR, "top": 290.0, "kind": "plex", "color": Color("#9C5A44")},
-	]
+	# The odd side of 6e Avenue, from the Street View pictures (sixieme_est).
+	sixth.left_walls = _walls_along("res://scenes/sixieme_est.gd", "rue_holt", 1, "holt_nord")
 	sixth.right_walls = _walls_along("res://scenes/main.gd", "rue_holt", -1, "ohbon")
 	var fifth := _cross_street("rue_5e", "5e Avenue", -1.0)
 	fifth.along_name = "Rue Holt"

@@ -276,7 +276,7 @@ func _build_doors() -> void:
 ## street) loads with Transition.arrive = `arrive`, so that street knows which corner she comes round.
 ## Only from the sidewalk Charlotte started on (the block the corner belongs to); the crosswalk below is for crossing.
 ## Clicking the cross street or pressing ↑ at the curb turns the corner; walking into the curb does nothing.
-func _add_corner(cs: CrossStreet, scene: String, arrive: String) -> void:
+func _add_corner(cs: CrossStreet, scene: String, arrive: String, own_crossing := true) -> void:
 	var home := _control.bounds
 	var curb := home.y if cs.x0 > _start else home.x
 	var area := Rect2(cs.x0 + 30.0, 380.0, cs.x1 - cs.x0 - 60.0, 218.0)
@@ -290,6 +290,8 @@ func _add_corner(cs: CrossStreet, scene: String, arrive: String) -> void:
 	spot.up_rect = Rect2(curb - 90.0, area.position.y, 180.0, area.size.y)
 	spot.condition = func(): return _segment_at(_charlotte.position.x) == home
 	add_child(spot)
+	if not own_crossing:
+		return
 	# A corner has TWO crosswalks (Julien): the one over the cross street (`_add_crossing`) and the one over the street
 	# she is on. That second one leaves toward the camera, so this view cannot show her walking it: it is painted at
 	# the corner (`CrossStreet.own_crosswalk`), and a click on it takes her round into the cross street's scene, where
@@ -309,6 +311,39 @@ func _add_corner(cs: CrossStreet, scene: String, arrive: String) -> void:
 		Transition.crossing = arrive
 		Transition.change_scene(self, scene), curb)
 	over.condition = spot.condition
+	add_child(over)
+
+
+## The crosswalk over our own street at a corner, when another scene shows the far side of that same street (6e Avenue and
+## `sixieme_est`, its odd side): there she goes, instead of round into the cross street. Neither view can show her on it —
+## both look across 6e — so she goes to the curb, looks both ways, and the far side loads with her at its matching corner.
+## Call it after `_add_corner(…, false)`.
+func _add_across(cs: CrossStreet, scene: String, arrive: String) -> void:
+	var home := _control.bounds
+	var curb := home.y if cs.x0 > _start else home.x
+	var ground: CrossStreet = _grounds.get(cs)
+	if ground == null:
+		return
+	ground.own_crosswalk = -1.0 if cs.x0 > _start else 1.0
+	ground.queue_redraw()
+	var over := DoorSpot.make(ground.own_crosswalk_rect(), func():
+		if DebugMenu.blocked(GameState.age < CROSS_AGE):
+			Bubble.say(self, _charlotte.position + Vector2(0, -190), CANT_CROSS, 2.6)
+			return
+		_control.enabled = false
+		_control.hands_off = true
+		_charlotte.is_walking = false
+		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je regarde des deux côtés !", 1.4)
+		var toward := 1 if cs.x0 > _charlotte.position.x else -1
+		var look := create_tween()
+		for side: int in [toward, -toward, toward]:
+			look.tween_callback(func(): _charlotte.facing = side)
+			look.tween_interval(0.45)
+		look.tween_callback(func():
+			Transition.arrive = arrive
+			Transition.crossing = ""
+			Transition.change_scene(self, scene)), curb)
+	over.condition = func(): return _segment_at(_charlotte.position.x) == home
 	add_child(over)
 
 
@@ -841,7 +876,8 @@ func _shop_shut() -> bool:
 
 
 ## The houses that never hand out candy, whatever the street: her own, the shops, the school, the lane mouths.
-const NO_CANDY := ["duplex_charlotte", "depanneur", "depanneur_front", "ohbon", "ecole", "garages", "ruelle", "ruelle_verte"]
+const NO_CANDY := ["duplex_charlotte", "depanneur", "depanneur_front", "ohbon", "ecole", "garages", "ruelle", "ruelle_verte",
+	"ruelle_impair_holt", "ruelle_impair_dandurand"]
 
 
 ## The evening of the Halloween quest: the dark, the lit houses with their decorations, the other children, and a
