@@ -93,7 +93,7 @@ const BLOCKS := {
 		"trees_after": [3, 6], "tree_shift": {3: 0.0, 6: -260.0}, "lamps_after": [2, 6], "hydrants_at": [5.5], "racks_at": [3.5],
 		"squirrels_at": [6.4], "moon_at": 7.5,
 		"signs": {
-			"masson_2801": [[450.0, "BANCO · ACHETONS OR", "#FFFFFF", "#9A141A", 13]],
+			"masson_2801": [[225.0, "CORVETTE", "#E8202A", "#1E1E20", 15], [645.0, "BANCO · ACHETONS OR", "#FFFFFF", "#9A141A", 12]],
 			"masson_2811": [[380.0, "pattes & griffes", "#FFFFFF", "#3E9A3E", 14]],
 			"masson_2819": [[430.0, "pizza pizza · 737-1111", "#FFFFFF", "#9A141A", 13]],
 			"masson_2823": [[380.0, "CAFÉ", "#FFFFFF", "#1A1A1A", 13]],
