@@ -136,7 +136,9 @@ Rules that bite:
   so the other houses don't move.
 - Keep the game's look: procedural SVG, light from the upper left, leaves never balls, no photo textures.
 - Real brands and logos are allowed only as in the project's conventions (`art/brands/`), nothing from the pictures.
-- Transcribe numbers and plates exactly (5672, not 5670), in French where there is text.
+- **No civic numbers on the buildings** (Julien): don't give a building its `number` plate, even when the photo shows it,
+  unless the user asks for that building's (as for Charlotte's house, 5672, and the Turcotte twins', 5716). Other text seen
+  on a building (a shop's name) is transcribed exactly, in French where there is text.
 - Don't touch the other buildings, and don't break the real photographs already used (`reference/maison_charlotte`,
   `coin_holt`, …): when two references disagree, keep the one the user chose and mention it.
 

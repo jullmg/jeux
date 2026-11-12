@@ -84,7 +84,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   (one over the street door), `balconies` (one span per flat instead of one gallery), `balcony_floors`, `door_floors`,
   `stair: []` (no outdoor stair), `pilasters` (stone strips up the front), `muntins: "x"` (diagonal lattice in the upper panes),
   `fence: "wood"` / `"chain"` (`_wood_fence`, `_chain_fence`), `frame` (the colour of `_casement` windows), and `door_x`
-  (any kind of building can name its door for `doors.json`, so it gets its doorbell on Halloween night). Helpers: `_casement`,
+  (no civic number plates on them: Julien wants numbers only where he asks, Charlotte's and the twins' houses) (any kind of building can name its door for `doors.json`, so it gets its doorbell on Halloween night). Helpers: `_casement`,
   `_glass_rail`, `_hydrangea`, `_cedar`, `_lantern_post`.
 - **Rue Masson** (Julien: one scene per side of each block, 1re → 9e Avenue, built block by block from `reference/streetview/`,
   INDEX.md "Rue Masson 2000–3400"): `scenes/masson.gd`, one script for them all, `@export block` ("6e_7e") and `side`

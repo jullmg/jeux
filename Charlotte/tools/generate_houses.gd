@@ -282,7 +282,7 @@ const HOUSES := [
 	{"name": "ruelle_impair_holt", "kind": "lane_odd", "width": 640.0, "lane_style": "holt"},
 	# 5713, beige brick duplex, the white stair up its lane side, French doors, a white canopy (5713…, 5717… and close-ups).
 	{
-		"name": "impair_5713", "number": "5713",
+		"name": "impair_5713",
 		"bricks": ["#D9CBB0", "#CFC0A3", "#E2D5BC", "#C7B697", "#DCCFB5"], "mortar": "#EDE6D8",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#E8E0D0", "lintel_dark": "#B9AE98",
 		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "double", "door_surround": "lintel",
@@ -293,7 +293,7 @@ const HOUSES := [
 	},
 	# 5707, red brick duplex, a black stair curling down to the left, a white canopy (5707…, 5709… and close-ups).
 	{
-		"name": "impair_5707", "number": "5707",
+		"name": "impair_5707",
 		"bricks": ["#9E4A36", "#A85440", "#8E4030", "#B25C46", "#94462F"], "mortar": "#CFC2B4",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
 		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel", "canopy": "#F2F0EA", "parapet": "flat",
@@ -303,7 +303,7 @@ const HOUSES := [
 	},
 	# 5699, a duplex: red brick upstairs over a ground floor of grey brick, a canvas awning over its door (5699…, 5703… and close-ups).
 	{
-		"name": "impair_5699", "number": "5699",
+		"name": "impair_5699",
 		"bricks": ["#9A3F33", "#A8473A", "#8E3A2F", "#B4513F", "#94402F"], "mortar": "#CDBFB0",
 		"lower_stone": true, "stones": ["#B8B2A6", "#C4BEB2", "#A8A296", "#BEB8AC"], "stone_mortar": "#8E887E",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D2C6", "lintel_dark": "#A39D93",
@@ -321,7 +321,7 @@ const HOUSES := [
 	},
 	# 5685, painted white, a balcony on the first floor only, no outdoor stair (5679…, 5685…, 5691… and close-ups).
 	{
-		"name": "impair_5685", "number": "5685",
+		"name": "impair_5685",
 		"bricks": ["#ECEAE4", "#E4E1DA", "#F2F0EB", "#DEDAD2", "#E8E5DF"], "mortar": "#CFCAC0",
 		"trim": "#4A3E34", "trim_dark": "#2E261F", "lintel": "#E6E3DC", "lintel_dark": "#B9B5AC", "lintel_style": "none",
 		"door": "#3A332C", "door_dark": "#1E1A16", "door_style": "slit", "parapet": "flat",
@@ -330,7 +330,7 @@ const HOUSES := [
 	},
 	# 5679, tan brick, its balconies on the right under a dark metal canopy (5677…, 5679… and close-ups).
 	{
-		"name": "impair_5679", "number": "5679",
+		"name": "impair_5679",
 		"bricks": ["#B08A62", "#A47E58", "#BC966E", "#9A7650", "#C29C74"], "mortar": "#D8CDBE",
 		"trim": "#3A3A3C", "trim_dark": "#1E1E20", "lintel": "#C9BBA6", "lintel_dark": "#9A8C76",
 		"door": "#2B2B2E", "door_dark": "#111111", "door_style": "slit", "canopy": "#3A3A3C", "parapet": "flat",
@@ -339,7 +339,7 @@ const HOUSES := [
 	},
 	# 5677, red-brown brick, a white door between its two windows, the stair curling down to the right (5677… and close-ups).
 	{
-		"name": "impair_5677", "number": "5677",
+		"name": "impair_5677",
 		"bricks": ["#8E5640", "#9A6048", "#7E4A36", "#A46A50", "#86503C"], "mortar": "#CFC2B0",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D9D2C4", "lintel_dark": "#A39A8A",
 		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "double", "canopy": "#F2F0EA", "parapet": "flat",
@@ -349,7 +349,7 @@ const HOUSES := [
 	},
 	# 5669, red brick, a dark door under its iron balconies and their canopy, the stair down to the left (5669…, 5671… and close-ups).
 	{
-		"name": "impair_5669", "number": "5669",
+		"name": "impair_5669",
 		"bricks": ["#A0503A", "#AA5A42", "#924632", "#B4624A", "#9A4C36"], "mortar": "#C8BBAA",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D9D2C4", "lintel_dark": "#A39A8A",
 		"door": "#2B2B2E", "door_dark": "#111111", "door_style": "grille", "canopy": "#F2F0EA", "parapet": "flat",
@@ -360,7 +360,7 @@ const HOUSES := [
 	# 5661, buff brick under a corbelled parapet, black iron balconies, a white door with an oval light under a fanlight
 	# (5661…, 5665…, 5671… and close-ups).
 	{
-		"name": "impair_5661", "number": "5661", "floors": 3,
+		"name": "impair_5661", "floors": 3,
 		"bricks": ["#B8946E", "#C4A07A", "#AA8862", "#CFAB86", "#B08C66"], "mortar": "#E2D6C4",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#E4DCCB", "lintel_dark": "#B3A88F",
 		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "oval", "door_surround": "lintel", "canopy": "#F2F0EA",
@@ -381,7 +381,7 @@ const HOUSES := [
 	},
 	# 5649, red-brown brick, iron balconies under a white canopy, an iron stair curling down to the left (5649…, 5653… and close-ups).
 	{
-		"name": "impair_5649", "number": "5649",
+		"name": "impair_5649",
 		"bricks": ["#9A5440", "#A65E48", "#8C4C38", "#B06850", "#945038"], "mortar": "#D2C4B2",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#E8E2D6", "lintel_dark": "#B3AA9A",
 		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "leaded", "canopy": "#F2F0EA", "parapet": "flat", "ornate": true,
@@ -399,14 +399,14 @@ const HOUSES := [
 	},
 	# 5637, the little white one-storey house (5635…, 5647… and close-ups).
 	{
-		"name": "impair_5637", "kind": "bungalow", "width": 640.0, "door_x": 320.0, "number": "5637",
+		"name": "impair_5637", "kind": "bungalow", "width": 640.0, "door_x": 320.0,
 		"trim": "#F2F0EA", "trim_dark": "#B9B5AC", "lintel": "#E4E1DA", "lintel_dark": "#B9B5AC", "lintel_style": "none",
 		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "slots", "stripe_color": "#5E86B5",
 		"windows": [[80.0, 150.0], [410.0, 150.0]], "door_cx": 320.0, "fence": "black", "basement": [],
 	},
 	# 5631, red brick, red and white striped awnings over its balconies, the stair down to the left (5623…, 5631…, 5635… and close-ups).
 	{
-		"name": "impair_5631", "number": "5631",
+		"name": "impair_5631",
 		"bricks": ["#A85238", "#B25C42", "#9A4A32", "#BC664A", "#A24E36"], "mortar": "#D4C6B4",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#E4DCCB", "lintel_dark": "#B3A88F",
 		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel", "stripe_awnings": true, "parapet": "flat",
@@ -417,7 +417,7 @@ const HOUSES := [
 	# 5621, cream brick under a pressed cornice with its little pediment, black balconies the width of the front, a steel stair with
 	# wooden treads (5623…, 5631… and close-ups).
 	{
-		"name": "impair_5621", "number": "5621", "floors": 3, "width": 760.0,
+		"name": "impair_5621", "floors": 3, "width": 760.0,
 		"bricks": ["#E8DCC4", "#E2D4BA", "#EEE4D0", "#DCCDB2", "#E6D9BF"], "mortar": "#F2ECE0",
 		"cornice": "#ECE3CF", "cornice_dark": "#B9AA8C", "pediment": true,
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#F0E8D8", "lintel_dark": "#C2B49A",
@@ -429,7 +429,7 @@ const HOUSES := [
 	# 5615, pale brick, concrete balconies the width of the front, a steel stair with wooden treads; its dark brick side runs along
 	# the lane (5609…, 5615…, 5617… and close-ups).
 	{
-		"name": "impair_5615", "number": "5615", "floors": 3, "width": 760.0,
+		"name": "impair_5615", "floors": 3, "width": 760.0,
 		"bricks": ["#E2D2B4", "#D8C8A8", "#EADCC0", "#CFBF9E", "#E6D7BA"], "mortar": "#EFE7DA",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "lintel_style": "none",
 		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel", "tread": "#8A5A3A", "tread_dark": "#5E3B24",
@@ -442,7 +442,7 @@ const HOUSES := [
 	{"name": "ruelle_impair_dandurand", "kind": "lane_odd", "width": 600.0, "lane_style": "dandurand"},
 	# 5601–5609, the gabled block at the corner (5601…, 5605…, 5609… and close-ups).
 	{
-		"name": "impair_5601", "kind": "gables", "width": 1400.0, "floors": 3, "top": 48.0, "door_x": 700.0, "number": "5601",
+		"name": "impair_5601", "kind": "gables", "width": 1400.0, "floors": 3, "top": 48.0, "door_x": 700.0,
 		"bricks": ["#C98A64", "#D0936C", "#BF805A", "#D69C74", "#C4865F"], "mortar": "#E8D9C6",
 		"lintel": "#E4DCCD", "lintel_dark": "#B5AC9C", "siding": "#B98656", "door_cx": 700.0,
 		"metal": "#1F1F1F", "tread": "#5A5A5A", "tread_dark": "#3A3A3A", "fence": "chain", "halloween": false, "basement": [180.0, 1124.0],
@@ -1103,7 +1103,7 @@ const HOUSES := [
 	# The north side, 2e (left) to 3e (right). Across 2e: the next block's corner, its side.
 	{
 		"name": "masson_2645_cote", "kind": "side_wall", "width": 560.0, "floors": 2,
-		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F"], "mortar": "#CDBFB0",
+		"bricks": ["#8E4A3A", "#9A5242", "#844436", "#A0584A"], "mortar": "#B9AC9E",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
 	},
 	# 2651–2659, at 2e: a low commercial building of the 1970s, two floors, a long band of windows upstairs on pale panels, shops
@@ -1195,6 +1195,83 @@ const HOUSES := [
 	{
 		"name": "masson_2636_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
 		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F"], "mortar": "#CDBFB0",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
+	},
+	# ── Rue Masson, 1re to 2e Avenue ──
+	# The north side, 1re (left) to 2e (right). Across 1re: the next block's corner, its side.
+	{
+		"name": "masson_2595_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F"], "mortar": "#CDBFB0",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
+	},
+	# 2601–2607, at 1re: pale grey brick on three floors, the dépanneur Bonsoir under its red sign (2605…).
+	{
+		"name": "masson_2605", "kind": "commerce", "width": 820.0, "floors": 3,
+		"bricks": ["#C9C7C0", "#BFBDB6", "#D2D0C9", "#B8B6AF"], "mortar": "#E6E4DE", "parapet": "flat",
+		"lintel": "#E8E6E0", "lintel_dark": "#9E9A92", "windows": [[90.0, 130.0], [330.0, 130.0], [570.0, 130.0]],
+		"shops": [{"x0": 30.0, "x1": 790.0, "sign": "#D8202A", "frame": "#B01A22", "door": 160.0}], "basement": [],
+	},
+	# 2609–2611: charcoal brick on three floors, black balconies, Domino's (2605…, 2613…).
+	{
+		"name": "masson_2611", "kind": "commerce", "width": 700.0, "floors": 3,
+		"bricks": ["#3E3C3A", "#4A4846", "#363432", "#52504C"], "mortar": "#6A6864", "parapet": "flat",
+		"lintel": "#5E5C58", "lintel_dark": "#2E2C2A", "lintel_style": "none", "windows": [[90.0, 110.0], [450.0, 110.0]],
+		"projecting": [[250.0, 420.0]],
+		"shops": [{"x0": 30.0, "x1": 670.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 560.0}], "basement": [],
+	},
+	# 2613–2617: white brick on three floors, the flower shop Le Jardin under its black sign (2613…).
+	{
+		"name": "masson_2615", "kind": "commerce", "width": 700.0, "floors": 3,
+		"bricks": ["#E8E6E0", "#DEDCD6", "#F0EEE8", "#D6D4CE"], "mortar": "#C9C7C0", "parapet": "flat",
+		"lintel": "#E8E6E0", "lintel_dark": "#9E9A92", "lintel_style": "none", "windows": [[90.0, 130.0], [400.0, 130.0]],
+		"shops": [{"x0": 30.0, "x1": 670.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 120.0}], "basement": [],
+	},
+	{
+		"name": "masson_2619", "kind": "masson_lot", "lot_style": "parking", "width": 420.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	# 2623–2629: white brick on three floors, two shops under black signs (2629…).
+	{
+		"name": "masson_2629", "kind": "commerce", "width": 900.0, "floors": 3,
+		"bricks": ["#E2E0DA", "#D8D6D0", "#EAE8E2", "#D0CEC8"], "mortar": "#C9C7C0", "parapet": "flat",
+		"lintel": "#E8E6E0", "lintel_dark": "#9E9A92", "lintel_style": "none", "windows": [[90.0, 130.0], [380.0, 130.0], [640.0, 130.0]],
+		"shops": [{"x0": 30.0, "x1": 450.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 380.0},
+			{"x0": 450.0, "x1": 870.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 520.0}], "basement": [],
+	},
+	# 2631–2641, at 2e: red-brown brick on two floors, Yoga D.N.A., a phở restaurant and a juice bar (2631…, 2633…).
+	{
+		"name": "masson_2631", "kind": "commerce", "width": 1300.0, "floors": 2,
+		"bricks": ["#8E4A3A", "#9A5242", "#844436", "#A0584A"], "mortar": "#B9AC9E", "parapet": "corbel",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 120.0], [360.0, 120.0], [640.0, 120.0], [920.0, 120.0], [1150.0, 100.0]],
+		"projecting": [[60.0, 260.0]],
+		"shops": [{"x0": 30.0, "x1": 440.0, "sign": "#5E3A7E", "frame": "#2B2B2E", "door": 380.0},
+			{"x0": 440.0, "x1": 860.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 800.0},
+			{"x0": 860.0, "x1": 1270.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 1200.0}], "basement": [],
+	},
+	# Across 2e: the side of the commercial block there (2653…).
+	{
+		"name": "masson_2653_cote", "kind": "side_wall", "width": 560.0, "floors": 2,
+		"bricks": ["#D8D6D0", "#CECCC6", "#E0DED8"], "mortar": "#B9B5AC",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
+	},
+	# The south side, 2e (left) to 1re (right), after the planted square across 2e: apartment blocks of the 1960s set back behind
+	# their lawns, the TELUS shop in one (2618…, 2620…, 2636…), and the low white building behind red shrubs at 1re (2606…, 2614…).
+	{
+		"name": "masson_2636", "kind": "masson_lot", "lot_style": "setback", "width": 1200.0, "floors": 3, "halloween": false,
+		"bricks": ["#A8503E", "#B05A46", "#9A4636", "#B86450"], "mortar": "#D0C4B6",
+	},
+	{
+		"name": "masson_2620", "kind": "masson_lot", "lot_style": "setback", "width": 1100.0, "floors": 3, "halloween": false,
+		"bricks": ["#A04A3A", "#AE5442", "#943F31", "#B85E4A"], "mortar": "#CDBFB0", "band": "#4B286D",
+	},
+	{
+		"name": "masson_2606", "kind": "masson_lot", "lot_style": "setback", "white": true, "width": 1100.0, "floors": 3,
+		"halloween": false, "bricks": ["#ECEAE4"], "mortar": "#C9C5BC",
+	},
+	# Across 1re: the next block's corner, its side.
+	{
+		"name": "masson_2600_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#C8A27A", "#BC966E", "#D4AE86", "#B08A62"], "mortar": "#E6DCCB",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
 	},
 	# Across 5e: the side of Dollarama's building, buff brick (2840…).
@@ -5642,6 +5719,9 @@ func _masson_lot() -> void:
 		"plaza":
 			_plaza()
 			return
+		"setback":
+			_setback()
+			return
 		"parking":
 			_parking_lot()
 			return
@@ -5756,6 +5836,60 @@ func _plaza() -> void:
 		_rect(bx - 4, g - 70, 8, 70, "#1A1A1A")
 		for st in 3:
 			_rect(bx - 4, g - 64 + st * 18.0, 8, 7, "#F2F0EA")
+
+
+# A block set back from the street behind its lawn (2606…, 2618…, 2636…): the apartment buildings of the 1960s, plain brick
+# on three floors with rows of windows, or (`white`) a low white commercial building with ribbon windows; a shop band
+# (`band`, its colour) on the ground floor, trees and red shrubs on the lawn.
+func _setback() -> void:
+	var g := ground_y
+	var lawn_top := g - 150.0
+	var white: bool = k.get("white", false)
+	var floors := 2 if white else 3
+	var fh := 170.0
+	var top := lawn_top - floors * fh - 20.0
+	var x0 := X0
+	var x1 := X1 - 40.0
+	if white:
+		_rect(x0, top, x1 - x0, lawn_top - top, "#ECEAE4", _stroke("#B9B5AC", 1.5))
+		for f in floors:
+			var wy := top + 30.0 + f * fh
+			_rect(x0 + 20, wy, x1 - x0 - 40, 90, "#3A4048")
+			_rect(x0 + 24, wy + 4, x1 - x0 - 48, 82, "url(#glass)")
+			var mx := x0 + 80.0
+			while mx < x1 - 40.0:
+				_rect(mx, wy, 4, 90, "#3A4048")
+				mx += 90.0
+			_glass_shine(x0 + 24, wy + 4, x1 - x0 - 48, 82)
+	else:
+		var keep1 := X1
+		X1 = x1
+		_bricks(top, lawn_top)
+		X1 = keep1
+		for f in floors:
+			var wx := x0 + 50.0
+			while wx < x1 - 100.0:
+				_rect(wx, top + 40.0 + f * fh, 90, 100, "#E8E4DA")
+				_rect(wx + 5, top + 45.0 + f * fh, 80, 90, "url(#glass)")
+				_rect(wx + 42, top + 45.0 + f * fh, 4, 90, "#E8E4DA")
+				wx += 170.0
+	_rect(x0 - 6, top - 12, x1 - x0 + 12, 14, "#8E8A82")
+	_snow(x0 - 6, x1 - x0 + 12, top - 12)
+	var band: String = k.get("band", "")
+	if band != "":
+		_rect(x0 + 60, lawn_top - fh + 20, (x1 - x0) * 0.55, 40, band)
+		_rect(x0 + 60, lawn_top - fh + 60, (x1 - x0) * 0.55, fh - 60, "#2F3A41")
+		_rect(x0 + 64, lawn_top - fh + 64, (x1 - x0) * 0.55 - 8, fh - 68, "url(#warm)", 'opacity="0.4"')
+	split = out.size()
+	_lawn(X0, X1, lawn_top)
+	_rect(X0 + (X1 - X0) * 0.45, lawn_top, 60, ground_y - lawn_top, "#B9B4AA")
+	if white:
+		var sx := X0 + 30.0
+		while sx < X1 - 20.0:
+			_shrub(sx, 40.0, {"winter": "#6A5A4A", "spring": "#6A3A3A", "summer": "#7A3A34"}.get(season, "#A83A2E"))
+			sx += 60.0
+	else:
+		_fine_tree(Vector2(X0 + 140.0, g - 40.0), g - 330.0, -PI * 0.5, 1.0, ["#E3A33A", "#D9682B", "#C9562E", "#E8B54A"])
 
 
 # A parking lot behind a low hedge (3021…): asphalt with its painted lines, the brick backs beyond; the cars left out.
