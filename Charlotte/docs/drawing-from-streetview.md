@@ -33,7 +33,43 @@ Open the main picture, then the close-ups if there are any. Write down, from the
   and which way it goes down, its rail, its beam.
 - Fence and front garden, trees at the curb, lamp post, hydrant, poles, parked bikes: those belong to the
   street scene, not to the facade.
+- What isn't part of the building (see "Draw the building, not the day the photo was taken" below): note it and leave it out.
 - What the photo can't tell you (the back, the lane, the inside): don't invent it as fact.
+
+### Draw the building, not the day the photo was taken
+
+The pictures are one moment (most of ours are October 2024, so Halloween is everywhere). The game has its own
+seasons and its own decorations (the generator adds Halloween, wreaths, Christmas lights, snow and flowers by
+season, and the night of the Halloween quest), so **a seasonal or temporary thing seen in the photo is never
+drawn into the building**, or it would stay there all year and double up with the game's own.
+
+Leave out:
+
+- **Halloween and other holiday decoration**: pumpkins, skeletons, ghosts, cobwebs, bats, tombstones, straw
+  bales and corn stalks, Christmas lights and wreaths, flags and banners, string lights, signs for a party.
+  Don't copy a colour just because a decoration covers it (orange lights, black cloth): look at the wall
+  behind it, or at another picture.
+- **Seasonal state**: leaves on the ground, snow, flowers and pots on the steps, bare or leafy trees, and the
+  light of the hour (a shadow across a facade is not a dark patch of brick). The seasons are the game's job.
+- **Anything unusual or temporary on or in front of the building**: scaffolding, a construction fence, a tarp,
+  a dumpster or bins, bikes, strollers, a parked car or truck, a moving van, people, signs and posters taped up,
+  real-estate or political signs, graffiti and tags, laundry, an air conditioner in a window, patched or
+  boarded windows, a satellite dish, extension cords, a ladder.
+- **The camera's own artefacts**: blurred faces and number plates, the car's roof in the corner, the Google
+  logo and copyright, stitching seams, lens distortion at the edges of a picture.
+- **A repair or odd change that clearly isn't the building's design** (a window bricked up, a mismatched door put
+  in later): ask the user whether it belongs.
+
+Keep what is part of the building, however small: the bricks and their colours, lintels, cornices, windows and
+their sills, doors and their surrounds, stairs and rails, balconies and their posts, lamps and the number
+plate, mailboxes, the fence and gate, the meter box and downpipes, fixed awnings. Mailboxes, gates and similar
+fixtures are the building's even if they are unusual; **a fixed fixture that is part of the facade stays, an
+object that could be moved away tomorrow goes**. When in doubt, compare the building across several pictures
+(the main one, its close-ups, a neighbour's picture that shows it from another angle, another capture date if
+there is one): what is in all of them is the building, what appears in one is an object.
+
+Mention in your report what you left out on purpose (for example "5671: pumpkins on the stair, a bike, a
+parked car: not drawn"), so the user can overrule you.
 
 ## 3. Draw it
 
