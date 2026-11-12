@@ -288,7 +288,9 @@ func _add_corner(cs: CrossStreet, scene: String, arrive: String, own_crossing :=
 		home = _segment_at(cs.x0 - 1.0)
 	elif side > 0:
 		home = _segment_at(cs.x1 + 1.0)
-	var curb := home.y if cs.x0 >= home.y else home.x
+	# The curb at this corner: the stretch's right end when the cross street lies to its right (its curb is inside the gap,
+	# so compare with the gap's middle, not its edge), else its left end.
+	var curb := home.y if (cs.x0 + cs.x1) / 2.0 > home.y else home.x
 	var area := Rect2(cs.x0 + 30.0, 380.0, cs.x1 - cs.x0 - 60.0, 218.0)
 	var turn := func():
 		_control.enabled = false
