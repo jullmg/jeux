@@ -601,7 +601,7 @@ const HOUSES := [
 	{
 		"name": "masson_2888", "kind": "commerce", "width": 1100.0, "floors": 2, "halloween": false,
 		"bricks": ["#8E4A3A", "#9A5242", "#844436", "#A0584A", "#8A4838"], "mortar": "#B9AC9E", "parapet": "flat",
-		"lintel": "#D8CFBF", "lintel_dark": "#A89E8C", "lintel_style": "none", "stone_frame": "#D8CFBF", "belt": "#D8CFBF",
+		"lintel": "#D8CFBF", "lintel_dark": "#A89E8C", "lintel_style": "none", "window_style": "fixed", "frame": "#3A3A3C", "stone_frame": "#D8CFBF", "belt": "#D8CFBF",
 		"windows": [[150.0, 120.0], [330.0, 120.0], [510.0, 120.0], [690.0, 120.0], [870.0, 120.0]],
 		"shops": [{"x0": 100.0, "x1": 1000.0, "sign": "#E9E5DE", "frame": "#6E6A64", "door": 820.0, "inside": "bank", "transom": "none", "panes": 6}], "basement": [],
 	},
@@ -610,7 +610,7 @@ const HOUSES := [
 	{
 		"name": "masson_2884", "kind": "commerce", "width": 560.0, "floors": 2,
 		"bricks": ["#A8503E", "#B05A46", "#9A4636", "#B86450", "#A04A3A"], "mortar": "#D0C4B6", "parapet": "flat",
-		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 220.0], [380.0, 120.0]], "roof_rail": "#A8865E",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "window_style": "slider", "frame": "#2B2B2E", "windows": [[90.0, 220.0], [380.0, 120.0]], "roof_rail": "#A8865E",
 		"shops": [{"x0": 30.0, "x1": 530.0, "sign": "#5E4A3E", "frame": "#3A2E28", "door": 420.0, "dark": true, "awning": "#6E5A4A"}],
 		"basement": [],
 	},
@@ -630,7 +630,7 @@ const HOUSES := [
 	{
 		"name": "masson_2870", "kind": "commerce", "width": 1000.0, "floors": 3, "upper": "stone", "upper_stone": "#B2AEA6",
 		"bricks": ["#A9A59D", "#B2AEA6", "#A09C94"], "mortar": "#8E8A82", "parapet": "corbel",
-		"lintel": "#C9C5BC", "lintel_dark": "#8E8A82", "metal": "#1F1F1F",
+		"lintel": "#C9C5BC", "lintel_dark": "#8E8A82", "metal": "#1F1F1F", "window_style": "slider", "frame": "#2B2B2E",
 		"windows": [[80.0, 100.0], [190.0, 100.0], [430.0, 100.0], [540.0, 100.0], [780.0, 100.0], [890.0, 100.0]],
 		"projecting": [[410.0, 660.0]],
 		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#1E1E20", "frame": "#F2F0EA", "door": 110.0, "inside": "restaurant", "wall": "#F2EEE6", "transom": "none"},
@@ -642,7 +642,7 @@ const HOUSES := [
 	{
 		"name": "masson_2846", "kind": "commerce", "width": 1700.0, "floors": 3, "upper": "stone", "upper_stone": "#B5B1A9",
 		"bricks": ["#A9A59D", "#B2AEA6", "#A09C94"], "mortar": "#8E8A82", "parapet": "corbel",
-		"lintel": "#C9C5BC", "lintel_dark": "#8E8A82", "metal": "#1F1F1F",
+		"lintel": "#C9C5BC", "lintel_dark": "#8E8A82", "metal": "#1F1F1F", "window_style": "slider", "frame": "#2B2B2E",
 		"windows": [[80.0, 100.0], [190.0, 100.0], [420.0, 100.0], [530.0, 100.0], [760.0, 100.0], [870.0, 100.0],
 			[1100.0, 100.0], [1210.0, 100.0], [1440.0, 100.0], [1550.0, 100.0]],
 		"projecting": [[400.0, 650.0], [1080.0, 1330.0]],
