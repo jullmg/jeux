@@ -453,6 +453,120 @@ const HOUSES := [
 		"bricks": ["#B5603F", "#A85536", "#C26B48", "#9C4D31", "#C77650"], "mortar": "#D6C9B9",
 		"parapet": "flat", "windows": [[110.0, 90.0], [320.0, 90.0]], "basement": [], "downspout": 40.0,
 	},
+	# ── Rue Masson, 6e to 7e Avenue (reference/streetview/rue-masson/, INDEX.md "Rue Masson 2000–3400") ──
+	# The odd side is the north side; its pictures 2901… to 2939…; the even (south) side 2902… to 2990…. Seasonal things, cars,
+	# bikes, café terraces, sale posters and graffiti are left out on purpose. Shop names are labels laid by scenes/masson.gd.
+	# Across 6e from 2901: the side of Église Saint-Esprit's grounds, grey stone.
+	{
+		"name": "masson_eglise_cote", "kind": "side_wall", "width": 600.0, "floors": 3,
+		"bricks": ["#B9B4AA", "#AEA99F", "#C2BDB3", "#A8A399", "#BDB8AE"], "mortar": "#8E8A82",
+		"parapet": "flat", "windows": [[160.0, 90.0], [360.0, 90.0]], "basement": [], "downspout": 540.0,
+	},
+	# 2901, at 6e: red brick over a grey stone ground floor, its windows set high, a stack of balconies at the corner (2901…).
+	{
+		"name": "masson_2901", "kind": "commerce", "width": 1100.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844", "#94422F"], "mortar": "#CFC2B4", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[180.0, 110.0], [420.0, 110.0], [660.0, 110.0], [890.0, 110.0]],
+		"projecting": [[34.0, 140.0]], "ground": "stone", "stone": "#A9A49C", "ground_windows": [[140.0, 200.0], [600.0, 200.0], [860.0, 200.0]],
+		"res_doors": [1030.0], "basement": [],
+	},
+	# 2903–2905, Fraîchement Bon, the greengrocer's: red brick, a stack of balconies on the left, two bays of shop under black signs
+	# and gooseneck lamps, the fruit out front, the flats' door between them (2903… and close-ups).
+	{
+		"name": "masson_2903", "kind": "commerce", "width": 820.0, "floors": 3,
+		"bricks": ["#8E3E30", "#9A4636", "#7E3628", "#A44E3C", "#923F31"], "mortar": "#C8BBAA", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[200.0, 110.0], [420.0, 110.0], [620.0, 110.0]],
+		"projecting": [[34.0, 170.0]], "pier": "#B9B3A8",
+		"shops": [{"x0": 30.0, "x1": 420.0, "sign": "#1E1E20", "lamps": 3, "door": 360.0},
+			{"x0": 500.0, "x1": 790.0, "sign": "#1E1E20", "awning": "#24282C", "lamps": 2, "crates": true, "door": 740.0}],
+		"res_doors": [460.0], "basement": [],
+	},
+	# 2909–2919, Poulet Rouge: dark brown brick, the black front of the restaurant, the white doors to the flats (2909…, 2913…, 2919…).
+	{
+		"name": "masson_2909", "kind": "commerce", "width": 960.0, "floors": 3,
+		"bricks": ["#5E3A2E", "#6E4234", "#4E3026", "#744838", "#583428"], "mortar": "#9A8E80", "parapet": "flat",
+		"lintel": "#B9B3A8", "lintel_dark": "#7E786E", "windows": [[90.0, 120.0], [330.0, 120.0], [580.0, 120.0], [800.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 720.0, "sign": "#141416", "door": 600.0}], "res_doors": [820.0], "basement": [],
+	},
+	# 2921–2931, red brick with Juliet rails at every window, white stone lintels; downstairs four shops: Aquarium café-bar,
+	# N. Mode, Frites Alors!, Coyote's tacos (2919…, 2925… and close-ups).
+	{
+		"name": "masson_2925", "kind": "commerce", "width": 1300.0, "floors": 3,
+		"bricks": ["#B04A38", "#BC5440", "#A44232", "#C25C46", "#AA4834"], "mortar": "#D8CABA", "parapet": "flat",
+		"lintel": "#E8E2D6", "lintel_dark": "#B3AA9A", "juliets": true, "metal": "#1F1F1F",
+		"windows": [[80.0, 100.0], [290.0, 100.0], [500.0, 100.0], [710.0, 100.0], [920.0, 100.0], [1130.0, 100.0]],
+		"shops": [{"x0": 30.0, "x1": 300.0, "sign": "#1E3E5E", "door": 90.0},
+			{"x0": 300.0, "x1": 560.0, "sign": "#2B2B2E", "door": 500.0},
+			{"x0": 560.0, "x1": 860.0, "sign": "#E9E2D0", "frame": "#3A2A20", "door": 620.0},
+			{"x0": 860.0, "x1": 1270.0, "sign": "#1E1E20", "frame": "#2B1E18", "door": 1200.0}],
+		"basement": [],
+	},
+	# 2933–2939, at 7e: the old bank in grey stone, fluted pilasters, a copper-topped cornice, the door at the corner (2933…, 2937…, 2939…).
+	{
+		"name": "masson_2933", "kind": "bank", "width": 1500.0, "floors": 2, "halloween": false,
+		"stone": "#BDB8AE", "pilasters": [420.0, 800.0, 1180.0], "windows": [[110.0, 240.0], [500.0, 230.0], [880.0, 230.0]],
+		"corner_side": 1.0, "basement": [],
+	},
+	# Across 7e from the bank: the next block's corner, its side.
+	{
+		"name": "masson_3001_cote", "kind": "side_wall", "width": 580.0, "floors": 3,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
+		"parapet": "flat", "windows": [[100.0, 90.0], [320.0, 90.0]], "basement": [], "downspout": 40.0,
+	},
+	# The south side, 7e (left) to 6e (right). Across 7e: the corner of the next block, its side.
+	{
+		"name": "masson_3000_cote", "kind": "side_wall", "width": 580.0, "floors": 3,
+		"bricks": ["#C8A27A", "#BC966E", "#D4AE86", "#B08A62", "#CCA680"], "mortar": "#E6DCCB",
+		"parapet": "flat", "windows": [[110.0, 90.0], [320.0, 90.0]], "basement": [], "downspout": 520.0,
+	},
+	# 2970–2990, at 7e: four floors, the flats behind white-framed windows with Juliet rails over a white-painted ground floor
+	# where lilies are painted big; the Tim Hortons at the corner (2970…, 2974…, 2980…, 2982…, 2990… and close-ups).
+	{
+		"name": "masson_2970", "kind": "commerce", "width": 1500.0, "floors": 4, "upper": "frame", "juliets": true,
+		"concrete": "#D8CDB8", "frame_piers": [30.0, 380.0, 740.0, 1100.0, 1440.0], "metal": "#2B3A6E",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "ground": "painted", "paint": "#E6E4DE", "mural": "lilies", "mural_x0": 600.0,
+		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#3A3A3C", "door": 130.0}], "basement": [],
+	},
+	# 2930–2958: four floors in a pale concrete frame with Juliet rails; downstairs a hair salon, Mèdz, La Puce the jeweller's, the
+	# building's lobby and an accountant's (2930…, 2940…, 2950… and close-ups).
+	{
+		"name": "masson_2930", "kind": "commerce", "width": 1700.0, "floors": 4, "upper": "frame", "juliets": true,
+		"concrete": "#D9D0BE", "frame_piers": [30.0, 440.0, 850.0, 1260.0, 1640.0], "metal": "#1F1F1F",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E",
+		"shops": [{"x0": 30.0, "x1": 440.0, "sign": "#2B2B2E", "door": 380.0},
+			{"x0": 440.0, "x1": 740.0, "sign": "#1E1E20", "door": 700.0},
+			{"x0": 740.0, "x1": 1130.0, "sign": "#141416", "frame": "#141416", "door": 1080.0},
+			{"x0": 1130.0, "x1": 1400.0, "sign": "#3A3A3C", "frame": "#3A3A3C", "door": 1265.0, "dark": true},
+			{"x0": 1400.0, "x1": 1670.0, "sign": "#E9E5DE", "frame": "#4E4E50", "door": 1600.0}],
+		"basement": [],
+	},
+	# 2908–2928, the hardware store, Quincaillerie Bélanger (RONA): two floors of grey stone panels, the long dark sign band,
+	# its display windows (2930…, 2940… right side, and the RONA's pictures 2908…, 2916…).
+	{
+		"name": "masson_2908", "kind": "commerce", "width": 1500.0, "floors": 2, "halloween": false,
+		"bricks": ["#BDB8AE", "#B3AEA4", "#C6C1B7", "#ADA89E", "#C0BBB1"], "mortar": "#9A958C", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [], "belt": "#3A3E42",
+		"shops": [{"x0": 30.0, "x1": 900.0, "sign": "#3A3E42", "frame": "#2B2E32", "door": 300.0, "lamps": 4},
+			{"x0": 900.0, "x1": 1470.0, "sign": "#1F4E9A", "frame": "#2B2E32", "door": 1180.0}],
+		"basement": [],
+	},
+	# 2902–2904, at 6e: buff brick laid in corbelled bands, an arched doorway under a balcony, the dark tiled front of Fido at the
+	# corner (2902…, 2904… and close-ups).
+	{
+		"name": "masson_2902", "kind": "commerce", "width": 1100.0, "floors": 3,
+		"bricks": ["#D4A774", "#C99C6A", "#DDB07E", "#BE9262", "#D8AC78"], "mortar": "#EFE2CC", "parapet": "corbel",
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[90.0, 110.0], [320.0, 110.0], [600.0, 110.0], [860.0, 110.0]],
+		"projecting": [[560.0, 760.0]], "pier": "#2E3236",
+		"shops": [{"x0": 30.0, "x1": 520.0, "sign": "#2B2B2E", "frame": "#2E3236", "door": 440.0},
+			{"x0": 820.0, "x1": 1070.0, "sign": "#2B2B2E", "frame": "#2E3236", "door": 945.0}],
+		"res_doors": [660.0], "basement": [],
+	},
+	# Across 6e from 2902: the corner of the next block, its side.
+	{
+		"name": "masson_2892_cote", "kind": "side_wall", "width": 580.0, "floors": 3,
+		"bricks": ["#7E4436", "#8A4A3A", "#6E3A2E", "#94543F", "#743F33"], "mortar": "#BFB2A3",
+		"parapet": "flat", "windows": [[100.0, 90.0], [320.0, 90.0]], "basement": [], "downspout": 40.0,
+	},
 ]
 
 var k: Dictionary
@@ -633,6 +747,10 @@ func _svg() -> void:
 			_corner_yard()
 		"lane_odd":
 			_lane_odd()
+		"commerce":
+			_commerce()
+		"bank":
+			_bank()
 		_:
 			_building()
 	out.append('</svg>')
@@ -3902,6 +4020,332 @@ func _lane_odd() -> void:
 		out.append('<ellipse cx="%s" cy="%s" rx="7" ry="2.5" fill="#000000" opacity="0.25"/>' % [_n(px + 2), _n(ground_y - 3)])
 		_rect(px - 44, ground_y - 282, 88, 28, "#1E1E1E", 'rx="2"')
 		_path("M%s %s h-60 m12 -9 l-12 9 l12 9" % [_n(px + 32), _n(ground_y - 268)], "none", _stroke("#FFFFFF", 5) + ' stroke-linecap="round" stroke-linejoin="round"')
+
+
+# ── Rue Masson: shops downstairs, flats upstairs ────────────────────────────
+# From reference/streetview/rue-masson/ (INDEX.md, "Rue Masson 2000–3400"). The commercial street a block south of Dandurand:
+# `_commerce` is any of its mixed buildings (the flats' floors over a row of shopfronts, or over a stone base, or over a painted
+# wall), `_bank` the stone banks at its corners. A shop's name is not drawn here: the street scene lays it on the sign band
+# as a label (scenes/masson.gd), like Oh Bon!'s.
+
+
+# A building of the commercial street. Upstairs: brick (or a concrete frame, `upper: "frame"`) with its windows, Juliet
+# rails, balconies, a belt course and the roof line; downstairs (`ground`): "shops" (a row of `shops`), "stone" (a grey
+# stone base with windows set high), or "painted" (a painted wall, a mural on it, and its `shops`).
+func _commerce() -> void:
+	var top := _top()
+	var belt := _fb(0) - 250.0
+	var floors: int = k.floors
+	if k.get("upper", "brick") == "frame":
+		_frame_upper(top, belt)
+	else:
+		_bricks(top, belt + 4.0)
+		_wall_shading(top)
+		match k.parapet:
+			"flat":
+				_flat_parapet(top)
+			"corbel":
+				_corbel_parapet(top)
+			_:
+				_cornice(top)
+		for f in range(1, floors):
+			for w in k.windows:
+				_window(w[0], _win_y(f), w[1], 160.0)
+				if k.get("juliets", false):
+					_juliet(w[0], w[1], _win_y(f) + 160.0)
+		for bal: Array in k.get("projecting", []):
+			for f in range(1, floors):
+				_balcony(bal[0], bal[1], _fb(f), [])
+				_rect(bal[0] - 6, _fb(f) + 16, bal[1] - bal[0] + 12, 34, k.slab_dark)
+	# The belt between the shops and the flats: stone, or a dark cornice band.
+	_rect(X0 - 4, belt, X1 - X0 + 8, 16, k.get("belt", "#B9B3A8"), _stroke("#8E887E", 1.5))
+	_rect(X0 - 4, belt, X1 - X0 + 8, 3, "#FFFFFF", 'opacity="0.3"')
+	_rect(X0, belt + 16, X1 - X0, 10, "#000000", 'opacity="0.2"')
+	_snow(X0 - 4, X1 - X0 + 8, belt)
+	var ground: String = k.get("ground", "shops")
+	if ground == "stone":
+		_ashlar(belt + 16.0, ground_y, k.get("stone", "#A9A49C"))
+		for w in k.get("ground_windows", []):
+			_rect(w[0] - 4, belt + 56, w[1] + 8, 96, "#5E5A54")
+			_rect(w[0], belt + 60, w[1], 88, "url(#glass)")
+			_glass_shine(w[0], belt + 60, w[1], 88)
+			_rect(w[0] - 10, belt + 152, w[1] + 20, 8, "#C9C3B6", _stroke("#8E887E", 1))
+	elif ground == "painted":
+		_rect(X0, belt + 16, X1 - X0, ground_y - belt - 16, k.get("paint", "#E9E7E1"))
+		var py := belt + 24.0
+		while py < ground_y:
+			_rect(X0, py, X1 - X0, 1.2, "#C9C5BC", 'opacity="0.7"')
+			py += 13.0
+		if k.get("mural", "") == "lilies":
+			_lily_mural(k.get("mural_x0", X0), X1, belt + 16.0, ground_y)
+	else:
+		_rect(X0, belt + 16, X1 - X0, ground_y - belt - 16, k.get("pier", "#3A3836"))
+	for door_x: float in k.get("res_doors", []):
+		_res_door(door_x, belt + 40.0)
+	split = out.size()
+	for shop: Dictionary in k.get("shops", []):
+		_shopfront(shop, belt + 16.0)
+	for p: float in k.get("piers", []):
+		_rect(p - 10, belt + 16, 20, ground_y - belt - 16, k.get("pier_stone", "#B9B3A8"), _stroke("#8E887E", 1))
+		_rect(p - 10, belt + 16, 5, ground_y - belt - 16, "#FFFFFF", 'opacity="0.25"')
+	_rect(X0, ground_y - 6, X1 - X0, 6, "#8E8A82")
+
+
+# One shopfront on the street (`shop`: x0, x1 its bay; sign: the colour of its sign band, where the scene writes the name;
+# frame: the colour of its frame; door: x of its glass door; awning: a colour (striped with `stripes`) or nothing; lamps: how
+# many gooseneck lamps over the sign; crates: fruit and vegetables in their crates out on the sidewalk; dark: no lights on).
+func _shopfront(shop: Dictionary, top: float) -> void:
+	var x0: float = shop.x0
+	var x1: float = shop.x1
+	var frame: String = shop.get("frame", "#1E1E20")
+	var sign_h := 56.0
+	var glass_top := top + sign_h + 12.0
+	var kick := ground_y - 28.0
+	_rect(x0, top, x1 - x0, ground_y - top, frame)
+	_rect(x0 + 4, top + 4, x1 - x0 - 8, sign_h, shop.get("sign", "#1E1E20"), _stroke("#000000", 1) + ' opacity="0.95"')
+	_rect(x0 + 4, top + 4, x1 - x0 - 8, 4, "#FFFFFF", 'opacity="0.18"')
+	_rect(x0 + 4, top + sign_h + 4, x1 - x0 - 8, 8, "#000000", 'opacity="0.35"')
+	var gx0 := x0 + 10.0
+	var gx1 := x1 - 10.0
+	var seed_value := int(hash(k.name) % 997) + int(x0)
+	_rect(gx0, glass_top, gx1 - gx0, kick - glass_top, "#2F3A41")
+	if not shop.get("dark", false):
+		_shop_glass_glow(gx0, glass_top, gx1 - gx0, kick - glass_top, seed_value)
+		_shop_glass_goods(gx0 + 4, glass_top + 30, gx1 - gx0 - 8, kick - glass_top - 40, seed_value, 2)
+	# Its door, glass in a frame, a push bar across it.
+	var dx: float = shop.get("door", (x0 + x1) / 2.0)
+	_rect(dx - 38, glass_top - 2, 76, ground_y - glass_top - 4, frame)
+	_rect(dx - 32, glass_top + 4, 64, ground_y - glass_top - 16, "#33404A")
+	if not shop.get("dark", false):
+		_rect(dx - 32, glass_top + 4, 64, ground_y - glass_top - 16, "url(#warm)", 'opacity="0.55"')
+	_rect(dx - 28, glass_top + 100, 56, 5, "#C9C5BC")
+	# The panes: mullions down the window, a transom bar.
+	var n := maxi(int((gx1 - gx0) / 150.0), 1)
+	for i in range(1, n):
+		var mx := lerpf(gx0, gx1, float(i) / n)
+		if absf(mx - dx) > 50.0:
+			_rect(mx - 3, glass_top, 6, kick - glass_top, frame)
+	_rect(gx0, glass_top + 34, gx1 - gx0, 5, frame, 'opacity="0.9"')
+	_rect(gx0, kick, gx1 - gx0, ground_y - kick - 6, frame)
+	_rect(gx0, kick, gx1 - gx0, 3, "#FFFFFF", 'opacity="0.15"')
+	_glass_shine(gx0, glass_top, gx1 - gx0, kick - glass_top)
+	var awning: String = shop.get("awning", "")
+	if awning != "":
+		if shop.get("stripes", false):
+			_stripe_awning(x0 + 8, x1 - 8, top + sign_h + 10, awning)
+		else:
+			_plain_awning(x0 + 8, x1 - 8, top + sign_h + 10, awning)
+	var lamps: int = shop.get("lamps", 0)
+	for i in lamps:
+		_gooseneck(lerpf(x0, x1, (i + 0.5) / lamps), top - 4.0)
+	if shop.get("crates", false):
+		_fruit_crates(x0 + 24, x1 - 24)
+	_door_wreath(dx, glass_top, glass_top + 60)
+
+
+# `_shop_glass_shine` clipped to its pane, for the narrow shop windows of Masson (the shared one overflows them; it is left as
+# it is for the shops that already use it).
+var _clips := 0
+func _glass_shine(x: float, y: float, w: float, h: float) -> void:
+	_clips += 1
+	out.append('<clipPath id="pane%d"><rect x="%s" y="%s" width="%s" height="%s"/></clipPath><g clip-path="url(#pane%d)">' % [_clips, _n(x), _n(y), _n(w), _n(h), _clips])
+	_shop_glass_shine(x, y, w, h)
+	out.append('</g>')
+
+
+# A canvas awning in one colour, its scalloped valance a shade darker.
+func _plain_awning(x0: float, x1: float, y: float, colour: String) -> void:
+	var dark := "#" + Color(colour).darkened(0.3).to_html(false)
+	var drop := 40.0
+	var reach := 16.0
+	_rect(x0 - 4, y + drop + 6, x1 - x0 + 8, 26, "url(#drop)")
+	_path("M%s %s H%s L%s %s H%s Z" % [_n(x0), _n(y), _n(x1), _n(x1 + reach), _n(y + drop), _n(x0 - reach)], colour, _stroke(dark, 1.5))
+	_path("M%s %s H%s L%s %s H%s Z" % [_n(x0 - reach * 0.5), _n(y + drop * 0.5), _n(x1 + reach * 0.5), _n(x1 + reach), _n(y + drop), _n(x0 - reach)], "#000000", 'opacity="0.12"')
+	var x := x0 - reach
+	while x < x1 + reach - 2.0:
+		_path("M%s %s h18 v7 q-9 8 -18 0 z" % [_n(x), _n(y + drop)], dark)
+		x += 18.0
+	_snow(x0, x1 - x0, y)
+
+
+# A gooseneck lamp over a shop sign: a black arm curling out from the wall, a dish shade, its light on the sign.
+func _gooseneck(x: float, y: float) -> void:
+	_circle(x + 18, y + 40, 22, "url(#glow)")
+	_path("M%s %s q0 -22 14 -22 q14 0 14 14" % [_n(x), _n(y + 8)], "none", _stroke("#1A1A1A", 3))
+	_path("M%s %s l14 0 l-4 9 l-6 0 z" % [_n(x + 21), _n(y)], "#1A1A1A")
+	_rect(x - 3, y + 6, 6, 8, "#1A1A1A")
+
+
+# Crates of fruit and vegetables out on the sidewalk in front of a greengrocer's, on a low stand.
+func _fruit_crates(x0: float, x1: float) -> void:
+	var y := ground_y - 34.0
+	_rect(x0, y + 18, x1 - x0, 16, "#6E5A44")
+	var x := x0
+	var i := 0
+	var produce := ["#E8812E", "#D9342B", "#F2C230", "#7FA34A", "#E8542F", "#9C3B6E"]
+	while x < x1 - 70.0:
+		_rect(x, y - 6, 66, 26, "#C9A06A", _stroke("#8A6A3E", 1.5))
+		for s in 3:
+			_rect(x, y + s * 8.0 - 2.0, 66, 1.5, "#8A6A3E", 'opacity="0.6"')
+		var c: String = produce[(i + int(x0)) % produce.size()]
+		for j in 6:
+			_circle(x + 8 + j * 10.0, y - 8.0 - (j % 2) * 4.0, 7, c, _stroke("#" + Color(c).darkened(0.3).to_html(false), 1))
+			_circle(x + 6 + j * 10.0, y - 10.0 - (j % 2) * 4.0, 2.5, "#FFFFFF", 'opacity="0.35"')
+		x += 74.0
+		i += 1
+
+
+# A Juliet rail across the bottom of an upper window: black bars between two little posts, a scroll in the middle.
+func _juliet(x: float, w: float, y: float) -> void:
+	var top := y - 46.0
+	_rect(x - 8, top, w + 16, 4, k.metal)
+	_rect(x - 8, y - 6, w + 16, 4, k.metal)
+	var bx := x - 2.0
+	while bx < x + w + 4.0:
+		_rect(bx, top + 4, 2, 36, k.metal)
+		bx += 9.0
+	_scroll((x * 2.0 + w) / 2.0, top + 12.0)
+	_rect(x - 12, y - 2, w + 24, 8, k.lintel, _stroke(k.lintel_dark, 1))
+	_snow(x - 8, w + 16, top)
+
+
+# The narrow door to the flats upstairs, between the shops: a dark frame, a glass door, its little lamp and number.
+func _res_door(x: float, top: float) -> void:
+	_rect(x - 36, top - 6, 72, ground_y - top + 6, "#C9C3B6", _stroke("#8E887E", 1.5))
+	_rect(x - 28, top + 2, 56, ground_y - top - 8, "#2B2B2E")
+	_rect(x - 22, top + 10, 44, (ground_y - top) * 0.55, "url(#glass)")
+	_rect(x - 22, top + 10, 44, 6, "url(#drop)")
+	_circle(x + 16, top + (ground_y - top) * 0.62, 2.5, "#C9A227")
+	_wall_lantern(x + 46, top + 20)
+
+
+# Ashlar: big blocks of grey stone in courses, each block a slightly different grey, its joints shaded under the light.
+func _ashlar(y0: float, y1: float, stone: String) -> void:
+	_rect(X0, y0, X1 - X0, y1 - y0, "#" + Color(stone).darkened(0.25).to_html(false))
+	var y := y0
+	var row := 0
+	while y < y1:
+		var h := minf(46.0, y1 - y)
+		var x := X0 - (60.0 if row % 2 == 1 else 0.0)
+		while x < X1:
+			var bx := maxf(x, X0)
+			var bw := minf(x + 118.0, X1) - bx
+			if bw > 2.0:
+				var tone := Color(stone).lightened(rng.randf_range(-0.06, 0.08))
+				_rect(bx + 1.5, y + 1.5, bw - 3.0, h - 3.0, "#" + tone.to_html(false))
+				_rect(bx + 1.5, y + 1.5, bw - 3.0, 3, "#FFFFFF", 'opacity="0.18"')
+			x += 120.0
+		y += 48.0
+		row += 1
+
+
+# A modern concrete frame (Masson's four-storey blocks): piers and floor slabs in pale concrete,
+# each bay filled with windows in white frames, a Juliet rail across the lower half.
+func _frame_upper(top: float, belt: float) -> void:
+	var concrete: String = k.get("concrete", "#D9D0BE")
+	var dark := "#" + Color(concrete).darkened(0.25).to_html(false)
+	_rect(X0, top, X1 - X0, belt - top + 4, "#4E5A62")
+	var piers: Array = k.get("frame_piers", [X0, X1 - 30.0])
+	var floors: int = k.floors
+	for f in range(1, floors):
+		var fy := _fb(f) - 248.0
+		for i in piers.size() - 1:
+			var a: float = piers[i] + 30.0
+			var b: float = piers[i + 1]
+			_rect(a, fy, b - a, 230, "url(#glass)")
+			_path("M%s %s l%s 0 l%s %s l%s 0 z" % [_n(a + (b - a) * 0.5), _n(fy), _n((b - a) * 0.12), _n(-(b - a) * 0.18), _n(230), _n(-(b - a) * 0.12)], "#FFFFFF", 'opacity="0.18"')
+			var panes := maxi(int((b - a) / 90.0), 2)
+			for p in range(0, panes + 1):
+				_rect(a + (b - a) * p / float(panes) - 3.0, fy, 6, 230, "#F2F0EA")
+			_rect(a, fy + 120, b - a, 6, "#F2F0EA")
+			if season == "autumn" and not night:
+				if not windows.has(k.name):
+					windows[k.name] = []
+				windows[k.name].append({"pane": [a + 4, fy + 4, b - a - 8, 222], "bar_y": fy + 120, "trim": "#F2F0EA", "lit": false, "flower_box": false})
+			if k.get("juliets", false):
+				_juliet(a + 10, b - a - 20, fy + 228)
+		_rect(X0, _fb(f) - 18, X1 - X0, 26, concrete, _stroke(dark, 1.5))
+		_rect(X0, _fb(f) - 18, X1 - X0, 4, "#FFFFFF", 'opacity="0.3"')
+		_snow(X0, X1 - X0, _fb(f) - 18)
+	for p: float in piers:
+		_rect(p, top, 30, belt - top, concrete, _stroke(dark, 1.5))
+		_rect(p, top, 6, belt - top, "#FFFFFF", 'opacity="0.25"')
+	_rect(X0 - 4, top - 14, X1 - X0 + 8, 18, concrete, _stroke(dark, 1.5))
+	_snow(X0 - 4, X1 - X0 + 8, top - 14)
+
+
+# The lilies painted big across a white wall (Masson's 2970–2990, the building of the Tim Hortons at 7e): long
+# stems, white calla flowers outlined in blue, a red and a white diagonal band crossing behind them.
+func _lily_mural(x0: float, x1: float, y0: float, y1: float) -> void:
+	for band: Array in [[0.15, "#FFFFFF"], [0.35, "#FFFFFF"], [0.55, "#C8343A"]]:
+		var bx: float = lerpf(x0, x1, band[0])
+		_path("M%s %s L%s %s" % [_n(bx), _n(y1), _n(bx + (y1 - y0) * 0.75), _n(y0)], "none", _stroke(band[1], 12) + ' opacity="0.85"')
+	for f: Array in [[0.14, 0.2, 2.1], [0.36, 0.42, 1.6], [0.66, 0.16, 2.3], [0.88, 0.4, 1.8]]:
+		var cx: float = lerpf(x0, x1, f[0])
+		var cy: float = lerpf(y0, y1, f[1])
+		var s: float = f[2]
+		_path("M%s %s Q%s %s %s %s" % [_n(cx), _n(cy + 40 * s), _n(cx + 10 * s), _n(cy + 120 * s), _n(cx - 6 * s), _n(y1)], "none", _stroke("#5E8A3A", 5 * s))
+		_path("M%s %s c%s %s %s %s %s %s c%s %s %s %s %s %s c%s %s %s %s %s %s z" % [_n(cx + 6 * s), _n(cy + 40 * s),
+			_n(-30 * s), _n(-10 * s), _n(-44 * s), _n(-46 * s), _n(-20 * s), _n(-70 * s),
+			_n(10 * s), _n(30 * s), _n(34 * s), _n(40 * s), _n(40 * s), _n(70 * s),
+			_n(-6 * s), _n(4 * s), _n(-14 * s), _n(4 * s), _n(-20 * s), _n(0)], "#FBFAF6", _stroke("#3E5E9A", 2.6))
+		_path("M%s %s c%s %s %s %s %s %s" % [_n(cx + 4 * s), _n(cy + 34 * s), _n(4 * s), _n(-16 * s), _n(8 * s), _n(-30 * s), _n(4 * s), _n(-44 * s)], "none", _stroke("#F2C230", 3 * s))
+		_path("M%s %s c-14 10 -30 30 -24 56" % [_n(cx - 4 * s), _n(cy + 60 * s)], "none", _stroke("#5E8A3A", 6 * s) + ' stroke-linecap="round"')
+
+
+# A bank of stone at a corner (Masson's 2933–2939 at 7e, a physiotherapy clinic now): two floors of big grey stone blocks, fluted
+# pilasters up the front, a deep cornice and its green copper flashing, wide windows in bronze frames, the door and its lamp
+# at the cut-off corner (`corner_side`: -1 left, 1 right).
+func _bank() -> void:
+	var top := _top()
+	var stone: String = k.get("stone", "#BDB8AE")
+	_ashlar(top, ground_y, stone)
+	_wall_shading(top)
+	# The cornice and its green copper top.
+	_rect(X0 - 8, top - 26, X1 - X0 + 16, 30, stone, _stroke("#8E887E", 1.5))
+	_rect(X0 - 8, top - 32, X1 - X0 + 16, 8, "#6E9A86", _stroke("#4E7A66", 1))
+	_rect(X0 - 4, top + 4, X1 - X0 + 8, 10, "#000000", 'opacity="0.2"')
+	var x := X0 + 10.0
+	while x < X1 - 10.0:
+		_rect(x, top - 4, 10, 8, "#" + Color(stone).darkened(0.15).to_html(false))
+		x += 22.0
+	_snow(X0 - 8, X1 - X0 + 16, top - 32)
+	# Pilasters, fluted, between the bays.
+	for p: float in k.get("pilasters", []):
+		_rect(p - 18, top, 36, ground_y - top - 10, "#" + Color(stone).lightened(0.06).to_html(false), _stroke("#8E887E", 1.5))
+		for fl in 4:
+			_rect(p - 12 + fl * 7.0, top + 30, 2, ground_y - top - 70, "#" + Color(stone).darkened(0.2).to_html(false))
+		_rect(p - 24, top, 48, 16, stone, _stroke("#8E887E", 1))
+	# Upstairs, small paired windows; downstairs, wide ones, each in a bronze frame with a transom.
+	for w in k.windows:
+		for i in 2:
+			var wx: float = w[0] + i * (w[1] / 2.0 + 6.0)
+			_rect(wx - 3, _win_y(1) + 30 - 3, w[1] / 2.0 - 6 + 6, 118, "#5E4A36")
+			_rect(wx, _win_y(1) + 30, w[1] / 2.0 - 6, 112, "url(#glass)")
+			_rect(wx, _win_y(1) + 30 + 40, w[1] / 2.0 - 6, 4, "#5E4A36")
+		_rect(w[0] - 4, _win_y(0) + 10, w[1] + 8, 180, "#4E3E2E")
+		_rect(w[0], _win_y(0) + 14, w[1], 172, "url(#glass)")
+		_rect(w[0], _win_y(0) + 56, w[1], 5, "#4E3E2E")
+		_rect(w[0] + w[1] / 2.0 - 2, _win_y(0) + 61, 4, 125, "#4E3E2E")
+		_glass_shine(w[0], _win_y(0) + 14, w[1], 172)
+		if season == "autumn" and not night:
+			if not windows.has(k.name):
+				windows[k.name] = []
+			windows[k.name].append({"pane": [w[0], _win_y(0) + 14, w[1], 172], "bar_y": _win_y(0) + 56, "trim": "#4E3E2E", "lit": false, "flower_box": false})
+		_rect(w[0] - 12, _win_y(0) + 190, w[1] + 24, 10, "#" + Color(stone).darkened(0.1).to_html(false), _stroke("#8E887E", 1))
+	split = out.size()
+	# The door at the corner, under its pediment, a lamp on its post beside it.
+	var side: float = k.get("corner_side", 1.0)
+	var dx: float = X1 - 70.0 if side > 0.0 else X0 + 70.0
+	_rect(dx - 46, _fb(0) - 230, 92, ground_y - _fb(0) + 230, "#" + Color(stone).darkened(0.1).to_html(false), _stroke("#8E887E", 1.5))
+	_rect(dx - 36, _fb(0) - 216, 72, ground_y - _fb(0) + 210, "#3A3028")
+	_rect(dx - 30, _fb(0) - 210, 60, 110, "url(#glass)")
+	_path("M%s %s L%s %s L%s %s Z" % [_n(dx - 56), _n(_fb(0) - 230), _n(dx), _n(_fb(0) - 270), _n(dx + 56), _n(_fb(0) - 230)], stone, _stroke("#8E887E", 1.5))
+	var lx := dx - side * 92.0
+	_rect(lx - 3, ground_y - 250, 6, 250, "#1A1A1A")
+	_rect(lx - 9, ground_y - 282, 18, 32, "#ECE7DA", _stroke("#1A1A1A", 2))
+	_path("M%s %s l12 -10 l12 10 z" % [_n(lx - 12), _n(ground_y - 282)], "#1A1A1A")
+	_circle(lx, ground_y - 266, 26, "url(#glow)")
 
 
 # ── What every lane entrance seen from the street gets ───────────────────────

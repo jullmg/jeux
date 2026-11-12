@@ -93,7 +93,7 @@ func _build(scene: Node2D) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(scene.seed_value) + 777
 	_fall_of_night(NIGHT)
-	var moon_at := Vector2(scene._street_width * 0.5, 118.0)
+	var moon_at := Vector2(scene._moon_x(), 118.0)
 	var moon := _Moon.new()
 	moon.where = moon_at
 	moon.shade = NIGHT
@@ -191,7 +191,7 @@ func _dress_the_houses(scene: Node2D, rng: RandomNumberGenerator) -> void:
 		# A lane mouth gets nothing at all: it stays a black hole, and Charlotte won't go in there tonight.
 		if art.begins_with("ruelle"):
 			continue
-		var house_gives := HalloweenNight.gives(str(scene.street_key), art, i)
+		var house_gives: bool = scene.gives_candy and HalloweenNight.gives(str(scene.street_key), art, i)
 		# The glass of this house, lit or dark. It is painted over its facade but UNDER everything the house draws
 		# in front of its windows (`StreetScene.over_tex`), so its outdoor stair, its balconies and their railings
 		# still pass in front of the light instead of being covered by it.

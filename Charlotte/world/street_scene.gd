@@ -46,6 +46,9 @@ var seed_value := 2026
 ## Short name used in corner and lane hand-overs ("6e", "5e", "holt", "dandurand"): Transition.arrive keys
 ## are "<street>_from_<where>".
 var street_key := ""
+## Whether its houses hand out candy on Halloween night (lit windows, decorations, doorbells). Off for a street of shops,
+## closed at that hour (Rue Masson): its windows stay dark and nobody answers.
+var gives_candy := true
 
 var _street_width := 0.0
 var _starts: Array[float] = []
@@ -895,6 +898,8 @@ func _build_halloween() -> void:
 	if not Halloween.night():
 		return
 	HalloweenNight.build(self)
+	if not gives_candy:
+		return
 	for i in layout.size():
 		var art: String = layout[i]
 		if cross_streets.has(art) or NO_CANDY.has(art):
@@ -913,6 +918,12 @@ func _build_halloween() -> void:
 		if gives:
 			add_child(QuestMark.make(Vector2(x, HOUSE_BASE_Y - 262.0), func() -> bool:
 				return Halloween.night() and not Halloween.knocked().has(key), 0.62))
+
+
+## Where the moon stands on Halloween night: over the middle of the street, unless a street of tall buildings puts it over
+## a low one (it is drawn over everything, so it must be in the sky above the roofs).
+func _moon_x() -> float:
+	return _street_width * 0.5
 
 
 # She rings: a lit, decorated house hands out candy (once), a dark one is already asleep.

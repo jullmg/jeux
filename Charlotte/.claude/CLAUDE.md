@@ -86,6 +86,23 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `fence: "wood"` / `"chain"` (`_wood_fence`, `_chain_fence`), `frame` (the colour of `_casement` windows), and `door_x`
   (any kind of building can name its door for `doors.json`, so it gets its doorbell on Halloween night). Helpers: `_casement`,
   `_glass_rail`, `_hydrangea`, `_cedar`, `_lantern_post`.
+- **Rue Masson** (Julien: one scene per side of each block, 1re → 9e Avenue, built block by block from `reference/streetview/`,
+  INDEX.md "Rue Masson 2000–3400"): `scenes/masson.gd`, one script for them all, `@export block` ("6e_7e") and `side`
+  ("impair" = the north side, seen from the south sidewalk, the lower avenue on the left; "pair" = the south side, the higher
+  avenue on the left), each a `.tscn` (`masson_6e_7e_impair.tscn`, `masson_6e_7e_pair.tscn`), `street_key`
+  "masson_<block>_<side>". Its data is `BLOCKS` ("<block>_<side>": layout with the corner across each avenue at both ends,
+  `avenues` [gap, name, width], trees with `tree_shift` clear of the signs, lamps…, `moon_at`, `signs` = shop names as labels
+  on the sign band (302 above the facade's foot), `panels` = small boards on a wall): **a new block = one BLOCKS entry per
+  side, its facades in the generator, two .tscn files, and a line each in PlaceLabel, DebugMenu and `TownMap._here`.** The
+  crosswalk over Masson at either corner goes to the other side of the block (`_add_across`, keys
+  "masson_<block>_<side>_from_<gap>"); the avenues aren't turned into yet, and Masson isn't reached from her block yet (only
+  the debug menu). Facades: the generator's "Rue Masson" section, kinds `commerce` (`_commerce`: brick or `upper: "frame"`
+  flats over a row of `_shopfront`s with sign bands, awnings, gooseneck lamps, fruit crates, a residential door, the lily
+  mural) and `bank` (stone), plus `*_cote` side walls of the corners across the avenues. Built so far: 6e–7e (2901–2933
+  north with the Église Saint-Esprit's side and 3001's across 7e; 2902–2970 south with 2892 and 3000 across). The map
+  puts her at its foot, between the avenues. On Halloween night the shops are shut (`StreetScene.gives_candy = false`: dark
+  windows, no decorations, no doorbells) and the moon rises over the lowest building (`StreetScene._moon_x()`, which
+  `HalloweenNight` reads; the middle of the street by default).
 - The 6e/Holt corner follows `reference/coin_holt/6eme_coin_holt.png`, `reference/coin_holt/holt_coin_6eme.png` and `reference/ruelle/entree_ruelle_6eme_coin_holt.png`:
   generator kinds `corner_holt` (`coin_holt`: long brown three-storey, stepped white lintels, diamonds, the beige
   corrugated annex with its shingle awning, the red corner window), `ohbon` (dépanneur Oh Bon! on Holt: red storefront,
