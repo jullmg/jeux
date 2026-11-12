@@ -32,7 +32,12 @@ never copy one into the game or commit it.
 
 Open the main picture, then the close-ups if there are any. Write down, from the photo, not from habit:
 
-- Storeys, width against height, roof line (flat parapet, cornice, pediment), chimneys.
+- Storeys, width against height, roof line (flat parapet, cornice, pediment), chimneys. **Count the storeys on the main
+  picture only, never on the close-ups**: their two rows overlap by about half, so the same balcony, canopy or row of
+  windows shows in both, and a duplex laid out as `r1` over `r0` looks like a triplex (it happened: eight duplexes across
+  6e Avenue were first drawn with three floors). Count the doors up the facade and the balconies over the street door;
+  check the height against the neighbours in the same picture (a duplex beside a triplex is a floor lower); a mansard or
+  a tall parapet is the top of the last floor, not a floor of its own. Write the number down before drawing.
 - Brick: colours (several, mixed), mortar colour, any stone or painted base, soffits.
 - Windows: how many per floor, their x positions, style (hung, casement, arched), lintels and sills.
 - Door(s): position, style, surround, lamps, number plate, awning.

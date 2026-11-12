@@ -24,7 +24,8 @@ How to use it (for an AI agent or a person):
 - **close-ups**: with `--detail`, six narrow-view (30°) pictures of the same facade in `<street>/detail/`, named
   `…_r<row>c<column>.jpg` (row 0 = ground floor, row 1 = upper floors and cornice; columns left to right, about
   ±14° and a little overlapping). The main picture is 90° wide and 640 px: use the close-ups for any detail (bricks,
-  number plates, railings, door and window styles).
+  number plates, railings, door and window styles). **Count storeys on the main picture, never on the close-ups**: their
+  two rows overlap by about half, so one balcony shows in both and a duplex looks like a triplex.
 - The other side of each street and the views down the street (for the cross-street vistas) follow in their own tables.
 - **The pictures show one day (often Halloween): decorations, bikes, cars, bins, scaffolding and other temporary or unusual
   objects are not part of the building and must not be drawn** (details in the guide below).

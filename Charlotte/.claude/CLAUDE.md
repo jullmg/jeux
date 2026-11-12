@@ -71,9 +71,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   pressed cornice), 5615, the lane near Dandurand (`ruelle_impair_dandurand`, kind `lane_odd` "dandurand": asphalt, the one-way
   sign, a chain-link fence), 5601 (the gabled block of the 1990s, kind `gables`), Rue Dandurand and the corner across it
   (`impair_dandurand_sud`). Each `impair_*` entry of the generator names its pictures. She gets there by the crosswalk over
-  6e Avenue at either corner of `main.tscn` (`_add_across`) and comes back the same way; her lanes are on the other side,
-  so these two only get a line from her (`NOT_OUR_LANE`), and the cross streets don't turn (nothing is built east of
-  6e yet). The vistas down 6e from Holt and from Dandurand show these real facades (`_walls_along("res://scenes/sixieme_est.gd", …)`).
+  6e Avenue at either corner of `main.tscn` (`_add_across`) and comes back the same way; its corners turn onto Holt and
+  Dandurand east of 6e (the stretches of `holt.tscn` and `dandurand.tscn` across 6e from her block, keys "holt_from_6e_est",
+  "dandurand_from_6e_est"), and from those stretches back round onto it ("6e_est_from_holt", "6e_est_from_dandurand"):
+  `_add_corner(…, side)` takes the stretch left (-1) or right (1) of the gap instead of her block's. Her lanes are on the
+  other side, so these two only get a line from her (`NOT_OUR_LANE`). Duplex or triplex was counted on the main pictures
+  (5661, 5621, 5615 and 5601 have three floors, the rest two): see the note in the guide about the close-ups. The vistas down 6e from Holt and from Dandurand show these real facades (`_walls_along("res://scenes/sixieme_est.gd", …)`).
   **What the odd side shares is generator options any plex can take** (all off by default, so no other house moves):
   `parapet: "mansard"` (`_mansard`: slate face between two brick fire walls) and `"corbel"` (`_corbel_parapet`: brick
   dentils, raised middle), `canopy` (`_alu_canopy`: the deep white aluminium canopy over a top balcony, on brackets, no
@@ -151,6 +154,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   Where another scene shows the far side of our own street (6e Avenue and `sixieme_est`), that second crosswalk leads there
   instead: `_add_corner(cs, scene, key, false)` (the turn only) plus `_add_across(cs, scene, key)` — she looks both ways at the
   curb and the far side loads with her at its matching corner (keys "6e_est_from_6e_holt", "6e_from_6e_est_dandurand", …).
+  Those crosswalks are click-only (`DoorSpot.click_only`): ↑ at the curb always turns the corner.
   `CrossStreet.guard = true` (the school's crosswalk on Dandurand) adds a `CrossingGuard`
   (`world/crossing_guard.gd`, neon-yellow coat and cap) who steps out with her ARRÊT paddle while Charlotte crosses.
   `Bubble.say(parent, at, text)` shows a speech bubble anywhere (same speaker = replaces, others stack above; it stays at least its `seconds` but always long enough to be read, `Bubble.reading_time`: about twelve letters a second, up to 10 s, because Charlotte's age reads slowly); `DoorSpot` takes an optional `approach` and `condition`.

@@ -301,9 +301,9 @@ const HOUSES := [
 		"stair": [Vector2(190, 336), Vector2(60, 380), Vector2(10, 520), Vector2(90, 696)],
 		"fence": "black", "basement": [520.0],
 	},
-	# 5699, three floors, red brick over a ground floor of grey brick, a canvas awning over its door (5699…, 5703… and close-ups).
+	# 5699, a duplex: red brick upstairs over a ground floor of grey brick, a canvas awning over its door (5699…, 5703… and close-ups).
 	{
-		"name": "impair_5699", "number": "5699", "floors": 3,
+		"name": "impair_5699", "number": "5699",
 		"bricks": ["#9A3F33", "#A8473A", "#8E3A2F", "#B4513F", "#94402F"], "mortar": "#CDBFB0",
 		"lower_stone": true, "stones": ["#B8B2A6", "#C4BEB2", "#A8A296", "#BEB8AC"], "stone_mortar": "#8E887E",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D2C6", "lintel_dark": "#A39D93",
@@ -321,7 +321,7 @@ const HOUSES := [
 	},
 	# 5685, painted white, a balcony on the first floor only, no outdoor stair (5679…, 5685…, 5691… and close-ups).
 	{
-		"name": "impair_5685", "number": "5685", "floors": 3,
+		"name": "impair_5685", "number": "5685",
 		"bricks": ["#ECEAE4", "#E4E1DA", "#F2F0EB", "#DEDAD2", "#E8E5DF"], "mortar": "#CFCAC0",
 		"trim": "#4A3E34", "trim_dark": "#2E261F", "lintel": "#E6E3DC", "lintel_dark": "#B9B5AC", "lintel_style": "none",
 		"door": "#3A332C", "door_dark": "#1E1A16", "door_style": "slit", "parapet": "flat",
@@ -330,7 +330,7 @@ const HOUSES := [
 	},
 	# 5679, tan brick, its balconies on the right under a dark metal canopy (5677…, 5679… and close-ups).
 	{
-		"name": "impair_5679", "number": "5679", "floors": 3,
+		"name": "impair_5679", "number": "5679",
 		"bricks": ["#B08A62", "#A47E58", "#BC966E", "#9A7650", "#C29C74"], "mortar": "#D8CDBE",
 		"trim": "#3A3A3C", "trim_dark": "#1E1E20", "lintel": "#C9BBA6", "lintel_dark": "#9A8C76",
 		"door": "#2B2B2E", "door_dark": "#111111", "door_style": "slit", "canopy": "#3A3A3C", "parapet": "flat",
@@ -339,7 +339,7 @@ const HOUSES := [
 	},
 	# 5677, red-brown brick, a white door between its two windows, the stair curling down to the right (5677… and close-ups).
 	{
-		"name": "impair_5677", "number": "5677", "floors": 3,
+		"name": "impair_5677", "number": "5677",
 		"bricks": ["#8E5640", "#9A6048", "#7E4A36", "#A46A50", "#86503C"], "mortar": "#CFC2B0",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D9D2C4", "lintel_dark": "#A39A8A",
 		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "double", "canopy": "#F2F0EA", "parapet": "flat",
@@ -349,7 +349,7 @@ const HOUSES := [
 	},
 	# 5669, red brick, a dark door under its iron balconies and their canopy, the stair down to the left (5669…, 5671… and close-ups).
 	{
-		"name": "impair_5669", "number": "5669", "floors": 3,
+		"name": "impair_5669", "number": "5669",
 		"bricks": ["#A0503A", "#AA5A42", "#924632", "#B4624A", "#9A4C36"], "mortar": "#C8BBAA",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D9D2C4", "lintel_dark": "#A39A8A",
 		"door": "#2B2B2E", "door_dark": "#111111", "door_style": "grille", "canopy": "#F2F0EA", "parapet": "flat",
@@ -371,7 +371,7 @@ const HOUSES := [
 	# 5655, red brick under a mansard of dark slate, a white balcony at each window, a white stone pilaster down the middle, no
 	# outdoor stair (5649…, 5653…, 5665… and close-ups).
 	{
-		"name": "impair_5655", "floors": 3,
+		"name": "impair_5655",
 		"bricks": ["#A84E38", "#B25840", "#9A4632", "#BC6248", "#A04A34"], "mortar": "#D8CABA",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#F2F0EA", "lintel_dark": "#C2BDB2",
 		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "oval", "metal": "#F5F5F2", "metal_light": true,
@@ -381,7 +381,7 @@ const HOUSES := [
 	},
 	# 5649, red-brown brick, iron balconies under a white canopy, an iron stair curling down to the left (5649…, 5653… and close-ups).
 	{
-		"name": "impair_5649", "number": "5649", "floors": 3,
+		"name": "impair_5649", "number": "5649",
 		"bricks": ["#9A5440", "#A65E48", "#8C4C38", "#B06850", "#945038"], "mortar": "#D2C4B2",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#E8E2D6", "lintel_dark": "#B3AA9A",
 		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "leaded", "canopy": "#F2F0EA", "parapet": "flat", "ornate": true,
@@ -406,7 +406,7 @@ const HOUSES := [
 	},
 	# 5631, red brick, red and white striped awnings over its balconies, the stair down to the left (5623…, 5631…, 5635… and close-ups).
 	{
-		"name": "impair_5631", "number": "5631", "floors": 3,
+		"name": "impair_5631", "number": "5631",
 		"bricks": ["#A85238", "#B25C42", "#9A4A32", "#BC664A", "#A24E36"], "mortar": "#D4C6B4",
 		"trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#E4DCCB", "lintel_dark": "#B3A88F",
 		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel", "stripe_awnings": true, "parapet": "flat",
