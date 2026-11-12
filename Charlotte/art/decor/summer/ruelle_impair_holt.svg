@@ -1,7 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="640.0" height="700.0" viewBox="0 0 640.0 700.0">
 <defs><linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4E0EC"/><stop offset="1" stop-color="#557A90"/></linearGradient><linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.1"/><stop offset="1" stop-color="#000000" stop-opacity="0.16"/></linearGradient><radialGradient id="glow"><stop offset="0" stop-color="#FFE9A8" stop-opacity="0.75"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient><linearGradient id="warm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7B5"/><stop offset="1" stop-color="#D98E4A"/></linearGradient><linearGradient id="drop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1408" stop-opacity="0.3"/><stop offset="1" stop-color="#2A1408" stop-opacity="0"/></linearGradient><linearGradient id="sun" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE6B8" stop-opacity="0.14"/><stop offset="0.5" stop-color="#FFE6B8" stop-opacity="0"/><stop offset="1" stop-color="#1A0C14" stop-opacity="0.12"/></linearGradient><radialGradient id="pumpkin_glow"><stop offset="0" stop-color="#FFB347" stop-opacity="0.6"/><stop offset="1" stop-color="#FFB347" stop-opacity="0"/></radialGradient></defs>
 <defs><linearGradient id="lanesky" x1="0" y1="0" x2="0" y2="1"><stop offset="0.0" stop-color="#60a7e5" stop-opacity="0.0"/><stop offset="0.3" stop-color="#71b5eb" stop-opacity="1.0"/><stop offset="0.5" stop-color="#8cc4ed" stop-opacity="1.0"/><stop offset="0.8" stop-color="#a7d3f0" stop-opacity="1.0"/><stop offset="1.0" stop-color="#c1e1f1" stop-opacity="1.0"/></linearGradient></defs>
-<rect x="30.0" y="0.0" width="580.0" height="500.0" fill="url(#lanesky)" />
+<rect x="250.0" y="0.0" width="140.0" height="500.0" fill="url(#lanesky)" />
+<rect x="30.0" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.0"/>
+<rect x="591.2" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.0"/>
+<rect x="48.3" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.0"/>
+<rect x="572.8" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.0"/>
+<rect x="66.7" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.1"/>
+<rect x="554.5" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.1"/>
+<rect x="85.0" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.2"/>
+<rect x="536.2" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.2"/>
+<rect x="103.3" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.2"/>
+<rect x="517.8" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.2"/>
+<rect x="121.7" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.3"/>
+<rect x="499.5" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.3"/>
+<rect x="140.0" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.4"/>
+<rect x="481.2" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.4"/>
+<rect x="158.3" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.5"/>
+<rect x="462.8" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.5"/>
+<rect x="176.7" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.6"/>
+<rect x="444.5" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.6"/>
+<rect x="195.0" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.7"/>
+<rect x="426.2" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.7"/>
+<rect x="213.3" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.8"/>
+<rect x="407.8" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.8"/>
+<rect x="231.7" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.9"/>
+<rect x="389.5" y="0.0" width="18.8" height="500.0" fill="url(#lanesky)" opacity="0.9"/>
 <path d="M318.0 482.1 L348.5 482.1 L334.0 470.0 L334.0 470.0 Z" fill="#c9ced1" />
 <path d="M314.3 484.9 L351.9 484.9 L348.5 482.1 L318.0 482.1 Z" fill="#c4c6c6" />
 <path d="M289.2 449.1 L295.6 452.1 L295.6 482.1 L289.2 484.1 Z" fill="#b8b0b0" />
