@@ -709,10 +709,10 @@ const HOUSES := [
 		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
 	},
-	# The south side, 8e (left) to 7e (right). Across 8e: the next block's corner, its side.
+	# The south side, 8e (left) to 7e (right). Across 8e: the side of 3086, brick on two floors (3076…).
 	{
-		"name": "masson_3070_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
-		"bricks": ["#C8A27A", "#BC966E", "#D4AE86", "#B08A62", "#CCA680"], "mortar": "#E6DCCB",
+		"name": "masson_3070_cote", "kind": "side_wall", "width": 560.0, "floors": 2,
+		"bricks": ["#A4553E", "#B05E48", "#984E38", "#B86650", "#A0523C"], "mortar": "#CDBFB0",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
 	},
 	# 3038–3040, at 8e: red brick on three floors (3040…, 3038…).
@@ -869,6 +869,137 @@ const HOUSES := [
 	{
 		"name": "masson_2790_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
 		"bricks": ["#C8A27A", "#BC966E", "#D4AE86", "#B08A62", "#CCA680"], "mortar": "#E6DCCB",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
+	},
+	# ── Rue Masson, 8e to 9e Avenue ──
+	# The north side, 8e (left) to 9e (right). Across 8e: the end of the low painted wall (3053…).
+	{
+		"name": "masson_3053_cote", "kind": "side_wall", "width": 520.0, "floors": 2,
+		"bricks": ["#D9C4B6", "#D2BDAF", "#DECBBD"], "mortar": "#C9B4A6", "parapet": "flat", "windows": [], "basement": [], "downspout": -1.0,
+	},
+	# 3071–3101, at 8e: two floors, the ground floor painted pale pink with big plants, buff brick above (3071…, 3081…, 3091…).
+	{
+		"name": "masson_3071", "kind": "commerce", "width": 1100.0, "floors": 2,
+		"bricks": ["#D2B48A", "#C8A87E", "#DABE94", "#BE9E74"], "mortar": "#EDE3D2", "parapet": "flat",
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[120.0, 130.0], [420.0, 130.0], [740.0, 130.0]],
+		"ground": "painted", "paint": "#EBD3CF", "mural": "lilies", "mural_x0": 30.0,
+		"shops": [{"x0": 760.0, "x1": 1070.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 1000.0}], "basement": [],
+	},
+	# 3103–3105, Méga Vrac: grey-buff brick on three floors, its blue sign (3103…).
+	{
+		"name": "masson_3103", "kind": "commerce", "width": 760.0, "floors": 3,
+		"bricks": ["#B9AE9A", "#AFA490", "#C3B8A4", "#A69B88"], "mortar": "#DCD4C6", "parapet": "flat",
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "windows": [[90.0, 120.0], [330.0, 120.0], [560.0, 120.0]],
+		"shops": [{"x0": 30.0, "x1": 730.0, "sign": "#1F4E9A", "frame": "#1E1E20", "door": 120.0}], "basement": [],
+	},
+	# 3107–3109: buff brick on three floors, a tall red sign hung out at the corner (3103…, 3107…).
+	{
+		"name": "masson_3107", "kind": "commerce", "width": 620.0, "floors": 3,
+		"bricks": ["#CDB088", "#C2A47C", "#D6BA92", "#B89A72"], "mortar": "#E6DCCB", "parapet": "flat",
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[90.0, 110.0], [380.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 590.0, "sign": "#C8202A", "frame": "#2B2B2E", "door": 300.0}], "basement": [],
+	},
+	# 3115–3121, Quincaillerie A. Lalonde: brown brick on three floors, its white sign (3107…, 3115…).
+	{
+		"name": "masson_3115", "kind": "commerce", "width": 800.0, "floors": 3,
+		"bricks": ["#8E6448", "#9A6E52", "#825A40", "#A2765A"], "mortar": "#C9B89E", "parapet": "corbel",
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "windows": [[90.0, 110.0], [340.0, 110.0], [580.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 770.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 400.0, "lamps": 2}], "basement": [],
+	},
+	# 3125: grey stone on three floors (3127…).
+	{
+		"name": "masson_3125", "kind": "commerce", "width": 640.0, "floors": 3, "upper": "stone", "upper_stone": "#A9A59D",
+		"bricks": ["#A9A59D", "#B2AEA6"], "mortar": "#8E8A82", "parapet": "flat",
+		"lintel": "#C9C5BC", "lintel_dark": "#8E8A82", "windows": [[90.0, 110.0], [380.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 610.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 520.0}], "basement": [],
+	},
+	# 3127–3129: red brick on two floors, a shop under a yellow sign (3127…).
+	{
+		"name": "masson_3127", "kind": "commerce", "width": 600.0, "floors": 2,
+		"bricks": ["#A04A3A", "#AE5442", "#943F31", "#B85E4A"], "mortar": "#CDBFB0", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 130.0], [360.0, 130.0]],
+		"shops": [{"x0": 30.0, "x1": 570.0, "sign": "#F2C230", "frame": "#2B2B2E", "door": 500.0}], "basement": [],
+	},
+	# 3131–3135: the pub, its front of rough rubble stone on two floors, black frames (3127…, 3131…).
+	{
+		"name": "masson_3131", "kind": "commerce", "width": 680.0, "floors": 2, "upper": "rubble",
+		"bricks": ["#A89F92", "#B7AFA2"], "mortar": "#8E8A82", "parapet": "flat",
+		"lintel": "#8E8A82", "lintel_dark": "#5E5A54", "trim": "#1E1E20", "trim_dark": "#0E0E10",
+		"windows": [[110.0, 130.0], [420.0, 130.0]],
+		"shops": [{"x0": 30.0, "x1": 650.0, "sign": "#1E1E20", "frame": "#1E1E20", "door": 340.0}], "basement": [],
+	},
+	# 3139, at 9e: red brick on two floors, a café behind its black front (3139…).
+	{
+		"name": "masson_3139", "kind": "commerce", "width": 860.0, "floors": 2,
+		"bricks": ["#A4553E", "#B05E48", "#984E38", "#B86650"], "mortar": "#CDBFB0", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 110.0], [330.0, 110.0], [580.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 830.0, "sign": "#1E1E20", "frame": "#1E1E20", "door": 120.0}], "basement": [],
+	},
+	# Across 9e: the next block's corner, its side.
+	{
+		"name": "masson_3151_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#C8A27A", "#BC966E", "#D4AE86", "#B08A62"], "mortar": "#E6DCCB",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
+	},
+	# The south side, 9e (left) to 8e (right). Across 9e: the next block's corner, its side.
+	{
+		"name": "masson_3150_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F"], "mortar": "#CDBFB0",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
+	},
+	# 3132–3138, at 9e: red brick on three floors, balconies (3132…, 3138…).
+	{
+		"name": "masson_3132", "kind": "commerce", "width": 800.0, "floors": 3,
+		"bricks": ["#A8503E", "#B05A46", "#9A4636", "#B86450"], "mortar": "#D0C4B6", "parapet": "corbel",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 110.0], [330.0, 110.0], [570.0, 110.0]],
+		"projecting": [[40.0, 260.0]],
+		"shops": [{"x0": 30.0, "x1": 770.0, "sign": "#1F4E9A", "frame": "#1E1E20", "door": 700.0}], "basement": [],
+	},
+	# 3128–3130, Bossa: two floors clad in white, wide windows, its black sign (3132…).
+	{
+		"name": "masson_3128", "kind": "commerce", "width": 640.0, "floors": 2, "upper": "siding", "siding": "#F0EFEA",
+		"bricks": ["#E8E6E0"], "mortar": "#C9C5BC", "parapet": "flat",
+		"lintel": "#E8E6E0", "lintel_dark": "#B9B5AC", "lintel_style": "none", "windows": [[90.0, 200.0], [350.0, 200.0]],
+		"shops": [{"x0": 30.0, "x1": 610.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 300.0}], "basement": [],
+	},
+	# 3126: brick on two floors, a shop under a red sign (3132…).
+	{
+		"name": "masson_3126", "kind": "commerce", "width": 620.0, "floors": 2,
+		"bricks": ["#9A5A44", "#A6644E", "#8E5040", "#AE6C54"], "mortar": "#CDBFB0", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 130.0], [360.0, 130.0]],
+		"shops": [{"x0": 30.0, "x1": 590.0, "sign": "#C8202A", "frame": "#2B2B2E", "door": 520.0, "awning": "#C8202A"}], "basement": [],
+	},
+	# 3112–3122, Poke Monster: two floors, the upper one clad in ribbed white metal, the ground floor's wall papered with posters
+	# left out (3108…, 3124…).
+	{
+		"name": "masson_3112", "kind": "commerce", "width": 820.0, "floors": 2, "upper": "siding", "siding": "#ECEBE6",
+		"bricks": ["#E8E6E0"], "mortar": "#C9C5BC", "parapet": "flat", "trim": "#F2F0EA",
+		"lintel": "#E8E6E0", "lintel_dark": "#B9B5AC", "lintel_style": "none", "windows": [[160.0, 200.0], [500.0, 140.0]],
+		"shops": [{"x0": 30.0, "x1": 790.0, "sign": "#1A1A1A", "frame": "#B01A22", "door": 700.0}], "basement": [],
+	},
+	# 3104–3110: buff brick on two floors under a pressed cornice (3108…).
+	{
+		"name": "masson_3108", "kind": "commerce", "width": 740.0, "floors": 2,
+		"bricks": ["#CDB088", "#C2A47C", "#D6BA92", "#B89A72"], "mortar": "#E6DCCB", "parapet": "",
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[90.0, 120.0], [320.0, 120.0], [540.0, 120.0]],
+		"shops": [{"x0": 30.0, "x1": 710.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 650.0}], "basement": [],
+	},
+	{
+		"name": "masson_3102", "kind": "masson_lot", "lot_style": "murals", "width": 420.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	# 3076–3100, at 8e: a newer building on two floors, brick with tall round-arched windows and a bay of grey metal panels (3076…).
+	{
+		"name": "masson_3086", "kind": "commerce", "width": 1200.0, "floors": 2,
+		"bricks": ["#A4553E", "#B05E48", "#984E38", "#B86650", "#A0523C"], "mortar": "#CDBFB0", "parapet": "flat",
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "windows": [], "round_windows": [[120.0, 180.0], [880.0, 180.0]],
+		"metal_panels": [[380.0, 720.0]],
+		"shops": [{"x0": 30.0, "x1": 1170.0, "sign": "#3A3A3C", "frame": "#3A3A3C", "door": 200.0}], "basement": [],
+	},
+	# Across 8e: the side of 3038, red brick on three floors.
+	{
+		"name": "masson_3038_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#9A4A3A", "#A85442", "#8E4234", "#B05C48"], "mortar": "#C9BBAC",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
 	},
 	# Across 5e: the side of Dollarama's building, buff brick (2840…).
@@ -4378,6 +4509,10 @@ func _commerce() -> void:
 			_ashlar(top, belt + 4.0, k.get("upper_stone", "#B5B2AA"))
 		elif k.get("upper", "brick") == "stucco":
 			_stucco(top, belt + 4.0, k.stucco)
+		elif k.get("upper", "brick") == "rubble":
+			_rubble(top, belt + 4.0)
+		elif k.get("upper", "brick") == "siding":
+			_siding(top, belt + 4.0, k.get("siding", "#ECEBE6"))
 		else:
 			_bricks(top, belt + 4.0)
 		_wall_shading(top)
@@ -4390,6 +4525,10 @@ func _commerce() -> void:
 				_scroll_parapet(top)
 			_:
 				_cornice(top)
+		for rw: Array in k.get("round_windows", []):
+			_round_window(rw[0], rw[1], top + 50.0, belt - 30.0)
+		for mp: Array in k.get("metal_panels", []):
+			_siding_panel(mp[0], mp[1], top, belt + 4.0)
 		if k.get("quoins", false):
 			_corner_quoins(X0, top, belt)
 			_corner_quoins(X1 - 44.0, top, belt)
@@ -4765,6 +4904,59 @@ func _scroll_parapet(top: float) -> void:
 		_circle(sx + side * 3.0, top - 24, 5, "#000000", 'opacity="0.15"')
 	_rect(cx - 50, top - 70, 100, 34, "#" + Color(brick).lightened(0.1).to_html(false), _stroke(k.lintel_dark, 1))
 	_snow(X0 - 4, X1 - X0 + 8, top - 14)
+
+
+# Rough rubble stone laid in a wall (3131…): irregular grey and buff stones in thick mortar, the light on their upper left.
+func _rubble(y0: float, y1: float) -> void:
+	_rect(X0, y0, X1 - X0, y1 - y0, "#8E8A82")
+	var tones := ["#B7AFA2", "#A89F92", "#C4BBAE", "#9C9286", "#BDB09C", "#A0988C"]
+	var y := y0 + 3.0
+	while y < y1 - 6.0:
+		var h := rng.randf_range(26.0, 44.0)
+		var x := X0 + rng.randf_range(-20.0, 0.0)
+		while x < X1:
+			var w := rng.randf_range(40.0, 90.0)
+			var a := Vector2(maxf(x, X0) + 3.0, y + rng.randf_range(0.0, 5.0))
+			var b := Vector2(minf(x + w, X1) - 3.0, y + rng.randf_range(0.0, 5.0))
+			var c := Vector2(b.x - rng.randf_range(0.0, 6.0), minf(y + h, y1) - rng.randf_range(2.0, 6.0))
+			var d := Vector2(a.x + rng.randf_range(0.0, 6.0), minf(y + h, y1) - rng.randf_range(2.0, 6.0))
+			if b.x - a.x > 8.0:
+				_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(a.x), _n(a.y), _n(b.x), _n(b.y), _n(c.x), _n(c.y), _n(d.x), _n(d.y)], tones[rng.randi_range(0, tones.size() - 1)])
+				_path("M%s %s L%s %s" % [_n(a.x), _n(a.y + 1), _n(b.x), _n(b.y + 1)], "none", _stroke("#FFFFFF", 2) + ' opacity="0.25"')
+			x += w
+		y += h
+
+
+# Ribbed metal siding over the whole upper floor (3112…, white over Poke Monster).
+func _siding(y0: float, y1: float, color: String) -> void:
+	_siding_panel(X0, X1, y0, y1, color)
+
+
+func _siding_panel(x0: float, x1: float, y0: float, y1: float, color := "#B9BDC1") -> void:
+	_rect(x0, y0, x1 - x0, y1 - y0, color)
+	var x := x0 + 4.0
+	while x < x1 - 2.0:
+		_rect(x, y0, 2.5, y1 - y0, "#000000", 'opacity="0.1"')
+		_rect(x + 2.5, y0, 1.5, y1 - y0, "#FFFFFF", 'opacity="0.25"')
+		x += 12.0
+	_rect(x0, y0, x1 - x0, 6, "#000000", 'opacity="0.12"')
+
+
+# A tall window with a round top, in a white frame (3086…): its glass, the fanlight bars, a sill.
+func _round_window(x: float, w: float, y0: float, y1: float) -> void:
+	var r := w / 2.0
+	var outer := "M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(x - 8), _n(y1), _n(y0 + r), _n(r + 8), _n(r + 8), _n(x + w + 8), _n(y0 + r), _n(y1)]
+	_path(outer, "#F2F0EA", _stroke("#B9B5AC", 1.5))
+	var glass := "M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(x), _n(y1 - 4), _n(y0 + r + 6), _n(r), _n(r), _n(x + w), _n(y0 + r + 6), _n(y1 - 4)]
+	_path(glass, "url(#glass)")
+	_rect(x, y0 + r + 6, w, 5, "#F2F0EA")
+	for i in range(1, 4):
+		var a := PI + PI * i / 4.0
+		_path("M%s %s L%s %s" % [_n(x + r), _n(y0 + r + 6), _n(x + r + cos(a) * r), _n(y0 + r + 6 + sin(a) * r)], "none", _stroke("#F2F0EA", 4))
+	_rect(x + r - 2, y0 + r + 6, 4, y1 - y0 - r - 10, "#F2F0EA")
+	_glass_shine(x, y0 + r + 6, w, y1 - y0 - r - 10)
+	_rect(x - 14, y1, w + 28, 10, "#D8D2C6", _stroke("#9E968A", 1))
+	_snow(x - 14, w + 28, y1)
 
 
 # A low wall along the sidewalk, one storey, painted with big flowers, smiling faces and round medallions (3043…, 3053…), the
@@ -5251,13 +5443,29 @@ func _mural_passage() -> void:
 	var g := ground_y
 	_bricks(g - 780.0, g - 120.0)
 	var colors := ["#E85FA0", "#3D8BD9", "#F2C230", "#E8812E", "#8E5FC4", "#4FA34A", "#E04A3A", "#5EC8C0"]
-	for i in 14:
-		var c: String = colors[i % colors.size()]
-		var x := rng.randf_range(X0, X1)
-		var y := rng.randf_range(g - 700.0, g - 160.0)
-		var r := rng.randf_range(50.0, 120.0)
-		_path("M%s %s q%s %s %s %s q%s %s %s %s q%s %s %s %s z" % [_n(x - r), _n(y), _n(r * 0.3), _n(-r * 1.1), _n(r * 1.2), _n(-r * 0.4), _n(r * 0.9), _n(r * 0.5), _n(r * 0.6), _n(r * 1.0), _n(-r * 0.9), _n(r * 0.6), _n(-r * 1.8), _n(-r * 0.6)], c, _stroke("#1A1A1A", 4) + ' opacity="0.92"')
-		_path("M%s %s q%s %s %s %s" % [_n(x - r * 0.5), _n(y + r * 0.1), _n(r * 0.4), _n(-r * 0.5), _n(r), _n(0)], "none", _stroke("#FFFFFF", 5) + ' opacity="0.6" stroke-linecap="round"')
+	# The painting keeps to the wall: a clip over the brick, broad fields of colour first, then bold shapes outlined in black.
+	_clips += 1
+	var top := g - 720.0
+	var bottom := g - 130.0
+	out.append('<clipPath id="mur%d"><rect x="%s" y="%s" width="%s" height="%s"/></clipPath><g clip-path="url(#mur%d)">' % [_clips, _n(X0), _n(top), _n(X1 - X0), _n(bottom - top), _clips])
+	var fx := X0
+	var f := 0
+	while fx < X1:
+		var fw := rng.randf_range(90.0, 160.0)
+		_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(fx), _n(top), _n(fx + fw + 30), _n(top), _n(fx + fw - 20), _n(bottom), _n(fx - 40), _n(bottom)], colors[(f * 3) % colors.size()], 'opacity="0.85"')
+		fx += fw
+		f += 1
+	for i in 9:
+		var c: String = colors[(i * 5 + 2) % colors.size()]
+		var x := rng.randf_range(X0 + 40.0, X1 - 40.0)
+		var y := rng.randf_range(top + 60.0, bottom - 60.0)
+		var r := rng.randf_range(40.0, 80.0)
+		_path("M%s %s q%s %s %s %s q%s %s %s %s q%s %s %s %s z" % [_n(x - r), _n(y), _n(r * 0.3), _n(-r * 0.9), _n(r * 1.1), _n(-r * 0.5), _n(r * 0.9), _n(r * 0.4), _n(r * 0.6), _n(r * 0.9), _n(-r * 0.9), _n(r * 0.6), _n(-r * 1.7), _n(-r * 0.4)], c, _stroke("#1A1A1A", 5))
+		_path("M%s %s q%s %s %s %s" % [_n(x - r * 0.5), _n(y), _n(r * 0.3), _n(-r * 0.4), _n(r * 0.9), _n(-r * 0.1)], "none", _stroke("#FFFFFF", 5) + ' opacity="0.7" stroke-linecap="round"')
+		# A few drips and stars of spray.
+		_rect(x + r * 0.2, y + r * 0.5, 4, rng.randf_range(14.0, 34.0), c)
+		_circle(x - r * 0.8, y - r * 0.7, 5, "#FFFFFF", 'opacity="0.8"')
+	out.append('</g>')
 	for i in 4:
 		var sy := g - 640.0 + i * 120.0
 		_rect(X0 + 70, sy - 6, 200, 6, "#1A1A1A")

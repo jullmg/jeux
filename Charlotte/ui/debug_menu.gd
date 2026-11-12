@@ -48,6 +48,8 @@ const PLACES := [
 	{"name": "Rue Masson 6e–7e, côté sud : coin 7e", "scene": "masson_6e_7e_pair", "arrive": "masson_6e_7e_pair_from_rue_7e"},
 	{"name": "Rue Masson 7e–8e, côté nord : milieu", "scene": "masson_7e_8e_impair"},
 	{"name": "Rue Masson 7e–8e, côté sud : milieu", "scene": "masson_7e_8e_pair"},
+	{"name": "Rue Masson 8e–9e, côté nord : milieu", "scene": "masson_8e_9e_impair"},
+	{"name": "Rue Masson 8e–9e, côté sud : milieu", "scene": "masson_8e_9e_pair"},
 	{"group": "Ruelles"},
 	{"name": "Ruelle du milieu (cour de Charlotte)", "scene": "ruelle"},
 	{"name": "Ruelle du milieu (les jumelles y sont si la quête « amies » est lancée)", "scene": "ruelle", "x": 2400.0},
