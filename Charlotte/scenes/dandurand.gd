@@ -22,6 +22,8 @@ func _start_x() -> float:
 		return _starts[layout.find("rue_6e")] - 40.0
 	if _arriving("dandurand_from_5e"):
 		return _starts[layout.find("rue_5e") + 1] + 40.0
+	if _arriving("dandurand_from_6e_est"):
+		return _starts[layout.find("rue_6e") + 1] + 40.0
 	if not is_nan(Transition.street_x):
 		var x := Transition.street_x
 		Transition.street_x = NAN
@@ -60,6 +62,8 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 func _build_doors() -> void:
 	_add_corner(_cross_streets[0], "res://scenes/cinquieme.tscn", "5e_from_dandurand")
 	_add_corner(_cross_streets[1], "res://scenes/main.tscn", "6e_from_dandurand")
+	# Across 6e from her block, round onto the other side of 6e Avenue (sixieme_est).
+	_add_corner(_cross_streets[1], "res://scenes/sixieme_est.tscn", "6e_est_from_dandurand", false, 1)
 	# The dépanneur's glass door, at the top of its steps.
 	var origin := _house_origin(layout.find("depanneur_front"))
 	var area := Rect2(origin + Vector2(338.0, 503.0) * HOUSE_SCALE, Vector2(104.0, 97.0) * HOUSE_SCALE)

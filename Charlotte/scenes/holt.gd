@@ -23,6 +23,8 @@ func _start_x() -> float:
 		return _starts[layout.find("rue_6e") + 1] + 40.0
 	if _arriving("holt_from_5e"):
 		return _starts[layout.find("rue_5e")] - 40.0
+	if _arriving("holt_from_6e_est"):
+		return _starts[layout.find("rue_6e")] - 40.0
 	if not is_nan(Transition.street_x):
 		var x := Transition.street_x
 		Transition.street_x = NAN
@@ -76,6 +78,8 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 func _build_doors() -> void:
 	_add_corner(_cross_streets[0], "res://scenes/main.tscn", "6e_from_holt")
 	_add_corner(_cross_streets[1], "res://scenes/cinquieme.tscn", "5e_from_holt")
+	# Across 6e from her block, round onto the other side of 6e Avenue (sixieme_est).
+	_add_corner(_cross_streets[0], "res://scenes/sixieme_est.tscn", "6e_est_from_holt", false, -1)
 	# Oh Bon!'s black-framed glass door (SVG x 134-208, y 694-889): in to the shop.
 	var origin := _house_origin(layout.find("ohbon"))
 	var area := Rect2(origin + Vector2(134.0, 694.0) * HOUSE_SCALE, Vector2(74.0, 195.0) * HOUSE_SCALE)

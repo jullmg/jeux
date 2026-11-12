@@ -276,9 +276,16 @@ func _build_doors() -> void:
 ## street) loads with Transition.arrive = `arrive`, so that street knows which corner she comes round.
 ## Only from the sidewalk Charlotte started on (the block the corner belongs to); the crosswalk below is for crossing.
 ## Clicking the cross street or pressing ↑ at the curb turns the corner; walking into the curb does nothing.
-func _add_corner(cs: CrossStreet, scene: String, arrive: String, own_crossing := true) -> void:
+## `side` is the stretch of sidewalk the corner is turned from: 0, the one she started on (her block's, as before); -1 or 1,
+## the stretch just left or right of this cross street — across it from her block, where another street now goes on (the
+## far side of 6e Avenue, `sixieme_est`, from the stretches of Holt and Dandurand east of 6e).
+func _add_corner(cs: CrossStreet, scene: String, arrive: String, own_crossing := true, side := 0) -> void:
 	var home := _control.bounds
-	var curb := home.y if cs.x0 > _start else home.x
+	if side < 0:
+		home = _segment_at(cs.x0 - 1.0)
+	elif side > 0:
+		home = _segment_at(cs.x1 + 1.0)
+	var curb := home.y if cs.x0 >= home.y else home.x
 	var area := Rect2(cs.x0 + 30.0, 380.0, cs.x1 - cs.x0 - 60.0, 218.0)
 	var turn := func():
 		_control.enabled = false
@@ -310,6 +317,7 @@ func _add_corner(cs: CrossStreet, scene: String, arrive: String, own_crossing :=
 		Transition.arrive = arrive
 		Transition.crossing = arrive
 		Transition.change_scene(self, scene), curb)
+	over.click_only = true
 	over.condition = spot.condition
 	add_child(over)
 
@@ -343,6 +351,7 @@ func _add_across(cs: CrossStreet, scene: String, arrive: String) -> void:
 			Transition.arrive = arrive
 			Transition.crossing = ""
 			Transition.change_scene(self, scene)), curb)
+	over.click_only = true
 	over.condition = func(): return _segment_at(_charlotte.position.x) == home
 	add_child(over)
 

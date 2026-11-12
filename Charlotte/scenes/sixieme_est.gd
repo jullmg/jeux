@@ -3,7 +3,7 @@ extends StreetScene
 # street, so Rue Holt crosses at the left end and Rue Dandurand at the right. Drawn from the Street View pictures
 # (reference/streetview/INDEX.md, "6e Avenue 5600–5800 (impairs)"; the facades are the `impair_*` entries of
 # tools/generate_houses.gd). She gets here by the crosswalk over 6e Avenue at either corner of main.tscn, and back the same way;
-# the cross streets run east from here, to blocks the game doesn't go to yet, so their corners don't turn.
+# round its corners she comes onto Holt and Dandurand east of 6e (their scenes' stretches across 6e from her block).
 
 
 func _init() -> void:
@@ -29,9 +29,9 @@ func _init() -> void:
 
 # At the corner she crossed from, else in the middle of the block (a debug teleport, a reload).
 func _start_x() -> float:
-	if _arriving("6e_est_from_6e_holt"):
+	if _arriving("6e_est_from_6e_holt") or _arriving("6e_est_from_holt"):
 		return _starts[layout.find("rue_holt") + 1] + 40.0
-	if _arriving("6e_est_from_6e_dandurand"):
+	if _arriving("6e_est_from_6e_dandurand") or _arriving("6e_est_from_dandurand"):
 		return _starts[layout.find("rue_dandurand")] - 40.0
 	if not is_nan(Transition.street_x):
 		var x := Transition.street_x
@@ -70,8 +70,11 @@ func _build_cross_streets() -> void:
 	]
 
 
-# Back over 6e Avenue at either corner; the lanes on this side aren't hers.
+# Round either corner onto Holt or Dandurand, east of 6e (the stretches of those streets across 6e from her block); back over
+# 6e Avenue at either corner; the lanes on this side aren't hers.
 func _build_doors() -> void:
+	_add_corner(_cross_streets[0], "res://scenes/holt.tscn", "holt_from_6e_est", false)
+	_add_corner(_cross_streets[1], "res://scenes/dandurand.tscn", "dandurand_from_6e_est", false)
 	_add_across(_cross_streets[0], "res://scenes/main.tscn", "6e_from_6e_est_holt")
 	_add_across(_cross_streets[1], "res://scenes/main.tscn", "6e_from_6e_est_dandurand")
 	for art in ["ruelle_impair_holt", "ruelle_impair_dandurand"]:

@@ -143,7 +143,7 @@ func _door_ahead() -> DoorSpot:
 	var x := charlotte.position.x
 	for node in get_tree().get_nodes_in_group("interactable"):
 		var door := node as DoorSpot
-		if door == null or not door.can_interact():
+		if door == null or door.click_only or not door.can_interact():
 			continue
 		var span := door.up_rect if door.up_rect.has_area() else door.rect
 		if x < span.position.x - 20.0 or x > span.end.x + 20.0:

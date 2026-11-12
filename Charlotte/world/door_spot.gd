@@ -12,6 +12,8 @@ var approach := Callable()
 var up_rect := Rect2()
 ## Optional: whether it can be clicked right now.
 var condition := Callable()
+## Only a click takes it, never ↑ (the crosswalk over our own street at a corner: ↑ at the curb turns the corner).
+var click_only := false
 
 
 static func make(area: Rect2, on_enter: Callable, stand := NAN) -> DoorSpot:
