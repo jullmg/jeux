@@ -466,7 +466,7 @@ const HOUSES := [
 	{
 		"name": "masson_2901", "kind": "commerce", "width": 1100.0, "floors": 3, "halloween": false,
 		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844", "#94422F"], "mortar": "#CFC2B4", "parapet": "flat",
-		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[180.0, 110.0], [420.0, 110.0], [660.0, 110.0], [890.0, 110.0]],
+		"lintel": "#B9B5AC", "lintel_dark": "#7E7A72", "window_style": "hung", "windows": [[180.0, 110.0], [420.0, 110.0], [660.0, 110.0], [890.0, 110.0]],
 		"projecting": [[34.0, 140.0]], "ground": "stone", "stone": "#A9A49C", "ground_windows": [[140.0, 200.0], [600.0, 200.0], [860.0, 200.0]],
 		"res_doors": [1030.0], "basement": [],
 	},
@@ -476,29 +476,29 @@ const HOUSES := [
 		"name": "masson_2903", "kind": "commerce", "width": 820.0, "floors": 3,
 		"bricks": ["#8E3E30", "#9A4636", "#7E3628", "#A44E3C", "#923F31"], "mortar": "#C8BBAA", "parapet": "flat",
 		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[200.0, 110.0], [420.0, 110.0], [620.0, 110.0]],
-		"projecting": [[34.0, 170.0]], "pier": "#B9B3A8",
-		"shops": [{"x0": 30.0, "x1": 420.0, "sign": "#1E1E20", "lamps": 3, "door": 360.0},
-			{"x0": 500.0, "x1": 790.0, "sign": "#1E1E20", "awning": "#24282C", "lamps": 2, "crates": true, "door": 740.0}],
+		"projecting": [[34.0, 170.0]], "pier": "#B9B3A8", "window_style": "hung", "hung_frame": "#E8E4DA", "lamp_color": "#F2F0EA",
+		"shops": [{"x0": 30.0, "x1": 420.0, "sign": "#1E4A32", "awning": "#1E4A32", "lamps": 3, "door": 360.0, "inside": "fruit", "crates": true, "transom": "none"},
+			{"x0": 500.0, "x1": 790.0, "sign": "#1E4A32", "awning": "#1E4A32", "lamps": 2, "crates": true, "door": 740.0, "inside": "fruit", "transom": "none"}],
 		"res_doors": [460.0], "basement": [],
 	},
 	# 2909–2919, Poulet Rouge: dark brown brick, the black front of the restaurant, the white doors to the flats (2909…, 2913…, 2919…).
 	{
 		"name": "masson_2909", "kind": "commerce", "width": 960.0, "floors": 3,
 		"bricks": ["#5E3A2E", "#6E4234", "#4E3026", "#744838", "#583428"], "mortar": "#9A8E80", "parapet": "flat",
-		"lintel": "#B9B3A8", "lintel_dark": "#7E786E", "windows": [[90.0, 120.0], [330.0, 120.0], [580.0, 120.0], [800.0, 110.0]],
-		"shops": [{"x0": 30.0, "x1": 720.0, "sign": "#141416", "door": 600.0}], "res_doors": [820.0], "basement": [],
+		"lintel": "#B9B3A8", "lintel_dark": "#7E786E", "window_style": "hung", "hung_frame": "#E8E4DA", "windows": [[90.0, 120.0], [330.0, 120.0], [580.0, 120.0], [800.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 720.0, "sign": "#141416", "door": 600.0, "inside": "restaurant", "wall": "#3A3230", "transom": "none", "panes": 3, "kick_h": 20.0}], "res_doors": [820.0], "basement": [],
 	},
 	# 2921–2931, red brick with Juliet rails at every window, white stone lintels; downstairs four shops: Aquarium café-bar,
 	# N. Mode, Frites Alors!, Coyote's tacos (2919…, 2925… and close-ups).
 	{
 		"name": "masson_2925", "kind": "commerce", "width": 1300.0, "floors": 3,
 		"bricks": ["#B04A38", "#BC5440", "#A44232", "#C25C46", "#AA4834"], "mortar": "#D8CABA", "parapet": "flat",
-		"lintel": "#E8E2D6", "lintel_dark": "#B3AA9A", "juliets": true, "metal": "#1F1F1F",
+		"lintel": "#E8E2D6", "lintel_dark": "#B3AA9A", "juliets": true, "metal": "#1F1F1F", "window_style": "casement", "frame": "#F2F0EA",
 		"windows": [[80.0, 100.0], [290.0, 100.0], [500.0, 100.0], [710.0, 100.0], [920.0, 100.0], [1130.0, 100.0]],
-		"shops": [{"x0": 30.0, "x1": 300.0, "sign": "#1E3E5E", "door": 90.0},
-			{"x0": 300.0, "x1": 560.0, "sign": "#2B2B2E", "door": 500.0},
-			{"x0": 560.0, "x1": 860.0, "sign": "#E9E2D0", "frame": "#3A2A20", "door": 620.0},
-			{"x0": 860.0, "x1": 1270.0, "sign": "#1E1E20", "frame": "#2B1E18", "door": 1200.0}],
+		"shops": [{"x0": 30.0, "x1": 300.0, "sign": "#1E3E5E", "door": 90.0, "inside": "restaurant", "front": "wood", "frame": "#3A3A3C", "kick": "panel"},
+			{"x0": 300.0, "x1": 560.0, "sign": "#2B2B2E", "door": 500.0, "inside": "clothes", "transom": "none"},
+			{"x0": 560.0, "x1": 860.0, "sign": "#E9E2D0", "frame": "#5A3A24", "door": 620.0, "inside": "restaurant", "front": "wood", "door_style": "double"},
+			{"x0": 860.0, "x1": 1270.0, "sign": "#1E1E20", "frame": "#2B1E18", "door": 1200.0, "inside": "restaurant", "front": "wood", "kick": "tile", "tile": "#C8202A"}],
 		"basement": [],
 	},
 	# 2933–2939, at 7e: the old bank in grey stone, fluted pilasters, a copper-topped cornice, the door at the corner (2933…, 2937…, 2939…).
@@ -1758,9 +1758,16 @@ func _window(x: float, y: float, w: float, h: float) -> void:
 	if k.keystone:
 		var ky := y - 38.0 if k.lintel_style == "arch" else y - 24.0
 		_path("M%s %s h20 l-3 26 h-14 z" % [_n(x + w / 2 - 10), _n(ky)], k.lintel, _stroke(k.lintel_dark, 1.5))
-	if k.get("window_style", "") == "hung":
-		_hung_window(x, y, w, h)
-		return
+	match k.get("window_style", ""):
+		"hung":
+			_hung_window(x, y, w, h)
+			return
+		"casement":
+			_casement(x, y, w, h)
+			return
+		"slider", "fixed":
+			_modern_window(x, y, w, h, k.window_style == "slider")
+			return
 	_rect(x - 3, y - 3, w + 6, h + 6, k.trim_dark)
 	_rect(x, y, w, h, k.trim)
 	var lit := rng.randf() < 0.22
@@ -1813,8 +1820,8 @@ func _window(x: float, y: float, w: float, h: float) -> void:
 # A double-hung window (reference/maison_charlotte/): a black frame, one meeting rail and no upright, the same glass as the other
 # houses', a thick stone sill.
 func _hung_window(x: float, y: float, w: float, h: float) -> void:
-	const FRAME := "#1E1A18"
-	_rect(x - 2, y - 2, w + 4, h + 4, "#0F0C0A")
+	var FRAME: String = k.get("hung_frame", "#1E1A18")
+	_rect(x - 2, y - 2, w + 4, h + 4, "#" + Color(FRAME).darkened(0.45).to_html(false))
 	_rect(x, y, w, h, FRAME)
 	var pane_h := (h - 16.0) * 0.47
 	var rail_y := y + 8.0 + pane_h
@@ -4438,6 +4445,27 @@ func _gables() -> void:
 		_pumpkin(cx + 70, land, 0.7, false)
 
 
+# A window of today in a plain opening (Rue Masson's renovated fronts): a thin frame in `frame` (black, brown, aluminium), one
+# big pane (`fixed`) or two panes sliding side by side (`slider`), a narrow sill.
+func _modern_window(x: float, y: float, w: float, h: float, slider: bool) -> void:
+	var frame: String = k.get("frame", "#2B2B2E")
+	_rect(x - 3, y - 3, w + 6, h + 6, "#000000", 'opacity="0.25"')
+	_rect(x, y, w, h, frame)
+	var lit := rng.randf() < 0.2
+	_rect(x + 5, y + 5, w - 10, h - 10, "url(#warm)" if lit else "url(#glass)")
+	_path("M%s %s l%s 0 l%s %s l%s 0 z" % [_n(x + w * 0.5), _n(y + 5), _n(w * 0.16), _n(-w * 0.3), _n((h - 10) * 0.6), _n(-w * 0.16)], "#FFFFFF", 'opacity="0.2"')
+	_rect(x + 5, y + 5, w - 10, 8, "url(#drop)")
+	if slider:
+		_rect(x + w / 2.0 - 3, y + 5, 6, h - 10, frame)
+		_rect(x + w / 2.0 + 3, y + 5, 2, h - 10, "#000000", 'opacity="0.2"')
+	if season == "autumn" and not night:
+		if not windows.has(k.name):
+			windows[k.name] = []
+		windows[k.name].append({"pane": [x + 5, y + 5, w - 10, h - 10], "bar_y": y + h * 0.5, "trim": frame, "lit": lit, "flower_box": false})
+	_rect(x - 6, y + h + 2, w + 12, 6, k.lintel, _stroke(k.lintel_dark, 1))
+	_snow(x - 6, w + 12, y + h + 2)
+
+
 # A white casement window in a plain opening: two tall sashes and a stone sill (the 1990s blocks and the renovated plexes).
 func _casement(x: float, y: float, w: float, h: float) -> void:
 	var frame: String = k.get("frame", "#F7F5F0")
@@ -4885,9 +4913,11 @@ func _shopfront(shop: Dictionary, top: float) -> void:
 	var x0: float = shop.x0
 	var x1: float = shop.x1
 	var frame: String = shop.get("frame", "#1E1E20")
+	var front: String = shop.get("front", "alu")
 	var sign_h := 56.0
 	var glass_top := top + sign_h + 12.0
-	var kick := ground_y - 28.0
+	var kick_h: float = shop.get("kick_h", 28.0 if front == "alu" else 70.0)
+	var kick := ground_y - kick_h
 	_rect(x0, top, x1 - x0, ground_y - top, frame)
 	_rect(x0 + 4, top + 4, x1 - x0 - 8, sign_h, shop.get("sign", "#1E1E20"), _stroke("#000000", 1) + ' opacity="0.95"')
 	_rect(x0 + 4, top + 4, x1 - x0 - 8, 4, "#FFFFFF", 'opacity="0.18"')
@@ -4902,25 +4932,92 @@ func _shopfront(shop: Dictionary, top: float) -> void:
 	var gx0 := x0 + 10.0
 	var gx1 := x1 - 10.0
 	var seed_value := int(hash(k.name) % 997) + int(x0)
+	# What is behind the glass: the shop's own inside (`inside`), lit, or dark when it is closed.
 	_rect(gx0, glass_top, gx1 - gx0, kick - glass_top, "#2F3A41")
 	if not shop.get("dark", false):
-		_shop_glass_glow(gx0, glass_top, gx1 - gx0, kick - glass_top, seed_value)
-		_shop_glass_goods(gx0 + 4, glass_top + 30, gx1 - gx0 - 8, kick - glass_top - 40, seed_value, 2)
-	# Its door, glass in a frame, a push bar across it.
+		_shop_inside(shop.get("inside", "goods"), gx0, glass_top, gx1 - gx0, kick - glass_top, seed_value, shop.get("wall", ""))
+	# Its door (`door_style`): a glass door and its push bar, two glass doors, or a wooden door with a pane.
 	var dx: float = shop.get("door", (x0 + x1) / 2.0)
-	_rect(dx - 38, glass_top - 2, 76, ground_y - glass_top - 4, frame)
-	_rect(dx - 32, glass_top + 4, 64, ground_y - glass_top - 16, "#33404A")
-	if not shop.get("dark", false):
-		_rect(dx - 32, glass_top + 4, 64, ground_y - glass_top - 16, "url(#warm)", 'opacity="0.55"')
-	_rect(dx - 28, glass_top + 100, 56, 5, "#C9C5BC")
-	# The panes: mullions down the window, a transom bar.
-	var n := maxi(int((gx1 - gx0) / 150.0), 1)
+	var door_style: String = shop.get("door_style", "glass")
+	var dw := 76.0 if door_style != "double" else 140.0
+	_rect(dx - dw / 2.0, glass_top - 2, dw, ground_y - glass_top - 4, frame)
+	match door_style:
+		"wood":
+			var wood: String = shop.get("door_color", "#6E4226")
+			_rect(dx - 32, glass_top + 4, 64, ground_y - glass_top - 16, wood, _stroke("#3E2414", 1.5))
+			_rect(dx - 22, glass_top + 14, 44, 90, "url(#warm)" if not shop.get("dark", false) else "#33404A", 'opacity="0.8"')
+			_rect(dx - 22, glass_top + 120, 44, ground_y - glass_top - 150, "none", _stroke("#3E2414", 1.5))
+			_circle(dx + 22, glass_top + 112, 3, "#C9A23A")
+		"double":
+			for side: float in [-1.0, 1.0]:
+				var cx := dx + side * 34.0
+				_rect(cx - 30, glass_top + 4, 60, ground_y - glass_top - 16, "#33404A")
+				if not shop.get("dark", false):
+					_rect(cx - 30, glass_top + 4, 60, ground_y - glass_top - 16, "url(#warm)", 'opacity="0.55"')
+				_rect(cx - 4 * side - 2, glass_top + 90, 4, 50, "#C9C5BC")
+		_:
+			_rect(dx - 32, glass_top + 4, 64, ground_y - glass_top - 16, "#33404A")
+			if not shop.get("dark", false):
+				_rect(dx - 32, glass_top + 4, 64, ground_y - glass_top - 16, "url(#warm)", 'opacity="0.55"')
+			_rect(dx - 28, glass_top + 100, 56, 5, "#C9C5BC")
+	# The panes: mullions down the window (`panes` of them, or one every 150), and across the top the transom (`transom`): a bar,
+	# a row of small panes, or nothing.
+	var n: int = shop.get("panes", maxi(int((gx1 - gx0) / 150.0), 1))
+	var mull := 6.0 if front == "alu" else 10.0
 	for i in range(1, n):
 		var mx := lerpf(gx0, gx1, float(i) / n)
-		if absf(mx - dx) > 50.0:
-			_rect(mx - 3, glass_top, 6, kick - glass_top, frame)
-	_rect(gx0, glass_top + 34, gx1 - gx0, 5, frame, 'opacity="0.9"')
-	_rect(gx0, kick, gx1 - gx0, ground_y - kick - 6, frame)
+		if absf(mx - dx) > dw / 2.0 + 12.0:
+			_rect(mx - mull / 2.0, glass_top, mull, kick - glass_top, frame)
+	match shop.get("transom", "bar" if front == "alu" else "panes"):
+		"bar":
+			_rect(gx0, glass_top + 34, gx1 - gx0, 5, frame, 'opacity="0.9"')
+		"panes":
+			_rect(gx0, glass_top + 44, gx1 - gx0, 7, frame)
+			var tx := gx0
+			while tx < gx1:
+				if absf(tx - dx) > dw / 2.0:
+					_rect(tx - 2, glass_top, 4, 44, frame)
+				tx += 38.0
+	# The bulkhead under the glass (`kick`): a plain panel, raised wooden panels, glazed tiles, brick or stone.
+	match shop.get("kick", "panel" if front == "alu" else "wood"):
+		"wood":
+			_rect(gx0, kick, gx1 - gx0, ground_y - kick - 6, frame)
+			var px := gx0 + 8.0
+			while px < gx1 - 40.0:
+				if absf(px + 30.0 - dx) > dw / 2.0 + 30.0:
+					_rect(px, kick + 10, 60, ground_y - kick - 26, "none", _stroke("#000000", 2) + ' opacity="0.3"')
+					_rect(px + 2, kick + 12, 56, 3, "#FFFFFF", 'opacity="0.15"')
+				px += 72.0
+		"tile":
+			_rect(gx0, kick, gx1 - gx0, ground_y - kick - 6, shop.get("tile", "#2E5E5A"))
+			var ty := kick
+			while ty < ground_y - 8.0:
+				_rect(gx0, ty, gx1 - gx0, 1.2, "#FFFFFF", 'opacity="0.35"')
+				ty += 12.0
+			var tx2 := gx0
+			while tx2 < gx1:
+				_rect(tx2, kick, 1.2, ground_y - kick - 6, "#FFFFFF", 'opacity="0.35"')
+				tx2 += 12.0
+		"brick":
+			var brick: String = k.bricks[0]
+			_rect(gx0, kick, gx1 - gx0, ground_y - kick - 6, k.mortar)
+			var by := kick + 1.0
+			var row := 0
+			while by < ground_y - 10.0:
+				var bx := gx0 - (12.0 if row % 2 == 1 else 0.0)
+				while bx < gx1:
+					var a2 := maxf(bx, gx0)
+					var b2 := minf(bx + 22.0, gx1)
+					if b2 - a2 > 2.0:
+						_rect(a2, by, b2 - a2, 7, k.bricks[(row + int(bx)) % k.bricks.size()] if k.bricks.size() > 1 else brick)
+					bx += 24.0
+				by += 9.0
+				row += 1
+		"stone":
+			_rect(gx0, kick, gx1 - gx0, ground_y - kick - 6, "#A9A49C", _stroke("#7E7A72", 1))
+			_rect(gx0, kick, gx1 - gx0, 4, "#C9C5BC")
+		_:
+			_rect(gx0, kick, gx1 - gx0, ground_y - kick - 6, frame)
 	_rect(gx0, kick, gx1 - gx0, 3, "#FFFFFF", 'opacity="0.15"')
 	_glass_shine(gx0, glass_top, gx1 - gx0, kick - glass_top)
 	var awning: String = shop.get("awning", "")
@@ -4935,6 +5032,127 @@ func _shopfront(shop: Dictionary, top: float) -> void:
 	if shop.get("crates", false):
 		_fruit_crates(x0 + 24, x1 - 24)
 	_door_wreath(dx, glass_top, glass_top + 60)
+
+
+# What a shop window shows of the shop, by kind: "goods" (shelves of tins, bottles and boxes: a dépanneur, a pharmacy), "cafe",
+# "restaurant", "clothes", "fruit", "bank", "salon", "office" (blinds down), "florist", "bakery", "hardware", "pharmacy". Its own
+# random numbers, so the rest of the facade doesn't move.
+func _shop_inside(kind: String, x: float, y: float, w: float, h: float, seed_value: int, wall_color := "") -> void:
+	if kind == "goods":
+		_shop_glass_glow(x, y, w, h, seed_value)
+		_shop_glass_goods(x + 4, y + 30, w - 8, h - 40, seed_value, 2)
+		return
+	var r := RandomNumberGenerator.new()
+	r.seed = seed_value * 7 + 3
+	_clips += 1
+	out.append('<clipPath id="in%d"><rect x="%s" y="%s" width="%s" height="%s"/></clipPath><g clip-path="url(#in%d)">' % [_clips, _n(x), _n(y), _n(w), _n(h), _clips])
+	var walls := {"cafe": "#C99A6A", "restaurant": "#B5664A", "clothes": "#ECE8E0", "fruit": "#E8E0C8", "bank": "#E4E2DC",
+		"salon": "#F0EEE8", "office": "#D8D4CC", "florist": "#DDE6D2", "bakery": "#E8D2A8", "hardware": "#D2C8B4", "pharmacy": "#F4F4F2"}
+	var wall: String = wall_color if wall_color != "" else walls.get(kind, "#D8CDBA")
+	var floor_y := y + h - 14.0
+	_rect(x, y, w, h, wall)
+	_rect(x, y, w, h, "url(#warm)", 'opacity="0.25"')
+	_rect(x, floor_y, w, 14, "#" + Color(wall).darkened(0.35).to_html(false))
+	match kind:
+		"cafe", "restaurant":
+			# Pendant lamps, a counter or banquette at the back, little tables and chairs by the glass.
+			var lx := x + 40.0
+			while lx < x + w:
+				_path("M%s %s V%s" % [_n(lx), _n(y), _n(y + 30)], "none", _stroke("#2A2A2A", 1.5))
+				_path("M%s %s l12 0 l-4 -10 l-4 0 z" % [_n(lx - 6), _n(y + 40)], "#2A2A2A")
+				_circle(lx, y + 42, 10, "#FFE2A0", 'opacity="0.8"')
+				lx += r.randf_range(70.0, 110.0)
+			_rect(x, floor_y - 60, w, 60, "#" + Color(wall).darkened(0.25).to_html(false))
+			if kind == "cafe":
+				_rect(x + w * 0.6, floor_y - 74, 50, 30, "#C9C5BC", _stroke("#5E5A54", 1.5))
+				_rect(x + 12, y + 50, 60, 44, "#2A2E2C", _stroke("#8A6A4A", 3))
+				for l in 4:
+					_rect(x + 18, y + 58 + l * 9, r.randf_range(24.0, 46.0), 2, "#E8E4DA")
+			var tx := x + 30.0
+			while tx < x + w - 30.0:
+				var cloth := "#F2F0EA" if kind == "restaurant" else "#3A2A20"
+				_rect(tx - 18, floor_y - 34, 36, 5, cloth)
+				_rect(tx - 2, floor_y - 30, 4, 30, "#2A2A2A")
+				for cs: float in [-1.0, 1.0]:
+					_rect(tx + cs * 26 - 3, floor_y - 44, 4, 44, "#3A2A20")
+					_rect(tx + cs * 26 - 8, floor_y - 22, 14, 4, "#3A2A20")
+				tx += r.randf_range(90.0, 130.0)
+		"clothes":
+			_rect(x + 10, y + 46, w - 20, 3, "#8E8A82")
+			var cx := x + 20.0
+			var colors := ["#C8202A", "#1F3E8E", "#F2C230", "#3A3A3C", "#E85FA0", "#4FA34A", "#E8E4DA", "#8E5FC4"]
+			while cx < x + w - 20.0:
+				var c: String = colors[r.randi_range(0, colors.size() - 1)]
+				_path("M%s %s l8 -4 l8 4 l4 6 l-4 2 v%s h-16 v-%s l-4 -2 z" % [_n(cx), _n(y + 54), _n(r.randf_range(50.0, 80.0)), _n(0)], c)
+				cx += r.randf_range(18.0, 26.0)
+			# A mannequin in the window.
+			var mx := x + w * 0.8
+			_circle(mx, floor_y - 110, 9, "#E8E4DA")
+			_path("M%s %s l14 0 l4 50 l-22 0 z" % [_n(mx - 7), _n(floor_y - 100)], colors[r.randi_range(0, 3)])
+			_rect(mx - 1, floor_y - 50, 2, 50, "#8E8A82")
+		"fruit":
+			for row in 3:
+				var ry := floor_y - 20.0 - row * 34.0
+				_rect(x, ry, w, 6, "#8A6A4A")
+				var fx := x + 8.0
+				while fx < x + w - 8.0:
+					var fc: String = ["#E04A3A", "#F2C230", "#4FA34A", "#E8812E", "#8E2A4A"][r.randi_range(0, 4)]
+					for f in 4:
+						_circle(fx + f * 9.0, ry - 6, 5.5, fc)
+					fx += 44.0
+		"bank":
+			_rect(x, floor_y - 50, w, 50, "#C9C5BC")
+			_rect(x, floor_y - 54, w, 6, "#8E8A82")
+			var ax := x + 30.0
+			while ax < x + w - 40.0:
+				_rect(ax, floor_y - 120, 40, 70, "#3A3E44", _stroke("#1E1E20", 1.5))
+				_rect(ax + 6, floor_y - 112, 28, 20, "#5EA8E8")
+				ax += 160.0
+			_shrub(x + w - 30.0, 22.0, "#3E7A3A")
+		"salon":
+			var sx := x + 30.0
+			while sx < x + w - 30.0:
+				_rect(sx - 22, y + 30, 44, 70, "#DDE6EC", _stroke("#B9B5AC", 2))
+				_rect(sx - 16, floor_y - 48, 32, 30, "#1E1E20")
+				_rect(sx - 3, floor_y - 18, 6, 18, "#8E8A82")
+				sx += 110.0
+		"office":
+			_rect(x, y, w, h, "#E8E4DA")
+			var by := y + 4.0
+			while by < y + h * 0.8:
+				_rect(x, by, w, 3, "#B9B5AC")
+				by += 8.0
+		"florist":
+			var px := x + 14.0
+			while px < x + w - 10.0:
+				var pr := r.randf_range(16.0, 30.0)
+				_rect(px - 8, floor_y - 18, 16, 18, "#8A5A3A")
+				_shrub(px, pr, ["#3E7A3A", "#4E8A44", "#2E6A3A"][r.randi_range(0, 2)])
+				for b in 3:
+					_bloom(px + r.randf_range(-pr, pr) * 0.6, floor_y - 18 - r.randf_range(4.0, pr * 1.4), 5.0, ["#E85FA0", "#F2C230", "#E8E4DA", "#C8202A"][r.randi_range(0, 3)])
+				px += r.randf_range(34.0, 50.0)
+		"bakery":
+			for row in 3:
+				var ry := y + 40.0 + row * 40.0
+				_rect(x + 10, ry, w - 20, 4, "#8A6A4A")
+				var bx := x + 18.0
+				while bx < x + w - 24.0:
+					out.append('<ellipse cx="%s" cy="%s" rx="13" ry="6" fill="#C98A3A" stroke="#8A5A2A" stroke-width="1"/>' % [_n(bx), _n(ry - 6)])
+					bx += 30.0
+			_rect(x, floor_y - 40, w, 40, "#E8E4DA", _stroke("#B9B5AC", 1.5))
+		"hardware":
+			_rect(x, y + 20, w, h * 0.5, "#B9A882")
+			var hx := x + 12.0
+			while hx < x + w - 12.0:
+				_rect(hx, y + 40 + r.randf_range(0.0, 30.0), 6, r.randf_range(20.0, 40.0), ["#C8202A", "#F2C230", "#3A3A3C", "#1F4E9A"][r.randi_range(0, 3)])
+				hx += 16.0
+			var cx2 := x + 10.0
+			while cx2 < x + w - 20.0:
+				_rect(cx2, floor_y - 26, 18, 24, ["#E8E4DA", "#3D8BD9", "#4FA34A", "#E8812E"][r.randi_range(0, 3)], _stroke("#5E5A54", 1))
+				cx2 += 22.0
+		"pharmacy":
+			_shop_glass_goods(x + 4, y + 30, w - 8, h - 40, seed_value, 3)
+	out.append('</g>')
 
 
 # `_shop_glass_shine` clipped to its pane, for the narrow shop windows of Masson (the shared one overflows them; it is left as
@@ -4964,10 +5182,11 @@ func _plain_awning(x0: float, x1: float, y: float, colour: String) -> void:
 
 # A gooseneck lamp over a shop sign: a black arm curling out from the wall, a dish shade, its light on the sign.
 func _gooseneck(x: float, y: float) -> void:
+	var c: String = k.get("lamp_color", "#1A1A1A")
 	_circle(x + 18, y + 40, 22, "url(#glow)")
-	_path("M%s %s q0 -22 14 -22 q14 0 14 14" % [_n(x), _n(y + 8)], "none", _stroke("#1A1A1A", 3))
-	_path("M%s %s l14 0 l-4 9 l-6 0 z" % [_n(x + 21), _n(y)], "#1A1A1A")
-	_rect(x - 3, y + 6, 6, 8, "#1A1A1A")
+	_path("M%s %s q0 -22 14 -22 q14 0 14 14" % [_n(x), _n(y + 8)], "none", _stroke(c, 3))
+	_path("M%s %s l14 0 l-4 9 l-6 0 z" % [_n(x + 21), _n(y)], c, _stroke("#8E8A82", 0.8))
+	_rect(x - 3, y + 6, 6, 8, c)
 
 
 # Crates of fruit and vegetables out on the sidewalk in front of a greengrocer's, on a low stand.

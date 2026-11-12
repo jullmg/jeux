@@ -192,7 +192,7 @@ const BLOCKS := {
 		"avenues": [["rue_6e", "6e Avenue", 560.0], ["rue_7e", "7e Avenue", 540.0]],
 		"trees_after": [2, 5], "tree_shift": {2: -45.0, 5: 60.0}, "lamps_after": [2, 5], "hydrants_at": [2.1], "racks_at": [4.6], "squirrels_at": [3.5], "moon_at": 6.5,
 		"signs": {
-			"masson_2903": [[225.0, "FRAÎCHEMENT BON", "#FFFFFF", "#1E1E20", 13], [645.0, "VOTRE FRUITERIE DE QUARTIER", "#FFFFFF", "#1E1E20", 9]],
+			"masson_2903": [[225.0, "FRAÎCHEMENT BON", "#FFFFFF", "#123322", 13], [645.0, "VOTRE FRUITERIE DE QUARTIER", "#FFFFFF", "#123322", 9]],
 			"masson_2909": [[375.0, "POULET ROUGE", "#FFFFFF", "#C8202A", 15]],
 			"masson_2925": [[165.0, "AQUARIUM", "#FFFFFF", "#1E3E5E", 11], [430.0, "N. MODE", "#FFFFFF", "#2B2B2E", 11],
 				[710.0, "FRITES ALORS!", "#C8202A", "#E9E2D0", 12], [1065.0, "COYOTE · TACOS", "#E8812E", "#1E1E20", 12]],

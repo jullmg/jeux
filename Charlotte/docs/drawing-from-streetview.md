@@ -38,6 +38,20 @@ Open the main picture, then the close-ups if there are any. Write down, from the
   6e Avenue were first drawn with three floors). Count the doors up the facade and the balconies over the street door;
   check the height against the neighbours in the same picture (a duplex beside a triplex is a floor lower); a mansard or
   a tall parapet is the top of the last floor, not a floor of its own. Write the number down before drawing.
+- **Everything must match the photos (Julien), not the generator's defaults**: check each of these on the close-ups and set
+  it explicitly in the entry, never leave the default white T-window or plain cornice out of habit:
+  - the cladding: brick (and its colours), stone, rubble, stucco, siding, metal panels, painted wall;
+  - the top of the building: flat coping, cornice (pressed metal, brick, stone), corbelled or stepped parapet, mansard, crest;
+  - the windows: their frame colour (white, black, brown, aluminium), their shape (square, tall, wide, arched, round) and their
+    type (double-hung, casement, slider, fixed pane, bay, ribbon), their lintels and sills;
+  - the windows' lintels and sills: stone, brick soldier course, arched, with ears or a keystone, or none (`lintel_style`,
+    `keystone`, `lintel` / `lintel_dark` colours), as the photo shows them;
+  - the doors: style, colour, glass, transom, how many and where.
+  - the shopfronts (Rue Masson): no two alike unless the photos are. For each shop set what the photo shows: what is seen
+    inside (`inside`: goods, cafe, restaurant, clothes, fruit, bank, salon, office, florist, bakery, hardware, pharmacy), the
+    frame (`front` "alu" thin aluminium or "wood"/painted with heavier mullions, its `frame` colour, `panes`), the transom
+    (`transom`: bar, small panes, none), the bulkhead under the glass (`kick`: panel, wood panels, tile, brick, stone), the
+    door (`door_style`: glass, double, wood), the sign band's colour and the awning.
 - Brick: colours (several, mixed), mortar colour, any stone or painted base, soffits.
 - Windows: how many per floor, their x positions, style (hung, casement, arched), lintels and sills.
 - Door(s): position, style, surround, lamps, number plate, awning.
