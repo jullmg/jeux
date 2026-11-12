@@ -64,6 +64,13 @@ var lane_side := 1.0
 ## distant city fades in slowly, leaving the sun (see _horizon).
 var from_lane := false
 
+## The crosswalk over OUR street at this corner (the one that goes toward the camera), painted at the edge of the
+## intersection on the block's side: -1 = along the gap's left edge, 1 = its right edge, 0 = none. Set on the GROUND
+## part by `StreetScene._add_corner`, which also makes it clickable (`own_crosswalk_rect`).
+var own_crosswalk := 0.0
+const OWN_CROSSWALK_W := 92.0
+const OWN_CROSSWALK_TOP := 668.0
+
 var _rng := RandomNumberGenerator.new()
 var _tree_tex: Array[Texture2D] = []
 # Depth ranges where the next streets cross ours down the vista (from the walls' "cross" gaps).
@@ -95,6 +102,13 @@ func _at(front: Vector2, depth: float) -> Vector2:
 func _fan(x: float, y: float) -> float:
 	var vp := _vp()
 	return vp.x + (x - vp.x) * (y - vp.y) / (FACADE_Y - vp.y)
+
+
+## Where the crosswalk over our own street lies (world rectangle, from the gutter to the bottom of the view).
+func own_crosswalk_rect() -> Rect2:
+	var road := road_x(OWN_CROSSWALK_TOP)
+	var left := road.x + 8.0 if own_crosswalk < 0.0 else road.y - 8.0 - OWN_CROSSWALK_W
+	return Rect2(left, OWN_CROSSWALK_TOP - 4.0, OWN_CROSSWALK_W, VIEW_BOTTOM - OWN_CROSSWALK_TOP + 4.0)
 
 
 ## The road between the curbs at height y: x range Charlotte can't step into (yet).
@@ -715,6 +729,17 @@ func _draw_ground() -> void:
 		var b := lerpf(l, r, (i + 0.75) / n)
 		draw_colored_polygon(PackedVector2Array([Vector2(_fan(a, 606.0), 606.0), Vector2(_fan(b, 606.0), 606.0),
 			Vector2(_fan(b, 654.0), 654.0), Vector2(_fan(a, 654.0), 654.0)]), bar)
+	# The other crosswalk of the corner, over our own street: it leaves the corner toward us, so its bars lie across
+	# the view, each a little bigger than the one before as it comes nearer, and it runs off the bottom.
+	if own_crosswalk != 0.0:
+		var band := own_crosswalk_rect()
+		var top := OWN_CROSSWALK_TOP
+		var step := 9.0
+		while top < VIEW_BOTTOM:
+			var grow := (top - OWN_CROSSWALK_TOP) * 0.16
+			draw_rect(Rect2(band.position.x - grow, top, band.size.x + grow * 2.0, step * 0.6), bar)
+			top += step
+			step += 2.6
 	# Leaves blown over the intersection, and above all the street's line of them along the gutter, which has to carry on
 	# across the gap instead of stopping dead at the corner: thinner in the middle, where the cars sweep it.
 	for i in 22:

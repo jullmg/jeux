@@ -6,6 +6,9 @@ extends RefCounted
 static var street_x := NAN
 ## Which corner Charlotte comes round when a street loads (e.g. "dandurand_from_6e"; "" = none).
 static var arrive := ""
+## Set (to the same key as `arrive`) when she comes round that corner in order to CROSS the street she was on: the
+## street that loads walks her over its gap for that street as soon as she arrives (`StreetScene._add_corner`).
+static var crossing := ""
 ## Interior x to put Charlotte at when an interior reloads (NAN = its default spot).
 static var inside_x := NAN
 

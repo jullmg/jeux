@@ -116,7 +116,14 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Crossing streets: the sidewalk is split into stretches at each cross street's curbs (`StreetScene._segments`); Charlotte
   walks one stretch at a time. Every crosswalk is clickable (`_add_crossing`, automatic): she goes to the curb on her side,
   says "Je regarde des deux côtés !" and looks both ways, then walks across on her own (`PlayerControl.hands_off`) to the
-  other stretch. `CrossStreet.guard = true` (the school's crosswalk on Dandurand) adds a `CrossingGuard`
+  other stretch. **A corner has two crosswalks and both work (Julien)**: the one over the cross street (above), and the
+  one over the street she is on, which leaves toward the camera so this view cannot show her walking it. It is painted
+  at the block's corner of each gap (`CrossStreet.own_crosswalk`, bars lying across the view and running off the bottom,
+  set on the GROUND part kept in `StreetScene._grounds`) and made clickable by `_add_corner` (`own_crosswalk_rect`): a
+  click takes her round into the cross street's scene with `Transition.crossing` = the arrive key, and that scene walks
+  her straight over its gap for our street (`_cross_on_arrival`, looking both ways as usual) — one click for what used
+  to be "turn the corner, then cross". Same age rule as any crosswalk (`CANT_CROSS`, through `DebugMenu.blocked`).
+  `CrossStreet.guard = true` (the school's crosswalk on Dandurand) adds a `CrossingGuard`
   (`world/crossing_guard.gd`, neon-yellow coat and cap) who steps out with her ARRÊT paddle while Charlotte crosses.
   `Bubble.say(parent, at, text)` shows a speech bubble anywhere (same speaker = replaces, others stack above; it stays at least its `seconds` but always long enough to be read, `Bubble.reading_time`: about twelve letters a second, up to 10 s, because Charlotte's age reads slowly); `DoorSpot` takes an optional `approach` and `condition`.
 - Real-world rules (from the Google Maps view): back lanes (ruelles) only open onto the north-south avenues like 6e

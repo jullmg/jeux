@@ -21,6 +21,8 @@ const STRAY_CAT_Y := 646.0
 const MAX_STRAY_CATS := 1
 ## Charlotte may cross a street on her own from this age; before that she stays on her block (corners and lanes).
 const CROSS_AGE := 8
+## What she says at a crosswalk before that age.
+const CANT_CROSS := "Je n'ai pas le droit de traverser\ntoute seule !"
 
 # ── The street's data (set by the subclass in _init) ────────────
 ## Buildings left to right (facade SVG names), with cross streets as gaps named in `cross_streets`.
@@ -69,6 +71,8 @@ var _control := PlayerControl.new()
 var _cross_streets: Array[CrossStreet] = []
 # The sidewalk's stretches between cross streets (x from, x to); Charlotte walks one at a time and crosses between them.
 var _segments: Array[Vector2] = []
+## Each cross street's GROUND part (the one drawn), so a corner can have its second crosswalk painted on it.
+var _grounds := {}
 # Each street tree's scale (TREE_SIZES).
 var _tree_scales: Array[float] = []
 # Where each lamp stands (x of its post), a lamp being moved aside when it would stand in a tree pit or a cross street.
@@ -105,12 +109,17 @@ func _ready() -> void:
 	street.width = _street_width
 	add_child(street)
 	for cs in _cross_streets:
-		add_child(CrossStreet.make(CrossStreet.Part.GROUND, cs))
+		var ground := CrossStreet.make(CrossStreet.Part.GROUND, cs)
+		_grounds[cs] = ground
+		add_child(ground)
 	_build_sidewalk_props()
 	var trees := _tree_textures()
 	_separate_props()
 	_build_tree_shadows(trees)
 	_build_passersby()
+	# Did she come round this corner in order to cross the street she was on? (Read before _start_x uses the key up.)
+	var crossing := Transition.crossing != "" and Transition.crossing == Transition.arrive
+	Transition.crossing = ""
 	var start_x := _start_x()
 	_start = start_x
 	var x_arg := _arg("--x=")
@@ -126,6 +135,8 @@ func _ready() -> void:
 	_build_doors()
 	for cs in _cross_streets:
 		_add_crossing(cs)
+	if crossing:
+		_cross_on_arrival()
 	var saver := Saver.new()
 	saver.who = _charlotte
 	add_child(saver)
@@ -272,12 +283,50 @@ func _add_corner(cs: CrossStreet, scene: String, arrive: String) -> void:
 	var turn := func():
 		_control.enabled = false
 		Transition.arrive = arrive
+		Transition.crossing = ""
 		Transition.change_scene(self, scene)
 	var spot := DoorSpot.make(area, turn, curb)
 	# ↑ at the curb (not walking into it) takes the corner; arrow keys alone never do.
 	spot.up_rect = Rect2(curb - 90.0, area.position.y, 180.0, area.size.y)
 	spot.condition = func(): return _segment_at(_charlotte.position.x) == home
 	add_child(spot)
+	# A corner has TWO crosswalks (Julien): the one over the cross street (`_add_crossing`) and the one over the street
+	# she is on. That second one leaves toward the camera, so this view cannot show her walking it: it is painted at
+	# the corner (`CrossStreet.own_crosswalk`), and a click on it takes her round into the cross street's scene, where
+	# she crosses our street straight away (`Transition.crossing`, `_cross_on_arrival`) — what used to take two steps,
+	# turning the corner first and only then crossing.
+	var ground: CrossStreet = _grounds.get(cs)
+	if ground == null:
+		return
+	ground.own_crosswalk = -1.0 if cs.x0 > _start else 1.0
+	ground.queue_redraw()
+	var over := DoorSpot.make(ground.own_crosswalk_rect(), func():
+		if DebugMenu.blocked(GameState.age < CROSS_AGE):
+			Bubble.say(self, _charlotte.position + Vector2(0, -190), CANT_CROSS, 2.6)
+			return
+		_control.enabled = false
+		Transition.arrive = arrive
+		Transition.crossing = arrive
+		Transition.change_scene(self, scene), curb)
+	over.condition = spot.condition
+	add_child(over)
+
+
+## She came round the corner to cross the street she was on (see `_add_corner`): once the view has faded in, she
+## crosses the gap she is standing next to, looking both ways first like at any crosswalk.
+func _cross_on_arrival() -> void:
+	var nearest: CrossStreet = null
+	for cs in _cross_streets:
+		if nearest == null or absf((cs.x0 + cs.x1) / 2.0 - _charlotte.position.x) < absf((nearest.x0 + nearest.x1) / 2.0 - _charlotte.position.x):
+			nearest = cs
+	if nearest == null:
+		return
+	_control.enabled = false
+	var wait := create_tween()
+	wait.tween_interval(0.7)
+	wait.tween_callback(func() -> void:
+		_control.enabled = true
+		_cross(nearest))
 
 
 ## The crosswalk: click it and Charlotte goes to the curb on her side, looks both ways, and crosses to the other
@@ -301,7 +350,7 @@ func _add_crossing(cs: CrossStreet) -> void:
 
 func _cross(cs: CrossStreet) -> void:
 	if DebugMenu.blocked(GameState.age < CROSS_AGE):
-		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je n'ai pas le droit de traverser\ntoute seule !", 2.6)
+		Bubble.say(self, _charlotte.position + Vector2(0, -190), CANT_CROSS, 2.6)
 		return
 	var curbs := cs.road_x(CHARLOTTE_Y)
 	var mid := (cs.x0 + cs.x1) / 2.0

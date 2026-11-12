@@ -214,6 +214,7 @@ func _teleport(place: Dictionary) -> void:
 	Transition.street_x = NAN
 	Transition.inside_x = NAN
 	Transition.arrive = str(place.get("arrive", ""))
+	Transition.crossing = ""
 	var scene_name := str(place.scene)
 	if place.has("x"):
 		if scene_name in ["house", "depanneur", "ohbon"]:
