@@ -548,6 +548,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   its origin) seen through a window right of the margin, "top" (frame, tape, title, compass, stop sign) over it. On opening it shows
   her block, then slides by itself (`_pan_for`, `_set_pan`, a tween that runs while the game is paused) to put her in the middle
   when she is elsewhere. On Masson her place comes from the crossings round her (`_masson_x`), each block on its own stretch.
+  She can also look round: drag it with the mouse or a finger (`_drag`), or the arrow keys / WASD while it is open; it stops at
+  the edges of `WORLD`. 6e's west side below the school is drawn too (gym, schoolyard, apartments, parish hall, church).
   The street she is on is never greyed, even past where she may go alone (`_Sheet.here`). **A new place on the map** = its drawing in
   the "map" layer (anywhere in `WORLD`, widen it if needed) + its case in `_here()`.
 - `--map` (a user arg, after `--`) opens it one second after the scene starts, for screenshots: `Godot --path . --screen 1 res://scenes/holt.tscn -- --screenshot=/path/map.png --wait=2.5 --map`.

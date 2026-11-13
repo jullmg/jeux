@@ -99,6 +99,14 @@ func _process(_delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _open and event is InputEventKey and event.pressed:
+		var step := {KEY_LEFT: Vector2(-60, 0), KEY_RIGHT: Vector2(60, 0), KEY_UP: Vector2(0, -60), KEY_DOWN: Vector2(0, 60),
+			KEY_A: Vector2(-60, 0), KEY_D: Vector2(60, 0), KEY_W: Vector2(0, -60), KEY_S: Vector2(0, 60)}
+		if step.has(event.keycode):
+			get_viewport().set_input_as_handled()
+			_stop_slide()
+			_set_pan(_pan + step[event.keycode])
+			return
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
 	if not _open and not get_tree().get_nodes_in_group("modal").is_empty():
@@ -231,8 +239,26 @@ func _pan_for(at: Vector2) -> Vector2:
 
 
 func _set_pan(pan: Vector2) -> void:
+	pan.x = clampf(pan.x, WORLD.position.x - SIDE, WORLD.end.x - SHEET.x)
+	pan.y = clampf(pan.y, 0.0, WORLD.end.y - SHEET.y)
 	_pan = pan
 	_sheet.position = Vector2(-SIDE, 0.0) - pan
+
+
+func _stop_slide() -> void:
+	if _slide:
+		_slide.kill()
+		_slide = null
+
+
+## Dragging the map with the mouse or a finger to look round; it stays where it is left until the map is opened again.
+func _drag(event: InputEvent) -> void:
+	if event is InputEventMouseMotion and event.button_mask & MOUSE_BUTTON_MASK_LEFT:
+		_stop_slide()
+		_set_pan(_pan - event.relative / SCALE)
+	elif event is InputEventScreenDrag:
+		_stop_slide()
+		_set_pan(_pan - event.relative / SCALE)
 
 
 # ── The page ────────────────────────────────────────────────
@@ -271,7 +297,9 @@ func _build_page() -> void:
 	window.position = Vector2(SIDE, 0.0)
 	window.size = Vector2(SHEET.x - SIDE, SHEET.y)
 	window.clip_contents = true
-	window.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	window.mouse_filter = Control.MOUSE_FILTER_STOP
+	window.mouse_default_cursor_shape = Control.CURSOR_DRAG
+	window.gui_input.connect(_drag)
 	holder.add_child(window)
 	_sheet = _Sheet.new()
 	_sheet.layer = "map"
@@ -615,6 +643,32 @@ class _Sheet:
 					else:
 						_house(Vector2(x + w / 2.0, y + h + w * 0.55), w, h, wall, roof, true)
 				x += w + _rng.randf_range(3.0, 7.0)
+		# 6e Avenue's west side below the school, as Charlotte walks it (reference/streetview/6e-avenue/5446…–5544…): the gym in orange
+		# brick, the schoolyard with its basketball hoop, the grey apartment block behind its lawn, the parish hall by the church.
+		var w0 := FIVE_X + AVE_W / 2.0 + 10.0
+		var w1 := SIX_X - AVE_W / 2.0 - 10.0
+		var gy := DAND_Y + 176.0
+		CuteArt._shape(self, [Vector2(w0 + 40, gy), Vector2(w1, gy), Vector2(w1, gy + 70), Vector2(w0 + 40, gy + 70)], Color("#D07A40"), true, _rng)
+		for k in 4:
+			draw_rect(Rect2(w0 + 52 + k * ((w1 - w0 - 64.0) / 4.0), gy + 12, 6, 30), Color("#BFE3F7"))
+		var yy := gy + 86.0
+		CuteArt._shape(self, [Vector2(w0, yy), Vector2(w1, yy), Vector2(w1, yy + 80), Vector2(w0, yy + 80)], Color("#C9C2B0"), true, _rng)
+		var hoop := Vector2(w0 + 30, yy + 16)
+		CuteArt._stroke(self, [hoop + Vector2(0, 50), hoop], EDGE, 2.4, true, _rng)
+		draw_rect(Rect2(hoop + Vector2(-9, -8), Vector2(18, 12)), Color("#FFFDF7"))
+		draw_arc(hoop + Vector2(0, 7), 5.0, 0.0, PI, 8, Color("#E8812E"), 2.0)
+		var fence := []
+		for k in 20:
+			fence.append(Vector2(w0 + k * (w1 - w0) / 19.0, yy + (4.0 if k % 2 == 0 else 0.0)))
+		CuteArt._crayon_line(self, fence, Color("#8A8176"), 1.8, _rng, 1)
+		var ay := yy + 96.0
+		CuteArt._shape(self, CuteArt._oval(Vector2((w0 + w1) / 2.0, ay + 70), Vector2((w1 - w0) / 2.0, 22)), Color("#9BD27E"), true, _rng)
+		CuteArt._shape(self, [Vector2(w0 + 20, ay), Vector2(w1 - 20, ay), Vector2(w1 - 20, ay + 58), Vector2(w0 + 20, ay + 58)], Color("#A7AFB8"), true, _rng)
+		for row in 2:
+			for col in 3:
+				draw_rect(Rect2(w0 + 30 + col * ((w1 - w0 - 64.0) / 3.0), ay + 8 + row * 24, 14, 14), Color("#5E6B80"))
+		var hy := MASSON_Y - ST_W / 2.0 - 104.0
+		CuteArt._shape(self, [Vector2(w0 + 20, hy), Vector2(w1 - 30, hy), Vector2(w1 - 30, hy + 40), Vector2(w0 + 20, hy + 40)], Color("#B5B0A6"), true, _rng)
 		# The church: grey stone, its tower with the cross, between 5e and 6e on the north side.
 		var c0 := FIVE_X + AVE_W / 2.0 + 10.0
 		var c1 := SIX_X - AVE_W / 2.0 - 10.0
@@ -802,6 +856,8 @@ class _Sheet:
 		_text("Rue Masson", Vector2(FOUR_X - 2.5 * AVE_STEP, MASSON_Y + 5), 14, ink)
 		_text("Rue Masson", Vector2(FOUR_X + 5.5 * AVE_STEP, MASSON_Y + 5), 14, ink)
 		_text("Église", Vector2((FIVE_X + SIX_X) / 2.0 - 12.0, MASSON_Y - 50), 13, Color("#FFFDF7"), -0.02)
+		_text("gym", Vector2(LANE_X + 10, DAND_Y + 215), 12, Color("#FFFDF7"), -0.02)
+		_text("cour d'école", Vector2(LANE_X + 8, DAND_Y + 300), 11, Color("#5E5240"), 0.02)
 		_text("Parc", Vector2((MOLSON_X + FOUR_X - 3.0 * AVE_STEP) / 2.0, MASSON_Y + 74), 15, Color("#2E5E20"), 0.02)
 		for a in [[FOUR_X - 3.0 * AVE_STEP, "1re Avenue"], [FOUR_X - 2.0 * AVE_STEP, "2e Avenue"], [FOUR_X - AVE_STEP, "3e Avenue"],
 				[FOUR_X + 5.0 * AVE_STEP, "9e Avenue"], [TEN_X, "10e Avenue"]]:
