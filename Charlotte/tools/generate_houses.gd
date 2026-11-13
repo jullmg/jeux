@@ -1116,36 +1116,37 @@ const HOUSES := [
 		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#1E6E3E", "frame": "#2B2B2E", "door": 420.0, "awning": "#1E6E3E", "inside": "books", "transom": "none"},
 			{"x0": 560.0, "x1": 1070.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 700.0, "inside": "goods", "kick": "panel"}], "basement": [],
 	},
-	# 2661–2663: new red brick on three floors, recessed balconies with glass rails (2661…, 2663…).
+	# 2661–2697, to 3e: one new condo building, red brick on three floors, balconies set into the wall between strips of pale
+	# stone, a ground floor of pale stone piers and big windows, the SAQ under its red band at the 3e corner. No yard in the
+	# middle: the old pictures from 3e made it look like two buildings (2661…, 2663…, 2675…, 2679…, 2687…, 2693…, 2697…).
+	# The posters in the shop windows are left out.
 	{
 		"name": "masson_2661", "kind": "commerce", "width": 800.0, "floors": 3,
 		"bricks": ["#A8473A", "#B4513F", "#9A3F33", "#B85C48"], "mortar": "#CDBFB0", "parapet": "flat",
 		"lintel": "#A8473A", "lintel_dark": "#8E3A2F", "lintel_style": "none", "window_style": "slider", "frame": "#1E1E20", "trim": "#2B2B2E", "trim_dark": "#1E1E20",
-		"windows": [[80.0, 120.0], [320.0, 120.0], [560.0, 120.0]], "projecting": [[500.0, 740.0]], "metal": "#3A3A3C",
-		"shops": [{"x0": 30.0, "x1": 770.0, "sign": "#3A3A3C", "frame": "#2B2B2E", "door": 400.0, "inside": "salon", "transom": "none", "panes": 2}], "basement": [],
+		"windows": [[70.0, 130.0], [300.0, 130.0]], "loggias": [[500.0, 740.0]], "upper_piers": [470.0, 770.0], "metal": "#3A3A3C",
+		"pier": "#C9C5BC",
+		"shops": [{"x0": 30.0, "x1": 770.0, "sign": "#3A3A3C", "frame": "#B9B5AC", "door": 400.0, "inside": "salon", "transom": "none", "panes": 3}], "basement": [],
 	},
 	{
-		"name": "masson_2671", "kind": "masson_lot", "width": 380.0, "floors": 3, "halloween": false,
-		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
-	},
-	# 2675–2683: the same new red brick, long, balconies set into the wall, the shop windows hung with bright posters left out
-	# (2675…, 2687…).
-	{
-		"name": "masson_2675", "kind": "commerce", "width": 1300.0, "floors": 3,
+		"name": "masson_2675", "kind": "commerce", "width": 1680.0, "floors": 3,
 		"bricks": ["#A44A3A", "#B05444", "#984234", "#B85E4C"], "mortar": "#CDBFB0", "parapet": "flat",
 		"lintel": "#A44A3A", "lintel_dark": "#8E3A2F", "lintel_style": "none", "window_style": "slider", "frame": "#1E1E20", "trim": "#2B2B2E", "trim_dark": "#1E1E20",
-		"windows": [[80.0, 110.0], [300.0, 110.0], [540.0, 110.0], [780.0, 110.0], [1040.0, 110.0]],
-		"projecting": [[250.0, 450.0], [740.0, 940.0]], "metal": "#3A3A3C",
-		"shops": [{"x0": 30.0, "x1": 640.0, "sign": "#C8202A", "frame": "#2B2B2E", "door": 560.0, "inside": "restaurant", "transom": "none"},
-			{"x0": 640.0, "x1": 1270.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 700.0, "inside": "clothes", "kick": "panel"}], "basement": [],
+		"windows": [[60.0, 130.0], [250.0, 130.0], [700.0, 130.0], [890.0, 130.0], [1340.0, 130.0], [1520.0, 130.0]],
+		"loggias": [[440.0, 660.0], [1080.0, 1300.0]], "upper_piers": [420.0, 680.0, 1060.0, 1320.0], "metal": "#3A3A3C",
+		"pier": "#C9C5BC",
+		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#3A3A3C", "frame": "#B9B5AC", "door": 470.0, "inside": "goods", "transom": "none", "panes": 3},
+			{"x0": 560.0, "x1": 1100.0, "sign": "#3A3A3C", "frame": "#B9B5AC", "door": 640.0, "inside": "goods", "transom": "none", "panes": 3},
+			{"x0": 1100.0, "x1": 1650.0, "sign": "#3A3A3C", "frame": "#B9B5AC", "door": 1560.0, "inside": "clothes", "transom": "none", "panes": 3}], "basement": [],
 	},
-	# 2685–2697, at 3e: new brick on three floors with a bay of grey panels (2685…).
 	{
 		"name": "masson_2685", "kind": "commerce", "width": 900.0, "floors": 3,
 		"bricks": ["#A8503E", "#B05A46", "#9A4636", "#B86450"], "mortar": "#D0C4B6", "parapet": "flat",
 		"lintel": "#A8503E", "lintel_dark": "#8E3A2F", "lintel_style": "none", "window_style": "slider", "frame": "#1E1E20", "trim": "#2B2B2E", "trim_dark": "#1E1E20",
-		"windows": [[80.0, 110.0], [300.0, 110.0], [720.0, 110.0]], "metal_panels": [[560.0, 680.0]],
-		"shops": [{"x0": 30.0, "x1": 870.0, "sign": "#3A3A3C", "frame": "#2B2B2E", "door": 160.0, "inside": "cafe", "transom": "none", "panes": 4}], "basement": [],
+		"windows": [[60.0, 130.0], [520.0, 130.0], [710.0, 130.0]], "loggias": [[250.0, 470.0]], "upper_piers": [230.0, 490.0], "metal": "#3A3A3C",
+		"pier": "#C9C5BC",
+		"shops": [{"x0": 30.0, "x1": 420.0, "sign": "#3A3A3C", "frame": "#B9B5AC", "door": 120.0, "inside": "cafe", "transom": "none", "panes": 2},
+			{"x0": 420.0, "x1": 870.0, "sign": "#B5121B", "frame": "#B9B5AC", "door": 800.0, "inside": "goods", "transom": "none", "panes": 3}], "basement": [],
 	},
 	# Across 3e: the old bank's side, buff stone (2703…).
 	{
@@ -1167,29 +1168,42 @@ const HOUSES := [
 		"windows": [[80.0, 200.0], [330.0, 200.0], [580.0, 200.0], [830.0, 200.0]],
 		"shops": [{"x0": 30.0, "x1": 1070.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 980.0, "awning": "#F2F0EA", "inside": "goods", "transom": "none", "panes": 6}], "basement": [],
 	},
-	# 2682–2686: red brick on three floors, "Les fleurs poussent encore" painted along the top, Monteiro downstairs (2690…).
+	# 2682–2686: red brick on three floors, "Les fleurs poussent encore" painted along the top, a ground floor of dark granite
+	# round a restaurant's window, the flats' door at the right (2682…, 2668…).
 	{
 		"name": "masson_2682", "kind": "commerce", "width": 860.0, "floors": 3,
 		"bricks": ["#A44A3A", "#B05444", "#984234", "#B85E4C"], "mortar": "#CDBFB0", "parapet": "flat",
 		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 110.0], [360.0, 110.0], [620.0, 110.0]],
-		"shops": [{"x0": 30.0, "x1": 450.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 120.0, "inside": "restaurant", "front": "wood", "kick": "wood"},
-			{"x0": 450.0, "x1": 830.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 760.0, "inside": "clothes", "wall": "#1E1E20", "transom": "none"}], "basement": [],
+		"pier": "#3A3836",
+		"shops": [{"x0": 30.0, "x1": 640.0, "sign": "#2B2A2A", "frame": "#3A3836", "door": 560.0, "inside": "restaurant", "transom": "none"}],
+		"res_doors": [740.0], "basement": [],
 	},
-	# 2658–2668: dark brick on three floors, shops (2656…, 2668…).
+	# 2666–2668: red-brown brick on three floors, white windows, Monteiro under its black sign over a band of blue tiles, the
+	# white door to the flats (2666…, 2668…, 2658…).
 	{
 		"name": "masson_2666", "kind": "commerce", "width": 820.0, "floors": 3,
-		"bricks": ["#5E4A40", "#6A564A", "#544238", "#725E52"], "mortar": "#9A8E84", "parapet": "corbel",
-		"lintel": "#B9B3A8", "lintel_dark": "#7E786E", "windows": [[90.0, 110.0], [340.0, 110.0], [580.0, 110.0]],
-		"shops": [{"x0": 30.0, "x1": 790.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 400.0, "inside": "goods", "kick": "brick"}], "basement": [],
+		"bricks": ["#9A5040", "#A65A48", "#8E4838", "#B0624E"], "mortar": "#CDBFB0", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "window_style": "slider", "frame": "#F2F0EA", "windows": [[90.0, 120.0], [340.0, 120.0], [590.0, 120.0]],
+		"shops": [{"x0": 30.0, "x1": 600.0, "sign": "#1A1A1A", "frame": "#1E1E20", "door": 120.0, "inside": "restaurant", "kick": "tile", "tile": "#2E5E9E"}],
+		"res_doors": [700.0], "basement": [],
 	},
+	# 2656–2658: charcoal brick on three floors, white windows under stone lintels, a dark shopfront (2656…, 2658…).
 	{
-		"name": "masson_2650", "kind": "masson_lot", "lot_style": "murals", "width": 420.0, "floors": 3, "halloween": false,
-		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+		"name": "masson_2650", "kind": "commerce", "width": 700.0, "floors": 3,
+		"bricks": ["#3E3A38", "#4A4542", "#34302E", "#55504C"], "mortar": "#8E8A84", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 110.0], [290.0, 110.0], [490.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 470.0, "inside": "goods", "front": "wood", "kick": "wood"}],
+		"res_doors": [620.0], "basement": [],
 	},
-	# 2644–2648, at 2e: the little planted square (2644…, 2648…).
+	# 2644–2648, at 2e: Pista, two floors, brown brick over a black shopfront with its long steel sign, a white door; its side on
+	# 2e has the pink mural. (2e Avenue itself is the planted square here, not a lot on Masson: 2644…, 2648…, 2650….)
 	{
-		"name": "masson_2644", "kind": "masson_lot", "lot_style": "plaza", "width": 900.0, "floors": 3, "halloween": false,
-		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+		"name": "masson_2644", "kind": "commerce", "width": 620.0, "floors": 2,
+		"bricks": ["#7A5040", "#865A48", "#6E4838", "#8E624E"], "mortar": "#B9AC9E", "parapet": "flat",
+		"lintel_style": "none", "window_style": "slider", "frame": "#1E1E20", "ribbon_sill": true, "win_h": 100.0,
+		"windows": [[60.0, 160.0], [240.0, 160.0], [420.0, 160.0]],
+		"shops": [{"x0": 120.0, "x1": 590.0, "sign": "#C9CCCF", "frame": "#1A1A1A", "door": 520.0, "inside": "cafe", "transom": "none", "panes": 3}],
+		"res_doors": [60.0], "basement": [],
 	},
 	# Across 2e: the next block's corner, its side.
 	{
@@ -5051,6 +5065,18 @@ func _commerce() -> void:
 				_window(w[0], _win_y(f) + k.get("win_dy", 0.0), w[1], k.get("win_h", 160.0))
 				if k.get("juliets", false):
 					_juliet(w[0], w[1], _win_y(f) + 160.0)
+		# Balconies set into the wall (`loggias`: [x0, x1] bays), each floor a dark recess with its glass door and a glass rail,
+		# and pale stone strips up the front (`upper_piers`: x of each), the new condos at 2e–3e (2661…, 2675…, 2687…).
+		for lg: Array in k.get("loggias", []):
+			for f in range(1, floors):
+				var ly := _win_y(f) - 20.0
+				_rect(lg[0], ly, lg[1] - lg[0], _fb(f) - ly, "#3A302C")
+				_rect(lg[0], ly, lg[1] - lg[0], 14, "#000000", 'opacity="0.35"')
+				_rect(lg[0] + 18, ly + 24, (lg[1] - lg[0]) * 0.45, _fb(f) - ly - 26, "url(#glass)", 'opacity="0.7"')
+				_glass_rail(lg[0] + 6, lg[1] - 6, _fb(f))
+		for up: float in k.get("upper_piers", []):
+			_rect(up - 22, top, 44, belt - top + 4, "#C9C5BC", _stroke("#9E9A92", 1))
+			_rect(up - 22, top, 8, belt - top + 4, "#FFFFFF", 'opacity="0.3"')
 		for bal: Array in k.get("projecting", []):
 			for f in range(1, floors):
 				_balcony(bal[0], bal[1], _fb(f), [])

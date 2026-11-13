@@ -54,12 +54,13 @@ const BLOCKS := {
 		"panels": {},
 	},
 	"2e_3e_impair": {
-		"layout": ["masson_2645_cote", "rue_2e", "masson_2653", "masson_2661", "masson_2671", "masson_2675", "masson_2685",
+		"layout": ["masson_2645_cote", "rue_2e", "masson_2653", "masson_2661", "masson_2675", "masson_2685",
 			"rue_3e", "masson_2703_cote"],
 		"avenues": [["rue_2e", "2e Avenue", 540.0], ["rue_3e", "3e Avenue", 540.0]],
-		"trees_after": [2, 4], "tree_shift": {2: 0.0, 4: 0.0}, "lamps_after": [2, 5], "hydrants_at": [3.5], "racks_at": [5.5],
+		"trees_after": [2, 4], "tree_shift": {2: 0.0, 4: 0.0}, "lamps_after": [3, 5], "hydrants_at": [3.5], "racks_at": [4.3],
 		"squirrels_at": [4.5], "moon_at": 2.5,
-		"signs": {"masson_2653": [[295.0, "Paulines", "#FFFFFF", "#1E5E3A", 15]]},
+		"signs": {"masson_2653": [[295.0, "Paulines", "#FFFFFF", "#1E5E3A", 15]],
+			"masson_2685": [[645.0, "SAQ", "#FFFFFF", "#B5121B", 17]]},
 		"panels": {},
 	},
 	"2e_3e_pair": {
@@ -70,7 +71,8 @@ const BLOCKS := {
 		"squirrels_at": [6.5], "moon_at": 6.5,
 		"signs": {
 			"masson_2692": [[550.0, "PLACE DOLLAR", "#1E7A3E", "#FFFFFF", 17]],
-			"masson_2682": [[640.0, "monteiro", "#FFFFFF", "#1A1A1A", 14]],
+			"masson_2666": [[315.0, "monteiro", "#FFFFFF", "#1A1A1A", 14]],
+			"masson_2644": [[355.0, "PISTA", "#2B2B2E", "#C9CCCF", 15]],
 		},
 		"texts": {"masson_2682": [[430.0, 112.0, "LES FLEURS POUSSENT ENCORE", "#F7F3EA", "#5E2A20", 17]]},
 		"panels": {},

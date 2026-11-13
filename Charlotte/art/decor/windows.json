@@ -2764,6 +2764,44 @@
 			"trim": "#F4F1EA"
 		}
 	],
+	"masson_2644": [
+		{
+			"bar_y": 185.0,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				65.0,
+				140.0,
+				150.0,
+				90.0
+			],
+			"trim": "#1E1E20"
+		},
+		{
+			"bar_y": 185.0,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				245.0,
+				140.0,
+				150.0,
+				90.0
+			],
+			"trim": "#1E1E20"
+		},
+		{
+			"bar_y": 185.0,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				425.0,
+				140.0,
+				150.0,
+				90.0
+			],
+			"trim": "#1E1E20"
+		}
+	],
 	"masson_2645_cote": [
 		{
 			"bar_y": 464.4,
@@ -2809,6 +2847,80 @@
 				338.0,
 				143.0,
 				84.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		}
+	],
+	"masson_2650": [
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				98.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				298.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 464.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				498.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				98.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				298.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F4F1EA"
+		},
+		{
+			"bar_y": 189.4,
+			"flower_box": false,
+			"lit": true,
+			"pane": [
+				498.0,
+				143.0,
+				94.0,
 				144.0
 			],
 			"trim": "#F4F1EA"
@@ -2920,9 +3032,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				85.0,
+				75.0,
 				415.0,
-				110.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -2932,21 +3044,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				325.0,
+				305.0,
 				415.0,
-				110.0,
-				150.0
-			],
-			"trim": "#1E1E20"
-		},
-		{
-			"bar_y": 490.0,
-			"flower_box": false,
-			"lit": false,
-			"pane": [
-				565.0,
-				415.0,
-				110.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -2956,9 +3056,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				85.0,
+				75.0,
 				140.0,
-				110.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -2968,21 +3068,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				325.0,
+				305.0,
 				140.0,
-				110.0,
-				150.0
-			],
-			"trim": "#1E1E20"
-		},
-		{
-			"bar_y": 215.0,
-			"flower_box": false,
-			"lit": false,
-			"pane": [
-				565.0,
-				140.0,
-				110.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -2990,76 +3078,76 @@
 	],
 	"masson_2666": [
 		{
-			"bar_y": 464.4,
+			"bar_y": 490.0,
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				98.0,
-				418.0,
-				94.0,
-				144.0
+				95.0,
+				415.0,
+				110.0,
+				150.0
 			],
-			"trim": "#F4F1EA"
+			"trim": "#F2F0EA"
 		},
 		{
-			"bar_y": 464.4,
+			"bar_y": 490.0,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				345.0,
+				415.0,
+				110.0,
+				150.0
+			],
+			"trim": "#F2F0EA"
+		},
+		{
+			"bar_y": 490.0,
 			"flower_box": false,
 			"lit": true,
 			"pane": [
-				348.0,
-				418.0,
-				94.0,
-				144.0
+				595.0,
+				415.0,
+				110.0,
+				150.0
 			],
-			"trim": "#F4F1EA"
+			"trim": "#F2F0EA"
 		},
 		{
-			"bar_y": 464.4,
+			"bar_y": 215.0,
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				588.0,
-				418.0,
-				94.0,
-				144.0
+				95.0,
+				140.0,
+				110.0,
+				150.0
 			],
-			"trim": "#F4F1EA"
+			"trim": "#F2F0EA"
 		},
 		{
-			"bar_y": 189.4,
+			"bar_y": 215.0,
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				98.0,
-				143.0,
-				94.0,
-				144.0
+				345.0,
+				140.0,
+				110.0,
+				150.0
 			],
-			"trim": "#F4F1EA"
+			"trim": "#F2F0EA"
 		},
 		{
-			"bar_y": 189.4,
+			"bar_y": 215.0,
 			"flower_box": false,
-			"lit": false,
+			"lit": true,
 			"pane": [
-				348.0,
-				143.0,
-				94.0,
-				144.0
+				595.0,
+				140.0,
+				110.0,
+				150.0
 			],
-			"trim": "#F4F1EA"
-		},
-		{
-			"bar_y": 189.4,
-			"flower_box": false,
-			"lit": false,
-			"pane": [
-				588.0,
-				143.0,
-				94.0,
-				144.0
-			],
-			"trim": "#F4F1EA"
+			"trim": "#F2F0EA"
 		}
 	],
 	"masson_2675": [
@@ -3068,9 +3156,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				85.0,
+				65.0,
 				415.0,
-				100.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -3080,9 +3168,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				305.0,
+				255.0,
 				415.0,
-				100.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -3092,21 +3180,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				545.0,
+				705.0,
 				415.0,
-				100.0,
-				150.0
-			],
-			"trim": "#1E1E20"
-		},
-		{
-			"bar_y": 490.0,
-			"flower_box": false,
-			"lit": true,
-			"pane": [
-				785.0,
-				415.0,
-				100.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -3116,9 +3192,33 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				1045.0,
+				895.0,
 				415.0,
-				100.0,
+				120.0,
+				150.0
+			],
+			"trim": "#1E1E20"
+		},
+		{
+			"bar_y": 490.0,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				1345.0,
+				415.0,
+				120.0,
+				150.0
+			],
+			"trim": "#1E1E20"
+		},
+		{
+			"bar_y": 490.0,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				1525.0,
+				415.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -3128,9 +3228,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				85.0,
+				65.0,
 				140.0,
-				100.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -3140,9 +3240,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				305.0,
+				255.0,
 				140.0,
-				100.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -3152,9 +3252,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				545.0,
+				705.0,
 				140.0,
-				100.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -3164,9 +3264,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				785.0,
+				895.0,
 				140.0,
-				100.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -3176,9 +3276,21 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				1045.0,
+				1345.0,
 				140.0,
-				100.0,
+				120.0,
+				150.0
+			],
+			"trim": "#1E1E20"
+		},
+		{
+			"bar_y": 215.0,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				1525.0,
+				140.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -3264,9 +3376,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				85.0,
+				65.0,
 				415.0,
-				100.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -3276,9 +3388,9 @@
 			"flower_box": false,
 			"lit": true,
 			"pane": [
-				305.0,
+				525.0,
 				415.0,
-				100.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -3288,9 +3400,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				725.0,
+				715.0,
 				415.0,
-				100.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -3300,9 +3412,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				85.0,
+				65.0,
 				140.0,
-				100.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -3312,9 +3424,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				305.0,
+				525.0,
 				140.0,
-				100.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
@@ -3324,9 +3436,9 @@
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				725.0,
+				715.0,
 				140.0,
-				100.0,
+				120.0,
 				150.0
 			],
 			"trim": "#1E1E20"
