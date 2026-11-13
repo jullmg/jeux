@@ -10,7 +10,7 @@ var _window_neighbour: WindowNeighbour
 func _init() -> void:
 	street_key = "6e"
 	layout = [
-		"ecole", "rue_dandurand",
+		"ecole_6e", "rue_dandurand",
 		"depanneur", "garages", "ruelle_verte",
 		"triplex_exemple_2", "plex_02", "plex_03", "moderne", "plex_04",
 		"duplex_voisin_gauche", "duplex_charlotte", "duplex_voisin_droite",
@@ -53,7 +53,7 @@ func _build_cross_streets() -> void:
 	dandurand.school = true
 	dandurand.guard = true
 	dandurand.left_walls = [
-		{"to": 2.6, "top": _house_top("ecole"), "kind": "school", "color": Color("#A9472F")},
+		{"to": 2.6, "top": _house_top("ecole_6e"), "kind": "school", "color": Color("#A9472F")},
 		{"to": CrossStreet.FAR, "top": 330.0, "kind": "plex", "color": Color("#9C5A44")},
 	]
 	# Along Dandurand the first wall is Xin-Xin's own front (its door, its sign, its Coors logos' band), not a plain side: it keeps

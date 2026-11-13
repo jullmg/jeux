@@ -261,6 +261,14 @@ const HOUSES := [
 		"trim": "#ECE8E0", "trim_dark": "#A9A398", "lintel": "#D8CFC0", "lintel_dark": "#A39A8A",
 		"basement": [120.0, 420.0, 720.0], "fence": "black", "halloween": false,
 	},
+	# École Saint-Jean-de-Brébeuf's side on 6e Avenue, as Charlotte sees it from 6e (main.tscn, across Dandurand) and from
+	# 6e below Dandurand (sixieme_sud.tscn): reference/streetview/6e-avenue/5578…, 5582…, 5586… and their close-ups.
+	{
+		"name": "ecole_6e", "kind": "school_side", "width": 1400.0, "floors": 3, "top": 104.0,
+		"bricks": ["#8E3E2E", "#9A4636", "#843828", "#A44E3C", "#7E3426"], "mortar": "#B9A898",
+		"trim": "#ECE8E0", "trim_dark": "#A9A398", "lintel": "#D6D0C2", "lintel_dark": "#A39A8A",
+		"basement": [], "fence": "", "halloween": false,
+	},
 	# ── Across 6e Avenue, the odd numbers, Holt (left) to Dandurand (right) ──
 	# From reference/streetview/6e-avenue/ (INDEX.md "6e Avenue 5600–5800 (impairs)"): each entry names its pictures. Seasonal
 	# decorations, parked cars, bikes, bins, the plywood boarding up 5685's balcony and the children's mural on 5713's side wall
@@ -1637,6 +1645,8 @@ func _svg() -> void:
 			_modern()
 		"school":
 			_school()
+		"school_side":
+			_school_side()
 		"gables":
 			_gables()
 		"bungalow":
@@ -3005,6 +3015,99 @@ func _school() -> void:
 	_snow(cx - 110, 220, top - 40)
 	_foundation()
 	_fence([])
+
+
+# École Saint-Jean-de-Brébeuf's side on 6e Avenue (6e-avenue/5578…, 5582…, 5586… and close-ups): red-brown brick on three
+# floors over a tall basement of grey parging, cracked and stained; a pale stone water table, a band of basket-weave brick
+# over it and a stone sill course; the windows in pairs, double-hung in dark maroon frames, light blinds behind the glass,
+# pale stone sills; the plain corner at Dandurand (the right end) a little proud, with stone at its foot; a dark brown
+# cornice band under a stone coping. Left out: the grey insulation panels pinned to the wall in the pictures (works).
+func _school_side() -> void:
+	var top := _top()
+	var stone_top := base_y - 92.0
+	var basement_top := stone_top - 40.0
+	var weave_top := basement_top - 70.0
+	_bricks(top, weave_top + 4.0)
+	_wall_shading(top)
+	# ── The basement: grey parging over the stone, cracks, stains, small dark windows behind their bars.
+	_rect(X0, basement_top, X1 - X0, ground_y - basement_top, "#A9A69E")
+	var crack := RandomNumberGenerator.new()
+	crack.seed = 4207
+	for i in 18:
+		var cx := crack.randf_range(X0 + 20, X1 - 20)
+		var cy := crack.randf_range(basement_top + 10, ground_y - 20)
+		_path("M%s %s l%s %s l%s %s l%s %s" % [_n(cx), _n(cy), _n(crack.randf_range(-30, 30)), _n(crack.randf_range(8, 24)),
+			_n(crack.randf_range(-30, 30)), _n(crack.randf_range(8, 24)), _n(crack.randf_range(-20, 20)), _n(crack.randf_range(6, 18))],
+			"none", _stroke("#6E6A62", 1.4) + ' opacity="0.6"')
+	for i in 10:
+		_rect(crack.randf_range(X0, X1 - 120), basement_top + 6, crack.randf_range(40, 120), crack.randf_range(30, 90), "#5E5A52", 'opacity="0.12"')
+	var bx := X0 + 120.0
+	while bx < X1 - 200.0:
+		_rect(bx, base_y - 70, 96, 40, "#2E2A26", _stroke("#5E5A52", 2))
+		_rect(bx - 6, base_y - 30, 108, 8, "#BDB7AD", _stroke("#8E8A82", 1))
+		bx += 230.0
+	# ── The water table, the basket-weave band, the sill course.
+	_rect(X0 - 4, basement_top - 4, X1 - X0 + 8, 14, k.lintel, _stroke(k.lintel_dark, 1.5))
+	_rect(X0 - 4, basement_top - 4, X1 - X0 + 8, 3, "#FFFFFF", 'opacity="0.35"')
+	_snow(X0 - 4, X1 - X0 + 8, basement_top - 4)
+	_rect(X0, weave_top, X1 - X0, basement_top - weave_top - 4, k.bricks[2])
+	var wy := weave_top + 4.0
+	var row := 0
+	while wy < basement_top - 10.0:
+		var wx := X0 + (18.0 if row % 2 == 1 else 0.0)
+		while wx < X1:
+			# Three bricks laid one way, three the other: the basket weave.
+			for j in 3:
+				_rect(wx + 1, wy + j * 6.0 + 1, 34, 4.5, k.bricks[j % 3], _stroke("#5A2418", 0.6))
+			for j in 3:
+				_rect(wx + 37 + j * 12.0, wy + 1, 10, 17, k.bricks[(j + 1) % 3], _stroke("#5A2418", 0.6))
+			wx += 72.0
+		wy += 20.0
+		row += 1
+	_rect(X0 - 4, weave_top - 12, X1 - X0 + 8, 12, k.lintel, _stroke(k.lintel_dark, 1.2))
+	_snow(X0 - 4, X1 - X0 + 8, weave_top - 12)
+	# ── The corner at Dandurand, a little proud of the wall, stone at its foot.
+	var corner := X1 - 230.0
+	_rect(corner, top - 20, X1 - corner, weave_top - top + 20, k.bricks[1])
+	_rect(corner, top - 20, 12, weave_top - top + 20, "#000000", 'opacity="0.18"')
+	_rect(corner - 6, weave_top - 50, X1 - corner + 10, 40, k.lintel, _stroke(k.lintel_dark, 1.2))
+	# ── Three floors of windows in pairs, maroon frames, pale stone sills.
+	var floor_h := (weave_top - 12.0 - top - 40.0) / 3.0
+	for f in 3:
+		var sill := weave_top - 30.0 - f * floor_h
+		var wh := floor_h * 0.66
+		var xs: Array[float] = []
+		var x := X0 + 70.0
+		while x < corner - 160.0:
+			xs.append(x)
+			xs.append(x + 88.0)
+			x += 250.0
+		xs.append(corner + 40.0)
+		xs.append(corner + 128.0)
+		for wx2: float in xs:
+			_school_sash(wx2, sill - wh, 72.0, wh)
+	# ── The cornice: a dark brown band with its dentils under a pale stone coping.
+	_rect(X0 - 6, top - 24, X1 - X0 + 12, 26, "#4A3028", _stroke("#2A1A14", 1.5))
+	var dx := X0
+	while dx < X1:
+		_rect(dx + 4, top - 4, 8, 10, "#4A3028")
+		dx += 22.0
+	_rect(X0 - 10, top - 36, X1 - X0 + 20, 12, k.lintel, _stroke(k.lintel_dark, 1.2))
+	_rect(X0 - 10, top - 36, X1 - X0 + 20, 3, "#FFFFFF", 'opacity="0.35"')
+	_snow(X0 - 10, X1 - X0 + 20, top - 36)
+	_foundation()
+
+
+# A double-hung sash of the school's side: dark maroon frame, light blinds behind the glass, a meeting rail, a stone sill.
+func _school_sash(x: float, y: float, w: float, h: float) -> void:
+	_rect(x - 6, y + h, w + 12, 10, k.lintel, _stroke(k.lintel_dark, 1.2))
+	_snow(x - 6, w + 12, y + h)
+	_rect(x, y, w, h, "#6E2620", _stroke("#4A1814", 1.5))
+	_rect(x + 5, y + 5, w - 10, h * 0.5 - 7, "#C9D2D6")
+	_rect(x + 5, y + h * 0.5 + 2, w - 10, h * 0.5 - 7, "#B9C6CC")
+	_rect(x + 5, y + h * 0.5 + 2, w - 10, (h * 0.5 - 7) * 0.4, "#E4E8EA", 'opacity="0.7"')
+	_rect(x + 3, y + h * 0.5 - 2, w - 6, 5, "#6E2620")
+	_path("M%s %s l%s 0 l%s %s z" % [_n(x + 6), _n(y + 6), _n(w * 0.45), _n(-w * 0.45), _n(h * 0.3)], "#FFFFFF", 'opacity="0.3"')
 
 
 # A school window: a tall dark-framed sash with a transom, a stone sill under it (reference/coin_dandurand).

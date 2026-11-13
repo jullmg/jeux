@@ -813,7 +813,7 @@ func _walls_along(script_path: String, from_gap: String, direction: int, ours :=
 	# The next cross street (an open "cross" gap, with its crosswalk), then the next block's plexes into the distance.
 	walls.append({"to": d + 0.5, "kind": "cross"})
 	var beyond := i + direction
-	if beyond >= 0 and beyond < lay.size() and lay[beyond] == "ecole":
+	if beyond >= 0 and beyond < lay.size() and lay[beyond].begins_with("ecole"):
 		# Down 5e or 6e past Dandurand: the school, then more plexes.
 		var school := _tex("ecole")
 		walls.append({"to": d + 3.1, "top": HOUSE_BASE_Y - (school.get_height() - 40.0) * HOUSE_SCALE, "kind": "school", "color": Color("#A9472F")})
@@ -824,7 +824,7 @@ func _walls_along(script_path: String, from_gap: String, direction: int, ours :=
 func _wall_kind(art: String) -> String:
 	if art.begins_with("ruelle"):
 		return "gap"
-	return {"ohbon": "ohbon", "coin_holt": "corner_holt", "depanneur_front": "shop", "garages": "garage", "ecole": "school"}.get(art, "plex")
+	return {"ohbon": "ohbon", "coin_holt": "corner_holt", "depanneur_front": "shop", "garages": "garage", "ecole": "school", "ecole_6e": "school"}.get(art, "plex")
 
 
 # A facade's brick colour: the average of points across it, keeping only brick-coloured ones (not the white
@@ -927,7 +927,7 @@ func _shop_shut() -> bool:
 
 
 ## The houses that never hand out candy, whatever the street: her own, the shops, the school, the lane mouths.
-const NO_CANDY := ["duplex_charlotte", "depanneur", "depanneur_front", "ohbon", "ecole", "garages", "ruelle", "ruelle_verte",
+const NO_CANDY := ["duplex_charlotte", "depanneur", "depanneur_front", "ohbon", "ecole", "ecole_6e", "garages", "ruelle", "ruelle_verte",
 	"ruelle_impair_holt", "ruelle_impair_dandurand"]
 
 

@@ -13,7 +13,7 @@ func _init() -> void:
 	street_key = "6e_sud"
 	layout = [
 		"masson_2892_cote", "rue_masson",
-		"six_sud_eglise", "six_sud_salle", "six_sud_appartements", "six_sud_cour", "six_sud_gymnase", "ecole",
+		"six_sud_eglise", "six_sud_salle", "six_sud_appartements", "six_sud_cour", "six_sud_gymnase", "ecole_6e",
 		"rue_dandurand", "depanneur",
 	]
 	cross_streets = {"rue_masson": 600.0, "rue_dandurand": 560.0}
@@ -60,7 +60,7 @@ func _build_cross_streets() -> void:
 	var dandurand := _cross_street("rue_dandurand", "Rue Dandurand", -1.0)
 	dandurand.school = true
 	dandurand.left_walls = [
-		{"to": 2.6, "top": _house_top("ecole"), "kind": "school", "color": Color("#A9472F")},
+		{"to": 2.6, "top": _house_top("ecole_6e"), "kind": "school", "color": Color("#A9472F")},
 		{"to": CrossStreet.FAR, "top": 330.0, "kind": "plex", "color": Color("#9C5A44")},
 	]
 	dandurand.right_walls = _walls_along("res://scenes/dandurand.gd", "rue_6e", -1)

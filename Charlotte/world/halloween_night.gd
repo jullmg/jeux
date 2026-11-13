@@ -49,7 +49,7 @@ static func glow_texture() -> ImageTexture:
 
 ## Does this house give candy tonight? Always the same answer for the same house, so the street stays itself.
 static func gives(street_key: String, art: String, i: int) -> bool:
-	if art.begins_with("rue_") or art.begins_with("coin_") or art == "ecole" or art == "garages":
+	if art.begins_with("rue_") or art.begins_with("coin_") or art.begins_with("ecole") or art == "garages":
 		return false
 	return absi(hash("%s/%s/%d" % [street_key, art, i])) % 3 < GIVES
 
