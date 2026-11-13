@@ -11,6 +11,9 @@ const ALIASES := {"printemps": "spring", "ete": "summer", "été": "summer", "au
 ## only (never saved), and off in a release build since the menu cannot be opened there. Gates ask it through
 ## `blocked()`, never by reading it.
 var no_limits := false
+## Debug: Charlotte crosses without stopping to look both ways first (`StreetScene._look_both_ways`), to test crossings
+## quickly. Session only, never saved, like `no_limits`.
+var skip_look := false
 ## The story flags each quest leaves behind, cleared with it.
 ## Story flags that belong to no quest, cleared by "Tout effacer".
 const OTHER_FLAGS := ["met_twins", "met_billie_auguste", "devoirs", "candy_bag_kind"]
@@ -178,6 +181,7 @@ func _places_list(parent: Control) -> void:
 	title.add_theme_font_size_override("font_size", 20)
 	list.add_child(title)
 	list.add_child(_no_limits_button())
+	list.add_child(_skip_look_button())
 	var known := {}
 	for place: Dictionary in PLACES:
 		if place.has("group"):
@@ -218,6 +222,21 @@ func _no_limits_button() -> Button:
 	b.add_theme_color_override("font_color", Color("#9AE6A1") if no_limits else Color("#CFCFD8"))
 	b.pressed.connect(func() -> void:
 		no_limits = not no_limits
+		_close()
+		_open())
+	return b
+
+
+# The switch that lets her cross without looking both ways first (and without saying so).
+func _skip_look_button() -> Button:
+	var b := Button.new()
+	b.text = "▶ Traverser sans regarder : OUI" if skip_look else "Traverser sans regarder : non"
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.tooltip_text = "Charlotte traverse tout de suite, sans s'arrêter regarder des deux côtés. Pour l'essai seulement."
+	b.add_theme_font_size_override("font_size", 15)
+	b.add_theme_color_override("font_color", Color("#9AE6A1") if skip_look else Color("#CFCFD8"))
+	b.pressed.connect(func() -> void:
+		skip_look = not skip_look
 		_close()
 		_open())
 	return b

@@ -754,7 +754,10 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 
   It is `rule` as usual, except that the debug menu's **"Sans limites"** switch (`DebugMenu.no_limits`, top of the
   "Aller à…" column, this session only, never saved) turns it off and opens the whole neighbourhood. **Write every new
-  limit this way** and that switch covers it without anyone remembering to wire it. A limit that is not a yes-or-no
+  limit this way** and that switch covers it without anyone remembering to wire it.
+  Beside it, **"Traverser sans regarder"** (`DebugMenu.skip_look`, session only) lets her cross without stopping to look both
+  ways: every crossing (crosswalks, the crosswalk over our own street, `_cross_to`, Masson's) goes through
+  `StreetScene._look_both_ways(tween, dir)`, so a new crossing must call it too. A limit that is not a yes-or-no
   refusal — the grey crayon over `TownMap._reachable` — reads `DebugMenu.no_limits` instead.
 - `ui/debug_menu.gd` is the `DebugMenu` autoload: reads `--season=` and `--halloween` (the evening of the Halloween
   quest, step 2, for a screenshot or a test run), and in debug builds F1 opens a "Saisons" menu that

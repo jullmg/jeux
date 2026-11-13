@@ -355,12 +355,9 @@ func _add_across(cs: CrossStreet, scene: String, arrive: String, stretch := 0) -
 		_control.enabled = false
 		_control.hands_off = true
 		_charlotte.is_walking = false
-		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je regarde des deux côtés !", 1.4)
 		var toward := 1 if cs.x0 > _charlotte.position.x else -1
 		var look := create_tween()
-		for side: int in [toward, -toward, toward]:
-			look.tween_callback(func(): _charlotte.facing = side)
-			look.tween_interval(0.45)
+		_look_both_ways(look, toward)
 		look.tween_callback(func():
 			Transition.arrive = arrive
 			Transition.crossing = ""
@@ -419,12 +416,8 @@ func _cross(cs: CrossStreet) -> void:
 	_control.enabled = false
 	_control.hands_off = true
 	_charlotte.is_walking = false
-	Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je regarde des deux côtés !", 1.4)
 	var tween := create_tween()
-	# Look both ways first: toward the road, back, and toward it again.
-	for look in [dir, -dir, dir]:
-		tween.tween_callback(func(): _charlotte.facing = look)
-		tween.tween_interval(0.45)
+	_look_both_ways(tween, dir)
 	if _guards.has(cs):
 		_guards[cs].escort(mid, walk_time + 0.6)
 		tween.tween_interval(0.9)
@@ -453,15 +446,24 @@ func _cross_to(cs: CrossStreet, scene: String, arrive: String) -> void:
 	_control.hands_off = true
 	_charlotte.is_walking = false
 	_charlotte.position.x = curbs.x - 8.0 if going_right else curbs.y + 8.0
-	Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je regarde des deux côtés !", 1.4)
 	var tween := create_tween()
-	for look in [dir, -dir, dir]:
-		tween.tween_callback(func(): _charlotte.facing = look)
-		tween.tween_interval(0.45)
+	_look_both_ways(tween, dir)
 	tween.tween_callback(func():
 		Transition.arrive = arrive
 		Transition.crossing = ""
 		Transition.change_scene(self, scene))
+
+
+## Before every crossing: "Je regarde des deux côtés !", then she looks toward the road, back, and toward it again, on
+## `tween`. The debug menu can skip it (`DebugMenu.skip_look`, to test crossings quickly): she just turns to the road.
+func _look_both_ways(tween: Tween, dir: int) -> void:
+	if DebugMenu.skip_look:
+		tween.tween_callback(func(): _charlotte.facing = dir)
+		return
+	Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je regarde des deux côtés !", 1.4)
+	for look in [dir, -dir, dir]:
+		tween.tween_callback(func(): _charlotte.facing = look)
+		tween.tween_interval(0.45)
 
 
 ## A back lane's entrance (the "ruelle" or "ruelle_verte" building in `layout`): click it and Charlotte walks into

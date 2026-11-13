@@ -443,12 +443,9 @@ func _masson_crossing(cs: CrossStreet, right: bool, arrive: String) -> void:
 		_control.enabled = false
 		_control.hands_off = true
 		_charlotte.is_walking = false
-		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je regarde des deux côtés !", 1.4)
 		var toward := -1 if right else 1
 		var look := create_tween()
-		for s: int in [toward, -toward, toward]:
-			look.tween_callback(func(): _charlotte.facing = s)
-			look.tween_interval(0.45)
+		_look_both_ways(look, toward)
 		look.tween_callback(func():
 			Transition.arrive = arrive
 			Transition.crossing = ""
