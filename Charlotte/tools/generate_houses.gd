@@ -762,7 +762,7 @@ const HOUSES := [
 	# (2803…, 2815…).
 	{
 		"name": "masson_2811", "kind": "commerce", "width": 760.0, "floors": 2,
-		"bricks": ["#B04E3A", "#BC5844", "#A44632", "#C4624C", "#AA4A36"], "mortar": "#D0C4B6", "parapet": "corbel",
+		"bricks": ["#B04E3A", "#BC5844", "#A44632", "#C4624C", "#AA4A36"], "mortar": "#D0C4B6", "parapet": "stepped",
 		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "window_style": "slider", "frame": "#2B2B2E", "windows": [[100.0, 100.0], [330.0, 100.0], [560.0, 100.0]],
 		"shops": [{"x0": 30.0, "x1": 730.0, "sign": "#1E1E20", "frame": "#1E1E20", "door": 640.0, "inside": "goods", "wall": "#E8F0E0", "kick": "brick"}], "basement": [],
 	},
@@ -1051,7 +1051,9 @@ const HOUSES := [
 		"name": "masson_2734", "kind": "commerce", "width": 760.0, "floors": 3,
 		"bricks": ["#8A5E48", "#966852", "#7E5440", "#A0725A"], "mortar": "#C2B4A4", "parapet": "flat",
 		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 110.0], [330.0, 110.0], [560.0, 110.0]],
-		"shops": [{"x0": 30.0, "x1": 730.0, "sign": "#3A3A3C", "frame": "#2B2B2E", "door": 650.0, "inside": "clothes", "front": "wood", "kick": "wood"}], "basement": [],
+		"projecting": [[300.0, 470.0]], "metal": "#1F1F1F",
+		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 120.0, "inside": "office", "wall": "#2E4E8E", "transom": "none"}],
+		"res_doors": [650.0], "basement": [],
 	},
 	# 2716–2732, Jean Coutu: red-brown brick on two floors, the brick piers between wide windows, its yellow sign (2716…, 2726…).
 	{
@@ -5025,6 +5027,8 @@ func _commerce() -> void:
 				_scroll_parapet(top)
 			"crenel":
 				_crenel_parapet(top)
+			"stepped":
+				_stepped_parapet(top)
 			_:
 				_cornice(top)
 		if k.get("sky_mural", false):
@@ -5703,6 +5707,21 @@ func _corner_quoins(x: float, y0: float, y1: float) -> void:
 
 
 # A parapet raised in the middle in a curved crest ending in scrolls, under a stone coping (3012…, 3028…).
+# The parapet rising in steps to the middle, a stone diamond set in the top step (Pattes & Griffes, 2811…, 2815…).
+func _stepped_parapet(top: float) -> void:
+	var brick: String = k.bricks[0]
+	var cx := (X0 + X1) / 2.0
+	var half := (X1 - X0) / 2.0
+	for i in 4:
+		var w := half * (1.0 - i * 0.22)
+		_rect(cx - w, top - 10 - i * 22.0, w * 2.0, 24, brick)
+		_rect(cx - w - 4, top - 12 - i * 22.0, w * 2.0 + 8, 5, k.lintel, _stroke(k.lintel_dark, 1))
+	var dy := top - 46.0
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(cx), _n(dy - 18), _n(cx + 18), _n(dy), _n(cx), _n(dy + 18), _n(cx - 18), _n(dy)], k.lintel, _stroke(k.lintel_dark, 1.2))
+	_rect(X0, top, X1 - X0, 6, "#000000", 'opacity="0.15"')
+	_snow(cx - half * 0.34, half * 0.68, top - 78)
+
+
 # Brick merlons along the top, like a little castle (2609–2611, Domino's building, 2613…).
 func _crenel_parapet(top: float) -> void:
 	var brick: String = k.bricks[0]
