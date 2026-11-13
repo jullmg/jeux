@@ -29,8 +29,10 @@ func _init() -> void:
 func _start_x() -> float:
 	if _arriving("6e_sud_from_6e"):
 		return _starts[layout.find("rue_dandurand")] - 40.0
-	if _arriving("6e_sud_from_masson"):
+	if _arriving("6e_sud_from_masson") or _arriving("6e_sud_from_est_masson"):
 		return _starts[layout.find("rue_masson") + 1] + 40.0
+	if _arriving("6e_sud_from_est_dandurand"):
+		return _starts[layout.find("rue_dandurand")] - 40.0
 	if not is_nan(Transition.street_x):
 		var x := Transition.street_x
 		Transition.street_x = NAN
@@ -64,9 +66,12 @@ func _build_cross_streets() -> void:
 	dandurand.right_walls = _walls_along("res://scenes/dandurand.gd", "rue_6e", -1)
 
 
-# Round the Masson corner onto Rue Masson's north side (by the church).
+# Round the Masson corner onto Rue Masson's north side (by the church), and over 6e Avenue to its other side.
 func _build_doors() -> void:
 	_add_corner(_cross_streets[0], "res://scenes/masson_impair.tscn", "masson_impair_from_rue_6e_5e_6e", false, 1)
+	# Over 6e Avenue at either corner, to the other side (sixieme_sud_est).
+	_add_across(_cross_streets[0], "res://scenes/sixieme_sud_est.tscn", "6e_sud_est_from_sud_masson", 1)
+	_add_across(_cross_streets[1], "res://scenes/sixieme_sud_est.tscn", "6e_sud_est_from_sud_dandurand", -1)
 
 
 # Crossing Dandurand northward takes her back onto her own block (main.tscn), at its Dandurand corner.

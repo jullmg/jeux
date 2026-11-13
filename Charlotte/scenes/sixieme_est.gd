@@ -31,7 +31,7 @@ func _init() -> void:
 func _start_x() -> float:
 	if _arriving("6e_est_from_6e_holt") or _arriving("6e_est_from_holt"):
 		return _starts[layout.find("rue_holt") + 1] + 40.0
-	if _arriving("6e_est_from_6e_dandurand") or _arriving("6e_est_from_dandurand"):
+	if _arriving("6e_est_from_6e_dandurand") or _arriving("6e_est_from_dandurand") or _arriving("6e_est_from_sud"):
 		return _starts[layout.find("rue_dandurand")] - 40.0
 	if not is_nan(Transition.street_x):
 		var x := Transition.street_x
@@ -90,3 +90,11 @@ func _build_doors() -> void:
 const NOT_OUR_LANE := ["C'est pas ma ruelle, ça.\nJe la connais pas pantoute !",
 	"Maman veut pas que j'aille\ndans les ruelles que je connais pas.",
 	"Ma ruelle à moi, c'est de l'autre côté\nde la rue !"]
+
+
+# Crossing Dandurand southward goes on down this side of 6e Avenue toward Masson (sixieme_sud_est.tscn).
+func _cross(cs: CrossStreet) -> void:
+	if cs != _cross_streets[1] or _charlotte.position.x > cs.x0:
+		super._cross(cs)
+		return
+	_cross_to(cs, "res://scenes/sixieme_sud_est.tscn", "6e_sud_est_from_6e_est")

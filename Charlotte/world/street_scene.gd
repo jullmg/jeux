@@ -331,13 +331,22 @@ func _add_corner(cs: CrossStreet, scene: String, arrive: String, own_crossing :=
 ## `sixieme_est`, its odd side): there she goes, instead of round into the cross street. Neither view can show her on it —
 ## both look across 6e — so she goes to the curb, looks both ways, and the far side loads with her at its matching corner.
 ## Call it after `_add_corner(…, false)`.
-func _add_across(cs: CrossStreet, scene: String, arrive: String) -> void:
+## `stretch`: 0, from the stretch she started on (as before); -1 or 1, from the stretch left or right of this cross street (a
+## scene with crossings at both ends of a block, like 6e Avenue below Dandurand).
+func _add_across(cs: CrossStreet, scene: String, arrive: String, stretch := 0) -> void:
 	var home := _control.bounds
-	var curb := home.y if cs.x0 > _start else home.x
+	var left_corner := cs.x0 > _start
+	if stretch < 0:
+		home = _segment_at(cs.x0 - 1.0)
+		left_corner = true
+	elif stretch > 0:
+		home = _segment_at(cs.x1 + 1.0)
+		left_corner = false
+	var curb := home.y if left_corner else home.x
 	var ground: CrossStreet = _grounds.get(cs)
 	if ground == null:
 		return
-	ground.own_crosswalk = -1.0 if cs.x0 > _start else 1.0
+	ground.own_crosswalk = -1.0 if left_corner else 1.0
 	ground.queue_redraw()
 	var over := DoorSpot.make(ground.own_crosswalk_rect(), func():
 		if DebugMenu.blocked(GameState.age < CROSS_AGE):

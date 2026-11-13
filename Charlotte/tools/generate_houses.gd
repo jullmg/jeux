@@ -1301,6 +1301,158 @@ const HOUSES := [
 		"name": "six_sud_gymnase", "kind": "gym", "width": 1600.0, "floors": 3, "halloween": false,
 		"bricks": ["#B4693E", "#A85E36", "#BE7446", "#9E5832"], "mortar": "#D8C8B0", "entrance": 1340.0,
 	},
+	# ── 6e Avenue between Dandurand (left) and Masson (right), the east side (reference/streetview/6e-avenue/5385… to 5595…) ──
+	# Across Dandurand: the side of 5601, its salmon brick.
+	{
+		"name": "six_est_sud_5601_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#C98A64", "#BE805A", "#D2946E", "#B47650"], "mortar": "#E6DCCB",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
+	},
+	# 5591–5595, at Dandurand: two floors of brick painted red, a white door, no outdoor stair (5591…, 5595…).
+	{
+		"name": "six_est_sud_5595",
+		"bricks": ["#B84A3E", "#B04438", "#BE5044", "#A84236"], "mortar": "#C9A49A", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#E8E0D0", "lintel_dark": "#B9AE98",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel", "parapet": "flat", "windows": [[80.0, 140.0], [480.0, 140.0]],
+		"door_cx": 340.0, "balcony": [250.0, 430.0], "porch": [260.0, 420.0], "stair": [], "fence": "", "basement": [], "halloween": false,
+	},
+	# 5581, the triplex in brown brick, black balconies, a straight stair down to the left (5581…).
+	{
+		"name": "six_est_sud_5581", "floors": 3,
+		"bricks": ["#7E5440", "#8A5E4A", "#724A38", "#946852", "#7A503C"], "mortar": "#D0C4B6", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "grid", "door_surround": "lintel", "metal": "#1F1F1F", "tread": "#454545", "tread_dark": "#262626", "parapet": "flat",
+		"windows": [[450.0, 150.0]], "door_cx": 290.0, "balcony": [60.0, 420.0], "porch": [200.0, 380.0],
+		"stair": [Vector2(180, 336), Vector2(133, 456), Vector2(87, 576), Vector2(40, 696)], "fence": "black", "basement": [460.0],
+	},
+	# 5573, dark brown brick, black balconies, the stair curling down (5573…).
+	{
+		"name": "six_est_sud_5573", "floors": 3,
+		"bricks": ["#5E3E34", "#6A4A3E", "#54362E", "#744E40"], "mortar": "#D0C4B6", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel", "door_surround": "lintel", "metal": "#1F1F1F", "tread": "#454545", "tread_dark": "#262626", "parapet": "flat",
+		"windows": [[450.0, 150.0]], "door_cx": 290.0, "balcony": [60.0, 420.0], "porch": [200.0, 380.0],
+		"stair": [Vector2(170, 336), Vector2(70, 400), Vector2(40, 540), Vector2(100, 696)], "fence": "black", "basement": [460.0],
+	},
+	# 5565, grey stone, white balconies and stair, cedars in front (5565…, 5569…).
+	{
+		"name": "six_est_sud_5565", "floors": 3,
+		"bricks": ["#A9A59D", "#B2AEA6", "#A09C94", "#B8B4AC"], "mortar": "#D0C4B6", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "oval", "door_surround": "lintel", "metal": "#F5F5F2", "metal_light": true, "tread": "#C8C8C4", "tread_dark": "#8C8C88", "parapet": "corbel",
+		"windows": [[450.0, 150.0]], "door_cx": 290.0, "balcony": [60.0, 420.0], "porch": [200.0, 380.0],
+		"stair": [Vector2(170, 336), Vector2(70, 400), Vector2(40, 540), Vector2(100, 696)], "fence": "black", "basement": [460.0],
+	},
+	# 5561, brown brick, black balconies, the stair down to the right (5561…).
+	{
+		"name": "six_est_sud_5561", "floors": 3,
+		"bricks": ["#7E5440", "#8A5E4A", "#724A38", "#946852", "#7A503C"], "mortar": "#D0C4B6", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "double", "door_surround": "lintel", "metal": "#1F1F1F", "tread": "#454545", "tread_dark": "#262626", "parapet": "flat",
+		"windows": [[450.0, 150.0]], "door_cx": 290.0, "balcony": [60.0, 420.0], "porch": [200.0, 380.0],
+		"stair": [Vector2(320, 336), Vector2(380, 420), Vector2(370, 560), Vector2(330, 696)], "fence": "black", "basement": [460.0],
+	},
+	# 5551, red brick, white balconies (5549…, 5551…, 5555…).
+	{
+		"name": "six_est_sud_5551", "floors": 3,
+		"bricks": ["#9E4A36", "#A85440", "#8E4030", "#B25C46", "#94462F"], "mortar": "#D0C4B6", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel", "door_surround": "lintel", "metal": "#F5F5F2", "metal_light": true, "tread": "#C8C8C4", "tread_dark": "#8C8C88", "parapet": "flat",
+		"windows": [[450.0, 150.0]], "door_cx": 290.0, "balcony": [60.0, 420.0], "porch": [200.0, 380.0],
+		"stair": [Vector2(180, 336), Vector2(133, 456), Vector2(87, 576), Vector2(40, 696)], "fence": "black", "basement": [460.0],
+	},
+	# The lane between the plexes (5545…): asphalt, the one-way sign, a chain-link fence.
+	{
+		"name": "ruelle_six_est_sud", "kind": "lane_odd", "lane_style": "dandurand", "width": 560.0, "halloween": false,
+	},
+	# 5535, painted white, black balconies (5531…, 5535…, 5537…).
+	{
+		"name": "six_est_sud_5535", "floors": 3,
+		"bricks": ["#ECEAE4", "#E4E1DA", "#F2F0EB", "#DEDAD2"], "mortar": "#D0C4B6", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "grid", "door_surround": "lintel", "metal": "#1F1F1F", "tread": "#454545", "tread_dark": "#262626", "parapet": "corbel",
+		"windows": [[450.0, 150.0]], "door_cx": 290.0, "balcony": [60.0, 420.0], "porch": [200.0, 380.0],
+		"stair": [Vector2(170, 336), Vector2(70, 400), Vector2(40, 540), Vector2(100, 696)], "fence": "black", "basement": [460.0],
+	},
+	# 5527, grey stone, dark balconies (5527…, 5529…).
+	{
+		"name": "six_est_sud_5527", "floors": 3,
+		"bricks": ["#A9A59D", "#B2AEA6", "#A09C94", "#B8B4AC"], "mortar": "#D0C4B6", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "oval", "door_surround": "lintel", "metal": "#1F1F1F", "tread": "#454545", "tread_dark": "#262626", "parapet": "flat",
+		"windows": [[450.0, 150.0]], "door_cx": 290.0, "balcony": [60.0, 420.0], "porch": [200.0, 380.0],
+		"stair": [Vector2(180, 336), Vector2(133, 456), Vector2(87, 576), Vector2(40, 696)], "fence": "black", "basement": [460.0],
+	},
+	# 5517, brown brick, white balconies (5517…, 5525…).
+	{
+		"name": "six_est_sud_5517", "floors": 3,
+		"bricks": ["#7E5440", "#8A5E4A", "#724A38", "#946852", "#7A503C"], "mortar": "#D0C4B6", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel", "door_surround": "lintel", "metal": "#F5F5F2", "metal_light": true, "tread": "#C8C8C4", "tread_dark": "#8C8C88", "parapet": "corbel",
+		"windows": [[450.0, 150.0]], "door_cx": 290.0, "balcony": [60.0, 420.0], "porch": [200.0, 380.0],
+		"stair": [Vector2(170, 336), Vector2(70, 400), Vector2(40, 540), Vector2(100, 696)], "fence": "black", "basement": [460.0],
+	},
+	# 5509, red brick, black balconies and their flower boxes (5509…, 5511…).
+	{
+		"name": "six_est_sud_5509", "floors": 3,
+		"bricks": ["#9E4A36", "#A85440", "#8E4030", "#B25C46", "#94462F"], "mortar": "#D0C4B6", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "double", "door_surround": "lintel", "metal": "#1F1F1F", "tread": "#454545", "tread_dark": "#262626", "parapet": "flat",
+		"windows": [[450.0, 150.0]], "door_cx": 290.0, "balcony": [60.0, 420.0], "porch": [200.0, 380.0],
+		"stair": [Vector2(320, 336), Vector2(380, 420), Vector2(370, 560), Vector2(330, 696)], "fence": "black", "basement": [460.0],
+	},
+	# 5501, red-brown brick, black balconies (5499…, 5501…, 5503…).
+	{
+		"name": "six_est_sud_5501", "floors": 3,
+		"bricks": ["#9E4A36", "#A85440", "#8E4030", "#B25C46", "#94462F"], "mortar": "#D0C4B6", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "grid", "door_surround": "lintel", "metal": "#1F1F1F", "tread": "#454545", "tread_dark": "#262626", "parapet": "flat",
+		"windows": [[450.0, 150.0]], "door_cx": 290.0, "balcony": [60.0, 420.0], "porch": [200.0, 380.0],
+		"stair": [Vector2(170, 336), Vector2(70, 400), Vector2(40, 540), Vector2(100, 696)], "fence": "black", "basement": [460.0],
+	},
+	# 5491, buff brick, white balconies (5491…, 5495…).
+	{
+		"name": "six_est_sud_5491", "floors": 3,
+		"bricks": ["#C9AE88", "#BFA47E", "#D2B892", "#B49A74"], "mortar": "#D0C4B6", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel", "door_surround": "lintel", "metal": "#F5F5F2", "metal_light": true, "tread": "#C8C8C4", "tread_dark": "#8C8C88", "parapet": "flat",
+		"windows": [[450.0, 150.0]], "door_cx": 290.0, "balcony": [60.0, 420.0], "porch": [200.0, 380.0],
+		"stair": [Vector2(180, 336), Vector2(133, 456), Vector2(87, 576), Vector2(40, 696)], "fence": "black", "basement": [460.0],
+	},
+	# 5471, cream brick, black balconies (5471…, 5481…).
+	{
+		"name": "six_est_sud_5471", "floors": 3,
+		"bricks": ["#E2D6BE", "#D8CCB4", "#EADFC8", "#D0C4AC"], "mortar": "#D0C4B6", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "oval", "door_surround": "lintel", "metal": "#1F1F1F", "tread": "#454545", "tread_dark": "#262626", "parapet": "flat",
+		"windows": [[450.0, 150.0]], "door_cx": 290.0, "balcony": [60.0, 420.0], "porch": [200.0, 380.0],
+		"stair": [Vector2(170, 336), Vector2(70, 400), Vector2(40, 540), Vector2(100, 696)], "fence": "black", "basement": [460.0],
+	},
+	# 5459, red brick, white balconies (5459…).
+	{
+		"name": "six_est_sud_5459", "floors": 3,
+		"bricks": ["#9E4A36", "#A85440", "#8E4030", "#B25C46", "#94462F"], "mortar": "#D0C4B6", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#D8D0C0", "lintel_dark": "#A89E8C",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "double", "door_surround": "lintel", "metal": "#F5F5F2", "metal_light": true, "tread": "#C8C8C4", "tread_dark": "#8C8C88", "parapet": "flat",
+		"windows": [[450.0, 150.0]], "door_cx": 290.0, "balcony": [60.0, 420.0], "porch": [200.0, 380.0],
+		"stair": [Vector2(320, 336), Vector2(380, 420), Vector2(370, 560), Vector2(330, 696)], "fence": "black", "basement": [460.0],
+	},
+	# 5455, a newer duplex of the 1960s: beige brick, a garage under the house (5455…).
+	{
+		"name": "six_est_sud_5455", "kind": "modern", "width": 640.0, "door_x": 220.0,
+		"bricks": ["#C9AE88", "#BFA47E", "#D2B892", "#B49A74"], "mortar": "#E6DCCB",
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "step": "#B9B4AA", "step_dark": "#8E8A82", "metal": "#3A3A3A",
+		"windows": [[150.0, 120.0], [400.0, 120.0]], "ground_window": [400.0, 110.0], "door_cx": 220.0, "basement": [],
+	},
+	# 5435, the same kind, pale brick with grey stone under it (5435…).
+	{
+		"name": "six_est_sud_5435", "kind": "modern", "width": 640.0, "door_x": 220.0,
+		"bricks": ["#D8C8B0", "#CEBEA6", "#E0D0B8", "#C4B49C"], "mortar": "#ECE4D6",
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "step": "#B9B4AA", "step_dark": "#8E8A82", "metal": "#F2F0EA",
+		"windows": [[150.0, 120.0], [400.0, 120.0]], "ground_window": [400.0, 110.0], "door_cx": 220.0, "basement": [],
+	},
+	# The parking lot near Masson (5423…), the cars left out.
+	{
+		"name": "six_est_sud_stationnement", "kind": "masson_lot", "lot_style": "parking", "width": 700.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	# The little square by Masson with its bicycle shelter (5415…, 5419…).
+	{
+		"name": "six_est_sud_place", "kind": "masson_lot", "lot_style": "plaza", "width": 600.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	# At Masson: the side of 2901, red brick over its grey stone ground floor, the green door of the greengrocer's (5403…, 5411…).
+	{
+		"name": "six_est_sud_2901_cote", "kind": "side_wall", "width": 640.0, "floors": 3, "lower_stone": true,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844", "#94422F"], "mortar": "#CFC2B4",
+		"parapet": "flat", "windows": [[110.0, 100.0], [380.0, 100.0]], "basement": [], "downspout": 40.0,
+	},
 	# Across 5e: the side of Dollarama's building, buff brick (2840…).
 	{
 		"name": "masson_2840_cote", "kind": "side_wall", "width": 560.0, "floors": 3,

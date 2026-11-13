@@ -100,6 +100,16 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   (`main.gd _cross`) loads it ("6e_sud_from_6e"), crossing back loads her block at its Dandurand corner ("6e_from_sud", both
   through `StreetScene._cross_to`); its Masson corner turns onto Masson's north side by the church. Kept separate from main so
   the saved positions on her block don't move.
+- **The other side of that stretch** (east, odd numbers), `scenes/sixieme_sud_est.gd` (`street_key` "6e_sud_est", plate "6e Avenue,
+  entre Dandurand et Masson, de l'autre côté"), from `reference/streetview/6e-avenue/5385…–5601…`: seen from the west sidewalk, so
+  Dandurand is on the LEFT: the side of 5601 (`six_est_sud_5601_cote`), Rue Dandurand, the red-painted 5595, the triplexes
+  5581–5551 with their outdoor stairs, the lane (`ruelle_six_est_sud`, not hers: a line only), the triplexes 5535–5459, two 1960s
+  duplexes (5455, 5435, kind `modern`), the parking lot and the little square (`masson_lot` "parking" / "plaza"), the side of
+  2901 Masson, Rue Masson, the side of 2902 across it. Connections: crossing Dandurand from `sixieme_est` ("6e_sud_est_from_6e_est",
+  back "6e_est_from_sud"); across 6e from `sixieme_sud` at both corners (`_add_across(cs, scene, key, stretch)`, `stretch` -1/1 =
+  the stretch left/right of the gap; keys "6e_sud_est_from_sud_masson|dandurand", "6e_sud_from_est_masson|dandurand"); its Masson
+  corner turns onto Masson's north side by 6e–7e, and from `masson_impair` the 6e corner turns into either side of 6e
+  ("6e_sud_from_masson" from the stretch left of it, "6e_sud_est_from_masson" from the right).
 - **Rue Masson** (built block by block from `reference/streetview/`, INDEX.md "Rue Masson 2000–3400"): **one scene per side of the
   whole street** (Julien: so she isn't forever crossing into another scene), `scenes/masson.gd` with `@export side`:
   `masson_impair.tscn` (the odd numbers, the NORTH side, seen from the south sidewalk, the 1re on the left) and `masson_pair.tscn`

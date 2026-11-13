@@ -32,6 +32,8 @@ const PLACES := [
 	{"name": "6e Avenue, entre Masson et Dandurand : milieu", "scene": "sixieme_sud"},
 	{"name": "6e Avenue, entre Masson et Dandurand : coin Dandurand", "scene": "sixieme_sud", "arrive": "6e_sud_from_6e"},
 	{"name": "6e Avenue, entre Masson et Dandurand : coin Masson", "scene": "sixieme_sud", "arrive": "6e_sud_from_masson"},
+	{"name": "6e Avenue, entre Dandurand et Masson, l'autre côté : milieu", "scene": "sixieme_sud_est"},
+	{"name": "6e Avenue, entre Dandurand et Masson, l'autre côté : coin Masson", "scene": "sixieme_sud_est", "arrive": "6e_sud_est_from_masson"},
 	{"name": "Rue Dandurand : dépanneur Xin-Xin", "scene": "dandurand"},
 	{"name": "Rue Dandurand : coin 6e", "scene": "dandurand", "arrive": "dandurand_from_6e"},
 	{"name": "Rue Dandurand : coin 5e", "scene": "dandurand", "arrive": "dandurand_from_5e"},

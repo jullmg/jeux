@@ -415,6 +415,11 @@ func _build_doors() -> void:
 			right = false
 		if b != "":
 			_masson_crossing(cs, right, "masson_%s_from_%s_%s" % [other, gap, b])
+		# From the north side, 6e Avenue runs up toward Dandurand: turn into it on either side of the avenue, the church's
+		# side (sixieme_sud) from the corner left of it, the other side (sixieme_sud_est) from the corner right of it.
+		if side == "impair" and gap == "rue_6e":
+			_add_corner(cs, "res://scenes/sixieme_sud.tscn", "6e_sud_from_masson", false, -1)
+			_add_corner(cs, "res://scenes/sixieme_sud_est.tscn", "6e_sud_est_from_masson", false, 1)
 
 
 ## The crosswalk over Masson at one corner of an avenue (`right`: the corner right of it), from that stretch of sidewalk.
