@@ -231,7 +231,8 @@ func _skip_look_button() -> Button:
 	var b := Button.new()
 	b.text = "▶ Traverser sans regarder : OUI" if skip_look else "Traverser sans regarder : non"
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	b.tooltip_text = "Charlotte traverse tout de suite, sans s'arrêter regarder des deux côtés. Pour l'essai seulement."
+	b.tooltip_text = ("Charlotte traverse sans s'arrêter regarder des deux côtés, et le trottoir continue par-dessus les rues :\n"
+		+ "elle marche tout droit d'un pâté à l'autre, sans cliquer. Pour l'essai seulement.")
 	b.add_theme_font_size_override("font_size", 15)
 	b.add_theme_color_override("font_color", Color("#9AE6A1") if skip_look else Color("#CFCFD8"))
 	b.pressed.connect(func() -> void:

@@ -199,9 +199,23 @@ func _unparented() -> Array[Node]:
 
 
 func _process(delta: float) -> void:
+	_open_street()
 	_follow_charlotte()
 	_spawn_stray_cats(delta)
 	_spawn_cyclists(delta)
+
+
+# With the debug menu's "Traverser sans regarder" on (and nothing forbidding her to cross), the sidewalk runs on over every
+# cross street as if the street went on: she walks straight across without a click. Off again, she keeps to the stretch she
+# is on. Lanes have no stretches (`_segments` empty) and are left alone.
+func _open_street() -> void:
+	if _control == null or _segments.size() < 2 or not _control.enabled or _control.hands_off:
+		return
+	var whole := Vector2(_segments[0].x, _segments[-1].y)
+	if DebugMenu.skip_look and not DebugMenu.blocked(GameState.age < CROSS_AGE):
+		_control.bounds = whole
+	elif _control.bounds == whole:
+		_control.bounds = _segment_at(_charlotte.position.x)
 
 
 # Now and then someone rides by in the traffic lane, from one end of the view to the other (rarer in winter).
