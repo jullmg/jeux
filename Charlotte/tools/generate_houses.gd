@@ -1226,17 +1226,14 @@ const HOUSES := [
 		"lintel": "#E8E6E0", "lintel_dark": "#9E9A92", "lintel_style": "none", "window_style": "slider", "frame": "#F2F0EA", "windows": [[90.0, 130.0], [400.0, 130.0]],
 		"shops": [{"x0": 30.0, "x1": 670.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 120.0, "inside": "florist", "front": "wood", "kick": "wood"}], "basement": [],
 	},
-	{
-		"name": "masson_2619", "kind": "masson_lot", "lot_style": "parking", "width": 420.0, "floors": 3, "halloween": false,
-		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
-	},
-	# 2623–2629: white brick on three floors, two shops under black signs (2629…).
+	# 2619–2629: white brick on three floors (the same as Le Jardin de Mathilde's), Les Coeurs de Jupons under a black sign, then the
+	# white pier with the flats' black door (2619…, 2629… and close-ups).
 	{
 		"name": "masson_2629", "kind": "commerce", "width": 900.0, "floors": 3,
 		"bricks": ["#E2E0DA", "#D8D6D0", "#EAE8E2", "#D0CEC8"], "mortar": "#C9C7C0", "parapet": "flat",
 		"lintel": "#E8E6E0", "lintel_dark": "#9E9A92", "lintel_style": "none", "window_style": "slider", "frame": "#F2F0EA", "windows": [[90.0, 130.0], [380.0, 130.0], [640.0, 130.0]],
-		"shops": [{"x0": 30.0, "x1": 450.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 380.0, "inside": "clothes", "kick": "brick"},
-			{"x0": 450.0, "x1": 870.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 520.0, "inside": "cafe", "front": "wood", "kick": "wood"}], "basement": [],
+		"shops": [{"x0": 30.0, "x1": 640.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 470.0, "inside": "clothes", "kick": "brick"}],
+		"res_doors": [760.0], "basement": [],
 	},
 	# 2631–2641, at 2e: red-brown brick on two floors, Yoga D.N.A., a phở restaurant and a juice bar (2631…, 2633…).
 	{
@@ -1254,19 +1251,33 @@ const HOUSES := [
 		"bricks": ["#D8D6D0", "#CECCC6", "#E0DED8"], "mortar": "#B9B5AC",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
 	},
-	# The south side, 2e (left) to 1re (right), after the planted square across 2e: apartment blocks of the 1960s set back behind
-	# their lawns, the TELUS shop in one (2618…, 2620…, 2636…), and the low white building behind red shrubs at 1re (2606…, 2614…).
+	# The south side, 2e (left) to 1re (right), from the front pictures (2618…, 2620…, 2632…, 2606…, 2610…, 2614…): the red brick
+	# block on three floors right at the sidewalk, white balconies stacked at its 2e corner, TELUS, Koodo and two more shops
+	# downstairs; a small parking lot; and at 1re the fire station (Caserne 29), buff brick, a ribbon of windows upstairs,
+	# two glass garage doors and its office. (The old pictures were taken from 1re and 2e and showed the blocks' sides.)
 	{
-		"name": "masson_2636", "kind": "masson_lot", "lot_style": "setback", "width": 1200.0, "floors": 3, "halloween": false,
-		"bricks": ["#A8503E", "#B05A46", "#9A4636", "#B86450"], "mortar": "#D0C4B6",
+		"name": "masson_2636", "kind": "commerce", "width": 1500.0, "floors": 3,
+		"bricks": ["#A8503E", "#B05A46", "#9A4636", "#B86450", "#A44A3A"], "mortar": "#D0C4B6", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "lintel_style": "none", "window_style": "slider", "frame": "#F2F0EA",
+		"windows": [[250.0, 110.0], [450.0, 110.0], [650.0, 110.0], [850.0, 110.0], [1050.0, 110.0], [1250.0, 110.0]],
+		"projecting": [[30.0, 200.0]], "metal": "#F2F0EA", "metal_light": true,
+		"shops": [{"x0": 30.0, "x1": 330.0, "sign": "#C8202A", "frame": "#E9E7E1", "door": 270.0, "inside": "goods"},
+			{"x0": 330.0, "x1": 700.0, "sign": "#4B286D", "frame": "#E9E7E1", "door": 640.0, "inside": "goods", "wall": "#EEEAF4"},
+			{"x0": 700.0, "x1": 1050.0, "sign": "#D6157A", "frame": "#E9E7E1", "door": 990.0, "inside": "goods", "wall": "#F6E8F0"},
+			{"x0": 1050.0, "x1": 1470.0, "sign": "#E9E7E1", "frame": "#B9B5AC", "door": 1400.0, "inside": "goods"}], "basement": [],
 	},
 	{
-		"name": "masson_2620", "kind": "masson_lot", "lot_style": "setback", "width": 1100.0, "floors": 3, "halloween": false,
-		"bricks": ["#A04A3A", "#AE5442", "#943F31", "#B85E4A"], "mortar": "#CDBFB0", "band": "#F2F0EA",
+		"name": "masson_2620", "kind": "masson_lot", "lot_style": "parking", "width": 420.0, "floors": 3, "halloween": false,
+		"bricks": ["#A04A3A", "#AE5442", "#943F31", "#B85E4A"], "mortar": "#CDBFB0",
 	},
 	{
-		"name": "masson_2606", "kind": "masson_lot", "lot_style": "setback", "white": true, "width": 1100.0, "floors": 3,
-		"halloween": false, "bricks": ["#ECEAE4"], "mortar": "#C9C5BC",
+		"name": "masson_2606", "kind": "commerce", "width": 1100.0, "floors": 2, "halloween": false,
+		"bricks": ["#CDB892", "#C4AE88", "#D6C29C", "#BCA67E", "#C9B48C"], "mortar": "#E2D8C6", "parapet": "flat",
+		"lintel_style": "none", "window_style": "slider", "frame": "#2B2B2E", "ribbon_sill": true, "win_h": 90.0, "win_dy": 30.0,
+		"windows": [[60.0, 110.0], [180.0, 110.0], [300.0, 110.0], [420.0, 110.0], [540.0, 110.0], [660.0, 110.0], [780.0, 110.0], [900.0, 110.0]],
+		"belt": "#D8D2C4", "ground": "stone", "stone": "#CFC6B2", "ground_windows": [[760.0, 200.0]],
+		"shops": [{"x0": 40.0, "x1": 370.0, "front": "garage"}, {"x0": 390.0, "x1": 720.0, "front": "garage", "truck": true}],
+		"res_doors": [1010.0], "basement": [],
 	},
 	# Across 1re: the next block's corner, its side.
 	{
@@ -5110,6 +5121,33 @@ func _commerce() -> void:
 	_rect(X0, ground_y - 6, X1 - X0, 6, "#8E8A82")
 
 
+# A garage bay instead of a shop (`front: "garage"`, the fire station at 1re, 2606–2614…): a pale surround, and a sectional
+# door of glass panes in a white grid, the dark bay behind it (a fire truck's red when `truck`).
+func _garage_bay(shop: Dictionary, top: float) -> void:
+	var x0: float = shop.x0
+	var x1: float = shop.x1
+	var y0 := top + 30.0
+	_rect(x0, y0 - 14, x1 - x0, ground_y - y0 + 14, shop.get("frame", "#D8D2C4"), _stroke("#A89E8C", 1.5))
+	var gx0 := x0 + 14.0
+	var gx1 := x1 - 14.0
+	_rect(gx0, y0, gx1 - gx0, ground_y - y0 - 4, "#2A2E32")
+	if shop.get("truck", false):
+		_rect(gx0 + 20, y0 + 70, gx1 - gx0 - 40, ground_y - y0 - 90, "#9E1C1C")
+		_rect(gx0 + 30, y0 + 84, (gx1 - gx0) * 0.35, 46, "#3A4650")
+		_rect(gx0 + 20, ground_y - 64, gx1 - gx0 - 40, 10, "#E9E7E1")
+	var cols := maxi(int((gx1 - gx0) / 70.0), 3)
+	var rows := 5
+	var ph := (ground_y - y0 - 4) / rows
+	for r in rows:
+		for c in cols:
+			var px := lerpf(gx0, gx1, float(c) / cols)
+			_rect(px + 3, y0 + r * ph + 3, (gx1 - gx0) / cols - 6, ph - 6, "url(#glass)", 'opacity="0.55"')
+	for r in range(rows + 1):
+		_rect(gx0, y0 + r * ph - 3, gx1 - gx0, 6, "#F2F0EA")
+	for c in range(cols + 1):
+		_rect(lerpf(gx0, gx1, float(c) / cols) - 3, y0, 6, ground_y - y0 - 4, "#F2F0EA")
+
+
 # One shopfront on the street (`shop`: x0, x1 its bay; sign: the colour of its sign band, where the scene writes the name;
 # frame: the colour of its frame; door: x of its glass door; awning: a colour (striped with `stripes`) or nothing; lamps: how
 # many gooseneck lamps over the sign; crates: fruit and vegetables in their crates out on the sidewalk; dark: no lights on).
@@ -5122,6 +5160,9 @@ func _shopfront(shop: Dictionary, top: float) -> void:
 	var glass_top := top + sign_h + 12.0
 	var kick_h: float = shop.get("kick_h", 28.0 if front == "alu" else 70.0)
 	var kick := ground_y - kick_h
+	if front == "garage":
+		_garage_bay(shop, top)
+		return
 	_rect(x0, top, x1 - x0, ground_y - top, frame)
 	_rect(x0 + 4, top + 4, x1 - x0 - 8, sign_h, shop.get("sign", "#1E1E20"), _stroke("#000000", 1) + ' opacity="0.95"')
 	_rect(x0 + 4, top + 4, x1 - x0 - 8, 4, "#FFFFFF", 'opacity="0.18"')

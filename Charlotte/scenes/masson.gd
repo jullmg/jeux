@@ -27,15 +27,16 @@ const AVENUE_NAMES := {"1re": "1re", "2e": "2e", "3e": "3e", "4e": "4e", "5e": "
 ## `logos` = real logos from art/brands/ on those bands: {art: [[x, file, height], …]}.
 const BLOCKS := {
 	"1re_2e_impair": {
-		"layout": ["masson_2595_cote", "rue_1re", "masson_2605", "masson_2611", "masson_2615", "masson_2619", "masson_2629",
+		"layout": ["masson_2595_cote", "rue_1re", "masson_2605", "masson_2611", "masson_2615", "masson_2629",
 			"masson_2631", "rue_2e", "masson_2653_cote"],
 		"avenues": [["rue_1re", "1re Avenue", 540.0], ["rue_2e", "2e Avenue", 540.0]],
-		"trees_after": [3, 5], "tree_shift": {3: 0.0, 5: 0.0}, "lamps_after": [2, 6], "hydrants_at": [4.5], "racks_at": [5.6],
+		"trees_after": [3, 5], "tree_shift": {3: 0.0, 5: 0.0}, "lamps_after": [2, 5], "hydrants_at": [4.5], "racks_at": [5.6],
 		"squirrels_at": [5.5], "moon_at": 4.5,
 		"signs": {
 			"masson_2605": [[410.0, "Boni-soir", "#FFFFFF", "#C8202A", 17]],
 			"masson_2611": [[380.0, "Domino's", "#0B6EAF", "#FFFFFF", 15]],
 			"masson_2615": [[350.0, "Le Jardin de Mathilde", "#FFFFFF", "#1A1A1A", 12]],
+			"masson_2629": [[335.0, "Les Cœurs de Jupons", "#F2E6C8", "#1A1A1A", 12]],
 			"masson_2631": [[235.0, "YOGA D.N.A.", "#FFFFFF", "#6E5E7E", 13], [650.0, "Restaurant Phở", "#C8202A", "#F2F0EA", 13],
 				[1065.0, "Jus", "#3E9A3E", "#F2F0EA", 14]],
 		},
@@ -47,8 +48,9 @@ const BLOCKS := {
 		"avenues": [["rue_2e", "2e Avenue", 540.0], ["rue_1re", "1re Avenue", 540.0]],
 		"trees_after": [2, 3], "tree_shift": {2: 0.0, 3: 0.0}, "lamps_after": [2, 4], "hydrants_at": [3.5], "racks_at": [],
 		"squirrels_at": [3.3], "moon_at": 4.5,
-		"signs": {},
-		"logos": {"masson_2620": [[330.0, "telus_logo.svg", 18.0, 638.0]]},
+		"signs": {"masson_2636": [[865.0, "koodo", "#FFFFFF", "#D6157A", 15], [1260.0, "Rosemont", "#3A3A3C", "#E9E7E1", 12]],
+			"masson_2606": [[880.0, "CASERNE 29", "#C8202A", "#CFC6B2", 13]]},
+		"logos": {"masson_2636": [[515.0, "telus_logo.svg", 20.0]]},
 		"panels": {},
 	},
 	"2e_3e_impair": {
