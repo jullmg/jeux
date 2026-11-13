@@ -31,6 +31,21 @@ const LANE_B := 427.0
 const HOUSE_Y := 290.0
 const HOUSE_X := 621.0
 const SHOP_X := 618.0
+## The map goes on past the sheet: south to Rue Masson (6e Avenue runs about 260 m from Dandurand to Masson, Holt to Dandurand
+## about 205 m for the 460 px of the sheet), west to Rue D'Iberville and east to Boulevard Saint-Michel along Masson. The sheet is a
+## window on it that slides to wherever she is (`_pan_to`), the same size of drawing, never zoomed out.
+const MASSON_Y := 1093.0
+const AVE_STEP := FIVE_X - FOUR_X
+const MOLSON_X := FOUR_X - 3.0 * AVE_STEP - 320.0
+const IBERVILLE_X := FOUR_X - 3.0 * AVE_STEP - 640.0
+const TEN_X := FOUR_X + 5.0 * AVE_STEP + 151.0
+const STMICHEL_X := FOUR_X + 5.0 * AVE_STEP + 338.0
+const WORLD := Rect2(IBERVILLE_X - 120.0, 0.0, STMICHEL_X + 120.0 - (IBERVILLE_X - 120.0), MASSON_Y + 150.0)
+## Where each street crossing Masson lies on the map (by the gap's name in the Masson scenes).
+const MASSON_GAPS := {"rue_iberville": IBERVILLE_X, "rue_molson": MOLSON_X, "rue_1re": FOUR_X - 3.0 * AVE_STEP,
+	"rue_2e": FOUR_X - 2.0 * AVE_STEP, "rue_3e": FOUR_X - AVE_STEP, "rue_4e": FOUR_X, "rue_5e": FIVE_X, "rue_6e": SIX_X,
+	"rue_7e": SEVEN_X, "rue_8e": EIGHT_X, "rue_9e": FOUR_X + 5.0 * AVE_STEP, "rue_10e": TEN_X, "rue_stmichel": STMICHEL_X}
+
 ## Charlotte on the sidewalks round her block.
 const WALK_W := FIVE_X + 14.0
 const WALK_E := SIX_X - 14.0
@@ -41,7 +56,12 @@ var _button: Button
 var _open := false
 var _page: Control
 var _sheet: _Sheet
+var _paper: _Sheet
+var _top: _Sheet
 var _you: _You
+## How far the map has slid under the sheet (map pixels), and the slide in progress.
+var _pan := Vector2.ZERO
+var _slide: Tween
 
 
 func _ready() -> void:
@@ -95,7 +115,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func toggle() -> void:
 	_open = not _open
 	if _open:
-		_sheet.queue_redraw()
+		for s in [_paper, _sheet, _top]:
+			s.queue_redraw()
+		_set_pan(Vector2.ZERO)
 		_place_you()
 	_page.visible = _open
 	_you.set_process(_open)
@@ -123,13 +145,13 @@ func _here() -> Dictionary:
 			# first `_dand_f` of its length.
 			var dand: float = scene.call("_dandurand_f") if scene.has_method("_dandurand_f") else 0.0
 			if f < dand:
-				return {"at": Vector2(WALK_E, lerpf(SHEET.y - 20.0, DAND_Y + ST_W / 2.0 + 10.0, f / dand)), "say": "Je suis sur la 6e, vers Masson !"}
+				return {"at": Vector2(WALK_E, lerpf(MASSON_Y - ST_W / 2.0 - 10.0, DAND_Y + ST_W / 2.0 + 10.0, f / dand)), "say": "Je suis sur la 6e, vers Masson !"}
 			return {"at": Vector2(WALK_E, lerpf(WALK_S, WALK_N, (f - dand) / (1.0 - dand))), "say": "Je suis ici !"}
 		"sixieme_est":
 			# The other side of 6e Avenue, the odd numbers: Holt on the left of the view, Dandurand, then Masson on the right.
 			var dand2: float = scene.call("_dandurand_f") if scene.has_method("_dandurand_f") else 1.0
 			if f > dand2:
-				return {"at": Vector2(SIX_X + AVE_W / 2.0 + 8.0, lerpf(DAND_Y + ST_W / 2.0 + 10.0, SHEET.y - 20.0, (f - dand2) / (1.0 - dand2))),
+				return {"at": Vector2(SIX_X + AVE_W / 2.0 + 8.0, lerpf(DAND_Y + ST_W / 2.0 + 10.0, MASSON_Y - ST_W / 2.0 - 10.0, (f - dand2) / (1.0 - dand2))),
 					"say": "Je suis sur la 6e, vers Masson !"}
 			return {"at": Vector2(SIX_X + AVE_W / 2.0 + 8.0, lerpf(HOLT_Y + ST_W / 2.0 + 6.0, DAND_Y - ST_W / 2.0 - 6.0, f / dand2)),
 				"say": "Je suis en face de chez moi !"}
@@ -152,21 +174,65 @@ func _here() -> Dictionary:
 		"ohbon":
 			return {"at": Vector2(SHOP_X, HOLT_Y + 50.0), "say": "Je suis chez Oh Bon !"}
 	if key == "masson_impair" or key == "masson_pair":
-		# Rue Masson lies south of the sheet: at its foot, from D'Iberville to Saint-Michel (the odd side's view has D'Iberville on
-		# the left). The avenues are 153 apart, 4e at FOUR_X; D'Iberville lies four avenue-blocks west of 1re, Saint-Michel a little
-		# over two east of 9e.
-		var a := FOUR_X + (1 - 4 - 4.2) * (FIVE_X - FOUR_X)
-		var b := FOUR_X + (9 - 4 + 2.2) * (FIVE_X - FOUR_X)
-		var x := lerpf(a, b, f if key == "masson_impair" else 1.0 - f)
-		return {"at": Vector2(clampf(x, SIDE + 20.0, SHEET.x - 20.0), SHEET.y - 20.0), "say": "Je suis sur la rue Masson !"}
+		# Rue Masson, D'Iberville to Saint-Michel: between the two crossings she stands between, as far along as she is (the scene's
+		# blocks aren't all drawn at the same scale, so each block maps onto its own stretch of the map).
+		var y: float = MASSON_Y - ST_W / 2.0 - 8.0 if key == "masson_impair" else MASSON_Y + ST_W / 2.0 + 8.0
+		var at_x := _masson_x(scene, who.position.x if who is Node2D else 0.0)
+		return {"at": Vector2(at_x, y), "say": "Je suis sur la rue Masson !"}
 	return {"at": Vector2(HOUSE_X, HOUSE_Y - 10.0), "say": "Je suis ici !"}
+
+
+## Where x in a Masson scene lies on the map: between the map positions of the two crossings round it.
+func _masson_x(scene: Node, x: float) -> float:
+	var starts: Array = scene.get("_starts")
+	var lay: Array = scene.get("layout")
+	var pts := []
+	for i in lay.size():
+		if MASSON_GAPS.has(lay[i]):
+			pts.append([(starts[i] + starts[i + 1]) / 2.0, MASSON_GAPS[lay[i]]])
+	if pts.size() < 2:
+		return SIX_X
+	for i in range(pts.size() - 1):
+		if x <= pts[i + 1][0] or i == pts.size() - 2:
+			var t := clampf((x - pts[i][0]) / maxf(pts[i + 1][0] - pts[i][0], 1.0), -0.2, 1.2)
+			return lerpf(pts[i][1], pts[i + 1][1], t)
+	return pts[-1][1]
 
 
 func _place_you() -> void:
 	var here := _here()
+	if _sheet.here != here.at:
+		_sheet.here = here.at
+		_sheet.queue_redraw()
 	_you.position = here.at
 	_you.text = here.say
-	_you.bubble_left = here.at.x > 800.0
+	# Out of the sheet's window: the map slides to her, by itself, once it is open.
+	var target := _pan_for(here.at)
+	_you.bubble_left = here.at.x - target.x > 700.0
+	if target != _pan:
+		if _slide:
+			_slide.kill()
+		_slide = create_tween()
+		_slide.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		_slide.tween_interval(0.35)
+		_slide.tween_method(_set_pan, _pan, target, clampf(target.length() / 700.0, 0.6, 1.6)).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+## The slide that keeps a point of the map in the sheet's window: none while it is already well inside (her block), else the
+## point in the middle of the window, as far as the map goes.
+func _pan_for(at: Vector2) -> Vector2:
+	var view := Rect2(SIDE, 0.0, SHEET.x - SIDE, SHEET.y)
+	if view.grow(-70.0).has_point(at):
+		return Vector2.ZERO
+	var pan := at - view.get_center()
+	pan.x = clampf(pan.x, WORLD.position.x - SIDE, WORLD.end.x - SHEET.x)
+	pan.y = clampf(pan.y, 0.0, WORLD.end.y - SHEET.y)
+	return pan
+
+
+func _set_pan(pan: Vector2) -> void:
+	_pan = pan
+	_sheet.position = Vector2(-SIDE, 0.0) - pan
 
 
 # ── The page ────────────────────────────────────────────────
@@ -197,13 +263,28 @@ func _build_page() -> void:
 	shadow.position = Vector2(8, 11)
 	shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	holder.add_child(shadow)
+	_paper = _Sheet.new()
+	_paper.layer = "paper"
+	_paper.size = SHEET
+	holder.add_child(_paper)
+	var window := Control.new()
+	window.position = Vector2(SIDE, 0.0)
+	window.size = Vector2(SHEET.x - SIDE, SHEET.y)
+	window.clip_contents = true
+	window.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.add_child(window)
 	_sheet = _Sheet.new()
-	_sheet.size = SHEET
-	_sheet.clip_contents = true
-	holder.add_child(_sheet)
+	_sheet.layer = "map"
+	_sheet.size = WORLD.end
+	_sheet.position = Vector2(-SIDE, 0.0)
+	window.add_child(_sheet)
 	_you = _You.new()
 	_you.set_process(false)
 	_sheet.add_child(_you)
+	_top = _Sheet.new()
+	_top.layer = "top"
+	_top.size = SHEET
+	holder.add_child(_top)
 	var hint := Label.new()
 	hint.text = "C, M ou clique à côté pour fermer"
 	hint.add_theme_font_size_override("font_size", 15)
@@ -271,33 +352,48 @@ class _You:
 # ── The drawing ─────────────────────────────────────────────
 
 class _Sheet:
-	extends Control
+	# A Node2D, not a Control: the map reaches far left of its origin (D'Iberville), where a Control's drawing is cut off.
+	extends Node2D
+
+	var size := Vector2.ZERO
 
 	const ROAD := Color("#9AA5B5")
 	const EDGE := Color("#5E6B80")
 	const DASH := Color("#F7D154")
 	const WALLS := [Color("#E8812E"), Color("#F2C230"), Color("#E85FA0"), Color("#3D8BD9"), Color("#8E5FC4"), Color("#E0A878"), Color("#C9503C"), Color("#6DB35A")]
 	const ROOFS := [Color("#C9503C"), Color("#7A5232"), Color("#3D8BD9"), Color("#4FA34A"), Color("#8E5FC4"), Color("#3A3A48")]
-	const AVENUES := [FOUR_X, FIVE_X, SIX_X, SEVEN_X, EIGHT_X]
+	const AVENUES := [IBERVILLE_X, MOLSON_X, FOUR_X - 3.0 * AVE_STEP, FOUR_X - 2.0 * AVE_STEP, FOUR_X - AVE_STEP, FOUR_X, FIVE_X, SIX_X,
+		SEVEN_X, EIGHT_X, FOUR_X + 5.0 * AVE_STEP, TEN_X, STMICHEL_X]
+	const STREETS := [HOLT_Y, DAND_Y, MASSON_Y]
 	var _rng := RandomNumberGenerator.new()
+	## "paper" (the sheet under everything), "map" (the neighbourhood, larger than the sheet, slid under its window) or "top"
+	## (the frame, the tape and the doodles in the margin, over the map).
+	var layer := "map"
+	## Where she stands on the map: the street she is on is never greyed, even where she may not go alone (a debug trip).
+	var here := Vector2(HOUSE_X, HOUSE_Y)
 
 	func _draw() -> void:
 		_rng.seed = 2026
-		_paper()
-		_block_wash()
-		_roads()
-		_neighbours()
-		_school()
-		_lanes()
-		_block_houses()
-		_yards()
-		_shops_and_home()
-		_grey_out()
-		_labels()
-		_decor()
-		_frame()
-		if DebugMenu.blocked(GameState.age < StreetScene.CROSS_AGE):
-			_stop_sign()
+		match layer:
+			"paper":
+				_paper()
+			"top":
+				_decor()
+				_frame()
+				if DebugMenu.blocked(GameState.age < StreetScene.CROSS_AGE):
+					_stop_sign()
+			_:
+				_block_wash()
+				_roads()
+				_neighbours()
+				_south()
+				_school()
+				_lanes()
+				_block_houses()
+				_yards()
+				_shops_and_home()
+				_grey_out()
+				_labels()
 
 	# ── Paper and frame ──
 
@@ -395,26 +491,26 @@ class _Sheet:
 		return out
 
 	func _st_cuts() -> Array:
-		return [[HOLT_Y - ST_W / 2.0, HOLT_Y + ST_W / 2.0], [DAND_Y - ST_W / 2.0, DAND_Y + ST_W / 2.0]]
+		return STREETS.map(func(y): return [y - ST_W / 2.0, y + ST_W / 2.0])
 
 	func _roads() -> void:
 		# The surfaces first (scribbled grey), then the kerbs and the yellow dashes between the crossings.
 		for x in AVENUES:
 			var h := AVE_W / 2.0
 			CuteArt._shape(self, [Vector2(x - h, -8), Vector2(x + h, -8), Vector2(x + h, size.y + 8), Vector2(x - h, size.y + 8)], ROAD, true, _rng, false)
-		for y in [HOLT_Y, DAND_Y]:
+		for y in STREETS:
 			var h := ST_W / 2.0
-			CuteArt._shape(self, [Vector2(SIDE, y - h), Vector2(size.x + 8, y - h), Vector2(size.x + 8, y + h), Vector2(SIDE, y + h)], ROAD, true, _rng, false)
+			CuteArt._shape(self, [Vector2(WORLD.position.x, y - h), Vector2(size.x + 8, y - h), Vector2(size.x + 8, y + h), Vector2(WORLD.position.x, y + h)], ROAD, true, _rng, false)
 		for x in AVENUES:
 			for side in [-1.0, 1.0]:
 				for p in _pieces(-8.0, size.y + 8.0, _st_cuts()):
 					CuteArt._stroke(self, [Vector2(x + side * AVE_W / 2.0, p[0]), Vector2(x + side * AVE_W / 2.0, p[1])], EDGE, 2.2, true, _rng)
 			_dashes(Vector2(x, -8), Vector2(x, size.y + 8), _st_cuts().map(func(c): return [c[0] - 4.0, c[1] + 4.0]))
-		for y in [HOLT_Y, DAND_Y]:
+		for y in STREETS:
 			for side in [-1.0, 1.0]:
-				for p in _pieces(SIDE, size.x + 8.0, _av_cuts()):
+				for p in _pieces(WORLD.position.x, size.x + 8.0, _av_cuts()):
 					CuteArt._stroke(self, [Vector2(p[0], y + side * ST_W / 2.0), Vector2(p[1], y + side * ST_W / 2.0)], EDGE, 2.2, true, _rng)
-			_dashes(Vector2(SIDE, y), Vector2(size.x + 8, y), _av_cuts().map(func(c): return [c[0] - 4.0, c[1] + 4.0]))
+			_dashes(Vector2(WORLD.position.x, y), Vector2(size.x + 8, y), _av_cuts().map(func(c): return [c[0] - 4.0, c[1] + 4.0]))
 		# Zebra crossings round the block's four corners, the way she crosses.
 		for x in [FIVE_X, SIX_X]:
 			for y in [HOLT_Y, DAND_Y]:
@@ -488,17 +584,63 @@ class _Sheet:
 		var north := HOLT_Y + ST_W / 2.0 + 4.0
 		var south := DAND_Y - ST_W / 2.0 - 2.0
 		var below := DAND_Y + ST_W / 2.0 + 6.0
-		for x in [FOUR_X + 30.0, FIVE_X - 30.0, SIX_X + 30.0, SEVEN_X - 30.0, SEVEN_X + 30.0, EIGHT_X - 30.0]:
-			_column(x, north, south, false)
-			_column(x, below, size.y - 14.0, false)
-		_column(FOUR_X - 26.0, north, south, false)
-		_column(FOUR_X - 26.0, below, size.y - 14.0, false)
+		var above_masson := MASSON_Y - ST_W / 2.0 - 4.0
+		for x in AVENUES:
+			for side in [-30.0, 30.0]:
+				if (x == FIVE_X and side > 0.0) or (x == SIX_X and side < 0.0):
+					continue
+				_column(x + side, north, south, false)
+				_column(x + side, below, above_masson, false)
+		# Below Dandurand on 6e Avenue, Charlotte's side: the gym, then the church to Masson; across, the row of plexes.
+		_column(SIX_X + 30.0, below, above_masson, true)
+
+	# Rue Masson and what stands along it: the shops in a row on both sides, the church between 5e and 6e on its north side, the park
+	# between 1re and Molson on its south side, and the Maxi between Molson and 1re.
+	func _south() -> void:
+		for side in [-1.0, 1.0]:
+			var y: float = MASSON_Y + side * (ST_W / 2.0 + 4.0)
+			var x := IBERVILLE_X + 14.0
+			while x < STMICHEL_X - 14.0:
+				var w := _rng.randf_range(24.0, 32.0)
+				var h := _rng.randf_range(22.0, 32.0)
+				var wall: Color = WALLS[_rng.randi() % WALLS.size()]
+				var roof: Color = ROOFS[_rng.randi() % ROOFS.size()]
+				var on_avenue := false
+				for ax in AVENUES:
+					on_avenue = on_avenue or absf(x + w / 2.0 - ax) < AVE_W / 2.0 + w / 2.0 + 2.0
+				var landmark: bool = (side < 0.0 and x > FIVE_X and x < SIX_X) or (side > 0.0 and x > FOUR_X - 3.0 * AVE_STEP - 320.0 and x < FOUR_X - 3.0 * AVE_STEP)
+				if not on_avenue and not landmark:
+					if side < 0.0:
+						_house(Vector2(x + w / 2.0, y), w, h, wall, roof, true)
+					else:
+						_house(Vector2(x + w / 2.0, y + h + w * 0.55), w, h, wall, roof, true)
+				x += w + _rng.randf_range(3.0, 7.0)
+		# The church: grey stone, its tower with the cross, between 5e and 6e on the north side.
+		var c0 := FIVE_X + AVE_W / 2.0 + 10.0
+		var c1 := SIX_X - AVE_W / 2.0 - 10.0
+		var cb := MASSON_Y - ST_W / 2.0 - 4.0
+		CuteArt._shape(self, [Vector2(c0, cb - 60), Vector2(c1, cb - 60), Vector2(c1, cb), Vector2(c0, cb)], Color("#A8A49C"), true, _rng)
+		CuteArt._shape(self, [Vector2(c0 - 4, cb - 60), Vector2((c0 + c1) / 2.0, cb - 92), Vector2(c1 + 4, cb - 60)], Color("#6E6A64"), true, _rng)
+		CuteArt._shape(self, [Vector2(c1 - 34, cb - 120), Vector2(c1 - 6, cb - 120), Vector2(c1 - 6, cb - 58), Vector2(c1 - 34, cb - 58)], Color("#9A968E"), true, _rng)
+		CuteArt._stroke(self, [Vector2(c1 - 20, cb - 140), Vector2(c1 - 20, cb - 120)], INK, 2.4, true, _rng)
+		CuteArt._stroke(self, [Vector2(c1 - 28, cb - 133), Vector2(c1 - 12, cb - 133)], INK, 2.4, true, _rng)
+		for k in 4:
+			draw_rect(Rect2(c0 + 14 + k * 26, cb - 46, 10, 22), Color("#BFE3F7"))
+		# The park, south of Masson between 1re and Molson: a green lawn and its trees.
+		var p0 := MOLSON_X + AVE_W / 2.0 + 6.0
+		var p1 := FOUR_X - 3.0 * AVE_STEP - AVE_W / 2.0 - 6.0
+		var pt := MASSON_Y + ST_W / 2.0 + 6.0
+		CuteArt._shape(self, [Vector2(p0, pt), Vector2(p1, pt), Vector2(p1, pt + 90), Vector2(p0, pt + 90)], Color("#9BD27E"), true, _rng)
+		var tx := p0 + 24.0
+		while tx < p1 - 10.0:
+			_tree(Vector2(tx, pt + 40.0 + _rng.randf_range(-12.0, 18.0)), 9.0)
+			tx += 42.0
 
 	func _school() -> void:
 		var x0 := FIVE_X + AVE_W / 2.0 + 5.0
 		var x1 := SIX_X - AVE_W / 2.0 - 5.0
 		var y0 := DAND_Y + 56.0
-		var y1 := size.y - 22.0
+		var y1 := DAND_Y + 158.0
 		CuteArt._shape(self, [Vector2(x0, y0), Vector2(x1, y0), Vector2(x1, y1), Vector2(x0, y1)], Color("#C9654A"), true, _rng)
 		CuteArt._shape(self, [Vector2(x0 - 6, y0), Vector2((x0 + x1) / 2.0, y0 - 30), Vector2(x1 + 6, y0)], Color("#7A5232"), true, _rng)
 		for row in 2:
@@ -549,6 +691,8 @@ class _Sheet:
 		var s := Vector2(HOUSE_X - 30.0, HOUSE_Y - 18.0)
 		CuteArt._stroke(self, [s + Vector2(-10, 14), s + Vector2(0, -2), s + Vector2(10, 14)], Color("#7A5232"), 2.0, true, _rng)
 		CuteArt._crayon_line(self, [s + Vector2(-6, 8), s + Vector2(6, 8)], CRAYONS[0], 2.2, _rng, 1)
+		# A little capybara in her yard by the swing.
+		CuteArt.capybara(self, Vector2(HOUSE_X - 52.0, HOUSE_Y + 14.0), 8.0, true, _rng)
 		# A stray cat in the lane.
 		CuteArt.cat_head(self, Vector2(LANE_X, 350), 6.0, Color("#6E6E7A"), true, _rng)
 
@@ -581,33 +725,58 @@ class _Sheet:
 
 	# ── Where she may not go ──
 
-	# What she can reach: her block and the streets round it; from 8 (she may cross), also the corners across them and the school.
-	# The rest (7e, 4e, west of the corners) leads nowhere in the game yet.
-	func _reachable() -> Rect2:
+	# What she can reach, as rectangles of the map: her block and the streets round it; from 8 (she may cross), also 6e Avenue down
+	# to Masson and Rue Masson from D'Iberville to Saint-Michel, the corners across her streets and the school. The rest (the far
+	# avenues) leads nowhere in the game yet.
+	func _reachable() -> Array:
 		var left := FIVE_X - AVE_W / 2.0
 		var right := SIX_X + AVE_W / 2.0
 		var top := HOLT_Y - ST_W / 2.0
 		var bottom := DAND_Y + ST_W / 2.0
 		if DebugMenu.no_limits:
-			return Rect2(0.0, 0.0, size.x, size.y)
+			return [WORLD]
+		var south := Rect2(left - 70.0, 0.0, right - left + 140.0, MASSON_Y)
+		var masson := Rect2(IBERVILLE_X - 20.0, MASSON_Y - 70.0, STMICHEL_X - IBERVILLE_X + 40.0, 140.0)
 		if GameState.age >= StreetScene.CROSS_AGE:
-			return Rect2(left - 70.0, 0.0, right - left + 140.0, size.y)
-		return Rect2(left, top, right - left, bottom - top)
+			return [south, masson]
+		var open := [Rect2(left, top, right - left, bottom - top)]
+		if here.y > MASSON_Y - 70.0:
+			open.append(masson)
+		elif here.y > bottom:
+			open.append(Rect2(left - 70.0, bottom, right - left + 140.0, MASSON_Y - bottom))
+		return open
 
 	# Everything else coloured over in grey crayon, scribbled by hand, with a line round what stays hers. The names go on top, so
-	# they can still be read, and the title and the doodles too.
+	# they can still be read. The map is cut on the edges of the open rectangles into cells, and each cell outside them is greyed.
 	func _grey_out() -> void:
-		var open := _reachable()
+		var open: Array = _reachable()
 		var grey := Color("#8E8F96", 0.8)
 		var scribble := Color("#6E6F78", 0.5)
-		for r: Rect2 in [Rect2(SIDE, 0, size.x - SIDE, open.position.y), Rect2(SIDE, open.end.y, size.x - SIDE, size.y - open.end.y),
-				Rect2(SIDE, open.position.y, open.position.x - SIDE, open.size.y), Rect2(open.end.x, open.position.y, size.x - open.end.x, open.size.y)]:
-			draw_rect(r, grey)
-			var y := r.position.y + 5.0
-			while y < r.end.y - 5.0:
-				CuteArt._crayon_line(self, [Vector2(r.position.x + 3.0, y), Vector2(r.end.x - 3.0, y + _rng.randf_range(-3.0, 3.0))], scribble, 2.0, _rng, 1)
-				y += 12.0
-		CuteArt._crayon_line(self, [open.position, Vector2(open.end.x, open.position.y), open.end, Vector2(open.position.x, open.end.y), open.position, open.position + Vector2(30, 0)], Color("#F2C230"), 3.4, _rng)
+		var xs := [WORLD.position.x, WORLD.end.x]
+		var ys := [WORLD.position.y, WORLD.end.y]
+		for r: Rect2 in open:
+			xs.append_array([clampf(r.position.x, WORLD.position.x, WORLD.end.x), clampf(r.end.x, WORLD.position.x, WORLD.end.x)])
+			ys.append_array([clampf(r.position.y, WORLD.position.y, WORLD.end.y), clampf(r.end.y, WORLD.position.y, WORLD.end.y)])
+		xs.sort()
+		ys.sort()
+		for j in range(ys.size() - 1):
+			for i in range(xs.size() - 1):
+				var cell := Rect2(xs[i], ys[j], xs[i + 1] - xs[i], ys[j + 1] - ys[j])
+				if cell.size.x < 1.0 or cell.size.y < 1.0:
+					continue
+				var inside := false
+				for r: Rect2 in open:
+					inside = inside or r.grow(0.5).encloses(cell)
+				if inside:
+					continue
+				draw_rect(cell, grey)
+				var y := cell.position.y + 5.0
+				while y < cell.end.y - 5.0:
+					CuteArt._crayon_line(self, [Vector2(cell.position.x + 3.0, y), Vector2(cell.end.x - 3.0, y + _rng.randf_range(-3.0, 3.0))], scribble, 2.0, _rng, 1)
+					y += 12.0
+		for r: Rect2 in open:
+			if r != WORLD:
+				CuteArt._crayon_line(self, [r.position, Vector2(r.end.x, r.position.y), r.end, Vector2(r.position.x, r.end.y), r.position, r.position + Vector2(30, 0)], Color("#F2C230"), 3.4, _rng)
 
 	# ── Names ──
 
@@ -629,6 +798,20 @@ class _Sheet:
 		_text("ma cour", Vector2(HOUSE_X - 30, HOUSE_Y - 24), 9, Color("#3E7A2C"), -0.04)
 		_text("minou", Vector2(LANE_X + 23, 354), 9, Color("#6E6E7A"))
 		_text("École", Vector2(LANE_X, DAND_Y + 50), 15, Color("#FFF3D6"), -0.02)
+		_text("Rue Masson", Vector2(LANE_X, MASSON_Y + 5), 15, ink)
+		_text("Rue Masson", Vector2(FOUR_X - 2.5 * AVE_STEP, MASSON_Y + 5), 14, ink)
+		_text("Rue Masson", Vector2(FOUR_X + 5.5 * AVE_STEP, MASSON_Y + 5), 14, ink)
+		_text("Église", Vector2((FIVE_X + SIX_X) / 2.0 - 12.0, MASSON_Y - 50), 13, Color("#FFFDF7"), -0.02)
+		_text("Parc", Vector2((MOLSON_X + FOUR_X - 3.0 * AVE_STEP) / 2.0, MASSON_Y + 74), 15, Color("#2E5E20"), 0.02)
+		for a in [[FOUR_X - 3.0 * AVE_STEP, "1re Avenue"], [FOUR_X - 2.0 * AVE_STEP, "2e Avenue"], [FOUR_X - AVE_STEP, "3e Avenue"],
+				[FOUR_X + 5.0 * AVE_STEP, "9e Avenue"], [TEN_X, "10e Avenue"]]:
+			_text(a[1], Vector2(a[0] + 5, 280), 14, ink, -PI / 2.0)
+		for a in [[FOUR_X - 3.0 * AVE_STEP, "1re"], [FOUR_X - 2.0 * AVE_STEP, "2e"], [FOUR_X - AVE_STEP, "3e"], [FOUR_X, "4e"], [FIVE_X, "5e"],
+				[SIX_X, "6e"], [SEVEN_X, "7e"], [EIGHT_X, "8e"], [FOUR_X + 5.0 * AVE_STEP, "9e"], [TEN_X, "10e"]]:
+			_text(a[1] + " Avenue", Vector2(a[0] + 5, MASSON_Y - 150), 13, ink, -PI / 2.0)
+		_text("Rue Molson", Vector2(MOLSON_X + 5, MASSON_Y - 150), 13, ink, -PI / 2.0)
+		_text("Rue D'Iberville", Vector2(IBERVILLE_X + 5, MASSON_Y - 170), 14, ink, -PI / 2.0)
+		_text("Boul. Saint-Michel", Vector2(STMICHEL_X + 5, MASSON_Y - 180), 14, ink, -PI / 2.0)
 
 	# ── Doodles ──
 
@@ -658,7 +841,6 @@ class _Sheet:
 			CuteArt.star(self, p, 11.0, CRAYONS[2], true, _rng)
 		# Capybaras: a big one in the margin, a little one in her yard by the swing.
 		CuteArt.capybara(self, Vector2(180, 560), 30.0, true, _rng)
-		CuteArt.capybara(self, Vector2(HOUSE_X - 52.0, HOUSE_Y + 14.0), 8.0, true, _rng)
 		for p in [Vector2(100, 565), Vector2(262, 340), Vector2(40, 500)]:
 			CuteArt.flower(self, p, 11.0, CRAYONS[5], true, _rng)
 		# What the map is for.

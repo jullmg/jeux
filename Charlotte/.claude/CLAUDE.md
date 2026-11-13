@@ -542,6 +542,14 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   notebook (N) and the menu (Esc) ignore their keys while it is open. The roads keep the real proportions measured on `reference/cartes/google_map_immediate_area.png`: a block is about 3× as long (Holt to Dandurand) as wide (5e to 6e), the lanes about 18 % in from each street; the title, compass and stop sign sit in the paper margin left of `SIDE`. Geometry constants (`HOLT_Y`, `DAND_Y`, `SIX_X`, lanes…) are at the
   top of the file: a new place on the block = a drawing in `_Sheet` + a case in `_here()`.
 - Whatever she can't reach is coloured over in grey crayon (`_Sheet._reachable`, `_grey_out`, names, title and doodles on top): before `CROSS_AGE` all but her block and the streets round it; from then on the corners across them and the school come back, and 7e, 4e and the houses farther west stay grey (no scene goes there). A new place she can reach = widen `_reachable`.
+- **The map is bigger than the sheet and slides to her** (Julien: no zooming out, the drawing must stay readable): it reaches south
+  to Rue Masson (`MASSON_Y`) and along Masson from D'Iberville to Saint-Michel (`WORLD`, `MASSON_GAPS`), with the church, the park
+  and the shops in rows. Three layers (`_Sheet.layer`): "paper" under, "map" (a Node2D, since a Control's drawing is cut off left of
+  its origin) seen through a window right of the margin, "top" (frame, tape, title, compass, stop sign) over it. On opening it shows
+  her block, then slides by itself (`_pan_for`, `_set_pan`, a tween that runs while the game is paused) to put her in the middle
+  when she is elsewhere. On Masson her place comes from the crossings round her (`_masson_x`), each block on its own stretch.
+  The street she is on is never greyed, even past where she may go alone (`_Sheet.here`). **A new place on the map** = its drawing in
+  the "map" layer (anywhere in `WORLD`, widen it if needed) + its case in `_here()`.
 - `--map` (a user arg, after `--`) opens it one second after the scene starts, for screenshots: `Godot --path . --screen 1 res://scenes/holt.tscn -- --screenshot=/path/map.png --wait=2.5 --map`.
 
 ## Where she is
