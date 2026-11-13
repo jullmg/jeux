@@ -849,34 +849,24 @@ const HOUSES := [
 		"name": "masson_3053_cote", "kind": "side_wall", "width": 520.0, "floors": 2,
 		"bricks": ["#D9C4B6", "#D2BDAF", "#DECBBD"], "mortar": "#C9B4A6", "parapet": "flat", "windows": [], "basement": [], "downspout": -1.0,
 	},
-	# 3071–3101, at 8e: two floors, the ground floor painted pale pink with big plants, buff brick above (3071…, 3081…, 3091…).
+	# 3071–3101, at 8e: two floors of cream brick, white windows; Méga Vrac all along the ground floor under its long navy sign,
+	# then the flats' door (3081…, 3091…, 3101…, 3103…). The pink wall with its big plants is the building's side on 8e.
 	{
-		"name": "masson_3071", "kind": "commerce", "width": 1100.0, "floors": 2,
-		"bricks": ["#D2B48A", "#C8A87E", "#DABE94", "#BE9E74"], "mortar": "#EDE3D2", "parapet": "flat",
-		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[120.0, 130.0], [420.0, 130.0], [740.0, 130.0]],
-		"ground": "painted", "paint": "#EBD3CF", "mural": "plants", "mural_x0": 30.0,
-		"shops": [{"x0": 760.0, "x1": 1070.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 1000.0, "inside": "clothes", "transom": "none"}], "basement": [],
+		"name": "masson_3071", "kind": "commerce", "width": 1600.0, "floors": 2,
+		"bricks": ["#DCCDB0", "#D2C2A4", "#E4D6BA", "#C8B898"], "mortar": "#EDE6D8", "parapet": "flat",
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "lintel_style": "none", "window_style": "slider", "frame": "#F2F0EA",
+		"windows": [[120.0, 150.0], [420.0, 150.0], [740.0, 150.0], [1060.0, 150.0], [1360.0, 150.0]],
+		"shops": [{"x0": 30.0, "x1": 1380.0, "sign": "#1F2E5E", "frame": "#2B2B2E", "door": 760.0, "inside": "fruit", "wall": "#E8E0CC", "kick": "wood", "transom": "none", "panes": 8}],
+		"res_doors": [1480.0], "basement": [],
 	},
-	# 3103–3105, Méga Vrac: grey-buff brick on three floors, its blue sign (3103…).
+	# 3103–3111, Quincaillerie A. Lalonde: buff brick on three floors, the tall red SICO sign hung out by its windows, the shop under
+	# a white sign with the red SICO at its end (3107…, 3109…, 3115…).
 	{
-		"name": "masson_3103", "kind": "commerce", "width": 760.0, "floors": 3,
-		"bricks": ["#B9AE9A", "#AFA490", "#C3B8A4", "#A69B88"], "mortar": "#DCD4C6", "parapet": "flat",
-		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "lintel_style": "none", "window_style": "slider", "frame": "#F2F0EA", "windows": [[90.0, 120.0], [330.0, 120.0], [560.0, 120.0]],
-		"shops": [{"x0": 30.0, "x1": 730.0, "sign": "#1F4E9A", "frame": "#1E1E20", "door": 120.0, "inside": "fruit", "wall": "#E8E0CC", "kick": "wood", "front": "wood"}], "basement": [],
-	},
-	# 3107–3109: buff brick on three floors, a tall red sign hung out at the corner (3103…, 3107…).
-	{
-		"name": "masson_3107", "kind": "commerce", "width": 620.0, "floors": 3,
+		"name": "masson_3107", "kind": "commerce", "width": 1100.0, "floors": 3,
 		"bricks": ["#CDB088", "#C2A47C", "#D6BA92", "#B89A72"], "mortar": "#E6DCCB", "parapet": "flat",
-		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "lintel_style": "none", "window_style": "hung", "hung_frame": "#F2F0EA", "quoins": true, "windows": [[90.0, 110.0], [380.0, 110.0]],
-		"shops": [{"x0": 30.0, "x1": 590.0, "sign": "#C8202A", "frame": "#2B2B2E", "door": 300.0, "inside": "goods", "kick": "brick"}], "basement": [],
-	},
-	# 3115–3121, Quincaillerie A. Lalonde: brown brick on three floors, its white sign (3107…, 3115…).
-	{
-		"name": "masson_3115", "kind": "commerce", "width": 800.0, "floors": 3,
-		"bricks": ["#C9AE88", "#BFA47E", "#D2B892", "#B49A74"], "mortar": "#E6DCCB", "parapet": "flat", "quoins": true,
-		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "lintel_style": "none", "window_style": "hung", "hung_frame": "#F2F0EA", "windows": [[90.0, 110.0], [340.0, 110.0], [580.0, 110.0]],
-		"shops": [{"x0": 30.0, "x1": 770.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 400.0, "lamps": 2, "inside": "hardware", "front": "wood", "kick": "wood"}], "basement": [],
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "lintel_style": "none", "window_style": "hung", "hung_frame": "#F2F0EA", "quoins": true,
+		"windows": [[90.0, 110.0], [380.0, 110.0], [640.0, 110.0], [880.0, 110.0]],
+		"shops": [{"x0": 30.0, "x1": 1070.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 520.0, "lamps": 2, "inside": "hardware", "front": "wood", "kick": "wood"}], "basement": [],
 	},
 	# 3125: grey stone on three floors (3127…).
 	{
@@ -941,6 +931,14 @@ const HOUSES := [
 		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[90.0, 130.0], [360.0, 130.0]],
 		"shops": [{"x0": 30.0, "x1": 590.0, "sign": "#C8202A", "frame": "#2B2B2E", "door": 520.0, "awning": "#C8202A", "inside": "bakery", "front": "wood", "kick": "wood"}], "basement": [],
 	},
+	# 3118–3122: two floors of cream stucco under a little green crenellated parapet, a shop in red and yellow (3116…, 3122…,
+	# 3124…).
+	{
+		"name": "masson_3120", "kind": "commerce", "width": 700.0, "floors": 2, "upper": "stucco", "stucco": "#E2D8B8",
+		"bricks": ["#E2D8B8"], "mortar": "#C9BFA0", "parapet": "corbel", "cornice": "#5E7A4A", "cornice_dark": "#3E5A32",
+		"lintel_style": "none", "window_style": "slider", "frame": "#F2F0EA", "windows": [[120.0, 180.0], [420.0, 180.0]],
+		"shops": [{"x0": 30.0, "x1": 670.0, "sign": "#F2C21E", "frame": "#C8202A", "door": 560.0, "inside": "goods", "transom": "none", "panes": 3}], "basement": [],
+	},
 	# 3112–3122, Poke Monster: two floors, the upper one clad in ribbed white metal, the ground floor's wall papered with posters
 	# left out (3108…, 3124…).
 	{
@@ -956,8 +954,9 @@ const HOUSES := [
 		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[90.0, 120.0], [320.0, 120.0], [540.0, 120.0]],
 		"shops": [{"x0": 30.0, "x1": 710.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 650.0, "inside": "salon", "front": "wood", "kick": "tile", "tile": "#2E3E5E"}], "basement": [],
 	},
+	# 3102: a little square with its benches before the corner building at 8e, not a passage of murals (3108…, 3112…).
 	{
-		"name": "masson_3102", "kind": "masson_lot", "lot_style": "murals", "width": 420.0, "floors": 3, "halloween": false,
+		"name": "masson_3102", "kind": "masson_lot", "lot_style": "plaza", "width": 420.0, "floors": 3, "halloween": false,
 		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
 	},
 	# 3076–3100, at 8e: a newer building on two floors, brick with tall round-arched windows and a bay of grey metal panels (3076…).

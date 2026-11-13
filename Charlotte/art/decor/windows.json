@@ -8137,40 +8137,64 @@
 	],
 	"masson_3071": [
 		{
-			"bar_y": 189.4,
+			"bar_y": 215.0,
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				128.0,
-				143.0,
-				114.0,
-				144.0
+				125.0,
+				140.0,
+				140.0,
+				150.0
 			],
-			"trim": "#F4F1EA"
+			"trim": "#F2F0EA"
 		},
 		{
-			"bar_y": 189.4,
+			"bar_y": 215.0,
 			"flower_box": false,
-			"lit": false,
+			"lit": true,
 			"pane": [
-				428.0,
-				143.0,
-				114.0,
-				144.0
+				425.0,
+				140.0,
+				140.0,
+				150.0
 			],
-			"trim": "#F4F1EA"
+			"trim": "#F2F0EA"
 		},
 		{
-			"bar_y": 189.4,
+			"bar_y": 215.0,
 			"flower_box": false,
 			"lit": false,
 			"pane": [
-				748.0,
-				143.0,
-				114.0,
-				144.0
+				745.0,
+				140.0,
+				140.0,
+				150.0
 			],
-			"trim": "#F4F1EA"
+			"trim": "#F2F0EA"
+		},
+		{
+			"bar_y": 215.0,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				1065.0,
+				140.0,
+				140.0,
+				150.0
+			],
+			"trim": "#F2F0EA"
+		},
+		{
+			"bar_y": 215.0,
+			"flower_box": false,
+			"lit": false,
+			"pane": [
+				1365.0,
+				140.0,
+				140.0,
+				150.0
+			],
+			"trim": "#F2F0EA"
 		}
 	],
 	"masson_3071_cote": [
@@ -8247,85 +8271,11 @@
 			"trim": "#F4F1EA"
 		}
 	],
-	"masson_3103": [
-		{
-			"bar_y": 490.0,
-			"flower_box": false,
-			"lit": false,
-			"pane": [
-				95.0,
-				415.0,
-				110.0,
-				150.0
-			],
-			"trim": "#F2F0EA"
-		},
-		{
-			"bar_y": 490.0,
-			"flower_box": false,
-			"lit": false,
-			"pane": [
-				335.0,
-				415.0,
-				110.0,
-				150.0
-			],
-			"trim": "#F2F0EA"
-		},
-		{
-			"bar_y": 490.0,
-			"flower_box": false,
-			"lit": false,
-			"pane": [
-				565.0,
-				415.0,
-				110.0,
-				150.0
-			],
-			"trim": "#F2F0EA"
-		},
-		{
-			"bar_y": 215.0,
-			"flower_box": false,
-			"lit": true,
-			"pane": [
-				95.0,
-				140.0,
-				110.0,
-				150.0
-			],
-			"trim": "#F2F0EA"
-		},
-		{
-			"bar_y": 215.0,
-			"flower_box": false,
-			"lit": false,
-			"pane": [
-				335.0,
-				140.0,
-				110.0,
-				150.0
-			],
-			"trim": "#F2F0EA"
-		},
-		{
-			"bar_y": 215.0,
-			"flower_box": false,
-			"lit": true,
-			"pane": [
-				565.0,
-				140.0,
-				110.0,
-				150.0
-			],
-			"trim": "#F2F0EA"
-		}
-	],
 	"masson_3107": [
 		{
 			"bar_y": 485.68,
 			"flower_box": false,
-			"lit": true,
+			"lit": false,
 			"no_cat": false,
 			"pane": [
 				98.0,
@@ -8342,6 +8292,32 @@
 			"no_cat": false,
 			"pane": [
 				388.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F2F0EA"
+		},
+		{
+			"bar_y": 485.68,
+			"flower_box": false,
+			"lit": false,
+			"no_cat": false,
+			"pane": [
+				648.0,
+				418.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F2F0EA"
+		},
+		{
+			"bar_y": 485.68,
+			"flower_box": false,
+			"lit": false,
+			"no_cat": false,
+			"pane": [
+				888.0,
 				418.0,
 				94.0,
 				144.0
@@ -8368,6 +8344,32 @@
 			"no_cat": false,
 			"pane": [
 				388.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F2F0EA"
+		},
+		{
+			"bar_y": 210.68,
+			"flower_box": false,
+			"lit": false,
+			"no_cat": false,
+			"pane": [
+				648.0,
+				143.0,
+				94.0,
+				144.0
+			],
+			"trim": "#F2F0EA"
+		},
+		{
+			"bar_y": 210.68,
+			"flower_box": false,
+			"lit": true,
+			"no_cat": false,
+			"pane": [
+				888.0,
 				143.0,
 				94.0,
 				144.0
@@ -8439,82 +8441,28 @@
 			"trim": "#F2F0EA"
 		}
 	],
-	"masson_3115": [
+	"masson_3120": [
 		{
-			"bar_y": 485.68,
+			"bar_y": 215.0,
 			"flower_box": false,
 			"lit": false,
-			"no_cat": false,
 			"pane": [
-				98.0,
-				418.0,
-				94.0,
-				144.0
+				125.0,
+				140.0,
+				170.0,
+				150.0
 			],
 			"trim": "#F2F0EA"
 		},
 		{
-			"bar_y": 485.68,
+			"bar_y": 215.0,
 			"flower_box": false,
 			"lit": true,
-			"no_cat": false,
 			"pane": [
-				348.0,
-				418.0,
-				94.0,
-				144.0
-			],
-			"trim": "#F2F0EA"
-		},
-		{
-			"bar_y": 485.68,
-			"flower_box": false,
-			"lit": false,
-			"no_cat": false,
-			"pane": [
-				588.0,
-				418.0,
-				94.0,
-				144.0
-			],
-			"trim": "#F2F0EA"
-		},
-		{
-			"bar_y": 210.68,
-			"flower_box": false,
-			"lit": false,
-			"no_cat": false,
-			"pane": [
-				98.0,
-				143.0,
-				94.0,
-				144.0
-			],
-			"trim": "#F2F0EA"
-		},
-		{
-			"bar_y": 210.68,
-			"flower_box": false,
-			"lit": false,
-			"no_cat": false,
-			"pane": [
-				348.0,
-				143.0,
-				94.0,
-				144.0
-			],
-			"trim": "#F2F0EA"
-		},
-		{
-			"bar_y": 210.68,
-			"flower_box": false,
-			"lit": false,
-			"no_cat": false,
-			"pane": [
-				588.0,
-				143.0,
-				94.0,
-				144.0
+				425.0,
+				140.0,
+				170.0,
+				150.0
 			],
 			"trim": "#F2F0EA"
 		}
