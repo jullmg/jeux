@@ -51,7 +51,14 @@ func _exit_tree() -> void:
 
 ## Plays a sound. `at`: world position (Vector2.INF = not in the world, e.g. UI). A little random pitch
 ## keeps repeated sounds (footsteps) from sounding mechanical.
+## Run without sound (`--audio-driver Dummy`, the test and screenshot runs): nothing is played, or the dummy driver keeps the
+## stream alive and Godot reports it as leaked at exit (as `Music._silent`).
+static var _silent: bool = AudioServer.get_driver_name() == "Dummy"
+
+
 func play(sound: String, at := Vector2.INF, volume_db := 0.0, pitch := 1.0) -> void:
+	if _silent:
+		return
 	var stream := _stream(sound)
 	if stream == null:
 		return
@@ -76,6 +83,8 @@ func play(sound: String, at := Vector2.INF, volume_db := 0.0, pitch := 1.0) -> v
 ## Outdoor ambience for a scene: now and then a bird calls somewhere near the camera (not in winter, and not on
 ## Halloween night: the birds are long asleep by then).
 func ambience(parent: Node) -> void:
+	if _silent:
+		return
 	if Season.is_winter() or Halloween.night():
 		return
 	var timer := Timer.new()

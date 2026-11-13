@@ -1,15 +1,24 @@
 extends StreetScene
-# Rue Masson, the shopping street a block south of Dandurand, one scene per side of each block between two avenues (Julien),
-# drawn from the Street View pictures (reference/streetview/INDEX.md, "Rue Masson 2000–3400"; facades `masson_*` in
-# tools/generate_houses.gd). One script, a scene per `block` and `side`: the odd numbers are the NORTH side (seen from the
-# south sidewalk, so the lower avenue is on the left), the even numbers the SOUTH side (seen from the north, the higher avenue
-# on the left). Shop names are labels laid on their sign bands. The crosswalk over Masson at either corner leads to the other
-# side of the same block (`_add_across`). A new block = one entry in BLOCKS, its facades in the generator, two .tscn files.
+# Rue Masson, the shopping street a block south of Dandurand, from the 1re to the 9e Avenue, drawn from the Street View pictures
+# (reference/streetview/INDEX.md, "Rue Masson 2000–3400"; facades `masson_*` in tools/generate_houses.gd). One scene per side of
+# the street (Julien: so she isn't always crossing into another scene): `masson_impair.tscn`, the odd numbers, the NORTH side,
+# seen from the south sidewalk with the 1re on the left; `masson_pair.tscn`, the even numbers, the SOUTH side, seen from the
+# north with the 9e on the left. Each side is put together, block after block, from `BLOCKS` (one entry per side of each block,
+# as it was drawn) in the order `ORDER` gives. The crosswalk over Masson at every avenue leads to the other side, at the same
+# corner. The plate at the top names the block she is in (`room_name`). A new block = one entry per side in BLOCKS, its
+# place in ORDER, its facades in the generator.
 
-## Which block: the two avenues it lies between, e.g. "6e_7e".
-@export var block := "6e_7e"
 ## "impair" (the north side) or "pair" (the south side).
 @export var side := "impair"
+
+## The blocks, left to right as each side is seen.
+const ORDER := {
+	"impair": ["1re_2e", "2e_3e", "3e_4e", "4e_5e", "5e_6e", "6e_7e", "7e_8e", "8e_9e"],
+	"pair": ["8e_9e", "7e_8e", "6e_7e", "5e_6e", "4e_5e", "3e_4e", "2e_3e", "1re_2e"],
+}
+
+## How each avenue is written on the plate.
+const AVENUE_NAMES := {"1re": "1re", "2e": "2e", "3e": "3e", "4e": "4e", "5e": "5e", "6e": "6e", "7e": "7e", "8e": "8e", "9e": "9e"}
 
 ## Each side of each block: its layout left to right (the corners across the avenues at both ends), its two avenues (the
 ## gap in the layout, the avenue's name, its width), its trees (shifted clear of the signs) and lamps, where the moon rises
@@ -218,24 +227,63 @@ const BLOCKS := {
 }
 
 
+## This side, put together from its blocks: layout, avenues (in order), trees, lamps…, signs, and where each block's buildings
+## run in the layout (`blocks`: {block: Vector2i(first, last)}).
+var _side_data := {}
+
+
 func _init() -> void:
 	_setup()
 
 
-# The street's data from BLOCKS. Called again once the exports are set (a scene file sets them after _init).
+# The street's data, its blocks joined end to end. Called again once the export is set (a scene file sets it after _init).
 func _setup() -> void:
-	var data: Dictionary = BLOCKS["%s_%s" % [block, side]]
-	street_key = "masson_%s_%s" % [block, side]
-	layout.assign(data.layout)
+	var m := {"layout": [], "avenues": [], "trees_after": [], "tree_shift": {}, "lamps_after": [], "hydrants_at": [],
+		"racks_at": [], "squirrels_at": [], "signs": {}, "logos": {}, "texts": {}, "panels": {}, "blocks": {}}
+	var order: Array = ORDER[side]
+	for n in order.size():
+		var d: Dictionary = BLOCKS["%s_%s" % [order[n], side]]
+		var lay: Array = d.layout
+		# The first block keeps the corner across its first avenue; the next ones start after the avenue they share with the
+		# block before; the last one keeps the corner across its last avenue.
+		var start := 0 if n == 0 else 2
+		var stop: int = lay.size() if n == order.size() - 1 else lay.size() - 1
+		var offset: int = m.layout.size() - start
+		for i in range(start, stop):
+			m.layout.append(lay[i])
+		for av: Array in d.avenues:
+			var known := false
+			for had: Array in m.avenues:
+				known = known or had[0] == av[0]
+			if not known:
+				m.avenues.append(av)
+		for t: int in d.trees_after:
+			if t >= start and t < stop:
+				m.trees_after.append(t + offset)
+				if d.tree_shift.has(t):
+					m.tree_shift[t + offset] = d.tree_shift[t]
+		for t: int in d.lamps_after:
+			if t >= start and t < stop:
+				m.lamps_after.append(t + offset)
+		for key in ["hydrants_at", "racks_at", "squirrels_at"]:
+			for at: float in d[key]:
+				if at >= start and at < stop:
+					m[key].append(at + offset)
+		for key in ["signs", "logos", "texts", "panels"]:
+			m[key].merge(d.get(key, {}))
+		m.blocks[order[n]] = Vector2i(offset + 2, offset + lay.size() - 3)
+	_side_data = m
+	street_key = "masson_%s" % side
+	layout.assign(m.layout)
 	cross_streets = {}
-	for a: Array in data.avenues:
+	for a: Array in m.avenues:
 		cross_streets[a[0]] = a[2]
-	trees_after.assign(data.trees_after)
-	tree_shift = data.tree_shift.duplicate()
-	lamps_after.assign(data.lamps_after)
-	hydrants_at.assign(data.hydrants_at)
-	racks_at.assign(data.racks_at)
-	squirrels_at.assign(data.squirrels_at)
+	trees_after.assign(m.trees_after)
+	tree_shift = m.tree_shift
+	lamps_after.assign(m.lamps_after)
+	hydrants_at.assign(m.hydrants_at)
+	racks_at.assign(m.racks_at)
+	squirrels_at.assign(m.squirrels_at)
 	seed_value = absi(hash(street_key)) % 9000 + 1000
 	# The shops are shut by the time the children go round: no candy on Masson, the evening is on her block.
 	gives_candy = false
@@ -247,51 +295,79 @@ func _ready() -> void:
 
 
 func _data() -> Dictionary:
-	return BLOCKS["%s_%s" % [block, side]]
+	return _side_data
 
 
-## The scene of the other side of this block.
+## The scene of the other side of the street.
 func _other_side() -> String:
-	return "res://scenes/masson_%s_%s.tscn" % [block, "pair" if side == "impair" else "impair"]
+	return "res://scenes/masson_%s.tscn" % ("pair" if side == "impair" else "impair")
 
 
-# At the corner she crossed to, else in the middle of the block.
+## The block whose buildings start just past layout index `i` or end just before it (an avenue's gap at `i`), on side `after`.
+func _block_beside(i: int, after: bool) -> String:
+	for b: String in _side_data.blocks:
+		var r: Vector2i = _side_data.blocks[b]
+		if (after and r.x == i + 1) or (not after and r.y == i - 1):
+			return b
+	return ""
+
+
+# At the corner she crossed to (on her block's side of the avenue), else by the 6e Avenue, the nearest to her own block.
 func _start_x() -> float:
-	for a: Array in _data().avenues:
+	for a: Array in _side_data.avenues:
 		var gap: String = a[0]
-		if _arriving("%s_from_%s" % [street_key, gap]):
-			var i := layout.find(gap)
-			return _starts[i + 1] + 40.0 if i == 1 else _starts[i] - 40.0
+		var i := layout.find(gap)
+		for after: bool in [true, false]:
+			var b := _block_beside(i, after)
+			if b != "" and _arriving("%s_from_%s_%s" % [street_key, gap, b]):
+				return _starts[i + 1] + 40.0 if after else _starts[i] - 40.0
 	if not is_nan(Transition.street_x):
 		var x := Transition.street_x
 		Transition.street_x = NAN
 		return x
-	return _street_x(layout.size() / 2.0)
+	return _starts[layout.find("rue_6e") + 1] + 60.0
 
 
-# On Halloween night the moon rises over the block's lowest building (the bank, the hardware store): the others reach the top.
-func _moon_x() -> float:
-	return _street_x(_data().moon_at)
+## The block she is in, for the plate at the top of the screen (PlaceLabel), and where she is on the map.
+func room_name() -> String:
+	var x := _charlotte.position.x if _charlotte else 0.0
+	var gaps := []
+	for a: Array in _side_data.avenues:
+		gaps.append([_starts[layout.find(a[0])], a[0].trim_prefix("rue_")])
+	var left := ""
+	var right := ""
+	for g: Array in gaps:
+		if g[0] <= x:
+			left = g[1]
+		elif right == "":
+			right = g[1]
+	var pair := [left, right]
+	pair = pair.filter(func(v): return v != "")
+	if pair.size() < 2:
+		return "Rue Masson, au coin de la %s" % (pair[0] if pair.size() else "6e")
+	if side == "pair":
+		pair.reverse()
+	return "Rue Masson, entre la %s et la %s%s" % [pair[0], pair[1], " (côté sud)" if side == "pair" else ""]
 
 
 # The avenues run north from the odd side's view, south from the even side's; their far sides aren't drawn from photos yet.
 func _build_cross_streets() -> void:
-	var avenues: Array = _data().avenues
+	var avenues: Array = _side_data.avenues
+	var brick := [Color("#A8473A"), Color("#9C5A44"), Color("#B5603F"), Color("#7E4436")]
 	for n in avenues.size():
 		var a: Array = avenues[n]
-		var cs := _cross_street(a[0], a[1], 1.0 if n == 0 else -1.0)
+		var cs := _cross_street(a[0], a[1], -1.0 if n == avenues.size() - 1 else 1.0)
 		cs.along_name = "Rue Masson"
 		cs.facing = "north" if side == "impair" else "south"
-		var brick := [Color("#A8473A"), Color("#9C5A44"), Color("#B5603F"), Color("#7E4436")]
 		cs.left_walls = [
-			{"to": 0.8, "top": 300.0, "kind": "plex", "color": brick[n]},
-			{"to": 2.4, "top": 290.0, "kind": "plex", "color": brick[n + 1]},
-			{"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": brick[n + 2]},
+			{"to": 0.8, "top": 300.0, "kind": "plex", "color": brick[n % 4]},
+			{"to": 2.4, "top": 290.0, "kind": "plex", "color": brick[(n + 1) % 4]},
+			{"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": brick[(n + 2) % 4]},
 		]
 		cs.right_walls = [
-			{"to": 0.8, "top": 290.0, "kind": "plex", "color": brick[n + 2]},
-			{"to": 2.2, "top": 300.0, "kind": "plex", "color": brick[n]},
-			{"to": CrossStreet.FAR, "top": 290.0, "kind": "plex", "color": brick[n + 1]},
+			{"to": 0.8, "top": 290.0, "kind": "plex", "color": brick[(n + 2) % 4]},
+			{"to": 2.2, "top": 300.0, "kind": "plex", "color": brick[n % 4]},
+			{"to": CrossStreet.FAR, "top": 290.0, "kind": "plex", "color": brick[(n + 1) % 4]},
 		]
 
 
@@ -299,11 +375,11 @@ func _build_cross_streets() -> void:
 func _decorate_house(i: int, house: Sprite2D) -> void:
 	var art: String = layout[i]
 	var tex_h := _tex(art).get_height()
-	for s: Array in _data().signs.get(art, []):
+	for s: Array in _side_data.signs.get(art, []):
 		var at := house.position + Vector2(float(s[0]), tex_h - 302.0) * HOUSE_SCALE
 		_label(s[1], at, Vector2(220, 22), int(s[4]), Color(s[2]), Color(s[3]))
 	# Real logos (art/brands/, SOURCES.md): [x on the facade, file, height in the world], centred on the sign band.
-	for l: Array in _data().get("logos", {}).get(art, []):
+	for l: Array in _side_data.logos.get(art, []):
 		var tex: Texture2D = load("res://art/brands/%s" % l[1])
 		var logo := Sprite2D.new()
 		logo.texture = tex
@@ -313,9 +389,9 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 		logo.position = house.position + Vector2(float(l[0]), float(l[3]) if l.size() > 3 else tex_h - 302.0) * HOUSE_SCALE
 		add_child(logo)
 	# Words painted straight on a wall: [x, y on the facade, text, colour, outline, size].
-	for t: Array in _data().get("texts", {}).get(art, []):
+	for t: Array in _side_data.texts.get(art, []):
 		_label(t[2], house.position + Vector2(float(t[0]), float(t[1])) * HOUSE_SCALE, Vector2(360, 22), int(t[5]), Color(t[3]), Color(t[4]))
-	for p: Array in _data().panels.get(art, []):
+	for p: Array in _side_data.panels.get(art, []):
 		var at := house.position + Vector2(float(p[0]), float(p[1])) * HOUSE_SCALE
 		var board := ColorRect.new()
 		board.color = Color(p[4])
@@ -325,8 +401,48 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 		_label(p[2], at, Vector2(60, 20), int(p[5]), Color(p[3]), Color(p[4]))
 
 
-# Over Masson at either corner, to the other side of this block.
+# Over Masson at every avenue, to the other side of the street at the same corner: the crosswalk is painted on the corner of
+# the block to the right of the avenue, and leads from that stretch of sidewalk to the same block across the street.
 func _build_doors() -> void:
-	for n in _cross_streets.size():
-		var gap: String = _data().avenues[n][0]
-		_add_across(_cross_streets[n], _other_side(), "masson_%s_%s_from_%s" % [block, "pair" if side == "impair" else "impair", gap])
+	var other := "pair" if side == "impair" else "impair"
+	for cs in _cross_streets:
+		var i := _starts.find(cs.x0)
+		var gap: String = layout[i]
+		var b := _block_beside(i, true)
+		var right := true
+		if b == "":
+			b = _block_beside(i, false)
+			right = false
+		if b != "":
+			_masson_crossing(cs, right, "masson_%s_from_%s_%s" % [other, gap, b])
+
+
+## The crosswalk over Masson at one corner of an avenue (`right`: the corner right of it), from that stretch of sidewalk.
+func _masson_crossing(cs: CrossStreet, right: bool, arrive: String) -> void:
+	var home := _segment_at(cs.x1 + 1.0) if right else _segment_at(cs.x0 - 1.0)
+	var curb := home.x if right else home.y
+	var ground: CrossStreet = _grounds.get(cs)
+	if ground == null:
+		return
+	ground.own_crosswalk = 1.0 if right else -1.0
+	ground.queue_redraw()
+	var over := DoorSpot.make(ground.own_crosswalk_rect(), func():
+		if DebugMenu.blocked(GameState.age < CROSS_AGE):
+			Bubble.say(self, _charlotte.position + Vector2(0, -190), CANT_CROSS, 2.6)
+			return
+		_control.enabled = false
+		_control.hands_off = true
+		_charlotte.is_walking = false
+		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je regarde des deux côtés !", 1.4)
+		var toward := -1 if right else 1
+		var look := create_tween()
+		for s: int in [toward, -toward, toward]:
+			look.tween_callback(func(): _charlotte.facing = s)
+			look.tween_interval(0.45)
+		look.tween_callback(func():
+			Transition.arrive = arrive
+			Transition.crossing = ""
+			Transition.change_scene(self, _other_side())), curb)
+	over.click_only = true
+	over.condition = func(): return _segment_at(_charlotte.position.x) == home
+	add_child(over)

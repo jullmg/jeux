@@ -90,18 +90,20 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `fence: "wood"` / `"chain"` (`_wood_fence`, `_chain_fence`), `frame` (the colour of `_casement` windows), and `door_x`
   (no civic number plates on them: Julien wants numbers only where he asks, Charlotte's and the twins' houses) (any kind of building can name its door for `doors.json`, so it gets its doorbell on Halloween night). Helpers: `_casement`,
   `_glass_rail`, `_hydrangea`, `_cedar`, `_lantern_post`.
-- **Rue Masson** (Julien: one scene per side of each block, 1re → 9e Avenue, built block by block from `reference/streetview/`,
-  INDEX.md "Rue Masson 2000–3400"): `scenes/masson.gd`, one script for them all, `@export block` ("6e_7e") and `side`
-  ("impair" = the north side, seen from the south sidewalk, the lower avenue on the left; "pair" = the south side, the higher
-  avenue on the left), each a `.tscn` (`masson_6e_7e_impair.tscn`, `masson_6e_7e_pair.tscn`), `street_key`
-  "masson_<block>_<side>". Its data is `BLOCKS` ("<block>_<side>": layout with the corner across each avenue at both ends,
-  `avenues` [gap, name, width], trees with `tree_shift` clear of the signs, lamps…, `moon_at`, `signs` = shop names as labels
-  on the sign band (302 above the facade's foot), `logos` = the chains' real logos from `art/brands/` on their bands (Tim Hortons,
-  RONA, Fido, Couche-Tard, Première Moisson, Banque Nationale; SVGs imported at `svg/scale=4.0`), `panels` = small boards on a wall): **a new block = one BLOCKS entry per
-  side, its facades in the generator, two .tscn files, and a line each in PlaceLabel, DebugMenu and `TownMap._here`.** The
-  crosswalk over Masson at either corner goes to the other side of the block (`_add_across`, keys
-  "masson_<block>_<side>_from_<gap>"); the avenues aren't turned into yet, and Masson isn't reached from her block yet (only
-  the debug menu). Facades: the generator's "Rue Masson" section, kinds `commerce` (`_commerce`: brick or `upper: "frame"`
+- **Rue Masson** (built block by block from `reference/streetview/`, INDEX.md "Rue Masson 2000–3400"): **one scene per side of the
+  whole street** (Julien: so she isn't forever crossing into another scene), `scenes/masson.gd` with `@export side`:
+  `masson_impair.tscn` (the odd numbers, the NORTH side, seen from the south sidewalk, the 1re on the left) and `masson_pair.tscn`
+  (the SOUTH side, the 9e on the left), `street_key` "masson_<side>". Each side is put together at load (`_setup`) from `BLOCKS`
+  ("<block>_<side>": layout with the corner across each avenue at both ends, `avenues` [gap, name, width], trees with
+  `tree_shift` clear of the signs, lamps…, `signs` = shop names as labels on the sign band (302 above the facade's foot), `logos`
+  = the chains' real logos from `art/brands/` (SVGs imported at `svg/scale=4.0`; a 4th value = their own height on the facade),
+  `texts` painted on a wall, `panels` = small boards) in the order `ORDER` gives: shared avenues once, the inner corner side walls
+  dropped, indices shifted (`_side_data`, `blocks` = where each block's buildings run). **A new block = one BLOCKS entry per
+  side, its place in ORDER, its facades in the generator.** The plate names the block she is in (`room_name()`, read by
+  PlaceLabel); the map puts her at the sheet's foot between the 1re and the 9e. Every avenue has a crosswalk over Masson at its
+  corner on the block to its right (`_masson_crossing`, from that stretch only): it loads the other side with her at the same
+  corner (keys "masson_<side>_from_<gap>_<block>", also the F1 menu's entries). The avenues aren't turned into yet, and Masson
+  isn't reached from her block yet (only the debug menu). Facades: the generator's "Rue Masson" section, kinds `commerce` (`_commerce`: brick or `upper: "frame"`
   flats over a row of `_shopfront`s with sign bands, awnings, gooseneck lamps, fruit crates, a residential door, the lily
   mural; options `upper: "stone"` rusticated grey stone, shop `ribs` a corrugated sign band, `stone_frame` pale stone piers and
   coping, `roof_rail` a terrace's wooden rail) and `bank` (stone), `church` (`_church`: Église Saint-Esprit, its tower, three

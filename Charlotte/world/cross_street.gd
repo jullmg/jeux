@@ -490,9 +490,14 @@ func _quad(a: Vector2, b: Vector2, d0: float, d1: float, col: Color) -> void:
 
 # A wall face running along the cross street, from `front_x` on the facade line into the distance.
 func _wall_quad(front_x: float, top: float, bottom: float, d0: float, d1: float, col: Color) -> void:
-	draw_colored_polygon(PackedVector2Array([
+	var pts := PackedVector2Array([
 		_at(Vector2(front_x, top), d0), _at(Vector2(front_x, bottom), d0),
-		_at(Vector2(front_x, bottom), d1), _at(Vector2(front_x, top), d1)]), col)
+		_at(Vector2(front_x, bottom), d1), _at(Vector2(front_x, top), d1)])
+	# Far down the street a window shrinks to a sliver that `draw_colored_polygon` can't triangulate (Godot reports it): a quad
+	# is drawn as a primitive instead, which never needs triangulating; one with no area at all is skipped.
+	if absf((pts[2] - pts[0]).cross(pts[3] - pts[1])) < 0.01:
+		return
+	draw_primitive(pts, PackedColorArray([col, col, col, col]), PackedVector2Array())
 
 
 func _walls(walls: Array, front_x: float, side: float) -> void:

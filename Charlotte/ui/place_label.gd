@@ -16,22 +16,6 @@ const NAMES := {
 	"ruelle_holt": "Ruelle près de Holt, entre la 5e et la 6e Avenue",
 	"depanneur": "Dépanneur Xin-Xin, rue Dandurand",
 	"ohbon": "Dépanneur Oh Bon!, rue Holt",
-	"masson_1re_2e_impair": "Rue Masson, entre la 1re et la 2e",
-	"masson_1re_2e_pair": "Rue Masson, entre la 1re et la 2e (côté sud)",
-	"masson_2e_3e_impair": "Rue Masson, entre la 2e et la 3e",
-	"masson_2e_3e_pair": "Rue Masson, entre la 2e et la 3e (côté sud)",
-	"masson_3e_4e_impair": "Rue Masson, entre la 3e et la 4e",
-	"masson_3e_4e_pair": "Rue Masson, entre la 3e et la 4e (côté sud)",
-	"masson_4e_5e_impair": "Rue Masson, entre la 4e et la 5e",
-	"masson_4e_5e_pair": "Rue Masson, entre la 4e et la 5e (côté sud)",
-	"masson_5e_6e_impair": "Rue Masson, entre la 5e et la 6e",
-	"masson_5e_6e_pair": "Rue Masson, entre la 5e et la 6e (côté sud)",
-	"masson_7e_8e_impair": "Rue Masson, entre la 7e et la 8e",
-	"masson_7e_8e_pair": "Rue Masson, entre la 7e et la 8e (côté sud)",
-	"masson_8e_9e_impair": "Rue Masson, entre la 8e et la 9e",
-	"masson_8e_9e_pair": "Rue Masson, entre la 8e et la 9e (côté sud)",
-	"masson_6e_7e_impair": "Rue Masson, entre la 6e et la 7e",
-	"masson_6e_7e_pair": "Rue Masson, entre la 6e et la 7e (côté sud)",
 }
 
 var _plate: PanelContainer
