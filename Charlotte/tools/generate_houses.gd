@@ -462,15 +462,8 @@ const HOUSES := [
 		"bricks": ["#B9B4AA", "#AEA99F", "#C2BDB3", "#A8A399", "#BDB8AE"], "mortar": "#8E8A82",
 		"parapet": "flat", "windows": [[160.0, 90.0], [360.0, 90.0]], "basement": [], "downspout": 540.0,
 	},
-	# 2901, at 6e: red brick over a grey stone ground floor, its windows set high, a stack of balconies at the corner (2901…).
-	{
-		"name": "masson_2901", "kind": "commerce", "width": 1100.0, "floors": 3, "halloween": false,
-		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844", "#94422F"], "mortar": "#CFC2B4", "parapet": "flat",
-		"lintel": "#B9B5AC", "lintel_dark": "#7E7A72", "window_style": "hung", "windows": [[180.0, 110.0], [420.0, 110.0], [660.0, 110.0], [890.0, 110.0]],
-		"projecting": [[34.0, 140.0]], "ground": "stone", "stone": "#A9A49C", "ground_windows": [[140.0, 200.0], [600.0, 200.0], [860.0, 200.0]],
-		"res_doors": [1030.0], "basement": [],
-	},
-	# 2903–2905, Fraîchement Bon, the greengrocer's: red brick, a stack of balconies on the left, two bays of shop under black signs
+	# 2901–2905, at 6e, Fraîchement Bon, the greengrocer's: red brick, a stack of balconies at the corner (the grey stone
+	# building drawn here before was its side on 6e, from an old picture), two bays of shop under black signs
 	# and gooseneck lamps, the fruit out front, the flats' door between them (2903… and close-ups).
 	{
 		"name": "masson_2903", "kind": "commerce", "width": 820.0, "floors": 3,
@@ -519,13 +512,15 @@ const HOUSES := [
 		"bricks": ["#D4B4AA", "#CDAEA4", "#D9BAB0", "#C9A89E", "#D6B6AC"], "mortar": "#D9BEB4",
 		"parapet": "flat", "windows": [[110.0, 90.0], [320.0, 90.0]], "basement": [], "downspout": 520.0,
 	},
-	# 2970–2990, at 7e: four floors, the flats behind white-framed windows with Juliet rails over a white-painted ground floor
-	# where lilies are painted big; the Tim Hortons at the corner (2970…, 2974…, 2980…, 2982…, 2990… and close-ups).
+	# 2970–2990, at 7e: four floors, the flats behind white-framed windows with Juliet rails; downstairs the Tim Hortons at the
+	# corner and a row of shopfronts (2970…, 2974…, 2980…, 2982…, 2990…; the lilies painted big were on its side, on 7e).
 	{
 		"name": "masson_2970", "kind": "commerce", "width": 1500.0, "floors": 4, "upper": "frame", "juliets": true,
 		"concrete": "#D8CDB8", "frame_piers": [30.0, 380.0, 740.0, 1100.0, 1440.0], "metal": "#2B3A6E",
-		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "ground": "painted", "paint": "#B9BCBE", "mural_stripes": true, "mural": "lilies", "mural_x0": 600.0,
-		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#3A3A3C", "door": 130.0, "inside": "cafe", "transom": "none", "panes": 3}], "basement": [],
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E",
+		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#3A3A3C", "door": 130.0, "inside": "cafe", "transom": "none", "panes": 3},
+			{"x0": 560.0, "x1": 1000.0, "sign": "#2B2B2E", "door": 920.0, "inside": "salon", "transom": "none", "panes": 3},
+			{"x0": 1000.0, "x1": 1470.0, "sign": "#1E1E20", "door": 1080.0, "inside": "goods", "transom": "none", "panes": 3}], "basement": [],
 	},
 	# 2930–2958: four floors in a pale concrete frame with Juliet rails; downstairs a hair salon, Mèdz, La Puce the jeweller's, the
 	# building's lobby and an accountant's (2930…, 2940…, 2950… and close-ups).
@@ -540,10 +535,11 @@ const HOUSES := [
 			{"x0": 1400.0, "x1": 1670.0, "sign": "#E9E5DE", "frame": "#4E4E50", "door": 1600.0, "inside": "office"}],
 		"basement": [],
 	},
-	# 2908–2928, the hardware store, Quincaillerie Bélanger (RONA): two floors of grey stone panels, the long dark sign band,
-	# its display windows (2930…, 2940… right side, and the RONA's pictures 2908…, 2916…).
+	# 2908–2928, the hardware store, Quincaillerie Bélanger (RONA): two floors faced in pale grey stone panels, a taller panel of
+	# brown brick over the RONA's door, the long dark sign band, its display windows (2908…, 2912…, 2916…, 2918…).
 	{
-		"name": "masson_2908", "kind": "commerce", "width": 1500.0, "floors": 2, "halloween": false, "upper": "siding", "siding": "#C2452E", "siding_dir": "h",
+		"name": "masson_2908", "kind": "commerce", "width": 1500.0, "floors": 2, "halloween": false, "upper": "stone", "upper_stone": "#CFCDC8",
+		"metal_panels": [[900.0, 1260.0, "#8A5236"]],
 		"bricks": ["#4E3A3E", "#5A4448", "#463438", "#62484C"], "mortar": "#8E8486", "parapet": "flat",
 		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [], "belt": "#3A3E42",
 		"shops": [{"x0": 30.0, "x1": 900.0, "sign": "#3A3E42", "frame": "#2B2E32", "door": 300.0, "lamps": 4, "inside": "hardware", "kick": "brick"},
@@ -5045,7 +5041,10 @@ func _commerce() -> void:
 		for rw: Array in k.get("round_windows", []):
 			_round_window(rw[0], rw[1], top + 50.0, belt - 30.0)
 		for mp: Array in k.get("metal_panels", []):
-			_siding_panel(mp[0], mp[1], top, belt + 4.0)
+			if mp.size() > 2:  # a panel of its own colour, brick-red for the RONA's (2908…)
+				_siding_panel(mp[0], mp[1], top - 40.0, belt + 4.0, mp[2])
+			else:
+				_siding_panel(mp[0], mp[1], top, belt + 4.0)
 		if k.get("quoins", false):
 			_corner_quoins(X0, top, belt)
 			_corner_quoins(X1 - 44.0, top, belt)

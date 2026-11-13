@@ -204,10 +204,10 @@ const BLOCKS := {
 		"panels": {},
 	},
 	"6e_7e_impair": {
-		"layout": ["masson_eglise_cote", "rue_6e", "masson_2901", "masson_2903", "masson_2909", "masson_2925", "masson_2933",
+		"layout": ["masson_eglise_cote", "rue_6e", "masson_2903", "masson_2909", "masson_2925", "masson_2933",
 			"rue_7e", "masson_3001_cote"],
 		"avenues": [["rue_6e", "6e Avenue", 560.0], ["rue_7e", "7e Avenue", 540.0]],
-		"trees_after": [2, 5], "tree_shift": {2: -45.0, 5: 60.0}, "lamps_after": [2, 5], "hydrants_at": [2.1], "racks_at": [4.6], "squirrels_at": [3.5], "moon_at": 6.5,
+		"trees_after": [2, 4], "tree_shift": {2: -45.0, 4: 60.0}, "lamps_after": [2, 4], "hydrants_at": [2.1], "racks_at": [3.6], "squirrels_at": [2.5], "moon_at": 5.5,
 		"signs": {
 			"masson_2903": [[225.0, "FRAÎCHEMENT BON", "#FFFFFF", "#123322", 13], [645.0, "VOTRE FRUITERIE DE QUARTIER", "#FFFFFF", "#123322", 9]],
 			"masson_2909": [[375.0, "POULET ROUGE", "#FFFFFF", "#C8202A", 15]],
