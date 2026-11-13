@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900.0" height="975.0" viewBox="0 0 900.0 975.0">
 <defs><linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4E0EC"/><stop offset="1" stop-color="#557A90"/></linearGradient><linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.1"/><stop offset="1" stop-color="#000000" stop-opacity="0.16"/></linearGradient><radialGradient id="glow"><stop offset="0" stop-color="#FFE9A8" stop-opacity="0.75"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient><linearGradient id="warm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7B5"/><stop offset="1" stop-color="#D98E4A"/></linearGradient><linearGradient id="drop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1408" stop-opacity="0.3"/><stop offset="1" stop-color="#2A1408" stop-opacity="0"/></linearGradient><linearGradient id="sun" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE6B8" stop-opacity="0.14"/><stop offset="0.5" stop-color="#FFE6B8" stop-opacity="0"/><stop offset="1" stop-color="#1A0C14" stop-opacity="0.12"/></linearGradient><radialGradient id="pumpkin_glow"><stop offset="0" stop-color="#FFB347" stop-opacity="0.6"/><stop offset="1" stop-color="#FFB347" stop-opacity="0"/></radialGradient></defs>
 <rect x="30.0" y="641.0" width="840.0" height="334.0" fill="#1E1E20" />
-<rect x="34.0" y="645.0" width="832.0" height="56.0" fill="#2B2B2E" stroke="#000000" stroke-width="1.0" opacity="0.95"/>
+<rect x="34.0" y="645.0" width="832.0" height="56.0" fill="#F2C21E" stroke="#000000" stroke-width="1.0" opacity="0.95"/>
 <rect x="34.0" y="645.0" width="832.0" height="4.0" fill="#FFFFFF" opacity="0.18"/>
 <rect x="34.0" y="701.0" width="832.0" height="8.0" fill="#000000" opacity="0.35"/>
 <rect x="40.0" y="709.0" width="820.0" height="238.0" fill="#2F3A41" />
@@ -194,5 +194,56 @@
 <path d="M499.2 947.0 l178.5 -238.0 l33.3 0 l-178.5 238.0 Z" fill="#FFFFFF" opacity="0.08"/>
 <rect x="40.0" y="709.0" width="820.0" height="42.8" fill="#CFE0EC" opacity="0.18"/>
 </g>
+<rect x="34.0" y="753.0" width="832.0" height="26.0" fill="url(#drop)" />
+<path d="M38.0 707.0 H862.0 L878.0 747.0 H22.0 Z" fill="#F2C21E" stroke="#a98815" stroke-width="1.5"/>
+<path d="M30.0 727.0 H870.0 L878.0 747.0 H22.0 Z" fill="#000000" opacity="0.12"/>
+<path d="M22.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M40.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M58.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M76.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M94.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M112.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M130.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M148.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M166.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M184.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M202.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M220.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M238.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M256.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M274.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M292.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M310.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M328.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M346.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M364.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M382.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M400.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M418.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M436.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M454.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M472.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M490.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M508.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M526.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M544.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M562.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M580.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M598.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M616.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M634.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M652.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M670.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M688.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M706.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M724.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M742.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M760.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M778.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M796.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M814.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M832.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M850.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
+<path d="M868.0 747.0 h18 v7 q-9 8 -18 0 z" fill="#a98815" />
 <rect x="30.0" y="969.0" width="840.0" height="6.0" fill="#8E8A82" />
 </svg>

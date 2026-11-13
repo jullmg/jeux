@@ -78,14 +78,14 @@ const BLOCKS := {
 		"panels": {},
 	},
 	"3e_4e_impair": {
-		"layout": ["masson_2697_cote", "rue_3e", "masson_2703", "masson_2711", "masson_2719", "masson_2721", "masson_2731",
+		"layout": ["masson_2697_cote", "rue_3e", "masson_2703", "masson_2711", "masson_2721", "masson_2731",
 			"masson_2737", "rue_4e", "masson_2801_cote"],
 		"avenues": [["rue_3e", "3e Avenue", 540.0], ["rue_4e", "4e Avenue", 540.0]],
-		"trees_after": [3, 5], "tree_shift": {3: 0.0, 5: 0.0}, "lamps_after": [2, 6], "hydrants_at": [4.5], "racks_at": [3.5],
+		"trees_after": [3, 4], "tree_shift": {3: 0.0, 4: 0.0}, "lamps_after": [2, 5], "hydrants_at": [3.7], "racks_at": [3.3],
 		"squirrels_at": [4.4], "moon_at": 4.5,
 		"signs": {
 			"masson_2731": [[420.0, "Boulangerie", "#3A2A1E", "#E8E0D0", 14]],
-			"masson_2737": [[935.0, "SERVICE COMPTANT", "#FFFFFF", "#1F4E9A", 11]],
+			"masson_2737": [[335.0, "SERVICE COMPTANT", "#FFD400", "#1F4E9A", 13]],
 		},
 		"panels": {},
 	},
@@ -99,6 +99,7 @@ const BLOCKS := {
 			"masson_2716": [[650.0, "Jean Coutu", "#1F3E8E", "#FFD400", 17]],
 		},
 		"panels": {"masson_2716": [[470.0, 398.0, "PJC", "#FFFFFF", "#C8202A", 10]]},
+		"texts": {"masson_2702": [[500.0, 70.0, "Yoga chaud | Pilates", "#FFFFFF", "#7A3026", 15]]},
 	},
 	"4e_5e_impair": {
 		"layout": ["masson_2755_cote", "rue_4e", "masson_2801", "masson_2811", "masson_2819", "masson_2823", "masson_2825",

@@ -1015,18 +1015,17 @@ const HOUSES := [
 		"stone": "#E8E4DA", "bank_brick": true, "pilaster": "#F2EFE8", "bricks": ["#8A5E44", "#966850", "#7E5440", "#A0725A"], "mortar": "#C2B4A4", "pilasters": [260.0, 500.0, 740.0], "windows": [[80.0, 150.0], [320.0, 150.0], [560.0, 150.0], [800.0, 150.0]],
 		"corner_side": -1.0, "basement": [],
 	},
-	# 2707–2715: brown brick on three floors, windows framed in dark green, round windows on the top floor, a shop in green
-	# (2707…, 2711…; the building site in front of it in the pictures left out).
+	# 2707–2719: brown brick on three floors, windows framed in dark green, round windows on the top floor, a shop in green, then
+	# the flats' door and a second shop; no parking lot at 2719, the building runs on to its neighbour (2707…, 2711…, 2715…,
+	# 2719…; the building site in front of it in the pictures left out).
 	{
-		"name": "masson_2711", "kind": "commerce", "width": 900.0, "floors": 3,
+		"name": "masson_2711", "kind": "commerce", "width": 1320.0, "floors": 3,
 		"bricks": ["#8A5A42", "#96644C", "#7E5038", "#A06C54", "#86563E"], "mortar": "#C2B4A4", "parapet": "flat",
 		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "trim": "#2B2B2E", "trim_dark": "#1A1A1C", "window_style": "slider", "frame": "#2B2B2E",
-		"windows": [[90.0, 120.0], [360.0, 120.0], [630.0, 120.0]],
-		"shops": [{"x0": 30.0, "x1": 870.0, "sign": "#2E5E3E", "frame": "#1E3E28", "door": 450.0, "inside": "florist", "front": "wood", "kick": "wood"}], "basement": [],
-	},
-	{
-		"name": "masson_2719", "kind": "masson_lot", "lot_style": "parking", "width": 420.0, "floors": 3, "halloween": false,
-		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+		"windows": [[90.0, 120.0], [360.0, 120.0], [630.0, 120.0], [900.0, 120.0], [1140.0, 120.0]],
+		"shops": [{"x0": 30.0, "x1": 870.0, "sign": "#2E5E3E", "frame": "#1E3E28", "door": 450.0, "inside": "florist", "front": "wood", "kick": "wood"},
+			{"x0": 980.0, "x1": 1290.0, "sign": "#2B2B2E", "frame": "#2B2B2E", "door": 1220.0, "inside": "goods", "transom": "none"}],
+		"res_doors": [925.0], "basement": [],
 	},
 	# 2721–2729: brown brick on three floors, two buildings in one row, a green sign (2721…, 2723…).
 	{
@@ -1044,13 +1043,16 @@ const HOUSES := [
 		"projecting": [[560.0, 800.0]],
 		"shops": [{"x0": 30.0, "x1": 850.0, "sign": "#E8E0D0", "frame": "#3A3A3C", "door": 760.0, "inside": "bakery", "front": "wood", "kick": "tile", "tile": "#5E3A2A"}], "basement": [],
 	},
-	# 2737–2755, at 4e: two floors painted all over with a mural of sky, hills and flowers (2737…, 2755…).
+	# 2737–2755, at 4e: two floors of brown brick, wide windows upstairs in stone frames, Service Comptant downstairs under its
+	# blue sign, a dark front behind a grille. The mural of sky and flowers is on its side wall on 4e, not on Masson: the old
+	# pictures were taken from 4e (2737… and close-ups, 2747…, 2755…).
 	{
-		"name": "masson_2737", "kind": "commerce", "width": 1200.0, "floors": 2, "upper": "stucco", "stucco": "#9CC8E0",
-		"bricks": ["#9CC8E0"], "mortar": "#8AB4CC", "parapet": "flat", "lintel": "#E8E6E0", "lintel_dark": "#9E968A",
-		"windows": [[120.0, 150.0], [460.0, 150.0], [800.0, 150.0]], "sky_mural": true,
-		"ground": "painted", "paint": "#9CC8E0", "mural": "plants", "mural_x0": 30.0,
-		"shops": [{"x0": 700.0, "x1": 1170.0, "sign": "#1F4E9A", "frame": "#2B2B2E", "door": 760.0, "inside": "office", "transom": "none"}], "basement": [],
+		"name": "masson_2737", "kind": "commerce", "width": 1200.0, "floors": 2,
+		"bricks": ["#8E5A44", "#9A644E", "#82503C", "#A46C56", "#8A5640"], "mortar": "#C2B4A4", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "lintel_style": "none", "window_style": "slider", "frame": "#2B2B2E",
+		"windows": [[90.0, 300.0], [480.0, 150.0], [760.0, 150.0], [1000.0, 150.0]],
+		"shops": [{"x0": 30.0, "x1": 640.0, "sign": "#1F4E9A", "frame": "#2B2B2E", "door": 560.0, "inside": "office", "transom": "none", "dark": true},
+			{"x0": 640.0, "x1": 1170.0, "sign": "#8E5A44", "frame": "#3A3836", "door": 1100.0, "inside": "goods", "transom": "none"}], "basement": [],
 	},
 	# Across 4e: the side of BANCO's building, brown brick (2801…).
 	{
@@ -1064,13 +1066,14 @@ const HOUSES := [
 		"bricks": ["#9A4A3A", "#A85442", "#8E4234", "#B05C48"], "mortar": "#C9BBAC",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
 	},
-	# 2740–2752, at 4e: brown brick on three floors, white bays upstairs (2742…, 2740…).
+	# 2740–2752, at 4e: brown brick on three floors under a parapet of white stone scrolls, white sills, a little balcony; the
+	# corner shop under a yellow canopy (2742…, 2740…, 2734…).
 	{
 		"name": "masson_2742", "kind": "commerce", "width": 900.0, "floors": 3,
-		"bricks": ["#7E5440", "#8A5E4A", "#724A38", "#946852", "#7A503C"], "mortar": "#C2B4A4", "parapet": "corbel",
+		"bricks": ["#7E5440", "#8A5E4A", "#724A38", "#946852", "#7A503C"], "mortar": "#C2B4A4", "parapet": "scroll",
 		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "windows": [[90.0, 110.0], [380.0, 140.0], [660.0, 110.0]],
 		"projecting": [[340.0, 560.0]], "window_style": "hung", "hung_frame": "#F2F0EA", "slab": "#F2F0EA", "metal": "#F2F0EA",
-		"shops": [{"x0": 30.0, "x1": 870.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 120.0, "inside": "cafe", "kick": "brick"}], "basement": [],
+		"shops": [{"x0": 30.0, "x1": 870.0, "sign": "#F2C21E", "frame": "#1E1E20", "door": 120.0, "inside": "cafe", "kick": "brick", "awning": "#F2C21E"}], "basement": [],
 	},
 	# 2734: brown brick on three floors (2734…).
 	{
@@ -1086,12 +1089,15 @@ const HOUSES := [
 		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "windows": [[100.0, 220.0], [420.0, 220.0], [740.0, 220.0], [1020.0, 220.0]],
 		"shops": [{"x0": 30.0, "x1": 1270.0, "sign": "#FFD400", "frame": "#3A3A3C", "door": 640.0, "inside": "pharmacy", "transom": "none", "panes": 8}], "basement": [],
 	},
-	# 2700–2714, at 3e: the upper floor clad in grey metal over a ground floor painted with graffiti murals (2700…, 2702…, 2714…).
+	# 2700–2714, at 3e: red brick on two floors, wide windows upstairs, "Yoga chaud | Pilates" in white letters along the top,
+	# a band of grey stone over the big windows of the ground floor (2700…, 2702…, 2714…). The grey metal and the graffiti were
+	# its side and back, seen from 3e in the old pictures.
 	{
-		"name": "masson_2702", "kind": "commerce", "width": 1000.0, "floors": 2, "upper": "siding", "siding": "#B9BDB6",
-		"bricks": ["#B9BDB6"], "mortar": "#9A9E98", "parapet": "flat", "trim": "#E8E6E0",
-		"lintel": "#B9BDB6", "lintel_dark": "#8E928C", "lintel_style": "none", "windows": [[180.0, 110.0], [640.0, 110.0]],
-		"ground": "painted", "paint": "#5E4A8E", "mural": "graffiti", "mural_x0": 30.0, "shops": [], "basement": [],
+		"name": "masson_2702", "kind": "commerce", "width": 1000.0, "floors": 2,
+		"bricks": ["#A8473A", "#B4513F", "#9A3F33", "#B85C48"], "mortar": "#CDBFB0", "parapet": "flat",
+		"lintel_style": "none", "window_style": "slider", "frame": "#2B2B2E", "windows": [[120.0, 260.0], [560.0, 260.0]],
+		"belt": "#C9C5BC",
+		"shops": [{"x0": 30.0, "x1": 970.0, "sign": "#C9C5BC", "frame": "#3A3A3C", "door": 860.0, "inside": "salon", "transom": "none", "panes": 5}], "basement": [],
 	},
 	# Across 3e: the next block's corner, its side.
 	{
