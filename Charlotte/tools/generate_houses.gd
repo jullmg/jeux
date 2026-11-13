@@ -790,24 +790,21 @@ const HOUSES := [
 		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "window_style": "slider", "frame": "#2B2B2E", "windows": [[100.0, 100.0], [330.0, 100.0], [560.0, 100.0]],
 		"shops": [{"x0": 30.0, "x1": 730.0, "sign": "#1E1E20", "frame": "#1E1E20", "door": 640.0, "inside": "goods", "wall": "#E8F0E0", "kick": "brick"}], "basement": [],
 	},
-	# 2819–2821: brown brick on three floors, balconies; Pizza Pizza under its red sign (2819…).
+	# 2819–2821: two floors of grey stucco, a row of windows upstairs; Pizza Pizza under its red sign (2817…, 2819…).
 	{
-		"name": "masson_2819", "kind": "commerce", "width": 860.0, "floors": 3,
-		"upper": "stucco", "stucco": "#E2E0DA", "bricks": ["#E2E0DA"], "mortar": "#C9C5BC", "parapet": "flat",
-		"lintel": "#E8E6E0", "lintel_dark": "#9E9A92", "lintel_style": "none", "window_style": "slider", "frame": "#3A3A3C", "windows": [[90.0, 110.0], [370.0, 110.0], [640.0, 110.0]],
-		"projecting": [[330.0, 520.0]],
+		"name": "masson_2819", "kind": "commerce", "width": 860.0, "floors": 2,
+		"upper": "stucco", "stucco": "#C9C7C2", "bricks": ["#C9C7C2"], "mortar": "#B5B2AC", "parapet": "flat",
+		"lintel": "#E8E6E0", "lintel_dark": "#9E9A92", "lintel_style": "none", "window_style": "slider", "frame": "#F2F0EA", "windows": [[90.0, 200.0], [330.0, 200.0], [570.0, 200.0]],
 		"shops": [{"x0": 30.0, "x1": 830.0, "sign": "#E8502A", "frame": "#2B2B2E", "door": 760.0, "inside": "restaurant", "wall": "#E8DCC8", "transom": "none"}], "basement": [],
 	},
-	# 2823: red brick on three floors, a café downstairs under its black sign (2819…, 2829…).
+	# 2823–2827: two floors faced in cream siding, the café Trou. under its long navy sign, its door and the flats' white door at
+	# the right; no lot at 2825 (2823…, 2825…, 2827…).
 	{
-		"name": "masson_2823", "kind": "commerce", "width": 760.0, "floors": 3,
-		"bricks": ["#A44A3A", "#B05444", "#984234", "#B85E4C", "#9E4838"], "mortar": "#CDBFB0", "parapet": "corbel",
-		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "windows": [[90.0, 110.0], [320.0, 110.0], [550.0, 110.0]],
-		"shops": [{"x0": 30.0, "x1": 730.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 120.0, "inside": "cafe", "front": "wood", "kick": "wood"}], "basement": [],
-	},
-	{
-		"name": "masson_2825", "kind": "masson_lot", "width": 440.0, "floors": 3, "halloween": false,
-		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+		"name": "masson_2823", "kind": "commerce", "width": 1200.0, "floors": 2, "upper": "siding", "siding": "#E6DFCC",
+		"bricks": ["#E6DFCC"], "mortar": "#C9C2B0", "parapet": "flat",
+		"lintel_style": "none", "window_style": "slider", "frame": "#2B2B2E", "windows": [[120.0, 200.0], [560.0, 200.0], [900.0, 200.0]],
+		"shops": [{"x0": 30.0, "x1": 1000.0, "sign": "#1E2A4A", "frame": "#1A1A1A", "door": 640.0, "inside": "cafe", "transom": "none", "panes": 5}],
+		"res_doors": [1090.0], "basement": [],
 	},
 	# 2829–2833, BMO at 5e: red brick on two floors over a stone base, a cornice, wide windows in stone surrounds (2829…, 2833…).
 	{
@@ -832,21 +829,20 @@ const HOUSES := [
 	# 2826–2840, Dollarama at 5e: buff brick on three floors, white-framed windows, a cornice, the long sign band (2836…, 2840…).
 	{
 		"name": "masson_2836", "kind": "commerce", "width": 1300.0, "floors": 3, "halloween": false,
-		"bricks": ["#D6B98C", "#CDB082", "#DEC296", "#C4A678", "#D2B488"], "mortar": "#EDE3D2", "parapet": "",
+		"bricks": ["#D6B98C", "#CDB082", "#DEC296", "#C4A678", "#D2B488"], "mortar": "#EDE3D2", "parapet": "scroll",
 		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[90.0, 110.0], [330.0, 110.0], [580.0, 110.0], [830.0, 110.0], [1070.0, 110.0]],
 		"shops": [{"x0": 30.0, "x1": 1270.0, "sign": "#00704A", "frame": "#2B2B2E", "door": 1150.0, "inside": "goods", "transom": "none", "panes": 7}], "basement": [],
 	},
-	# 2818–2824: buff brick on two floors, a shop downstairs (2826…).
+	# 2816–2826: buff brick on three floors (Dollarama's building goes on), a balcony with its plants, the Fruiterie au Melon Miel
+	# under its red sign and striped awning with the fruit out on the sidewalk, then the flats' door; no parking lot at 2816
+	# (2826…, 2818…, 2816…).
 	{
-		"name": "masson_2818", "kind": "commerce", "width": 760.0, "floors": 2,
-		"bricks": ["#C9A87A", "#BE9C6E", "#D2B084", "#B49266", "#CCAA7C"], "mortar": "#E6DCCB", "parapet": "flat",
-		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[100.0, 130.0], [330.0, 130.0], [560.0, 130.0]],
-		"projecting": [[300.0, 480.0]],
-		"shops": [{"x0": 30.0, "x1": 730.0, "sign": "#3A3A3C", "frame": "#2B2B2E", "door": 400.0, "inside": "clothes", "front": "wood", "kick": "wood"}], "basement": [],
-	},
-	{
-		"name": "masson_2816", "kind": "masson_lot", "lot_style": "parking", "width": 420.0, "floors": 3, "halloween": false,
-		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+		"name": "masson_2818", "kind": "commerce", "width": 1180.0, "floors": 3,
+		"bricks": ["#D2B488", "#C9AA7E", "#DABE92", "#BEA074", "#D0B084"], "mortar": "#EDE3D2", "parapet": "flat",
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "windows": [[90.0, 110.0], [330.0, 110.0], [580.0, 110.0], [830.0, 110.0], [1020.0, 110.0]],
+		"projecting": [[60.0, 260.0]],
+		"shops": [{"x0": 30.0, "x1": 900.0, "sign": "#D8322A", "frame": "#2B2B2E", "door": 760.0, "inside": "fruit", "awning": "#D8322A", "stripes": true, "crates": true, "transom": "none"}],
+		"res_doors": [1000.0], "basement": [],
 	},
 	# 2806–2814: buff brick on three floors, white balconies, shops under their bands (2812…, 2802…).
 	{
