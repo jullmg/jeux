@@ -13,6 +13,7 @@ import json
 import math
 import os
 import sys
+import time
 import unicodedata
 import urllib.error
 import urllib.parse
@@ -33,6 +34,11 @@ SIZE = "640x640"  # the API's maximum
 PANO_RADIUS = 30  # metres: how far from a point on a walk we accept a panorama
 BLOCK_MARGIN = 10.0  # metres from a crossing's centre line that a block's buildings start
 DETAIL_FOV = 30
+FRONT = 30.0  # degrees off straight-on still counted as a front view
+OBLIQUE = 50.0  # beyond this the picture shows more side than front
+FRONT_DISTANCE = 32.0  # metres: a front-view camera stands in the street just before the building
+GENERIC = {"rue", "avenue", "av", "boulevard", "bd", "boul", "chemin", "place", "de", "la", "le", "du", "des", "d", "l", "est", "ouest", "e", "o"}
+ON_STREET = 12.0  # metres: a camera this close to a street's centre line stands in that street
 GOOGLE = "Google"  # copyright of the pictures taken by Google's own cars
 SAME_BUILDING = 4.0  # metres: two civic numbers this close share a facade
 FACADE_OFFSET = 14.0  # metres from the camera to the facade it looks at
@@ -67,6 +73,27 @@ def project(a: tuple[float, float], b: tuple[float, float], p: tuple[float, floa
 	ax, ay, px, py = (b[1] - a[1]) * k, (b[0] - a[0]) * 111320.0, (p[1] - a[1]) * k, (p[0] - a[0]) * 111320.0
 	length = math.hypot(ax, ay) or 1.0
 	return ((px * ax + py * ay) / length, (px * ay - py * ax) / length)
+
+
+def to_line(p: tuple[float, float], lines: list) -> tuple[float, float | None]:
+	"""Metres from p to the nearest of these polylines, and that segment's bearing (None when there are none)."""
+	best, heading = float("inf"), None
+	k = math.cos(math.radians(p[0])) * 111320.0
+	for line in lines:
+		for a, b in zip(line, line[1:]):
+			ax, ay = (a[1] - p[1]) * k, (a[0] - p[0]) * 111320.0
+			bx, by = (b[1] - p[1]) * k, (b[0] - p[0]) * 111320.0
+			dx, dy = bx - ax, by - ay
+			t = max(0.0, min(1.0, -(ax * dx + ay * dy) / ((dx * dx + dy * dy) or 1.0)))
+			d = math.hypot(ax + t * dx, ay + t * dy)
+			if d < best:
+				best, heading = d, bearing(a, b)
+	return best, heading
+
+
+def off_front(heading: float, axis: float) -> float:
+	"""Degrees between a view and the straight-on view of a facade along a street running at `axis`: 0 = square on."""
+	return abs(((heading - axis) % 180.0) - 90.0)
 
 
 def between(a: tuple[float, float], b: tuple[float, float], t: float) -> tuple[float, float]:
@@ -142,6 +169,48 @@ class Google:
 				break
 		return min(found.values(), key=lambda p: distance(point, (p["location"]["lat"], p["location"]["lng"])), default=None)
 
+	def panoramas_around(self, point: tuple[float, float]) -> list[dict]:
+		"""Every Google panorama near a point (the spot itself, then two rings round it), nearest first."""
+		found: dict[str, dict] = {}
+		spots = [point] + [offset(point, h, m) for m in (12, 24, 36) for h in range(0, 360, 45)]
+		for where in spots:
+			pano = self._pano_at(where, 15)
+			if pano and GOOGLE in pano.get("copyright", ""):
+				found.setdefault(pano["pano_id"], pano)
+		return sorted(found.values(), key=lambda p: distance(point, (p["location"]["lat"], p["location"]["lng"])))
+
+	def street_line(self, street: str, near: tuple[float, float]) -> list[list[tuple[float, float]]]:
+		"""The centre line of a named street round a point, from OpenStreetMap (Overpass): a list of polylines."""
+		words = [w for w in slug(street).split("-") if w not in GENERIC]
+		if not words:
+			return []
+		name = " ".join(words)
+		key = f"osm:{name}:{near[0]:.2f},{near[1]:.2f}"  # one query per street and ~2 km square
+		if key not in self.cache:
+			pattern = "(^| )" + name.replace(" ", ".*") + "( |$)"
+			query = (f'[out:json][timeout:25];way["highway"]["highway"!~"footway|path|cycleway|service|steps"]'
+				f'["name"~"{pattern}",i]({round(near[0], 2) - 0.015},{round(near[1], 2) - 0.015},{round(near[0], 2) + 0.015},{round(near[1], 2) + 0.015});out geom;')
+			data = None
+			for attempt in range(4):
+				try:
+					request = urllib.request.Request("https://overpass-api.de/api/interpreter",
+						data=urllib.parse.urlencode({"data": query}).encode(), headers={"User-Agent": "streetview-reference-tool/1.0"})
+					with urllib.request.urlopen(request, timeout=60) as reply:
+						data = json.load(reply)
+					break
+				except (urllib.error.URLError, json.JSONDecodeError):
+					time.sleep(5 * (attempt + 1))
+			if data is None:
+				return []
+			self.cache[key] = [[(n["lat"], n["lon"]) for n in way["geometry"]] for way in data.get("elements", [])]
+			self.cache_file.write_text(json.dumps(self.cache, ensure_ascii=False))
+			time.sleep(1)  # Overpass asks for gentle use
+		return [[tuple(p) for p in line] for line in self.cache[key]]
+
+	def street_at(self, point: tuple[float, float]) -> str:
+		"""The street a camera stands in: the route of the address nearest to it."""
+		return part(self.address_at(point), "route")
+
 	def picture(self, pano: str, heading: float, pitch: float, fov: float, to: Path) -> bool:
 		if to.exists():
 			return True
@@ -191,7 +260,7 @@ class Capture:
 
 	def shoot(self, pano: dict, heading: float, street: str, number: str, mode: str, side: str,
 			address: str = "", approx: bool = False, walk: dict | None = None, along: float = 0.0,
-			target: tuple[float, float] | None = None) -> None:
+			target: tuple[float, float] | None = None, axis: float | None = None) -> None:
 		at = (pano["location"]["lat"], pano["location"]["lng"])
 		folder = slug(street) or "divers"
 		name = f"{number or 'sn'}_{folder}_{side}_{pano['pano_id'][:8]}"
@@ -218,7 +287,51 @@ class Capture:
 			**({"target_lat": round(target[0], 7), "target_lng": round(target[1], 7)} if target else {}),
 			"maps": "https://www.google.com/maps/@?api=1&map_action=pano&pano=%s&heading=%.0f" % (pano["pano_id"], heading),
 		})
-		print(f"  {file}  ({self.shots[-1]['address']}, vers le {compass(heading)}, {pano.get('date', '?')})")
+		if target is not None:
+			self.shots[-1].update(self.rate(self.shots[-1], street, axis))
+		warn = "" if self.shots[-1].get("view", "front") in ("front", "unknown") else f"  ! {self.shots[-1]['view']}"
+		print(f"  {file}  ({self.shots[-1]['address']}, vers le {compass(heading)}, {pano.get('date', '?')}){warn}")
+
+	def axis(self, street: str, number: str, target: tuple[float, float], city: str) -> dict | None:
+		"""The building's own street where it stands: {"bearing": which way it runs, "line": its centre lines}.
+		From OpenStreetMap; failing that, from the neighbours' civic numbers (bearing only)."""
+		line = self.google.street_line(street, target)
+		gap, heading = to_line(target, line)
+		if heading is not None and gap < 60:
+			return {"bearing": heading, "line": line}
+		if not number.isdigit():
+			return None
+		n = int(number)
+		points: list[tuple[int, tuple[float, float]]] = []
+		for d in (-20, -14, -10, -6, -4, 4, 6, 10, 14, 20):
+			if n + d <= 0:
+				continue
+			found = self.google.locate(f"{n + d} {street}, {city}")
+			if found and part(found, "street_number") == str(n + d) and slug(street) in slug(part(found, "route")):
+				if distance(spot(found), target) < 120:
+					points.append((n + d, spot(found)))
+		points.append((n, target))
+		points.sort()
+		if distance(points[0][1], points[-1][1]) < 15:
+			return None
+		return {"bearing": bearing(points[0][1], points[-1][1]), "line": []}
+
+	def rate(self, shot: dict, street: str, axis: float | None) -> dict:
+		"""How the picture sees its building (see view_of)."""
+		at, target = (shot["lat"], shot["lng"]), (shot["target_lat"], shot["target_lng"])
+		return view_of(at, target, axis, lambda: self.google.street_at(at), street)
+
+	def front_pano(self, target: tuple[float, float], street: str, axis: float | None) -> dict | None:
+		"""The panorama that sees the building's front, square on from its own street, then the nearest one.
+		A camera in a cross street or behind the building would show its side or its back: those come last."""
+		ranked = []
+		for pano in self.google.panoramas_around(target):
+			at = (pano["location"]["lat"], pano["location"]["lng"])
+			view = view_of(at, target, axis, None, street)
+			order = VIEWS.index(view["view"])
+			ranked.append((order, round((view["off_front"] or 0) / 10), distance(at, target), pano))
+		ranked.sort(key=lambda r: r[:3])
+		return ranked[0][3] if ranked else None
 
 	def address(self, query: str, city: str) -> None:
 		"""One picture of a given address, the camera turned toward it."""
@@ -227,14 +340,15 @@ class Capture:
 			print(f"  ! address not found: {query}")
 			return
 		target = spot(found)
-		pano = self.google.panorama(target, 60)
+		street = part(found, "route") or query
+		axis = self.axis(street, part(found, "street_number"), target, city)
+		pano = self.front_pano(target, street, axis)
 		if not pano:
-			print(f"  ! no Street View near {query}")
+			print(f"  ! no Street View of {query}'s front")
 			return
 		at = (pano["location"]["lat"], pano["location"]["lng"])
-		street = part(found, "route") or query
 		self.shoot(pano, bearing(at, target), street, part(found, "street_number"), "address", "face",
-			found.get("formatted_address", query), bool(found.get("partial_match")), target=target)
+			found.get("formatted_address", query), bool(found.get("partial_match")), target=target, axis=axis)
 
 	def buildings(self, walk: dict, city: str) -> None:
 		"""Every building of a street between two civic numbers: each number is looked up and photographed from the
@@ -270,15 +384,17 @@ class Capture:
 		for number, found, target, along, right in found_at:
 			if any(distance(target, other) < SAME_BUILDING for other in kept):
 				continue
-			pano = self.google.panorama(target, 60)
+			street = part(found, "route") or walk["street"]
+			axis = self.axis(street, str(number), target, city)
+			pano = self.front_pano(target, street, axis)
 			if not pano:
-				print(f"  ! no Street View near {number}")
+				print(f"  ! no Street View of {number}'s front")
 				continue
 			kept.append(target)
 			at = (pano["location"]["lat"], pano["location"]["lng"])
 			self.shoot(pano, bearing(at, target), part(found, "route") or walk["street"], str(number), "range",
 				("right" if right > 0 else "left") if corners else "face",
-				found.get("formatted_address", ""), False, walk, max(along, 0), target)
+				found.get("formatted_address", ""), False, walk, max(along, 0), target, axis)
 
 	def walk(self, walk: dict, city: str) -> None:
 		"""Every panorama along a street, looking at both sides (and down the street at its ends)."""
@@ -333,6 +449,55 @@ def api_key() -> str:
 	return key
 
 
+def building_key(shot: dict) -> str:
+	"""One picture per building and walk: a new picture of it replaces the old one in the index."""
+	if shot["mode"] in ("range", "address") and shot["number"].isdigit():
+		return f"{shot['mode']}|{shot['walk']}|{shot['street']}|{shot['number']}"
+	return ""
+
+
+def audit(options: argparse.Namespace, places: dict, city: str) -> None:
+	"""--audit rates every picture of a building in the index; --fix-views also re-takes those that don't show its front."""
+	google = Google(api_key(), options.out / "cache.json")
+	capture = Capture(google, options.out, options)
+	shots = json.loads((options.out / "index.json").read_text())
+	result: list[dict] = []
+	fixed = 0
+	for shot in shots:
+		if "target_lat" not in shot or not shot["number"].isdigit():
+			result.append(shot)
+			continue
+		target = (shot["target_lat"], shot["target_lng"])
+		axis = capture.axis(shot["street"], shot["number"], target, city)
+		shot.update(capture.rate(shot, shot["street"], axis))
+		if options.fix_views and shot["view"] not in ("front", "unknown"):
+			pano = capture.front_pano(target, shot["street"], axis)
+			if pano and pano["pano_id"] != shot["pano"]:
+				at = (pano["location"]["lat"], pano["location"]["lng"])
+				capture.options.detail = bool(shot["details"])
+				walk = {"name": shot["walk"], "game": shot["game"]}
+				capture.shoot(pano, bearing(at, target), shot["street"], shot["number"], shot["mode"], shot["side"],
+					shot["address"], shot["approx"], walk, shot["along_m"], target, axis)
+				new = capture.shots.pop()
+				new["our_side"] = shot["our_side"]
+				if new.get("view") == "front" or (new.get("off_front") or 99) < (shot.get("off_front") or 99) or shot["view"] == "other street":
+					for old in [shot["file"]] + shot["details"]:  # kept aside, not deleted: something may have been drawn from it
+						if (options.out / old).exists():
+							(options.out / "remplacees" / old).parent.mkdir(parents=True, exist_ok=True)
+							(options.out / old).rename(options.out / "remplacees" / old)
+					print(f"  {shot['number']} {shot['street']}: {shot['view']} → {new.get('view')} ({new.get('off_front')}°)")
+					result.append(new)
+					fixed += 1
+					continue
+				for extra in [new["file"]] + new["details"]:
+					(options.out / extra).unlink(missing_ok=True)
+		result.append(shot)
+	write_index(options.out, result, area(google, places, options.out, result))
+	from collections import Counter
+	print("Views:", dict(Counter(s.get("view", "-") for s in result)), f"; re-taken: {fixed}" if options.fix_views else "")
+	print("Calls made: %(geocode)d geocoding, %(metadata)d metadata (free), %(image)d images" % google.calls)
+
+
 def area(google: Google, places: dict, out: Path, shots: list[dict]) -> list[str]:
 	"""The zoomed-out maps of the neighbourhood named in places.json's "area"."""
 	spec, city = places.get("area"), places.get("city", "")
@@ -352,6 +517,51 @@ def write_index(out: Path, shots: list[dict], area_made: list[str] | None = None
 	page = (HERE / "map_template.html").read_text().replace("/*SHOTS*/[]", json.dumps(shots, ensure_ascii=False))
 	(out / "index.html").write_text(page)
 	(out / "INDEX.md").write_text(guide(shots, maps.make(shots, out, slug), area_made or []))
+
+
+VIEWS = ["front", "unknown", "oblique", "far", "side", "other street"]  # best first
+
+
+def view_of(at, target, axis, street_at, street: str) -> dict:
+	"""How a camera at `at` sees the building at `target` (axis: from Capture.axis):
+	other street: the camera isn't in the building's own street (ON_STREET metres from its centre line): a cross
+	  street shows the building's side, a lane or the next street its back;
+	front: in its street and square on (FRONT degrees at most); oblique: at a slant; side: almost along the street;
+	far: square on but too far (no street line to check with), probably its back;
+	unknown: nothing to measure with (street_at, if given, then names the camera's street)."""
+	if axis is None:
+		camera_street = street_at() if street_at else ""
+		other = bool(camera_street) and slug(street) not in slug(camera_street)
+		return {"view": "other street" if other else "unknown", "off_front": None, "camera_street": camera_street}
+	angle = off_front(bearing(at, target), axis["bearing"])
+	if axis["line"]:
+		if to_line(at, axis["line"])[0] > ON_STREET:
+			camera_street = street_at() if street_at else ""
+			return {"view": "other street", "off_front": round(angle), "camera_street": camera_street}
+		near = True
+	else:
+		near = distance(at, target) * math.cos(math.radians(angle)) <= FRONT_DISTANCE
+	if angle <= FRONT:
+		view = "front" if near else "far"
+	else:
+		view = "oblique" if angle <= OBLIQUE else "side"
+	return {"view": view, "off_front": round(angle), "camera_street": ""}
+
+
+def view_text(shot: dict) -> str:
+	"""The INDEX.md cell saying how the picture sees its building, loud when it is not the front."""
+	view, angle = shot.get("view"), shot.get("off_front")
+	if view is None or view == "unknown":
+		return "?"
+	if view == "front":
+		return f"front ({angle}°)"
+	if view == "other street":
+		return f"**NOT THE FRONT: camera in another street{(' (' + shot['camera_street'] + ')') if shot.get('camera_street') else ''}: side or back**"
+	if view == "far":
+		return f"**FAR: probably its BACK ({angle}°)**"
+	if view == "side":
+		return f"**SIDE ({angle}° off): not the front**"
+	return f"**{view.upper()} ({angle}° off)**"
 
 
 def guide(shots: list[dict], maps_made: dict[str, str], area_made: list[str]) -> str:
@@ -377,11 +587,11 @@ def guide(shots: list[dict], maps_made: dict[str, str], area_made: list[str]) ->
 			ours = ", **Charlotte's block: what the game shows, left to right on screen**" if group[0]["our_side"] else ""
 			what = "looking down the street from each end" if side == "along" else f"{side} side, camera facing {group[0]['looking']}"
 			lines += [f"### {what}{ours}", ""]
-		lines += ["| m along | address | picture | taken at | date | close-ups |", "|---:|---|---|---|---|---|"]
+		lines += ["| m along | address | picture | view | taken at | date | close-ups |", "|---:|---|---|---|---|---|---|"]
 		for shot in group:
 			address = shot["address"].split(",")[0] + (" (approx.)" if shot["approx"] else "")
-			lines.append(f"| {shot['along_m'] if name else ''} | {address} | `{shot['file']}` | {shot['lat']}, {shot['lng']} "
-				f"| {shot['date']} | {len(shot['details'])} |")
+			lines.append(f"| {shot['along_m'] if name else ''} | {address} | `{shot['file']}` | {view_text(shot)} "
+				f"| {shot['lat']}, {shot['lng']} | {shot['date']} | {len(shot['details'])} |")
 		lines.append("")
 	return "\n".join(lines)
 
@@ -401,6 +611,8 @@ def main() -> None:
 	parser.add_argument("--fov", type=float, default=90, help="field of view, degrees (120 at most)")
 	parser.add_argument("--pitch", type=float, default=12, help="camera tilt up, degrees")
 	parser.add_argument("--maps-only", action="store_true", help="redraw the maps, index and INDEX.md from index.json, no Google calls")
+	parser.add_argument("--audit", action="store_true", help="rate how every picture in the index sees its building (front, oblique, side or back)")
+	parser.add_argument("--fix-views", action="store_true", help="re-take, from the building's own street and square on, every picture the audit found not to show the front")
 	parser.add_argument("--detail", action="store_true", help="also six narrow-view close-ups of each facade, 3x the resolution (7x the pictures)")
 	options = parser.parse_args()
 
@@ -411,6 +623,9 @@ def main() -> None:
 		write_index(options.out, shots, area(google, places, options.out, shots))
 		return
 	city = options.city or places.get("city", "")
+	if options.audit or options.fix_views:
+		audit(options, places, city)
+		return
 	places["walks"] = places.get("walks", []) + [range_walk(r) for r in places.get("ranges", [])]
 	if options.street:
 		if options.first is None or options.last is None:
@@ -435,8 +650,9 @@ def main() -> None:
 
 	# A partial run (--only) keeps what the earlier runs found.
 	index = options.out / "index.json"
-	fresh = {s["file"] for s in capture.shots}
-	kept = [s for s in json.loads(index.read_text()) if s["file"] not in fresh] if index.exists() else []
+	fresh = {s["file"] for s in capture.shots} | {building_key(s) for s in capture.shots if building_key(s)}
+	kept = [s for s in json.loads(index.read_text())
+		if s["file"] not in fresh and building_key(s) not in fresh] if index.exists() else []
 	write_index(options.out, kept + capture.shots, area(google, places, options.out, kept + capture.shots))
 	print(f"\n{len(capture.shots)} pictures ({len(kept)} kept from before) → {options.out}")
 	print(f"Map: {options.out / 'index.html'}")

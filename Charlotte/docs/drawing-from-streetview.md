@@ -28,6 +28,31 @@ never copy one into the game or commit it.
    `plex_NN` is an invented building that the real one can replace. If the real building isn't in the
    layout, say so and ask before changing the layout (widths shift everything after it).
 
+### Make sure the picture shows the front
+
+Street View takes the nearest panorama, and the nearest one is sometimes in a cross street or behind the
+building: the picture then shows its **side or its back**, and both can look like a perfectly good front. The
+classic case is a corner building on a commercial street: seen from the avenue, its side wall has a door,
+windows and a sign too, and it is the wrong facade.
+
+1. Read the **view** column of the row in INDEX.md. `front (n°)` is the building's face, seen from its own street,
+   n degrees from straight on. Anything in bold is not the front: `NOT THE FRONT: camera in another street`
+   (side or back), `SIDE`, `FAR: probably its BACK`, `OBLIQUE` (a slanted view: usable for depth and side walls,
+   but measure widths and window rhythm on a front view). `?` means it couldn't be measured: check by eye.
+2. Check on the street's map (`maps/*.png`): the blue camera dot must be in the building's own street, in front
+   of it, and the line to the red dot must cross the sidewalk square on. A camera dot in a cross street or a lane
+   is a side or back view, whatever the picture looks like.
+3. Check in the picture itself: the front has the civic number, the street door and the outdoor stair or
+   balconies facing the street, and the street's sidewalk and curb run across the bottom of the picture. A back
+   has galleries, spiral stairs, fences and yards, sheds, a lane's gravel or concrete; a side has a long wall
+   with few windows, and the cross street runs away from the camera.
+4. Don't draw a facade from a picture that isn't its front. Look for another picture that shows it (a neighbour's
+   picture often does), and if none does, say so in your report: the user can run
+   `utils/streetview/.venv/bin/python utils/streetview/capture.py --fix-views`, which re-takes those pictures from the
+   building's own street, square on, or capture that address again.
+5. Side and back pictures stay useful for what they really show: a corner building's side wall (the game draws it
+   in the cross-street vistas), the depth of a building, the lane.
+
 ## 2. Look before drawing
 
 Open the main picture, then the close-ups if there are any. Write down, from the photo, not from habit:

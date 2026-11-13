@@ -4,8 +4,8 @@ Takes Street View pictures of the neighbourhood, to draw the Charlotte game from
 its civic number, its street and its pin on a map.
 
 It uses Google's official APIs (Street View Static, its metadata endpoint, Geocoding), not screenshots of the
-Google Maps site. Python 3.10+; Pillow only for the PNG maps. The map tiles come from OpenStreetMap (a few dozen requests,
-cached in `tiles/`).
+Google Maps site. Python 3.10+; Pillow only for the PNG maps. The map tiles and the streets' centre lines (to tell a
+front view from a side or a back) come from OpenStreetMap, a few dozen requests, cached.
 
 ## Setup, once
 
@@ -13,7 +13,14 @@ cached in `tiles/`).
    account (Google asks for a card even for free use).
 2. Enable **Street View Static API** and **Geocoding API**.
 3. Create an API key (APIs & Services → Credentials) and restrict it to those two APIs.
-4. Put it in `utils/streetview/.env` (gitignored):
+4. The Python environment (Homebrew's Python refuses `pip install`):
+
+   ```
+   python3 -m venv utils/streetview/.venv && utils/streetview/.venv/bin/pip install pillow
+   ```
+
+   and run the tool with `utils/streetview/.venv/bin/python` (below, `python` stands for it).
+5. Put it in `utils/streetview/.env` (gitignored):
 
    ```
    GOOGLE_MAPS_API_KEY=your-key
@@ -22,12 +29,14 @@ cached in `tiles/`).
 ## Use
 
 ```sh
-python3 utils/streetview/capture.py                    # everything in places.json
-python3 utils/streetview/capture.py --only "6e Avenue" # one street
-python3 utils/streetview/capture.py --street "Rue Masson" --from 2800 --to 2990 --parity odd  # another area, one side
-python3 utils/streetview/capture.py --street "Main Street" --from 10 --to 80 --city "Burlington, VT, USA"
-python3 utils/streetview/capture.py --maps-only          # redraw maps and index from index.json, no Google calls
-python3 utils/streetview/capture.py --detail           # plus six close-ups of each facade
+python utils/streetview/capture.py                    # everything in places.json
+python utils/streetview/capture.py --only "6e Avenue" # one street
+python utils/streetview/capture.py --street "Rue Masson" --from 2800 --to 2990 --parity odd  # another area, one side
+python utils/streetview/capture.py --street "Main Street" --from 10 --to 80 --city "Burlington, VT, USA"
+python utils/streetview/capture.py --maps-only          # redraw maps and index from index.json, no Google calls
+python utils/streetview/capture.py --detail           # plus six close-ups of each facade
+python utils/streetview/capture.py --audit            # rate every picture: front, oblique, side or back
+python utils/streetview/capture.py --fix-views        # re-take those that don't show the front
 ```
 
 Then open `Charlotte/reference/streetview/index.html`: a map with an arrow where each picture was taken,
@@ -72,6 +81,13 @@ Every area goes into the same folder and the same index, one section per street 
 
 ## Good to know
 
+- **Front, side or back**: the nearest panorama to a building is sometimes in a cross street (it shows the building's
+  side, which can look like a front: door, windows, a sign) or behind it (its back). Each building is now taken
+  from its own street, square on: the candidates round it are ranked by whether the camera stands in the building's
+  street (within 12 m of its centre line, from OpenStreetMap) and by how far from straight on it looks (`front` at
+  30° at most, `oblique` to 50°, `side` beyond). Every row of the index carries that rating (`view`, `off_front`), and
+  INDEX.md shows it in bold when it isn't the front. `--audit` rates pictures taken before; `--fix-views` re-takes the
+  ones that aren't front views and moves the old pictures to `remplacees/` (something may have been drawn from them).
 - **Resolution**: the Street View Static API caps every picture at 640×640 and has no `scale` option, so a sharper
   picture means a narrower view, not a bigger file. The main picture (90°) is for context; `--detail` adds six
   30° close-ups per building (three across, two up), three times the pixels per degree: bricks, number plates, door

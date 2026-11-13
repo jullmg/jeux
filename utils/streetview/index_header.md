@@ -20,6 +20,9 @@ How to use it (for an AI agent or a person):
 - **address** is the civic number and street. "(approx.)" means Google's nearest address to the facade the camera
   looks at: it can be one door off, and at a corner it may be on the cross street. Check the number on the door
   in the picture. Rows under "Adresses demandées" are exact, the camera turned toward that door.
+- **view**: how the picture sees its building. `front (n°)`: from its own street, n degrees off straight on. **In bold,
+  it is NOT the front**: camera in another street (a cross street shows the building's side, a lane its back), side,
+  far (probably the back) or oblique. Never draw a facade from those; see the guide.
 - **taken at** is the camera's latitude, longitude (in the roadway, not at the building). `index.html` shows them on a map.
 - **close-ups**: with `--detail`, six narrow-view (30°) pictures of the same facade in `<street>/detail/`, named
   `…_r<row>c<column>.jpg` (row 0 = ground floor, row 1 = upper floors and cornice; columns left to right, about
