@@ -48,9 +48,9 @@ const BLOCKS := {
 		"avenues": [["rue_2e", "2e Avenue", 540.0], ["rue_1re", "1re Avenue", 540.0]],
 		"trees_after": [2, 3], "tree_shift": {2: 0.0, 3: 0.0}, "lamps_after": [2, 4], "hydrants_at": [3.5], "racks_at": [],
 		"squirrels_at": [3.3], "moon_at": 4.5,
-		"signs": {"masson_2636": [[865.0, "koodo", "#FFFFFF", "#D6157A", 15], [1260.0, "Rosemont", "#3A3A3C", "#E9E7E1", 12]],
+		"signs": {"masson_2636": [[515.0, "TELUS", "#FFFFFF", "#4B286D", 16], [865.0, "koodo", "#FFFFFF", "#D6157A", 15], [1260.0, "Rosemont", "#3A3A3C", "#E9E7E1", 12]],
 			"masson_2606": [[880.0, "CASERNE 29", "#C8202A", "#CFC6B2", 13]]},
-		"logos": {"masson_2636": [[515.0, "telus_logo.svg", 20.0]]},
+		"logos": {},
 		"panels": {},
 	},
 	"2e_3e_impair": {
