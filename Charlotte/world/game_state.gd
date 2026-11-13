@@ -109,7 +109,7 @@ static func save_game(scene: String, x: float) -> void:
 	if not enabled() or scene.is_empty():
 		return
 	var data := {
-		"version": 3, "scene": scene, "x": x,
+		"version": 4, "scene": scene, "x": x,
 		"day": Season.day, "season": Season.current, "age": age,
 		"money": money, "quests": quests, "flags": flags,
 	}
@@ -142,6 +142,12 @@ static func load_game(n: int) -> String:
 		var moved := _merged_scene(scene, x)
 		scene = moved[0]
 		x = moved[1]
+	if int(data.get("version", 1)) < 4:
+		# Rue Masson grew at the start of both its scenes (D'Iberville–1re on the north side, Saint-Michel–9e on the south side).
+		if scene.ends_with("/scenes/masson_impair.tscn"):
+			x += MASSON_NORTH_GAINED
+		elif scene.ends_with("/scenes/masson_pair.tscn"):
+			x += MASSON_SOUTH_GAINED
 	if scene.contains("/scenes/house") or scene.contains("/scenes/depanneur") or scene.contains("/scenes/ohbon"):
 		Transition.inside_x = x
 	else:
@@ -154,6 +160,10 @@ static func load_game(n: int) -> String:
 ## sixieme_sud_est.tscn is now the right end of sixieme_est.tscn (its x moves right by EST_GAINED).
 const MAIN_GAINED := 5228.4
 const EST_GAINED := 8351.8
+## Saves from before Rue Masson reached D'Iberville and Saint-Michel (version 4, 2026-11-13): the blocks added at the left end of
+## each side's scene move the old x right by these.
+const MASSON_NORTH_GAINED := 6472.0
+const MASSON_SOUTH_GAINED := 5238.0
 
 
 static func _merged_scene(scene: String, x: float) -> Array:

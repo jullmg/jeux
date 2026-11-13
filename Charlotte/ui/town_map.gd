@@ -152,10 +152,11 @@ func _here() -> Dictionary:
 		"ohbon":
 			return {"at": Vector2(SHOP_X, HOLT_Y + 50.0), "say": "Je suis chez Oh Bon !"}
 	if key == "masson_impair" or key == "masson_pair":
-		# Rue Masson lies south of the sheet: at its foot, from the 1re to the 9e (the odd side's view has the 1re on the left).
-		# The avenues are 153 apart, 4e at FOUR_X.
-		var a := FOUR_X + (1 - 4) * (FIVE_X - FOUR_X)
-		var b := FOUR_X + (9 - 4) * (FIVE_X - FOUR_X)
+		# Rue Masson lies south of the sheet: at its foot, from D'Iberville to Saint-Michel (the odd side's view has D'Iberville on
+		# the left). The avenues are 153 apart, 4e at FOUR_X; D'Iberville lies four avenue-blocks west of 1re, Saint-Michel a little
+		# over two east of 9e.
+		var a := FOUR_X + (1 - 4 - 4.2) * (FIVE_X - FOUR_X)
+		var b := FOUR_X + (9 - 4 + 2.2) * (FIVE_X - FOUR_X)
 		var x := lerpf(a, b, f if key == "masson_impair" else 1.0 - f)
 		return {"at": Vector2(clampf(x, SIDE + 20.0, SHEET.x - 20.0), SHEET.y - 20.0), "say": "Je suis sur la rue Masson !"}
 	return {"at": Vector2(HOUSE_X, HOUSE_Y - 10.0), "say": "Je suis ici !"}

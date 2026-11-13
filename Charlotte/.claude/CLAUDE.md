@@ -135,7 +135,16 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   doors, buttresses, the flight of steps, the grounds; the tower's top isn't in any picture), `presbytere` (over `_building`:
   buff zigzag friezes, copper band, the columned porch), `masson_lot` (the gap at 2876: backs, a painted shed, a tree), plus
   `*_cote` side walls of the corners across the avenues; `_back_row` draws hazy buildings behind open ground so the distant
-  city doesn't show as a grey slab. Built: the whole street, 1re to 9e, both sides, **revised 2026-11-12 from front pictures only** (the first
+  city doesn't show as a grey slab. Built: the whole street from Rue D'Iberville to Boulevard Saint-Michel, both sides (gaps `rue_iberville`, `rue_molson`, `rue_1re` …
+  `rue_9e`, `rue_10e`, `rue_stmichel`; `AVENUE_NAMES` gives each its article for the plate). **D'Iberville–1re** (blocks
+  `iberville_molson`, `molson_1re`, from `rue-masson/2421…–2593…`): north side the site hoarding papered with posters
+  (`lot_style` "hoarding"), a little bakery, a long low beige building, the Maxi set back behind its lot and red hedge
+  ("supermarket"), shops up to 1re; south side the park ("park") between 1re and Molson, the gas station ("gas") and the McDonald's
+  with the condos behind ("fastfood"). **9e–Saint-Michel** (`9e_10e`, `10e_stmichel`, from `3151…–3245…`): Postes Canada,
+  Tabagie Impériale, Boulangerie Ange, Pastero / Juste Nouilles, Ongles Sunny, Le Lunetier at 10e, a parking lot, the long block of
+  Alimentation Poivre & Sel and Jean Coutu; south: Renaissance fripe at Saint-Michel, Econofitness, Subway, a black modern front at
+  10e, the new block with the brasserie, the red-brick row with Yellow / Sports Uptown / Mystik to 9e. Saves from before carry
+  their x over (`GameState` version 4, `MASSON_NORTH_GAINED` / `MASSON_SOUTH_GAINED`). 1re to 9e was **revised 2026-11-12 from front pictures only** (the first
   drawing used pictures taken from the avenues, i.e. the corner buildings' sides: lots, murals and setbacks that aren't on
   Masson). 1re–2e (north: Boni-soir, Domino's in black brick under `parapet: "crenel"`, Le Jardin de Mathilde and Les Cœurs de Jupons under the same white brick, the
   Yoga D.N.A. / Phở / juice bar block at 2e; south: the TELUS block at the sidewalk with Koodo, white balconies at its 2e corner,

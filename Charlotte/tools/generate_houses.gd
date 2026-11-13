@@ -1198,6 +1198,220 @@ const HOUSES := [
 		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F"], "mortar": "#CDBFB0",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
 	},
+	# ── Rue Masson, D'Iberville to 1re (two blocks, Rue Molson between), from reference/streetview/rue-masson/2421… to 2593… ──
+	# North side, D'Iberville (left) to 1re. Across D'Iberville: the next block's side.
+	{
+		"name": "masson_2400_cote", "kind": "side_wall", "width": 560.0, "floors": 2,
+		"bricks": ["#C2A07A", "#B8966E", "#CCAA84", "#B08C66"], "mortar": "#E2D8C6",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
+	},
+	{
+		"name": "masson_2421", "kind": "masson_lot", "lot_style": "hoarding", "width": 1800.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	# 2515: a little one-storey bakery, beige walls under a deep blue fascia, glass round the door (2511…, 2515…).
+	{
+		"name": "masson_2515", "kind": "commerce", "width": 700.0, "floors": 1, "halloween": false,
+		"bricks": ["#E6DCC8", "#DCD2BE", "#ECE2CE"], "mortar": "#CFC5B0", "parapet": "flat", "windows": [],
+		"belt": "#1E3E7E", "pier": "#E6DCC8",
+		"shops": [{"x0": 40.0, "x1": 660.0, "sign": "#1E3E7E", "frame": "#2B2B2E", "door": 560.0, "inside": "cafe", "transom": "none", "panes": 3}], "basement": [],
+	},
+	# 2519–2535, to Molson: a long low building of beige brick on two floors, its windows in bands under a blue trim (2519…, 2527…, 2531…).
+	{
+		"name": "masson_2531", "kind": "commerce", "width": 2000.0, "floors": 2, "halloween": false,
+		"bricks": ["#D8C8A4", "#CEBE9A", "#E0D0AE", "#C4B490"], "mortar": "#E8DECA", "parapet": "flat",
+		"lintel_style": "none", "window_style": "slider", "frame": "#2E4E8E", "ribbon_sill": true, "win_h": 110.0,
+		"windows": [[80.0, 220.0], [340.0, 220.0], [600.0, 220.0], [1100.0, 220.0], [1360.0, 220.0], [1620.0, 220.0]],
+		"belt": "#2E4E8E", "ground": "stone", "stone": "#D8C8A4", "ground_windows": [[120.0, 300.0], [560.0, 300.0], [1160.0, 300.0], [1560.0, 300.0]],
+		"res_doors": [900.0], "basement": [],
+	},
+	# Between Molson and 1re: the Maxi set back behind its lot and hedge, then a short row of shops up to 1re.
+	{
+		"name": "masson_2551", "kind": "masson_lot", "lot_style": "supermarket", "width": 2600.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	# 2577–2581: red brick on two floors, its side painted, the restaurant under three navy awnings (2577…, 2581…).
+	{
+		"name": "masson_2577", "kind": "commerce", "width": 800.0, "floors": 2,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "window_style": "slider", "frame": "#2B2B2E", "windows": [[160.0, 130.0], [450.0, 130.0]],
+		"shops": [{"x0": 30.0, "x1": 770.0, "sign": "#1E2A4A", "frame": "#1E1E20", "door": 600.0, "awning": "#1E2A4A", "inside": "restaurant", "transom": "none"}], "basement": [],
+	},
+	# 2587: red brick on two floors, the parapet stepped with a cross in relief, wide windows (2587…).
+	{
+		"name": "masson_2587", "kind": "commerce", "width": 700.0, "floors": 2,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0", "parapet": "stepped",
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "window_style": "slider", "frame": "#2B2B2E", "windows": [[90.0, 200.0], [400.0, 200.0]],
+		"shops": [{"x0": 30.0, "x1": 670.0, "sign": "#C8202A", "frame": "#2B2B2E", "door": 560.0, "inside": "goods", "transom": "none"}], "basement": [],
+	},
+	# 2589–2591: two floors of grey glass in a dark frame, a clinic downstairs (2587…).
+	{
+		"name": "masson_2591", "kind": "commerce", "width": 500.0, "floors": 2, "upper": "siding", "siding": "#5E666E",
+		"bricks": ["#5E666E"], "mortar": "#4A5056", "parapet": "flat", "lintel_style": "none", "window_style": "fixed", "frame": "#1E1E20",
+		"windows": [[40.0, 420.0]],
+		"shops": [{"x0": 30.0, "x1": 470.0, "sign": "#F2F0EA", "frame": "#1E1E20", "door": 120.0, "inside": "office", "transom": "none"}], "basement": [],
+	},
+	# 2593, by 1re: buff brick on two floors, a wooden balcony, the sushi counter under its sign (2593…).
+	{
+		"name": "masson_2593", "kind": "commerce", "width": 700.0, "floors": 2,
+		"bricks": ["#D2B488", "#C9AA7E", "#DABE92", "#BEA074", "#D0B084"], "mortar": "#E6DCCB", "parapet": "flat", "lintel": "#E8E0D0", "lintel_dark": "#B9AE98",
+		"window_style": "slider", "frame": "#F2F0EA", "windows": [[90.0, 120.0], [400.0, 120.0]], "projecting": [[40.0, 260.0]],
+		"slab": "#8A6A4A", "slab_dark": "#5E4630", "metal": "#6A4E34",
+		"shops": [{"x0": 30.0, "x1": 670.0, "sign": "#F2F0EA", "frame": "#3A3836", "door": 120.0, "inside": "restaurant", "transom": "none"}], "basement": [],
+	},
+	# South side, 1re (left) to D'Iberville: the park between 1re and Molson; the gas station at Molson, the McDonald's by
+	# D'Iberville; across D'Iberville the next block's side.
+	{
+		"name": "masson_2560", "kind": "masson_lot", "lot_style": "park", "width": 3600.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	{
+		"name": "masson_2544", "kind": "masson_lot", "lot_style": "gas", "width": 1400.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	{
+		"name": "masson_2520", "kind": "masson_lot", "lot_style": "fastfood", "width": 1400.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	{
+		"name": "masson_2401_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#D2D0CA", "#C8C6C0", "#DAD8D2"], "mortar": "#B9B5AC",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
+	},
+	# ── Rue Masson, 9e to Boulevard Saint-Michel (two blocks, 10e between), from reference/streetview/rue-masson/3151… to 3245… ──
+	# North side, 9e (left) to Saint-Michel. 3151–3155, at 9e: red-brown brick on three floors, black balconies at the corner,
+	# Postes Canada under its red band (3151…, 3161…).
+	{
+		"name": "masson_3151", "kind": "commerce", "width": 700.0, "floors": 3,
+		"bricks": ["#8E4A36", "#9A5240", "#844430", "#A45A46"], "mortar": "#C9BBAC", "parapet": "corbel",
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "window_style": "hung", "hung_frame": "#F2F0EA", "windows": [[300.0, 110.0], [500.0, 110.0]],
+		"projecting": [[40.0, 240.0]], "slab": "#2B2B2E", "slab_dark": "#1A1A1A", "metal": "#1A1A1A",
+		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#D8202A", "frame": "#1E1E20", "door": 480.0, "inside": "office", "transom": "none"}],
+		"res_doors": [625.0], "basement": [],
+	},
+	# 3157–3161: brown brick on three floors, white windows, a balcony; the Tabagie Impériale under its black sign (3161…).
+	{
+		"name": "masson_3161", "kind": "commerce", "width": 650.0, "floors": 3,
+		"bricks": ["#6E4636", "#7A5040", "#644030", "#845A48"], "mortar": "#B9AC9E", "parapet": "corbel",
+		"lintel": "#E8E2D6", "lintel_dark": "#A39A8A", "window_style": "hung", "hung_frame": "#F2F0EA", "windows": [[90.0, 110.0], [420.0, 110.0]],
+		"projecting": [[380.0, 600.0]], "metal": "#1A1A1A",
+		"shops": [{"x0": 150.0, "x1": 620.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 560.0, "inside": "goods", "transom": "none"}],
+		"res_doors": [80.0], "basement": [],
+	},
+	# 3165–3177: the Boulangerie Ange, two floors of beige brick, its name across the wall, big black-framed windows below (3165…, 3173…).
+	{
+		"name": "masson_3165", "kind": "commerce", "width": 1100.0, "floors": 2,
+		"bricks": ["#CDBC9E", "#C4B294", "#D6C6A8", "#BCAA8C"], "mortar": "#E2D8C6", "parapet": "flat",
+		"lintel_style": "none", "windows": [], "pier": "#CDBC9E",
+		"shops": [{"x0": 40.0, "x1": 1060.0, "sign": "#CDBC9E", "frame": "#1A1A1A", "door": 900.0, "inside": "restaurant", "transom": "panes", "panes": 6}], "basement": [],
+	},
+	# 3179–3185: beige brick on two floors, wide windows upstairs, arched openings below: Pastero and Juste Nouilles (3179…, 3183…).
+	{
+		"name": "masson_3179", "kind": "commerce", "width": 1000.0, "floors": 2,
+		"bricks": ["#CDBC9E", "#C4B294", "#D6C6A8", "#BCAA8C"], "mortar": "#E2D8C6", "parapet": "flat",
+		"lintel_style": "none", "window_style": "slider", "frame": "#1E1E20", "windows": [[160.0, 240.0], [600.0, 240.0]],
+		"shops": [{"x0": 30.0, "x1": 480.0, "sign": "#C8202A", "frame": "#1E1E20", "door": 120.0, "inside": "restaurant", "front": "wood", "kick": "brick"},
+			{"x0": 480.0, "x1": 970.0, "sign": "#1A1A1A", "frame": "#1E1E20", "door": 880.0, "inside": "restaurant", "kick": "brick"}], "basement": [],
+	},
+	# 3187: red brick on two floors with white trim, Ongles Sunny (3187…).
+	{
+		"name": "masson_3187", "kind": "commerce", "width": 500.0, "floors": 2,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0", "parapet": "corbel",
+		"lintel": "#F2F0EA", "lintel_dark": "#B9B3A8", "window_style": "slider", "frame": "#F2F0EA", "windows": [[90.0, 130.0], [290.0, 130.0]],
+		"shops": [{"x0": 30.0, "x1": 470.0, "sign": "#1A1A1A", "frame": "#F2F0EA", "door": 400.0, "inside": "salon", "transom": "none"}], "basement": [],
+	},
+	# 3189–3191, at 10e: Le Lunetier, two floors clad in black, a big window upstairs, the shop in black glass (3191…).
+	{
+		"name": "masson_3191", "kind": "commerce", "width": 600.0, "floors": 2, "upper": "siding", "siding": "#1E1E20",
+		"bricks": ["#1E1E20"], "mortar": "#2A2A2C", "parapet": "flat", "lintel_style": "none", "window_style": "fixed", "frame": "#0E0E10",
+		"windows": [[60.0, 440.0]],
+		"shops": [{"x0": 30.0, "x1": 570.0, "sign": "#1A1A1A", "frame": "#0E0E10", "door": 480.0, "inside": "goods", "transom": "none"}], "basement": [],
+	},
+	# Past 10e: a parking lot, then the long low block of Alimentation Poivre & Sel and the Jean Coutu, its upper band of grey
+	# metal with a black stripe (3207…, 3213…, 3225…, 3237…, 3245…).
+	{
+		"name": "masson_3207", "kind": "masson_lot", "lot_style": "parking", "width": 900.0, "floors": 3, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+	},
+	{
+		"name": "masson_3213", "kind": "commerce", "width": 2600.0, "floors": 2, "halloween": false, "upper": "siding", "siding": "#C9CCCF", "siding_dir": "h",
+		"bricks": ["#C9CCCF"], "mortar": "#9EA2A6", "parapet": "flat", "lintel_style": "none", "windows": [], "belt": "#1E1E20",
+		"shops": [{"x0": 30.0, "x1": 1700.0, "sign": "#2B2E32", "frame": "#1E1E20", "door": 1500.0, "inside": "fruit", "transom": "none", "panes": 9},
+			{"x0": 1700.0, "x1": 2570.0, "sign": "#F2F0EA", "frame": "#1E1E20", "door": 2450.0, "inside": "pharmacy", "transom": "none", "panes": 5}], "basement": [],
+	},
+	{
+		"name": "masson_3301_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F"], "mortar": "#CDBFB0",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
+	},
+	# South side, Saint-Michel (left) to 9e. Across Saint-Michel: the next block's side.
+	{
+		"name": "masson_3300_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"bricks": ["#9A5A48", "#A8664E", "#8E5040", "#B07A5E"], "mortar": "#CDBFB0",
+		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
+	},
+	# 3240–3244, at Saint-Michel: red brick on three floors, a long row of windows, Renaissance fripe under its big blue sign (3240…).
+	{
+		"name": "masson_3240", "kind": "commerce", "width": 1200.0, "floors": 3, "halloween": false,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0", "parapet": "flat",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "lintel_style": "none", "window_style": "hung", "hung_frame": "#F2F0EA",
+		"windows": [[70.0, 90.0], [210.0, 90.0], [350.0, 90.0], [490.0, 90.0], [630.0, 90.0], [770.0, 90.0], [910.0, 90.0], [1050.0, 90.0]],
+		"shops": [{"x0": 30.0, "x1": 1170.0, "sign": "#1E3E8E", "frame": "#1E1E20", "door": 600.0, "inside": "clothes", "transom": "none", "panes": 6}], "basement": [],
+	},
+	# 3234: Econofitness, red brick on three floors, narrow windows in a row (3220…, 3224…, 3234…).
+	{
+		"name": "masson_3234", "kind": "commerce", "width": 700.0, "floors": 3,
+		"bricks": ["#8E3E2E", "#9A4636", "#843828", "#A44E3C"], "mortar": "#B9A898", "parapet": "flat",
+		"lintel_style": "none", "window_style": "hung", "hung_frame": "#2B2B2E", "windows": [[60.0, 70.0], [190.0, 70.0], [320.0, 70.0], [450.0, 70.0], [580.0, 70.0]],
+		"shops": [{"x0": 30.0, "x1": 670.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 340.0, "inside": "office", "transom": "none"}], "basement": [],
+	},
+	# 3224–3228: beige brick on three floors, black balconies, the flats' arched door (3220…, 3224…).
+	{
+		"name": "masson_3224", "kind": "commerce", "width": 600.0, "floors": 3,
+		"bricks": ["#D2B488", "#C9AA7E", "#DABE92", "#BEA074", "#D0B084"], "mortar": "#E6DCCB", "parapet": "flat", "lintel": "#E8E0D0", "lintel_dark": "#B9AE98",
+		"window_style": "hung", "hung_frame": "#F2F0EA", "windows": [[340.0, 110.0], [470.0, 110.0]], "projecting": [[60.0, 280.0]],
+		"slab": "#2B2B2E", "slab_dark": "#1A1A1A", "metal": "#1A1A1A",
+		"shops": [{"x0": 260.0, "x1": 570.0, "sign": "#3A3A3C", "frame": "#2B2B2E", "door": 500.0, "inside": "goods", "transom": "none"}],
+		"res_doors": [150.0], "basement": [],
+	},
+	# 3214–3218: red-brown brick on three floors, white balconies stacked, the Subway downstairs (3208…, 3214…).
+	{
+		"name": "masson_3214", "kind": "commerce", "width": 600.0, "floors": 3,
+		"bricks": ["#8E4A36", "#9A5240", "#844430", "#A45A46"], "mortar": "#C9BBAC", "parapet": "flat",
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "window_style": "hung", "hung_frame": "#F2F0EA", "windows": [[90.0, 110.0], [450.0, 110.0]],
+		"projecting": [[240.0, 440.0]], "slab": "#F2F0EA", "metal": "#F2F0EA", "metal_light": true,
+		"shops": [{"x0": 30.0, "x1": 420.0, "sign": "#1E6E3A", "frame": "#1E1E20", "door": 120.0, "inside": "restaurant", "transom": "none"}],
+		"res_doors": [520.0], "basement": [],
+	},
+	# 3200–3208, at 10e: two floors clad in black boards, one wide window upstairs, a glass shopfront (3200…, 3204…, 3208…).
+	{
+		"name": "masson_3204", "kind": "commerce", "width": 1000.0, "floors": 2, "upper": "siding", "siding": "#26282A",
+		"bricks": ["#26282A"], "mortar": "#1A1A1C", "parapet": "flat", "lintel_style": "none", "window_style": "fixed", "frame": "#0E0E10",
+		"windows": [[120.0, 520.0]],
+		"shops": [{"x0": 30.0, "x1": 970.0, "sign": "#26282A", "frame": "#0E0E10", "door": 800.0, "inside": "cafe", "transom": "none", "panes": 4}], "basement": [],
+	},
+	# Past 10e toward 9e: the new brick block on three floors with big windows and balconies set into the wall, the brasserie on
+	# its corner (3178…, 3182…, 3188…, 3192…); then to 9e the long red-brick row on three floors, black balconies, its ground floor
+	# of pale stone with Yellow, Sports Uptown and Mystik (3154…, 3162…, 3164…, 3174…).
+	{
+		"name": "masson_3188", "kind": "commerce", "width": 1300.0, "floors": 3,
+		"bricks": ["#A45A42", "#B0644C", "#985038", "#B86E54"], "mortar": "#D0C4B6", "parapet": "flat",
+		"lintel_style": "none", "window_style": "slider", "frame": "#2B2B2E", "windows": [[80.0, 260.0], [800.0, 260.0]],
+		"loggias": [[440.0, 680.0], [1100.0, 1260.0]], "upper_piers": [], "metal": "#3A3A3C", "pier": "#C9C5BC",
+		"shops": [{"x0": 30.0, "x1": 640.0, "sign": "#3A3A3C", "frame": "#B9B5AC", "door": 120.0, "inside": "restaurant", "transom": "none", "panes": 3},
+			{"x0": 640.0, "x1": 1270.0, "sign": "#3A3A3C", "frame": "#B9B5AC", "door": 1150.0, "inside": "goods", "transom": "none", "panes": 3}], "basement": [],
+	},
+	{
+		"name": "masson_3164", "kind": "commerce", "width": 2000.0, "floors": 3,
+		"bricks": ["#A8503E", "#B05A46", "#9A4636", "#B86450", "#A44A3A"], "mortar": "#D0C4B6", "parapet": "corbel",
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "window_style": "hung", "hung_frame": "#F2F0EA",
+		"windows": [[90.0, 100.0], [300.0, 100.0], [700.0, 100.0], [900.0, 100.0], [1300.0, 100.0], [1500.0, 100.0], [1800.0, 100.0]],
+		"projecting": [[460.0, 640.0], [1060.0, 1240.0], [1620.0, 1780.0]], "slab": "#2B2B2E", "slab_dark": "#1A1A1A", "metal": "#1A1A1A",
+		"pier": "#C9C5BC",
+		"shops": [{"x0": 30.0, "x1": 640.0, "sign": "#1A1A1A", "frame": "#B9B5AC", "door": 560.0, "inside": "clothes", "transom": "none"},
+			{"x0": 640.0, "x1": 1300.0, "sign": "#1A1A1A", "frame": "#B9B5AC", "door": 700.0, "inside": "goods", "transom": "none"},
+			{"x0": 1300.0, "x1": 1970.0, "sign": "#1A1A1A", "frame": "#B9B5AC", "door": 1900.0, "inside": "clothes", "transom": "none"}], "basement": [],
+	},
 	# ── Rue Masson, 1re to 2e Avenue ──
 	# The north side, 1re (left) to 2e (right). Across 1re: the next block's corner, its side.
 	{
@@ -6447,6 +6661,21 @@ func _masson_lot() -> void:
 		"parking":
 			_parking_lot()
 			return
+		"hoarding":
+			_hoarding_lot()
+			return
+		"gas":
+			_gas_station()
+			return
+		"park":
+			_park_lot()
+			return
+		"supermarket":
+			_supermarket_lot()
+			return
+		"fastfood":
+			_fastfood_lot()
+			return
 	var g := ground_y
 	var back := g - 160.0
 	# The plexes behind, across their yards: brick, windows, the iron stair zigzagging down.
@@ -6649,6 +6878,186 @@ func _school_court() -> void:
 
 
 # A parking lot behind a low hedge (3021…): asphalt with its painted lines, the brick backs beyond; the cars left out.
+# ── Rue Masson's west end and east end (D'Iberville–1re, 9e–Saint-Michel), from reference/streetview/rue-masson/ ──
+
+# 2421–2511, by D'Iberville: an empty lot behind a site hoarding papered with posters, the bare red-brick building at the back with
+# its two billboards on the roof (2421…, 2507…, 2511…). Posters are bright blocks, no words.
+func _hoarding_lot() -> void:
+	var g := ground_y
+	var r := RandomNumberGenerator.new()
+	r.seed = 2421
+	_back_row(X0, X1, g - 520.0, g - 150.0)
+	# The building at the back, two floors of red brick, flat roof, and its billboards.
+	var bx0 := X0 + (X1 - X0) * 0.18
+	var bx1 := X0 + (X1 - X0) * 0.62
+	_rect(bx0, g - 430.0, bx1 - bx0, 280.0, "#9A4A3A", _stroke("#6E3226", 1.5))
+	var wx := bx0 + 30.0
+	while wx < bx1 - 60.0:
+		_rect(wx, g - 400.0, 46, 54, "#5E6A72")
+		_rect(wx, g - 300.0, 46, 54, "#5E6A72")
+		wx += 82.0
+	for bb: float in [bx0 + 40.0, bx0 + 230.0]:
+		_rect(bb + 70, g - 470.0, 6, 42, "#3A3A3C")
+		_rect(bb, g - 560.0, 170, 92, "#F2F0EA", _stroke("#3A3A3C", 2))
+		_rect(bb + 8, g - 552.0, 154, 76, ["#2E6EB0", "#D8502A"][int(bb) % 2], 'opacity="0.85"')
+		_rect(bb + 20, g - 540.0, 60, 50, "#F2D24A", 'opacity="0.8"')
+	# The lot: gravel and weeds.
+	_rect(X0, g - 150.0, X1 - X0, 150, "#8E8A80")
+	split = out.size()
+	# The hoarding: plywood panels on posts, papered with posters.
+	var hy := g - 150.0
+	_rect(X0, hy, X1 - X0, 140, "#C9B48E", _stroke("#8E7A5A", 1.5))
+	var px := X0 + 6.0
+	var colours := ["#E8502A", "#2E8AD0", "#F2C21E", "#7A3E9A", "#3EA64E", "#E86AA0", "#1E3E6E", "#F28A2A", "#FFFFFF"]
+	while px < X1 - 40.0:
+		var pw := r.randf_range(50.0, 90.0)
+		var c: String = colours[r.randi_range(0, colours.size() - 1)]
+		_rect(px, hy + 14, pw - 4, 110, c, _stroke("#5E5A54", 0.8))
+		_rect(px + 6, hy + 24 + r.randf_range(0, 30), pw - 16, r.randf_range(14, 40), colours[r.randi_range(0, colours.size() - 1)], 'opacity="0.85"')
+		for li in 3:
+			_rect(px + 8, hy + 80 + li * 10.0, (pw - 20) * r.randf_range(0.4, 1.0), 4, "#1A1A1A", 'opacity="0.35"')
+		px += pw
+	var post := X0
+	while post < X1:
+		_rect(post, hy - 6, 8, 146, "#6E5A3E")
+		post += 240.0
+	_snow(X0, X1 - X0, hy)
+
+
+# 2544, at Molson: a gas station, its white canopy on two posts with the red and yellow band, the pumps under it, the little shop
+# behind, the new condo tower beyond (2544…). The brand's name is a label laid by the scene.
+func _gas_station() -> void:
+	var g := ground_y
+	_back_row(X0, X1, g - 620.0, g - 300.0)
+	# The condo tower behind: pale panels, rows of windows, glass balconies.
+	var tx0 := X0 + (X1 - X0) * 0.45
+	_rect(tx0, g - 760.0, (X1 - tx0) - 40.0, 460, "#D8D6D0", _stroke("#9E9A92", 1.5))
+	for row in 6:
+		var wy := g - 740.0 + row * 72.0
+		var wx := tx0 + 20.0
+		while wx < X1 - 90.0:
+			_rect(wx, wy, 56, 46, "#5E6E78")
+			_rect(wx - 4, wy + 44, 64, 6, "#CFE4EC", 'opacity="0.6"')
+			wx += 86.0
+	# The shop at the back.
+	_rect(X0 + 60, g - 300.0, (X1 - X0) * 0.55, 170, "#ECEBE6", _stroke("#9E9A92", 1.5))
+	_rect(X0 + 80, g - 250.0, (X1 - X0) * 0.4, 110, "url(#glass)", 'opacity="0.8"')
+	_rect(X0 + 60, g - 310.0, (X1 - X0) * 0.55, 18, "#E8302A")
+	_rect(X0, g - 130.0, X1 - X0, 130, "#7A7874")
+	split = out.size()
+	# The canopy over the pumps.
+	var cx0 := X0 + 60.0
+	var cx1 := X1 - 60.0
+	for post: float in [cx0 + 120.0, cx1 - 140.0]:
+		_rect(post, g - 380.0, 22, 380, "#ECEBE6", _stroke("#9E9A92", 1))
+	_rect(cx0, g - 430.0, cx1 - cx0, 56, "#F4F2EE", _stroke("#9E9A92", 1.5))
+	_rect(cx0, g - 392.0, cx1 - cx0, 14, "#E8302A")
+	_rect(cx0, g - 404.0, cx1 - cx0, 10, "#F6C21E")
+	_rect(cx0, g - 374.0, cx1 - cx0, 10, "#000000", 'opacity="0.2"')
+	_snow(cx0, cx1 - cx0, g - 430.0)
+	for pump: float in [cx0 + 260.0, cx1 - 300.0]:
+		_rect(pump, g - 150.0, 60, 150, "#ECEBE6", _stroke("#5E5A54", 1.5))
+		_rect(pump + 8, g - 140.0, 44, 30, "#2E3A42")
+		_rect(pump, g - 160.0, 60, 12, "#E8302A")
+		_rect(pump - 20, g - 12, 100, 12, "#B9B5AC")
+
+
+# 2560, between 1re and Molson: the park, its lawn and big trees, a low pavilion of grey brick with a flat roof, a bench, the
+# bus shelter at the curb (2560…).
+func _park_lot() -> void:
+	var g := ground_y
+	_back_row(X0, X1, g - 560.0, g - 200.0)
+	var lawn := {"winter": "#E8ECEE", "spring": "#7AAE58", "summer": "#5E9A44"}
+	_rect(X0, g - 200.0, X1 - X0, 200, lawn.get(season, "#8EA052"))
+	_snow(X0, X1 - X0, g - 200.0)
+	# The pavilion.
+	var px0 := X0 + (X1 - X0) * 0.4
+	_rect(px0, g - 330.0, 520, 150, "#8E8A84", _stroke("#5E5A54", 1.5))
+	_rect(px0 - 20, g - 346.0, 560, 18, "#4A5A4A")
+	for dx in 3:
+		_rect(px0 + 60 + dx * 150.0, g - 290.0, 70, 110, "#3A4A3E")
+	split = out.size()
+	var autumn := ["#E3A33A", "#D9682B", "#C9B03A", "#B5442E", "#E8B54A"]
+	var tx := X0 + 160.0
+	var i := 0
+	while tx < X1 - 120.0:
+		if absf(tx - (px0 + 260.0)) > 340.0:
+			_fine_tree(Vector2(tx, g - 40.0), g - 420.0, -PI * (0.42 + 0.08 * float(i % 3)), 0.9, autumn)
+		tx += 420.0
+		i += 1
+	# A bench, a low iron fence along the sidewalk, and the bus shelter.
+	_rect(X0 + 220, g - 52, 120, 8, "#6A5A3E")
+	_rect(X0 + 220, g - 72, 120, 6, "#6A5A3E")
+	var fx := X0
+	while fx < X1:
+		_rect(fx, g - 46, 3, 46, "#2A2A2A")
+		fx += 22.0
+	_rect(X0, g - 46, X1 - X0, 4, "#2A2A2A")
+	var sx := X1 - 420.0
+	_rect(sx, g - 230.0, 260, 10, "#3A3A3C")
+	for lx: float in [sx, sx + 250.0]:
+		_rect(lx, g - 230.0, 8, 230, "#3A3A3C")
+	_rect(sx + 8, g - 220.0, 244, 200, "#CFE4EC", 'opacity="0.3"')
+
+
+# 2539–2571, between Molson and 1re: the Maxi supermarket set far back behind its parking lot, a low white box with its sign, and
+# the red hedge along the sidewalk with lamp posts in it (2539…, 2543…, 2551…, 2563…).
+func _supermarket_lot() -> void:
+	var g := ground_y
+	_back_row(X0, X1, g - 560.0, g - 330.0)
+	var sx0 := X0 + 40.0
+	var sx1 := X0 + (X1 - X0) * 0.55
+	_rect(sx0, g - 400.0, sx1 - sx0, 150, "#E9E7E1", _stroke("#9E9A92", 1.5))
+	_rect(sx0, g - 400.0, sx1 - sx0, 40, "#D8D6CF")
+	_rect(sx0 + 40, g - 330.0, sx1 - sx0 - 80, 70, "url(#glass)", 'opacity="0.7"')
+	_rect(sx0 + (sx1 - sx0) * 0.6, g - 460.0, 120, 70, "#1E4E9E", _stroke("#143A6E", 2))
+	_rect(X0, g - 250.0, X1 - X0, 250, "#7A7874")
+	var lx := X0 + 40.0
+	while lx < X1:
+		_path("M%s %s L%s %s" % [_n(lx), _n(g - 240), _n(lx - 40), _n(g - 120)], "none", _stroke("#E8E4DA", 3) + ' opacity="0.7"')
+		lx += 120.0
+	_snow(X0, X1 - X0, g - 246.0)
+	split = out.size()
+	var hedge := {"winter": "#6A5A4A", "spring": "#4E8A44", "summer": "#3E7A3A"}
+	var hx := X0 + 20.0
+	while hx < X1 - 20.0:
+		_shrub(hx, 40.0, hedge.get(season, "#A8442E"))
+		hx += 50.0
+	for post: float in [X0 + 400.0, X0 + (X1 - X0) * 0.55, X1 - 400.0]:
+		_rect(post, g - 330.0, 8, 330, "#2A2A2A")
+		_rect(post - 14, g - 346.0, 36, 22, "#2A2A2A")
+
+
+# 2520, by D'Iberville: the McDonald's, low, brown brick under a dark shingled mansard with its yellow awnings, set back behind a
+# strip of cedars; the new condo blocks rise behind it (2520…). The name is a label laid by the scene.
+func _fastfood_lot() -> void:
+	var g := ground_y
+	_back_row(X0, X1, g - 600.0, g - 300.0)
+	for bi in 2:
+		var bx0 := X0 + 60.0 + bi * (X1 - X0) * 0.48
+		_rect(bx0, g - 700.0 + bi * 60.0, (X1 - X0) * 0.42, 420, "#D2D0CA", _stroke("#9E9A92", 1.5))
+		for row in 5:
+			var wx := bx0 + 20.0
+			while wx < bx0 + (X1 - X0) * 0.42 - 60.0:
+				_rect(wx, g - 680.0 + bi * 60.0 + row * 72.0, 46, 40, "#5E6E78")
+				wx += 74.0
+	var mx0 := X0 + (X1 - X0) * 0.2
+	var mx1 := X0 + (X1 - X0) * 0.8
+	_rect(mx0, g - 300.0, mx1 - mx0, 200, "#8A5A40", _stroke("#5E3A28", 1.5))
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(mx0 - 20), _n(g - 300), _n(mx0 + 30), _n(g - 360), _n(mx1 - 30), _n(g - 360), _n(mx1 + 20), _n(g - 300)], "#4A3A34", _stroke("#2A1E1A", 1.5))
+	var wx2 := mx0 + 40.0
+	while wx2 < mx1 - 90.0:
+		_rect(wx2, g - 250.0, 80, 110, "url(#glass)")
+		_path("M%s %s L%s %s L%s %s Z" % [_n(wx2 - 6), _n(g - 254), _n(wx2 + 86), _n(g - 254), _n(wx2 + 40), _n(g - 286)], "#F2C21E", _stroke("#B88A10", 1))
+		wx2 += 130.0
+	_rect(X0, g - 100.0, X1 - X0, 100, "#7A7874")
+	split = out.size()
+	var hx := X0 + 30.0
+	while hx < X1 - 20.0:
+		_cedar(hx, g - 150.0)
+		hx += 70.0
+
+
 func _parking_lot() -> void:
 	var g := ground_y
 	_back_row(X0, X1, g - 620.0, g - 150.0)

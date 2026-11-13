@@ -13,12 +13,15 @@ extends StreetScene
 
 ## The blocks, left to right as each side is seen.
 const ORDER := {
-	"impair": ["1re_2e", "2e_3e", "3e_4e", "4e_5e", "5e_6e", "6e_7e", "7e_8e", "8e_9e"],
-	"pair": ["8e_9e", "7e_8e", "6e_7e", "5e_6e", "4e_5e", "3e_4e", "2e_3e", "1re_2e"],
+	"impair": ["iberville_molson", "molson_1re", "1re_2e", "2e_3e", "3e_4e", "4e_5e", "5e_6e", "6e_7e", "7e_8e", "8e_9e", "9e_10e",
+		"10e_stmichel"],
+	"pair": ["10e_stmichel", "9e_10e", "8e_9e", "7e_8e", "6e_7e", "5e_6e", "4e_5e", "3e_4e", "2e_3e", "1re_2e", "molson_1re",
+		"iberville_molson"],
 }
 
 ## How each avenue is written on the plate.
-const AVENUE_NAMES := {"1re": "1re", "2e": "2e", "3e": "3e", "4e": "4e", "5e": "5e", "6e": "6e", "7e": "7e", "8e": "8e", "9e": "9e"}
+const AVENUE_NAMES := {"1re": "la 1re", "2e": "la 2e", "3e": "la 3e", "4e": "la 4e", "5e": "la 5e", "6e": "la 6e", "7e": "la 7e", "8e": "la 8e",
+	"9e": "la 9e", "10e": "la 10e", "molson": "la rue Molson", "iberville": "la rue D'Iberville", "stmichel": "le boulevard Saint-Michel"}
 
 ## Each side of each block: its layout left to right (the corners across the avenues at both ends), its two avenues (the
 ## gap in the layout, the avenue's name, its width), its trees (shifted clear of the signs) and lamps, where the moon rises
@@ -26,6 +29,86 @@ const AVENUE_NAMES := {"1re": "1re", "2e": "2e", "3e": "3e", "4e": "4e", "5e": "
 ## {art: [[x on the facade, text, text colour, outline colour, font size], …]} (laid on the sign band, 302 above its foot),
 ## `logos` = real logos from art/brands/ on those bands: {art: [[x, file, height], …]}.
 const BLOCKS := {
+	# The west end, D'Iberville to 1re (Rue Molson between): a site hoarding, a bakery, a long low building, the Maxi behind its lot
+	# and a few shops up to 1re on the north side; the McDonald's, the gas station and the park on the south side.
+	"iberville_molson_impair": {
+		"layout": ["masson_2400_cote", "rue_iberville", "masson_2421", "masson_2515", "masson_2531", "rue_molson", "masson_2551"],
+		"avenues": [["rue_iberville", "Rue D'Iberville", 620.0], ["rue_molson", "Rue Molson", 540.0]],
+		"trees_after": [3], "tree_shift": {3: 0.0}, "lamps_after": [2, 4], "hydrants_at": [4.5], "racks_at": [], "squirrels_at": [4.3],
+		"moon_at": 2.5, "signs": {"masson_2515": [[350.0, "Boulangerie", "#FFFFFF", "#1E3E7E", 14]]}, "panels": {},
+	},
+	"molson_1re_impair": {
+		"layout": ["masson_2531", "rue_molson", "masson_2551", "masson_2577", "masson_2587", "masson_2591", "masson_2593", "rue_1re",
+			"masson_2605"],
+		"avenues": [["rue_molson", "Rue Molson", 540.0], ["rue_1re", "1re Avenue", 540.0]],
+		"trees_after": [3, 5], "tree_shift": {3: 0.0, 5: 0.0}, "lamps_after": [2, 5], "hydrants_at": [3.5], "racks_at": [5.5],
+		"squirrels_at": [2.7], "moon_at": 2.5, "signs": {},
+		"texts": {"masson_2551": [[954.0, 552.0, "maxi", "#FFFFFF", "#1E4E9E", 18]]}, "panels": {},
+	},
+	"molson_1re_pair": {
+		"layout": ["masson_2606", "rue_1re", "masson_2560", "rue_molson", "masson_2544"],
+		"avenues": [["rue_1re", "1re Avenue", 540.0], ["rue_molson", "Rue Molson", 540.0]],
+		"trees_after": [], "tree_shift": {}, "lamps_after": [2], "hydrants_at": [2.2], "racks_at": [], "squirrels_at": [2.5],
+		"moon_at": 2.5, "signs": {}, "panels": {},
+	},
+	"iberville_molson_pair": {
+		"layout": ["masson_2560", "rue_molson", "masson_2544", "masson_2520", "rue_iberville", "masson_2401_cote"],
+		"avenues": [["rue_molson", "Rue Molson", 540.0], ["rue_iberville", "Rue D'Iberville", 620.0]],
+		"trees_after": [2], "tree_shift": {2: 0.0}, "lamps_after": [2], "hydrants_at": [3.5], "racks_at": [], "squirrels_at": [3.5],
+		"moon_at": 2.5, "signs": {},
+		"texts": {"masson_2544": [[715.0, 548.0, "Shell", "#E8302A", "#F6C21E", 18]], "masson_2520": [[700.0, 640.0, "McDonald's", "#F6C21E", "#B8202A", 16]]},
+		"panels": {},
+	},
+	# The east end, 9e to Boulevard Saint-Michel (10e between).
+	"9e_10e_impair": {
+		"layout": ["masson_3139", "rue_9e", "masson_3151", "masson_3161", "masson_3165", "masson_3179", "masson_3187", "masson_3191",
+			"rue_10e", "masson_3207"],
+		"avenues": [["rue_9e", "9e Avenue", 540.0], ["rue_10e", "10e Avenue", 540.0]],
+		"trees_after": [2, 4, 6], "tree_shift": {2: 0.0, 4: 0.0, 6: 0.0}, "lamps_after": [3, 6], "hydrants_at": [4.5], "racks_at": [5.5],
+		"squirrels_at": [4.5], "moon_at": 4.5,
+		"signs": {
+			"masson_3151": [[295.0, "POSTES CANADA", "#FFFFFF", "#D8202A", 12]],
+			"masson_3161": [[385.0, "TABAGIE IMPÉRIALE", "#FFFFFF", "#1A1A1A", 11]],
+			"masson_3165": [[550.0, "Boulangerie  ange  Restaurant", "#1A1A1A", "#CDBC9E", 15]],
+			"masson_3179": [[255.0, "Pastero", "#FFFFFF", "#C8202A", 14], [725.0, "Juste Nouilles", "#E8502A", "#1A1A1A", 13]],
+			"masson_3187": [[250.0, "Ongles Sunny", "#F2D24A", "#1A1A1A", 12]],
+			"masson_3191": [[300.0, "LE LUNETIER", "#FFFFFF", "#1A1A1A", 13]],
+		},
+		"panels": {},
+	},
+	"10e_stmichel_impair": {
+		"layout": ["masson_3191", "rue_10e", "masson_3207", "masson_3213", "rue_stmichel", "masson_3301_cote"],
+		"avenues": [["rue_10e", "10e Avenue", 540.0], ["rue_stmichel", "Boulevard Saint-Michel", 720.0]],
+		"trees_after": [3], "tree_shift": {3: 0.0}, "lamps_after": [2], "hydrants_at": [3.3], "racks_at": [3.6], "squirrels_at": [3.5],
+		"moon_at": 2.5,
+		"signs": {"masson_3213": [[865.0, "Alimentation Poivre & Sel", "#FFFFFF", "#2B2E32", 15], [2135.0, "Jean Coutu", "#D8202A", "#F2F0EA", 16]]},
+		"panels": {},
+	},
+	"10e_stmichel_pair": {
+		"layout": ["masson_3300_cote", "rue_stmichel", "masson_3240", "masson_3234", "masson_3224", "masson_3214", "masson_3204",
+			"rue_10e", "masson_3188"],
+		"avenues": [["rue_stmichel", "Boulevard Saint-Michel", 720.0], ["rue_10e", "10e Avenue", 540.0]],
+		"trees_after": [3, 5], "tree_shift": {3: 0.0, 5: 0.0}, "lamps_after": [2, 5], "hydrants_at": [4.5], "racks_at": [6.5],
+		"squirrels_at": [5.5], "moon_at": 6.5,
+		"signs": {
+			"masson_3240": [[600.0, "RENAISSANCE | fripe", "#FFFFFF", "#1E3E8E", 16]],
+			"masson_3234": [[350.0, "Econofitness", "#FFFFFF", "#2B2B2E", 13]],
+			"masson_3214": [[225.0, "SUBWAY", "#F2D24A", "#1E6E3A", 14]],
+		},
+		"panels": {},
+	},
+	"9e_10e_pair": {
+		"layout": ["masson_3204", "rue_10e", "masson_3188", "masson_3164", "rue_9e", "masson_3150_cote"],
+		"avenues": [["rue_10e", "10e Avenue", 540.0], ["rue_9e", "9e Avenue", 540.0]],
+		"trees_after": [2, 3], "tree_shift": {2: 0.0, 3: 0.0}, "lamps_after": [2], "hydrants_at": [3.5], "racks_at": [2.5],
+		"squirrels_at": [3.4], "moon_at": 2.5,
+		"signs": {
+			"masson_3188": [[335.0, "BRASSERIE", "#FFFFFF", "#3A3A3C", 13]],
+			"masson_3164": [[335.0, "Yellow", "#F2D24A", "#1A1A1A", 15], [970.0, "SPORTS UPTOWN", "#FFFFFF", "#1A1A1A", 12],
+				[1635.0, "Mystik", "#FFFFFF", "#1A1A1A", 14]],
+		},
+		"panels": {},
+	},
 	"1re_2e_impair": {
 		"layout": ["masson_2595_cote", "rue_1re", "masson_2605", "masson_2611", "masson_2615", "masson_2629",
 			"masson_2631", "rue_2e", "masson_2653_cote"],
@@ -349,10 +432,10 @@ func room_name() -> String:
 	var pair := [left, right]
 	pair = pair.filter(func(v): return v != "")
 	if pair.size() < 2:
-		return "Rue Masson, au coin de la %s (%s)" % [pair[0] if pair.size() else "6e", _side_name()]
+		return "Rue Masson, au coin de %s (%s)" % [AVENUE_NAMES.get(pair[0] if pair.size() else "6e", "la 6e"), _side_name()]
 	if side == "pair":
 		pair.reverse()
-	return "Rue Masson, entre la %s et la %s (%s)" % [pair[0], pair[1], _side_name()]
+	return "Rue Masson, entre %s et %s (%s)" % [AVENUE_NAMES.get(pair[0], pair[0]), AVENUE_NAMES.get(pair[1], pair[1]), _side_name()]
 
 
 func _side_name() -> String:
