@@ -135,7 +135,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `*_cote` side walls of the corners across the avenues; `_back_row` draws hazy buildings behind open ground so the distant
   city doesn't show as a grey slab. Built: the whole street, 1re to 9e, both sides, **revised 2026-11-12 from front pictures only** (the first
   drawing used pictures taken from the avenues, i.e. the corner buildings' sides: lots, murals and setbacks that aren't on
-  Masson). 1re–2e (north: Boni-soir, Domino's, Le Jardin de Mathilde and Les Cœurs de Jupons under the same white brick, the
+  Masson). 1re–2e (north: Boni-soir, Domino's in black brick under `parapet: "crenel"`, Le Jardin de Mathilde and Les Cœurs de Jupons under the same white brick, the
   Yoga D.N.A. / Phở / juice bar block at 2e; south: the TELUS block at the sidewalk with Koodo, white balconies at its 2e corner,
   a small parking lot, and the fire station Caserne 29 at 1re, its glass garage doors a shopfront `front: "garage"`, `_garage_bay`),
   2e–3e (north: the Paulines block at 2e, then one condo building to 3e with balconies set into the wall, `loggias` and
@@ -143,7 +143,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   the charcoal brick building, Pista at 2e), 3e–4e (north: the old bank at 3e as a `bank`, the green-framed building running on
   to its neighbour, the boulangerie, Service Comptant in brown brick at 4e (its mural is on its side); south: the scroll parapet
   and yellow canopy at 4e, Jean Coutu, the red brick yoga studio at 3e, "Yoga chaud | Pilates" in `texts`), 4e–5e (north:
-  BANCO/La Corvette, Pattes & Griffes, Pizza Pizza on two floors, the café Trou. in cream siding, BMO; south: Dollarama, the
+  BANCO/La Corvette, Pattes & Griffes under `parapet: "stepped"`, Pizza Pizza on two floors, the café Trou. in cream siding, BMO; south: Dollarama, the
   Fruiterie au Melon Miel in the same buff building, the corner at 4e), 5e–6e (north: the presbytery and the church; south:
   the Banque Nationale, one narrow brick building with set-back balconies, the grey stone row with L'Oeufrier and the Tabagie),
   6e–7e (north: Fraîchement Bon at the 6e corner, Poulet Rouge, the Aquarium row, the old bank at 7e; south: the Tim Hortons
