@@ -1,6 +1,9 @@
 extends StreetScene
-# Charlotte's side of 6e Avenue seen from the sidewalk: Dandurand on the left, Holt on the right.
-# Across each cross street, the first building of the next block (the school across Dandurand).
+# Charlotte's side of 6e Avenue (the west side, even numbers) seen from the other sidewalk, in ONE scene from Rue Masson (left)
+# to Rue Holt (right) — a street is one scene per side (Julien). Left to right: the side of the Banque Nationale across Masson,
+# Rue Masson, the long side of Église Saint-Esprit and its parish hall, the modern apartment block behind its court, the
+# schoolyard, the school's gym and the school's side (`ecole_6e`), all drawn from the Street View pictures (INDEX.md "6e
+# Avenue" 5360… to 5590…; facades `six_sud_*`), Rue Dandurand, then her own block up to Holt, and the corner across Holt.
 # The generic street (sky, houses, trees, people, animals, camera) lives in StreetScene.
 
 
@@ -10,6 +13,8 @@ var _window_neighbour: WindowNeighbour
 func _init() -> void:
 	street_key = "6e"
 	layout = [
+		"masson_2892_cote", "rue_masson",
+		"six_sud_eglise", "six_sud_salle", "six_sud_appartements", "six_sud_cour", "six_sud_gymnase",
 		"ecole_6e", "rue_dandurand",
 		"depanneur", "garages", "ruelle_verte",
 		"triplex_exemple_2", "plex_02", "plex_03", "moderne", "plex_04",
@@ -18,22 +23,27 @@ func _init() -> void:
 		"ruelle", "coin_holt",
 		"rue_holt", "coin_holt_est",
 	]
-	cross_streets = {"rue_dandurand": 560.0, "rue_holt": 520.0}
-	trees_after = [6, 8, 10, 13, 15, 17]
+	cross_streets = {"rue_masson": 600.0, "rue_dandurand": 560.0, "rue_holt": 520.0}
+	# Below Dandurand (indices up to 7), then her block (indices from 8).
+	trees_after = [3, 4, 5, 13, 15, 17, 20, 22, 24]
 	# The tree in front of Charlotte's house stands toward its Holt end, past the window to the right of her door, big, its crown
 	# high up, which leaves her doors in view.
-	tree_shift = {10: 340.0}
-	tree_size = {10: 0.72}
-	lamps_after = [4, 9, 14, 18]
-	hydrants_at = [7.5, 16.3]
-	racks_at = [2.5, 11.55, 15.6]
-	squirrels_at = [4.2, 9.5, 14.6, 18.4]
+	tree_shift = {17: 340.0}
+	tree_size = {17: 0.72}
+	lamps_after = [3, 5, 11, 16, 21, 25]
+	hydrants_at = [4.5, 14.5, 23.3]
+	racks_at = [9.5, 18.55, 22.6]
+	squirrels_at = [3.5, 5.5, 11.2, 16.5, 21.6, 25.4]
 
 
 # In front of her duplex, back where she left the street (from her flat), at a corner or out of the lane.
 func _start_x() -> float:
-	if _arriving("6e_from_dandurand") or _arriving("6e_from_6e_est_dandurand") or _arriving("6e_from_sud"):
+	if _arriving("6e_from_dandurand") or _arriving("6e_from_6e_est_dandurand"):
 		return _starts[layout.find("depanneur")] + 60.0
+	if _arriving("6e_from_6e_est_dandurand_sud"):
+		return _starts[layout.find("rue_dandurand")] - 40.0
+	if _arriving("6e_from_masson") or _arriving("6e_from_6e_est_masson"):
+		return _starts[layout.find("rue_masson") + 1] + 40.0
 	if _arriving("6e_from_holt") or _arriving("6e_from_6e_est_holt"):
 		return _starts[layout.find("rue_holt")] - 40.0
 	var lane := _from_lane()
@@ -46,9 +56,24 @@ func _start_x() -> float:
 	return _starts[layout.find("duplex_charlotte")] + 150.0
 
 
-# Rue Dandurand (left, from the reference photos: the dépanneur's real front, the school across) and Rue Holt
-# (right). The vistas go behind the houses.
+# Rue Masson, Rue Dandurand (from the reference photos: the dépanneur's real front, the school across) and Rue Holt. The
+# vistas go behind the houses; all three run west from 6e (Mount Royal at the end).
 func _build_cross_streets() -> void:
+	# Down Masson the church's front and the Masson shops (north side), the Banque Nationale's block on the left.
+	var masson := _cross_street("rue_masson", "Rue Masson", 1.0)
+	masson.facing = "west"
+	masson.left_walls = [
+		{"to": 1.2, "top": 330.0, "kind": "plex", "color": Color("#8E4A3A")},
+		{"to": 2.6, "top": 300.0, "kind": "plex", "color": Color("#B5B1A9")},
+		{"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": Color("#9C5A44")},
+	]
+	# The church's grey stone front along Masson, then the presbytery's red brick and the shops beyond (its facade is too tall to be
+	# laid in perspective as a texture).
+	masson.right_walls = [
+		{"to": 1.4, "top": 230.0, "kind": "plex", "color": Color("#A8A49C")},
+		{"to": 2.0, "top": 300.0, "kind": "plex", "color": Color("#9A3E30")},
+		{"to": CrossStreet.FAR, "top": 310.0, "kind": "plex", "color": Color("#8E5A44")},
+	]
 	var dandurand := _cross_street("rue_dandurand", "Rue Dandurand", 1.0)
 	dandurand.school = true
 	dandurand.guard = true
@@ -90,15 +115,22 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 		_label("RUELLE\nVERTE", house.position + Vector2(_tex("ruelle_verte").get_width() / 2.0 + 90.0, 416.0) * HOUSE_SCALE, Vector2(72, 36), 12, Color.WHITE, Color("#1E5E30"))
 
 
-# Charlotte's own front door (ground floor of her duplex): click it to go inside. Click Rue Dandurand or Rue Holt
-# to turn the corner, the lane entrances to go into the lane.
+# Charlotte's own front door (ground floor of her duplex): click it to go inside. Round the corners onto Rue Masson (by the
+# church), Rue Dandurand and Rue Holt (from her block), over 6e Avenue to its other side at every corner, the lane entrances to
+# go into the lane. Each one names the stretch of sidewalk it belongs to, since the scene now holds several.
 func _build_doors() -> void:
 	_window_neighbour.charlotte = _charlotte
-	_add_corner(_cross_streets[0], "res://scenes/dandurand.tscn", "dandurand_from_6e", false)
-	_add_corner(_cross_streets[1], "res://scenes/holt.tscn", "holt_from_6e", false)
-	# Over 6e Avenue itself, to the other side of the street (the odd numbers, sixieme_est).
-	_add_across(_cross_streets[0], "res://scenes/sixieme_est.tscn", "6e_est_from_6e_dandurand")
-	_add_across(_cross_streets[1], "res://scenes/sixieme_est.tscn", "6e_est_from_6e_holt")
+	var masson := _cross_streets[0]
+	var dandurand := _cross_streets[1]
+	var holt := _cross_streets[2]
+	_add_corner(masson, "res://scenes/masson_impair.tscn", "masson_impair_from_rue_6e_5e_6e", false, 1)
+	_add_corner(dandurand, "res://scenes/dandurand.tscn", "dandurand_from_6e", false, 1)
+	_add_corner(holt, "res://scenes/holt.tscn", "holt_from_6e", false, -1)
+	# Over 6e Avenue itself, to the other side of the street (the odd numbers, sixieme_est), at the matching corner.
+	_add_across(masson, "res://scenes/sixieme_est.tscn", "6e_est_from_6e_masson", 1)
+	_add_across(dandurand, "res://scenes/sixieme_est.tscn", "6e_est_from_6e_dandurand_sud", -1)
+	_add_across(dandurand, "res://scenes/sixieme_est.tscn", "6e_est_from_6e_dandurand", 1)
+	_add_across(holt, "res://scenes/sixieme_est.tscn", "6e_est_from_6e_holt", -1)
 	_add_lane("ruelle_verte")
 	_add_lane("ruelle")
 	var origin := _house_origin(layout.find("duplex_charlotte"))
@@ -110,10 +142,6 @@ func _build_doors() -> void:
 		Transition.change_scene(self, "res://scenes/house.tscn")))
 
 
-# Crossing Dandurand southward from her block goes on down 6e Avenue toward Masson (sixieme_sud.tscn, where the school and
-# what lies past it are drawn from the pictures).
-func _cross(cs: CrossStreet) -> void:
-	if cs != _cross_streets[0] or _charlotte.position.x < cs.x0:
-		super._cross(cs)
-		return
-	_cross_to(cs, "res://scenes/sixieme_sud.tscn", "6e_sud_from_6e")
+## How far along the scene Rue Dandurand is (0..1), for the town map (`TownMap._here`).
+func _dandurand_f() -> float:
+	return (_starts[layout.find("rue_dandurand")] + _starts[layout.find("rue_dandurand") + 1]) / 2.0 / _street_width

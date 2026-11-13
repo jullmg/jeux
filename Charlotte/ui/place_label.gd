@@ -2,17 +2,16 @@ extends CanvasLayer
 ## Autoload "PlaceLabel": where Charlotte is, on a little plate at the top middle of the screen ("6e Avenue", "Dépanneur
 ## Xin-Xin, rue Dandurand"), to help find one's way. A new place = one line in NAMES (key: the scene file's name); a scene that
 ## isn't there shows no plate (the title screen, tools/). A scene with rooms answers `room_name()` instead (the house).
+## A street names its side by the compass, never "de l'autre côté" (Julien): "6e Avenue, côté ouest", "Rue Masson … (côté nord)".
 ## Layer 52: above the colour grade, under the bedtime night and every window.
 
 const BLUE := Color("#1D4F91")
 const NAMES := {
-	"main": "6e Avenue",
-	"sixieme_est": "6e Avenue, de l'autre côté",
-	"sixieme_sud": "6e Avenue, entre Masson et Dandurand",
-	"sixieme_sud_est": "6e Avenue, entre Dandurand et Masson, de l'autre côté",
-	"holt": "Rue Holt",
-	"cinquieme": "5e Avenue",
-	"dandurand": "Rue Dandurand",
+	"main": "6e Avenue, côté ouest",
+	"sixieme_est": "6e Avenue, côté est",
+	"holt": "Rue Holt, côté sud",
+	"cinquieme": "5e Avenue, côté est",
+	"dandurand": "Rue Dandurand, côté nord",
 	"ruelle": "Ruelle entre la 5e et la 6e Avenue",
 	"ruelle_dandurand": "Ruelle verte, entre la 5e et la 6e Avenue",
 	"ruelle_holt": "Ruelle près de Holt, entre la 5e et la 6e Avenue",

@@ -119,19 +119,22 @@ func _here() -> Dictionary:
 	# 6e to 5e, 5e Avenue Holt to Dandurand, Rue Dandurand 5e to 6e; the lanes the same way round.
 	match key:
 		"main":
-			return {"at": Vector2(WALK_E, lerpf(WALK_S, WALK_N, f)), "say": "Je suis ici !"}
+			# 6e Avenue, Charlotte's side, from Masson (the left end, past the sheet's foot) to Holt: the part below Dandurand is the
+			# first `_dand_f` of its length.
+			var dand: float = scene.call("_dandurand_f") if scene.has_method("_dandurand_f") else 0.0
+			if f < dand:
+				return {"at": Vector2(WALK_E, lerpf(SHEET.y - 20.0, DAND_Y + ST_W / 2.0 + 10.0, f / dand)), "say": "Je suis sur la 6e, vers Masson !"}
+			return {"at": Vector2(WALK_E, lerpf(WALK_S, WALK_N, (f - dand) / (1.0 - dand))), "say": "Je suis ici !"}
 		"sixieme_est":
-			# The other side of 6e Avenue, the odd numbers: Holt on the left of the view, Dandurand on the right.
-			return {"at": Vector2(SIX_X + AVE_W / 2.0 + 8.0, lerpf(HOLT_Y + ST_W / 2.0 + 6.0, DAND_Y - ST_W / 2.0 - 6.0, f)),
+			# The other side of 6e Avenue, the odd numbers: Holt on the left of the view, Dandurand, then Masson on the right.
+			var dand2: float = scene.call("_dandurand_f") if scene.has_method("_dandurand_f") else 1.0
+			if f > dand2:
+				return {"at": Vector2(SIX_X + AVE_W / 2.0 + 8.0, lerpf(DAND_Y + ST_W / 2.0 + 10.0, SHEET.y - 20.0, (f - dand2) / (1.0 - dand2))),
+					"say": "Je suis sur la 6e, vers Masson !"}
+			return {"at": Vector2(SIX_X + AVE_W / 2.0 + 8.0, lerpf(HOLT_Y + ST_W / 2.0 + 6.0, DAND_Y - ST_W / 2.0 - 6.0, f / dand2)),
 				"say": "Je suis en face de chez moi !"}
 		"holt":
 			return {"at": Vector2(lerpf(WALK_E, WALK_W, f), WALK_N), "say": "Je suis ici !"}
-		"sixieme_sud_est":
-			# The other side of 6e below Dandurand: Dandurand on the left of the view, Masson on the right.
-			return {"at": Vector2(SIX_X + AVE_W / 2.0 + 8.0, lerpf(DAND_Y + ST_W / 2.0 + 10.0, SHEET.y - 20.0, f)), "say": "Je suis sur la 6e, vers Masson !"}
-		"sixieme_sud":
-			# 6e Avenue below Dandurand, toward Masson at the sheet's foot (Masson on the left of the view, Dandurand on the right).
-			return {"at": Vector2(WALK_E, lerpf(SHEET.y - 20.0, DAND_Y + ST_W / 2.0 + 10.0, f)), "say": "Je suis sur la 6e, vers Masson !"}
 		"cinquieme":
 			return {"at": Vector2(WALK_W, lerpf(WALK_N, WALK_S, f)), "say": "Je suis ici !"}
 		"dandurand":

@@ -262,7 +262,7 @@ const HOUSES := [
 		"basement": [120.0, 420.0, 720.0], "fence": "black", "halloween": false,
 	},
 	# École Saint-Jean-de-Brébeuf's side on 6e Avenue, as Charlotte sees it from 6e (main.tscn, across Dandurand) and from
-	# 6e below Dandurand (sixieme_sud.tscn): reference/streetview/6e-avenue/5578…, 5582…, 5586… and their close-ups.
+	# 6e below Dandurand (the left end of main.tscn): reference/streetview/6e-avenue/5578…, 5582…, 5586… and their close-ups.
 	{
 		"name": "ecole_6e", "kind": "school_side", "width": 1400.0, "floors": 3, "top": 104.0,
 		"bricks": ["#8E3E2E", "#9A4636", "#843828", "#A44E3C", "#7E3426"], "mortar": "#B9A898",

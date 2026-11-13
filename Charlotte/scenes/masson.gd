@@ -349,10 +349,14 @@ func room_name() -> String:
 	var pair := [left, right]
 	pair = pair.filter(func(v): return v != "")
 	if pair.size() < 2:
-		return "Rue Masson, au coin de la %s" % (pair[0] if pair.size() else "6e")
+		return "Rue Masson, au coin de la %s (%s)" % [pair[0] if pair.size() else "6e", _side_name()]
 	if side == "pair":
 		pair.reverse()
-	return "Rue Masson, entre la %s et la %s%s" % [pair[0], pair[1], " (côté sud)" if side == "pair" else ""]
+	return "Rue Masson, entre la %s et la %s (%s)" % [pair[0], pair[1], _side_name()]
+
+
+func _side_name() -> String:
+	return "côté sud" if side == "pair" else "côté nord"
 
 
 # The avenues run north from the odd side's view, south from the even side's; their far sides aren't drawn from photos yet.
@@ -421,10 +425,10 @@ func _build_doors() -> void:
 		if b != "":
 			_masson_crossing(cs, right, "masson_%s_from_%s_%s" % [other, gap, b])
 		# From the north side, 6e Avenue runs up toward Dandurand: turn into it on either side of the avenue, the church's
-		# side (sixieme_sud) from the corner left of it, the other side (sixieme_sud_est) from the corner right of it.
+		# side (main.tscn) from the corner left of it, the other side (sixieme_est) from the corner right of it.
 		if side == "impair" and gap == "rue_6e":
-			_add_corner(cs, "res://scenes/sixieme_sud.tscn", "6e_sud_from_masson", false, -1)
-			_add_corner(cs, "res://scenes/sixieme_sud_est.tscn", "6e_sud_est_from_masson", false, 1)
+			_add_corner(cs, "res://scenes/main.tscn", "6e_from_masson", false, -1)
+			_add_corner(cs, "res://scenes/sixieme_est.tscn", "6e_est_from_masson", false, 1)
 
 
 ## The crosswalk over Masson at one corner of an avenue (`right`: the corner right of it), from that stretch of sidewalk.

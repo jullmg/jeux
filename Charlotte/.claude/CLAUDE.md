@@ -60,15 +60,22 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `squirrels_at`; fractional values = position across a building), plus hooks (`_start_x`, `_walk_bounds`,
   `_build_cross_streets`, `_decorate_house`, `_build_landmarks`, `_build_doors`, `_build_sidewalk_props` (against the
   buildings, behind people), `_build_extra_props` (curbside, in front of people)).
+- **A street is ONE scene per side** (Julien, 2026-11-13, for every street and every future addition): all its blocks end to end
+  in one `StreetScene`, never a scene per block. Extending a street = adding the block to that side's scene; a street still in
+  pieces gets merged. In such a scene every `_add_corner` / `_add_across` names its stretch of sidewalk (`side` / `stretch`
+  -1 or 1), since the scene holds several; crossing a cross street inside it is an ordinary crossing. A merge shifts the saved
+  x: bump the save `version` and move old positions in `GameState._merged_scene`. The plate names the side by the compass
+  ("6e Avenue, côté ouest", "Rue Masson, … (côté nord)"), never "de l'autre côté".
 - Charlotte's block, every side a `StreetScene` seen from across the road, walking right goes round it clockwise:
-  `scenes/main.gd` (6e Avenue, `street_key` "6e": Dandurand left, Holt right), `scenes/holt.gd` (Rue Holt: 6e left, 5e right,
+  `scenes/main.gd` (6e Avenue, `street_key` "6e", plate "6e Avenue, côté ouest": its whole west side, Masson left, Dandurand, her
+  block, Holt right), `scenes/holt.gd` (Rue Holt: 6e left, 5e right,
   plex_13–16, 28), `scenes/cinquieme.gd` (5e Avenue: Holt left, Dandurand right, the school across it; plex_17–26 and 29–36 and both lane
   entrances), `scenes/dandurand.gd` (Rue Dandurand: 5e left, dépanneur Xin-Xin's real front `depanneur_front`, 6e right).
   Cross-street `facing` by Montreal's compass: from 6e they run west (Mount Royal), from Dandurand north, from 5e east,
   from Holt south. New corner/side walls in the generator: `holt_nord`, `holt_sud`, `cinq_holt_ouest`, `coin_5e_holt`,
   `coin_5e_dandurand`, `dandurand_sud` (`VARIANTS` is 36: plex_27 on Dandurand, plex_28 on Holt, plex_29–36 on 5e, counted from the Google map).
-- **The other side of 6e Avenue**, the odd numbers facing her block (`scenes/sixieme_est.gd`, `street_key` "6e_est"; plate "6e
-  Avenue, de l'autre côté"), drawn from the Street View pictures (`reference/streetview/`, `docs/drawing-from-streetview.md`).
+- **The east side of 6e Avenue**, the odd numbers (`scenes/sixieme_est.gd`, `street_key` "6e_est"; plate "6e Avenue, côté est"),
+  from Holt (left) past Dandurand to Masson (right) in one scene; drawn from the Street View pictures (`reference/streetview/`, `docs/drawing-from-streetview.md`).
   Seen from her own sidewalk across the street, so Holt is on the LEFT and Dandurand on the right; left to right: the corner
   across Holt (`impair_holt_nord`, a side wall), Rue Holt, the corner house with its fenced yard (`impair_coin_holt`, kind
   `corner_yard`: terracotta base, white pickets between brick piers, a gate under two lanterns, a red board fence with a
@@ -93,26 +100,21 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `fence: "wood"` / `"chain"` (`_wood_fence`, `_chain_fence`), `frame` (the colour of `_casement` windows), and `door_x`
   (no civic number plates on them: Julien wants numbers only where he asks, Charlotte's and the twins' houses) (any kind of building can name its door for `doors.json`, so it gets its doorbell on Halloween night). Helpers: `_casement`,
   `_glass_rail`, `_hydrangea`, `_cedar`, `_lantern_post`.
-- **6e Avenue between Masson and Dandurand**, her side (west, even numbers), `scenes/sixieme_sud.gd` (`street_key` "6e_sud", plate
-  "6e Avenue, entre Masson et Dandurand"), drawn from `reference/streetview/6e-avenue/5360…–5590…`: left to right the side of
-  the Banque Nationale across Masson (`masson_2892_cote`), Rue Masson, the long side of Église Saint-Esprit (`six_sud_eglise`,
-  kind `church_side`: rock-faced stone bays between buttresses, round-headed windows, red basement doors in pairs, the tower at
-  the Masson end) and its parish hall (`six_sud_salle`), the modern apartment block behind its court (`six_sud_appartements`,
-  kind `apartments`), the schoolyard (`six_sud_cour`, `lot_style` "court"), the school's gym (`six_sud_gymnase`, kind `gym`), the
-  school (`ecole`, its photo-based drawing kept), Rue Dandurand and Xin-Xin's side. Crossing Dandurand southward from her block
-  (`main.gd _cross`) loads it ("6e_sud_from_6e"), crossing back loads her block at its Dandurand corner ("6e_from_sud", both
-  through `StreetScene._cross_to`); its Masson corner turns onto Masson's north side by the church. Kept separate from main so
-  the saved positions on her block don't move.
-- **The other side of that stretch** (east, odd numbers), `scenes/sixieme_sud_est.gd` (`street_key` "6e_sud_est", plate "6e Avenue,
-  entre Dandurand et Masson, de l'autre côté"), from `reference/streetview/6e-avenue/5385…–5601…`: seen from the west sidewalk, so
-  Dandurand is on the LEFT: the side of 5601 (`six_est_sud_5601_cote`), Rue Dandurand, the red-painted 5595, the triplexes
-  5581–5551 with their outdoor stairs, the lane (`ruelle_six_est_sud`, not hers: a line only), the triplexes 5535–5459, two 1960s
-  duplexes (5455, 5435, kind `modern`), the parking lot and the little square (`masson_lot` "parking" / "plaza"), the side of
-  2901 Masson, Rue Masson, the side of 2902 across it. Connections: crossing Dandurand from `sixieme_est` ("6e_sud_est_from_6e_est",
-  back "6e_est_from_sud"); across 6e from `sixieme_sud` at both corners (`_add_across(cs, scene, key, stretch)`, `stretch` -1/1 =
-  the stretch left/right of the gap; keys "6e_sud_est_from_sud_masson|dandurand", "6e_sud_from_est_masson|dandurand"); its Masson
-  corner turns onto Masson's north side by 6e–7e, and from `masson_impair` the 6e corner turns into either side of 6e
-  ("6e_sud_from_masson" from the stretch left of it, "6e_sud_est_from_masson" from the right).
+- **6e Avenue between Masson and Dandurand** (the left end of `main.tscn` since the merge, and the right end of `sixieme_est`), drawn
+  from `reference/streetview/6e-avenue/5360…–5590…` and `5385…–5601…`. West side (main): the side of the Banque Nationale across
+  Masson (`masson_2892_cote`), Rue Masson, the long side of Église Saint-Esprit (`six_sud_eglise`, kind `church_side`: rock-faced
+  stone bays between buttresses, round-headed windows, red basement doors in pairs, the tower at the Masson end) and its parish
+  hall (`six_sud_salle`), the modern apartment block behind its court (`six_sud_appartements`, kind `apartments`), the schoolyard
+  (`six_sud_cour`, `lot_style` "court"), the school's gym (`six_sud_gymnase`, kind `gym`) and the school's own side on 6e
+  (`ecole_6e`, kind `school_side`: red-brown brick over a tall grey parged basement, a stone water table and a band of basket-weave
+  brick, maroon double-hung windows in pairs, the plain corner at Dandurand; the Dandurand front `ecole` is still what 5e
+  Avenue shows). East side (sixieme_est, Dandurand on the left there): the red-painted 5595, the triplexes 5581–5551 with their
+  outdoor stairs, the lane (`ruelle_six_est_sud`, not hers: a line only), the triplexes 5535–5459, two 1960s duplexes (5455,
+  5435, kind `modern`), the parking lot and the little square (`masson_lot` "parking" / "plaza"), the side of 2901 Masson, Rue
+  Masson, the side of 2902 across it. Keys: "6e_from_masson", "6e_from_6e_est_masson", "6e_from_6e_est_dandurand_sud",
+  "6e_est_from_masson", "6e_est_from_6e_masson", "6e_est_from_6e_dandurand_sud"; from `masson_impair` the 6e corner turns into the
+  west side from the stretch left of it, the east side from the right. `main.gd` and `sixieme_est.gd` tell the town map where
+  Dandurand lies along them (`_dandurand_f`).
 - **Rue Masson** (built block by block from `reference/streetview/`, INDEX.md "Rue Masson 2000–3400"): **one scene per side of the
   whole street** (Julien: so she isn't forever crossing into another scene), `scenes/masson.gd` with `@export side`:
   `masson_impair.tscn` (the odd numbers, the NORTH side, seen from the south sidewalk, the 1re on the left) and `masson_pair.tscn`

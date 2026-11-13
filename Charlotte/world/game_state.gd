@@ -109,7 +109,7 @@ static func save_game(scene: String, x: float) -> void:
 	if not enabled() or scene.is_empty():
 		return
 	var data := {
-		"version": 2, "scene": scene, "x": x,
+		"version": 3, "scene": scene, "x": x,
 		"day": Season.day, "season": Season.current, "age": age,
 		"money": money, "quests": quests, "flags": flags,
 	}
@@ -138,11 +138,32 @@ static func load_game(n: int) -> String:
 	Carry.migrate()
 	var scene := str(data.get("scene", ""))
 	var x := float(data.get("x", NAN))
+	if int(data.get("version", 1)) < 3:
+		var moved := _merged_scene(scene, x)
+		scene = moved[0]
+		x = moved[1]
 	if scene.contains("/scenes/house") or scene.contains("/scenes/depanneur") or scene.contains("/scenes/ohbon"):
 		Transition.inside_x = x
 	else:
 		Transition.street_x = x
 	return scene
+
+
+## Saves from before 6e Avenue became one scene per side (version 3, 2026-11-13): main.tscn gained the stretch Masson–Dandurand
+## at its left end (its old x moves right by MAIN_GAINED), sixieme_sud.tscn was that stretch (same x in main.tscn), and
+## sixieme_sud_est.tscn is now the right end of sixieme_est.tscn (its x moves right by EST_GAINED).
+const MAIN_GAINED := 5228.4
+const EST_GAINED := 8351.8
+
+
+static func _merged_scene(scene: String, x: float) -> Array:
+	if scene.ends_with("/scenes/main.tscn"):
+		return [scene, x + MAIN_GAINED]
+	if scene.ends_with("/scenes/sixieme_sud.tscn"):
+		return ["res://scenes/main.tscn", x]
+	if scene.ends_with("/scenes/sixieme_sud_est.tscn"):
+		return ["res://scenes/sixieme_est.tscn", x + EST_GAINED]
+	return [scene, x]
 
 
 ## A fresh start in slot `n`: day 1 in autumn, starting money, no quests done, her usual dress, a bare fridge.
