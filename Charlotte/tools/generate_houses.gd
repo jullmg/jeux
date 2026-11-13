@@ -1205,10 +1205,11 @@ const HOUSES := [
 	# 2609–2611: charcoal brick on three floors, black balconies, Domino's (2605…, 2613…).
 	{
 		"name": "masson_2611", "kind": "commerce", "width": 700.0, "floors": 3,
-		"bricks": ["#3E3C3A", "#4A4846", "#363432", "#52504C"], "mortar": "#6A6864", "parapet": "flat",
-		"lintel": "#5E5C58", "lintel_dark": "#2E2C2A", "lintel_style": "none", "window_style": "hung", "hung_frame": "#2B2B2E", "windows": [[90.0, 110.0], [450.0, 110.0]],
-		"projecting": [[250.0, 420.0]],
-		"shops": [{"x0": 30.0, "x1": 670.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 560.0, "inside": "restaurant", "wall": "#E8E4DA", "transom": "none"}], "basement": [],
+		"bricks": ["#2E2D2C", "#353433", "#2A2928", "#3C3A38"], "mortar": "#4A4846", "parapet": "crenel",
+		"lintel": "#3A3836", "lintel_dark": "#1E1D1C", "lintel_style": "none", "window_style": "hung", "hung_frame": "#2B2B2E", "windows": [[290.0, 110.0], [480.0, 110.0]],
+		"projecting": [[40.0, 240.0]], "slab": "#2B2B2E", "slab_dark": "#1A1A1A", "metal": "#1A1A1A",
+		"shops": [{"x0": 30.0, "x1": 560.0, "sign": "#F2F0EA", "frame": "#2B2B2E", "door": 480.0, "inside": "restaurant", "wall": "#E8E4DA", "transom": "none"}],
+		"res_doors": [625.0], "basement": [],
 	},
 	# 2613–2617: white brick on three floors, the flower shop Le Jardin under its black sign (2613…).
 	{
@@ -5022,6 +5023,8 @@ func _commerce() -> void:
 				_corbel_parapet(top)
 			"scroll":
 				_scroll_parapet(top)
+			"crenel":
+				_crenel_parapet(top)
 			_:
 				_cornice(top)
 		if k.get("sky_mural", false):
@@ -5700,6 +5703,20 @@ func _corner_quoins(x: float, y0: float, y1: float) -> void:
 
 
 # A parapet raised in the middle in a curved crest ending in scrolls, under a stone coping (3012…, 3028…).
+# Brick merlons along the top, like a little castle (2609–2611, Domino's building, 2613…).
+func _crenel_parapet(top: float) -> void:
+	var brick: String = k.bricks[0]
+	_rect(X0 - 4, top - 8, X1 - X0 + 8, 10, brick)
+	var x := X0
+	var w := 46.0
+	while x < X1 - 10.0:
+		_rect(x, top - 30, minf(w, X1 - x), 24, brick, _stroke("#000000", 0.8) + ' stroke-opacity="0.4"')
+		_rect(x, top - 30, minf(w, X1 - x), 3, "#FFFFFF", 'opacity="0.15"')
+		x += w * 2.0
+	_rect(X0, top, X1 - X0, 6, "#000000", 'opacity="0.2"')
+	_snow(X0 - 4, X1 - X0 + 8, top - 8)
+
+
 func _scroll_parapet(top: float) -> void:
 	var brick: String = k.bricks[0]
 	var cx := (X0 + X1) / 2.0
