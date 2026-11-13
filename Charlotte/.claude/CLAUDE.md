@@ -27,7 +27,10 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   then plays nothing, `Music._silent`) and through `open -W -g -n -a /Applications/Godot.app --stdout F --stderr F --args …`
   so the window never takes the focus (`-g`), then read F. Headless runs (`--headless`: generator, import) need neither.
 - Temporary test scenes and scripts go in `zz_*` files at the project root (ignored by git) and are deleted when done.
-- Screenshots (use them to check visual changes). Julien's main display is an HDMI monitor: add `--screen 1` (engine arg, before `--`) so the window opens on the MacBook's built-in screen and doesn't interrupt their work:
+- Screenshots (use them to check visual changes). Every window must open on the MacBook's built-in screen, never on Julien's
+  external monitor: pass `--screen $(tools/ecran_macbook.sh)` (engine arg, before `--`). Godot numbers the MAIN display 0, and
+  which one is main changes with how the screens are plugged in (the MacBook was 1, now 0), so never hard-code the index.
+  Below, `--screen 1` stands for that:
   - `Godot --path . res://scenes/intro.tscn -- --screenshot=/path/intro.png`
   - `Godot --path . res://scenes/main.tscn -- --screenshot=/path/main.png [--x=1234] [--wait=6]` (`--x` = Charlotte's start x, `--wait` = seconds before the shot)
   - `Godot --path . res://scenes/house.tscn -- --screenshot=/path/house.png [--x=1234] [--wait=1]` (x ≥ 5000 = bedroom)
@@ -130,19 +133,27 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   doors, buttresses, the flight of steps, the grounds; the tower's top isn't in any picture), `presbytere` (over `_building`:
   buff zigzag friezes, copper band, the columned porch), `masson_lot` (the gap at 2876: backs, a painted shed, a tree), plus
   `*_cote` side walls of the corners across the avenues; `_back_row` draws hazy buildings behind open ground so the distant
-  city doesn't show as a grey slab. Built: the whole street, 1re to 9e, both sides. 1re–2e (north: Bonsoir, Domino's, Le Jardin, a lot, Yoga D.N.A. / Phở /
-  juice bar at 2e; south: after the square across 2e, apartment blocks `lot_style` "setback" behind lawns, TELUS, the low white
-  building at 1re), 2e–3e (north: the 1970s commercial block at 2e, new brick condos with a yard between them; south:
-  Place Dollar at 3e, `texts` painted on 2682's wall, Monteiro, a passage of murals, the planted square at 2e, `lot_style` "plaza"),
-  3e–4e (north: the old bank at 3e as a `bank`, green-framed windows, a parking lot, the boulangerie, the
-  `sky_mural` building at 4e; south: the white bays at 4e, Jean Coutu, the metal-clad corner at 3e over its `mural: "graffiti"`),
-  4e–5e (north: BANCO, Pattes & Griffes, Pizza Pizza, a café, a lot, BMO; south: Dollarama, a
-  parking lot, the buff row with white balconies, the corner at 4e), 5e–6e (north: the presbytery and the church; south: 2846–2888, the grey
-  stone row, L'Oeufrier, the lot, the Banque Nationale), 6e–7e (2901–2933 north; 2902–2970 south) and 7e–8e (north: Première
-  Moisson, a parking lot (`lot_style` "parking"), the stucco 3039 with `quoins`, the painted wall `mural_wall`; south: the
-  passage of murals (`lot_style` "murals"), Milot and Raposo, the `scroll` parapet, Tandoori Masson, the pink Couche-Tard) and 8e–9e (north: the pink painted corner, Méga Vrac, Quincaillerie A. Lalonde, grey
-  stone, the pub's `upper: "rubble"`, the café at 9e; south: `round_windows` and `metal_panels` at 8e, the murals, Poke Monster
-  and Bossa under `upper: "siding"`). `TownMap._here` reads
+  city doesn't show as a grey slab. Built: the whole street, 1re to 9e, both sides, **revised 2026-11-12 from front pictures only** (the first
+  drawing used pictures taken from the avenues, i.e. the corner buildings' sides: lots, murals and setbacks that aren't on
+  Masson). 1re–2e (north: Boni-soir, Domino's, Le Jardin de Mathilde and Les Cœurs de Jupons under the same white brick, the
+  Yoga D.N.A. / Phở / juice bar block at 2e; south: the TELUS block at the sidewalk with Koodo, white balconies at its 2e corner,
+  a small parking lot, and the fire station Caserne 29 at 1re, its glass garage doors a shopfront `front: "garage"`, `_garage_bay`),
+  2e–3e (north: the Paulines block at 2e, then one condo building to 3e with balconies set into the wall, `loggias` and
+  `upper_piers`, the SAQ at the corner; south: Place Dollar at 3e, "Les fleurs poussent encore" over dark granite, Monteiro,
+  the charcoal brick building, Pista at 2e), 3e–4e (north: the old bank at 3e as a `bank`, the green-framed building running on
+  to its neighbour, the boulangerie, Service Comptant in brown brick at 4e (its mural is on its side); south: the scroll parapet
+  and yellow canopy at 4e, Jean Coutu, the red brick yoga studio at 3e, "Yoga chaud | Pilates" in `texts`), 4e–5e (north:
+  BANCO/La Corvette, Pattes & Griffes, Pizza Pizza on two floors, the café Trou. in cream siding, BMO; south: Dollarama, the
+  Fruiterie au Melon Miel in the same buff building, the corner at 4e), 5e–6e (north: the presbytery and the church; south:
+  the Banque Nationale, one narrow brick building with set-back balconies, the grey stone row with L'Oeufrier and the Tabagie),
+  6e–7e (north: Fraîchement Bon at the 6e corner, Poulet Rouge, the Aquarium row, the old bank at 7e; south: the Tim Hortons
+  building with its shops, the RONA in grey stone with its brick panel (`metal_panels` [x0, x1, colour]), Fido at 6e), 7e–8e
+  (north: Première Moisson, the two-floor sandwich shop, the brick row, the Brûlerie St-Denis in stucco with `quoins` at 8e;
+  south: the restaurant at 8e, Milot and Raposo, the `scroll` parapet, Tandoori Masson, the Couche-Tard in grey stone brick)
+  and 8e–9e (north: Méga Vrac in cream brick at 8e, the Lalonde hardware store with its SICO sign, grey stone, the pub's
+  `upper: "rubble"`, the café at 9e; south: the corner at 8e, a little square at 3102 (`lot_style` "plaza"), the scroll
+  building, Poke Monster under `upper: "siding"`, the cream building with its crenellated parapet, Chic!, Bossa, the corner at 9e).
+  `TownMap._here` reads
   the block from the key and puts her at the sheet's foot between its avenues. **Halloween won't be played on Masson
   (Julien): don't spend time checking it there**; it is only kept from breaking (`StreetScene.gives_candy = false`, and
   `StreetScene._moon_x()` so the moon isn't drawn over a tall facade).
