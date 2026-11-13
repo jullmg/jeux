@@ -59,21 +59,12 @@ func _start_x() -> float:
 # Rue Masson, Rue Dandurand (from the reference photos: the dépanneur's real front, the school across) and Rue Holt. The
 # vistas go behind the houses; all three run west from 6e (Mount Royal at the end).
 func _build_cross_streets() -> void:
-	# Down Masson the church's front and the Masson shops (north side), the Banque Nationale's block on the left.
+	# Down Masson toward 5e, its real buildings (Julien): the south side (masson_pair) on the left, the church and the north side
+	# (masson_impair) on the right.
 	var masson := _cross_street("rue_masson", "Rue Masson", 1.0)
 	masson.facing = "west"
-	masson.left_walls = [
-		{"to": 1.2, "top": 330.0, "kind": "plex", "color": Color("#8E4A3A")},
-		{"to": 2.6, "top": 300.0, "kind": "plex", "color": Color("#B5B1A9")},
-		{"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": Color("#9C5A44")},
-	]
-	# The church's grey stone front along Masson, then the presbytery's red brick and the shops beyond (its facade is too tall to be
-	# laid in perspective as a texture).
-	masson.right_walls = [
-		{"to": 1.4, "top": 230.0, "kind": "plex", "color": Color("#A8A49C")},
-		{"to": 2.0, "top": 300.0, "kind": "plex", "color": Color("#9A3E30")},
-		{"to": CrossStreet.FAR, "top": 310.0, "kind": "plex", "color": Color("#8E5A44")},
-	]
+	masson.left_walls = _walls_along("res://scenes/masson.gd", "rue_6e", 1, "", {"side": "pair"})
+	masson.right_walls = _walls_along("res://scenes/masson.gd", "rue_6e", -1, "", {"side": "impair"})
 	var dandurand := _cross_street("rue_dandurand", "Rue Dandurand", 1.0)
 	dandurand.school = true
 	dandurand.guard = true

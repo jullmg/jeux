@@ -796,8 +796,13 @@ func _house_top(art: String) -> float:
 ## with its width, height, colour (sampled off its facade) and kind; then the next block, generic, into the distance.
 ## The first one is the corner building's side, the same building as `ours` (our facade at that corner): it takes our
 ## facade's height and brick, so the corner joins up.
-func _walls_along(script_path: String, from_gap: String, direction: int, ours := "") -> Array:
+func _walls_along(script_path: String, from_gap: String, direction: int, ours := "", setup := {}) -> Array:
 	var other: Node = load(script_path).new()
+	# A street drawn as one scene per side (Rue Masson) is told which side to lay out.
+	for key in setup:
+		other.set(key, setup[key])
+	if not setup.is_empty() and other.has_method("_setup"):
+		other.call("_setup")
 	var lay: Array = other.layout
 	var gaps: Dictionary = other.cross_streets
 	other.free()
@@ -805,8 +810,15 @@ func _walls_along(script_path: String, from_gap: String, direction: int, ours :=
 	var d := 0.0
 	var i := lay.find(from_gap) + direction
 	var last := Color("#9C5A44")
-	while i >= 0 and i < lay.size() and not gaps.has(lay[i]):
+	# The real buildings, block after block (an open "cross" gap with its crosswalk at each cross street), as far as that street
+	# is drawn and the vista can show them; generic plexes beyond.
+	while i >= 0 and i < lay.size() and d < VISTA_REAL:
 		var art: String = lay[i]
+		if gaps.has(art):
+			d += float(gaps[art]) / 650.0
+			walls.append({"to": d, "kind": "cross"})
+			i += direction
+			continue
 		var tex := _tex(art)
 		d += (tex.get_width() - 2.0 * MARGIN) * HOUSE_SCALE / 650.0
 		var wall := {"to": d, "top": HOUSE_BASE_Y - (tex.get_height() - 40.0) * HOUSE_SCALE, "kind": _wall_kind(art), "color": _wall_color(tex)}
@@ -819,18 +831,14 @@ func _walls_along(script_path: String, from_gap: String, direction: int, ours :=
 		if wall.kind != "gap":
 			last = wall.color
 		i += direction
-	if ours != "" and not walls.is_empty() and walls[0].kind != "gap":
+	if ours != "" and not walls.is_empty() and walls[0].kind != "gap" and walls[0].kind != "cross":
 		# The corner building's side: drawn at our corner facade's height and brick so the corner joins up.
 		walls[0].top = _house_top(ours)
 		walls[0].color = _wall_color(_tex(ours))
 		walls[0].erase("tex")
-	# The next cross street (an open "cross" gap, with its crosswalk), then the next block's plexes into the distance.
-	walls.append({"to": d + 0.5, "kind": "cross"})
-	var beyond := i + direction
-	if beyond >= 0 and beyond < lay.size() and lay[beyond].begins_with("ecole"):
-		# Down 5e or 6e past Dandurand: the school, then more plexes.
-		var school := _tex("ecole")
-		walls.append({"to": d + 3.1, "top": HOUSE_BASE_Y - (school.get_height() - 40.0) * HOUSE_SCALE, "kind": "school", "color": Color("#A9472F")})
+	if walls.is_empty() or walls[-1].kind != "cross":
+		# The end of what is drawn: the next cross street, then the next block's plexes into the distance.
+		walls.append({"to": d + 0.5, "kind": "cross"})
 	walls.append({"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": last.lerp(Color("#B5603F"), 0.5)})
 	return walls
 
@@ -941,6 +949,8 @@ func _shop_shut() -> bool:
 
 
 ## The houses that never hand out candy, whatever the street: her own, the shops, the school, the lane mouths.
+## How deep down a cross street the vista lays the real buildings of that street (in the vista's depth units).
+const VISTA_REAL := 9.0
 const NO_CANDY := ["duplex_charlotte", "depanneur", "depanneur_front", "ohbon", "ecole", "ecole_6e", "garages", "ruelle", "ruelle_verte",
 	"ruelle_impair_holt", "ruelle_impair_dandurand"]
 

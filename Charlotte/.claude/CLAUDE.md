@@ -178,6 +178,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   Drawn walls (the corner building's side, the other blocks across) get exposed brick courses and staggered joints
   (`_bricks`). Planted curb extensions on both curbs past the corner and either side of the next crossing
   (`_curb_gardens`).
+- **A vista shows the real buildings of the street it looks down, whenever that street is drawn** (Julien, 2026-11-13, for every
+  scene and every future street): build its walls with `_walls_along`, never generic plexes, and when a new street is drawn,
+  revisit the scenes whose vistas look down it. `_walls_along(script, gap, direction, ours, setup)` now runs on past the next cross
+  street (a "cross" gap of its real width) block after block, up to `VISTA_REAL` deep, then generic plexes; `setup` sets
+  properties on the scene before reading its layout (Masson: `{"side": "pair"}`). Masson's avenues that are drawn are listed in
+  `masson.gd` `REAL_AVENUES` (6e from the north side); 6e Avenue's two scenes look down Masson at its real facades.
 - Cross-street vistas show the real street that runs there: `StreetScene._walls_along(script, from_gap, direction)`
   reads that street's `layout` (its scene script's `_init`) from our corner to its next cross street, giving each wall
   its building's width, height, kind (`_wall_kind`: ohbon, corner_holt, shop = Xin-Xin, garage, school, gap = lane,

@@ -359,7 +359,15 @@ func _side_name() -> String:
 	return "côté sud" if side == "pair" else "côté nord"
 
 
-# The avenues run north from the odd side's view, south from the even side's; their far sides aren't drawn from photos yet.
+## The avenues drawn as scenes, by the side of Masson we stand on: {gap: [[left script, its gap, direction], [right …]]}.
+## Below Masson nothing is drawn yet, so the south side's views down the avenues stay generic.
+const REAL_AVENUES := {
+	"impair": {"rue_6e": [["res://scenes/main.gd", "rue_masson", 1], ["res://scenes/sixieme_est.gd", "rue_masson", -1]]},
+}
+
+
+# The avenues run north from the odd side's view, south from the even side's. Those already drawn show their real buildings
+# (REAL_AVENUES); the others are generic.
 func _build_cross_streets() -> void:
 	var avenues: Array = _side_data.avenues
 	var brick := [Color("#A8473A"), Color("#9C5A44"), Color("#B5603F"), Color("#7E4436")]
@@ -378,6 +386,12 @@ func _build_cross_streets() -> void:
 			{"to": 2.2, "top": 300.0, "kind": "plex", "color": brick[n % 4]},
 			{"to": CrossStreet.FAR, "top": 290.0, "kind": "plex", "color": brick[(n + 1) % 4]},
 		]
+		# An avenue that is drawn shows its real buildings (Julien): up 6e from the north side, its west side (main.tscn) on the
+		# left — the church's long side first — and its east side (sixieme_est) on the right — Fraîchement Bon's side first.
+		var real: Array = REAL_AVENUES.get(side, {}).get(a[0], [])
+		if not real.is_empty():
+			cs.left_walls = _walls_along(real[0][0], real[0][1], real[0][2])
+			cs.right_walls = _walls_along(real[1][0], real[1][1], real[1][2])
 
 
 # The shops' names on their sign bands, and the odd sign panel on a wall.

@@ -81,19 +81,13 @@ func _build_cross_streets() -> void:
 		{"to": 2.2, "top": 290.0, "kind": "plex", "color": Color("#A8473A")},
 		{"to": CrossStreet.FAR, "top": 310.0, "kind": "plex", "color": Color("#7E4436")},
 	]
+	# Down Masson toward 7e, its real buildings (Julien): the north side (masson_impair), Fraîchement Bon first, on the left, the
+	# south side (masson_pair) on the right.
 	var masson := _cross_street("rue_masson", "Rue Masson", -1.0)
 	masson.along_name = "6e Avenue"
 	masson.facing = "east"
-	masson.left_walls = [
-		{"to": 1.2, "top": _house_top("six_est_sud_2901_cote"), "kind": "plex", "color": Color("#9A4636")},
-		{"to": 2.6, "top": 300.0, "kind": "plex", "color": Color("#8E3E30")},
-		{"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": Color("#B04A38")},
-	]
-	masson.right_walls = [
-		{"to": 1.0, "top": 300.0, "kind": "plex", "color": Color("#D4A774")},
-		{"to": 2.4, "top": 330.0, "kind": "plex", "color": Color("#5E4A3E")},
-		{"to": CrossStreet.FAR, "top": 290.0, "kind": "plex", "color": Color("#C2452E")},
-	]
+	masson.left_walls = _walls_along("res://scenes/masson.gd", "rue_6e", 1, "", {"side": "impair"})
+	masson.right_walls = _walls_along("res://scenes/masson.gd", "rue_6e", -1, "", {"side": "pair"})
 
 
 # Round the corners onto Holt and Dandurand east of 6e (the stretches of those streets across 6e from her block) and onto
