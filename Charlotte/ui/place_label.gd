@@ -8,6 +8,7 @@ const BLUE := Color("#1D4F91")
 const NAMES := {
 	"main": "6e Avenue",
 	"sixieme_est": "6e Avenue, de l'autre côté",
+	"sixieme_sud": "6e Avenue, entre Masson et Dandurand",
 	"holt": "Rue Holt",
 	"cinquieme": "5e Avenue",
 	"dandurand": "Rue Dandurand",

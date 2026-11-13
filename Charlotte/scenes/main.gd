@@ -32,7 +32,7 @@ func _init() -> void:
 
 # In front of her duplex, back where she left the street (from her flat), at a corner or out of the lane.
 func _start_x() -> float:
-	if _arriving("6e_from_dandurand") or _arriving("6e_from_6e_est_dandurand"):
+	if _arriving("6e_from_dandurand") or _arriving("6e_from_6e_est_dandurand") or _arriving("6e_from_sud"):
 		return _starts[layout.find("depanneur")] + 60.0
 	if _arriving("6e_from_holt") or _arriving("6e_from_6e_est_holt"):
 		return _starts[layout.find("rue_holt")] - 40.0
@@ -108,3 +108,12 @@ func _build_doors() -> void:
 		Transition.street_x = area.get_center().x
 		Sfx.play("door", area.get_center())
 		Transition.change_scene(self, "res://scenes/house.tscn")))
+
+
+# Crossing Dandurand southward from her block goes on down 6e Avenue toward Masson (sixieme_sud.tscn, where the school and
+# what lies past it are drawn from the pictures).
+func _cross(cs: CrossStreet) -> void:
+	if cs != _cross_streets[0] or _charlotte.position.x < cs.x0:
+		super._cross(cs)
+		return
+	_cross_to(cs, "res://scenes/sixieme_sud.tscn", "6e_sud_from_6e")

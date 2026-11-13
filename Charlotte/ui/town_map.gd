@@ -126,6 +126,9 @@ func _here() -> Dictionary:
 				"say": "Je suis en face de chez moi !"}
 		"holt":
 			return {"at": Vector2(lerpf(WALK_E, WALK_W, f), WALK_N), "say": "Je suis ici !"}
+		"sixieme_sud":
+			# 6e Avenue below Dandurand, toward Masson at the sheet's foot (Masson on the left of the view, Dandurand on the right).
+			return {"at": Vector2(WALK_E, lerpf(SHEET.y - 20.0, DAND_Y + ST_W / 2.0 + 10.0, f)), "say": "Je suis sur la 6e, vers Masson !"}
 		"cinquieme":
 			return {"at": Vector2(WALK_W, lerpf(WALK_N, WALK_S, f)), "say": "Je suis ici !"}
 		"dandurand":

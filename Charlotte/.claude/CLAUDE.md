@@ -90,6 +90,16 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `fence: "wood"` / `"chain"` (`_wood_fence`, `_chain_fence`), `frame` (the colour of `_casement` windows), and `door_x`
   (no civic number plates on them: Julien wants numbers only where he asks, Charlotte's and the twins' houses) (any kind of building can name its door for `doors.json`, so it gets its doorbell on Halloween night). Helpers: `_casement`,
   `_glass_rail`, `_hydrangea`, `_cedar`, `_lantern_post`.
+- **6e Avenue between Masson and Dandurand**, her side (west, even numbers), `scenes/sixieme_sud.gd` (`street_key` "6e_sud", plate
+  "6e Avenue, entre Masson et Dandurand"), drawn from `reference/streetview/6e-avenue/5360…–5590…`: left to right the side of
+  the Banque Nationale across Masson (`masson_2892_cote`), Rue Masson, the long side of Église Saint-Esprit (`six_sud_eglise`,
+  kind `church_side`: rock-faced stone bays between buttresses, round-headed windows, red basement doors in pairs, the tower at
+  the Masson end) and its parish hall (`six_sud_salle`), the modern apartment block behind its court (`six_sud_appartements`,
+  kind `apartments`), the schoolyard (`six_sud_cour`, `lot_style` "court"), the school's gym (`six_sud_gymnase`, kind `gym`), the
+  school (`ecole`, its photo-based drawing kept), Rue Dandurand and Xin-Xin's side. Crossing Dandurand southward from her block
+  (`main.gd _cross`) loads it ("6e_sud_from_6e"), crossing back loads her block at its Dandurand corner ("6e_from_sud", both
+  through `StreetScene._cross_to`); its Masson corner turns onto Masson's north side by the church. Kept separate from main so
+  the saved positions on her block don't move.
 - **Rue Masson** (built block by block from `reference/streetview/`, INDEX.md "Rue Masson 2000–3400"): **one scene per side of the
   whole street** (Julien: so she isn't forever crossing into another scene), `scenes/masson.gd` with `@export side`:
   `masson_impair.tscn` (the odd numbers, the NORTH side, seen from the south sidewalk, the 1re on the left) and `masson_pair.tscn`
@@ -458,6 +468,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - `art/logo.png` is cut out of `art/logo.jpg` by `tools/cutout_logo.gd` (same headless invocation).
 - `reference/` holds real-world reference photos, sorted (see `reference/LISEZMOI.md`): `personnages/`, `maison_charlotte/` (with `interieur/`), `coin_dandurand/`, `coin_holt/`, `ruelle/`, `rue/` (doors, stairs, curb gardens, example houses), `cartes/`, `logo/`. It is gitignored; new pictures go in the matching folder.
 - `reference/streetview/` (once `utils/streetview/capture.py` has run; see its README): Street View pictures of the four streets round the block, about every 10 m. **Start from its `INDEX.md`**: one table per street with each picture's civic number, position and file, Charlotte's side listed in the order the scene's `layout` runs (left to right), `maps/quartier.png` / `quartier_detail.png` show the whole neighbourhood (D'Iberville to Saint-Michel, Bellechasse to Saint-Joseph, Montréal north up as in the game), the other `maps/*.png` locate each building in its street (open the map first: camera dots, lines to the facades, civic numbers, north up), and `index.html` is the same on a clickable map. Reference only, never shipped in the game.
+  Each row's **view** says whether the picture really shows the building's front (bold = a side or back seen from a cross
+  street or a lane: never draw a facade from it).
   **To draw a building or its surroundings from them, follow `docs/drawing-from-streetview.md`** (find it on the map, what to read off the photo, which generator entry to edit, regenerate, screenshot and compare in every season).
 
 ## Interactions and scene changes

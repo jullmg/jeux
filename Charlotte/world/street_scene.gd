@@ -431,6 +431,30 @@ func _cross(cs: CrossStreet) -> void:
 
 
 
+## Crossing a street whose other side is another scene (6e Avenue below Dandurand): she goes to the curb, looks both ways like
+## at any crosswalk, and `scene` loads with `Transition.arrive` = `arrive`. Same age rule as every crossing.
+func _cross_to(cs: CrossStreet, scene: String, arrive: String) -> void:
+	if DebugMenu.blocked(GameState.age < CROSS_AGE):
+		Bubble.say(self, _charlotte.position + Vector2(0, -190), CANT_CROSS, 2.6)
+		return
+	var curbs := cs.road_x(CHARLOTTE_Y)
+	var going_right := _charlotte.position.x < (cs.x0 + cs.x1) / 2.0
+	var dir := 1 if going_right else -1
+	_control.enabled = false
+	_control.hands_off = true
+	_charlotte.is_walking = false
+	_charlotte.position.x = curbs.x - 8.0 if going_right else curbs.y + 8.0
+	Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je regarde des deux côtés !", 1.4)
+	var tween := create_tween()
+	for look in [dir, -dir, dir]:
+		tween.tween_callback(func(): _charlotte.facing = look)
+		tween.tween_interval(0.45)
+	tween.tween_callback(func():
+		Transition.arrive = arrive
+		Transition.crossing = ""
+		Transition.change_scene(self, scene))
+
+
 ## A back lane's entrance (the "ruelle" or "ruelle_verte" building in `layout`): click it and Charlotte walks into
 ## that cross lane (the green one near Dandurand, or the one near Holt), arriving at this street's end of it.
 func _add_lane(art: String) -> void:

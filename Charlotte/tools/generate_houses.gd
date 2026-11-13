@@ -1274,6 +1274,33 @@ const HOUSES := [
 		"bricks": ["#C8A27A", "#BC966E", "#D4AE86", "#B08A62"], "mortar": "#E6DCCB",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 40.0,
 	},
+	# ── 6e Avenue between Masson (left) and Dandurand (right), the west side (reference/streetview/6e-avenue/5360… to 5590…) ──
+	# The long side of Église Saint-Esprit along 6e, the tower at the Masson end, red basement doors in pairs (5360…, 5418…, 5436…).
+	{
+		"name": "six_sud_eglise", "kind": "church_side", "width": 2600.0, "floors": 4, "halloween": false,
+		"stone": "#9E9A92", "tower_x": 60.0, "bay": 300.0, "doors": [760.0, 1360.0, 1960.0],
+	},
+	# Its parish hall, lower down the same wall: the beige door and the red one with its sign (5438…, 5444…, 5446…).
+	{
+		"name": "six_sud_salle", "kind": "church_side", "width": 900.0, "floors": 4, "halloween": false,
+		"stone": "#A29E96", "bay": 300.0, "hall_doors": [260.0, 620.0],
+	},
+	# The modern apartment block behind its court (5462…, 5470…, 5486…, 5498…, 5502…).
+	{
+		"name": "six_sud_appartements", "kind": "apartments", "width": 1700.0, "floors": 4, "halloween": false,
+		"volumes": [[30.0, 500.0, "#C9CCCE"], [530.0, 340.0, "#5E6266"], [870.0, 500.0, "#C9CCCE"], [1370.0, 300.0, "#5E6266"]],
+		"entrance": 700.0, "bricks": ["#9A4636", "#A84E3C"], "mortar": "#C9BBAC",
+	},
+	# The schoolyard: lawn and the fenced basketball court (5522…).
+	{
+		"name": "six_sud_cour", "kind": "masson_lot", "lot_style": "court", "width": 1100.0, "floors": 3, "halloween": false,
+		"bricks": ["#B4693E", "#A85E36", "#BE7446"], "mortar": "#D8C8B0",
+	},
+	# The school's gym: orange-brown brick, a beige band, slit windows, its entrance in a beige stone block (5524…, 5534…, 5544…).
+	{
+		"name": "six_sud_gymnase", "kind": "gym", "width": 1600.0, "floors": 3, "halloween": false,
+		"bricks": ["#B4693E", "#A85E36", "#BE7446", "#9E5832"], "mortar": "#D8C8B0", "entrance": 1340.0,
+	},
 	# Across 5e: the side of Dollarama's building, buff brick (2840…).
 	{
 		"name": "masson_2840_cote", "kind": "side_wall", "width": 560.0, "floors": 3,
@@ -1472,6 +1499,12 @@ func _svg() -> void:
 			_presbytere()
 		"masson_lot":
 			_masson_lot()
+		"church_side":
+			_church_side()
+		"apartments":
+			_apartments()
+		"gym":
+			_gym()
 		"mural_wall":
 			_mural_wall()
 		_:
@@ -6070,6 +6103,9 @@ func _masson_lot() -> void:
 		"setback":
 			_setback()
 			return
+		"court":
+			_school_court()
+			return
 		"parking":
 			_parking_lot()
 			return
@@ -6248,6 +6284,32 @@ func _setback() -> void:
 		_fine_tree(Vector2(X0 + 140.0, g - 40.0), g - 330.0, -PI * 0.5, 1.0, ["#E3A33A", "#D9682B", "#C9562E", "#E8B54A"])
 
 
+# The schoolyard by 6e (5522…): a lawn, then the basketball court behind a tall green chain-link fence, its hoop, the school's
+# brick beyond.
+func _school_court() -> void:
+	var g := ground_y
+	_back_row(X0, X1, g - 520.0, g - 140.0)
+	_lawn(X0, X1, g - 140.0)
+	var c0 := X0 + 80.0
+	_rect(c0, g - 140.0, X1 - c0, 140, "#6E7A86")
+	_rect(c0 + 20, g - 120.0, X1 - c0 - 40, 3, "#F2F0EA")
+	split = out.size()
+	var top := g - 300.0
+	var post := c0
+	while post <= X1:
+		_rect(post - 3, top, 6, g - top, "#3E5E4A")
+		post += 120.0
+	var mesh := c0
+	while mesh < X1:
+		_path("M%s %s L%s %s M%s %s L%s %s" % [_n(mesh), _n(top), _n(mesh + 30), _n(g - 4), _n(mesh + 30), _n(top), _n(mesh), _n(g - 4)], "none", _stroke("#4E7A5E", 1) + ' opacity="0.55"')
+		mesh += 15.0
+	_rect(c0, top, X1 - c0, 5, "#3E5E4A")
+	var hx := (c0 + X1) / 2.0
+	_rect(hx - 4, g - 260, 8, 160, "#3A3A3A")
+	_rect(hx - 40, g - 290, 80, 50, "#F2F0EA", _stroke("#3A3A3A", 2))
+	_rect(hx - 16, g - 246, 32, 5, "#E8502A")
+
+
 # A parking lot behind a low hedge (3021…): asphalt with its painted lines, the brick backs beyond; the cars left out.
 func _parking_lot() -> void:
 	var g := ground_y
@@ -6263,6 +6325,168 @@ func _parking_lot() -> void:
 	while hx < X1 - 20.0:
 		_shrub(hx, 34.0, "#3E6A3A")
 		hx += 52.0
+
+
+# ── 6e Avenue between Dandurand and Masson, the west side ───────────────────
+# From reference/streetview/6e-avenue/5360… to 5590… (and their close-ups): the long side of Église Saint-Esprit along 6e, its
+# parish hall, the modern apartment block behind its court, the schoolyard, the school's gym; the school itself (`ecole`) is
+# already drawn from its photo and kept.
+
+# The church's long side (5360…, 5412…, 5418…, 5436…, 5444…): rock-faced grey stone in bays between buttresses, tall
+# round-headed windows in pale stone surrounds, small square windows above and below, a belt course, and in the basement the red
+# doors in pairs at the top of their steps with black rails; the tower's side at the Masson end (`tower_x`).
+func _church_side() -> void:
+	var stone: String = k.get("stone", "#9E9A92")
+	var trim := "#D8D4CC"
+	var g := ground_y
+	var top := g - 640.0
+	var base := g - 120.0
+	_stone_courses(X0, top, X1, g - 6.0, stone, 34.0, 70.0)
+	# The rough face: darker speckles on every stone.
+	for i in int((X1 - X0) * (g - top) / 2600.0):
+		_rect(rng.randf_range(X0, X1), rng.randf_range(top, g), rng.randf_range(4.0, 10.0), rng.randf_range(2.0, 5.0), "#5E5A54", 'opacity="0.35"')
+	_rect(X0 - 6, top - 18, X1 - X0 + 12, 20, trim, _stroke("#8A867E", 1))
+	_snow(X0 - 6, X1 - X0 + 12, top - 18)
+	_rect(X0, base - 12, X1 - X0, 12, trim, _stroke("#8A867E", 1))
+	var tx: float = k.get("tower_x", -1.0)
+	if tx > 0.0:
+		_stone_courses(tx, g - 960.0, tx + 260.0, top, stone, 34.0, 70.0)
+		_rect(tx - 8, g - 975.0, 276, 18, trim, _stroke("#8A867E", 1))
+		_lancet(tx + 130.0, g - 920.0, g - 760.0, 54.0, trim, CHURCH_GLASS)
+	var bay: float = k.get("bay", 300.0)
+	var x := X0 + 20.0
+	while x < X1 - 40.0:
+		if tx > 0.0 and x > tx - 60.0 and x < tx + 260.0:
+			x += bay
+			continue
+		# A buttress, then the bay's windows: the tall round-headed one, a small square one above and one below the belt.
+		_rect(x, top, 34, g - top - 6, "#" + Color(stone).darkened(0.08).to_html(false), _stroke("#6E6A64", 1))
+		_rect(x, top, 8, g - top - 6, "#FFFFFF", 'opacity="0.12"')
+		var wx := x + bay / 2.0 - 30.0
+		_round_window_stone(wx, 60.0, top + 120.0, base - 80.0, trim)
+		_square_window(wx + 14.0, top + 36.0, 32.0, trim)
+		_square_window(wx + 14.0, base + 20.0, 32.0, trim)
+		x += bay
+	# The basement doors: red, in pairs, at the top of a few steps with black rails (`doors`: their x).
+	split = out.size()
+	for dx: float in k.get("doors", []):
+		for side: float in [-1.0, 1.0]:
+			_rect(dx + side * 30.0 - 24.0, base - 6.0, 48, 94, "#A8302A", _stroke("#5E1A16", 2))
+			_rect(dx + side * 30.0 - 18.0, base + 4.0, 36, 30, "#C84A40", 'opacity="0.5"')
+		_rect(dx - 64, base - 12, 128, 8, trim)
+		for st in 3:
+			_rect(dx - 70 - st * 10.0, base + 88.0 + st * 10.0, 140 + st * 20.0, 10, "#8E8A82", _stroke("#6E6A64", 1))
+		for side: float in [-1.0, 1.0]:
+			_path("M%s %s L%s %s" % [_n(dx + side * 74.0), _n(base + 40), _n(dx + side * 96.0), _n(g - 6)], "none", _stroke("#1A1A1A", 3))
+	for dx: float in k.get("hall_doors", []):
+		_rect(dx - 26, base + 4.0, 52, g - base - 22, ["#C9B88E", "#A8302A"][int(dx) % 2], _stroke("#3A3A3A", 2))
+		_rect(dx - 16, base + 14.0, 32, 30, "#E8E4DA", 'opacity="0.6"')
+	if k.get("fence", "") == "iron":
+		_iron_fence(X0, X1)
+
+
+# A round-headed window in a pale stone surround, small panes.
+func _round_window_stone(x: float, w: float, y0: float, y1: float, trim: String) -> void:
+	var r := w / 2.0
+	_path("M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(x - 10), _n(y1 + 6), _n(y0 + r), _n(r + 10), _n(r + 10), _n(x + w + 10), _n(y0 + r), _n(y1 + 6)], trim, _stroke("#8A867E", 1.2))
+	_path("M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(x), _n(y1), _n(y0 + r), _n(r), _n(r), _n(x + w), _n(y0 + r), _n(y1)], "url(#glass)")
+	_rect(x + w / 2.0 - 1.5, y0 + 6, 3, y1 - y0 - 6, "#E8E4DA")
+	var py := y0 + r + 30.0
+	while py < y1:
+		_rect(x, py, w, 2.5, "#E8E4DA")
+		py += 36.0
+	_rect(x - 12, y1 + 4, w + 24, 8, trim, _stroke("#8A867E", 1))
+	_snow(x - 12, w + 24, y1 + 4)
+
+
+func _square_window(x: float, y: float, w: float, trim: String) -> void:
+	_rect(x - 6, y - 6, w + 12, w + 12, trim, _stroke("#8A867E", 1))
+	_rect(x, y, w, w, "url(#glass)")
+
+
+# The modern apartment block (5462…, 5470…, 5486…, 5498…, 5502…): set back behind a planted court with a path and benches,
+# volumes of pale and dark grey metal panels side by side, balconies with metal rails stacked up the pale ones, an entrance
+# under a canopy.
+func _apartments() -> void:
+	var g := ground_y
+	var court := g - 130.0
+	var top := g - 820.0
+	_back_row(X0, X1, g - 860.0, court)
+	var vols: Array = k.get("volumes", [[X0, 420.0, "#C9CCCE"], [450.0, 300.0, "#5E6266"], [750.0, 420.0, "#C9CCCE"]])
+	for v: Array in vols:
+		var vx: float = v[0]
+		var vw: float = v[1]
+		var col: String = v[2]
+		var vt := top + (40.0 if col == "#5E6266" else 0.0)
+		_rect(vx, vt, vw, court - vt, col, _stroke("#3A3E42", 1.5))
+		var px := vx + 6.0
+		while px < vx + vw - 4.0:
+			_rect(px, vt, 2, court - vt, "#000000", 'opacity="0.08"')
+			px += 36.0
+		var f := 0
+		var fy := vt + 40.0
+		while fy < court - 120.0:
+			var wx := vx + 30.0
+			while wx < vx + vw - 90.0:
+				_rect(wx, fy, 70, 90, "#2B3036")
+				_rect(wx + 4, fy + 4, 62, 82, "url(#glass)")
+				wx += 110.0
+			if col != "#5E6266":
+				# A balcony on each floor of the pale volumes.
+				_rect(vx + vw - 150.0, fy + 92.0, 140, 10, "#8E9296")
+				var bx := vx + vw - 146.0
+				while bx < vx + vw - 12.0:
+					_rect(bx, fy + 56.0, 2, 36, "#3A3E42")
+					bx += 10.0
+				_rect(vx + vw - 150.0, fy + 54.0, 140, 3, "#3A3E42")
+			fy += 130.0
+			f += 1
+		_snow(vx, vw, vt - 4.0)
+	split = out.size()
+	# The entrance under its canopy, then the court: lawn, a path, low shrubs, two benches.
+	var ex: float = k.get("entrance", 560.0)
+	_rect(ex - 70, court - 150, 140, 150, "#2B3036")
+	_rect(ex - 62, court - 142, 124, 142, "url(#glass)")
+	_rect(ex - 100, court - 170, 200, 18, "#5E6266", _stroke("#2B3036", 1.5))
+	_lawn(X0, X1, court)
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(ex - 50), _n(court), _n(ex + 50), _n(court), _n(ex + 90), _n(g), _n(ex - 90), _n(g)], "#B9B4AA")
+	var sx := X0 + 30.0
+	while sx < X1 - 20.0:
+		if absf(sx - ex) > 120.0:
+			_shrub(sx, 24.0 + rng.randf_range(0.0, 8.0), "#3E6A3A")
+		sx += 70.0
+	for bx: float in [ex - 200.0, ex + 160.0]:
+		_rect(bx, g - 60, 60, 8, "#8A6A4A")
+		_rect(bx + 4, g - 52, 4, 20, "#3A3A3A")
+		_rect(bx + 52, g - 52, 4, 20, "#3A3A3A")
+
+
+# The school's gym on 6e (5522…, 5524…, 5534…, 5544…): a long low wall of orange-brown brick with a beige band, tall slit windows,
+# and the entrance in a beige stone block with dark glass doors under a small canopy (`entrance`).
+func _gym() -> void:
+	var g := ground_y
+	var top := g - 430.0
+	_bricks(top, g - 6.0)
+	_wall_shading(top)
+	_rect(X0 - 4, top - 14, X1 - X0 + 8, 16, "#B9A88E", _stroke("#8E7E66", 1))
+	_snow(X0 - 4, X1 - X0 + 8, top - 14)
+	_rect(X0, g - 150, X1 - X0, 16, "#D8C8A8")
+	var ex: float = k.get("entrance", -1.0)
+	var x := X0 + 60.0
+	while x < X1 - 40.0:
+		if ex < 0.0 or absf(x - ex) > 160.0:
+			_rect(x, top + 60, 18, 160, "#2B2E32")
+			_rect(x + 3, top + 63, 12, 154, "url(#glass)")
+		x += 150.0
+	split = out.size()
+	if ex > 0.0:
+		_rect(ex - 120, top - 30, 240, g - top + 24, "#D8CCB4", _stroke("#A89A80", 1.5))
+		_rect(ex - 80, top + 40, 40, 90, "#2B2E32")
+		_rect(ex + 40, top + 40, 40, 90, "#2B2E32")
+		_rect(ex - 70, g - 200, 140, 194, "#1E2226")
+		_rect(ex - 64, g - 194, 62, 182, "url(#glass)")
+		_rect(ex + 2, g - 194, 62, 182, "url(#glass)")
+		_rect(ex - 90, g - 222, 180, 14, "#3A3A3A")
 
 
 # ── What every lane entrance seen from the street gets ───────────────────────
