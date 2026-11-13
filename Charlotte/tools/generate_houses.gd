@@ -605,26 +605,17 @@ const HOUSES := [
 		"windows": [[150.0, 120.0], [330.0, 120.0], [510.0, 120.0], [690.0, 120.0], [870.0, 120.0]],
 		"shops": [{"x0": 100.0, "x1": 1000.0, "sign": "#E9E5DE", "frame": "#6E6A64", "door": 820.0, "inside": "bank", "transom": "none", "panes": 6}], "basement": [],
 	},
-	# 2884–2886: red brick on two floors under a roof terrace's wooden rail, a shingle awning over its door (2884…; the graffiti on
-	# the door left out).
+	# 2884–2886: narrow, three floors of dark red-brown brick, the parapet stepped up at both ends, the middle of the two upper
+	# floors set back behind black iron balconies; a café downstairs behind white frames (2886…, 2884…, 2876…). The grey stone
+	# row with L'Oeufrier follows right after it: the old pictures, taken from 6e, showed a terrace on the roof, a brick building
+	# and a lot that are its side and the backs behind it.
 	{
-		"name": "masson_2884", "kind": "commerce", "width": 560.0, "floors": 2,
-		"bricks": ["#A8503E", "#B05A46", "#9A4636", "#B86450", "#A04A3A"], "mortar": "#D0C4B6", "parapet": "flat",
-		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "window_style": "slider", "frame": "#2B2B2E", "windows": [[90.0, 220.0], [380.0, 120.0]], "roof_rail": "#A8865E",
-		"shops": [{"x0": 30.0, "x1": 530.0, "sign": "#5E4A3E", "frame": "#3A2E28", "door": 420.0, "dark": true, "awning": "#6E5A4A"}],
+		"name": "masson_2884", "kind": "commerce", "width": 640.0, "floors": 3,
+		"bricks": ["#7A4A3A", "#865444", "#6E4234", "#8E5C4A", "#744636"], "mortar": "#B9AC9E", "parapet": "corbel",
+		"lintel": "#C9BFAE", "lintel_dark": "#8E8474", "window_style": "hung", "hung_frame": "#F2F0EA", "windows": [[60.0, 110.0], [470.0, 110.0]],
+		"loggias": [[220.0, 420.0]], "metal": "#1F1F1F",
+		"shops": [{"x0": 30.0, "x1": 610.0, "sign": "#E9E7E1", "frame": "#F2F0EA", "door": 120.0, "inside": "cafe", "transom": "none", "panes": 3}],
 		"basement": [],
-	},
-	# 2878–2882: brown brick on three floors, the parapet stepped up at each end, iron balconies; a café downstairs (2878… close-ups).
-	{
-		"name": "masson_2878", "kind": "commerce", "width": 820.0, "floors": 3,
-		"bricks": ["#7A5040", "#86594A", "#6E4838", "#8E6050", "#744C3C"], "mortar": "#B9AC9E", "parapet": "corbel",
-		"lintel": "#C9BFAE", "lintel_dark": "#8E8474", "windows": [[90.0, 110.0], [330.0, 110.0], [580.0, 110.0]],
-		"projecting": [[300.0, 470.0]],
-		"shops": [{"x0": 30.0, "x1": 790.0, "sign": "#E2D6BE", "frame": "#C9BCA2", "door": 200.0, "lamps": 3, "inside": "cafe", "front": "wood", "kick": "wood"}], "basement": [],
-	},
-	{
-		"name": "masson_2876", "kind": "masson_lot", "width": 480.0, "floors": 3, "halloween": false,
-		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
 	},
 	# 2862–2872: the grey stone row goes on, L'Oeufrier at its 6e end (2870…, 2862…, 2872… close-ups).
 	{

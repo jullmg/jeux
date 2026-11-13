@@ -137,11 +137,11 @@ const BLOCKS := {
 		"moon_at": 3.85, "signs": {}, "panels": {},
 	},
 	"5e_6e_pair": {
-		"layout": ["masson_2902_cote", "rue_6e", "masson_2888", "masson_2884", "masson_2878", "masson_2876", "masson_2870",
+		"layout": ["masson_2902_cote", "rue_6e", "masson_2888", "masson_2884", "masson_2870",
 			"masson_2846", "rue_5e", "masson_2840_cote"],
 		"avenues": [["rue_6e", "6e Avenue", 560.0], ["rue_5e", "5e Avenue", 540.0]],
-		"trees_after": [3, 6], "tree_shift": {3: 20.0, 6: -110.0}, "lamps_after": [2, 6], "hydrants_at": [6.5], "racks_at": [2.4],
-		"squirrels_at": [5.5], "moon_at": 2.5,
+		"trees_after": [3, 4], "tree_shift": {3: 20.0, 4: -110.0}, "lamps_after": [2, 4], "hydrants_at": [4.5], "racks_at": [2.4],
+		"squirrels_at": [4.3], "moon_at": 2.5,
 		"signs": {
 			"masson_2888": [[600.0, "BANQUE NATIONALE", "#1E1E20", "#E9E5DE", 14]],
 			"masson_2870": [[295.0, "L'OEUFRIER", "#FFFFFF", "#1E1E20", 13]],
