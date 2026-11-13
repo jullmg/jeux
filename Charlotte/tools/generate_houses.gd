@@ -657,17 +657,15 @@ const HOUSES := [
 		"shops": [{"x0": 30.0, "x1": 1370.0, "sign": "#1A1A1A", "frame": "#2A2A2A", "door": 700.0, "lamps": 7, "door_style": "double", "inside": "bakery", "front": "wood", "kick": "stone", "transom": "none"}],
 		"piers": [260.0, 520.0, 880.0, 1140.0], "pier_stone": "#ECE8E0", "basement": [],
 	},
-	# 3017–3021: red brick on three floors, a balcony on the right (3011…).
+	# 3015–3023: red brick on two floors, white windows, a black iron balcony; the sandwich shop under its dark band (3011…,
+	# 3015…, 3021…). It runs on to the next building: no parking lot at 3019.
 	{
-		"name": "masson_3021", "kind": "commerce", "width": 760.0, "floors": 3,
+		"name": "masson_3021", "kind": "commerce", "width": 1000.0, "floors": 2,
 		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0", "parapet": "flat",
-		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "window_style": "hung", "hung_frame": "#F2F0EA", "windows": [[90.0, 110.0], [300.0, 110.0], [530.0, 110.0]],
-		"projecting": [[480.0, 700.0]],
-		"shops": [{"x0": 30.0, "x1": 730.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 640.0, "inside": "clothes", "kick": "brick"}], "basement": [],
-	},
-	{
-		"name": "masson_3019", "kind": "masson_lot", "lot_style": "parking", "width": 460.0, "floors": 3, "halloween": false,
-		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "window_style": "hung", "hung_frame": "#F2F0EA", "windows": [[90.0, 110.0], [300.0, 110.0], [760.0, 110.0]],
+		"projecting": [[480.0, 700.0]], "metal": "#1F1F1F",
+		"shops": [{"x0": 30.0, "x1": 520.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 120.0, "inside": "restaurant", "kick": "brick"},
+			{"x0": 520.0, "x1": 970.0, "sign": "#1E1E20", "frame": "#1E1E20", "door": 880.0, "inside": "cafe", "kick": "brick"}], "basement": [],
 	},
 	# 3025–3035: red brick on three floors, stone surrounds with keystones round the windows, two shops (3025…, 3031… close-ups).
 	{
@@ -684,11 +682,6 @@ const HOUSES := [
 		"bricks": ["#D9C4B6"], "mortar": "#C9B4A6", "parapet": "flat", "quoins": true,
 		"lintel": "#E8E0D4", "lintel_dark": "#B5AA98", "window_style": "hung", "hung_frame": "#F2F0EA", "windows": [[110.0, 100.0], [320.0, 100.0], [520.0, 100.0]],
 		"shops": [{"x0": 30.0, "x1": 690.0, "sign": "#1A1A1A", "frame": "#1A1A1A", "door": 600.0, "inside": "cafe", "wall": "#3A3230", "transom": "none", "panes": 2}], "basement": [],
-	},
-	# 3043–3053, to 8e: a low wall painted with flowers, smiling faces and two round medallions, the lot behind it.
-	{
-		"name": "masson_3043", "kind": "mural_wall", "width": 760.0, "floors": 2, "halloween": false,
-		"bricks": ["#9A4636", "#A84E3C"], "mortar": "#C9BBAC",
 	},
 	# Across 8e: the next block's corner, its side.
 	{
@@ -708,11 +701,6 @@ const HOUSES := [
 		"bricks": ["#7E3A30", "#8A4236", "#72342A", "#94483A", "#82382E"], "mortar": "#C9BBAC", "parapet": "flat",
 		"lintel": "#D8D0C0", "lintel_dark": "#9E968A", "lintel_style": "ears", "window_style": "slider", "frame": "#1E1E20", "windows": [[90.0, 110.0], [330.0, 110.0], [570.0, 110.0]],
 		"shops": [{"x0": 30.0, "x1": 790.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 160.0, "inside": "restaurant", "kick": "brick"}], "basement": [],
-	},
-	# The passage of murals between the buildings (3016…, 3022…, 3026…): the tags and lettering left out, the colours kept.
-	{
-		"name": "masson_3036", "kind": "masson_lot", "lot_style": "murals", "width": 420.0, "floors": 3, "halloween": false,
-		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844"], "mortar": "#C9BBAC",
 	},
 	# 3030–3034: red brick on three floors, arched windows with iron balconies on the right; Lunetterie Milot and Raposo, the
 	# Portuguese pâtisserie (3034…, 3040…).
@@ -741,10 +729,11 @@ const HOUSES := [
 		"shops": [{"x0": 30.0, "x1": 480.0, "sign": "#2B2B2E", "frame": "#1E1E20", "door": 420.0, "inside": "cafe", "wall": "#2E2A28", "front": "wood"},
 			{"x0": 480.0, "x1": 970.0, "sign": "#C8202A", "frame": "#2B2B2E", "door": 900.0, "awning": "#C8202A", "inside": "restaurant", "kick": "tile", "tile": "#8E2020"}], "basement": [],
 	},
-	# 3000, at 7e: two floors painted pink over the brick, the Couche-Tard downstairs (3000…, 3002…).
+	# 3000–3002, at 7e: two floors of grey-brown stone brick, like Tandoori Masson's next door, the Couche-Tard downstairs (3000…,
+	# 3002…; the pink wall was its side on 7e).
 	{
-		"name": "masson_3000", "kind": "commerce", "width": 900.0, "floors": 2, "upper": "stucco", "stucco": "#CDB4AE",
-		"bricks": ["#D9B8B0"], "mortar": "#C9A89E", "parapet": "flat", "lintel": "#E8E0D4", "lintel_dark": "#B5AA98", "lintel_style": "none", "window_style": "slider", "frame": "#2B2B2E",
+		"name": "masson_3000", "kind": "commerce", "width": 900.0, "floors": 2,
+		"bricks": ["#9E968A", "#A8A094", "#948C80", "#B0A89C", "#99917F"], "mortar": "#C9C3B8", "parapet": "flat", "lintel": "#E8E0D4", "lintel_dark": "#B5AA98", "lintel_style": "none", "window_style": "slider", "frame": "#2B2B2E",
 		"windows": [[120.0, 110.0], [380.0, 110.0], [640.0, 110.0]],
 		"shops": [{"x0": 30.0, "x1": 870.0, "sign": "#F2EFE8", "frame": "#C8202A", "door": 200.0, "inside": "goods", "transom": "none", "panes": 5}], "basement": [],
 	},
