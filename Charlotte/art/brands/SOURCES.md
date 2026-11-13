@@ -24,3 +24,5 @@ The Masson logos are SVGs imported at `svg/scale=4.0` (their `.import`) so they 
 | `bmo_logo.svg` | BMO (Banque de Montréal), the roundel and wordmark | Wikimedia Commons, `File:BMO Logo.svg` |
 | `dominos_logo.svg` | Domino's Pizza, the domino | Wikimedia Commons, `File:Domino's pizza logo.svg` |
 | `telus_logo.svg` | TELUS, its wordmark and leaf | Wikimedia Commons, `File:Telus-Logo.svg` |
+| `coors_logo_red.svg` | Coors, the script, recoloured red as on Xin-Xin's sign band | Wikimedia Commons, `File:Coors logo.svg` |
+| `coors_light_logo.svg` | Coors Light, for the neon in Xin-Xin's window | Wikimedia Commons, `File:Coors Light logo.svg` |

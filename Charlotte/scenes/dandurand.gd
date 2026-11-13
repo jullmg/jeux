@@ -56,7 +56,24 @@ func _build_cross_streets() -> void:
 func _decorate_house(i: int, house: Sprite2D) -> void:
 	if layout[i] == "depanneur_front":
 		_label("DÉPANNEUR XIN-XIN", house.position + Vector2(390, 396) * HOUSE_SCALE, Vector2(150, 18), 13, Color.WHITE, Color("#16285C"))
-		_label("LIVRAISON", house.position + Vector2(390, 418) * HOUSE_SCALE, Vector2(150, 14), 9, Color("#FFD23F"), Color("#16285C"))
+		_label("LIVRAISON  514 728-8827", house.position + Vector2(390, 418) * HOUSE_SCALE, Vector2(150, 14), 8, Color("#FFD23F"), Color("#16285C"))
+		# The Coors logos either side of the shop's sign, the Coors Light neon in the right window and the words of the green
+		# poster in the left one, as on reference/coin_dandurand/dépanneur_on_dandurand.jpg (art/brands/SOURCES.md).
+		for at: Vector2 in [Vector2(159, 396), Vector2(621, 396)]:
+			_logo(house, "coors_logo_red.svg", at, 22.0)
+		_logo(house, "coors_light_logo.svg", Vector2(590, 478), 11.0)
+		_label("Plus qu'une\ncourse", house.position + Vector2(191, 500) * HOUSE_SCALE, Vector2(80, 30), 8, Color.WHITE, Color("#0E4A28"))
+
+
+## A brand's logo (art/brands/) laid on a facade at `at` (its SVG units), `height` px high in the world.
+func _logo(house: Sprite2D, file: String, at: Vector2, height: float) -> void:
+	var tex: Texture2D = load("res://art/brands/%s" % file)
+	var logo := Sprite2D.new()
+	logo.texture = tex
+	logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	logo.scale = Vector2.ONE * height / tex.get_height()
+	logo.position = house.position + at * HOUSE_SCALE
+	add_child(logo)
 
 
 func _build_doors() -> void:

@@ -3133,15 +3133,16 @@ func _depanneur_front() -> void:
 	_rect(X0 - 10, slab, X1 - X0 + 20, 26, "#E8E4D8", _stroke("#B9B5AC", 1.5))
 	for i in 9:
 		_rect(rng.randf_range(X0, X1 - 60), slab + rng.randf_range(4, 18), rng.randf_range(20, 60), 4, "#B9B2A4", 'opacity="0.6"')
-	_rect(X0 - 10, slab + 26, X1 - X0 + 20, 20, "url(#drop)")
+	for tx in [X0 + 60.0, X0 + 250.0, X1 - 300.0, X1 - 110.0]:
+		_rect(tx, slab + 18, 70, 5, "#FFF8E0")
+		_circle(tx + 35, slab + 24, 26, "url(#glow)")
+	_rect(X0 - 10, slab + 26, X1 - X0 + 20, 34, "url(#drop)")
 	_snow(X0 + 4, X1 - X0 - 8, slab - 64)
 	# Sign band: red banners either side of the blue shop sign (its text is a label in the game).
 	var band := slab + 30.0
 	_rect(X0 + 6, band, X1 - X0 - 12, 62, "#F4F2EC", _stroke("#B9B5AC", 1.5))
 	for b in [[X0 + 14, 230.0], [X1 - 244, 230.0]]:
-		_rect(b[0], band + 6, b[1], 50, "#C8202A", _stroke("#8E1A20", 1.5))
-		_path("M%s %s q30 -14 60 0 t60 0 t60 0" % [_n(b[0] + 26), _n(band + 31)], "none", _stroke("#FFFFFF", 4) + ' stroke-linecap="round"')
-		_rect(b[0] + 12, band + 12, 22, 38, "#F4F2EC", 'rx="4"')
+		_rect(b[0], band + 6, b[1], 50, "#FBFAF6", _stroke("#C8202A", 2))
 	_rect(260, band + 4, 260, 54, "#25408F", _stroke("#16285C", 2))
 	_rect(X0 + 10, band + 62, X1 - X0 - 20, 4, "#FFF8D6", 'opacity="0.9"')
 	# Shop windows with their posters.
@@ -3155,22 +3156,28 @@ func _depanneur_front() -> void:
 		while gx < win[0] + win[1] - 6:
 			_rect(gx, wy + 4, 2, wb - wy - 8, "#E9EEF2", 'opacity="0.5"')
 			gx += 22.0
-	# The drinks fridge in the left window, lower now so the shelves of goods show above it.
-	var lx: float = X0 + 56.0
-	_rect(lx, wy + 104, 200, wb - wy - 120, "#2E7D4F", _stroke("#1E5A38", 2))
-	for bx in [lx + 40.0, lx + 70.0]:
-		_rect(bx, wy + 126, 18, 62, "#3E9A5E", 'rx="6"')
-		_rect(bx + 5, wy + 112, 8, 18, "#3E9A5E")
-	for i in 3:
-		_rect(lx + 110, wy + 126 + i * 16, 70, 6, "#F4F2EC")
-	var rxw: float = X1 - 266.0
-	_rect(rxw, wy + 96, 210, wb - wy - 116, "#F4F2EC", _stroke("#C9C2B4", 2))
-	_rect(rxw + 10, wy + 104, 190, 26, "#C8202A")
-	_rect(rxw + 20, wy + 140, 40, 56, "#E04F5F", 'rx="6"')
-	_rect(rxw + 80, wy + 146, 70, 36, "#FFFFFF", _stroke("#2B2B2B", 1.5))
-	_rect(rxw + 150, wy + 170, 50, 26, "#25408F")
+	# Left window: the big green beer poster ("Plus qu'une course", its words a label in the game), two green bottles on it.
+	var lx: float = X0 + 76.0
+	_rect(lx, wy + 30, 170, wb - wy - 40, "#1E7A44", _stroke("#0E4A28", 2))
+	_rect(lx + 8, wy + 40, 154, 50, "#2E9A5A")
+	for bx in [lx + 24.0, lx + 50.0]:
+		_rect(bx, wy + 110, 18, 74, "#3EAA5E", 'rx="6"')
+		_rect(bx + 5, wy + 94, 8, 20, "#3EAA5E")
+		_rect(bx + 2, wy + 134, 14, 18, "#F2F0EA")
+	_path("M%s %s q30 18 60 0 q20 -10 40 0" % [_n(lx + 86), _n(wy + 170)], "none", _stroke("#F2C230", 5))
+	# Right window: the shop behind the security grille, the Coors Light neon (a logo in the game), a pink poster.
+	var rxw: float = X1 - 280.0
+	_shop_glass_goods(rxw, wy + 60, 240, wb - wy - 70, int(rxw) * 31 + 7, 2)
+	_rect(rxw + 170, wy + 90, 46, 90, "#E86A8E", _stroke("#A83A5E", 1.5))
+	var grx := rxw + 4.0
+	while grx < rxw + 246.0:
+		_rect(grx, wy + 50, 2.5, wb - wy - 54, "#E9EEF2", 'opacity="0.85"')
+		grx += 20.0
+	var gry := wy + 50.0
+	while gry < wb - 4.0:
+		_rect(rxw, gry, 250, 2.5, "#E9EEF2", 'opacity="0.85"')
+		gry += 20.0
 	for win in [[X0 + 36, 250.0], [X1 - 286, 250.0]]:
-		_shop_glass_goods(win[0], wy + 2, win[1], 104.0, int(win[0]) * 31 + 7, 2)
 		_shop_glass_shine(win[0], wy, win[1], wb - wy)
 	# Air conditioners over the door, the door behind its grille, the civic number.
 	var dx := 390.0
@@ -3193,7 +3200,6 @@ func _depanneur_front() -> void:
 		gx2 += 16.0
 	_rect(dx - 20, dt + 62, 40, 26, "#F4F2EC")
 	_rect(dx + 34, dt + (db - dt) * 0.55, 6, 22, "#B9BEC4", 'rx="2"')
-	_plaque(dx + 88, wy + 64, "2891")
 	# Concrete steps with a handrail.
 	for i in range(1, 3):
 		var w := 150.0 + i * 20.0
@@ -3203,6 +3209,12 @@ func _depanneur_front() -> void:
 			_rect(dx - w / 2 + 6, _fb(0) + i * 33.0 - 2, w - 12, 5, "#F7F9FB")
 	_path("M%s %s L%s %s" % [_n(dx + 50), _n(_fb(0) - 40), _n(dx + 96), _n(ground_y - 50)], "none", _stroke("#E8E4DA", 5) + ' stroke-linecap="round"')
 	_rect(dx + 92, ground_y - 54, 5, 54, "#E8E4DA")
+	# The little white picket fence at the left, along the next lot.
+	var px := X0 + 4.0
+	while px < X0 + 150.0:
+		_path("M%s %s V%s L%s %s L%s %s V%s Z" % [_n(px), _n(ground_y - 2), _n(ground_y - 60), _n(px + 5), _n(ground_y - 68), _n(px + 10), _n(ground_y - 60), _n(ground_y - 2)], "#F4F2EC", _stroke("#B9B5AC", 1))
+		px += 16.0
+	_rect(X0, ground_y - 46, 152, 5, "#F4F2EC", _stroke("#B9B5AC", 1))
 	# Glass blocks low on the left, and Halloween by the steps.
 	for i in 4:
 		_rect(X0 + 40 + i * 22, base_y + 18, 20, 20, "#D6EAF5", _stroke("#9AB8C8", 1))
@@ -5809,6 +5821,13 @@ func _back_row(x0: float, x1: float, top: float, bottom: float) -> void:
 func _lawn(x0: float, x1: float, y0: float) -> void:
 	var c: String = {"winter": "#EEF2F5", "spring": "#6FA04A", "summer": "#5E9440"}.get(season, "#7E8A4A")
 	_rect(x0, y0, x1 - x0, ground_y - y0, c)
+	if season == "winter":
+		# Snow is never flat white: blue in the hollows, a few drifts catching the light.
+		_rect(x0, y0, x1 - x0, ground_y - y0, "#B9C8DA", 'opacity="0.35"')
+		var dx := x0
+		while dx < x1:
+			out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="#FFFFFF" opacity="0.7"/>' % [_n(dx + 40), _n(y0 + (ground_y - y0) * 0.55), _n(60), _n(10)])
+			dx += 140.0
 	_rect(x0, y0, x1 - x0, 4, "#000000", 'opacity="0.1"')
 	if season != "winter":
 		for i in int((x1 - x0) / 9.0):
@@ -6172,7 +6191,7 @@ func _plaza() -> void:
 # (`band`, its colour) on the ground floor, trees and red shrubs on the lawn.
 func _setback() -> void:
 	var g := ground_y
-	var lawn_top := g - 230.0
+	var lawn_top := g - 150.0
 	var white: bool = k.get("white", false)
 	var floors := 2 if white else 3
 	var fh := 135.0
@@ -6211,6 +6230,14 @@ func _setback() -> void:
 		_rect(x0 + 64, lawn_top - fh + 50, (x1 - x0) * 0.55 - 8, fh - 54, "url(#warm)", 'opacity="0.4"')
 	split = out.size()
 	_lawn(X0, X1, lawn_top)
+	# The lawn lies flat, away from us: the building's shadow along its back edge, a path to the door, a low hedge along the
+	# sidewalk (in winter a snowbank with the hedge's twigs poking out), so it never reads as a white wall.
+	_rect(X0, lawn_top, X1 - X0, 26, "#3A4A6A" if season == "winter" else "#000000", 'opacity="0.22"')
+	var hx := X0 + 14.0
+	while hx < X1 - 10.0:
+		if absf(hx - (X0 + (X1 - X0) * 0.45 + 30.0)) > 50.0:
+			_shrub(hx, 22.0, "#3E6A3A")
+		hx += 34.0
 	_rect(X0 + (X1 - X0) * 0.45, lawn_top, 60, ground_y - lawn_top, "#B9B4AA")
 	if white:
 		var sx := X0 + 30.0
