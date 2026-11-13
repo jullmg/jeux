@@ -139,36 +139,6 @@ const HOUSES := [
 		"fence": "black", "basement": [],
 	},
 	{
-		"name": "triplex_exemple_2", "floors": 3,
-		"bricks": ["#D9B88F", "#CFAE84", "#E2C39C", "#C4A079", "#DDBE96"], "mortar": "#EFE6D8",
-		"lintel": "#E4D6BE", "lintel_dark": "#B3A48A", "lintel_style": "arch", "keystone": true,
-		"cornice": "#E2D8C6", "cornice_dark": "#ADA28E", "pediment": true,
-		"door": "#F4F1EA", "door_dark": "#B9B2A5", "columns": true, "curtains": true,
-		"windows": [[70.0, 105.0], [525.0, 105.0]], "door_cx": 350.0,
-		"balcony": [200.0, 500.0], "porch": [230.0, 470.0],
-		"stair": [Vector2(232, 336), Vector2(90, 380), Vector2(5, 520), Vector2(75, 696)],
-		"fence": "black", "basement": [],
-	},
-	{
-		"name": "triplex_exemple_3", "floors": 3,
-		"bricks": ["#C8A27A", "#BC966E", "#D4AE86", "#B08A62", "#CCA680"], "mortar": "#E6DCCB",
-		"lintel": "#C8A27A", "lintel_dark": "#9C7A56", "parapet": "flat",
-		"door": "#F4F1EA", "door_dark": "#B9B2A5", "flower_boxes": true, "curtains": true,
-		"tread": "#8A5A3A", "tread_dark": "#5E3B24",
-		"windows": [[95.0, 105.0], [505.0, 105.0]], "door_cx": 340.0,
-		"balcony": [150.0, 640.0], "porch": [260.0, 420.0],
-		"stair": [Vector2(205, 336), Vector2(150, 456), Vector2(100, 576), Vector2(50, 696)],
-		"basement": [],
-	},
-	{
-		"name": "moderne", "kind": "modern",
-		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
-		"lintel": "#C46A55", "lintel_dark": "#7E3A2E", "lintel_style": "arch",
-		"step": "#B08F6A", "step_dark": "#7E6446", "metal": "#6B5442",
-		"windows": [[150.0, 100.0], [470.0, 80.0]], "ground_window": [500.0, 100.0], "door_cx": 330.0,
-		"basement": [500.0], "bins": true, "curtains": true,
-	},
-	{
 		# Dépanneur Xin-Xin fronts Dandurand: from 6e Avenue we see its side
 		# (reference/coin_dandurand/coin_dépanneur_sur_6eme_coin_dandurand.jpg).
 		"name": "depanneur", "kind": "depanneur_side", "width": 640.0, "halloween": false,
@@ -260,6 +230,92 @@ const HOUSES := [
 		"bricks": ["#A9472F", "#9C4029", "#B44F35", "#943B26", "#B85A3E"], "mortar": "#C9B7A4",
 		"trim": "#ECE8E0", "trim_dark": "#A9A398", "lintel": "#D8CFC0", "lintel_dark": "#A39A8A",
 		"basement": [120.0, 420.0, 720.0], "fence": "black", "halloween": false,
+	},
+	# ── 6e Avenue, Charlotte's side between the green lane and Holt, from reference/streetview/6e-avenue/5640… to 5722… ──
+	# Duplexes of brick on two floors, each with its outdoor stair; they replace the invented plexes and triplexes that stood here,
+	# at the same widths (her house, the twins' and her two neighbours, drawn from Julien's photos, are kept as they were).
+	# Halloween decorations, bikes, cars and bins in the pictures are left out.
+	# 5640–5642: buff brick, a black iron balcony across the upper floor, the iron stair curving down on the left (5640…).
+	{
+		"name": "six_5640",
+		"bricks": ["#C8A070", "#BE9668", "#D2AA7A", "#B48C60", "#CCA474"], "mortar": "#E2D6C2",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"windows": [[90.0, 110.0], [500.0, 110.0]], "door_cx": 330.0,
+		"balcony": [200.0, 640.0], "porch": [230.0, 440.0], "stair": [Vector2(232, 336), Vector2(90, 380), Vector2(5, 520), Vector2(75, 696)], "fence": "black", "basement": [480.0],
+	},
+	# 5644–5646: brown-red brick, the red double doors upstairs on their black balcony, a dark wood door below, the stair on the left (5640…, 5644…).
+	{
+		"name": "six_5644",
+		"bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#C9BBAC",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "corbel", "door": "#B8303A", "door_dark": "#7A1E24", "door_style": "double",
+		"windows": [[90.0, 110.0], [520.0, 110.0]], "door_cx": 340.0,
+		"balcony": [210.0, 480.0], "porch": [230.0, 450.0], "stair": [Vector2(232, 336), Vector2(90, 380), Vector2(5, 520), Vector2(75, 696)], "fence": "black", "basement": [480.0],
+	},
+	# 5648–5650: brown brick, white doors under stone lintels with their keystones, the iron balcony, the stair on the right (5648…, 5652…).
+	{
+		"name": "six_5648",
+		"bricks": ["#7E4436", "#8A4A3A", "#6E3A2E", "#94543F", "#743F33"], "mortar": "#C2B4A4",
+		"lintel": "#E2DACA", "lintel_dark": "#A89E8C", "lintel_style": "plain", "keystone": true, "parapet": "cornice",
+		"door": "#F2F0EA", "door_dark": "#B9B2A5", "windows": [[90.0, 110.0], [500.0, 110.0]], "door_cx": 330.0,
+		"balcony": [230.0, 480.0], "porch": [250.0, 420.0], "stair": [Vector2(525, 336), Vector2(600, 380), Vector2(655, 520), Vector2(640, 696)], "fence": "black", "basement": [120.0],
+	},
+	# 5652–5654: brown brick, a white aluminium awning over the upper balcony, a stair of wooden treads, white doors (5652…, 5654…).
+	{
+		"name": "six_5652",
+		"bricks": ["#845040", "#905846", "#784836", "#9A6050", "#7E4A3A"], "mortar": "#C9BBAC",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "cornice", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"awning": "#F2F0EA", "tread": "#A07A52", "tread_dark": "#6E5236",
+		"windows": [[90.0, 110.0], [520.0, 110.0]], "door_cx": 340.0,
+		"balcony": [220.0, 480.0], "porch": [240.0, 440.0], "stair": [Vector2(232, 336), Vector2(90, 380), Vector2(5, 520), Vector2(75, 696)], "fence": "black", "basement": [480.0],
+	},
+	# 5660–5664: brown brick, the white awning over the upper balcony, the stair on the right (5654…, 5660…, 5664…).
+	{
+		"name": "six_5660",
+		"bricks": ["#7A4A3A", "#6E4234", "#865243", "#5F392D", "#8E5A48"], "mortar": "#C2B4A4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "cornice", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"awning": "#F2F0EA", "windows": [[90.0, 110.0], [500.0, 110.0]], "door_cx": 330.0,
+		"balcony": [230.0, 480.0], "porch": [250.0, 420.0], "stair": [Vector2(525, 336), Vector2(600, 380), Vector2(655, 520), Vector2(640, 696)], "fence": "black", "basement": [120.0],
+	},
+	# 5688–5690: brown brick, a white balcony and the white metal stair down to the right (5688…).
+	{
+		"name": "six_5688",
+		"bricks": ["#8A5040", "#965846", "#7E4836", "#A06050", "#844A3A"], "mortar": "#C9BBAC",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"metal": "#F5F5F2", "metal_light": true, "tread": "#C8C8C4", "tread_dark": "#8C8C88",
+		"windows": [[90.0, 120.0], [530.0, 110.0]], "door_cx": 340.0,
+		"balcony": [250.0, 500.0], "porch": [250.0, 430.0], "stair": [Vector2(525, 336), Vector2(600, 380), Vector2(655, 520), Vector2(640, 696)], "fence": "white", "basement": [110.0],
+	},
+	# 5692–5696: red brick on two floors, a black balcony and the black stair of wooden treads on the left, creeper (5692…, 5696…).
+	{
+		"name": "six_5692",
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844", "#94422F"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#2B2B2E", "door_dark": "#111111",
+		"tread": "#2E2A26", "tread_dark": "#1A1714", "windows": [[110.0, 110.0], [520.0, 110.0]], "door_cx": 340.0,
+		"balcony": [210.0, 480.0], "porch": [230.0, 450.0], "stair": [Vector2(232, 336), Vector2(90, 380), Vector2(5, 520), Vector2(75, 696)], "fence": "black", "basement": [480.0],
+	},
+	# 5700–5708: beige brick on two floors, white windows, the two doors under navy dome awnings (5700…, 5704…, 5708…).
+	{
+		"name": "six_5700",
+		"bricks": ["#CDB892", "#C4AE88", "#D6C29C", "#BCA67E", "#C9B48C"], "mortar": "#E2D8C6",
+		"lintel": "#E8E0D0", "lintel_dark": "#B9AE98", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"door_awning": "#1E2A4A", "windows": [[90.0, 110.0], [500.0, 110.0]], "door_cx": 320.0,
+		"balcony": [230.0, 460.0], "porch": [230.0, 430.0], "stair": [Vector2(525, 336), Vector2(600, 380), Vector2(655, 520), Vector2(640, 696)], "fence": "black", "basement": [120.0],
+	},
+	# 5710–5714: dark brown brick, black balconies and the black iron stair zigzagging down (5708…, 5712…, 5714…).
+	{
+		"name": "six_5712",
+		"bricks": ["#5E3A2E", "#6A4234", "#523226", "#764A3A", "#5A382C"], "mortar": "#9A8E80",
+		"lintel": "#C9C3B6", "lintel_dark": "#8E887E", "parapet": "corbel", "door": "#2B2622", "door_dark": "#100D0B",
+		"windows": [[90.0, 110.0], [520.0, 110.0]], "door_cx": 340.0, "stair_kind": "landing",
+		"balcony": [210.0, 480.0], "porch": [230.0, 450.0], "stair": [Vector2(525, 336), Vector2(600, 380), Vector2(655, 520), Vector2(640, 696)], "fence": "black", "basement": [110.0],
+	},
+	# 5718–5722: dark brick under a stepped parapet, a porch on white columns, the stair curving down (5718…, 5720…, 5722…).
+	{
+		"name": "six_5718",
+		"bricks": ["#6E4234", "#7A4A3A", "#62392C", "#845242", "#6A3E30"], "mortar": "#A89C90",
+		"lintel": "#E2DACA", "lintel_dark": "#A89E8C", "parapet": "corbel", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"columns": true, "stair_kind": "curve", "windows": [[90.0, 110.0], [520.0, 110.0]], "door_cx": 340.0,
+		"balcony": [220.0, 480.0], "porch": [230.0, 450.0], "stair": [Vector2(232, 336), Vector2(90, 380), Vector2(5, 520), Vector2(75, 696)], "fence": "black", "basement": [480.0],
 	},
 	# École Saint-Jean-de-Brébeuf's side on 6e Avenue, as Charlotte sees it from 6e (main.tscn, across Dandurand) and from
 	# 6e below Dandurand (the left end of main.tscn): reference/streetview/6e-avenue/5578…, 5582…, 5586… and their close-ups.

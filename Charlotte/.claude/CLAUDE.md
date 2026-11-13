@@ -66,6 +66,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   -1 or 1), since the scene holds several; crossing a cross street inside it is an ordinary crossing. A merge shifts the saved
   x: bump the save `version` and move old positions in `GameState._merged_scene`. The plate names the side by the compass
   ("6e Avenue, côté ouest", "Rue Masson, … (côté nord)"), never "de l'autre côté".
+- **Charlotte's side of 6e between the green lane and Holt is drawn from Street View** (`reference/streetview/6e-avenue/5640…–5732…`,
+  2026-11-13): brick duplexes on two floors with their outdoor stairs, `six_5640`, `six_5644`, `six_5648`, `six_5652`, `six_5660`
+  | her neighbours, her house | `six_5688`, `six_5692`, `six_5700`, `six_5712` | the twins' | `six_5718`, each slot at the 700 px
+  of the invented plex it replaced so nothing else moves. **Charlotte's house and the Turcottes' are never touched** (Julien), and
+  her two neighbours (`duplex_voisin_gauche` / `_droite`) stay as drawn from Julien's photos. Pistache's owner (5684) lives in
+  `duplex_voisin_droite`, which is 5680–5684.
 - Charlotte's block, every side a `StreetScene` seen from across the road, walking right goes round it clockwise:
   `scenes/main.gd` (6e Avenue, `street_key` "6e", plate "6e Avenue, côté ouest": its whole west side, Masson left, Dandurand, her
   block, Holt right), `scenes/holt.gd` (Rue Holt: 6e left, 5e right,

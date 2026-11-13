@@ -11,7 +11,7 @@ const ALL := {
 	"cat": {
 		"name": "Pistache", "coat": 2, "collar": "#2F7BD8", "collar_name": "bleu",
 		"found": "dandurand", "found_at": 3.6, "poster": "6e",
-		"home": "6e", "house": "plex_05", "address": "5684, 6e Avenue", "owner": "Mme Gagnon",
+		"home": "6e", "house": "duplex_voisin_droite", "address": "5684, 6e Avenue", "owner": "Mme Gagnon",
 	},
 	"cat2": {
 		"name": "Caramel", "coat": 0, "collar": "#D9342B", "collar_name": "rouge",

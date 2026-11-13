@@ -17,9 +17,9 @@ func _init() -> void:
 		"six_sud_eglise", "six_sud_salle", "six_sud_appartements", "six_sud_cour", "six_sud_gymnase",
 		"ecole_6e", "rue_dandurand",
 		"depanneur", "garages", "ruelle_verte",
-		"triplex_exemple_2", "plex_02", "plex_03", "moderne", "plex_04",
+		"six_5640", "six_5644", "six_5648", "six_5652", "six_5660",
 		"duplex_voisin_gauche", "duplex_charlotte", "duplex_voisin_droite",
-		"plex_05", "triplex_exemple_3", "plex_06", "plex_07", "duplex_jumelles", "plex_09",
+		"six_5688", "six_5692", "six_5700", "six_5712", "duplex_jumelles", "six_5718",
 		"ruelle", "coin_holt",
 		"rue_holt", "coin_holt_est",
 	]

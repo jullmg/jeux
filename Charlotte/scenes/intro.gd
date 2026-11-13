@@ -22,7 +22,7 @@ const TREE_SCALE  := 0.55
 
 # A short street section: left neighbour | Charlotte's duplex | right neighbour
 const LAYOUT: Array[String] = [
-	"plex_04", "duplex_voisin_gauche", "duplex_charlotte", "duplex_voisin_droite", "plex_05",
+	"six_5660", "duplex_voisin_gauche", "duplex_charlotte", "duplex_voisin_droite", "six_5688",
 ]
 const TREES_AFTER: Array[int] = [0, 2, 4]
 
@@ -323,7 +323,7 @@ func _build_squirrels() -> void:
 # ─────────────────────────────────────────────────────────────
 
 func _build_props() -> void:
-	# Lamp post at the boundary between plex_04 and duplex_voisin_gauche
+	# Lamp post at the boundary between six_5660 and duplex_voisin_gauche
 	var lamp := _sprite(PropArt.lamppost(), 0.62)
 	lamp.position = Vector2(_starts[1] - 101.0 * 0.62, CURB_Y + 2.0 - 518.0 * 0.62)
 	add_child(lamp)
