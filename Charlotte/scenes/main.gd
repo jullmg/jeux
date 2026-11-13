@@ -56,7 +56,9 @@ func _build_cross_streets() -> void:
 		{"to": 2.6, "top": _house_top("ecole"), "kind": "school", "color": Color("#A9472F")},
 		{"to": CrossStreet.FAR, "top": 330.0, "kind": "plex", "color": Color("#9C5A44")},
 	]
-	dandurand.right_walls = _walls_along("res://scenes/dandurand.gd", "rue_6e", -1, "depanneur")
+	# Along Dandurand the first wall is Xin-Xin's own front (its door, its sign, its Coors logos' band), not a plain side: it keeps
+	# its real facade (no `ours`).
+	dandurand.right_walls = _walls_along("res://scenes/dandurand.gd", "rue_6e", -1)
 	var holt := _cross_street("rue_holt", "Rue Holt", -1.0)
 	holt.left_walls = _walls_along("res://scenes/holt.gd", "rue_6e", 1, "coin_holt")
 	holt.right_walls = [
