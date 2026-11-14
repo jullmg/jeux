@@ -1,17 +1,70 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1400.0" height="975.0" viewBox="0 0 1400.0 975.0">
 <defs><linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4E0EC"/><stop offset="1" stop-color="#557A90"/></linearGradient><linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.1"/><stop offset="1" stop-color="#000000" stop-opacity="0.16"/></linearGradient><radialGradient id="glow"><stop offset="0" stop-color="#FFE9A8" stop-opacity="0.75"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient><linearGradient id="warm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7B5"/><stop offset="1" stop-color="#D98E4A"/></linearGradient><linearGradient id="drop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1408" stop-opacity="0.3"/><stop offset="1" stop-color="#2A1408" stop-opacity="0"/></linearGradient><linearGradient id="sun" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE6B8" stop-opacity="0.14"/><stop offset="0.5" stop-color="#FFE6B8" stop-opacity="0"/><stop offset="1" stop-color="#1A0C14" stop-opacity="0.12"/></linearGradient><radialGradient id="pumpkin_glow"><stop offset="0" stop-color="#FFB347" stop-opacity="0.6"/><stop offset="1" stop-color="#FFB347" stop-opacity="0"/></radialGradient></defs>
+<defs><linearGradient id="grime" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A140E" stop-opacity="0"/><stop offset="1" stop-color="#1A140E" stop-opacity="0.3"/></linearGradient><linearGradient id="skyrefl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D6ECF8" stop-opacity="0.34"/><stop offset="1" stop-color="#D6ECF8" stop-opacity="0"/></linearGradient><linearGradient id="castr" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1A0C08" stop-opacity="0.3"/><stop offset="1" stop-color="#1A0C08" stop-opacity="0"/></linearGradient></defs>
 <rect x="210.0" y="595.0" width="22.0" height="380.0" fill="#ECEBE6" stroke="#9E9A92" stroke-width="1.0"/>
+<rect x="210.0" y="595.0" width="5.0" height="380.0" fill="#FFFFFF" opacity="0.5"/>
+<rect x="225.0" y="595.0" width="7.0" height="380.0" fill="#000000" opacity="0.12"/>
+<rect x="210.0" y="601.0" width="22.0" height="40.0" fill="url(#drop)" />
+<rect x="204.0" y="915.0" width="34.0" height="60.0" fill="#D8302A" stroke="#8E1E18" stroke-width="1.0"/>
+<rect x="204.0" y="915.0" width="34.0" height="4.0" fill="#FFFFFF" opacity="0.3"/>
 <rect x="1170.0" y="595.0" width="22.0" height="380.0" fill="#ECEBE6" stroke="#9E9A92" stroke-width="1.0"/>
+<rect x="1170.0" y="595.0" width="5.0" height="380.0" fill="#FFFFFF" opacity="0.5"/>
+<rect x="1185.0" y="595.0" width="7.0" height="380.0" fill="#000000" opacity="0.12"/>
+<rect x="1170.0" y="601.0" width="22.0" height="40.0" fill="url(#drop)" />
+<rect x="1164.0" y="915.0" width="34.0" height="60.0" fill="#D8302A" stroke="#8E1E18" stroke-width="1.0"/>
+<rect x="1164.0" y="915.0" width="34.0" height="4.0" fill="#FFFFFF" opacity="0.3"/>
 <rect x="90.0" y="545.0" width="1220.0" height="56.0" fill="#F4F2EE" stroke="#9E9A92" stroke-width="1.5"/>
+<rect x="90.0" y="545.0" width="1220.0" height="56.0" fill="url(#shade)" />
 <rect x="90.0" y="583.0" width="1220.0" height="14.0" fill="#E8302A" />
 <rect x="90.0" y="571.0" width="1220.0" height="10.0" fill="#F6C21E" />
 <rect x="90.0" y="601.0" width="1220.0" height="10.0" fill="#000000" opacity="0.2"/>
+<rect x="94.0" y="601.0" width="1212.0" height="7.0" fill="#5E6266" />
+<rect x="160.0" y="603.0" width="44.0" height="4.0" fill="#FFF6D8" />
+<circle cx="182.0" cy="613.0" r="22.0" fill="url(#glow)" />
+<rect x="310.0" y="603.0" width="44.0" height="4.0" fill="#FFF6D8" />
+<circle cx="332.0" cy="613.0" r="22.0" fill="url(#glow)" />
+<rect x="460.0" y="603.0" width="44.0" height="4.0" fill="#FFF6D8" />
+<circle cx="482.0" cy="613.0" r="22.0" fill="url(#glow)" />
+<rect x="610.0" y="603.0" width="44.0" height="4.0" fill="#FFF6D8" />
+<circle cx="632.0" cy="613.0" r="22.0" fill="url(#glow)" />
+<rect x="760.0" y="603.0" width="44.0" height="4.0" fill="#FFF6D8" />
+<circle cx="782.0" cy="613.0" r="22.0" fill="url(#glow)" />
+<rect x="910.0" y="603.0" width="44.0" height="4.0" fill="#FFF6D8" />
+<circle cx="932.0" cy="613.0" r="22.0" fill="url(#glow)" />
+<rect x="1060.0" y="603.0" width="44.0" height="4.0" fill="#FFF6D8" />
+<circle cx="1082.0" cy="613.0" r="22.0" fill="url(#glow)" />
+<rect x="1210.0" y="603.0" width="44.0" height="4.0" fill="#FFF6D8" />
+<circle cx="1232.0" cy="613.0" r="22.0" fill="url(#glow)" />
+<rect x="410.0" y="825.0" width="14.0" height="138.0" fill="url(#castr)" />
 <rect x="350.0" y="825.0" width="60.0" height="150.0" fill="#ECEBE6" stroke="#5E5A54" stroke-width="1.5"/>
+<rect x="350.0" y="825.0" width="60.0" height="150.0" fill="url(#sun)" />
 <rect x="358.0" y="835.0" width="44.0" height="30.0" fill="#2E3A42" />
+<rect x="362.0" y="839.0" width="36.0" height="9.0" fill="#9FE0B0" opacity="0.8"/>
+<rect x="362.0" y="851.0" width="24.0" height="7.0" fill="#9FE0B0" opacity="0.6"/>
+<rect x="359.0" y="873.0" width="12.0" height="12.0" fill="#F6C21E" stroke="#5E5A54" stroke-width="0.8"/>
+<rect x="374.0" y="873.0" width="12.0" height="12.0" fill="#E8302A" stroke="#5E5A54" stroke-width="0.8"/>
+<rect x="389.0" y="873.0" width="12.0" height="12.0" fill="#3E9A4E" stroke="#5E5A54" stroke-width="0.8"/>
+<rect x="356.0" y="895.0" width="48.0" height="62.0" fill="none" stroke="#B9B5AC" stroke-width="1.2"/>
+<rect x="392.0" y="879.0" width="12.0" height="30.0" fill="#2A2A2A" rx="3"/>
+<path d="M400.0 905.0 q26 70 -4 84 q-20 6 -22 -40" fill="none" stroke="#1E1E1E" stroke-width="3.5" stroke-linecap="round"/>
 <rect x="350.0" y="815.0" width="60.0" height="12.0" fill="#E8302A" />
-<rect x="330.0" y="963.0" width="100.0" height="12.0" fill="#B9B5AC" />
+<rect x="350.0" y="815.0" width="60.0" height="3.0" fill="#FFFFFF" opacity="0.3"/>
+<rect x="330.0" y="963.0" width="100.0" height="12.0" fill="#B9B5AC" stroke="#8E8A82" stroke-width="1.0"/>
+<rect x="330.0" y="963.0" width="100.0" height="3.0" fill="#FFFFFF" opacity="0.3"/>
+<rect x="1070.0" y="825.0" width="14.0" height="138.0" fill="url(#castr)" />
 <rect x="1010.0" y="825.0" width="60.0" height="150.0" fill="#ECEBE6" stroke="#5E5A54" stroke-width="1.5"/>
+<rect x="1010.0" y="825.0" width="60.0" height="150.0" fill="url(#sun)" />
 <rect x="1018.0" y="835.0" width="44.0" height="30.0" fill="#2E3A42" />
+<rect x="1022.0" y="839.0" width="36.0" height="9.0" fill="#9FE0B0" opacity="0.8"/>
+<rect x="1022.0" y="851.0" width="24.0" height="7.0" fill="#9FE0B0" opacity="0.6"/>
+<rect x="1019.0" y="873.0" width="12.0" height="12.0" fill="#F6C21E" stroke="#5E5A54" stroke-width="0.8"/>
+<rect x="1034.0" y="873.0" width="12.0" height="12.0" fill="#E8302A" stroke="#5E5A54" stroke-width="0.8"/>
+<rect x="1049.0" y="873.0" width="12.0" height="12.0" fill="#3E9A4E" stroke="#5E5A54" stroke-width="0.8"/>
+<rect x="1016.0" y="895.0" width="48.0" height="62.0" fill="none" stroke="#B9B5AC" stroke-width="1.2"/>
+<rect x="1052.0" y="879.0" width="12.0" height="30.0" fill="#2A2A2A" rx="3"/>
+<path d="M1060.0 905.0 q26 70 -4 84 q-20 6 -22 -40" fill="none" stroke="#1E1E1E" stroke-width="3.5" stroke-linecap="round"/>
 <rect x="1010.0" y="815.0" width="60.0" height="12.0" fill="#E8302A" />
-<rect x="990.0" y="963.0" width="100.0" height="12.0" fill="#B9B5AC" />
+<rect x="1010.0" y="815.0" width="60.0" height="3.0" fill="#FFFFFF" opacity="0.3"/>
+<rect x="990.0" y="963.0" width="100.0" height="12.0" fill="#B9B5AC" stroke="#8E8A82" stroke-width="1.0"/>
+<rect x="990.0" y="963.0" width="100.0" height="3.0" fill="#FFFFFF" opacity="0.3"/>
 </svg>

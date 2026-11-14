@@ -2456,6 +2456,7 @@ func _generate(configs: Array) -> void:
 		base_y = BASE + oy
 		ground_y = GROUND + oy
 		rng.seed = hash(k.name)
+		_wr.seed = hash(k.name) + 7919
 		if k.kind == "plex" or k.has("door_x"):
 			doors[k.name] = k.get("door_x", k.door_cx)
 		out = PackedStringArray()
@@ -2467,6 +2468,8 @@ func _generate(configs: Array) -> void:
 			if split <= 0:
 				continue
 			var over := PackedStringArray([out[0], out[1]])
+			if String(k.name).begins_with("masson_"):
+				over.append(out[2])  # their own gradients (see `_svg`)
 			over.append_array(out.slice(split))
 			FileAccess.open("res://art/decor/over/%s.svg" % k.name, FileAccess.WRITE).store_string("\n".join(over))
 			continue
@@ -2560,6 +2563,13 @@ func _svg() -> void:
 		+ '<linearGradient id="sun" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE6B8" stop-opacity="0.14"/><stop offset="0.5" stop-color="#FFE6B8" stop-opacity="0"/><stop offset="1" stop-color="#1A0C14" stop-opacity="0.12"/></linearGradient>'
 		+ '<radialGradient id="pumpkin_glow"><stop offset="0" stop-color="#FFB347" stop-opacity="0.6"/><stop offset="1" stop-color="#FFB347" stop-opacity="0"/></radialGradient>'
 		+ '</defs>')
+	# Rue Masson's fronts shade and weather with a few gradients of their own (only they carry them, so no other facade's file changes).
+	if String(k.name).begins_with("masson_"):
+		out.append('<defs>'
+			+ '<linearGradient id="grime" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A140E" stop-opacity="0"/><stop offset="1" stop-color="#1A140E" stop-opacity="0.3"/></linearGradient>'
+			+ '<linearGradient id="skyrefl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D6ECF8" stop-opacity="0.34"/><stop offset="1" stop-color="#D6ECF8" stop-opacity="0"/></linearGradient>'
+			+ '<linearGradient id="castr" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1A0C08" stop-opacity="0.3"/><stop offset="1" stop-color="#1A0C08" stop-opacity="0"/></linearGradient>'
+			+ '</defs>')
 	match k.kind:
 		"ruelle":
 			_ruelle()
@@ -2627,7 +2637,14 @@ func _building() -> void:
 	else:
 		_bricks(top, base_y)
 	_wall_shading(top)
+	# Rue Masson's side walls and its presbytery age like its shop fronts do (their own random numbers: see `_masson_wear`).
+	var masson: bool = String(k.name).begins_with("masson_")
+	if masson:
+		_masson_wear(top, (_fb(1) + 25.0) if k.lower_stone else base_y, true)
 	_foundation()
+	if masson:
+		_rect(X0, base_y + 5, X1 - X0, ground_y - base_y - 5, "url(#grime)")
+		_rect(X0, base_y + 5, X1 - X0, 10, "url(#drop)")
 	for px: float in k.get("pilasters", []):
 		_rect(px - 13, top, 26, base_y - top, k.lintel, _stroke(k.lintel_dark, 1.5))
 		_rect(px - 13, top, 5, base_y - top, "#FFFFFF", 'opacity="0.3"')
@@ -2650,6 +2667,8 @@ func _building() -> void:
 	var first_floor := 1 if k.kind == "shop" else 0
 	for f in range(first_floor, floors):
 		for w in k.windows:
+			if masson:
+				_window_under(w[0], _win_y(f), w[1], 160.0)
 			_window(w[0], _win_y(f), w[1], 160.0)
 	# Everything from here on (doors, balconies, porch, stair, railings, fence, garden) is the house's "over" layer.
 	split = out.size()
@@ -6180,6 +6199,106 @@ func _lane_odd() -> void:
 # A building of the commercial street. Upstairs: brick (or a concrete frame, `upper: "frame"`) with its windows, Juliet
 # rails, balconies, a belt course and the roof line; downstairs (`ground`): "shops" (a row of `shops`), "stone" (a grey
 # stone base with windows set high), or "painted" (a painted wall, a mural on it, and its `shops`).
+# ── Rue Masson: age, depth and small fittings ──
+# What makes these fronts look built and lived in rather than drawn flat. Everything here takes its random numbers from `_wr`
+# (seeded per building), never from `rng`, so nothing the facades already draw moves; and it draws the same in every season.
+var _wr := RandomNumberGenerator.new()
+
+
+# A wall's age, from y0 (under the coping) to y1: the coping's shade, the soot the rain has run down from under it, and on
+# brick (`brick`) single bricks fired darker or paler on the wall's own courses and a patch or two of newer, repointed brick.
+func _masson_wear(y0: float, y1: float, brick: bool) -> void:
+	var w := X1 - X0
+	_rect(X0, y0, w, 30, "url(#drop)")
+	for i in int(w / 150.0) + 1:
+		var sw := _wr.randf_range(16.0, 58.0)
+		var sx := _wr.randf_range(X0, X1 - sw)
+		var sh := _wr.randf_range(70.0, maxf(minf(240.0, y1 - y0), 80.0))
+		_rect(sx, y0, sw, minf(sh, y1 - y0), "url(#drop)", 'opacity="%s"' % _n(_wr.randf_range(0.35, 0.75)))
+	if not brick:
+		return
+	var rows := int((y1 - y0) / 13.0)
+	if rows < 4:
+		return
+	var pale_wall := Color(k.bricks[0]).get_luminance() > 0.6
+	for i in 1 + int(w / 700.0):
+		var pw := _wr.randf_range(90.0, 220.0)
+		var px := _wr.randf_range(X0, maxf(X1 - pw, X0 + 1.0))
+		var prow := _wr.randi_range(2, maxi(rows - 8, 3))
+		for j in _wr.randi_range(3, 6):
+			var jx := maxf(px + _wr.randf_range(-18.0, 18.0), X0)
+			if prow + j < rows:
+				_rect(jx, y0 + (prow + j) * 13.0 - 1.0, minf(pw, X1 - jx), 13, "#FFF6E6", 'opacity="0.09"')
+	for i in int(w * (y1 - y0) / 5200.0):
+		var row := _wr.randi_range(0, rows - 1)
+		var bx := X0 + _wr.randi_range(0, int(w / 36.0)) * 36.0 - (18.0 if row % 2 == 1 else 0.0)
+		var a := maxf(bx, X0)
+		var b := minf(bx + 34.0, X1)
+		var dark := _wr.randf() < 0.62
+		var strength := _wr.randf_range(0.08, 0.24) * (0.55 if pale_wall and dark else 1.0)
+		if b - a > 2.0:
+			_rect(a, y0 + row * 13.0, b - a, 11, "#1E0E08" if dark else "#FFF4E0", 'opacity="%s"' % _n(strength))
+
+
+# Under a window, drawn before it: the sill's shade thrown on the wall a little to the right, and the dirt the rain leaves
+# running down from the sill's two ends.
+func _window_under(x: float, y: float, w: float, h: float) -> void:
+	var sill: float = {"hung": 17.0, "casement": 10.0, "slider": 8.0, "fixed": 8.0}.get(k.get("window_style", ""), 12.0)
+	var sy := y + h + sill
+	_rect(x - 6, sy, w + 24, 18, "url(#drop)")
+	for end: float in [x - 9.0, x + w - 5.0]:
+		var sw := _wr.randf_range(8.0, 18.0)
+		_rect(end + _wr.randf_range(-4.0, 4.0), sy, sw, _wr.randf_range(30.0, 84.0), "url(#drop)", 'opacity="%s"' % _n(_wr.randf_range(0.35, 0.8)))
+
+
+# A patch of brickwork in the building's own bricks, laid like `_bricks` (for parapets raised above the wall).
+func _brick_patch(x: float, y: float, w: float, h: float) -> void:
+	_rect(x, y, w, h, k.mortar)
+	var row := 0
+	var by := y
+	while by < y + h - 1.0:
+		var bh := minf(11.0, y + h - by)
+		var bx := x - (18.0 if row % 2 == 1 else 0.0)
+		while bx < x + w:
+			var a := maxf(bx, x)
+			var b := minf(bx + 34.0, x + w)
+			if b - a > 1.0:
+				var pick := _wr.randf()
+				_rect(a, by, b - a, bh, k.bricks[0] if pick < 0.55 else k.bricks[1 + int(pick * 97.0) % (k.bricks.size() - 1)] if k.bricks.size() > 1 else k.bricks[0])
+			bx += 36.0
+		by += 13.0
+		row += 1
+
+
+# The top of a flat-roofed front: the metal coping's joints and its drip edge, and under it, on brick, what the bricklayer did
+# to finish the wall, one of three by the building: a course of bricks standing on end over a shadow line, a string course of
+# stone, or nothing but the coping.
+func _masson_coping(top: float) -> void:
+	var x := X0 + _wr.randf_range(40.0, 120.0)
+	while x < X1 - 20.0:
+		_rect(x, top - 12, 1.5, 12, "#4E5256", 'opacity="0.7"')
+		_rect(x + 1.5, top - 12, 1.5, 12, "#FFFFFF", 'opacity="0.2"')
+		x += 122.0
+	_rect(X0 - 4, top - 1.5, X1 - X0 + 8, 2.5, "#3E4246", 'opacity="0.55"')
+	if k.get("upper", "brick") != "brick" or k.get("lintel_style", "plain") == "arch" or k.get("sky_mural", false):
+		return
+	match absi(hash(k.name)) % 3:
+		0:
+			var sx := X0
+			while sx < X1 - 1.0:
+				var bw := minf(11.0, X1 - sx)
+				_rect(sx, top + 6, bw, 22, k.bricks[_wr.randi_range(0, k.bricks.size() - 1)])
+				sx += 13.0
+			_rect(X0, top + 4, X1 - X0, 2, k.mortar)
+			_rect(X0, top + 28, X1 - X0, 2.5, "#000000", 'opacity="0.3"')
+			_rect(X0, top + 30.5, X1 - X0, 9, "url(#drop)")
+			_rect(X0, top + 6, X1 - X0, 22, "url(#shade)")
+		1:
+			_rect(X0 - 2, top + 22, X1 - X0 + 4, 8, k.lintel, _stroke(k.lintel_dark, 1))
+			_rect(X0 - 2, top + 22, X1 - X0 + 4, 2, "#FFFFFF", 'opacity="0.35"')
+			_rect(X0, top + 30, X1 - X0, 12, "url(#drop)")
+
+
 func _commerce() -> void:
 	var top := _top()
 	var belt := _fb(0) - 250.0
@@ -6198,9 +6317,11 @@ func _commerce() -> void:
 		else:
 			_bricks(top, belt + 4.0)
 		_wall_shading(top)
+		_masson_wear(top, belt + 4.0, k.get("upper", "brick") == "brick")
 		match k.parapet:
 			"flat":
 				_flat_parapet(top)
+				_masson_coping(top)
 			"corbel":
 				_corbel_parapet(top)
 			"scroll":
@@ -6229,6 +6350,7 @@ func _commerce() -> void:
 				var sx0: float = k.windows[0][0]
 				_rect(sx0 - 40, _win_y(f) + k.get("win_dy", 0.0) - 22, last[0] + last[1] - sx0 + 80, k.get("win_h", 160.0) + 30, "#000000", 'opacity="0.1"')
 			for w in k.windows:
+				_window_under(w[0], _win_y(f) + k.get("win_dy", 0.0), w[1], k.get("win_h", 160.0))
 				_window(w[0], _win_y(f) + k.get("win_dy", 0.0), w[1], k.get("win_h", 160.0))
 				_window_life(w[0], _win_y(f) + k.get("win_dy", 0.0), w[1], k.get("win_h", 160.0), f)
 				if k.get("juliets", false):
@@ -6241,14 +6363,29 @@ func _commerce() -> void:
 				_rect(lg[0], ly, lg[1] - lg[0], _fb(f) - ly, "#3A302C")
 				_rect(lg[0], ly, lg[1] - lg[0], 14, "#000000", 'opacity="0.35"')
 				_rect(lg[0] + 18, ly + 24, (lg[1] - lg[0]) * 0.45, _fb(f) - ly - 26, "url(#glass)", 'opacity="0.7"')
+				# The recess: its ceiling's shade, the left wall's shade across the floor, the door's frame and handle.
+				_rect(lg[0], ly + 14, lg[1] - lg[0], 30, "url(#drop)")
+				_rect(lg[0], ly, 26, _fb(f) - ly, "url(#castr)")
+				_rect(lg[0] + 18, ly + 24, (lg[1] - lg[0]) * 0.45, _fb(f) - ly - 26, "none", _stroke("#1E1A18", 2.5))
+				_rect(lg[0] + 18 + (lg[1] - lg[0]) * 0.225 - 1.5, ly + 24, 3, _fb(f) - ly - 26, "#1E1A18")
+				_rect(lg[1] - 5, ly, 5, _fb(f) - ly, "#FFFFFF", 'opacity="0.08"')
 				_glass_rail(lg[0] + 6, lg[1] - 6, _fb(f))
 		for up: float in k.get("upper_piers", []):
+			_rect(up + 22, top, 14, belt - top + 4, "url(#castr)")
 			_rect(up - 22, top, 44, belt - top + 4, "#C9C5BC", _stroke("#9E9A92", 1))
 			_rect(up - 22, top, 8, belt - top + 4, "#FFFFFF", 'opacity="0.3"')
+			_rect(up + 14, top, 8, belt - top + 4, "#000000", 'opacity="0.08"')
+			var uy := top + 60.0
+			while uy < belt - 10.0:
+				_rect(up - 22, uy, 44, 1.5, "#9E9A92")
+				uy += 92.0
 		for bal: Array in k.get("projecting", []):
 			for f in range(1, floors):
 				_balcony(bal[0], bal[1], _fb(f), [])
 				_rect(bal[0] - 6, _fb(f) + 16, bal[1] - bal[0] + 12, 34, k.slab_dark)
+				# The slab's edge catching a little light, and its shade on the wall below.
+				_rect(bal[0] - 6, _fb(f) + 16, bal[1] - bal[0] + 12, 3, "#FFFFFF", 'opacity="0.14"')
+				_rect(bal[0] - 6, _fb(f) + 50, bal[1] - bal[0] + 26, 46, "url(#drop)")
 		# A wooden rail round a roof terrace.
 		if k.get("roof_rail", "") != "":
 			var rail: String = k.roof_rail
@@ -6260,10 +6397,16 @@ func _commerce() -> void:
 				post += 34.0
 			_snow(X0, X1 - X0, top - 74)
 	# The belt between the shops and the flats: stone, or a dark cornice band.
-	_rect(X0 - 4, belt, X1 - X0 + 8, 16, k.get("belt", "#B9B3A8"), _stroke("#8E887E", 1.5))
-	_rect(X0 - 4, belt, X1 - X0 + 8, 3, "#FFFFFF", 'opacity="0.3"')
+	# A moulded band, not a flat strip: a fillet standing proud along its top, the face, a bead in shade under it.
+	var belt_c: String = k.get("belt", "#B9B3A8")
+	var belt_dark := "#" + Color(belt_c).darkened(0.28).to_html(false)
+	_rect(X0 - 4, belt, X1 - X0 + 8, 16, belt_c, _stroke(belt_dark, 1.5))
+	_rect(X0 - 4, belt + 11, X1 - X0 + 8, 5, belt_dark, 'opacity="0.55"')
+	_rect(X0 - 4, belt + 10, X1 - X0 + 8, 1.2, "#FFFFFF", 'opacity="0.2"')
+	_rect(X0 - 7, belt - 4, X1 - X0 + 14, 7, "#" + Color(belt_c).lightened(0.1).to_html(false), _stroke(belt_dark, 1.2))
+	_rect(X0 - 7, belt - 4, X1 - X0 + 14, 2, "#FFFFFF", 'opacity="0.35"')
 	_rect(X0, belt + 16, X1 - X0, 10, "#000000", 'opacity="0.2"')
-	_snow(X0 - 4, X1 - X0 + 8, belt)
+	_snow(X0 - 7, X1 - X0 + 14, belt - 4)
 	var ground: String = k.get("ground", "shops")
 	if ground == "stone":
 		_ashlar(belt + 16.0, ground_y, k.get("stone", "#A9A49C"))
@@ -6290,15 +6433,34 @@ func _commerce() -> void:
 		elif k.get("mural", "") == "graffiti":
 			_graffiti_mural(k.get("mural_x0", X0), X1, belt + 16.0, ground_y)
 	else:
-		_rect(X0, belt + 16, X1 - X0, ground_y - belt - 16, k.get("pier", "#3A3836"))
+		var pier_c: String = k.get("pier", "#3A3836")
+		_rect(X0, belt + 16, X1 - X0, ground_y - belt - 16, pier_c)
+		# Where the wall shows between the shops: stone piers in courses when it is pale, and a plinth at its foot.
+		if Color(pier_c).get_luminance() > 0.45:
+			var jy := belt + 62.0
+			while jy < ground_y - 40.0:
+				_rect(X0, jy, X1 - X0, 1.5, "#000000", 'opacity="0.18"')
+				_rect(X0, jy + 1.5, X1 - X0, 1.5, "#FFFFFF", 'opacity="0.22"')
+				jy += 46.0
+		_rect(X0, ground_y - 36, X1 - X0, 30, "#" + Color(pier_c).darkened(0.16).to_html(false))
+		_rect(X0, ground_y - 36, X1 - X0, 2.5, "#FFFFFF", 'opacity="0.16"')
+	# The belt's shade on the wall under it, and the street's dirt at the wall's foot.
+	_rect(X0, belt + 16, X1 - X0, 26, "url(#drop)")
+	_rect(X0, ground_y - 58, X1 - X0, 52, "url(#grime)")
 	for door_x: float in k.get("res_doors", []):
 		_res_door(door_x, belt + 40.0)
 	split = out.size()
 	for shop: Dictionary in k.get("shops", []):
 		_shopfront(shop, belt + 16.0)
 	for p: float in k.get("piers", []):
+		_rect(p + 10, belt + 16, 12, ground_y - belt - 22, "url(#castr)")
 		_rect(p - 10, belt + 16, 20, ground_y - belt - 16, k.get("pier_stone", "#B9B3A8"), _stroke("#8E887E", 1))
 		_rect(p - 10, belt + 16, 5, ground_y - belt - 16, "#FFFFFF", 'opacity="0.25"')
+		_rect(p + 5, belt + 16, 5, ground_y - belt - 16, "#000000", 'opacity="0.1"')
+		# Its cap under the belt and its base on the sidewalk.
+		_rect(p - 13, belt + 16, 26, 10, k.get("pier_stone", "#B9B3A8"), _stroke("#8E887E", 1))
+		_rect(p - 13, ground_y - 34, 26, 28, k.get("pier_stone", "#B9B3A8"), _stroke("#8E887E", 1))
+		_rect(p - 13, ground_y - 34, 26, 2.5, "#FFFFFF", 'opacity="0.3"')
 	# A frame of pale stone: a pier up each end and a coping along the top (the Banque Nationale at 6e).
 	var frame_stone: String = k.get("stone_frame", "")
 	if frame_stone != "":
@@ -6361,6 +6523,15 @@ func _shopfront(shop: Dictionary, top: float) -> void:
 	_rect(x0 + 4, top + 4, x1 - x0 - 8, sign_h, shop.get("sign", "#1E1E20"), _stroke("#000000", 1) + ' opacity="0.95"')
 	_rect(x0 + 4, top + 4, x1 - x0 - 8, 4, "#FFFFFF", 'opacity="0.18"')
 	_rect(x0 + 4, top + sign_h + 4, x1 - x0 - 8, 8, "#000000", 'opacity="0.35"')
+	# The sign is a board fixed to the wall: light falling across it, its edge set in a little, its four fixings, and the
+	# belt's shade along its top.
+	var pale_sign := Color(shop.get("sign", "#1E1E20")).get_luminance() > 0.55
+	_rect(x0 + 4, top + 4, x1 - x0 - 8, sign_h, "url(#shade)")
+	_rect(x0 + 9, top + 9, x1 - x0 - 18, sign_h - 10, "none", _stroke("#000000" if pale_sign else "#FFFFFF", 1) + ' opacity="%s"' % ("0.16" if pale_sign else "0.1"))
+	for fx: float in [x0 + 15.0, x1 - 15.0]:
+		for fy: float in [top + 15.0, top + sign_h - 2.0]:
+			_circle(fx, fy, 1.7, "#000000" if pale_sign else "#FFFFFF", 'opacity="0.3"')
+	_rect(x0 + 4, top + 4, x1 - x0 - 8, 16, "url(#drop)")
 	# A band of corrugated metal instead of a flat sign board (2846…: rust-red, ribbed).
 	if shop.get("ribs", false):
 		var rx := x0 + 8.0
@@ -6375,30 +6546,13 @@ func _shopfront(shop: Dictionary, top: float) -> void:
 	_rect(gx0, glass_top, gx1 - gx0, kick - glass_top, "#2F3A41")
 	if not shop.get("dark", false):
 		_shop_inside(shop.get("inside", "goods"), gx0, glass_top, gx1 - gx0, kick - glass_top, seed_value, shop.get("wall", ""))
+	# The glass itself: the sky caught in its upper half, the street's dusk along its foot.
+	_rect(gx0, glass_top, gx1 - gx0, (kick - glass_top) * 0.55, "url(#skyrefl)")
+	_rect(gx0, kick - 40, gx1 - gx0, 40, "url(#grime)")
 	# Its door (`door_style`): a glass door and its push bar, two glass doors, or a wooden door with a pane.
 	var dx: float = shop.get("door", (x0 + x1) / 2.0)
 	var door_style: String = shop.get("door_style", "glass")
 	var dw := 96.0 if door_style != "double" else 150.0
-	_rect(dx - dw / 2.0, glass_top - 2, dw, ground_y - glass_top - 4, frame)
-	match door_style:
-		"wood":
-			var wood: String = shop.get("door_color", "#6E4226")
-			_rect(dx - 42, glass_top + 4, 84, ground_y - glass_top - 16, wood, _stroke("#3E2414", 1.5))
-			_rect(dx - 30, glass_top + 14, 60, 100, "url(#warm)" if not shop.get("dark", false) else "#33404A", 'opacity="0.8"')
-			_rect(dx - 30, glass_top + 130, 60, ground_y - glass_top - 160, "none", _stroke("#3E2414", 1.5))
-			_circle(dx + 30, glass_top + 122, 3, "#C9A23A")
-		"double":
-			for side: float in [-1.0, 1.0]:
-				var cx := dx + side * 34.0
-				_rect(cx - 30, glass_top + 4, 60, ground_y - glass_top - 16, "#33404A")
-				if not shop.get("dark", false):
-					_rect(cx - 30, glass_top + 4, 60, ground_y - glass_top - 16, "url(#warm)", 'opacity="0.55"')
-				_rect(cx - 4 * side - 2, glass_top + 90, 4, 50, "#C9C5BC")
-		_:
-			_rect(dx - 42, glass_top + 4, 84, ground_y - glass_top - 16, "#33404A")
-			if not shop.get("dark", false):
-				_rect(dx - 42, glass_top + 4, 84, ground_y - glass_top - 16, "url(#warm)", 'opacity="0.55"')
-			_rect(dx - 38, glass_top + 120, 76, 5, "#C9C5BC")
 	# The panes: mullions down the window (`panes` of them, or one every 150), and across the top the transom (`transom`): a bar,
 	# a row of small panes, or nothing.
 	var n: int = shop.get("panes", maxi(int((gx1 - gx0) / 150.0), 1))
@@ -6406,7 +6560,9 @@ func _shopfront(shop: Dictionary, top: float) -> void:
 	for i in range(1, n):
 		var mx := lerpf(gx0, gx1, float(i) / n)
 		if absf(mx - dx) > dw / 2.0 + 12.0:
+			_rect(mx + mull / 2.0, glass_top, 5, kick - glass_top, "#000000", 'opacity="0.16"')
 			_rect(mx - mull / 2.0, glass_top, mull, kick - glass_top, frame)
+			_rect(mx - mull / 2.0, glass_top, 1.5, kick - glass_top, "#FFFFFF", 'opacity="0.22"')
 	match shop.get("transom", "bar" if front == "alu" else "panes"):
 		"bar":
 			_rect(gx0, glass_top + 34, gx1 - gx0, 5, frame, 'opacity="0.9"')
@@ -6458,6 +6614,58 @@ func _shopfront(shop: Dictionary, top: float) -> void:
 		_:
 			_rect(gx0, kick, gx1 - gx0, ground_y - kick - 6, frame)
 	_rect(gx0, kick, gx1 - gx0, 3, "#FFFFFF", 'opacity="0.15"')
+	# The sill the glass stands on, its shade on the bulkhead, and the sidewalk's dirt up the foot of the front.
+	_rect(gx0 - 2, kick - 4, gx1 - gx0 + 4, 5, "#" + Color(frame).lightened(0.16).to_html(false))
+	_rect(gx0 - 2, kick - 4, gx1 - gx0 + 4, 1.5, "#FFFFFF", 'opacity="0.25"')
+	_rect(gx0, kick + 1, gx1 - gx0, 9, "url(#drop)")
+	# The door, drawn over the bulkhead and the sill so that it runs to its own threshold.
+	_rect(dx - dw / 2.0, glass_top - 2, dw, ground_y - glass_top - 4, frame)
+	match door_style:
+		"wood":
+			var wood: String = shop.get("door_color", "#6E4226")
+			_rect(dx - 42, glass_top + 4, 84, ground_y - glass_top - 16, wood, _stroke("#3E2414", 1.5))
+			_rect(dx - 42, glass_top + 4, 84, ground_y - glass_top - 16, "url(#shade)")
+			_rect(dx - 30, glass_top + 14, 60, 100, "url(#warm)" if not shop.get("dark", false) else "#33404A", 'opacity="0.8"')
+			# The pane's bead and the shade of its rebate, the raised panel under it, a brass plate at the foot, the handle.
+			_rect(dx - 30, glass_top + 14, 60, 100, "none", _stroke("#3E2414", 2))
+			_rect(dx - 30, glass_top + 14, 60, 9, "url(#drop)")
+			_rect(dx - 30, glass_top + 130, 60, ground_y - glass_top - 178, "none", _stroke("#3E2414", 1.5))
+			_rect(dx - 26, glass_top + 134, 52, ground_y - glass_top - 186, "none", _stroke("#FFFFFF", 1) + ' opacity="0.16"')
+			_rect(dx - 38, ground_y - 40, 76, 22, "#B8943A", _stroke("#7E6220", 1))
+			_rect(dx - 38, ground_y - 40, 76, 3, "#FFFFFF", 'opacity="0.3"')
+			_rect(dx + 27, glass_top + 112, 6, 24, "#C9A23A", _stroke("#7E6220", 0.8) + ' rx="2"')
+			_circle(dx + 30, glass_top + 144, 2.4, "#3E2414")
+		"double":
+			for side: float in [-1.0, 1.0]:
+				var cx := dx + side * 34.0
+				_rect(cx - 30, glass_top + 4, 60, ground_y - glass_top - 16, "#33404A")
+				if not shop.get("dark", false):
+					_rect(cx - 30, glass_top + 4, 60, ground_y - glass_top - 16, "url(#warm)", 'opacity="0.55"')
+				_rect(cx - 30, glass_top + 4, 60, (ground_y - glass_top) * 0.5, "url(#skyrefl)")
+				# Each leaf in its own metal frame, the rail at its foot, a long pull by the meeting stiles.
+				var leaf2 := "#" + Color(frame).lightened(0.2).to_html(false)
+				_rect(cx - 30, glass_top + 4, 60, ground_y - glass_top - 16, "none", _stroke(leaf2, 3.5))
+				_rect(cx - 30, ground_y - 36, 60, 24, leaf2)
+				_rect(cx - 30, ground_y - 36, 60, 2, "#FFFFFF", 'opacity="0.22"')
+				_rect(cx - 21 * side - 2, glass_top + 84, 4, 62, "#E4E6E8", _stroke("#7E8286", 0.8) + ' rx="2"')
+		_:
+			_rect(dx - 42, glass_top + 4, 84, ground_y - glass_top - 16, "#33404A")
+			if not shop.get("dark", false):
+				_rect(dx - 42, glass_top + 4, 84, ground_y - glass_top - 16, "url(#warm)", 'opacity="0.55"')
+			_rect(dx - 42, glass_top + 4, 84, (ground_y - glass_top) * 0.5, "url(#skyrefl)")
+			# A real shop door: the leaf in its metal frame, a rail at its foot, the closer at the head, the push bar across,
+			# a long pull on the latch side and its lock.
+			var leaf := "#" + Color(frame).lightened(0.2).to_html(false)
+			var latch := 1.0 if dx < (x0 + x1) / 2.0 else -1.0
+			_rect(dx - 42, glass_top + 4, 84, ground_y - glass_top - 16, "none", _stroke(leaf, 4))
+			_rect(dx - 42, ground_y - 38, 84, 26, leaf)
+			_rect(dx - 42, ground_y - 38, 84, 2, "#FFFFFF", 'opacity="0.22"')
+			_rect(dx - latch * 22.0 - 15, glass_top + 8, 30, 7, "#5E6266", _stroke("#3A3E42", 0.8))
+			_rect(dx - 38, glass_top + 120, 76, 5, "#C9C5BC")
+			_rect(dx - 38, glass_top + 125, 76, 2, "#000000", 'opacity="0.25"')
+			_rect(dx + latch * 31.0 - 2, glass_top + 92, 4, 62, "#E4E6E8", _stroke("#7E8286", 0.8) + ' rx="2"')
+			_circle(dx + latch * 31.0, glass_top + 166, 2.4, "#1E1E20")
+	_rect(x0, ground_y - 44, x1 - x0, 38, "url(#grime)")
 	_glass_shine(gx0, glass_top, gx1 - gx0, kick - glass_top)
 	var awning: String = shop.get("awning", "")
 	if awning != "":
@@ -6862,12 +7070,30 @@ func _plain_awning(x0: float, x1: float, y: float, colour: String) -> void:
 	var dark := "#" + Color(colour).darkened(0.3).to_html(false)
 	var drop := 40.0
 	var reach := 16.0
+	var light := "#" + Color(colour).lightened(0.22).to_html(false)
+	# Its shade, deep under the valance and fading down the glass.
 	_rect(x0 - 4, y + drop + 6, x1 - x0 + 8, 26, "url(#drop)")
-	_path("M%s %s H%s L%s %s H%s Z" % [_n(x0), _n(y), _n(x1), _n(x1 + reach), _n(y + drop), _n(x0 - reach)], colour, _stroke(dark, 1.5))
+	_rect(x0 - 4, y + drop + 6, x1 - x0 + 8, 52, "url(#drop)")
+	var slope := "M%s %s H%s L%s %s H%s Z" % [_n(x0), _n(y), _n(x1), _n(x1 + reach), _n(y + drop), _n(x0 - reach)]
+	_path(slope, colour, _stroke(dark, 1.5))
+	_path(slope, "url(#shade)")
 	_path("M%s %s H%s L%s %s H%s Z" % [_n(x0 - reach * 0.5), _n(y + drop * 0.5), _n(x1 + reach * 0.5), _n(x1 + reach), _n(y + drop), _n(x0 - reach)], "#000000", 'opacity="0.12"')
+	# The canvas is sewn in widths: a seam down the slope every half metre, fanning out with it, dark with a lit edge.
+	var widths := maxi(int((x1 - x0) / 46.0), 2)
+	for i in range(1, widths):
+		var t := float(i) / widths
+		var ax := lerpf(x0, x1, t)
+		var bx := lerpf(x0 - reach, x1 + reach, t)
+		_path("M%s %s L%s %s" % [_n(ax), _n(y), _n(bx), _n(y + drop)], "none", _stroke(dark, 1) + ' opacity="0.5"')
+		_path("M%s %s L%s %s" % [_n(ax + 1.5), _n(y), _n(bx + 1.5), _n(y + drop)], "none", _stroke(light, 1) + ' opacity="0.4"')
+	# The rail it hangs from on the wall, and the front bar under the canvas.
+	_rect(x0 - 3, y - 4, x1 - x0 + 6, 5, dark)
+	_rect(x0 - 3, y - 4, x1 - x0 + 6, 1.5, "#FFFFFF", 'opacity="0.25"')
+	_rect(x0 - reach, y + drop - 2.5, x1 - x0 + reach * 2.0, 2.5, light, 'opacity="0.55"')
 	var x := x0 - reach
 	while x < x1 + reach - 2.0:
 		_path("M%s %s h18 v7 q-9 8 -18 0 z" % [_n(x), _n(y + drop)], dark)
+		_path("M%s %s h18" % [_n(x), _n(y + drop + 2.5)], "none", _stroke(light, 0.8) + ' opacity="0.45" stroke-dasharray="3 2"')
 		x += 18.0
 	_snow(x0, x1 - x0, y)
 
@@ -6879,6 +7105,9 @@ func _gooseneck(x: float, y: float) -> void:
 	_path("M%s %s q0 -22 14 -22 q14 0 14 14" % [_n(x), _n(y + 8)], "none", _stroke(c, 3))
 	_path("M%s %s l14 0 l-4 9 l-6 0 z" % [_n(x + 21), _n(y)], c, _stroke("#8E8A82", 0.8))
 	_rect(x - 3, y + 6, 6, 8, c)
+	_circle(x, y + 10, 5, c, _stroke("#8E8A82", 0.8))
+	_path("M%s %s q0 -22 14 -22" % [_n(x - 1), _n(y + 8)], "none", _stroke("#FFFFFF", 1) + ' opacity="0.3"')
+	_path("M%s %s l10 0" % [_n(x + 23), _n(y + 10)], "none", _stroke("#FFF2C8", 2) + ' stroke-linecap="round"')
 
 
 # Crates of fruit and vegetables out on the sidewalk in front of a greengrocer's, on a low stand.
@@ -6927,11 +7156,31 @@ func _res_door(x: float, top: float) -> void:
 	var tr_top := frame_top + 10.0
 	var leaf_top := ground_y - leaf_h
 	_rect(x - leaf_w / 2.0, tr_top, leaf_w, leaf_top - tr_top - 6, "url(#glass)", _stroke("#2B2B2E", 3))
+	_rect(x - leaf_w / 2.0, tr_top, leaf_w, 8, "url(#drop)")
+	_path("M%s %s l14 0 l-16 %s l-14 0 z" % [_n(x + 4), _n(tr_top + 2), _n(leaf_top - tr_top - 10)], "#FFFFFF", 'opacity="0.2"')
 	_rect(x - leaf_w / 2.0, leaf_top, leaf_w, leaf_h - 6, "#2B2B2E")
-	_rect(x - leaf_w / 2.0 + 12, leaf_top + 14, leaf_w - 24, leaf_h * 0.5, "url(#glass)")
-	_rect(x - leaf_w / 2.0 + 12, leaf_top + 14, leaf_w - 24, 6, "url(#drop)")
+	_rect(x - leaf_w / 2.0, leaf_top, leaf_w, leaf_h - 6, "url(#shade)")
+	# The pane in its bead, the sky in it; under it a raised panel, the letter slot, a kick plate; the lever on its plate.
+	_rect(x - leaf_w / 2.0 + 12, leaf_top + 14, leaf_w - 24, leaf_h * 0.5, "url(#glass)", _stroke("#141416", 2.5))
+	_rect(x - leaf_w / 2.0 + 12, leaf_top + 14, leaf_w - 24, 9, "url(#drop)")
+	_path("M%s %s l16 0 l-26 %s l-16 0 z" % [_n(x + 6), _n(leaf_top + 16), _n(leaf_h * 0.5 - 4)], "#FFFFFF", 'opacity="0.18"')
+	_rect(x - leaf_w / 2.0 + 12, leaf_top + leaf_h * 0.5 + 40, leaf_w - 24, leaf_h * 0.5 - 100, "none", _stroke("#141416", 2))
+	_rect(x - leaf_w / 2.0 + 15, leaf_top + leaf_h * 0.5 + 43, leaf_w - 30, leaf_h * 0.5 - 106, "none", _stroke("#FFFFFF", 1) + ' opacity="0.14"')
+	_rect(x - 17, leaf_top + leaf_h * 0.5 + 22, 34, 8, "#C9A227", _stroke("#7E6220", 0.8) + ' rx="1.5"')
+	_rect(x - 13, leaf_top + leaf_h * 0.5 + 25, 26, 2, "#3A2E10")
 	_rect(x - leaf_w / 2.0 + 8, ground_y - 46, leaf_w - 16, 30, "#3A3A3E", _stroke("#1A1A1C", 1))
-	_rect(x + leaf_w / 2.0 - 16, leaf_top + leaf_h * 0.58, 5, 22, "#C9A227")
+	_rect(x - leaf_w / 2.0 + 8, ground_y - 46, leaf_w - 16, 2.5, "#FFFFFF", 'opacity="0.18"')
+	_rect(x + leaf_w / 2.0 - 10, leaf_top + leaf_h * 0.4, 7, 30, "#C9A227", _stroke("#7E6220", 0.8) + ' rx="2"')
+	_rect(x + leaf_w / 2.0 - 22, leaf_top + leaf_h * 0.4 + 9, 16, 4, "#E0BC48", _stroke("#7E6220", 0.6) + ' rx="2"')
+	# The stone frame: its inner edge in shade, a joint across each jamb, the bell plate.
+	_rect(x - leaf_w / 2.0 - 2, frame_top + 8, leaf_w + 4, ground_y - frame_top - 14, "none", _stroke("#000000", 2) + ' opacity="0.25"')
+	for jy: float in [frame_top + 90.0, frame_top + 180.0]:
+		if jy < ground_y - 30.0:
+			_rect(x - leaf_w / 2.0 - 12, jy, 10, 1.5, "#8E887E")
+			_rect(x + leaf_w / 2.0 + 2, jy, 10, 1.5, "#8E887E")
+	_rect(x - leaf_w / 2.0 - 10, ground_y - 150, 7, 20, "#8E9296", _stroke("#5E6266", 0.8))
+	for b in 3:
+		_circle(x - leaf_w / 2.0 - 6.5, ground_y - 146 + b * 6.0, 1.3, "#2B2B2E")
 	# The step and the shadow of the recess.
 	_rect(x - leaf_w / 2.0 - 16, ground_y - 8, leaf_w + 32, 8, "#A9A39A", _stroke("#7E7A72", 1))
 	_rect(x - leaf_w / 2.0, leaf_top, 8, leaf_h - 6, "#000000", 'opacity="0.3"')
@@ -6953,6 +7202,20 @@ func _ashlar(y0: float, y1: float, stone: String) -> void:
 				var tone := Color(stone).lightened(rng.randf_range(-0.06, 0.08))
 				_rect(bx + 1.5, y + 1.5, bw - 3.0, h - 3.0, "#" + tone.to_html(false))
 				_rect(bx + 1.5, y + 1.5, bw - 3.0, 3, "#FFFFFF", 'opacity="0.18"')
+				# Dressed stone: the lit top and left edges, the lower and right edges in shade, a vein or a stain on some.
+				_rect(bx + 1.5, y + 1.5, 2.5, h - 3.0, "#FFFFFF", 'opacity="0.12"')
+				_rect(bx + 1.5, y + h - 4.5, bw - 3.0, 3, "#000000", 'opacity="0.14"')
+				_rect(bx + bw - 4.0, y + 1.5, 2.5, h - 3.0, "#000000", 'opacity="0.1"')
+				var mark := _wr.randf()
+				var mx := bx + 6.0 + _wr.randf() * maxf(bw - 40.0, 1.0)
+				var my := y + 8.0 + _wr.randf() * maxf(h - 18.0, 1.0)
+				if bw > 50.0 and h > 20.0:
+					if mark < 0.22:
+						_path("M%s %s q%s %s %s %s" % [_n(mx), _n(my), _n(12.0), _n(-5.0 + mark * 40.0), _n(26.0), _n(2.0)], "none", _stroke("#000000", 1) + ' opacity="0.12"')
+					elif mark < 0.4:
+						out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="#000000" opacity="0.045"/>' % [_n(mx + 10), _n(my), _n(14.0 + mark * 30.0), _n(7.0)])
+					elif mark < 0.55:
+						out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="#FFFFFF" opacity="0.07"/>' % [_n(mx + 10), _n(my), _n(12.0 + mark * 24.0), _n(6.0)])
 			x += 120.0
 		y += 48.0
 		row += 1
@@ -6973,6 +7236,21 @@ func _frame_upper(top: float, belt: float) -> void:
 			var b: float = piers[i + 1]
 			_rect(a, fy, b - a, 230, "url(#glass)")
 			_path("M%s %s l%s 0 l%s %s l%s 0 z" % [_n(a + (b - a) * 0.5), _n(fy), _n((b - a) * 0.12), _n(-(b - a) * 0.18), _n(230), _n(-(b - a) * 0.12)], "#FFFFFF", 'opacity="0.18"')
+			# Rooms behind the glass: a curtain or a blind in some lights, by the bay and the floor.
+			var lights := maxi(int((b - a) / 90.0), 2)
+			for l in lights:
+				var lx := a + (b - a) * l / float(lights) + 4.0
+				var lw := (b - a) / float(lights) - 8.0
+				var pick := _wr.randf()
+				var cloth: String = ["#F3E9D8", "#E8D8C0", "#D9E4EC", "#F2D4C8", "#E4E8D2"][int(pick * 50.0) % 5]
+				if pick < 0.18:
+					_rect(lx, fy + 4, lw, 60.0 + pick * 300.0, cloth, 'opacity="0.85"')
+				elif pick < 0.34:
+					_path("M%s %s h%s q%s %s %s %s h%s z" % [_n(lx), _n(fy + 4), _n(lw * 0.45), _n(-lw * 0.3), _n(58), _n(-lw * 0.12), _n(112), _n(-lw * 0.33)], cloth, 'opacity="0.85"')
+				elif pick < 0.42:
+					_rect(lx, fy + 4, lw, 112, "url(#warm)", 'opacity="0.75"')
+			_rect(a, fy, b - a, 20, "url(#drop)")
+			_rect(a, fy, 22, 230, "url(#castr)")
 			var panes := maxi(int((b - a) / 90.0), 2)
 			for p in range(0, panes + 1):
 				_rect(a + (b - a) * p / float(panes) - 3.0, fy, 6, 230, "#F2F0EA")
@@ -6985,11 +7263,22 @@ func _frame_upper(top: float, belt: float) -> void:
 				_juliet(a + 10, b - a - 20, fy + 228)
 		_rect(X0, _fb(f) - 18, X1 - X0, 26, concrete, _stroke(dark, 1.5))
 		_rect(X0, _fb(f) - 18, X1 - X0, 4, "#FFFFFF", 'opacity="0.3"')
+		_rect(X0, _fb(f) + 2, X1 - X0, 6, "#000000", 'opacity="0.1"')
 		_snow(X0, X1 - X0, _fb(f) - 18)
 	for p: float in piers:
 		_rect(p, top, 30, belt - top, concrete, _stroke(dark, 1.5))
 		_rect(p, top, 6, belt - top, "#FFFFFF", 'opacity="0.25"')
+		_rect(p + 23, top, 7, belt - top, "#000000", 'opacity="0.09"')
+		# Poured concrete: the board marks of each lift, and the rain's streaks down from the slabs.
+		var ly := top + 40.0
+		while ly < belt - 10.0:
+			_rect(p + 1, ly, 28, 1.2, dark, 'opacity="0.45"')
+			ly += 68.75
+		for f in range(1, floors):
+			_rect(p + 4 + _wr.randf() * 12.0, _fb(f) + 8, 6.0 + _wr.randf() * 8.0, 60.0 + _wr.randf() * 90.0, "url(#drop)", 'opacity="0.6"')
+	_rect(X0, top + 4, X1 - X0, 18, "url(#drop)")
 	_rect(X0 - 4, top - 14, X1 - X0 + 8, 18, concrete, _stroke(dark, 1.5))
+	_rect(X0 - 4, top - 14, X1 - X0 + 8, 3, "#FFFFFF", 'opacity="0.3"')
 	_snow(X0 - 4, X1 - X0 + 8, top - 14)
 
 
@@ -7024,21 +7313,43 @@ func _bank() -> void:
 	_rect(X0 - 8, top - 26, X1 - X0 + 16, 30, stone, _stroke("#8E887E", 1.5))
 	_rect(X0 - 8, top - 32, X1 - X0 + 16, 8, "#6E9A86", _stroke("#4E7A66", 1))
 	_rect(X0 - 4, top + 4, X1 - X0 + 8, 10, "#000000", 'opacity="0.2"')
+	_rect(X0, top + 4, X1 - X0, 34, "url(#drop)")
+	_rect(X0 - 8, top - 26, X1 - X0 + 16, 3, "#FFFFFF", 'opacity="0.3"')
+	_rect(X0 - 8, top - 8, X1 - X0 + 16, 1.5, "#8E887E")
 	var x := X0 + 10.0
 	while x < X1 - 10.0:
+		_rect(x + 2, top - 2, 10, 8, "#000000", 'opacity="0.18"')
 		_rect(x, top - 4, 10, 8, "#" + Color(stone).darkened(0.15).to_html(false))
+		_rect(x, top - 4, 10, 1.5, "#FFFFFF", 'opacity="0.25"')
 		x += 22.0
 	_snow(X0 - 8, X1 - X0 + 16, top - 32)
 	# Pilasters, fluted, between the bays.
 	# The wall itself may be brick between the stone (`bank_brick`, 2703…), the pilasters in their own stone (`pilaster`).
 	if k.get("bank_brick", false):
 		_bricks(top, ground_y - 6.0)
+	# The rain's soot down from the cornice, and a plinth course of darker stone at the sidewalk.
+	_masson_wear(top + 4.0, ground_y - 60.0, k.get("bank_brick", false))
+	_rect(X0, ground_y - 50, X1 - X0, 44, "#" + Color(stone).darkened(0.14).to_html(false), _stroke("#8E887E", 1))
+	_rect(X0 - 3, ground_y - 56, X1 - X0 + 6, 8, "#" + Color(stone).darkened(0.04).to_html(false), _stroke("#8E887E", 1))
+	_rect(X0 - 3, ground_y - 56, X1 - X0 + 6, 2, "#FFFFFF", 'opacity="0.3"')
+	_rect(X0, ground_y - 48, X1 - X0, 8, "url(#drop)")
+	_rect(X0, ground_y - 50, X1 - X0, 44, "url(#grime)")
 	var pil: String = k.get("pilaster", "#" + Color(stone).lightened(0.06).to_html(false))
 	for p: float in k.get("pilasters", []):
+		_rect(p + 18, top, 16, ground_y - top - 10, "url(#castr)")
 		_rect(p - 18, top, 36, ground_y - top - 10, pil, _stroke("#8E887E", 1.5))
 		for fl in 4:
 			_rect(p - 12 + fl * 7.0, top + 30, 2, ground_y - top - 70, "#" + Color(stone).darkened(0.2).to_html(false))
+			_rect(p - 10 + fl * 7.0, top + 30, 1.5, ground_y - top - 70, "#FFFFFF", 'opacity="0.22"')
+		_rect(p - 18, top, 5, ground_y - top - 10, "#FFFFFF", 'opacity="0.16"')
+		_rect(p + 12, top, 6, ground_y - top - 10, "#000000", 'opacity="0.08"')
 		_rect(p - 24, top, 48, 16, stone, _stroke("#8E887E", 1))
+		_rect(p - 21, top + 16, 42, 7, stone, _stroke("#8E887E", 1))
+		_rect(p - 24, top, 48, 2.5, "#FFFFFF", 'opacity="0.3"')
+		# Its base: two steps of stone standing on the plinth.
+		_rect(p - 22, ground_y - 74, 44, 10, stone, _stroke("#8E887E", 1))
+		_rect(p - 26, ground_y - 64, 52, 58, "#" + Color(stone).darkened(0.08).to_html(false), _stroke("#8E887E", 1))
+		_rect(p - 26, ground_y - 64, 52, 2.5, "#FFFFFF", 'opacity="0.3"')
 	# Upstairs, small paired windows; downstairs, wide ones, each in a bronze frame with a transom.
 	for w in k.windows:
 		# Every upper floor has its pair (2703… has three floors).
@@ -7048,11 +7359,25 @@ func _bank() -> void:
 				_rect(wx - 3, _win_y(f) + 30 - 3, w[1] / 2.0 - 6 + 6, 118, "#5E4A36")
 				_rect(wx, _win_y(f) + 30, w[1] / 2.0 - 6, 112, "url(#glass)")
 				_rect(wx, _win_y(f) + 30 + 40, w[1] / 2.0 - 6, 4, "#5E4A36")
+				_rect(wx, _win_y(f) + 30, w[1] / 2.0 - 6, 12, "url(#drop)")
+				_rect(wx, _win_y(f) + 30, 7, 112, "#000000", 'opacity="0.16"')
+				_path("M%s %s l12 0 l-22 60 l-12 0 z" % [_n(wx + w[1] * 0.3), _n(_win_y(f) + 32)], "#FFFFFF", 'opacity="0.18"')
+			# A stone sill under the pair, its shade on the wall.
+			_rect(w[0] - 10, _win_y(f) + 30 + 115, w[1] + 20, 9, "#" + Color(stone).lightened(0.05).to_html(false), _stroke("#8E887E", 1))
+			_rect(w[0] - 10, _win_y(f) + 30 + 115, w[1] + 20, 2, "#FFFFFF", 'opacity="0.3"')
+			_rect(w[0] - 6, _win_y(f) + 30 + 124, w[1] + 22, 14, "url(#drop)")
 			_window_life(w[0], _win_y(f) + 30, w[1], 112, f)
 		_rect(w[0] - 4, _win_y(0) + 10, w[1] + 8, 180, "#4E3E2E")
 		_rect(w[0], _win_y(0) + 14, w[1], 172, "url(#glass)")
 		_rect(w[0], _win_y(0) + 56, w[1], 5, "#4E3E2E")
 		_rect(w[0] + w[1] / 2.0 - 2, _win_y(0) + 61, 4, 125, "#4E3E2E")
+		# Set deep in the stone: the head's and the left jamb's shade on the glass, the sky in its top, the bronze catching light.
+		_rect(w[0], _win_y(0) + 14, w[1], 86, "url(#skyrefl)")
+		_rect(w[0], _win_y(0) + 14, w[1], 16, "url(#drop)")
+		_rect(w[0], _win_y(0) + 14, 10, 172, "#000000", 'opacity="0.18"')
+		_rect(w[0] - 4, _win_y(0) + 10, w[1] + 8, 2, "#B89A6A", 'opacity="0.5"')
+		_rect(w[0] - 4, _win_y(0) + 10, 2, 180, "#B89A6A", 'opacity="0.4"')
+		_rect(w[0] - 6, _win_y(0) + 200, w[1] + 26, 16, "url(#drop)")
 		_glass_shine(w[0], _win_y(0) + 14, w[1], 172)
 		if season == "autumn" and not night:
 			if not windows.has(k.name):
@@ -7066,6 +7391,17 @@ func _bank() -> void:
 	_rect(dx - 46, _fb(0) - 230, 92, ground_y - _fb(0) + 230, "#" + Color(stone).darkened(0.1).to_html(false), _stroke("#8E887E", 1.5))
 	_rect(dx - 36, _fb(0) - 216, 72, ground_y - _fb(0) + 210, "#3A3028")
 	_rect(dx - 30, _fb(0) - 210, 60, 110, "url(#glass)")
+	# A bronze door: the pane's shade and shine, a panel under it, the long handle, a kick plate, the stone step.
+	_rect(dx - 36, _fb(0) - 216, 72, ground_y - _fb(0) + 210, "url(#shade)")
+	_rect(dx - 30, _fb(0) - 210, 60, 12, "url(#drop)")
+	_path("M%s %s l14 0 l-24 100 l-14 0 z" % [_n(dx + 4), _n(_fb(0) - 206)], "#FFFFFF", 'opacity="0.18"')
+	_rect(dx - 30, _fb(0) - 210, 60, 110, "none", _stroke("#1E1610", 2))
+	_rect(dx - 28, _fb(0) - 86, 56, ground_y - _fb(0) + 30, "none", _stroke("#1E1610", 2))
+	_rect(dx - 25, _fb(0) - 83, 50, ground_y - _fb(0) + 24, "none", _stroke("#B89A6A", 1) + ' opacity="0.35"')
+	_rect(dx + 20, _fb(0) - 120, 5, 56, "#C9A227", _stroke("#7E6220", 0.8) + ' rx="2"')
+	_rect(dx - 32, ground_y - 36, 64, 22, "#B8943A", _stroke("#7E6220", 1))
+	_rect(dx - 52, ground_y - 12, 104, 8, "#" + Color(stone).lightened(0.04).to_html(false), _stroke("#8E887E", 1))
+	_rect(dx - 36, _fb(0) - 216, 9, ground_y - _fb(0) + 204, "#000000", 'opacity="0.25"')
 	_path("M%s %s L%s %s L%s %s Z" % [_n(dx - 56), _n(_fb(0) - 230), _n(dx), _n(_fb(0) - 270), _n(dx + 56), _n(_fb(0) - 230)], stone, _stroke("#8E887E", 1.5))
 	var lx := dx - side * 92.0
 	_rect(lx - 3, ground_y - 250, 6, 250, "#1A1A1A")
@@ -7105,8 +7441,10 @@ func _stepped_parapet(top: float) -> void:
 	var half := (X1 - X0) / 2.0
 	for i in 4:
 		var w := half * (1.0 - i * 0.22)
-		_rect(cx - w, top - 10 - i * 22.0, w * 2.0, 24, brick)
+		_brick_patch(cx - w, top - 10 - i * 22.0, w * 2.0, 24)
 		_rect(cx - w - 4, top - 12 - i * 22.0, w * 2.0 + 8, 5, k.lintel, _stroke(k.lintel_dark, 1))
+		_rect(cx - w - 4, top - 12 - i * 22.0, w * 2.0 + 8, 1.5, "#FFFFFF", 'opacity="0.35"')
+		_rect(cx - w, top - 7 - i * 22.0, w * 2.0, 7, "url(#drop)")
 	var dy := top - 46.0
 	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(cx), _n(dy - 18), _n(cx + 18), _n(dy), _n(cx), _n(dy + 18), _n(cx - 18), _n(dy)], k.lintel, _stroke(k.lintel_dark, 1.2))
 	_rect(X0, top, X1 - X0, 6, "#000000", 'opacity="0.15"')
@@ -7117,11 +7455,17 @@ func _stepped_parapet(top: float) -> void:
 func _crenel_parapet(top: float) -> void:
 	var brick: String = k.bricks[0]
 	_rect(X0 - 4, top - 8, X1 - X0 + 8, 10, brick)
+	_brick_patch(X0, top - 6, X1 - X0, 8)
 	var x := X0
 	var w := 46.0
 	while x < X1 - 10.0:
-		_rect(x, top - 30, minf(w, X1 - x), 24, brick, _stroke("#000000", 0.8) + ' stroke-opacity="0.4"')
-		_rect(x, top - 30, minf(w, X1 - x), 3, "#FFFFFF", 'opacity="0.15"')
+		# Each merlon in real brick, a thin stone cap on it, its right side in shade and its shade thrown on the next gap.
+		var mw := minf(w, X1 - x)
+		_brick_patch(x, top - 30, mw, 24)
+		_rect(x, top - 30, mw, 24, "none", _stroke("#000000", 0.8) + ' stroke-opacity="0.4"')
+		_rect(x - 1.5, top - 33, mw + 3, 4, "#" + Color(brick).lightened(0.25).to_html(false), _stroke("#000000", 0.6) + ' stroke-opacity="0.35"')
+		_rect(x + mw - 5, top - 29, 5, 23, "#000000", 'opacity="0.18"')
+		_rect(x + mw, top - 8, 14, 3, "#000000", 'opacity="0.22"')
 		x += w * 2.0
 	_rect(X0, top, X1 - X0, 6, "#000000", 'opacity="0.2"')
 	_snow(X0 - 4, X1 - X0 + 8, top - 8)
@@ -7133,13 +7477,23 @@ func _scroll_parapet(top: float) -> void:
 	var hw := (X1 - X0) * 0.22
 	_rect(X0 - 4, top - 14, X1 - X0 + 8, 14, k.lintel, _stroke(k.lintel_dark, 1.5))
 	_rect(X0 - 4, top - 14, X1 - X0 + 8, 3, "#FFFFFF", 'opacity="0.35"')
-	_path("M%s %s Q%s %s %s %s Q%s %s %s %s Z" % [_n(cx - hw), _n(top - 14), _n(cx - hw * 0.5), _n(top - 96), _n(cx), _n(top - 98), _n(cx + hw * 0.5), _n(top - 96), _n(cx + hw), _n(top - 14)], brick, _stroke(k.lintel_dark, 1))
+	var crest := "M%s %s Q%s %s %s %s Q%s %s %s %s Z" % [_n(cx - hw), _n(top - 14), _n(cx - hw * 0.5), _n(top - 96), _n(cx), _n(top - 98), _n(cx + hw * 0.5), _n(top - 96), _n(cx + hw), _n(top - 14)]
+	_path(crest, brick, _stroke(k.lintel_dark, 1))
+	# The crest is brick too: its courses, cut to the curve.
+	_clips += 1
+	out.append('<clipPath id="crest%d"><path d="%s"/></clipPath><g clip-path="url(#crest%d)">' % [_clips, crest, _clips])
+	_brick_patch(cx - hw, top - 100, hw * 2.0, 88)
+	_rect(cx - hw, top - 100, hw * 2.0, 88, "url(#sun)")
+	out.append('</g>')
 	_path("M%s %s Q%s %s %s %s Q%s %s %s %s" % [_n(cx - hw - 8), _n(top - 12), _n(cx - hw * 0.5), _n(top - 106), _n(cx), _n(top - 108), _n(cx + hw * 0.5), _n(top - 106), _n(cx + hw + 8), _n(top - 12)], "none", _stroke(k.lintel, 10) + ' stroke-linecap="round"')
 	for side: float in [-1.0, 1.0]:
 		var sx := cx + side * (hw + 6.0)
 		_circle(sx, top - 24, 13, k.lintel, _stroke(k.lintel_dark, 1.2))
 		_circle(sx + side * 3.0, top - 24, 5, "#000000", 'opacity="0.15"')
 	_rect(cx - 50, top - 70, 100, 34, "#" + Color(brick).lightened(0.1).to_html(false), _stroke(k.lintel_dark, 1))
+	_rect(cx - 46, top - 66, 92, 26, "none", _stroke("#000000", 1) + ' opacity="0.18"')
+	_rect(cx - 50, top - 70, 100, 4, "url(#drop)")
+	_rect(X0, top, X1 - X0, 5, "#000000", 'opacity="0.22"')
 	_snow(X0 - 4, X1 - X0 + 8, top - 14)
 
 
@@ -7449,6 +7803,10 @@ func _church_door(x: float, w: float, floor_y: float, h: float, trim: String, st
 		_rect(x - r + 6, sy, w - 12, 5, "#2A2A2A", 'opacity="0.7"')
 	_rect(x - 10, lerpf(py, floor_y, 0.5), 6, 22, "#C9A23A")
 	_rect(x + 4, lerpf(py, floor_y, 0.5), 6, 22, "#C9A23A")
+	# The doors stand deep in their arch: its soffit's and its left jamb's shade on them, the worn foot of the leaves.
+	_path("M%s %s V%s A%s %s 0 0 1 %s %s" % [_n(x - r + 7), _n(floor_y), _n(spring), _n(r - 7), _n(r - 7), _n(x + r * 0.55), _n(spring - r * 0.78)], "none", _stroke("#000000", 14) + ' opacity="0.2"')
+	_rect(x - r, floor_y - 34, w, 34, "url(#grime)")
+	_rect(x - r + 4, floor_y - 14, w - 8, 12, "#2A160A", 'opacity="0.35"')
 
 
 # A row of brick buildings further back (behind a churchyard or a lot): plain walls of a few tones, their windows, flat roofs,
@@ -7537,7 +7895,13 @@ func _church() -> void:
 		var top := aisle_top - (140.0 if side > 0.0 else 0.0)
 		var w := absf(a1 - a0)
 		_stone_courses(minf(a0, a1), top, maxf(a0, a1), floor_y if side < 0.0 else g, stone)
+		# A century of rain on pale limestone: grey streaks down from under the coping.
+		for i in 4:
+			var sw := 14.0 + _wr.randf() * 34.0
+			_rect(minf(a0, a1) + _wr.randf() * maxf(w - sw, 1.0), top + 8, sw, 70.0 + _wr.randf() * 120.0, "url(#drop)", 'opacity="%s"' % _n(0.35 + _wr.randf() * 0.35))
+		_rect(minf(a0, a1), top + 8, w, 26, "url(#drop)")
 		_rect(minf(a0, a1) - 4, top - 6, w + 8, 14, trim, _stroke("#8A867E", 1))
+		_rect(minf(a0, a1) - 4, top - 6, w + 8, 3, "#FFFFFF", 'opacity="0.3"')
 		_snow(minf(a0, a1) - 4, w + 8, top - 6)
 		_deco_band(minf(a0, a1) + 10, maxf(a0, a1) - 10, top + 26.0, 26.0, trim)
 		_lancet((a0 + a1) / 2.0, top + 90.0, top + 300.0, 44.0, trim, CHURCH_GLASS)
@@ -7557,6 +7921,12 @@ func _church() -> void:
 	# The front: its two bays either side of the tower, crenellated along the top.
 	_stone_courses(cx - half, bay_top, cx + half, floor_y, stone)
 	_rect(cx - half, bay_top, 2 * half, floor_y - bay_top, "url(#sun)")
+	# The same rain on the front, under the crenellated coping; the shade of that coping; the street's dirt at the wall's foot.
+	for i in 9:
+		var sw := 14.0 + _wr.randf() * 40.0
+		_rect(cx - half + _wr.randf() * (2 * half - sw), bay_top + 2, sw, 80.0 + _wr.randf() * 170.0, "url(#drop)", 'opacity="%s"' % _n(0.35 + _wr.randf() * 0.35))
+	_rect(cx - half, bay_top + 2, 2 * half, 30, "url(#drop)")
+	_rect(cx - half, floor_y - 70.0, 2 * half, 70, "url(#grime)")
 	for side: float in [-1.0, 1.0]:
 		var m := cx + side * tw
 		var e := cx + side * half
@@ -7610,6 +7980,10 @@ func _church() -> void:
 		_rect(s0 + inset, sy, s1 - s0 - 2 * inset, 12.5, "#C2BEB6" if i % 2 == 0 else "#BAB6AE")
 		_rect(s0 + inset, sy, s1 - s0 - 2 * inset, 3, "#E2DED6")
 		_rect(s0 + inset, sy + 10.5, s1 - s0 - 2 * inset, 2, "#8A867E", 'opacity="0.6"')
+		# Each tread worn paler where people climb to the three doors, and the left cheek wall's shade across its end.
+		for door_c: float in [cx, cx - (tw + half) / 2.0, cx + (tw + half) / 2.0]:
+			_rect(door_c - 70.0 - i * 4.0, sy + 3, 140.0 + i * 8.0, 7.5, "#FFFFFF", 'opacity="0.1"')
+		_rect(s0 + 70.0, sy, 30.0 + i * 5.0, 12.5, "url(#castr)")
 		_snow(s0, s1 - s0, sy)
 	for side: float in [-1.0, 1.0]:
 		var wx: float = cx + side * (half + 40.0)
@@ -7700,17 +8074,38 @@ func _presbytere() -> void:
 		var sy := porch + i * ((ground_y - porch) / 7.0)
 		_rect(cx - 70 - i * 3.0, sy, 140 + i * 6.0, (ground_y - porch) / 7.0, "#9C968C" if i % 2 == 0 else "#A9A398")
 		_rect(cx - 70 - i * 3.0, sy, 140 + i * 6.0, 2, "#C9C3B8")
+	var col_top := porch - 250.0
+	# Under the porch the wall is in shade, deepest under its beam.
+	_rect(cx - pw - 13, col_top, 2 * pw + 26, porch - col_top, "#1A0C08", 'opacity="0.16"')
+	_rect(cx - pw - 13, col_top, 2 * pw + 26, 60, "url(#drop)")
 	_rect(cx - 52, _door_top(0), 104, porch - _door_top(0), "#5E3A22", _stroke("#3E2414", 2))
+	_rect(cx - 52, _door_top(0), 104, porch - _door_top(0), "url(#shade)")
 	_rect(cx - 40, _door_top(0) + 14, 80, 90, "url(#glass)")
 	_rect(cx - 40, _door_top(0) + 120, 80, 4, "#3E2414")
-	var col_top := porch - 250.0
+	# A panelled oak door: the pane in its bead with the sky in it, two raised panels under the rail, brass handle and plate.
+	_rect(cx - 40, _door_top(0) + 14, 80, 90, "none", _stroke("#3E2414", 2.5))
+	_rect(cx - 40, _door_top(0) + 14, 80, 12, "url(#drop)")
+	_path("M%s %s l16 0 l-26 84 l-16 0 z" % [_n(cx + 6), _n(_door_top(0) + 17)], "#FFFFFF", 'opacity="0.18"')
+	for side: float in [-1.0, 1.0]:
+		_rect(cx + side * 21.0 - 17, _door_top(0) + 134, 34, porch - _door_top(0) - 172, "none", _stroke("#3E2414", 2))
+		_rect(cx + side * 21.0 - 14, _door_top(0) + 137, 28, porch - _door_top(0) - 178, "none", _stroke("#FFFFFF", 1) + ' opacity="0.14"')
+	_rect(cx + 40, _door_top(0) + 104, 7, 26, "#C9A23A", _stroke("#7E6220", 0.8) + ' rx="2"')
+	_rect(cx - 46, porch - 30, 92, 22, "#B8943A", _stroke("#7E6220", 1))
+	_rect(cx - 52, _door_top(0), 10, porch - _door_top(0), "#000000", 'opacity="0.22"')
 	for p: float in [-pw, -pw + 52.0, pw - 52.0, pw]:
 		var px: float = cx + p
 		_rect(px - 13, col_top, 26, porch - col_top, "#C9C5BC", _stroke("#8E8A82", 1.2))
 		_rect(px - 13, col_top, 7, porch - col_top, "#FFFFFF", 'opacity="0.25"')
+		# Round columns: the far side falling into shade, the beam's shade at the head, a ring under the cap.
+		_rect(px + 3, col_top, 10, porch - col_top, "#000000", 'opacity="0.12"')
+		_rect(px - 13, col_top, 26, 22, "url(#drop)")
+		_rect(px - 15, col_top + 6, 30, 4, "#D8D4CC", _stroke("#8E8A82", 0.8))
 		_rect(px - 18, col_top - 10, 36, 12, "#D8D4CC", _stroke("#8E8A82", 1))
 		_rect(px - 18, porch - 14, 36, 14, "#B9B5AC", _stroke("#8E8A82", 1))
+		_rect(px - 18, porch - 14, 36, 3, "#FFFFFF", 'opacity="0.3"')
 	_rect(cx - pw - 26, col_top - 34, 2 * pw + 52, 26, "#D8D4CC", _stroke("#8E8A82", 1.2))
+	_rect(cx - pw - 26, col_top - 34, 2 * pw + 52, 4, "#FFFFFF", 'opacity="0.35"')
+	_rect(cx - pw - 26, col_top - 14, 2 * pw + 52, 6, "#000000", 'opacity="0.1"')
 	_path("M%s %s Q%s %s %s %s" % [_n(cx - pw - 20), _n(col_top - 34), _n(cx), _n(col_top - 130), _n(cx + pw + 20), _n(col_top - 34)], k.bricks[1], _stroke("#D8D2C6", 7))
 	_zigzag_frieze(cx - 80, cx + 80, col_top - 74.0, 27.0)
 	_rect(cx - 4, col_top - 112, 8, 34, "#E2C98E")
@@ -8029,29 +8424,81 @@ func _gas_station() -> void:
 		var wx := tx0 + 20.0
 		while wx < X1 - 90.0:
 			_rect(wx, wy, 56, 46, "#5E6E78")
+			_rect(wx, wy, 56, 9, "#000000", 'opacity="0.2"')
+			_rect(wx + 27, wy, 2, 46, "#C9C6BE")
 			_rect(wx - 4, wy + 44, 64, 6, "#CFE4EC", 'opacity="0.6"')
+			_rect(wx - 4, wy + 50, 64, 2, "#8E9AA2")
 			wx += 86.0
+		_rect(tx0, wy - 12, (X1 - tx0) - 40.0, 2, "#B5B2AA")
+	_rect(tx0 - 3, g - 766.0, (X1 - tx0) - 34.0, 8, "#A8A59C")
+	_rect(X1 - 66.0, g - 760.0, 26, 460, "#000000", 'opacity="0.07"')
+	_rect(tx0, g - 760.0, (X1 - tx0) - 40.0, 460, "#C9D6E2", 'opacity="0.22"')
 	# The shop at the back.
 	_rect(X0 + 60, g - 300.0, (X1 - X0) * 0.55, 170, "#ECEBE6", _stroke("#9E9A92", 1.5))
 	_rect(X0 + 80, g - 250.0, (X1 - X0) * 0.4, 110, "url(#glass)", 'opacity="0.8"')
+	# The shop: its lit shelves behind the glass, the glass in its frames, the door, the fascia's shade, a kerb.
+	var sw := (X1 - X0) * 0.4
+	_shop_glass_goods(X0 + 84, g - 236.0, sw - 8, 92, 77, 2)
+	_rect(X0 + 80, g - 250.0, sw, 50, "url(#skyrefl)")
+	_rect(X0 + 80, g - 250.0, sw, 16, "url(#drop)")
+	for i in 7:
+		_rect(X0 + 80 + sw * i / 6.0 - 2, g - 250.0, 4, 110, "#F4F2EE")
+	_rect(X0 + 76, g - 254.0, sw + 8, 5, "#F4F2EE")
+	_rect(X0 + 80 + sw + 30, g - 256.0, 70, 126, "#D8D6CF", _stroke("#9E9A92", 1))
+	_rect(X0 + 80 + sw + 38, g - 248.0, 54, 112, "#2E3A42", 'opacity="0.8"')
+	_rect(X0 + 80 + sw + 38, g - 248.0, 54, 50, "url(#skyrefl)")
+	_rect(X0 + 80 + sw + 44, g - 190.0, 42, 4, "#C9C5BC")
 	_rect(X0 + 60, g - 310.0, (X1 - X0) * 0.55, 18, "#E8302A")
+	_rect(X0 + 60, g - 310.0, (X1 - X0) * 0.55, 3, "#FFFFFF", 'opacity="0.3"')
+	_rect(X0 + 60, g - 292.0, (X1 - X0) * 0.55, 20, "url(#drop)")
+	_rect(X0 + 60 + (X1 - X0) * 0.55, g - 300.0, 14, 170, "url(#castr)")
 	_rect(X0, g - 130.0, X1 - X0, 130, "#7A7874")
+	_rect(X0, g - 130.0, X1 - X0, 130, "url(#shade)")
+	_rect(X0 + 60, g - 130.0, (X1 - X0) * 0.55, 12, "url(#drop)")
+	# The canopy's shade on the forecourt, and the pale concrete pad the pumps stand on.
+	_rect(X0 + 90, g - 60.0, X1 - X0 - 180, 60, "#000000", 'opacity="0.13"')
+	_rect(X0 + 200, g - 26.0, X1 - X0 - 400, 26, "#A8A49C", 'opacity="0.55"')
 	split = out.size()
 	# The canopy over the pumps.
 	var cx0 := X0 + 60.0
 	var cx1 := X1 - 60.0
 	for post: float in [cx0 + 120.0, cx1 - 140.0]:
 		_rect(post, g - 380.0, 22, 380, "#ECEBE6", _stroke("#9E9A92", 1))
+		_rect(post, g - 380.0, 5, 380, "#FFFFFF", 'opacity="0.5"')
+		_rect(post + 15, g - 380.0, 7, 380, "#000000", 'opacity="0.12"')
+		_rect(post, g - 374.0, 22, 40, "url(#drop)")
+		_rect(post - 6, g - 60.0, 34, 60, "#D8302A", _stroke("#8E1E18", 1))
+		_rect(post - 6, g - 60.0, 34, 4, "#FFFFFF", 'opacity="0.3"')
 	_rect(cx0, g - 430.0, cx1 - cx0, 56, "#F4F2EE", _stroke("#9E9A92", 1.5))
+	_rect(cx0, g - 430.0, cx1 - cx0, 56, "url(#shade)")
 	_rect(cx0, g - 392.0, cx1 - cx0, 14, "#E8302A")
 	_rect(cx0, g - 404.0, cx1 - cx0, 10, "#F6C21E")
 	_rect(cx0, g - 374.0, cx1 - cx0, 10, "#000000", 'opacity="0.2"')
+	# Its underside: the dark soffit seen from the street, a row of lights set in it.
+	_rect(cx0 + 4, g - 374.0, cx1 - cx0 - 8, 7, "#5E6266")
+	var lx := cx0 + 70.0
+	while lx < cx1 - 40.0:
+		_rect(lx, g - 372.0, 44, 4, "#FFF6D8")
+		_circle(lx + 22, g - 362.0, 22, "url(#glow)")
+		lx += 150.0
 	_snow(cx0, cx1 - cx0, g - 430.0)
 	for pump: float in [cx0 + 260.0, cx1 - 300.0]:
+		_rect(pump + 60, g - 150.0, 14, 138, "url(#castr)")
 		_rect(pump, g - 150.0, 60, 150, "#ECEBE6", _stroke("#5E5A54", 1.5))
+		_rect(pump, g - 150.0, 60, 150, "url(#sun)")
 		_rect(pump + 8, g - 140.0, 44, 30, "#2E3A42")
+		# The display's figures, the grades' buttons, the nozzle in its boot and its hose looping down.
+		_rect(pump + 12, g - 136.0, 36, 9, "#9FE0B0", 'opacity="0.8"')
+		_rect(pump + 12, g - 124.0, 24, 7, "#9FE0B0", 'opacity="0.6"')
+		for b in 3:
+			_rect(pump + 9 + b * 15.0, g - 102.0, 12, 12, ["#F6C21E", "#E8302A", "#3E9A4E"][b], _stroke("#5E5A54", 0.8))
+		_rect(pump + 6, g - 80.0, 48, 62, "none", _stroke("#B9B5AC", 1.2))
+		_rect(pump + 42, g - 96.0, 12, 30, "#2A2A2A", 'rx="3"')
+		_path("M%s %s q26 70 -4 84 q-20 6 -22 -40" % [_n(pump + 50), _n(g - 70)], "none", _stroke("#1E1E1E", 3.5) + ' stroke-linecap="round"')
 		_rect(pump, g - 160.0, 60, 12, "#E8302A")
-		_rect(pump - 20, g - 12, 100, 12, "#B9B5AC")
+		_rect(pump, g - 160.0, 60, 3, "#FFFFFF", 'opacity="0.3"')
+		_rect(pump - 20, g - 12, 100, 12, "#B9B5AC", _stroke("#8E8A82", 1))
+		_rect(pump - 20, g - 12, 100, 3, "#FFFFFF", 'opacity="0.3"')
 
 
 # 2560, between 1re and Molson: the park, its lawn and big trees, a low pavilion of grey brick with a flat roof, a bench, the
@@ -8201,8 +8648,46 @@ func _supermarket_lot() -> void:
 	_rect(sx0, g - 400.0, sx1 - sx0, 150, "#E9E7E1", _stroke("#9E9A92", 1.5))
 	_rect(sx0, g - 400.0, sx1 - sx0, 40, "#D8D6CF")
 	_rect(sx0 + 40, g - 330.0, sx1 - sx0 - 80, 70, "url(#glass)", 'opacity="0.7"')
+	# A real store front: the fascia's metal panels and its coping, its shade on the wall, the glass in its white frames with
+	# the doors in the middle, a canopy over them, the kerb the wall stands on.
+	_rect(sx0 - 4, g - 405.0, sx1 - sx0 + 8, 7, "#B9B5AC", _stroke("#8E8A82", 1))
+	_rect(sx0 - 4, g - 405.0, sx1 - sx0 + 8, 2, "#FFFFFF", 'opacity="0.4"')
+	var jx := sx0 + 96.0
+	while jx < sx1 - 20.0:
+		_rect(jx, g - 398.0, 1.5, 38, "#9E9A92", 'opacity="0.8"')
+		_rect(jx + 1.5, g - 398.0, 1.5, 38, "#FFFFFF", 'opacity="0.35"')
+		jx += 96.0
+	_rect(sx0, g - 360.0, sx1 - sx0, 3, "#9E9A92")
+	_rect(sx0, g - 357.0, sx1 - sx0, 22, "url(#drop)")
+	_rect(sx0 + 40, g - 330.0, sx1 - sx0 - 80, 36, "url(#skyrefl)")
+	_rect(sx0 + 40, g - 330.0, sx1 - sx0 - 80, 12, "url(#drop)")
+	var mx := sx0 + 40.0
+	while mx <= sx1 - 39.0:
+		_rect(mx - 2, g - 330.0, 4, 70, "#F4F2EE")
+		_rect(mx + 2, g - 330.0, 3, 70, "#000000", 'opacity="0.15"')
+		mx += (sx1 - sx0 - 80.0) / 14.0
+	_rect(sx0 + 36, g - 334.0, sx1 - sx0 - 72, 5, "#F4F2EE")
+	_rect(sx0 + 36, g - 262.0, sx1 - sx0 - 72, 6, "#F4F2EE")
+	var door_x := (sx0 + sx1) / 2.0
+	_rect(door_x - 70, g - 346.0, 140, 12, "#1E4E9E", _stroke("#143A6E", 1))
+	_rect(door_x - 70, g - 334.0, 140, 14, "url(#drop)")
+	_rect(door_x - 56, g - 322.0, 112, 66, "#2E3A42", 'opacity="0.75"')
+	_rect(door_x - 1.5, g - 322.0, 3, 66, "#F4F2EE")
+	_rect(sx0, g - 258.0, sx1 - sx0, 8, "#B9B5AC", _stroke("#8E8A82", 1))
+	_rect(sx1, g - 400.0, 16, 142, "url(#castr)")
+	_rect(sx0 + (sx1 - sx0) * 0.6 + 6, g - 388.0, 120, 8, "#000000", 'opacity="0.2"')
+	_rect(sx0 + (sx1 - sx0) * 0.6 + 55, g - 392.0, 10, 34, "#5E6266")
 	_rect(sx0 + (sx1 - sx0) * 0.6, g - 460.0, 120, 70, "#1E4E9E", _stroke("#143A6E", 2))
+	_rect(sx0 + (sx1 - sx0) * 0.6 + 5, g - 455.0, 110, 60, "none", _stroke("#FFFFFF", 1.2) + ' opacity="0.35"')
+	_rect(sx0 + (sx1 - sx0) * 0.6, g - 460.0, 120, 70, "url(#shade)")
 	_rect(X0, g - 250.0, X1 - X0, 250, "#7A7874")
+	# The lot's asphalt: paler where the cars turn, patched, darker toward the sidewalk.
+	_rect(X0, g - 250.0, X1 - X0, 250, "url(#shade)")
+	_rect(X0, g - 250.0, X1 - X0, 16, "url(#drop)")
+	for i in int((X1 - X0) / 260.0):
+		var px := X0 + _wr.randf() * (X1 - X0 - 200.0)
+		var py := g - 230.0 + _wr.randf() * 170.0
+		out.append('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="%s" opacity="0.1"/>' % [_n(px + 80), _n(py), _n(60.0 + _wr.randf() * 80.0), _n(10.0 + _wr.randf() * 10.0), "#000000" if i % 2 == 0 else "#FFFFFF"])
 	var lx := X0 + 40.0
 	while lx < X1:
 		_path("M%s %s L%s %s" % [_n(lx), _n(g - 240), _n(lx - 40), _n(g - 120)], "none", _stroke("#E8E4DA", 3) + ' opacity="0.7"')
@@ -8216,7 +8701,11 @@ func _supermarket_lot() -> void:
 		hx += 50.0
 	for post: float in [X0 + 400.0, X0 + (X1 - X0) * 0.55, X1 - 400.0]:
 		_rect(post, g - 330.0, 8, 330, "#2A2A2A")
+		_rect(post, g - 330.0, 2, 330, "#FFFFFF", 'opacity="0.2"')
+		_rect(post - 5, g - 26.0, 18, 26, "#3A3A3A", _stroke("#1A1A1A", 1))
 		_rect(post - 14, g - 346.0, 36, 22, "#2A2A2A")
+		_rect(post - 14, g - 346.0, 36, 3, "#FFFFFF", 'opacity="0.2"')
+		_rect(post - 10, g - 326.0, 28, 3, "#FFF2C8", 'opacity="0.8"')
 
 
 # 2520, by D'Iberville: the McDonald's, low, brown brick under a dark shingled mansard with its yellow awnings, set back behind a
@@ -8229,19 +8718,67 @@ func _fastfood_lot() -> void:
 		_rect(bx0, g - 700.0 + bi * 60.0, (X1 - X0) * 0.42, 420, "#D2D0CA", _stroke("#9E9A92", 1.5))
 		for row in 5:
 			var wx := bx0 + 20.0
+			# Each floor's slab showing as a line, a sill and a little shade at every window.
+			_rect(bx0, g - 692.0 + bi * 60.0 + row * 72.0, (X1 - X0) * 0.42, 2, "#B5B2AA")
 			while wx < bx0 + (X1 - X0) * 0.42 - 60.0:
 				_rect(wx, g - 680.0 + bi * 60.0 + row * 72.0, 46, 40, "#5E6E78")
+				_rect(wx, g - 680.0 + bi * 60.0 + row * 72.0, 46, 8, "#000000", 'opacity="0.2"')
+				_rect(wx + 22, g - 680.0 + bi * 60.0 + row * 72.0, 2, 40, "#C9C6BE")
+				_rect(wx - 3, g - 640.0 + bi * 60.0 + row * 72.0, 52, 4, "#EDEBE5")
 				wx += 74.0
+		_rect(bx0 - 3, g - 706.0 + bi * 60.0, (X1 - X0) * 0.42 + 6, 8, "#A8A59C")
+		_rect(bx0 + (X1 - X0) * 0.42 - 26.0, g - 700.0 + bi * 60.0, 26, 420, "#000000", 'opacity="0.07"')
+		_rect(bx0, g - 700.0 + bi * 60.0, (X1 - X0) * 0.42, 420, "#C9D6E2", 'opacity="0.22"')
 	var mx0 := X0 + (X1 - X0) * 0.2
 	var mx1 := X0 + (X1 - X0) * 0.8
 	_rect(mx0, g - 300.0, mx1 - mx0, 200, "#8A5A40", _stroke("#5E3A28", 1.5))
-	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(mx0 - 20), _n(g - 300), _n(mx0 + 30), _n(g - 360), _n(mx1 - 30), _n(g - 360), _n(mx1 + 20), _n(g - 300)], "#4A3A34", _stroke("#2A1E1A", 1.5))
+	# Brown brick in its courses, the low sun across it, the eave's shade, a soldier course at the foot.
+	var cy := g - 296.0
+	var crow := 0
+	while cy < g - 104.0:
+		_rect(mx0, cy, mx1 - mx0, 1.3, "#5E3A28", 'opacity="0.45"')
+		var bx := mx0 + (18.0 if crow % 2 == 1 else 0.0)
+		while bx < mx1:
+			_rect(bx, cy, 1.3, 13, "#5E3A28", 'opacity="0.3"')
+			bx += 36.0
+		cy += 13.0
+		crow += 1
+	_rect(mx0, g - 300.0, mx1 - mx0, 200, "url(#sun)")
+	_rect(mx0, g - 300.0, mx1 - mx0, 30, "url(#drop)")
+	_rect(mx0, g - 128.0, mx1 - mx0, 28, "url(#grime)")
+	var roof := "M%s %s L%s %s L%s %s L%s %s Z" % [_n(mx0 - 20), _n(g - 300), _n(mx0 + 30), _n(g - 360), _n(mx1 - 30), _n(g - 360), _n(mx1 + 20), _n(g - 300)]
+	_path(roof, "#4A3A34", _stroke("#2A1E1A", 1.5))
+	# The mansard is shingled: rows of them, their butts in shade, the ridge capped in metal, a fascia along the eave.
+	_clips += 1
+	out.append('<clipPath id="mans%d"><path d="%s"/></clipPath><g clip-path="url(#mans%d)">' % [_clips, roof, _clips])
+	for srow in 5:
+		var sy := g - 360.0 + srow * 12.0
+		_rect(mx0 - 20, sy + 10, mx1 - mx0 + 40, 2, "#000000", 'opacity="0.32"')
+		var shx := mx0 - 20.0 + (9.0 if srow % 2 == 1 else 0.0)
+		while shx < mx1 + 20.0:
+			_rect(shx, sy, 1.2, 10, "#000000", 'opacity="0.22"')
+			shx += 18.0
+	_rect(mx0 - 20, g - 360.0, mx1 - mx0 + 40, 60, "url(#shade)")
+	out.append('</g>')
+	_rect(mx0 + 28, g - 364.0, mx1 - mx0 - 56, 6, "#6E6A64", _stroke("#3A3632", 1))
+	_rect(mx0 - 22, g - 302.0, mx1 - mx0 + 44, 7, "#3A2E28", _stroke("#1E1612", 1))
+	_rect(mx0 - 22, g - 302.0, mx1 - mx0 + 44, 1.5, "#FFFFFF", 'opacity="0.2"')
 	var wx2 := mx0 + 40.0
 	while wx2 < mx1 - 90.0:
+		_rect(wx2 - 4, g - 254.0, 88, 118, "#3A2A20")
 		_rect(wx2, g - 250.0, 80, 110, "url(#glass)")
-		_path("M%s %s L%s %s L%s %s Z" % [_n(wx2 - 6), _n(g - 254), _n(wx2 + 86), _n(g - 254), _n(wx2 + 40), _n(g - 286)], "#F2C21E", _stroke("#B88A10", 1))
+		_rect(wx2, g - 250.0, 80, 50, "url(#skyrefl)")
+		_rect(wx2, g - 250.0, 80, 14, "url(#drop)")
+		_rect(wx2 + 38.5, g - 250.0, 3, 110, "#3A2A20")
+		_rect(wx2 - 8, g - 138.0, 96, 7, "#C9BFAE", _stroke("#8E8474", 1))
+		_rect(wx2 - 4, g - 131.0, 92, 8, "url(#drop)")
+		var aw := "M%s %s L%s %s L%s %s Z" % [_n(wx2 - 6), _n(g - 254), _n(wx2 + 86), _n(g - 254), _n(wx2 + 40), _n(g - 286)]
+		_path(aw, "#F2C21E", _stroke("#B88A10", 1))
+		_path("M%s %s L%s %s L%s %s Z" % [_n(wx2 + 40), _n(g - 254), _n(wx2 + 86), _n(g - 254), _n(wx2 + 40), _n(g - 286)], "#000000", 'opacity="0.12"')
 		wx2 += 130.0
 	_rect(X0, g - 100.0, X1 - X0, 100, "#7A7874")
+	_rect(X0, g - 100.0, X1 - X0, 100, "url(#shade)")
+	_rect(mx0 - 10, g - 100.0, mx1 - mx0 + 40, 14, "url(#drop)")
 	split = out.size()
 	var hx := X0 + 30.0
 	while hx < X1 - 20.0:

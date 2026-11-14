@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="2600.0" height="975.0" viewBox="0 0 2600.0 975.0">
 <defs><linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4E0EC"/><stop offset="1" stop-color="#557A90"/></linearGradient><linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.1"/><stop offset="1" stop-color="#000000" stop-opacity="0.16"/></linearGradient><radialGradient id="glow"><stop offset="0" stop-color="#FFE9A8" stop-opacity="0.75"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient><linearGradient id="warm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7B5"/><stop offset="1" stop-color="#D98E4A"/></linearGradient><linearGradient id="drop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1408" stop-opacity="0.3"/><stop offset="1" stop-color="#2A1408" stop-opacity="0"/></linearGradient><linearGradient id="sun" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE6B8" stop-opacity="0.14"/><stop offset="0.5" stop-color="#FFE6B8" stop-opacity="0"/><stop offset="1" stop-color="#1A0C14" stop-opacity="0.12"/></linearGradient><radialGradient id="pumpkin_glow"><stop offset="0" stop-color="#FFB347" stop-opacity="0.6"/><stop offset="1" stop-color="#FFB347" stop-opacity="0"/></radialGradient></defs>
+<defs><linearGradient id="grime" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A140E" stop-opacity="0"/><stop offset="1" stop-color="#1A140E" stop-opacity="0.3"/></linearGradient><linearGradient id="skyrefl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D6ECF8" stop-opacity="0.34"/><stop offset="1" stop-color="#D6ECF8" stop-opacity="0"/></linearGradient><linearGradient id="castr" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1A0C08" stop-opacity="0.3"/><stop offset="1" stop-color="#1A0C08" stop-opacity="0"/></linearGradient></defs>
 <ellipse cx="53.0" cy="951.0" rx="40.0" ry="36.8" fill="#000000" opacity="0.15"/>
 <ellipse cx="50.0" cy="947.0" rx="36.8" ry="34.4" fill="#722e1f"/>
 <path d="M44.6 921.4L39.9 918.3L36.0 912.2L38.1 905.8L42.6 900.5L45.0 896.9L47.6 901.0L51.7 906.4L53.5 912.7L49.5 918.5 Z" fill="#b45f4c" />
@@ -3412,9 +3413,21 @@
 <path d="M2478.9 932.4L2474.3 935.6L2467.1 936.8L2462.0 932.5L2458.9 926.3L2456.4 922.7L2461.2 921.8L2467.8 920.1L2474.2 920.9L2478.1 926.8 Z" fill="#bf7666" />
 <path d="M2501.3 955.3L2505.8 958.6L2509.6 964.8L2507.2 971.1L2502.6 976.2L2500.1 979.8L2497.6 975.6L2493.6 970.1L2492.1 963.8L2496.3 958.1 Z" fill="#a1412c" />
 <rect x="430.0" y="645.0" width="8.0" height="330.0" fill="#2A2A2A" />
+<rect x="430.0" y="645.0" width="2.0" height="330.0" fill="#FFFFFF" opacity="0.2"/>
+<rect x="425.0" y="949.0" width="18.0" height="26.0" fill="#3A3A3A" stroke="#1A1A1A" stroke-width="1.0"/>
 <rect x="416.0" y="629.0" width="36.0" height="22.0" fill="#2A2A2A" />
+<rect x="416.0" y="629.0" width="36.0" height="3.0" fill="#FFFFFF" opacity="0.2"/>
+<rect x="420.0" y="649.0" width="28.0" height="3.0" fill="#FFF2C8" opacity="0.8"/>
 <rect x="1427.0" y="645.0" width="8.0" height="330.0" fill="#2A2A2A" />
+<rect x="1427.0" y="645.0" width="2.0" height="330.0" fill="#FFFFFF" opacity="0.2"/>
+<rect x="1422.0" y="949.0" width="18.0" height="26.0" fill="#3A3A3A" stroke="#1A1A1A" stroke-width="1.0"/>
 <rect x="1413.0" y="629.0" width="36.0" height="22.0" fill="#2A2A2A" />
+<rect x="1413.0" y="629.0" width="36.0" height="3.0" fill="#FFFFFF" opacity="0.2"/>
+<rect x="1417.0" y="649.0" width="28.0" height="3.0" fill="#FFF2C8" opacity="0.8"/>
 <rect x="2170.0" y="645.0" width="8.0" height="330.0" fill="#2A2A2A" />
+<rect x="2170.0" y="645.0" width="2.0" height="330.0" fill="#FFFFFF" opacity="0.2"/>
+<rect x="2165.0" y="949.0" width="18.0" height="26.0" fill="#3A3A3A" stroke="#1A1A1A" stroke-width="1.0"/>
 <rect x="2156.0" y="629.0" width="36.0" height="22.0" fill="#2A2A2A" />
+<rect x="2156.0" y="629.0" width="36.0" height="3.0" fill="#FFFFFF" opacity="0.2"/>
+<rect x="2160.0" y="649.0" width="28.0" height="3.0" fill="#FFF2C8" opacity="0.8"/>
 </svg>

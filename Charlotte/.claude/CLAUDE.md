@@ -185,6 +185,17 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   the block from the key and puts her at the sheet's foot between its avenues. **Halloween won't be played on Masson
   (Julien): don't spend time checking it there**; it is only kept from breaking (`StreetScene.gives_candy = false`, and
   `StreetScene._moon_x()` so the moon isn't drawn over a tall facade).
+- **Masson's fronts are aged and given depth by a layer of their own** (generator section "Rue Masson: age, depth and small
+  fittings", 2026-11-14), which never touches what other streets share: `_masson_wear` (the coping's shade, soot run down from
+  under it, single bricks fired darker or paler on the wall's own courses, a repointed patch), `_window_under` (the sill's
+  shade and the rain's dirt under every window, drawn before it), `_masson_coping` (joints in the metal coping and, by the
+  building, a soldier course, a stone string course or nothing), `_brick_patch` (real courses in the stepped, crenellated and
+  scrolled parapets), a moulded belt, plinths and pier caps, sign boards with their fixings, the sky in the top of the glass
+  (`skyrefl`), real shop doors (leaf frame, closer, pull, drawn over the bulkhead), sewn awnings, panelled flats' doors, bevelled
+  ashlar. **Rules**: its random numbers come from `_wr` (seeded per building), never `rng`; the gradients `grime`, `skyrefl`,
+  `castr` exist only in facades named `masson_*` (`_svg`), so use them nowhere else; shared helpers (`_bricks`, `_window`,
+  `_flat_parapet`, `_cornice`…) stay as they are and Masson draws over them. A regeneration must leave every non-Masson file
+  unchanged (`git status --short | grep art/decor | grep -v masson_` is empty).
 - The 6e/Holt corner follows `reference/coin_holt/6eme_coin_holt.png`, `reference/coin_holt/holt_coin_6eme.png` and `reference/ruelle/entree_ruelle_6eme_coin_holt.png`:
   generator kinds `corner_holt` (`coin_holt`: long brown three-storey, stepped white lintels, diamonds, the beige
   corrugated annex with its shingle awning, the red corner window), `ohbon` (dépanneur Oh Bon! on Holt: red storefront,

@@ -1,8 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000.0" height="975.0" viewBox="0 0 1000.0 975.0">
 <defs><linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4E0EC"/><stop offset="1" stop-color="#557A90"/></linearGradient><linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.1"/><stop offset="1" stop-color="#000000" stop-opacity="0.16"/></linearGradient><radialGradient id="glow"><stop offset="0" stop-color="#FFE9A8" stop-opacity="0.75"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient><linearGradient id="warm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7B5"/><stop offset="1" stop-color="#D98E4A"/></linearGradient><linearGradient id="drop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1408" stop-opacity="0.3"/><stop offset="1" stop-color="#2A1408" stop-opacity="0"/></linearGradient><linearGradient id="sun" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE6B8" stop-opacity="0.14"/><stop offset="0.5" stop-color="#FFE6B8" stop-opacity="0"/><stop offset="1" stop-color="#1A0C14" stop-opacity="0.12"/></linearGradient><radialGradient id="pumpkin_glow"><stop offset="0" stop-color="#FFB347" stop-opacity="0.6"/><stop offset="1" stop-color="#FFB347" stop-opacity="0"/></radialGradient></defs>
+<defs><linearGradient id="grime" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A140E" stop-opacity="0"/><stop offset="1" stop-color="#1A140E" stop-opacity="0.3"/></linearGradient><linearGradient id="skyrefl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D6ECF8" stop-opacity="0.34"/><stop offset="1" stop-color="#D6ECF8" stop-opacity="0"/></linearGradient><linearGradient id="castr" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1A0C08" stop-opacity="0.3"/><stop offset="1" stop-color="#1A0C08" stop-opacity="0"/></linearGradient></defs>
 <rect x="54.0" y="645.0" width="92.0" height="330.0" fill="#d1cdc4" stroke="#8E887E" stroke-width="1.5"/>
 <rect x="64.0" y="659.0" width="72.0" height="310.0" fill="#3A3028" />
 <rect x="70.0" y="665.0" width="60.0" height="110.0" fill="url(#glass)" />
+<rect x="64.0" y="659.0" width="72.0" height="310.0" fill="url(#shade)" />
+<rect x="70.0" y="665.0" width="60.0" height="12.0" fill="url(#drop)" />
+<path d="M104.0 669.0 l14 0 l-24 100 l-14 0 z" fill="#FFFFFF" opacity="0.18"/>
+<rect x="70.0" y="665.0" width="60.0" height="110.0" fill="none" stroke="#1E1610" stroke-width="2.0"/>
+<rect x="72.0" y="789.0" width="56.0" height="130.0" fill="none" stroke="#1E1610" stroke-width="2.0"/>
+<rect x="75.0" y="792.0" width="50.0" height="124.0" fill="none" stroke="#B89A6A" stroke-width="1.0" opacity="0.35"/>
+<rect x="120.0" y="755.0" width="5.0" height="56.0" fill="#C9A227" stroke="#7E6220" stroke-width="0.8" rx="2"/>
+<rect x="68.0" y="939.0" width="64.0" height="22.0" fill="#B8943A" stroke="#7E6220" stroke-width="1.0"/>
+<rect x="48.0" y="963.0" width="104.0" height="8.0" fill="#e9e5db" stroke="#8E887E" stroke-width="1.0"/>
+<rect x="64.0" y="659.0" width="9.0" height="304.0" fill="#000000" opacity="0.25"/>
 <path d="M44.0 645.0 L100.0 605.0 L156.0 645.0 Z" fill="#E8E4DA" stroke="#8E887E" stroke-width="1.5"/>
 <rect x="189.0" y="725.0" width="6.0" height="250.0" fill="#1A1A1A" />
 <rect x="183.0" y="693.0" width="18.0" height="32.0" fill="#ECE7DA" stroke="#1A1A1A" stroke-width="2.0"/>
