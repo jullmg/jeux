@@ -6971,11 +6971,14 @@ func _bank() -> void:
 		_rect(p - 24, top, 48, 16, stone, _stroke("#8E887E", 1))
 	# Upstairs, small paired windows; downstairs, wide ones, each in a bronze frame with a transom.
 	for w in k.windows:
-		for i in 2:
-			var wx: float = w[0] + i * (w[1] / 2.0 + 6.0)
-			_rect(wx - 3, _win_y(1) + 30 - 3, w[1] / 2.0 - 6 + 6, 118, "#5E4A36")
-			_rect(wx, _win_y(1) + 30, w[1] / 2.0 - 6, 112, "url(#glass)")
-			_rect(wx, _win_y(1) + 30 + 40, w[1] / 2.0 - 6, 4, "#5E4A36")
+		# Every upper floor has its pair (2703… has three floors).
+		for f in range(1, int(k.floors)):
+			for i in 2:
+				var wx: float = w[0] + i * (w[1] / 2.0 + 6.0)
+				_rect(wx - 3, _win_y(f) + 30 - 3, w[1] / 2.0 - 6 + 6, 118, "#5E4A36")
+				_rect(wx, _win_y(f) + 30, w[1] / 2.0 - 6, 112, "url(#glass)")
+				_rect(wx, _win_y(f) + 30 + 40, w[1] / 2.0 - 6, 4, "#5E4A36")
+			_window_life(w[0], _win_y(f) + 30, w[1], 112, f)
 		_rect(w[0] - 4, _win_y(0) + 10, w[1] + 8, 180, "#4E3E2E")
 		_rect(w[0], _win_y(0) + 14, w[1], 172, "url(#glass)")
 		_rect(w[0], _win_y(0) + 56, w[1], 5, "#4E3E2E")
