@@ -56,6 +56,11 @@ var _button: Button
 var _open := false
 var _page: Control
 var _sheet: _Sheet
+## The map's drawing is thousands of crayon strokes: drawn once into this viewport when the map opens (or she moves), then only
+## its picture slides under the window, or dragging it stutters.
+var _bake: SubViewport
+var _map: Node2D
+const BAKE := 2.0
 var _paper: _Sheet
 var _top: _Sheet
 var _you: _You
@@ -125,6 +130,7 @@ func toggle() -> void:
 	if _open:
 		for s in [_paper, _sheet, _top]:
 			s.queue_redraw()
+		_rebake()
 		_set_pan(Vector2.ZERO)
 		_place_you()
 	_page.visible = _open
@@ -212,6 +218,7 @@ func _place_you() -> void:
 	if _sheet.here != here.at:
 		_sheet.here = here.at
 		_sheet.queue_redraw()
+		_rebake()
 	_you.position = here.at
 	_you.text = here.say
 	# Out of the sheet's window: the map slides to her, by itself, once it is open.
@@ -242,7 +249,11 @@ func _set_pan(pan: Vector2) -> void:
 	pan.x = clampf(pan.x, WORLD.position.x - SIDE, WORLD.end.x - SHEET.x)
 	pan.y = clampf(pan.y, 0.0, WORLD.end.y - SHEET.y)
 	_pan = pan
-	_sheet.position = Vector2(-SIDE, 0.0) - pan
+	_map.position = Vector2(-SIDE, 0.0) - pan
+
+
+func _rebake() -> void:
+	_bake.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
 func _stop_slide() -> void:
@@ -301,14 +312,34 @@ func _build_page() -> void:
 	window.mouse_default_cursor_shape = Control.CURSOR_DRAG
 	window.gui_input.connect(_drag)
 	holder.add_child(window)
+	_bake = SubViewport.new()
+	_bake.size = Vector2i((WORLD.size * BAKE).ceil())
+	_bake.transparent_bg = true
+	_bake.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	_page.add_child(_bake)
 	_sheet = _Sheet.new()
 	_sheet.layer = "map"
 	_sheet.size = WORLD.end
-	_sheet.position = Vector2(-SIDE, 0.0)
-	window.add_child(_sheet)
+	_sheet.scale = Vector2.ONE * BAKE
+	_sheet.position = -WORLD.position * BAKE
+	_bake.add_child(_sheet)
+	_map = Node2D.new()
+	_map.position = Vector2(-SIDE, 0.0)
+	window.add_child(_map)
+	var picture := Sprite2D.new()
+	picture.texture = _bake.get_texture()
+	picture.centered = false
+	picture.position = WORLD.position
+	picture.scale = Vector2.ONE / BAKE
+	picture.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	# What a viewport renders over a clear background is premultiplied: blended as such, or the greyed crayon comes out dark.
+	var premult := CanvasItemMaterial.new()
+	premult.blend_mode = CanvasItemMaterial.BLEND_MODE_PREMULT_ALPHA
+	picture.material = premult
+	_map.add_child(picture)
 	_you = _You.new()
 	_you.set_process(false)
-	_sheet.add_child(_you)
+	_map.add_child(_you)
 	_top = _Sheet.new()
 	_top.layer = "top"
 	_top.size = SHEET
