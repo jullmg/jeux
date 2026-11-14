@@ -2637,9 +2637,11 @@ func _building() -> void:
 	else:
 		_bricks(top, base_y)
 	_wall_shading(top)
-	# Rue Masson's side walls and its presbytery age like its shop fronts do (their own random numbers: see `_masson_wear`).
+	# Every brick house ages as Rue Masson's fronts do (their own random numbers: see `_masson_wear`), except the four that
+	# stay exactly as they were drawn from Julien's photos (`UNTOUCHED`).
 	var masson: bool = String(k.name).begins_with("masson_")
-	if masson:
+	var aged: bool = not UNTOUCHED.has(k.name)
+	if aged:
 		_masson_wear(top, (_fb(1) + 25.0) if k.lower_stone else base_y, true)
 	_foundation()
 	if masson:
@@ -2656,6 +2658,8 @@ func _building() -> void:
 	match k.parapet:
 		"flat":
 			_flat_parapet(top)
+			if aged:
+				_masson_coping(top)
 		"mansard":
 			_mansard(top)
 		"corbel":
@@ -2667,7 +2671,7 @@ func _building() -> void:
 	var first_floor := 1 if k.kind == "shop" else 0
 	for f in range(first_floor, floors):
 		for w in k.windows:
-			if masson:
+			if aged:
 				_window_under(w[0], _win_y(f), w[1], 160.0)
 			_window(w[0], _win_y(f), w[1], 160.0)
 	# Everything from here on (doors, balconies, porch, stair, railings, fence, garden) is the house's "over" layer.
@@ -3801,11 +3805,13 @@ func _walkup() -> void:
 	var top := _top()
 	_bricks(top, base_y)
 	_wall_shading(top)
+	_masson_wear(top, base_y, true)
 	_rect(X0 - 4, top - 14, X1 - X0 + 8, 16, k.lintel, _stroke(k.lintel_dark, 1.2))
 	_snow(X0 - 4, X1 - X0 + 8, top - 14)
 	var ww: float = k.get("win_w", 80.0)
 	for f in int(k.floors):
 		for wx: float in k.get("cols", []):
+			_window_under(wx, _win_y(f), ww, 130.0)
 			_window(wx, _win_y(f), ww, 130.0)
 	for dx: float in k.get("doors", []):
 		_door(dx, _door_top(0), _fb(0))
@@ -6203,6 +6209,8 @@ func _lane_odd() -> void:
 # What makes these fronts look built and lived in rather than drawn flat. Everything here takes its random numbers from `_wr`
 # (seeded per building), never from `rng`, so nothing the facades already draw moves; and it draws the same in every season.
 var _wr := RandomNumberGenerator.new()
+## Never aged, never touched (Julien): Charlotte's house, the twins', and her two neighbours drawn from his photos.
+const UNTOUCHED := ["duplex_charlotte", "duplex_jumelles", "duplex_voisin_gauche", "duplex_voisin_droite"]
 
 
 # A wall's age, from y0 (under the coping) to y1: the coping's shade, the soot the rain has run down from under it, and on

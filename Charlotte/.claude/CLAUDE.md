@@ -194,8 +194,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   (`skyrefl`), real shop doors (leaf frame, closer, pull, drawn over the bulkhead), sewn awnings, panelled flats' doors, bevelled
   ashlar. **Rules**: its random numbers come from `_wr` (seeded per building), never `rng`; the gradients `grime`, `skyrefl`,
   `castr` exist only in facades named `masson_*` (`_svg`), so use them nowhere else; shared helpers (`_bricks`, `_window`,
-  `_flat_parapet`, `_cornice`…) stay as they are and Masson draws over them. A regeneration must leave every non-Masson file
-  unchanged (`git status --short | grep art/decor | grep -v masson_` is empty).
+  `_flat_parapet`, `_cornice`…) stay as they are and Masson draws over them.
+  **The wall's age is shared with the whole game** (Julien, 2026-11-14): `_building()` (every plex and side wall) and `_walkup`
+  call `_masson_wear`, `_window_under` and `_masson_coping` too, since those only need the shared `drop` / `shade` gradients.
+  The four houses in `UNTOUCHED` (Charlotte's, the twins', her two neighbours) are skipped: after a regeneration
+  `git status --short | grep duplex_` must be empty, and so must `grep decor/over` (the wear is on the wall, under the night's
+  "over" layer). Kinds with a drawing of their own (`modern`, `infill`, `gables`, the school, the dépanneurs…) are not aged yet.
 - The 6e/Holt corner follows `reference/coin_holt/6eme_coin_holt.png`, `reference/coin_holt/holt_coin_6eme.png` and `reference/ruelle/entree_ruelle_6eme_coin_holt.png`:
   generator kinds `corner_holt` (`coin_holt`: long brown three-storey, stepped white lintels, diamonds, the beige
   corrugated annex with its shingle awning, the red corner window), `ohbon` (dépanneur Oh Bon! on Holt: red storefront,
