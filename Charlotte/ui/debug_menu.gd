@@ -44,6 +44,7 @@ const PLACES := [
 	{"name": "5e Avenue : coin Dandurand", "scene": "cinquieme", "arrive": "5e_from_dandurand"},
 	{"name": "5e Avenue : coin Masson", "scene": "cinquieme", "arrive": "5e_from_masson"},
 	{"name": "Dollarama (rue Masson)", "scene": "dollarama"},
+	{"name": "Fraîchement Bon (rue Masson)", "scene": "fraichement_bon"},
 	{"name": "5e Avenue, côté ouest : milieu", "scene": "cinquieme_ouest"},
 	{"name": "5e Avenue, côté ouest : coin Masson", "scene": "cinquieme_ouest", "arrive": "5e_ouest_from_masson"},
 	{"name": "5e Avenue, côté ouest : coin Dandurand", "scene": "cinquieme_ouest", "arrive": "5e_ouest_from_5e_dandurand"},

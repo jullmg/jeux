@@ -205,6 +205,9 @@ func _here() -> Dictionary:
 			return {"at": Vector2(SHOP_X, DAND_Y - 30.0), "say": "Je suis chez Xin-Xin !"}
 		"ohbon":
 			return {"at": Vector2(SHOP_X, HOLT_Y + 50.0), "say": "Je suis chez Oh Bon !"}
+		"fraichement_bon":
+			# On Masson's north side, just east of 6e.
+			return {"at": Vector2(SIX_X + AVE_W / 2.0 + 40.0, MASSON_Y - ST_W / 2.0 - 30.0), "say": "Je suis au Fraîchement Bon !"}
 		"dollarama":
 			# On Masson's south side, just west of 5e.
 			return {"at": Vector2(FIVE_X - AVE_W / 2.0 - 40.0, MASSON_Y + ST_W / 2.0 + 30.0), "say": "Je suis au Dollarama !"}

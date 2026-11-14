@@ -560,19 +560,26 @@ func _build_doors() -> void:
 			_add_corner(cs, "res://scenes/sixieme_est.tscn", "6e_est_from_masson", false, 1)
 
 
-## Shops she can go into: the Dollarama (2836, its glass door at x 1150 of the facade, the shop's floor at the canvas's foot).
+## Shops she can go into: [facade, its scene, the x of its door on the facade]. The Dollarama (2836, south side by 5e) and
+## Fraîchement Bon (2903, north side at 6e). A new shop = one line here and its scene, whose door goes back to this side.
+const SHOP_DOORS := [["masson_2836", "res://scenes/dollarama.tscn", 1150.0], ["masson_2903", "res://scenes/fraichement_bon.tscn", 360.0]]
+
+
 func _build_shop_doors() -> void:
-	var i := layout.find("masson_2836")
-	if i < 0:
-		return
-	var tex := _tex("masson_2836")
-	var origin := _house_origin(i)
-	var area := Rect2(origin + Vector2(1110.0, tex.get_height() - 240.0) * HOUSE_SCALE, Vector2(80.0, 236.0) * HOUSE_SCALE)
-	add_child(DoorSpot.make(area, func():
-		_control.enabled = false
-		Transition.street_x = area.get_center().x
-		Sfx.play("bell")
-		Transition.change_scene(self, "res://scenes/dollarama.tscn"), area.get_center().x))
+	for d: Array in SHOP_DOORS:
+		var i := layout.find(d[0])
+		if i < 0:
+			continue
+		var tex := _tex(d[0])
+		var origin := _house_origin(i)
+		var door_x: float = d[2]
+		var area := Rect2(origin + Vector2(door_x - 44.0, tex.get_height() - 240.0) * HOUSE_SCALE, Vector2(88.0, 236.0) * HOUSE_SCALE)
+		var scene: String = d[1]
+		add_child(DoorSpot.make(area, func():
+			_control.enabled = false
+			Transition.street_x = area.get_center().x
+			Sfx.play("bell")
+			Transition.change_scene(self, scene), area.get_center().x))
 
 
 ## The crosswalk over Masson at one corner of an avenue (`right`: the corner right of it), from that stretch of sidewalk.

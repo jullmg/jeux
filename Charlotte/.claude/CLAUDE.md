@@ -368,6 +368,13 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   bonbons et collations, jouets et école, saison by `Season.current`), "SORTIE" at both ends, the near gondola as the blurred
   foreground; clicking the gondola buys one of its things (`BUYS`, at most 5 $; candy, chocolate and chips go to her stash).
   `world/dollar_art.gd` draws it all (`_product` kinds). `--x=` in an aisle's range starts there (screenshots).
+- `scenes/fraichement_bon.gd` (Fraîchement Bon, Rue Masson 2903 north side at 6e): the fruiterie and fine grocery, warm wood and
+  green under pendant lamps: flowers, the till and its cashier in a green apron, three tiered stands of crates of the season's
+  produce under chalk price cards (`FreshArt.produce_stand`, `produce()` by `Season.current`), the misted wall rack, the bread
+  basket, bulk bins of nuts, the fine grocery shelves (jams, oils, pasta, sauces, fine chocolate), the cheese and charcuterie
+  counter; each one sells something. `world/fresh_art.gd`. **Shops on Masson** are entered through `masson.gd SHOP_DOORS`
+  ([facade, scene, door x]); a new shop = one line there + its scene (whose door goes back to that side's scene). SVG `<text>`
+  doesn't render in these textures: words go in as scene labels.
 - Shop walls get advertising posters, never house picture frames: `ShopArt.ad_poster(kind)` (`AD_POSTERS`: coffee, ice cream, slush, hot dogs, cold drinks), hung with `Shop._ad(kind, x, bottom, scale)` (title label over the strip).
 - `tools/shop_objects.tscn` is the catalogue of every `ShopArt` object, twelve to a page, to judge their drawing: `Godot --path . --screen 1 res://tools/shop_objects.tscn -- --screenshot=/path/p.png --page=0` (pages 0–5; wait for `RenderingServer.frame_post_draw` before capturing in a tool scene, or the shot comes out transparent).
 - More shop objects in `ShopArt` (shopping cart, old cash register, spinner rack, produce crates, flower buckets, gumball machine,
