@@ -105,8 +105,8 @@ const HOUSES := [
 		"windows": [[165.0, 80.0], [478.0, 85.0]], "door_cx": 348.0,
 		"balcony": [205.0, 460.0], "porch": [205.0, 460.0], "slab_h": 32.0, "iron_rail": true,
 		"rail_up": [216.0, 429.0], "rail_down": [205.0, 448.0],
-		"stair": [Vector2(448, 336), Vector2(510, 456), Vector2(570, 576), Vector2(628, 696)],
-		"tread": "#D8D3C8", "tread_dark": "#8A857A", "stair_beam": true,
+		"stair": [Vector2(448, 336), Vector2(545, 430), Vector2(626, 520), Vector2(626, 696)],
+		"tread": "#D8D3C8", "tread_dark": "#8A857A", "stair_beam": true, "stair_style": "curl",
 		"steps_side": "left", "mailbox": true,
 		"fence": "black", "fence_style": "wide", "bare_garden": true, "basement": [120.0, 455.0],
 	},
@@ -2090,6 +2090,8 @@ func _plex_front() -> void:
 		_landing(land)
 		var f2 := land - Vector2(d * 30.0, -4.0)
 		_stairs(f2, f2.lerp(p3, 1.0 / 3.0), f2.lerp(p3, 2.0 / 3.0), p3)
+	elif k.get("stair_style", "") == "curl":
+		_curl_stairs(p0, s[1] + Vector2(0, oy), s[2] + Vector2(0, oy), p3)
 	else:
 		_stairs(p0, s[1] + Vector2(0, oy), s[2] + Vector2(0, oy), p3)
 	var gaps := [[cx - 66, cx + 66], [p3.x - 42, p3.x + 42]]
@@ -2898,6 +2900,64 @@ func _landing(c: Vector2) -> void:
 		_rect(x, c.y - RAIL_H, 2.5, RAIL_H, k.metal, _metal_stroke())
 		x += 9.0
 	_rect(c.x - 36, c.y - RAIL_H - 2, 72, 5, k.metal, _metal_stroke())
+
+
+# Her stair (reference/maison_charlotte/Maison-de-charlotte.png): from the end of the upper balcony it runs down to the right, then
+# curls round toward the sidewalk and comes down the last steps almost straight. A thick black steel stringer under it, its
+# underside in shadow; wide pale treads with a dark nose and the open gap under each, wider as the stair turns toward us; thin
+# black balusters close together on both sides, the handrails following the curve and ending in a curl at the foot.
+func _curl_stairs(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) -> void:
+	var steps := 15
+	var pts: Array[Vector2] = []
+	var hws: Array[float] = []
+	for i in steps + 1:
+		var t := float(i) / steps
+		pts.append(p0.bezier_interpolate(p1, p2, p3, t))
+		# Seen side-on along the diagonal the treads are short; turning toward us at the foot they show their full width.
+		hws.append(lerpf(24.0, 44.0, smoothstep(0.45, 1.0, t)))
+	var metal: String = k.metal
+	# The stringer: a band of black steel along the inner side, from the balcony to the ground, its lit top edge.
+	var top_edge := PackedStringArray()
+	var low_edge := PackedStringArray()
+	for i in pts.size():
+		top_edge.append("%s %s" % [_n(pts[i].x - hws[i] + 4.0), _n(pts[i].y + 6.0)])
+		low_edge.append("%s %s" % [_n(pts[i].x - hws[i] + 4.0), _n(pts[i].y + 40.0)])
+	low_edge.reverse()
+	_path("M" + " L".join(top_edge) + " L" + " L".join(low_edge) + " Z", metal, _stroke("#0E0E0E", 1.5))
+	_path("M" + " L".join(top_edge), "none", _stroke("#5A5A5A", 2) + ' opacity="0.8"')
+	# The inner rail's balusters and rail first (behind the treads).
+	for i in pts.size():
+		_rect(pts[i].x - hws[i] - 1.0, pts[i].y - RAIL_H, 2.2, RAIL_H, metal)
+	_line(_polyline_var(pts, hws, -1.0, -RAIL_H), 4.0)
+	# The treads, top to bottom: the open gap's shadow under each, the pale board, its dark nose.
+	for i in range(1, pts.size()):
+		var p := pts[i]
+		var hw := hws[i]
+		_rect(p.x - hw, p.y + 5.0, hw * 2.0, 6.0, "#000000", 'opacity="0.35"')
+		_rect(p.x - hw, p.y - 4.0, hw * 2.0, 9.0, k.tread, _stroke(k.tread_dark, 1))
+		_rect(p.x - hw, p.y - 4.0, hw * 2.0, 2.5, "#FFFFFF", 'opacity="0.35"')
+		_rect(p.x - hw, p.y + 3.0, hw * 2.0, 2.0, k.tread_dark)
+		_snow(p.x - hw, hw * 2.0, p.y - 4.0)
+	# The outer side: balusters at every tread and half way between, the handrail, and the curl at the foot.
+	for i in pts.size():
+		_rect(pts[i].x + hws[i] - 1.1, pts[i].y - RAIL_H, 2.2, RAIL_H, metal)
+		if i < pts.size() - 1:
+			var m := (pts[i] + pts[i + 1]) * 0.5
+			var mh := (hws[i] + hws[i + 1]) * 0.5
+			_rect(m.x + mh - 1.1, m.y - RAIL_H, 2.2, RAIL_H, metal)
+	_line(_polyline_var(pts, hws, 1.0, -RAIL_H), 5.0)
+	_line(_polyline_var(pts, hws, 1.0, -RAIL_H * 0.35), 2.5)
+	var foot := pts[-1] + Vector2(hws[-1], -RAIL_H)
+	_path("M%s %s c10 0 14 10 12 20 c-2 8 -12 8 -12 0 c0 -5 6 -6 7 -2" % [_n(foot.x), _n(foot.y)], "none", _stroke(metal, 3.5) + ' stroke-linecap="round"')
+	_rect(foot.x - 3.0, foot.y, 6.0, RAIL_H, metal)
+
+
+# A polyline through the stair's points, each pushed sideways by its own half-width (side -1 inner, 1 outer) and up by dy.
+func _polyline_var(pts: Array[Vector2], hws: Array[float], side: float, dy: float) -> String:
+	var parts := PackedStringArray()
+	for i in pts.size():
+		parts.append("%s %s" % [_n(pts[i].x + side * hws[i]), _n(pts[i].y + dy)])
+	return "M" + " L".join(parts)
 
 
 func _stairs(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) -> void:
