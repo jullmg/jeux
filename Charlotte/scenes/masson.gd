@@ -446,7 +446,7 @@ func _side_name() -> String:
 ## Below Masson nothing is drawn yet, so the south side's views down the avenues stay generic.
 const REAL_AVENUES := {
 	"impair": {"rue_6e": [["res://scenes/main.gd", "rue_masson", 1], ["res://scenes/sixieme_est.gd", "rue_masson", -1]],
-},
+		"rue_5e": [["res://scenes/cinquieme_ouest.gd", "rue_masson", 1], ["res://scenes/cinquieme.gd", "rue_masson", -1]]},
 }
 
 
@@ -553,6 +553,7 @@ func _build_doors() -> void:
 		# Up 5e Avenue: its east side (cinquieme) from the corner right of it.
 		if side == "impair" and gap == "rue_5e":
 			_add_corner(cs, "res://scenes/cinquieme.tscn", "5e_from_masson", false, 1)
+			_add_corner(cs, "res://scenes/cinquieme_ouest.tscn", "5e_ouest_from_masson", false, -1)
 		if side == "impair" and gap == "rue_6e":
 			_add_corner(cs, "res://scenes/main.tscn", "6e_from_masson", false, -1)
 			_add_corner(cs, "res://scenes/sixieme_est.tscn", "6e_est_from_masson", false, 1)

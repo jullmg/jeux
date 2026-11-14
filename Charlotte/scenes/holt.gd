@@ -44,11 +44,8 @@ func _build_cross_streets() -> void:
 	fifth.along_name = "Rue Holt"
 	fifth.facing = "south"
 	fifth.left_walls = _walls_along("res://scenes/cinquieme.gd", "rue_holt", 1, "plex_16")
-	fifth.right_walls = [
-		{"to": 0.7, "top": _house_top("holt_sud"), "kind": "plex", "color": Color("#C8A27A")},
-		{"to": 2.2, "top": 280.0, "kind": "plex", "color": Color("#9C5A44")},
-		{"to": CrossStreet.FAR, "top": 310.0, "kind": "plex", "color": Color("#B5603F")},
-	]
+	# The west side of 5e Avenue, from the Street View pictures (cinquieme_ouest).
+	fifth.right_walls = _walls_along("res://scenes/cinquieme_ouest.gd", "rue_holt", -1, "holt_sud")
 
 
 # Dépanneur Oh Bon! (reference/coin_holt/holt_coin_6eme.png): the words on its light-box sign, "OH BON!" in red neon in the big

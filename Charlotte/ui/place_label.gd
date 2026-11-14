@@ -11,6 +11,7 @@ const NAMES := {
 	"sixieme_est": "6e Avenue, côté est",
 	"holt": "Rue Holt, côté sud",
 	"cinquieme": "5e Avenue, côté est",
+	"cinquieme_ouest": "5e Avenue, côté ouest",
 	"dandurand": "Rue Dandurand, côté nord",
 	"ruelle": "Ruelle entre la 5e et la 6e Avenue",
 	"ruelle_dandurand": "Ruelle verte, entre la 5e et la 6e Avenue",

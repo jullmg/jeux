@@ -37,11 +37,8 @@ func _build_cross_streets() -> void:
 	var fifth := _cross_street("rue_5e", "5e Avenue", 1.0)
 	fifth.along_name = "Rue Dandurand"
 	fifth.facing = "north"
-	fifth.left_walls = [
-		{"to": 0.7, "top": _house_top("dandurand_sud"), "kind": "plex", "color": Color("#7A4A3A")},
-		{"to": 2.6, "top": 290.0, "kind": "plex", "color": Color("#B5603F")},
-		{"to": CrossStreet.FAR, "top": 310.0, "kind": "plex", "color": Color("#A8473A")},
-	]
+	# The west side of 5e Avenue, from the Street View pictures (cinquieme_ouest).
+	fifth.left_walls = _walls_along("res://scenes/cinquieme_ouest.gd", "rue_dandurand", 1, "dandurand_sud")
 	fifth.right_walls = _walls_along("res://scenes/cinquieme.gd", "rue_dandurand", -1, "plex_11")
 	var sixth := _cross_street("rue_6e", "6e Avenue", 1.0)
 	sixth.along_name = "Rue Dandurand"

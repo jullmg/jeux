@@ -80,6 +80,17 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   Cross-street `facing` by Montreal's compass: from 6e they run west (Mount Royal), from Dandurand north, from 5e east,
   from Holt south. New corner/side walls in the generator: `holt_nord`, `holt_sud`, `cinq_holt_ouest`, `coin_5e_holt`,
   `coin_5e_dandurand`, `dandurand_sud` (`VARIANTS` is 36: plex_27 on Dandurand, plex_28 on Holt, plex_29–36 on 5e, counted from the Google map).
+- **5e Avenue, both sides, drawn from Street View** (`reference/streetview/5e-avenue/`, walk `5e-avenue-massonholt`, 2026-11-14):
+  `scenes/cinquieme.gd` (east side, `street_key` "5e": Holt left, her block's back `cinq_5739`…`cinq_5605` at the old slots'
+  total widths so the lanes and saves don't move, Rue Dandurand, then the school's block `cinq_ecole`, `cinq_cour`,
+  `cinq_appartements`, `cinq_haie`, `cinq_stationnement`, `cinq_annexe`, `cinq_presbytere`, Rue Masson, `masson_2846_cote`) and
+  `scenes/cinquieme_ouest.gd` (west side, `street_key` "5e_ouest", plate "5e Avenue, côté ouest": Masson left, `ouest_5400`…
+  `ouest_5752`, four lanes that aren't hers `ruelle_cinq_ouest_*` (NOT_OUR_LANE), Holt right). Crossings over 5e at every corner
+  (`_add_across`, keys "5e_ouest_from_5e_<corner>" / "5e_from_5e_ouest_<corner>"), Masson's north side round the corners both
+  ways ("5e_from_masson", "5e_ouest_from_masson", "masson_impair_from_rue_5e_…"), Masson's REAL_AVENUES up 5e. Generator kinds
+  added for it: `walkup` (plain brick walk-up, `cols`, `doors`, `wood_balconies`) and `infill` (charcoal base with garages, white
+  top storey), lot styles `hedge`, `church_lot`, `annex`; `presbytere` with `porch: false` for its side. Caramel's home 5679 is
+  `cinq_5685`.
 - **The east side of 6e Avenue**, the odd numbers (`scenes/sixieme_est.gd`, `street_key` "6e_est"; plate "6e Avenue, côté est"),
   from Holt (left) past Dandurand to Masson (right) in one scene; drawn from the Street View pictures (`reference/streetview/`, `docs/drawing-from-streetview.md`).
   Seen from her own sidewalk across the street, so Holt is on the LEFT and Dandurand on the right; left to right: the corner
