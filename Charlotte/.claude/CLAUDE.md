@@ -549,7 +549,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   her block, then slides by itself (`_pan_for`, `_set_pan`, a tween that runs while the game is paused) to put her in the middle
   when she is elsewhere. On Masson her place comes from the crossings round her (`_masson_x`), each block on its own stretch.
   She can also look round: drag it with the mouse or a finger (`_drag`), or the arrow keys / WASD while it is open; it stops at
-  the edges of `WORLD`. The "map" layer is drawn once into a SubViewport (`_bake`, `BAKE` 2×, `_rebake()` when it opens or `here` changes)
+  the edges of `WORLD`. The "map" layer is drawn once into a SubViewport (`_bake`, `BAKE` 2×, `_rebake_if_needed()`: only when `_bake_key()` changes — her age past `CROSS_AGE`, "Sans limites", or her zone (block, 6e south of Dandurand, Masson) — and ahead of time 2 s after launch)
   and only that picture (`_map`, premultiplied blend) slides, or dragging thousands of crayon strokes stuttered. 6e's west side below the school is drawn too (gym, schoolyard, apartments, parish hall, church).
   The street she is on is never greyed, even past where she may go alone (`_Sheet.here`). **A new place on the map** = its drawing in
   the "map" layer (anywhere in `WORLD`, widen it if needed) + its case in `_here()`.

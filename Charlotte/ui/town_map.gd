@@ -61,6 +61,8 @@ var _sheet: _Sheet
 var _bake: SubViewport
 var _map: Node2D
 const BAKE := 2.0
+## What the baked picture was drawn for (`_bake_key`): drawing it takes a moment, so only when that changes.
+var _baked_key := ""
 var _paper: _Sheet
 var _top: _Sheet
 var _you: _You
@@ -88,6 +90,11 @@ func _ready() -> void:
 	_button.draw.connect(_draw_icon)
 	add_child(_button)
 	_build_page()
+	# Drawn ahead, while the title screen is up, so the first opening doesn't wait for it.
+	get_tree().create_timer(2.0).timeout.connect(func():
+		if not _open:
+			_sheet.here = _here().at
+			_rebake_if_needed())
 	if OS.get_cmdline_user_args().has("--map"):
 		await get_tree().create_timer(1.0).timeout
 		if not _open:
@@ -128,9 +135,8 @@ func _unhandled_input(event: InputEvent) -> void:
 func toggle() -> void:
 	_open = not _open
 	if _open:
-		for s in [_paper, _sheet, _top]:
+		for s in [_paper, _top]:
 			s.queue_redraw()
-		_rebake()
 		_set_pan(Vector2.ZERO)
 		_place_you()
 	_page.visible = _open
@@ -215,10 +221,8 @@ func _masson_x(scene: Node, x: float) -> float:
 
 func _place_you() -> void:
 	var here := _here()
-	if _sheet.here != here.at:
-		_sheet.here = here.at
-		_sheet.queue_redraw()
-		_rebake()
+	_sheet.here = here.at
+	_rebake_if_needed()
 	_you.position = here.at
 	_you.text = here.say
 	# Out of the sheet's window: the map slides to her, by itself, once it is open.
@@ -252,7 +256,23 @@ func _set_pan(pan: Vector2) -> void:
 	_map.position = Vector2(-SIDE, 0.0) - pan
 
 
-func _rebake() -> void:
+## The baked map only changes with what is greyed out: her age (may she cross?), the debug menu's "Sans limites", and whether
+## she stands on her block, on 6e south of Dandurand or on Masson (`_Sheet._reachable`).
+func _bake_key() -> String:
+	var zone := 0
+	if _sheet.here.y > MASSON_Y - 70.0:
+		zone = 2
+	elif _sheet.here.y > DAND_Y + ST_W / 2.0:
+		zone = 1
+	return "%s|%s|%d" % [GameState.age >= StreetScene.CROSS_AGE, DebugMenu.no_limits, zone]
+
+
+func _rebake_if_needed() -> void:
+	var key := _bake_key()
+	if key == _baked_key:
+		return
+	_baked_key = key
+	_sheet.queue_redraw()
 	_bake.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
