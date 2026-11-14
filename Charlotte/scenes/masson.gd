@@ -451,6 +451,11 @@ const REAL_AVENUES := {
 
 # The avenues run north from the odd side's view, south from the even side's. Those already drawn show their real buildings
 # (REAL_AVENUES); the others are generic.
+# The corner lots that are open ground, as the avenues' vistas show them beside the corner.
+const OPEN_CORNERS := {"masson_2560": "park", "masson_2551": "lot", "masson_2544": "lot", "masson_2520": "lot",
+	"masson_3207": "lot", "masson_2620": "lot"}
+
+
 func _build_cross_streets() -> void:
 	var avenues: Array = _side_data.avenues
 	var brick := [Color("#A8473A"), Color("#9C5A44"), Color("#B5603F"), Color("#7E4436")]
@@ -475,6 +480,13 @@ func _build_cross_streets() -> void:
 		if not real.is_empty():
 			cs.left_walls = _walls_along(real[0][0], real[0][1], real[0][2])
 			cs.right_walls = _walls_along(real[1][0], real[1][1], real[1][2])
+		else:
+			# A park or a parking lot on the corner runs back along the avenue too: open ground there, not a plex.
+			var gi := layout.find(a[0])
+			if gi > 0 and OPEN_CORNERS.has(layout[gi - 1]):
+				cs.left_walls[0] = {"to": 0.8, "top": CrossStreet.FACADE_Y, "kind": OPEN_CORNERS[layout[gi - 1]], "color": brick[n % 4]}
+			if gi < layout.size() - 1 and OPEN_CORNERS.has(layout[gi + 1]):
+				cs.right_walls[0] = {"to": 0.8, "top": CrossStreet.FACADE_Y, "kind": OPEN_CORNERS[layout[gi + 1]], "color": brick[n % 4]}
 
 
 # The shops' names on their sign bands, and the odd sign panel on a wall.

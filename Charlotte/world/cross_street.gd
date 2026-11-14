@@ -508,7 +508,7 @@ func _walls(walls: Array, front_x: float, side: float) -> void:
 	var d := 0.0
 	var prev_top := FACADE_Y
 	for w in walls:
-		var open_gap: bool = w.kind in ["gap", "cross"]
+		var open_gap: bool = w.kind in ["gap", "cross", "park", "lot"]
 		if not open_gap and float(w.top) < prev_top - 2.0 and d > 0.0:
 			ends.append([d, float(w.top), prev_top, w.color])
 		prev_top = FACADE_Y if open_gap else float(w.top)
@@ -523,6 +523,8 @@ func _walls(walls: Array, front_x: float, side: float) -> void:
 			"cross":
 				# The next street across: open, its crosswalk painted over our road (see _far_crosswalks).
 				_crossings.append(Vector2(d0, d1))
+			"park", "lot":
+				_open_lot(w.kind, front_x, side, d0, d1)
 			"gap":
 				# A back lane: a tree over a board fence, the lane's opening between.
 				if not _tree_tex.is_empty() and d0 < DETAIL:
@@ -557,6 +559,48 @@ func _walls(walls: Array, front_x: float, side: float) -> void:
 				if not w.has("tex"):
 					_wall_details(w, front_x, top, d0, d1)
 		d0 = d1
+
+
+# An open corner lot along the street instead of a building: a park (its lawn running back, big trees, a low iron fence) or a
+# parking lot (asphalt behind a low hedge, a few tall lamp posts). Its ground lies flat beyond the sidewalk line.
+func _open_lot(kind: String, front_x: float, side: float, d0: float, d1: float) -> void:
+	var back := front_x + side * 900.0
+	var ground: Color
+	if kind == "park":
+		ground = {"winter": Color("#E4E9EE"), "spring": Color("#7AAE58"), "summer": Color("#5E9A44")}.get(Season.current, Color("#8EA052"))
+	else:
+		ground = Color("#7A7874")
+	ground = ground.lerp(HAZE, clampf(d0 / FAR, 0.0, 0.5))
+	draw_colored_polygon(PackedVector2Array([_at(Vector2(front_x, FACADE_Y), d0), _at(Vector2(back, FACADE_Y), d0),
+		_at(Vector2(back, FACADE_Y), d1), _at(Vector2(front_x, FACADE_Y), d1)]), ground)
+	if kind == "park":
+		# The trees, far to near so the near ones cover the far ones, a little in from the fence.
+		if not _tree_tex.is_empty():
+			var ds: Array[float] = []
+			var td := d0 + 0.08
+			while td < d1 - 0.04 and td < DETAIL:
+				ds.append(td)
+				td += 0.3
+			ds.reverse()
+			for i in ds.size():
+				var md: float = ds[i]
+				var sz := Vector2(380, 780) * 0.62 / (1.0 + md)
+				var foot := _at(Vector2(front_x + side * (90.0 + 120.0 * float(i % 2)), FACADE_Y), md)
+				draw_texture_rect(_tree_tex[i % 2], Rect2(foot - Vector2(sz.x * 0.5, sz.y), sz), false, Color.WHITE.lerp(HAZE, clampf(md / FAR, 0.0, 0.6)))
+		var iron := Color("#262626")
+		_wall_quad(front_x, FACADE_Y - 44.0, FACADE_Y - 40.0, d0, d1, iron)
+		var fd := d0
+		while fd < d1 and fd < DETAIL:
+			draw_line(_at(Vector2(front_x, FACADE_Y - 44.0), fd), _at(Vector2(front_x, FACADE_Y), fd), iron, 1.0)
+			fd += 0.02
+	else:
+		var hedge: Color = {"winter": Color("#6A5A4A"), "spring": Color("#4E8A44"), "summer": Color("#3E7A3A")}.get(Season.current, Color("#A8442E"))
+		_wall_quad(front_x, FACADE_Y - 50.0, FACADE_Y, d0, d1, hedge.lerp(HAZE, clampf(d0 / FAR, 0.0, 0.5)))
+		_wall_quad(front_x, FACADE_Y - 50.0, FACADE_Y - 40.0, d0, d1, hedge.lightened(0.15))
+		var ld := d0 + 0.2
+		while ld < d1 and ld < DETAIL:
+			draw_line(_at(Vector2(front_x + side * 120.0, FACADE_Y - 420.0), ld), _at(Vector2(front_x + side * 120.0, FACADE_Y), ld), Color("#3A3A3A"), maxf(1.0, 4.0 / (1.0 + ld)))
+			ld += 0.6
 
 
 # A building's real facade (its street's SVG, `w.tex`) laid along the wall in perspective: cut into thin strips down
