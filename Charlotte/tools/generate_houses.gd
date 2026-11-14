@@ -642,7 +642,7 @@ const HOUSES := [
 		"windows": [[130.0, 100.0], [330.0, 100.0], [800.0, 100.0], [990.0, 100.0]], "basement": [], "downspout": 1150.0,
 	},
 	{
-		"name": "masson_eglise", "kind": "church", "width": 2900.0, "floors": 4, "halloween": false,
+		"name": "masson_eglise", "kind": "church", "width": 2900.0, "floors": 5, "halloween": false,
 		"stone": "#C9C7C0", "church_cx": 1800.0,
 	},
 	# Across 6e: 2901's side, red brick over its grey stone ground floor.
@@ -6573,6 +6573,14 @@ func _church() -> void:
 	var right_start := cx + half + aisle
 	_back_row(X0, cx, g - 600.0, g - 100.0)
 	_lawn(X0, cx - half - 40.0, g - 110.0)
+	# Toward 6e, set back behind the little square: the nave's long grey wall going back, and the square tower at the corner
+	# (the one that stands over 6e Avenue), so there is no gap of sky between the front and the corner.
+	var tower_x := X1 - 300.0
+	_stone_courses(cx + half - 20.0, bay_top + 30.0, tower_x + 10.0, g - 110.0, "#" + Color(stone).darkened(0.12).to_html(false), 34.0, 70.0)
+	_rect(cx + half - 20.0, bay_top + 18.0, tower_x - cx - half + 30.0, 16, trim, _stroke("#8A867E", 1))
+	_snow(cx + half - 20.0, tower_x - cx - half + 30.0, bay_top + 18.0)
+	_corner_tower(tower_x, g - 110.0, trim, false)
+	_rect(cx + half - 20.0, bay_top - 40.0, X1 - cx - half + 20.0, g - 110.0 - bay_top + 40.0, "#C9D6E2", 'opacity="0.12"')
 	_pavers(cx - half - 40.0, X1, g - 110.0)
 	# The aisles, low, under their slate roofs.
 	for side: float in [-1.0, 1.0]:
@@ -7286,40 +7294,7 @@ func _church_side() -> void:
 	_rect(X0, base - 12, X1 - X0, 12, trim, _stroke("#8A867E", 1))
 	var tx: float = k.get("tower_x", -1.0)
 	if tx > 0.0:
-		# The tower at the Masson corner (5360…): tall and square, pale dressed stone with quoins at its corners, a lancet
-		# half way, the belfry with its louvred openings, a plain parapet; at its foot the porch with its dark arched door.
-		var tw := 300.0
-		var t_top := g - 1260.0
-		var pale := "#C9C5BC"
-		_stone_courses(tx, t_top, tx + tw, g - 6.0, pale, 34.0, 70.0)
-		_rect(tx + tw - 40, t_top, 40, g - 6 - t_top, "#000000", 'opacity="0.14"')
-		_rect(tx, t_top, 10, g - 6 - t_top, "#FFFFFF", 'opacity="0.2"')
-		var qy := t_top
-		var qi := 0
-		while qy < g - 40.0:
-			for qx: float in [tx, tx + tw - (54.0 if qi % 2 == 0 else 34.0)]:
-				_rect(qx, qy, 54.0 if qi % 2 == 0 else 34.0, 34, "#DAD6CE", _stroke("#9E9A92", 1))
-			qy += 34.0
-			qi += 1
-		_rect(tx - 10, t_top - 30, tw + 20, 32, trim, _stroke("#8A867E", 1.2))
-		_rect(tx - 10, t_top - 30, tw + 20, 5, "#FFFFFF", 'opacity="0.35"')
-		_snow(tx - 10, tw + 20, t_top - 30)
-		# Belfry: two tall louvred openings under pointed heads.
-		for bx: float in [tx + 95.0, tx + 205.0]:
-			_path("M%s %s V%s Q%s %s %s %s Q%s %s %s %s V%s Z" % [_n(bx - 32), _n(t_top + 280), _n(t_top + 90), _n(bx - 32), _n(t_top + 50), _n(bx), _n(t_top + 40), _n(bx + 32), _n(t_top + 50), _n(bx + 32), _n(t_top + 90), _n(t_top + 280)], "#2A2E34", _stroke(trim, 5))
-			var ly := t_top + 80.0
-			while ly < t_top + 270.0:
-				_rect(bx - 30, ly, 60, 5, "#8E8A82")
-				ly += 14.0
-		_rect(tx + 20, t_top + 292, tw - 40, 14, trim, _stroke("#8A867E", 1))
-		_lancet(tx + tw / 2.0, g - 860.0, g - 660.0, 56.0, trim, CHURCH_GLASS)
-		_rect(tx + 70, g - 560.0, tw - 140, 60, trim, _stroke("#8A867E", 1))
-		# The porch at its foot: a gabled stone porch round a dark arched door.
-		var pc := tx + tw / 2.0
-		_path("M%s %s L%s %s L%s %s V%s H%s Z" % [_n(pc - 110), _n(g - 330), _n(pc), _n(g - 420), _n(pc + 110), _n(g - 330), _n(g - 6), _n(pc - 110)], "#B5B0A6", _stroke("#7E7A72", 1.5))
-		_path("M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(pc - 56), _n(g - 6), _n(g - 230), _n(56), _n(56), _n(pc + 56), _n(g - 230), _n(g - 6)], "#24201E")
-		_path("M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(pc - 40), _n(g - 6), _n(g - 220), _n(40), _n(40), _n(pc + 40), _n(g - 220), _n(g - 6)], "#7A2A24")
-		_snow(pc - 110, 220, g - 336)
+		_corner_tower(tx, g - 6.0, trim, true)
 	var bay: float = k.get("bay", 300.0)
 	var x := X0 + 20.0
 	while x < X1 - 40.0:
@@ -7353,6 +7328,48 @@ func _church_side() -> void:
 		_rect(dx - 16, base + 14.0, 32, 30, "#E8E4DA", 'opacity="0.6"')
 	if k.get("fence", "") == "iron":
 		_iron_fence(X0, X1)
+
+
+# The church's square tower at the corner of Masson and 6e (5360…, 2863…), from its foot at `foot`: pale dressed stone with
+# quoins, a lancet half way, the belfry's louvred openings, a plain parapet; on 6e (`porch`) the porch with its dark door.
+func _corner_tower(tx: float, foot: float, trim: String, porch: bool) -> void:
+	# The tower at the Masson corner (5360…): tall and square, pale dressed stone with quoins at its corners, a lancet
+	# half way, the belfry with its louvred openings, a plain parapet; at its foot the porch with its dark arched door.
+	var tw := 300.0
+	var g := foot
+	var t_top := foot - 1254.0
+	var pale := "#C9C5BC"
+	_stone_courses(tx, t_top, tx + tw, g, pale, 34.0, 70.0)
+	_rect(tx + tw - 40, t_top, 40, g - t_top, "#000000", 'opacity="0.14"')
+	_rect(tx, t_top, 10, g - t_top, "#FFFFFF", 'opacity="0.2"')
+	var qy := t_top
+	var qi := 0
+	while qy < g - 40.0:
+		for qx: float in [tx, tx + tw - (54.0 if qi % 2 == 0 else 34.0)]:
+			_rect(qx, qy, 54.0 if qi % 2 == 0 else 34.0, 34, "#DAD6CE", _stroke("#9E9A92", 1))
+		qy += 34.0
+		qi += 1
+	_rect(tx - 10, t_top - 30, tw + 20, 32, trim, _stroke("#8A867E", 1.2))
+	_rect(tx - 10, t_top - 30, tw + 20, 5, "#FFFFFF", 'opacity="0.35"')
+	_snow(tx - 10, tw + 20, t_top - 30)
+	# Belfry: two tall louvred openings under pointed heads.
+	for bx: float in [tx + 95.0, tx + 205.0]:
+		_path("M%s %s V%s Q%s %s %s %s Q%s %s %s %s V%s Z" % [_n(bx - 32), _n(t_top + 280), _n(t_top + 90), _n(bx - 32), _n(t_top + 50), _n(bx), _n(t_top + 40), _n(bx + 32), _n(t_top + 50), _n(bx + 32), _n(t_top + 90), _n(t_top + 280)], "#2A2E34", _stroke(trim, 5))
+		var ly := t_top + 80.0
+		while ly < t_top + 270.0:
+			_rect(bx - 30, ly, 60, 5, "#8E8A82")
+			ly += 14.0
+	_rect(tx + 20, t_top + 292, tw - 40, 14, trim, _stroke("#8A867E", 1))
+	_lancet(tx + tw / 2.0, g - 860.0, g - 660.0, 56.0, trim, CHURCH_GLASS)
+	_rect(tx + 70, g - 560.0, tw - 140, 60, trim, _stroke("#8A867E", 1))
+	if not porch:
+		return
+	# The porch at its foot: a gabled stone porch round a dark arched door.
+	var pc := tx + tw / 2.0
+	_path("M%s %s L%s %s L%s %s V%s H%s Z" % [_n(pc - 110), _n(g - 330), _n(pc), _n(g - 420), _n(pc + 110), _n(g - 330), _n(g - 6), _n(pc - 110)], "#B5B0A6", _stroke("#7E7A72", 1.5))
+	_path("M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(pc - 56), _n(g - 6), _n(g - 230), _n(56), _n(56), _n(pc + 56), _n(g - 230), _n(g - 6)], "#24201E")
+	_path("M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(pc - 40), _n(g - 6), _n(g - 220), _n(40), _n(40), _n(pc + 40), _n(g - 220), _n(g - 6)], "#7A2A24")
+	_snow(pc - 110, 220, g - 336)
 
 
 # A round-headed window in a pale stone surround, small panes.
