@@ -48,6 +48,10 @@ var school := false
 ## Walls along each side, nearest first: {"to": depth, "top": y at the facade line, "kind", "color"}.
 var left_walls: Array = []
 var right_walls: Array = []
+## Volumes standing back from a wall line, drawn behind the walls so only what rises over them shows: a church tower that is
+## on the cross street's own front, seen from the side down the vista. Each {side (-1 left, 1 right), back (px out from that
+## side's wall line), d0, d1 (depth), tex, rect (the part of tex to lay on the face, in its pixels)}.
+var towers: Array = []
 ## Plates on the corner sign: the cross street, then the street we're on.
 var street_name := ""
 var along_name := "6e Avenue"
@@ -83,7 +87,7 @@ var _litter: Array[Color] = Season.litter()
 static func make(which: Part, from: CrossStreet) -> CrossStreet:
 	var cs := CrossStreet.new()
 	cs.part = which
-	for prop in ["x0", "x1", "sidewalk", "school", "left_walls", "right_walls", "street_name", "along_name", "facing", "sign_side", "lane_side"]:
+	for prop in ["x0", "x1", "sidewalk", "school", "left_walls", "right_walls", "towers", "street_name", "along_name", "facing", "sign_side", "lane_side"]:
 		cs.set(prop, from.get(prop))
 	return cs
 
@@ -193,6 +197,8 @@ func _draw_vista() -> void:
 		if float(i % 10) / 10.0 < Season.litter_amount():
 			draw_circle(_at(Vector2(gx, FACADE_Y), d), 4.0 / (1.0 + d), lc)
 	_street_details()
+	for t: Dictionary in towers:
+		_tower_face(t)
 	_walls(left_walls, x0, -1.0)
 	_walls(right_walls, x1, 1.0)
 	_far_crosswalks()
@@ -604,6 +610,38 @@ func _open_lot(kind: String, front_x: float, side: float, d0: float, d1: float) 
 			ld += 0.6
 
 
+# A tower's side face running back from depth d0 to d1, `back` px out from the wall line, its picture taken from `rect` of
+# the tower's own front; its foot on the facade line, its top where the picture's top is.
+func _tower_face(t: Dictionary) -> void:
+	var tex: Texture2D = t.tex
+	var r: Rect2 = t.rect
+	var side: float = t.side
+	var x: float = (x0 if side < 0.0 else x1) + side * float(t.back)
+	var top := FACADE_Y - (tex.get_height() - r.position.y) * StreetScene.HOUSE_SCALE
+	var bottom := FACADE_Y - (tex.get_height() - r.end.y) * StreetScene.HOUSE_SCALE
+	var u0 := r.position.x / tex.get_width()
+	var u1 := r.end.x / tex.get_width()
+	var v0 := r.position.y / tex.get_height()
+	var v1 := r.end.y / tex.get_height()
+	var d0: float = t.d0
+	var d1: float = t.d1
+	var span := absf(_at(Vector2(x, top), d0).x - _at(Vector2(x, top), d1).x)
+	var strips := clampi(int(span / 4.0) + 4, 4, 120)
+	# Its side, out of the sun: a little darker than its front.
+	var tint := Color.WHITE.darkened(0.2 if side < 0.0 else 0.3)
+	var colors := PackedColorArray([tint, tint, tint, tint])
+	for i in strips:
+		var ta := float(i) / strips
+		var tb := float(i + 1) / strips
+		var da := lerpf(d0, d1, ta)
+		var db := lerpf(d0, d1, tb)
+		var ua := lerpf(u1, u0, ta) if side < 0.0 else lerpf(u0, u1, ta)
+		var ub := lerpf(u1, u0, tb) if side < 0.0 else lerpf(u0, u1, tb)
+		draw_polygon(PackedVector2Array([_at(Vector2(x, top), da), _at(Vector2(x, top), db),
+			_at(Vector2(x, bottom), db), _at(Vector2(x, bottom), da)]),
+			colors, PackedVector2Array([Vector2(ua, v0), Vector2(ub, v0), Vector2(ub, v1), Vector2(ua, v1)]), tex)
+
+
 # A building's real facade (its street's SVG, `w.tex`) laid along the wall in perspective: cut into thin strips down
 # the depth so the mapping follows it; the facade's bottom on the facade line, as on its own street; hazier further.
 func _textured_wall(front_x: float, w: Dictionary, d0: float, d1: float, side := 1.0) -> void:
@@ -611,13 +649,21 @@ func _textured_wall(front_x: float, w: Dictionary, d0: float, d1: float, side :=
 	var tw := float(tex.get_width())
 	var th := float(tex.get_height())
 	var top := FACADE_Y - th * StreetScene.HOUSE_SCALE
+	# `crop`: only up to its roof line, so a tower that really stands elsewhere (see `towers`) isn't painted on the wall.
+	var v_top := 0.0
+	if w.get("crop", false):
+		top = float(w.top) - 4.0
+		v_top = 1.0 - (FACADE_Y - top) / (th * StreetScene.HOUSE_SCALE)
 	var u0 := 30.0 / tw
 	var u1 := (tw - 30.0) / tw
 	if w.get("flip", false):
 		var t := u0
 		u0 = u1
 		u1 = t
-	var strips := clampi(int((d1 - d0) * 40.0) + 4, 4, 24)
+	# Each strip is two triangles mapped flat, which kinks the facade's level lines (roof, stone courses) into a saw where it
+	# bends: thin strips on screen, about 6 px each, keep that kink too small to see.
+	var span := absf(_at(Vector2(front_x, top), d0).x - _at(Vector2(front_x, top), d1).x)
+	var strips := clampi(int(span / 6.0) + 4, 4, 200)
 	var tint := Color.WHITE.lerp(HAZE, clampf(d0 / FAR * 1.4, 0.0, 0.65)).darkened(0.16 if side < 0.0 else 0.27)
 	var colors := PackedColorArray([tint, tint, tint, tint])
 	for i in strips:
@@ -629,7 +675,7 @@ func _textured_wall(front_x: float, w: Dictionary, d0: float, d1: float, side :=
 		var ub := lerpf(u0, u1, tb)
 		draw_polygon(PackedVector2Array([_at(Vector2(front_x, top), da), _at(Vector2(front_x, top), db),
 			_at(Vector2(front_x, FACADE_Y), db), _at(Vector2(front_x, FACADE_Y), da)]),
-			colors, PackedVector2Array([Vector2(ua, 0), Vector2(ub, 0), Vector2(ub, 1), Vector2(ua, 1)]), tex)
+			colors, PackedVector2Array([Vector2(ua, v_top), Vector2(ub, v_top), Vector2(ub, 1), Vector2(ua, 1)]), tex)
 
 
 # Exposed brickwork on a drawn wall: the courses, and near enough to see, the staggered joints between the bricks.

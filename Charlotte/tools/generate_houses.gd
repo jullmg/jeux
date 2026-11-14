@@ -643,7 +643,7 @@ const HOUSES := [
 	},
 	{
 		"name": "masson_eglise", "kind": "church", "width": 2900.0, "floors": 5, "halloween": false,
-		"stone": "#C9C7C0", "church_cx": 1800.0,
+		"stone": "#D9D5CB", "church_cx": 1800.0,
 	},
 	# Across 6e: 2901's side, red brick over its grey stone ground floor.
 	{
@@ -6568,29 +6568,34 @@ func _church() -> void:
 	var belfry_top := g - 955.0
 	var spire_top := g - 1010.0
 	var aisle_top := g - 420.0
-	# Behind the lawn on the presbytery's side, across the yards: the plexes of the avenue beyond, a little hazy. On the 6e
-	# side the church comes almost to the corner (2863…): past its right aisle only a little paved square, and the avenue.
-	var right_start := cx + half + aisle
+	# Behind the lawn on the presbytery's side, across the yards: the plexes of the avenue beyond, a little hazy. On the 6e side
+	# the church runs right to the corner (eglise-masson-1/2): its right aisle's pale block on a base of rough grey stone.
 	_back_row(X0, cx, g - 600.0, g - 100.0)
 	_lawn(X0, cx - half - 40.0, g - 110.0)
-	# Toward 6e, set back behind the little square: the nave's long grey wall going back, and the square tower at the corner
-	# (the one that stands over 6e Avenue), so there is no gap of sky between the front and the corner.
-	var tower_x := X1 - 300.0
-	_stone_courses(cx + half - 20.0, bay_top + 30.0, tower_x + 10.0, g - 110.0, "#" + Color(stone).darkened(0.12).to_html(false), 34.0, 70.0)
-	_rect(cx + half - 20.0, bay_top + 18.0, tower_x - cx - half + 30.0, 16, trim, _stroke("#8A867E", 1))
-	_snow(cx + half - 20.0, tower_x - cx - half + 30.0, bay_top + 18.0)
-	_corner_tower(tower_x, g - 110.0, trim, false)
-	_rect(cx + half - 20.0, bay_top - 40.0, X1 - cx - half + 20.0, g - 110.0 - bay_top + 40.0, "#C9D6E2", 'opacity="0.12"')
-	_pavers(cx - half - 40.0, X1, g - 110.0)
 	# The aisles, low, under their slate roofs.
 	for side: float in [-1.0, 1.0]:
 		var a0: float = cx + side * half
-		var a1: float = cx + side * (half + aisle)
-		_stone_courses(minf(a0, a1), aisle_top, maxf(a0, a1), floor_y, stone)
-		_rect(minf(a0, a1) - 4, aisle_top - 6, aisle + 8, 14, trim, _stroke("#8A867E", 1))
-		_snow(minf(a0, a1) - 4, aisle + 8, aisle_top - 6)
-		_deco_band(minf(a0, a1) + 10, maxf(a0, a1) - 10, aisle_top + 26.0, 26.0, trim)
-		_lancet(cx + side * (half + aisle / 2.0), aisle_top + 90.0, aisle_top + 270.0, 44.0, trim, CHURCH_GLASS)
+		var a1: float = X1 if side > 0.0 else cx - half - aisle
+		var top := aisle_top - (140.0 if side > 0.0 else 0.0)
+		var w := absf(a1 - a0)
+		_stone_courses(minf(a0, a1), top, maxf(a0, a1), floor_y if side < 0.0 else g, stone)
+		_rect(minf(a0, a1) - 4, top - 6, w + 8, 14, trim, _stroke("#8A867E", 1))
+		_snow(minf(a0, a1) - 4, w + 8, top - 6)
+		_deco_band(minf(a0, a1) + 10, maxf(a0, a1) - 10, top + 26.0, 26.0, trim)
+		_lancet((a0 + a1) / 2.0, top + 90.0, top + 300.0, 44.0, trim, CHURCH_GLASS)
+		if side > 0.0:
+			# The corner block on 6e: its base of rough grey stone, the stepped top of its parapet.
+			_rough_stone(minf(a0, a1) + 2.0, g - 300.0, maxf(a0, a1), g)
+			_rect(minf(a0, a1), g - 306.0, w, 10, trim, _stroke("#8A867E", 1))
+			for st in 3:
+				var sw := w * (0.5 - st * 0.14)
+				_rect((a0 + a1) / 2.0 - sw / 2.0, top - 26.0 - st * 22.0, sw, 24, stone, _stroke("#8A867E", 1))
+				_snow((a0 + a1) / 2.0 - sw / 2.0, sw, top - 26.0 - st * 22.0)
+		else:
+			# The little porch at the presbytery's side under its green copper dome.
+			var pc := (a0 + a1) / 2.0
+			_path("M%s %s A%s %s 0 0 1 %s %s Z" % [_n(pc - 90), _n(top - 4), _n(90), _n(70), _n(pc + 90), _n(top - 4)], "#6E9A86", _stroke("#4E7A66", 1.5))
+			_rect(pc - 4, top - 98, 8, 26, "#4E7A66")
 	# The front: its two bays either side of the tower, crenellated along the top.
 	_stone_courses(cx - half, bay_top, cx + half, floor_y, stone)
 	_rect(cx - half, bay_top, 2 * half, floor_y - bay_top, "url(#sun)")
@@ -6607,31 +6612,12 @@ func _church() -> void:
 		_lancet(wx, g - 640.0, g - 470.0, 62.0, trim, CHURCH_GLASS)
 		_lozenge(wx, g - 690.0 + 26.0, 13.0, trim)
 		_lozenge(wx, g - 428.0, 11.0, trim)
-	# The tower, up through the middle, its belfry with tall louvred openings, a copper pyramid and its cross.
-	_stone_courses(cx - tw, tower_top, cx + tw, floor_y, stone)
-	_rect(cx - tw, tower_top, 8, floor_y - tower_top, "#FFFFFF", 'opacity="0.16"')
-	_rect(cx + tw - 10, tower_top, 10, floor_y - tower_top, "#000000", 'opacity="0.12"')
-	_rect(cx - tw - 8, tower_top - 12, 2 * tw + 16, 16, trim, _stroke("#8A867E", 1))
-	_snow(cx - tw - 8, 2 * tw + 16, tower_top - 12)
-	_stone_courses(cx - tw + 24, belfry_top, cx + tw - 24, tower_top - 12, stone)
-	for side: float in [-1.0, 1.0]:
-		var bx := cx + side * 62.0
-		_path("M%s %s V%s Q%s %s %s %s Q%s %s %s %s V%s Z" % [_n(bx - 26), _n(tower_top - 26), _n(belfry_top + 50), _n(bx - 26), _n(belfry_top + 16), _n(bx), _n(belfry_top + 8), _n(bx + 26), _n(belfry_top + 16), _n(bx + 26), _n(belfry_top + 50), _n(tower_top - 26)], "#2A2E34", _stroke(trim, 4))
-		var ly := belfry_top + 40.0
-		while ly < tower_top - 30.0:
-			_rect(bx - 24, ly, 48, 4, "#8E8A82")
-			ly += 11.0
-	_rect(cx - tw + 14, belfry_top - 10, 2 * tw - 28, 14, trim, _stroke("#8A867E", 1))
-	_path("M%s %s L%s %s L%s %s Z" % [_n(cx - tw + 18), _n(belfry_top - 10), _n(cx), _n(spire_top), _n(cx + tw - 18), _n(belfry_top - 10)], "#6E9A86", _stroke("#4E7A66", 1.5))
-	_path("M%s %s L%s %s L%s %s Z" % [_n(cx), _n(spire_top), _n(cx + tw - 18), _n(belfry_top - 10), _n(cx + 10), _n(belfry_top - 10)], "#000000", 'opacity="0.14"')
-	if season == "winter":
-		_path("M%s %s L%s %s L%s %s Z" % [_n(cx - 40), _n(spire_top + 30), _n(cx), _n(spire_top + 4), _n(cx + 30), _n(spire_top + 26)], "#F7F9FB")
-	_rect(cx - 3, spire_top - 46, 6, 50, "#3A3A3A")
-	_rect(cx - 16, spire_top - 34, 32, 6, "#3A3A3A")
+	# The tower, up through the middle (eglise-masson-1): very tall, pale, the belfry stage with its pinnacles; no spire.
+	_se_tower(cx, tw, floor_y, stone, trim)
+	tower_top = g - 1160.0
 	for side: float in [-1.0, 1.0]:
 		var px := cx + side * (tw - 6.0)
-		_rect(px - 12, tower_top - 52, 24, 40, trim, _stroke("#8A867E", 1))
-		_path("M%s %s L%s %s L%s %s Z" % [_n(px - 14), _n(tower_top - 52), _n(px), _n(tower_top - 104), _n(px + 14), _n(tower_top - 52)], trim, _stroke("#8A867E", 1))
+		pass
 	# Its tall window over the great door, and a carved band of little blind arches right across the front.
 	_lancet(cx, g - 760.0, g - 480.0, 74.0, trim, CHURCH_GLASS)
 	_deco_band(cx - tw + 30, cx + tw - 30, g - 456.0, 30.0, trim)
@@ -6681,40 +6667,7 @@ func _church() -> void:
 	while cedar < left_end - 30.0:
 		_cedar(cedar, g - 260.0 - rng.randf_range(0.0, 60.0))
 		cedar += 70.0
-	# The square at the corner: one young tree, picnic tables, a bench; it is open to the sidewalk, no fence.
-	_fine_tree(Vector2(lerpf(right_start, X1, 0.45), g - 60.0), g - 330.0, -PI * 0.55, 1.2, ["#E3A33A", "#D9682B", "#C9562E", "#E8B54A", "#D9A23A"])
-	_picnic_table(lerpf(right_start, X1, 0.22), g - 40.0)
-	_picnic_table(lerpf(right_start, X1, 0.75), g - 30.0)
 	_iron_fence(X0, s0 - 72.0)
-
-
-# Grey concrete pavers, from x0 to x1, from y0 down to the sidewalk.
-func _pavers(x0: float, x1: float, y0: float) -> void:
-	_rect(x0, y0, x1 - x0, ground_y - y0, "#B4B0A8")
-	var row := 0
-	var py := y0
-	while py < ground_y:
-		var px := x0 + (0.0 if row % 2 == 0 else -24.0)
-		while px < x1:
-			_rect(maxf(px, x0), py, minf(48.0, x1 - maxf(px, x0)), 1.5, "#8E8A82")
-			_rect(maxf(px, x0), py, 1.5, 18.0, "#8E8A82")
-			px += 48.0
-		py += 18.0
-		row += 1
-	if season == "winter":
-		_rect(x0, y0, x1 - x0, ground_y - y0, "#F2F5F8", 'opacity="0.85"')
-	_rect(x0, y0, x1 - x0, 4, "#000000", 'opacity="0.1"')
-
-
-# A wooden picnic table seen from the front, its foot at y.
-func _picnic_table(x: float, y: float) -> void:
-	var wood := "#9A6A3E"
-	_rect(x - 70, y - 58, 140, 9, wood, _stroke("#5E3E22", 1))
-	_rect(x - 82, y - 30, 164, 7, wood, _stroke("#5E3E22", 1))
-	for side: float in [-1.0, 1.0]:
-		_path("M%s %s L%s %s" % [_n(x + side * 30), _n(y - 50), _n(x + side * 56), _n(y)], "none", _stroke("#6E4A2A", 6))
-		_path("M%s %s L%s %s" % [_n(x + side * 30), _n(y - 50), _n(x + side * 4), _n(y)], "none", _stroke("#6E4A2A", 6))
-	_snow(x - 70, 140, y - 58)
 
 
 # The presbytery beside it, from the close-ups of 2851… (AteR4eKT, usCf6EmL): red brick on three floors, buff brick laid in
@@ -7275,6 +7228,9 @@ func _church_side() -> void:
 	var g := ground_y
 	var top := g - 640.0
 	var base := g - 120.0
+	# Behind everything at the Masson end, the front's great tower rising over the roof (it stands on Masson, set back from 6e).
+	if k.has("tower_x"):
+		_se_tower(X0 + 330.0, 190.0, g - 100.0, "#D9D5CB", "#E8E4DA")
 	# The nave's slate roof sloping back above the parapet, dark, its ridge far behind.
 	if k.has("tower_x"):
 		_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(X0), _n(top - 10), _n(X0 + 40), _n(top - 150), _n(X1 - 40), _n(top - 150), _n(X1), _n(top - 10)], "#4A4E54", _stroke("#33363A", 1.5))
@@ -7294,7 +7250,19 @@ func _church_side() -> void:
 	_rect(X0, base - 12, X1 - X0, 12, trim, _stroke("#8A867E", 1))
 	var tx: float = k.get("tower_x", -1.0)
 	if tx > 0.0:
-		_corner_tower(tx, g - 6.0, trim, true)
+		# The corner block, as on Masson: pale stone over its base of rough grey stone, its stepped parapet.
+		_stone_courses(X0, top - 10.0, tx + 330.0, g - 300.0, "#D9D5CB")
+		_rect(X0, top - 10.0, 10, g - 300.0 - top, "#FFFFFF", 'opacity="0.2"')
+		_rough_stone(X0, g - 300.0, tx + 330.0, g - 6.0)
+		_rect(X0 - 6, top - 28.0, tx + 342.0 - X0, 20, "#E8E4DA", _stroke("#8A867E", 1))
+		_snow(X0 - 6, tx + 342.0 - X0, top - 28.0)
+		_lancet(tx + 150.0, top + 80.0, top + 290.0, 44.0, "#E8E4DA", CHURCH_GLASS)
+		# The corner porch (5360…): gabled, round a dark arched door.
+		var pc := tx + 150.0
+		_path("M%s %s L%s %s L%s %s V%s H%s Z" % [_n(pc - 110), _n(g - 330), _n(pc), _n(g - 420), _n(pc + 110), _n(g - 330), _n(g - 6), _n(pc - 110)], "#B5B0A6", _stroke("#7E7A72", 1.5))
+		_path("M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(pc - 56), _n(g - 6), _n(g - 230), _n(56), _n(56), _n(pc + 56), _n(g - 230), _n(g - 6)], "#24201E")
+		_path("M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(pc - 40), _n(g - 6), _n(g - 220), _n(40), _n(40), _n(pc + 40), _n(g - 220), _n(g - 6)], "#7A2A24")
+		_snow(pc - 110, 220, g - 336)
 	var bay: float = k.get("bay", 300.0)
 	var x := X0 + 20.0
 	while x < X1 - 40.0:
@@ -7330,46 +7298,59 @@ func _church_side() -> void:
 		_iron_fence(X0, X1)
 
 
-# The church's square tower at the corner of Masson and 6e (5360…, 2863…), from its foot at `foot`: pale dressed stone with
-# quoins, a lancet half way, the belfry's louvred openings, a plain parapet; on 6e (`porch`) the porch with its dark door.
-func _corner_tower(tx: float, foot: float, trim: String, porch: bool) -> void:
-	# The tower at the Masson corner (5360…): tall and square, pale dressed stone with quoins at its corners, a lancet
-	# half way, the belfry with its louvred openings, a plain parapet; at its foot the porch with its dark arched door.
-	var tw := 300.0
-	var g := foot
-	var t_top := foot - 1254.0
-	var pale := "#C9C5BC"
-	_stone_courses(tx, t_top, tx + tw, g, pale, 34.0, 70.0)
-	_rect(tx + tw - 40, t_top, 40, g - t_top, "#000000", 'opacity="0.14"')
-	_rect(tx, t_top, 10, g - t_top, "#FFFFFF", 'opacity="0.2"')
-	var qy := t_top
-	var qi := 0
-	while qy < g - 40.0:
-		for qx: float in [tx, tx + tw - (54.0 if qi % 2 == 0 else 34.0)]:
-			_rect(qx, qy, 54.0 if qi % 2 == 0 else 34.0, 34, "#DAD6CE", _stroke("#9E9A92", 1))
-		qy += 34.0
-		qi += 1
-	_rect(tx - 10, t_top - 30, tw + 20, 32, trim, _stroke("#8A867E", 1.2))
-	_rect(tx - 10, t_top - 30, tw + 20, 5, "#FFFFFF", 'opacity="0.35"')
-	_snow(tx - 10, tw + 20, t_top - 30)
-	# Belfry: two tall louvred openings under pointed heads.
-	for bx: float in [tx + 95.0, tx + 205.0]:
-		_path("M%s %s V%s Q%s %s %s %s Q%s %s %s %s V%s Z" % [_n(bx - 32), _n(t_top + 280), _n(t_top + 90), _n(bx - 32), _n(t_top + 50), _n(bx), _n(t_top + 40), _n(bx + 32), _n(t_top + 50), _n(bx + 32), _n(t_top + 90), _n(t_top + 280)], "#2A2E34", _stroke(trim, 5))
-		var ly := t_top + 80.0
-		while ly < t_top + 270.0:
-			_rect(bx - 30, ly, 60, 5, "#8E8A82")
-			ly += 14.0
-	_rect(tx + 20, t_top + 292, tw - 40, 14, trim, _stroke("#8A867E", 1))
-	_lancet(tx + tw / 2.0, g - 860.0, g - 660.0, 56.0, trim, CHURCH_GLASS)
-	_rect(tx + 70, g - 560.0, tw - 140, 60, trim, _stroke("#8A867E", 1))
-	if not porch:
-		return
-	# The porch at its foot: a gabled stone porch round a dark arched door.
-	var pc := tx + tw / 2.0
-	_path("M%s %s L%s %s L%s %s V%s H%s Z" % [_n(pc - 110), _n(g - 330), _n(pc), _n(g - 420), _n(pc + 110), _n(g - 330), _n(g - 6), _n(pc - 110)], "#B5B0A6", _stroke("#7E7A72", 1.5))
-	_path("M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(pc - 56), _n(g - 6), _n(g - 230), _n(56), _n(56), _n(pc + 56), _n(g - 230), _n(g - 6)], "#24201E")
-	_path("M%s %s V%s A%s %s 0 0 1 %s %s V%s Z" % [_n(pc - 40), _n(g - 6), _n(g - 220), _n(40), _n(40), _n(pc + 40), _n(g - 220), _n(g - 6)], "#7A2A24")
-	_snow(pc - 110, 220, g - 336)
+# Église Saint-Esprit's tower (eglise-masson-1, 5360…), centred on cx, 2·tw wide, from its foot up: a tall pale shaft with its
+# twin lancets and carved panels, a cornice, the narrower belfry with two tall louvred openings between slender pinnacles at
+# its corners, and a parapet with four more pinnacles. Its top stands about g - 1420 when its foot is the church floor.
+func _se_tower(cx: float, tw: float, foot: float, stone: String, trim: String) -> void:
+	var shaft_top := foot - 1060.0
+	var bel_top := shaft_top - 230.0
+	_stone_courses(cx - tw, shaft_top, cx + tw, foot, stone)
+	_rect(cx - tw, shaft_top, 8, foot - shaft_top, "#FFFFFF", 'opacity="0.2"')
+	_rect(cx + tw - 14, shaft_top, 14, foot - shaft_top, "#000000", 'opacity="0.12"')
+	for side: float in [-1.0, 1.0]:
+		_lancet(cx + side * 60.0, shaft_top + 70.0, shaft_top + 300.0, 46.0, trim, CHURCH_GLASS)
+	_deco_band(cx - tw + 26, cx + tw - 26, shaft_top + 330.0, 30.0, trim)
+	_rect(cx - tw - 12, shaft_top - 20, 2 * tw + 24, 24, trim, _stroke("#8A867E", 1.2))
+	_snow(cx - tw - 12, 2 * tw + 24, shaft_top - 20)
+	var bw := tw - 34.0
+	_stone_courses(cx - bw, bel_top, cx + bw, shaft_top - 20.0, stone)
+	_rect(cx + bw - 12, bel_top, 12, shaft_top - 20.0 - bel_top, "#000000", 'opacity="0.12"')
+	for side: float in [-1.0, 1.0]:
+		var bx := cx + side * 58.0
+		_path("M%s %s V%s Q%s %s %s %s Q%s %s %s %s V%s Z" % [_n(bx - 30), _n(shaft_top - 40), _n(bel_top + 70), _n(bx - 30), _n(bel_top + 34), _n(bx), _n(bel_top + 26), _n(bx + 30), _n(bel_top + 34), _n(bx + 30), _n(bel_top + 70), _n(shaft_top - 40)], "#2A2E34", _stroke(trim, 5))
+		var ly := bel_top + 60.0
+		while ly < shaft_top - 44.0:
+			_rect(bx - 28, ly, 56, 5, "#8E8A82")
+			ly += 13.0
+	# Pinnacles at the belfry's corners, and the parapet with its own four.
+	for side: float in [-1.0, 1.0]:
+		var px := cx + side * (bw + 6.0)
+		_rect(px - 14, bel_top + 10, 28, shaft_top - 30.0 - bel_top, trim, _stroke("#8A867E", 1))
+		_path("M%s %s L%s %s L%s %s Z" % [_n(px - 16), _n(bel_top + 12), _n(px), _n(bel_top - 60), _n(px + 16), _n(bel_top + 12)], trim, _stroke("#8A867E", 1))
+	_rect(cx - bw - 8, bel_top - 22, 2 * bw + 16, 24, trim, _stroke("#8A867E", 1.2))
+	_snow(cx - bw - 8, 2 * bw + 16, bel_top - 22)
+	for k2 in 4:
+		var px := lerpf(cx - bw + 6.0, cx + bw - 6.0, k2 / 3.0)
+		_rect(px - 9, bel_top - 70, 18, 50, trim, _stroke("#8A867E", 1))
+		_path("M%s %s L%s %s L%s %s Z" % [_n(px - 11), _n(bel_top - 68), _n(px), _n(bel_top - 108), _n(px + 11), _n(bel_top - 68)], trim, _stroke("#8A867E", 1))
+		_circle(px, bel_top - 112, 7, trim, _stroke("#8A867E", 1))
+
+
+# Rough grey stone, laid in irregular courses: the church's base and the long wall on 6e.
+func _rough_stone(x0: float, y0: float, x1: float, y1: float) -> void:
+	_rect(x0, y0, x1 - x0, y1 - y0, "#8E8A84")
+	var y := y0
+	var row := 0
+	while y < y1:
+		var h := 30.0 + float(row % 3) * 6.0
+		var x := x0 - float(row % 2) * 30.0
+		while x < x1:
+			var w := 50.0 + float((row * 7 + int(x)) % 5) * 12.0
+			var c: String = ["#7E7A74", "#9A968E", "#86827C", "#A29E96"][(row + int(x / 37.0)) % 4]
+			_rect(maxf(x, x0) + 2, y + 2, minf(w, x1 - maxf(x, x0)) - 4, minf(h, y1 - y) - 4, c, _stroke("#5E5A54", 1))
+			x += w
+		y += h
+		row += 1
 
 
 # A round-headed window in a pale stone surround, small panes.

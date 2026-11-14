@@ -188,6 +188,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   A building taller than the one before it shows its end wall above that one's roof (`_end_wall`, drawn first, far to
   near, so nearer facades hide the rest); street lamps down the right curb (`_lamps`); the next
   street down the vista is a "cross" gap (from `_walls_along`) with crosswalks painted across our road.
+- Église Saint-Esprit (from Julien's `scenes/eglise-masson-1/2.png` and Street View): ONE great pale tower in the middle of its
+  Masson front (`_se_tower`: shaft, belfry with pinnacles, no spire), the right aisle's pale block running to the 6e corner on
+  rough grey stone (`_rough_stone`); on 6e (`six_sud_eglise`) the same corner block, then the grey nave, and that tower rising
+  over the roof at the Masson end. Up 6e from Masson the side wall is cut at its roof (`crop` on a vista wall) and the tower is a
+  volume of its own, its east face running back from the Masson front (`CrossStreet.towers`, `_tower_face`, set by
+  `masson.gd _church_tower`). Textured vista walls are drawn in strips about 6 px wide on screen, or their level lines saw.
 - Vista walls built from a real street carry that building's own facade texture (`w.tex`, `w.flip` from `_walls_along`)
   laid in perspective in thin strips (`CrossStreet._textured_wall`): its doors, stairs, balconies, bricks, season decor.
   Drawn walls (the corner building's side, the other blocks across) get exposed brick courses and staggered joints

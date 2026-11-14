@@ -821,7 +821,7 @@ func _walls_along(script_path: String, from_gap: String, direction: int, ours :=
 			continue
 		var tex := _tex(art)
 		d += (tex.get_width() - 2.0 * MARGIN) * HOUSE_SCALE / 650.0
-		var wall := {"to": d, "top": HOUSE_BASE_Y - (tex.get_height() - _roof_line(tex)) * HOUSE_SCALE, "kind": _wall_kind(art), "color": _wall_color(tex)}
+		var wall := {"to": d, "top": HOUSE_BASE_Y - (tex.get_height() - _roof_line(tex)) * HOUSE_SCALE, "kind": _wall_kind(art), "color": _wall_color(tex), "art": art}
 		if wall.kind != "gap":
 			# Its real facade, laid along the wall in perspective; going back along that street's layout, its right
 			# edge is the near end.

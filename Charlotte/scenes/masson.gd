@@ -480,6 +480,7 @@ func _build_cross_streets() -> void:
 		if not real.is_empty():
 			cs.left_walls = _walls_along(real[0][0], real[0][1], real[0][2])
 			cs.right_walls = _walls_along(real[1][0], real[1][1], real[1][2])
+			_church_tower(cs)
 		else:
 			# A park or a parking lot on the corner runs back along the avenue too: open ground there, not a plex.
 			var gi := layout.find(a[0])
@@ -487,6 +488,19 @@ func _build_cross_streets() -> void:
 				cs.left_walls[0] = {"to": 0.8, "top": CrossStreet.FACADE_Y, "kind": OPEN_CORNERS[layout[gi - 1]], "color": brick[n % 4]}
 			if gi < layout.size() - 1 and OPEN_CORNERS.has(layout[gi + 1]):
 				cs.right_walls[0] = {"to": 0.8, "top": CrossStreet.FACADE_Y, "kind": OPEN_CORNERS[layout[gi + 1]], "color": brick[n % 4]}
+
+
+# Up 6e from the north side the church's long side runs on the left, and its great tower stands on Masson, set back from 6e
+# by the right half of its front: the side shows only up to its roof (the tower on its picture is that same tower), and the
+# tower is a volume of its own whose east face runs back from the Masson front, behind the side wall.
+func _church_tower(cs: CrossStreet) -> void:
+	for w: Dictionary in cs.left_walls:
+		if w.get("art", "") == "six_sud_eglise":
+			w.crop = true
+			var front := _tex("masson_eglise")
+			# masson_eglise: the tower is centred at x 1800, 380 wide, the corner at 2870 (generator `church_cx`).
+			cs.towers.append({"side": -1.0, "back": (2870.0 - 1990.0) * HOUSE_SCALE, "d0": 0.0, "d1": 380.0 * HOUSE_SCALE / 650.0,
+				"tex": front, "rect": Rect2(1610.0, 0.0, 380.0, front.get_height() - 100.0)})
 
 
 # The shops' names on their sign bands, and the odd sign panel on a wall.
