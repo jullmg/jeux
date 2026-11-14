@@ -445,7 +445,8 @@ func _side_name() -> String:
 ## The avenues drawn as scenes, by the side of Masson we stand on: {gap: [[left script, its gap, direction], [right …]]}.
 ## Below Masson nothing is drawn yet, so the south side's views down the avenues stay generic.
 const REAL_AVENUES := {
-	"impair": {"rue_6e": [["res://scenes/main.gd", "rue_masson", 1], ["res://scenes/sixieme_est.gd", "rue_masson", -1]]},
+	"impair": {"rue_6e": [["res://scenes/main.gd", "rue_masson", 1], ["res://scenes/sixieme_est.gd", "rue_masson", -1]],
+},
 }
 
 
@@ -549,6 +550,9 @@ func _build_doors() -> void:
 			_masson_crossing(cs, right, "masson_%s_from_%s_%s" % [other, gap, b])
 		# From the north side, 6e Avenue runs up toward Dandurand: turn into it on either side of the avenue, the church's
 		# side (main.tscn) from the corner left of it, the other side (sixieme_est) from the corner right of it.
+		# Up 5e Avenue: its east side (cinquieme) from the corner right of it.
+		if side == "impair" and gap == "rue_5e":
+			_add_corner(cs, "res://scenes/cinquieme.tscn", "5e_from_masson", false, 1)
 		if side == "impair" and gap == "rue_6e":
 			_add_corner(cs, "res://scenes/main.tscn", "6e_from_masson", false, -1)
 			_add_corner(cs, "res://scenes/sixieme_est.tscn", "6e_est_from_masson", false, 1)

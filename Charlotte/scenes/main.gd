@@ -65,6 +65,10 @@ func _build_cross_streets() -> void:
 	masson.facing = "west"
 	masson.left_walls = _walls_along("res://scenes/masson.gd", "rue_6e", 1, "", {"side": "pair"})
 	masson.right_walls = _walls_along("res://scenes/masson.gd", "rue_6e", -1, "", {"side": "impair"})
+	# The church's great tower, flush with its front: down Masson it turns its east face toward us, over the corner block.
+	var front := _tex("masson_eglise")
+	masson.towers.append({"side": 1.0, "d": (2870.0 - 1990.0) * HOUSE_SCALE / 650.0, "back": 380.0 * HOUSE_SCALE,
+		"tex": front, "rect": Rect2(1610.0, 0.0, 380.0, front.get_height() - 560.0)})
 	var dandurand := _cross_street("rue_dandurand", "Rue Dandurand", 1.0)
 	dandurand.school = true
 	dandurand.guard = true

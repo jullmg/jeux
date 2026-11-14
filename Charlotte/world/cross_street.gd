@@ -613,6 +613,9 @@ func _open_lot(kind: String, front_x: float, side: float, d0: float, d1: float) 
 # A tower's side face running back from depth d0 to d1, `back` px out from the wall line, its picture taken from `rect` of
 # the tower's own front; its foot on the facade line, its top where the picture's top is.
 func _tower_face(t: Dictionary) -> void:
+	if t.has("d"):
+		_tower_end(t)
+		return
 	var tex: Texture2D = t.tex
 	var r: Rect2 = t.rect
 	var side: float = t.side
@@ -640,6 +643,34 @@ func _tower_face(t: Dictionary) -> void:
 		draw_polygon(PackedVector2Array([_at(Vector2(x, top), da), _at(Vector2(x, top), db),
 			_at(Vector2(x, bottom), db), _at(Vector2(x, bottom), da)]),
 			colors, PackedVector2Array([Vector2(ua, v0), Vector2(ub, v0), Vector2(ub, v1), Vector2(ua, v1)]), tex)
+
+
+# A tower's face square to the view (`d`: its depth), from the wall line out by `back` px: seen down a street that runs along
+# the tower's front, the side it turns toward us, standing over the lower buildings nearer to us.
+func _tower_end(t: Dictionary) -> void:
+	var tex: Texture2D = t.tex
+	var r: Rect2 = t.rect
+	var side: float = t.side
+	var line: float = x0 if side < 0.0 else x1
+	var out := line + side * float(t.back)
+	var top := FACADE_Y - (tex.get_height() - r.position.y) * StreetScene.HOUSE_SCALE
+	var bottom := FACADE_Y - (tex.get_height() - r.end.y) * StreetScene.HOUSE_SCALE
+	var d: float = t.d
+	var tint := Color.WHITE.lerp(HAZE, clampf(d / FAR * 1.4, 0.0, 0.6)).darkened(0.08)
+	var u0 := r.position.x / tex.get_width()
+	var u1 := r.end.x / tex.get_width()
+	var v0 := r.position.y / tex.get_height()
+	var v1 := r.end.y / tex.get_height()
+	var a := _at(Vector2(line, top), d)
+	var b := _at(Vector2(out, top), d)
+	var c := _at(Vector2(out, bottom), d)
+	var e := _at(Vector2(line, bottom), d)
+	var ua := u0 if side > 0.0 else u1
+	var ub := u1 if side > 0.0 else u0
+	draw_polygon(PackedVector2Array([a, b, c, e]), PackedColorArray([tint, tint, tint, tint]),
+		PackedVector2Array([Vector2(ua, v0), Vector2(ub, v0), Vector2(ub, v1), Vector2(ua, v1)]), tex)
+	# Its edge toward the street catches the light.
+	draw_line(a, e, Color(1, 1, 1, 0.25), maxf(1.0, 3.0 / (1.0 + d)))
 
 
 # A building's real facade (its street's SVG, `w.tex`) laid along the wall in perspective: cut into thin strips down

@@ -178,7 +178,12 @@ func _here() -> Dictionary:
 		"holt":
 			return {"at": Vector2(lerpf(WALK_E, WALK_W, f), WALK_N), "say": "Je suis ici !"}
 		"cinquieme":
-			return {"at": Vector2(WALK_W, lerpf(WALK_N, WALK_S, f)), "say": "Je suis ici !"}
+			# 5e Avenue, its east side: Holt on the left of the view, Dandurand, then the school's block down to Masson.
+			var dand3: float = scene.call("_dandurand_f") if scene.has_method("_dandurand_f") else 1.0
+			if f > dand3:
+				return {"at": Vector2(WALK_W, lerpf(DAND_Y + ST_W / 2.0 + 10.0, MASSON_Y - ST_W / 2.0 - 10.0, (f - dand3) / (1.0 - dand3))),
+					"say": "Je suis sur la 5e, vers Masson !"}
+			return {"at": Vector2(WALK_W, lerpf(WALK_N, WALK_S, f / dand3)), "say": "Je suis ici !"}
 		"dandurand":
 			return {"at": Vector2(lerpf(WALK_W, WALK_E, f), WALK_S), "say": "Je suis ici !"}
 		"ruelle":

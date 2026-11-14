@@ -218,6 +218,195 @@ const HOUSES := [
 		"bricks": ["#9C6B4E", "#8E6146", "#A87656", "#82573E", "#B07E5E"], "mortar": "#D2C6B6",
 		"parapet": "flat", "windows": [[100.0, 90.0], [290.0, 90.0]], "basement": [], "downspout": 440.0,
 	},
+	# ── 5e Avenue, the east side (her block's back on 5e), Holt (left) to Dandurand (right), from reference/streetview/5e-avenue/
+	# 5739…–5745… down to 5605…–5621… (and the walk 5e-avenue-massonholt): they replace the invented plexes at the same total widths,
+	# so the lanes and the saved positions don't move. Cars, bins, bikes and decorations in the pictures are left out.
+	# 5739–5745 at the Holt corner: a plain three-storey walk-up of tan brick, stone sills, a parged base, no outdoor stair; a
+	# stack of wooden balconies at its end by the lane (5739…, 5743…, 5735…).
+	{
+		"name": "cinq_5739", "kind": "walkup", "width": 1760.0, "floors": 3, "halloween": false,
+		"bricks": ["#A8805E", "#9C7454", "#B48A66", "#8E6A4C", "#B08664"], "mortar": "#D2C4B0",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "door": "#5E3A22", "door_dark": "#3E2414", "door_style": "panel",
+		"cols": [90.0, 320.0, 550.0, 780.0, 1010.0, 1240.0], "doors": [700.0, 1160.0], "wood_balconies": [1480.0, 1710.0],
+		"basement": [200.0, 900.0, 1350.0],
+	},
+	# 5727, orange-brown brick, black iron balcony, the stair curving down on the right (5727…).
+	{
+		"name": "cinq_5727", "width": 640.0, "halloween": false,
+		"bricks": ["#B5603F", "#A85536", "#C26B48", "#9C4D31", "#C77650"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"windows": [[82.3, 120.0], [484.6, 110.0]], "door_cx": 310.9,
+		"balcony": [228.6, 457.1], "porch": [228.6, 393.1], "stair": [Vector2(480.0, 336), Vector2(548.6, 380), Vector2(598.9, 520), Vector2(585.1, 696)], "fence": "black", "basement": [100.6],
+	},
+	# 5723, tan brick, black balcony, the stair on the left (5723…).
+	{
+		"name": "cinq_5723", "width": 640.0, "halloween": false,
+		"bricks": ["#B8946E", "#C4A07A", "#AA8862", "#CFAB86", "#B08C66"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"windows": [[82.3, 110.0], [457.1, 110.0]], "door_cx": 301.7,
+		"balcony": [182.9, 585.1], "porch": [210.3, 402.3], "stair": [Vector2(212.1, 336), Vector2(82.3, 380), Vector2(5.0, 520), Vector2(68.6, 696)], "fence": "black", "basement": [438.9],
+		"parapet": "corbel",
+	},
+	# 5711–5719, the three floors faced in pale grey stone under a little gable, black balconies, the stair on the left (5715…).
+	{
+		"name": "cinq_5715", "width": 760.0, "floors": 3, "halloween": false,
+		"bricks": ["#BDB2A0", "#C7BCAA", "#B0A592", "#CFC4B2", "#B8AD9B"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"windows": [[97.7, 110.0], [542.9, 110.0]], "door_cx": 358.3,
+		"balcony": [217.1, 694.9], "porch": [249.7, 477.7], "stair": [Vector2(251.9, 336), Vector2(97.7, 380), Vector2(5.4, 520), Vector2(81.4, 696)], "fence": "black", "basement": [521.1],
+		"pediment": true, "door_style": "double", "pilasters": [380.0],
+	},
+	# 5709, brown-red brick on two floors, the stair on the right (5709…).
+	{
+		"name": "cinq_5709", "width": 620.0, "halloween": false,
+		"bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"windows": [[79.7, 120.0], [469.4, 110.0]], "door_cx": 301.1,
+		"balcony": [221.4, 442.9], "porch": [221.4, 380.9], "stair": [Vector2(465.0, 336), Vector2(531.4, 380), Vector2(580.1, 520), Vector2(566.9, 696)], "fence": "black", "basement": [97.4],
+	},
+	# 5705, newer: brick below, a white upper floor (5705…).
+	{
+		"name": "cinq_5705", "kind": "modern", "width": 620.0, "door_x": 200.0, "halloween": false,
+		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
+		"lintel": "#D8D2C6", "lintel_dark": "#A39D93", "step": "#B08F6A", "step_dark": "#7E6446",
+		"windows": [[140.0, 100.0], [390.0, 100.0]], "ground_window": [390.0, 110.0], "door_cx": 200.0, "basement": [],
+	},
+	# 5699, brown-red brick, a wooden balcony, the stair on the right (5699…).
+	{
+		"name": "cinq_5699", "width": 660.0, "halloween": false,
+		"bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"windows": [[84.9, 120.0], [499.7, 110.0]], "door_cx": 320.6,
+		"balcony": [235.7, 471.4], "porch": [235.7, 405.4], "stair": [Vector2(495.0, 336), Vector2(565.7, 380), Vector2(617.6, 520), Vector2(603.4, 696)], "fence": "black", "basement": [103.7],
+		"metal": "#6B5442", "tread": "#8A5A3A", "tread_dark": "#5E3B24",
+	},
+	# 5691–5695, tan brick, its balcony behind a beige concrete balustrade, the stair on the left (5691…, 5695…).
+	{
+		"name": "cinq_5695", "width": 680.0, "halloween": false,
+		"bricks": ["#B8946E", "#C4A07A", "#AA8862", "#CFAB86", "#B08C66"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"windows": [[87.4, 110.0], [485.7, 110.0]], "door_cx": 320.6,
+		"balcony": [194.3, 621.7], "porch": [223.4, 427.4], "stair": [Vector2(225.4, 336), Vector2(87.4, 380), Vector2(5.0, 520), Vector2(72.9, 696)], "fence": "black", "basement": [466.3],
+		"metal": "#D8CFC0", "metal_light": true,
+	},
+	# 5679–5685, three floors of pale beige brick, white balconies stacked up the front, the white stair on the left (5679…, 5683…, 5685…).
+	{
+		"name": "cinq_5685", "width": 720.0, "floors": 3, "halloween": false,
+		"bricks": ["#D8C8A8", "#CFBF9E", "#E2D2B4", "#C8B898", "#DCCCAE"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"windows": [[84.9, 110.0], [471.4, 110.0]], "door_cx": 311.1,
+		"balcony": [188.6, 603.4], "porch": [216.9, 414.9], "stair": [Vector2(218.7, 336), Vector2(84.9, 380), Vector2(5.0, 520), Vector2(70.7, 696)], "basement": [452.6],
+		"metal": "#F5F5F2", "metal_light": true, "tread": "#C8C8C4", "tread_dark": "#8C8C88", "fence": "white",
+	},
+	# 5673, red brick, a red door, its balconies under metal awnings (5673…).
+	{
+		"name": "cinq_5673", "width": 640.0, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C", "#8E3E30", "#B05844", "#94422F"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat",
+		"windows": [[82.3, 120.0], [484.6, 110.0]], "door_cx": 310.9,
+		"balcony": [228.6, 457.1], "porch": [228.6, 393.1], "stair": [Vector2(480.0, 336), Vector2(548.6, 380), Vector2(598.9, 520), Vector2(585.1, 696)], "fence": "black", "basement": [100.6],
+		"door": "#B8303A", "door_dark": "#7A1E24", "awning": "#3F4347",
+	},
+	# 5665–5669, brown-red brick with creeper, the black stair on the right (5665…, 5669…).
+	{
+		"name": "cinq_5669", "width": 640.0, "halloween": false,
+		"bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"windows": [[82.3, 120.0], [484.6, 110.0]], "door_cx": 310.9,
+		"balcony": [228.6, 457.1], "porch": [228.6, 393.1], "stair": [Vector2(480.0, 336), Vector2(548.6, 380), Vector2(598.9, 520), Vector2(585.1, 696)], "fence": "black", "basement": [100.6],
+	},
+	# 5663, dark brown brick, black balconies, the stair curving down on the right (5663…).
+	{
+		"name": "cinq_5663", "width": 640.0, "halloween": false,
+		"bricks": ["#7A4A3A", "#6E4234", "#865243", "#5F392D", "#8E5A48"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"windows": [[82.3, 120.0], [484.6, 110.0]], "door_cx": 310.9,
+		"balcony": [228.6, 457.1], "porch": [228.6, 393.1], "stair": [Vector2(480.0, 336), Vector2(548.6, 380), Vector2(598.9, 520), Vector2(585.1, 696)], "fence": "black", "basement": [100.6],
+	},
+	# 5655, brown-red brick, the black stair on the left (5655…).
+	{
+		"name": "cinq_5655", "width": 640.0, "halloween": false,
+		"bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"windows": [[82.3, 110.0], [457.1, 110.0]], "door_cx": 301.7,
+		"balcony": [182.9, 585.1], "porch": [210.3, 402.3], "stair": [Vector2(212.1, 336), Vector2(82.3, 380), Vector2(5.0, 520), Vector2(68.6, 696)], "fence": "black", "basement": [438.9],
+	},
+	# 5645, dark brown brick, the black stair on the left, the gate to the driveway beside it (5645…).
+	{
+		"name": "cinq_5645", "width": 640.0, "halloween": false,
+		"bricks": ["#7A4A3A", "#6E4234", "#865243", "#5F392D", "#8E5A48"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"windows": [[82.3, 110.0], [457.1, 110.0]], "door_cx": 301.7,
+		"balcony": [182.9, 585.1], "porch": [210.3, 402.3], "stair": [Vector2(212.1, 336), Vector2(82.3, 380), Vector2(5.0, 520), Vector2(68.6, 696)], "fence": "black", "basement": [438.9],
+	},
+	# 5633–5637, orange-brown brick with creeper, a white balcony, the stair on the left (5633…, 5637…).
+	{
+		"name": "cinq_5637", "width": 660.0, "halloween": false,
+		"bricks": ["#B5603F", "#A85536", "#C26B48", "#9C4D31", "#C77650"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"windows": [[84.9, 110.0], [471.4, 110.0]], "door_cx": 311.1,
+		"balcony": [188.6, 603.4], "porch": [216.9, 414.9], "stair": [Vector2(218.7, 336), Vector2(84.9, 380), Vector2(5.0, 520), Vector2(70.7, 696)], "fence": "black", "basement": [452.6],
+		"metal": "#F5F5F2", "metal_light": true, "tread": "#C8C8C4", "tread_dark": "#8C8C88",
+	},
+	# 5625–5629, brown-red brick, white balconies, the stair on the right (5625…, 5629…).
+	{
+		"name": "cinq_5629", "width": 660.0, "halloween": false,
+		"bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#CFC2B4",
+		"lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "door": "#F2F0EA", "door_dark": "#B9B2A5",
+		"windows": [[84.9, 120.0], [499.7, 110.0]], "door_cx": 320.6,
+		"balcony": [235.7, 471.4], "porch": [235.7, 405.4], "stair": [Vector2(495.0, 336), Vector2(565.7, 380), Vector2(617.6, 520), Vector2(603.4, 696)], "basement": [103.7],
+		"metal": "#F5F5F2", "metal_light": true, "tread": "#C8C8C4", "tread_dark": "#8C8C88", "fence": "white",
+	},
+	# 5605–5621 at the Dandurand corner: the newer infill, orange-brown brick over a charcoal brick base with black garage doors,
+	# a white top storey set back (5605…, 5609…, 5617…, 5621…).
+	{
+		"name": "cinq_5605", "kind": "infill", "width": 1780.0, "floors": 3, "halloween": false,
+		"bricks": ["#B0704E", "#A66848", "#BA7856", "#9C6042", "#B47452"], "mortar": "#D8C8B8",
+		"cols": [120.0, 380.0, 900.0, 1160.0, 1460.0, 1660.0], "white_top": [[40.0, 700.0], [1100.0, 1750.0]],
+		"garages": [[200.0, 420.0], [1160.0, 420.0]], "doors": [760.0, 1000.0, 1660.0], "basement": [],
+	},
+	# ── 5e Avenue, the east side south of Dandurand: the block of the school and the church, Dandurand (left) to Masson (right),
+	# from the walk 5e-avenue-massonholt (right side, 4 m to 250 m from Masson).
+	# The school's side on 5e: red brick on three floors, red-framed windows, the grey stone base, a door near Dandurand.
+	{
+		"name": "cinq_ecole", "kind": "school_side", "width": 1400.0, "floors": 3, "top": 104.0,
+		"bricks": ["#8E3E2E", "#9A4636", "#843828", "#A44E3C", "#7E3426"], "mortar": "#B9A898",
+		"trim": "#ECE8E0", "trim_dark": "#A9A398", "lintel": "#D6D0C2", "lintel_dark": "#A39A8A",
+		"basement": [], "fence": "", "halloween": false,
+	},
+	# The schoolyard behind its chain-link fence.
+	{
+		"name": "cinq_cour", "kind": "masson_lot", "lot_style": "court", "width": 1500.0, "floors": 3, "halloween": false,
+		"bricks": ["#B4693E", "#A85E36", "#BE7446"], "mortar": "#D8C8B0",
+	},
+	# The white apartment block with its balconies, behind its planted fence (126…–157… m).
+	{
+		"name": "cinq_appartements", "kind": "apartments", "width": 1700.0, "floors": 4, "halloween": false,
+		"volumes": [[30.0, 520.0, "#E2E2DE"], [550.0, 320.0, "#C9CCCE"], [870.0, 800.0, "#E2E2DE"]],
+		"entrance": 600.0, "bricks": ["#9A4636", "#A84E3C"], "mortar": "#C9BBAC",
+	},
+	# The tall cedar hedge along the sidewalk, the apartments showing over it (85…–116… m).
+	{
+		"name": "cinq_haie", "kind": "masson_lot", "lot_style": "hedge", "width": 1500.0, "floors": 4, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C"], "mortar": "#C9BBAC",
+	},
+	# The parking lot behind the church: chain-link fence, the church's pale back wall with its red doors (45…–75… m).
+	{
+		"name": "cinq_stationnement", "kind": "masson_lot", "lot_style": "church_lot", "width": 1600.0, "floors": 4, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C"], "mortar": "#C9BBAC",
+	},
+	# The little red clapboard annex at the back of the presbytery (35…–45… m).
+	{
+		"name": "cinq_annexe", "kind": "masson_lot", "lot_style": "annex", "width": 500.0, "floors": 2, "halloween": false,
+		"bricks": ["#9A4636", "#A84E3C"], "mortar": "#C9BBAC",
+	},
+	# The presbytery's side on 5e: red brick on three floors, the copper band and buff friezes, junipers and the iron fence (10…–31… m).
+	{
+		"name": "cinq_presbytere", "kind": "presbytere", "width": 1300.0, "floors": 3, "halloween": false, "porch": false,
+		"bricks": ["#9A3E30", "#A8473A", "#8E382C", "#B04E3E", "#94402F"], "mortar": "#C9BBAC", "parapet": "flat",
+		"lintel": "#D8D2C6", "lintel_dark": "#9E968A", "lintel_style": "arch", "door_cx": 650.0,
+		"windows": [[110.0, 100.0], [330.0, 100.0], [550.0, 100.0], [770.0, 100.0], [990.0, 100.0]], "basement": [],
+	},
 	# Across 5e Avenue on Rue Dandurand.
 	{
 		"name": "dandurand_sud", "kind": "side_wall", "width": 580.0, "floors": 3,
@@ -1913,6 +2102,10 @@ func _svg() -> void:
 			_garages()
 		"modern":
 			_modern()
+		"walkup":
+			_walkup()
+		"infill":
+			_infill()
 		"school":
 			_school()
 		"school_side":
@@ -3105,6 +3298,85 @@ func _fence(gaps: Array) -> void:
 		for px in [a, b - 8]:
 			_rect(px, top - 4, 8, ground_y - top + 4, col, st)
 			_rect(px - 2, top - 8, 12, 5, col, st)
+
+
+# A plain walk-up of brick on `floors` floors with no outdoor stair (5e Avenue at Holt, 5739…–5745…): a grid of windows (`cols`:
+# their x, `win_w` wide) on every floor, stone sills and lintels, a flat parapet, the parged base; street doors at `doors` (x);
+# a stack of wooden balconies at `wood_balconies` [x0, x1], the end where the lane runs.
+func _walkup() -> void:
+	var top := _top()
+	_bricks(top, base_y)
+	_wall_shading(top)
+	_rect(X0 - 4, top - 14, X1 - X0 + 8, 16, k.lintel, _stroke(k.lintel_dark, 1.2))
+	_snow(X0 - 4, X1 - X0 + 8, top - 14)
+	var ww: float = k.get("win_w", 80.0)
+	for f in int(k.floors):
+		for wx: float in k.get("cols", []):
+			_window(wx, _win_y(f), ww, 130.0)
+	for dx: float in k.get("doors", []):
+		_door(dx, _door_top(0), _fb(0))
+		_rect(dx - 60, _fb(0), 120, 14, k.step, _stroke(k.step_dark, 1.2))
+	_foundation()
+	split = out.size()
+	var wb: Array = k.get("wood_balconies", [])
+	if not wb.is_empty():
+		for f in range(1, int(k.floors)):
+			var fy := _fb(f) + 8.0
+			_rect(wb[0], fy, wb[1] - wb[0], 12, "#8A6A48", _stroke("#5E4630", 1))
+			_rect(wb[0], fy - 70, wb[1] - wb[0], 8, "#9A7856", _stroke("#5E4630", 1))
+			var bx: float = wb[0] + 6.0
+			while bx < wb[1] - 4.0:
+				_rect(bx, fy - 64, 5, 64, "#8A6A48")
+				bx += 14.0
+			for px: float in [wb[0] + 4.0, wb[1] - 10.0]:
+				_rect(px, fy - 200, 7, 200, "#7A5A3C")
+		_snow(wb[0], wb[1] - wb[0], _fb(1) - 62.0)
+
+
+# A newer infill (5e Avenue at Dandurand, 5605…–5621…): orange-brown brick, a base of charcoal brick with black roll-up garage
+# doors (`garages`: [x, w]) and black doors (`doors`: x), tall plain windows with white frames (`cols`, per floor), and a white
+# top storey of panels set back with its big windows (`white_top`: [x0, x1] of each white box).
+func _infill() -> void:
+	var top := _top()
+	var base_top := _fb(0) - 230.0
+	# The top storey is the white one: brick only below it.
+	var white := _fb(int(k.floors) - 1) + 10.0
+	_bricks(white, base_top)
+	_wall_shading(white)
+	_rect(X0, base_top, X1 - X0, ground_y - base_top, "#3C3A3A")
+	var by := base_top + 12.0
+	while by < ground_y:
+		_rect(X0, by, X1 - X0, 1.5, "#2A2828")
+		by += 14.0
+	_rect(X0, top, X1 - X0, white - top, "#D8D6D0")
+	_rect(X0 - 4, top - 8, X1 - X0 + 8, 10, "#E8E6E0")
+	for f in range(1, int(k.floors) - 1):
+		for wx: float in k.get("cols", []):
+			var wy := _win_y(f) + 6.0
+			_rect(wx - 6, wy - 6, 72, 146, "#F2F0EA")
+			_rect(wx, wy, 60, 134, "url(#glass)")
+			_rect(wx - 8, wy + 138, 76, 8, "#D8D4CC")
+	# The white boxes stand forward of the grey band set back between them, their big windows framed in black; the
+	# shade they throw on the set-back parts keeps it from looking flat.
+	for wt: Array in k.get("white_top", []):
+		_rect(wt[0] + 14, top + 14, wt[1] - wt[0], white - top - 4, "#000000", 'opacity="0.18"')
+		_rect(wt[0], top, wt[1] - wt[0], white - top, "#F4F3EF", _stroke("#CFCBC2", 1.5))
+		_rect(wt[0], top, 10, white - top, "#FFFFFF", 'opacity="0.5"')
+		var gw := minf(260.0, wt[1] - wt[0] - 80.0)
+		_rect(wt[1] - 40 - gw, top + 50, gw, 140, "url(#glass)", _stroke("#2B2B2E", 4))
+		_rect(wt[0] + 40, top + 60, 90, 120, "url(#glass)", _stroke("#2B2B2E", 4))
+		_snow(wt[0], wt[1] - wt[0], top)
+	for g: Array in k.get("garages", []):
+		_rect(g[0], ground_y - 190, g[1], 190, "#1E1E20", _stroke("#0E0E0E", 2))
+		var gy := ground_y - 184.0
+		while gy < ground_y - 4.0:
+			_rect(g[0] + 4, gy, g[1] - 8, 2, "#3A3A3E")
+			gy += 12.0
+	for dx: float in k.get("doors", []):
+		_rect(dx - 34, ground_y - 200, 68, 200, "#141416", _stroke("#000000", 2))
+		_rect(dx - 26, ground_y - 190, 20, 150, "url(#glass)", 'opacity="0.5"')
+	if k.get("basement_window", 0.0) > 0.0:
+		_rect(k.basement_window, base_top - 40, 70, 28, "url(#glass)", _stroke("#5E5A54", 2))
 
 
 # Modern infill: brick ground floor with white checker band and quoins, white stucco upper floor.
@@ -6702,6 +6974,16 @@ func _presbytere() -> void:
 		lx += 28.0
 	_rect(X0 - 8, top - 44, X1 - X0 + 16, 8, "#4E7E66")
 	_snow(X0 - 8, X1 - X0 + 16, top - 44)
+	if not k.get("porch", true):
+		# Its side: the friezes and the copper band only, junipers and the fence along the sidewalk.
+		_zigzag_frieze(X0, X1, _fb(1) + 8.0, 27.0)
+		split = out.size()
+		var jx := X0 + 60.0
+		while jx < X1 - 40.0:
+			_shrub(jx, 44.0 + rng.randf_range(0.0, 10.0), "#3A6A44")
+			jx += 220.0
+		_iron_fence(X0, X1)
+		return
 	# The raised gable over the middle, curved, its cross in buff brick, a globe at each shoulder.
 	var gw := 170.0
 	_path("M%s %s V%s Q%s %s %s %s Q%s %s %s %s V%s Z" % [_n(cx - gw), _n(top - 40), _n(top - 60), _n(cx - gw * 0.6), _n(top - 130), _n(cx), _n(top - 132), _n(cx + gw * 0.6), _n(top - 130), _n(cx + gw), _n(top - 60), _n(top - 40)], k.bricks[0], _stroke(k.lintel_dark, 1.5))
@@ -6775,6 +7057,15 @@ func _masson_lot() -> void:
 			return
 		"park":
 			_park_lot()
+			return
+		"hedge":
+			_hedge_lot()
+			return
+		"church_lot":
+			_church_lot()
+			return
+		"annex":
+			_annex_lot()
 			return
 		"supermarket":
 			_supermarket_lot()
@@ -7140,6 +7431,71 @@ func _park_lot() -> void:
 	_rect(sx + 8, g - 220.0, 244, 200, "#CFE4EC", 'opacity="0.3"')
 
 
+# A tall clipped cedar hedge along the sidewalk, white apartments with their balconies showing over it, a spruce or two.
+func _hedge_lot() -> void:
+	var g := ground_y
+	_rect(X0 + 80, g - 820.0, X1 - X0 - 160, 620, "#E2E2DE", _stroke("#B9B9B4", 1.5))
+	var fy := g - 780.0
+	while fy < g - 260.0:
+		_rect(X0 + 100, fy + 60, X1 - X0 - 200, 8, "#9EA2A6")
+		var bx := X0 + 120.0
+		while bx < X1 - 160.0:
+			_rect(bx, fy, 90, 56, "url(#glass)")
+			bx += 180.0
+		fy += 130.0
+	_rect(X0, g - 900.0, X1 - X0, 700, "#C9D6E2", 'opacity="0.25"')
+	for sx: float in [X0 + 200.0, X1 - 260.0]:
+		_cedar(sx, g - 560.0)
+	split = out.size()
+	var hedge: String = {"winter": "#3E5A44", "spring": "#3E7A44", "summer": "#356E3C"}.get(season, "#3E6A40")
+	_rect(X0, g - 270.0, X1 - X0, 270, hedge)
+	var hx := X0 + 10.0
+	while hx < X1 - 10.0:
+		_shrub(hx, 34.0 + rng.randf_range(0.0, 8.0), hedge)
+		hx += 40.0
+	_rect(X0, g - 300.0, X1 - X0, 40, hedge)
+	if season == "winter":
+		_rect(X0, g - 304.0, X1 - X0, 14, "#F2F5F8")
+
+
+# The church's back over its parking lot: the pale stone wall with tall windows and red doors at its foot, asphalt, a chain-link
+# fence along the sidewalk with a gate.
+func _church_lot() -> void:
+	var g := ground_y
+	var back := g - 200.0
+	_stone_courses(X0, g - 900.0, X1, back, "#D2CEC4", 34.0, 70.0)
+	_rect(X0, g - 900.0, X1 - X0, back - g + 900.0, "#C9D6E2", 'opacity="0.15"')
+	_rect(X0 - 6, g - 916.0, X1 - X0 + 12, 18, "#E8E4DA", _stroke("#8A867E", 1))
+	var wx := X0 + 120.0
+	while wx < X1 - 120.0:
+		_lancet(wx, g - 820.0, g - 560.0, 44.0, "#E8E4DA", CHURCH_GLASS)
+		_rect(wx - 30, back - 110.0, 60, 110, "#A8302A", _stroke("#5E1A16", 2))
+		wx += 300.0
+	_rect(X0, back, X1 - X0, g - back, "#7A7874")
+	var lx := X0 + 40.0
+	while lx < X1:
+		_path("M%s %s L%s %s" % [_n(lx), _n(back + 10), _n(lx - 40), _n(g - 20)], "none", _stroke("#E8E4DA", 3) + ' opacity="0.6"')
+		lx += 160.0
+	_snow(X0, X1 - X0, back + 2.0)
+	split = out.size()
+	_chain_fence([[X0 + (X1 - X0) * 0.3, X0 + (X1 - X0) * 0.3 + 140.0]])
+
+
+# A little one-and-a-half storey annex in red clapboard, a white door and a window, a shingled roof.
+func _annex_lot() -> void:
+	var g := ground_y
+	var top := g - 420.0
+	_path("M%s %s L%s %s L%s %s Z" % [_n(X0 - 10), _n(top), _n((X0 + X1) / 2.0), _n(top - 120), _n(X1 + 10), _n(top)], "#4A4E54", _stroke("#33363A", 1.5))
+	_rect(X0, top, X1 - X0, g - top, "#B0383A")
+	var cy := top + 14.0
+	while cy < g:
+		_rect(X0, cy, X1 - X0, 2, "#7E2426", 'opacity="0.6"')
+		cy += 18.0
+	_rect(X0 + 60, g - 230, 90, 230, "#F2F0EA", _stroke("#9A968E", 1.5))
+	_rect(X1 - 190, top + 90, 120, 130, "url(#glass)", _stroke("#F2F0EA", 6))
+	_snow(X0 - 10, X1 - X0 + 20, top - 4.0)
+
+
 # 2539–2571, between Molson and 1re: the Maxi supermarket set far back behind its parking lot, a low white box with its sign, and
 # the red hedge along the sidewalk with lamp posts in it (2539…, 2543…, 2551…, 2563…).
 func _supermarket_lot() -> void:
@@ -7231,6 +7587,9 @@ func _church_side() -> void:
 	# Behind everything at the Masson end, the front's great tower rising over the roof (it stands on Masson, set back from 6e).
 	if k.has("tower_x"):
 		_se_tower(X0 + 330.0, 190.0, g - 100.0, "#D9D5CB", "#E8E4DA")
+		# It stands some 25 m back from this wall: a veil of distance over it, and its far side in shade.
+		_rect(X0 + 130.0, g - 1520.0, 400, 1420, "#C9D6E2", 'opacity="0.22"')
+		_rect(X0 + 470.0, g - 1520.0, 60, 1420, "#1A1428", 'opacity="0.16"')
 	# The nave's slate roof sloping back above the parapet, dark, its ridge far behind.
 	if k.has("tower_x"):
 		_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(X0), _n(top - 10), _n(X0 + 40), _n(top - 150), _n(X1 - 40), _n(top - 150), _n(X1), _n(top - 10)], "#4A4E54", _stroke("#33363A", 1.5))
@@ -7239,6 +7598,7 @@ func _church_side() -> void:
 			_rect(X0 + 30, ry, X1 - X0 - 60, 2, "#3A3E44", 'opacity="0.7"')
 			ry += 16.0
 		_rect(X0 + 40, top - 154, X1 - X0 - 80, 6, "#6E747A")
+		_rect(X0 + 130.0, top - 190.0, 400, 36, "#1A1428", 'opacity="0.18"')
 		if season == "winter":
 			_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(X0 + 20), _n(top - 80), _n(X0 + 40), _n(top - 150), _n(X1 - 40), _n(top - 150), _n(X1 - 20), _n(top - 80)], "#F2F5F8", 'opacity="0.9"')
 	_stone_courses(X0, top, X1, g - 6.0, stone, 34.0, 70.0)
