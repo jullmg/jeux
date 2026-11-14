@@ -7050,29 +7050,63 @@ func _gas_station() -> void:
 # 2560, between 1re and Molson: the park, its lawn and big trees, a low pavilion of grey brick with a flat roof, a bench, the
 # bus shelter at the curb (2560…).
 func _park_lot() -> void:
+	# The park between 1re and Molson (2560…): open sky, a deep lawn running back to a far line of trees, the condos far off
+	# over them (small, hazy), the long low pavilion set well back with its red hedge, big trees near the sidewalk, a path.
 	var g := ground_y
-	_back_row(X0, X1, g - 560.0, g - 200.0)
-	var lawn := {"winter": "#E8ECEE", "spring": "#7AAE58", "summer": "#5E9A44"}
-	_rect(X0, g - 200.0, X1 - X0, 200, lawn.get(season, "#8EA052"))
-	_snow(X0, X1 - X0, g - 200.0)
-	# The pavilion.
-	var px0 := X0 + (X1 - X0) * 0.4
-	_rect(px0, g - 330.0, 520, 150, "#8E8A84", _stroke("#5E5A54", 1.5))
-	_rect(px0 - 20, g - 346.0, 560, 18, "#4A5A4A")
-	for dx in 3:
-		_rect(px0 + 60 + dx * 150.0, g - 290.0, 70, 110, "#3A4A3E")
-	split = out.size()
+	var far := g - 330.0
 	var autumn := ["#E3A33A", "#D9682B", "#C9B03A", "#B5442E", "#E8B54A"]
-	var tx := X0 + 160.0
+	# The condos far away, a few blocks with their balconies, then the haze over them.
+	for c: Array in [[0.06, 340.0, 230.0, "#D8D6D0"], [0.62, 300.0, 260.0, "#C9C6BE"], [0.8, 420.0, 300.0, "#E2DFD8"]]:
+		var bx: float = X0 + (X1 - X0) * c[0]
+		var top: float = far - c[2]
+		_rect(bx, top, c[1], c[2], c[3])
+		var fy := top + 22.0
+		while fy < far - 20.0:
+			_rect(bx + 10, fy, c[1] - 20, 6, "#8E9AA4")
+			_rect(bx + 10, fy + 6, c[1] - 20, 18, "#6E7E8A", 'opacity="0.5"')
+			fy += 40.0
+	_rect(X0, far - 320.0, X1 - X0, 330.0, "#C9D6E2", 'opacity="0.45"')
+	# The far edge of the park: a line of trees across, hazy.
+	var hx := X0 + 30.0
+	while hx < X1:
+		var tone := _canopy(autumn[rng.randi_range(0, autumn.size() - 1)])
+		_shrub(hx, 70.0 + rng.randf_range(0.0, 30.0), "#8E8478" if season == "winter" else tone)
+		hx += 90.0
+	_rect(X0, far - 110.0, X1 - X0, 120.0, "#C9D6E2", 'opacity="0.35"')
+	# The lawn, paler far off, and a path of stone dust curving across it.
+	var lawn: String = {"winter": "#E8ECEE", "spring": "#7AAE58", "summer": "#5E9A44"}.get(season, "#8EA052")
+	_rect(X0, far, X1 - X0, g - far, lawn)
+	_rect(X0, far, X1 - X0, 60, "#FFFFFF", 'opacity="0.18"')
+	_path("M%s %s C%s %s %s %s %s %s L%s %s C%s %s %s %s %s %s Z" % [_n(X0 + (X1 - X0) * 0.18), _n(g), _n(X0 + (X1 - X0) * 0.26), _n(g - 120), _n(X0 + (X1 - X0) * 0.45), _n(far + 50), _n(X0 + (X1 - X0) * 0.5), _n(far + 30), _n(X0 + (X1 - X0) * 0.52), _n(far + 34), _n(X0 + (X1 - X0) * 0.47), _n(far + 60), _n(X0 + (X1 - X0) * 0.3), _n(g - 110), _n(X0 + (X1 - X0) * 0.25), _n(g)], "#D8CBB0" if season != "winter" else "#DDE3EA")
+	_snow(X0, X1 - X0, far)
+	# The pavilion, long and low, set back: grey stone, a flat roof with its green fascia, green doors; the red hedge before it.
+	var px0 := X0 + (X1 - X0) * 0.55
+	var pw := 700.0
+	_rect(px0, far - 40.0, pw, 120, "#A8A49C", _stroke("#7E7A72", 1.5))
+	_rect(px0 - 14, far - 54.0, pw + 28, 16, "#3E6A4E")
+	_snow(px0 - 14, pw + 28, far - 54.0)
+	for dx in 4:
+		_rect(px0 + 70 + dx * 170.0, far - 6.0, 56, 86, "#3E6A4E", _stroke("#2A4A36", 1))
+	var hedge: String = {"winter": "#6A5A4A", "spring": "#4E8A44", "summer": "#3E7A3A"}.get(season, "#A8442E")
+	var rx := px0 - 120.0
+	while rx < px0 + pw + 120.0:
+		_shrub(rx, 34.0, hedge)
+		rx += 46.0
+	split = out.size()
+	# Big trees near the sidewalk, their trunks clear of the path.
+	var tx := X0 + 170.0
 	var i := 0
-	while tx < X1 - 120.0:
-		if absf(tx - (px0 + 260.0)) > 340.0:
-			_fine_tree(Vector2(tx, g - 40.0), g - 420.0, -PI * (0.42 + 0.08 * float(i % 3)), 0.9, autumn)
-		tx += 420.0
+	while tx < X1 - 150.0:
+		_fine_tree(Vector2(tx + rng.randf_range(-60.0, 60.0), g - 50.0), g - 400.0 - rng.randf_range(0.0, 80.0), -PI * (0.42 + 0.08 * float(i % 3)), 1.15 + rng.randf_range(0.0, 0.3), autumn)
+		tx += 560.0
 		i += 1
-	# A bench, a low iron fence along the sidewalk, and the bus shelter.
-	_rect(X0 + 220, g - 52, 120, 8, "#6A5A3E")
-	_rect(X0 + 220, g - 72, 120, 6, "#6A5A3E")
+	# Benches facing the street, a low iron fence along the sidewalk, and the bus shelter.
+	for bx: float in [X0 + 420.0, X0 + (X1 - X0) * 0.62]:
+		_rect(bx, g - 62, 130, 9, "#7A5A3A", _stroke("#4E3A26", 1))
+		_rect(bx, g - 86, 130, 7, "#7A5A3A", _stroke("#4E3A26", 1))
+		for lx: float in [bx + 10.0, bx + 112.0]:
+			_rect(lx, g - 86, 8, 86, "#2A2A2A")
+		_snow(bx, 130, g - 86)
 	var fx := X0
 	while fx < X1:
 		_rect(fx, g - 46, 3, 46, "#2A2A2A")
