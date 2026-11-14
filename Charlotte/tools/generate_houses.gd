@@ -6230,6 +6230,7 @@ func _commerce() -> void:
 				_rect(sx0 - 40, _win_y(f) + k.get("win_dy", 0.0) - 22, last[0] + last[1] - sx0 + 80, k.get("win_h", 160.0) + 30, "#000000", 'opacity="0.1"')
 			for w in k.windows:
 				_window(w[0], _win_y(f) + k.get("win_dy", 0.0), w[1], k.get("win_h", 160.0))
+				_window_life(w[0], _win_y(f) + k.get("win_dy", 0.0), w[1], k.get("win_h", 160.0), f)
 				if k.get("juliets", false):
 					_juliet(w[0], w[1], _win_y(f) + 160.0)
 		# Balconies set into the wall (`loggias`: [x0, x1] bays), each floor a dark recess with its glass door and a glass rail,
@@ -6469,7 +6470,144 @@ func _shopfront(shop: Dictionary, top: float) -> void:
 		_gooseneck(lerpf(x0, x1, (i + 0.5) / lamps), top - 4.0)
 	if shop.get("crates", false):
 		_fruit_crates(x0 + 24, x1 - 24)
+	_shop_life(shop, x0, x1, gx0, gx1, glass_top, kick, dx, dw)
 	_door_wreath(dx, glass_top, glass_top + 60)
+
+
+# A shopfront's depth and its small signs of life (Julien: never flat, and not every shop alike). The glass sits back in its
+# frame: the sign band and the left jamb throw their shade on it (light from the upper left), the door is set back in a darker
+# recess over its threshold, and the piers each side catch the light on their left edge. Then two or three things from a shop's
+# everyday: the OUVERT card, the hours on the door, a pot of plants by the door, a chalkboard, a string of little lights along the
+# top of the glass, lettering on the window, a bistro table and its chairs before a café or a restaurant. Its own random numbers,
+# the same draws in every season (only what shows changes), so nothing else on the street moves.
+func _shop_life(shop: Dictionary, x0: float, x1: float, gx0: float, gx1: float, glass_top: float, kick: float, dx: float, dw: float) -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = absi(hash(k.name)) % 100003 + int(x0) * 13
+	var dark: bool = shop.get("dark", false)
+	var winter := season == "winter"
+	# Depth.
+	_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(gx0), _n(glass_top), _n(gx1), _n(glass_top), _n(gx1 - 10), _n(glass_top + 34), _n(gx0 + 10), _n(glass_top + 34)], "#0E0A10", 'opacity="0.28"')
+	_rect(gx0, glass_top, 14, kick - glass_top, "#0E0A10", 'opacity="0.22"')
+	_rect(dx - dw / 2.0 - 4, glass_top - 2, dw + 8, ground_y - glass_top - 4, "#000000", 'opacity="0.18"')
+	_rect(dx - dw / 2.0 - 6, ground_y - 12, dw + 12, 8, "#9A958C", _stroke("#6E6A64", 1))
+	_rect(x0, glass_top - 12, 5, ground_y - glass_top + 6, "#FFFFFF", 'opacity="0.14"')
+	_rect(x1 - 7, glass_top - 12, 7, ground_y - glass_top + 6, "#000000", 'opacity="0.22"')
+	# Life.
+	var inside: String = shop.get("inside", "goods")
+	var picks := [r.randf(), r.randf(), r.randf(), r.randf(), r.randf(), r.randf(), r.randf()]
+	var side := -1.0 if r.randf() < 0.5 else 1.0
+	var pane_x := dx + side * (dw / 2.0 + 40.0)
+	if picks[0] < 0.55 and not dark:
+		# The OUVERT card hung in the window: red, white letters as strokes.
+		var ox := clampf(pane_x - 30.0, gx0 + 8.0, gx1 - 70.0)
+		var oy := glass_top + 50.0
+		_rect(ox + 28, oy - 14, 2, 14, "#3A3A3A")
+		_rect(ox, oy, 60, 24, "#D9342B", _stroke("#8E1E18", 1.2) + ' rx="4"')
+		for i in 5:
+			_rect(ox + 7 + i * 10, oy + 8, 6, 8, "#FFFFFF", 'opacity="0.9"')
+	if picks[1] < 0.6:
+		# The hours on the door's glass.
+		_rect(dx - 12, glass_top + 40, 24, 30, "#F4F1EA", 'opacity="0.85"')
+		for i in 4:
+			_rect(dx - 8, glass_top + 46 + i * 6, 16, 2, "#5A5A5A", 'opacity="0.7"')
+	if picks[2] < 0.35:
+		# Lettering on the glass, white vinyl: two lines of strokes across the top of the window.
+		var lx := clampf(dx - side * (dw / 2.0 + 150.0), gx0 + 20.0, gx1 - 180.0)
+		for row in 2:
+			var cx := lx + float(row) * 20.0
+			for i in 9 - row * 3:
+				_rect(cx + i * 15, glass_top + 70 + row * 22, 10, 12 - row * 3, "#FFFFFF", 'opacity="0.75"')
+	if picks[3] < 0.3 and not dark:
+		# A string of little lights along the top of the glass.
+		var bx := gx0 + 10.0
+		var i := 0
+		while bx < gx1 - 10.0:
+			var by := glass_top + 40.0 + sin(float(i) * 0.9) * 4.0
+			_circle(bx, by, 3.2, ["#FFD86A", "#FF9E5E", "#FFF2B0"][i % 3])
+			_circle(bx, by, 7, "#FFD86A", 'opacity="0.18"')
+			bx += 26.0
+			i += 1
+	var px := dx - side * (dw / 2.0 + 30.0)
+	if picks[4] < 0.45:
+		# A pot of plants by the door.
+		if px > x0 + 30.0 and px < x1 - 30.0:
+			_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(px - 20), _n(ground_y - 52), _n(px + 20), _n(ground_y - 52), _n(px + 15), _n(ground_y - 6), _n(px - 15), _n(ground_y - 6)], ["#B5603F", "#3A3A3A", "#E8E4DA"][r.randi_range(0, 2)], _stroke("#5E3A26", 1))
+			for j in 7:
+				var a := -PI / 2.0 + (float(j) - 3.0) * 0.32
+				var tip := Vector2(px, ground_y - 52) + Vector2(cos(a), sin(a)) * r.randf_range(30.0, 52.0)
+				if not winter:
+					_plant_leaf(tip, 22.0, rad_to_deg(a) + 90.0, ["#3E8A4E", "#2E6E3E", "#5E9A44"][j % 3])
+			if winter:
+				_rect(px - 18, ground_y - 58, 36, 8, "#F2F5F8")
+	elif picks[4] < 0.75 and (inside == "cafe" or inside == "restaurant" or inside == "bakery" or picks[5] < 0.3):
+		# A chalkboard on its easel.
+		if px > x0 + 40.0 and px < x1 - 40.0:
+			_path("M%s %s L%s %s L%s %s L%s %s Z" % [_n(px - 26), _n(ground_y - 6), _n(px - 18), _n(ground_y - 96), _n(px + 18), _n(ground_y - 96), _n(px + 26), _n(ground_y - 6)], "#8A6A48", _stroke("#5E4630", 1.2))
+			_rect(px - 16, ground_y - 90, 32, 70, "#2B302C")
+			for i in 4:
+				_rect(px - 11, ground_y - 82 + i * 15, 22 - (i % 2) * 8, 3, ["#F4F1EA", "#FFD23F", "#F4F1EA", "#F2A7B4"][i], 'opacity="0.85"')
+	if (inside == "cafe" or inside == "restaurant") and picks[6] < 0.7 and not winter:
+		# A bistro table and its two chairs out front.
+		var tx := clampf(dx + side * (dw / 2.0 + 110.0), x0 + 50.0, x1 - 50.0)
+		_rect(tx - 2, ground_y - 62, 4, 56, "#2A2A2A")
+		_path("M%s %s A%s %s 0 0 1 %s %s Z" % [_n(tx - 22), _n(ground_y - 62), _n(22), _n(5), _n(tx + 22), _n(ground_y - 62)], "#2A2A2A")
+		_rect(tx - 24, ground_y - 64, 48, 4, "#3A3A3A")
+		for cs: float in [-1.0, 1.0]:
+			var chx := tx + cs * 34.0
+			_rect(chx - 10, ground_y - 40, 20, 4, "#2A2A2A")
+			_rect(chx + cs * 8 - 1.5, ground_y - 80, 3, 74, "#2A2A2A")
+			_rect(chx - cs * 8 - 1.5, ground_y - 40, 3, 34, "#2A2A2A")
+
+
+# An upper window's life (Julien: not every window alike): curtains, a blind half down, a plant on the sill, a window box in
+# flower, an air conditioner under it, or nothing at all. Its own random numbers.
+func _window_life(x: float, y: float, w: float, h: float, floor_i: int) -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = absi(hash(k.name)) % 100003 + int(x) * 7 + floor_i * 131
+	var pick := r.randf()
+	var tone: String = ["#F3E9D8", "#E8D8C0", "#D9E4EC", "#F2D4C8", "#E4E8D2"][r.randi_range(0, 4)]
+	var gx := x + 10.0
+	var gw := w - 20.0
+	var gy := y + 10.0
+	var gh := h - 20.0
+	if pick < 0.2:
+		for sd: float in [0.0, 1.0]:
+			var cx := gx + sd * gw
+			var dir := 1.0 if sd < 0.5 else -1.0
+			_path("M%s %s L%s %s Q%s %s %s %s L%s %s Z" % [_n(cx), _n(gy), _n(cx + dir * gw * 0.28), _n(gy), _n(cx + dir * gw * 0.12), _n(gy + gh * 0.5), _n(cx + dir * gw * 0.2), _n(gy + gh), _n(cx), _n(gy + gh)], tone, 'opacity="0.9"')
+	elif pick < 0.38:
+		var bh := gh * r.randf_range(0.25, 0.55)
+		_rect(gx, gy, gw, bh, tone, 'opacity="0.92"')
+		var ly := gy + 6.0
+		while ly < gy + bh:
+			_rect(gx, ly, gw, 1.2, "#000000", 'opacity="0.1"')
+			ly += 7.0
+		_rect(gx, gy + bh - 3, gw, 3, "#B9B2A5")
+	elif pick < 0.52:
+		var px := gx + gw * r.randf_range(0.25, 0.75)
+		_rect(px - 9, y + h - 24, 18, 14, "#B5603F")
+		if season != "winter":
+			for j in 5:
+				_plant_leaf(Vector2(px + (j - 2) * 5.0, y + h - 26), 14.0, (j - 2) * 25.0, ["#3E8A4E", "#5E9A44"][j % 2])
+	elif pick < 0.62:
+		_rect(x - 4, y + h + 6, w + 8, 16, "#6E4A2E", _stroke("#4A2E1A", 1))
+		if season == "summer" or season == "spring" or season == "autumn":
+			var fx := x
+			var j := 0
+			while fx < x + w:
+				_plant_leaf(Vector2(fx + 6, y + h + 4), 12.0, -20.0 + (j % 3) * 20.0, "#3E7A3A")
+				if season != "autumn" or j % 2 == 0:
+					_circle(fx + 8, y + h, 4.5, ["#E85FA0", "#F2C230", "#E04F5F", "#FFFFFF"][j % 4])
+				fx += 14.0
+				j += 1
+		else:
+			_rect(x - 4, y + h + 2, w + 8, 5, "#F2F5F8")
+	elif pick < 0.7:
+		_rect(x + w * 0.3, y + h + 6, w * 0.4, 36, "#D8D6D0", _stroke("#9A968E", 1))
+		var vy := y + h + 12.0
+		while vy < y + h + 38.0:
+			_rect(x + w * 0.3 + 6, vy, w * 0.4 - 12, 2, "#8E8A82")
+			vy += 6.0
 
 
 # What a shop window shows of the shop, by kind: "goods" (shelves of tins, bottles and boxes: a dépanneur, a pharmacy), "cafe",
