@@ -541,14 +541,16 @@ func _walls(walls: Array, front_x: float, side: float) -> void:
 			_:
 				var top: float = w.top
 				var col: Color = w.color
-				_wall_quad(front_x, top, FACADE_Y, d0, d1, col)
 				if w.has("tex"):
-					_textured_wall(front_x, w, d0, d1)
+					# Its own picture only: a flat fill to the picture's full height showed as a block of colour wherever the
+					# facade is lower than its picture (the church's side beside its tower). The glancing shade is in the tint.
+					_textured_wall(front_x, w, d0, d1, side)
 				else:
+					_wall_quad(front_x, top, FACADE_Y, d0, d1, col)
 					_bricks(front_x, top, d0, d1, col)
-				# Seen at a glancing angle: a darker shade, the further from the sun the darker.
-				_wall_quad(front_x, top, FACADE_Y, d0, d1, Color(0.1, 0.04, 0.06, 0.18 if side < 0.0 else 0.3))
-				_wall_quad(front_x, top, top + 14.0, d0, d1, col.darkened(0.35))
+					# Seen at a glancing angle: a darker shade, the further from the sun the darker.
+					_wall_quad(front_x, top, FACADE_Y, d0, d1, Color(0.1, 0.04, 0.06, 0.18 if side < 0.0 else 0.3))
+					_wall_quad(front_x, top, top + 14.0, d0, d1, col.darkened(0.35))
 				_wall_quad(front_x, top - 6.0, top + 2.0, d0, d1, col.lightened(0.2))
 				# Where one building ends and the next begins.
 				draw_line(_at(Vector2(front_x, top), d0), _at(Vector2(front_x, FACADE_Y), d0), col.darkened(0.5), maxf(1.0, 2.5 / (1.0 + d0)))
@@ -559,7 +561,7 @@ func _walls(walls: Array, front_x: float, side: float) -> void:
 
 # A building's real facade (its street's SVG, `w.tex`) laid along the wall in perspective: cut into thin strips down
 # the depth so the mapping follows it; the facade's bottom on the facade line, as on its own street; hazier further.
-func _textured_wall(front_x: float, w: Dictionary, d0: float, d1: float) -> void:
+func _textured_wall(front_x: float, w: Dictionary, d0: float, d1: float, side := 1.0) -> void:
 	var tex: Texture2D = w.tex
 	var tw := float(tex.get_width())
 	var th := float(tex.get_height())
@@ -571,7 +573,7 @@ func _textured_wall(front_x: float, w: Dictionary, d0: float, d1: float) -> void
 		u0 = u1
 		u1 = t
 	var strips := clampi(int((d1 - d0) * 40.0) + 4, 4, 24)
-	var tint := Color.WHITE.lerp(HAZE, clampf(d0 / FAR * 1.4, 0.0, 0.65))
+	var tint := Color.WHITE.lerp(HAZE, clampf(d0 / FAR * 1.4, 0.0, 0.65)).darkened(0.16 if side < 0.0 else 0.27)
 	var colors := PackedColorArray([tint, tint, tint, tint])
 	for i in strips:
 		var ta := float(i) / strips

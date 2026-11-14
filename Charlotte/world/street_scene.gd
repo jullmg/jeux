@@ -821,7 +821,7 @@ func _walls_along(script_path: String, from_gap: String, direction: int, ours :=
 			continue
 		var tex := _tex(art)
 		d += (tex.get_width() - 2.0 * MARGIN) * HOUSE_SCALE / 650.0
-		var wall := {"to": d, "top": HOUSE_BASE_Y - (tex.get_height() - 40.0) * HOUSE_SCALE, "kind": _wall_kind(art), "color": _wall_color(tex)}
+		var wall := {"to": d, "top": HOUSE_BASE_Y - (tex.get_height() - _roof_line(tex)) * HOUSE_SCALE, "kind": _wall_kind(art), "color": _wall_color(tex)}
 		if wall.kind != "gap":
 			# Its real facade, laid along the wall in perspective; going back along that street's layout, its right
 			# edge is the near end.
@@ -841,6 +841,32 @@ func _walls_along(script_path: String, from_gap: String, direction: int, ours :=
 		walls.append({"to": d + 0.5, "kind": "cross"})
 	walls.append({"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": last.lerp(Color("#B5603F"), 0.5)})
 	return walls
+
+
+## How far down its picture a facade's roof line usually lies (the picture's height above it is a tower, a sign or nothing):
+## the median, across the picture, of the first opaque row. The end walls behind it are drawn up to there, not to the top.
+static var _roof_lines := {}
+
+
+static func _roof_line(tex: Texture2D) -> float:
+	if _roof_lines.has(tex):
+		return _roof_lines[tex]
+	var img := tex.get_image()
+	var line := 40.0
+	if img:
+		if img.is_compressed():
+			img.decompress()
+		var tops: Array[int] = []
+		for i in 24:
+			var x := int((i + 0.5) / 24.0 * img.get_width())
+			var y := 0
+			while y < img.get_height() and img.get_pixel(x, y).a < 0.5:
+				y += 4
+			tops.append(y)
+		tops.sort()
+		line = maxf(float(tops[tops.size() / 2]), 40.0)
+	_roof_lines[tex] = line
+	return line
 
 
 func _wall_kind(art: String) -> String:

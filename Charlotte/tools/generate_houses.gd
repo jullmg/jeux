@@ -643,7 +643,7 @@ const HOUSES := [
 	},
 	{
 		"name": "masson_eglise", "kind": "church", "width": 2900.0, "floors": 4, "halloween": false,
-		"stone": "#C9C7C0", "church_cx": 1250.0,
+		"stone": "#C9C7C0", "church_cx": 1800.0,
 	},
 	# Across 6e: 2901's side, red brick over its grey stone ground floor.
 	{
@@ -6508,10 +6508,12 @@ func _church() -> void:
 	var belfry_top := g - 955.0
 	var spire_top := g - 1010.0
 	var aisle_top := g - 420.0
-	# Behind the grounds, across the yards: the plexes of the avenue beyond, a little hazy with the distance.
-	_back_row(X0, X1, g - 600.0, g - 100.0)
-	# The grounds, in front of everything and round the church.
-	_lawn(X0, X1, g - 110.0)
+	# Behind the lawn on the presbytery's side, across the yards: the plexes of the avenue beyond, a little hazy. On the 6e
+	# side the church comes almost to the corner (2863…): past its right aisle only a little paved square, and the avenue.
+	var right_start := cx + half + aisle
+	_back_row(X0, cx, g - 600.0, g - 100.0)
+	_lawn(X0, cx + half + 110.0, g - 110.0)
+	_pavers(cx + half + 110.0, X1, g - 110.0)
 	# The aisles, low, under their slate roofs.
 	for side: float in [-1.0, 1.0]:
 		var a0: float = cx + side * half
@@ -6607,17 +6609,44 @@ func _church() -> void:
 		_rect(lx - 8, floor_y - 294, 16, 6, "#1A1A1A")
 	# The grounds either side: cedars along the left, a big tree on the right, the iron fence along the sidewalk.
 	var left_end := cx - half - aisle
-	var right_start := cx + half + aisle
 	var cedar := X0 + 50.0
 	while cedar < left_end - 30.0:
 		_cedar(cedar, g - 260.0 - rng.randf_range(0.0, 60.0))
 		cedar += 70.0
-	_fine_tree(Vector2(lerpf(right_start, X1, 0.3), g - 70.0), g - 300.0, -PI * 0.62, 1.35, ["#E3A33A", "#D9682B", "#C9562E", "#E8B54A", "#D9A23A"])
-	_fine_tree(Vector2(lerpf(right_start, X1, 0.78), g - 66.0), g - 280.0, -PI * 0.4, 1.25, ["#D9A23A", "#C9562E", "#E3A33A", "#B5442E"])
-	for i in 4:
-		_shrub(right_start + 60.0 + i * 120.0, 30.0 + rng.randf_range(0.0, 10.0), "#3E6A3A")
+	# The square at the corner: one young tree, picnic tables, a bench; it is open to the sidewalk, no fence.
+	_fine_tree(Vector2(lerpf(right_start, X1, 0.45), g - 60.0), g - 330.0, -PI * 0.55, 1.2, ["#E3A33A", "#D9682B", "#C9562E", "#E8B54A", "#D9A23A"])
+	_picnic_table(lerpf(right_start, X1, 0.22), g - 40.0)
+	_picnic_table(lerpf(right_start, X1, 0.75), g - 30.0)
 	_iron_fence(X0, s0 - 72.0)
-	_iron_fence(s1 + 72.0, X1)
+
+
+# Grey concrete pavers, from x0 to x1, from y0 down to the sidewalk.
+func _pavers(x0: float, x1: float, y0: float) -> void:
+	_rect(x0, y0, x1 - x0, ground_y - y0, "#B4B0A8")
+	var row := 0
+	var py := y0
+	while py < ground_y:
+		var px := x0 + (0.0 if row % 2 == 0 else -24.0)
+		while px < x1:
+			_rect(maxf(px, x0), py, minf(48.0, x1 - maxf(px, x0)), 1.5, "#8E8A82")
+			_rect(maxf(px, x0), py, 1.5, 18.0, "#8E8A82")
+			px += 48.0
+		py += 18.0
+		row += 1
+	if season == "winter":
+		_rect(x0, y0, x1 - x0, ground_y - y0, "#F2F5F8", 'opacity="0.85"')
+	_rect(x0, y0, x1 - x0, 4, "#000000", 'opacity="0.1"')
+
+
+# A wooden picnic table seen from the front, its foot at y.
+func _picnic_table(x: float, y: float) -> void:
+	var wood := "#9A6A3E"
+	_rect(x - 70, y - 58, 140, 9, wood, _stroke("#5E3E22", 1))
+	_rect(x - 82, y - 30, 164, 7, wood, _stroke("#5E3E22", 1))
+	for side: float in [-1.0, 1.0]:
+		_path("M%s %s L%s %s" % [_n(x + side * 30), _n(y - 50), _n(x + side * 56), _n(y)], "none", _stroke("#6E4A2A", 6))
+		_path("M%s %s L%s %s" % [_n(x + side * 30), _n(y - 50), _n(x + side * 4), _n(y)], "none", _stroke("#6E4A2A", 6))
+	_snow(x - 70, 140, y - 58)
 
 
 # The presbytery beside it, from the close-ups of 2851… (AteR4eKT, usCf6EmL): red brick on three floors, buff brick laid in
