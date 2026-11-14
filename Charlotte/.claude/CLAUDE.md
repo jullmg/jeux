@@ -360,6 +360,14 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   glass — dropped ceiling, fluorescent tubes, shelves, blue packs — the security grid over the lower two thirds, the three posters
   taped along the bottom, the street in the pane, a projecting sill), the meter on its board with its mast and the service cable
   (`_depanneur_fittings`), and the Dandurand balcony poking round the corner with its green corrugated awning (`_depanneur_corner`).
+- `scenes/dollarama.gd` (the Dollarama, Rue Masson 2836 south side by 5e; its door is `masson.gd _build_shop_doors`): a big bright
+  store of SIX aisles (Julien). The front of the store (`FRONT`: glass door, carts, baskets, two checkouts and the cashier in green,
+  the store's logo) then each aisle's stocked end (`DollarArt.endcap`) and its mouth running back in perspective
+  (`DollarArt.aisle_mouth`) under a green sign with its number in a yellow disc (`_aisle_sign`). Click a mouth or ↑ to go in: each
+  aisle is its own area (`_aisle_area`) with one long gondola of its department (`DollarArt.gondola`: fête, cuisine, entretien,
+  bonbons et collations, jouets et école, saison by `Season.current`), "SORTIE" at both ends, the near gondola as the blurred
+  foreground; clicking the gondola buys one of its things (`BUYS`, at most 5 $; candy, chocolate and chips go to her stash).
+  `world/dollar_art.gd` draws it all (`_product` kinds). `--x=` in an aisle's range starts there (screenshots).
 - Shop walls get advertising posters, never house picture frames: `ShopArt.ad_poster(kind)` (`AD_POSTERS`: coffee, ice cream, slush, hot dogs, cold drinks), hung with `Shop._ad(kind, x, bottom, scale)` (title label over the strip).
 - `tools/shop_objects.tscn` is the catalogue of every `ShopArt` object, twelve to a page, to judge their drawing: `Godot --path . --screen 1 res://tools/shop_objects.tscn -- --screenshot=/path/p.png --page=0` (pages 0–5; wait for `RenderingServer.frame_post_draw` before capturing in a tool scene, or the shot comes out transparent).
 - More shop objects in `ShopArt` (shopping cart, old cash register, spinner rack, produce crates, flower buckets, gumball machine,

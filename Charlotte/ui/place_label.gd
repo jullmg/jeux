@@ -18,6 +18,7 @@ const NAMES := {
 	"ruelle_holt": "Ruelle près de Holt, entre la 5e et la 6e Avenue",
 	"depanneur": "Dépanneur Xin-Xin, rue Dandurand",
 	"ohbon": "Dépanneur Oh Bon!, rue Holt",
+	"dollarama": "Dollarama, rue Masson",
 }
 
 var _plate: PanelContainer

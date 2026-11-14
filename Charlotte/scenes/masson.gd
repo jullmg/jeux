@@ -537,6 +537,7 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 # Over Masson at every avenue, to the other side of the street at the same corner: the crosswalk is painted on the corner of
 # the block to the right of the avenue, and leads from that stretch of sidewalk to the same block across the street.
 func _build_doors() -> void:
+	_build_shop_doors()
 	var other := "pair" if side == "impair" else "impair"
 	for cs in _cross_streets:
 		var i := _starts.find(cs.x0)
@@ -557,6 +558,21 @@ func _build_doors() -> void:
 		if side == "impair" and gap == "rue_6e":
 			_add_corner(cs, "res://scenes/main.tscn", "6e_from_masson", false, -1)
 			_add_corner(cs, "res://scenes/sixieme_est.tscn", "6e_est_from_masson", false, 1)
+
+
+## Shops she can go into: the Dollarama (2836, its glass door at x 1150 of the facade, the shop's floor at the canvas's foot).
+func _build_shop_doors() -> void:
+	var i := layout.find("masson_2836")
+	if i < 0:
+		return
+	var tex := _tex("masson_2836")
+	var origin := _house_origin(i)
+	var area := Rect2(origin + Vector2(1110.0, tex.get_height() - 240.0) * HOUSE_SCALE, Vector2(80.0, 236.0) * HOUSE_SCALE)
+	add_child(DoorSpot.make(area, func():
+		_control.enabled = false
+		Transition.street_x = area.get_center().x
+		Sfx.play("bell")
+		Transition.change_scene(self, "res://scenes/dollarama.tscn"), area.get_center().x))
 
 
 ## The crosswalk over Masson at one corner of an avenue (`right`: the corner right of it), from that stretch of sidewalk.

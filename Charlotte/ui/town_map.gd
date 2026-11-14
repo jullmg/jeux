@@ -205,6 +205,9 @@ func _here() -> Dictionary:
 			return {"at": Vector2(SHOP_X, DAND_Y - 30.0), "say": "Je suis chez Xin-Xin !"}
 		"ohbon":
 			return {"at": Vector2(SHOP_X, HOLT_Y + 50.0), "say": "Je suis chez Oh Bon !"}
+		"dollarama":
+			# On Masson's south side, just west of 5e.
+			return {"at": Vector2(FIVE_X - AVE_W / 2.0 - 40.0, MASSON_Y + ST_W / 2.0 + 30.0), "say": "Je suis au Dollarama !"}
 	if key == "masson_impair" or key == "masson_pair":
 		# Rue Masson, D'Iberville to Saint-Michel: between the two crossings she stands between, as far along as she is (the scene's
 		# blocks aren't all drawn at the same scale, so each block maps onto its own stretch of the map).
