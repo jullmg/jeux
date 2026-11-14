@@ -6378,15 +6378,15 @@ func _shopfront(shop: Dictionary, top: float) -> void:
 	# Its door (`door_style`): a glass door and its push bar, two glass doors, or a wooden door with a pane.
 	var dx: float = shop.get("door", (x0 + x1) / 2.0)
 	var door_style: String = shop.get("door_style", "glass")
-	var dw := 76.0 if door_style != "double" else 140.0
+	var dw := 96.0 if door_style != "double" else 150.0
 	_rect(dx - dw / 2.0, glass_top - 2, dw, ground_y - glass_top - 4, frame)
 	match door_style:
 		"wood":
 			var wood: String = shop.get("door_color", "#6E4226")
-			_rect(dx - 32, glass_top + 4, 64, ground_y - glass_top - 16, wood, _stroke("#3E2414", 1.5))
-			_rect(dx - 22, glass_top + 14, 44, 90, "url(#warm)" if not shop.get("dark", false) else "#33404A", 'opacity="0.8"')
-			_rect(dx - 22, glass_top + 120, 44, ground_y - glass_top - 150, "none", _stroke("#3E2414", 1.5))
-			_circle(dx + 22, glass_top + 112, 3, "#C9A23A")
+			_rect(dx - 42, glass_top + 4, 84, ground_y - glass_top - 16, wood, _stroke("#3E2414", 1.5))
+			_rect(dx - 30, glass_top + 14, 60, 100, "url(#warm)" if not shop.get("dark", false) else "#33404A", 'opacity="0.8"')
+			_rect(dx - 30, glass_top + 130, 60, ground_y - glass_top - 160, "none", _stroke("#3E2414", 1.5))
+			_circle(dx + 30, glass_top + 122, 3, "#C9A23A")
 		"double":
 			for side: float in [-1.0, 1.0]:
 				var cx := dx + side * 34.0
@@ -6395,10 +6395,10 @@ func _shopfront(shop: Dictionary, top: float) -> void:
 					_rect(cx - 30, glass_top + 4, 60, ground_y - glass_top - 16, "url(#warm)", 'opacity="0.55"')
 				_rect(cx - 4 * side - 2, glass_top + 90, 4, 50, "#C9C5BC")
 		_:
-			_rect(dx - 32, glass_top + 4, 64, ground_y - glass_top - 16, "#33404A")
+			_rect(dx - 42, glass_top + 4, 84, ground_y - glass_top - 16, "#33404A")
 			if not shop.get("dark", false):
-				_rect(dx - 32, glass_top + 4, 64, ground_y - glass_top - 16, "url(#warm)", 'opacity="0.55"')
-			_rect(dx - 28, glass_top + 100, 56, 5, "#C9C5BC")
+				_rect(dx - 42, glass_top + 4, 84, ground_y - glass_top - 16, "url(#warm)", 'opacity="0.55"')
+			_rect(dx - 38, glass_top + 120, 76, 5, "#C9C5BC")
 	# The panes: mullions down the window (`panes` of them, or one every 150), and across the top the transom (`transom`): a bar,
 	# a row of small panes, or nothing.
 	var n: int = shop.get("panes", maxi(int((gx1 - gx0) / 150.0), 1))
@@ -6548,15 +6548,71 @@ func _shop_life(shop: Dictionary, x0: float, x1: float, gx0: float, gx1: float, 
 				_rect(px - 11, ground_y - 82 + i * 15, 22 - (i % 2) * 8, 3, ["#F4F1EA", "#FFD23F", "#F4F1EA", "#F2A7B4"][i], 'opacity="0.85"')
 	if (inside == "cafe" or inside == "restaurant") and picks[6] < 0.7 and not winter:
 		# A bistro table and its two chairs out front.
-		var tx := clampf(dx + side * (dw / 2.0 + 110.0), x0 + 50.0, x1 - 50.0)
-		_rect(tx - 2, ground_y - 62, 4, 56, "#2A2A2A")
-		_path("M%s %s A%s %s 0 0 1 %s %s Z" % [_n(tx - 22), _n(ground_y - 62), _n(22), _n(5), _n(tx + 22), _n(ground_y - 62)], "#2A2A2A")
-		_rect(tx - 24, ground_y - 64, 48, 4, "#3A3A3A")
-		for cs: float in [-1.0, 1.0]:
-			var chx := tx + cs * 34.0
-			_rect(chx - 10, ground_y - 40, 20, 4, "#2A2A2A")
-			_rect(chx + cs * 8 - 1.5, ground_y - 80, 3, 74, "#2A2A2A")
-			_rect(chx - cs * 8 - 1.5, ground_y - 40, 3, 34, "#2A2A2A")
+		var tx := clampf(dx + side * (dw / 2.0 + 120.0), x0 + 60.0, x1 - 60.0)
+		_bistro_table(tx, ground_y - 4.0, false, 0, 1.4)
+		_bistro_chair(tx - 46.0, ground_y - 4.0, 1.0, "metal", "#2A2A2A", 1.4)
+		_bistro_chair(tx + 46.0, ground_y - 4.0, -1.0, "metal", "#2A2A2A", 1.4)
+
+
+# A café chair seen from the side, at x on the floor at floor_y, its seat toward `facing` (1: the table is to its right).
+# "bentwood": a rounded back of bent wood with spindles, a thick seat with its cushion, the legs splayed a little;
+# "upholstered": a padded back and seat, buttoned; "metal": a slim black frame and a slatted seat. Sized `k`.
+func _bistro_chair(x: float, floor_y: float, facing: float, style: String, tone: String, k := 1.0) -> void:
+	var seat_y := floor_y - 26.0 * k
+	var back := x - facing * 11.0 * k
+	var front := x + facing * 11.0 * k
+	var dark := "#" + Color(tone).darkened(0.35).to_html(false)
+	var lit := "#" + Color(tone).lightened(0.25).to_html(false)
+	# Legs: the back one carrying on up into the back, the front one splayed forward.
+	_path("M%s %s L%s %s" % [_n(back), _n(seat_y), _n(back - facing * 3.0 * k), _n(floor_y)], "none", _stroke(dark, 2.6 * k) + ' stroke-linecap="round"')
+	_path("M%s %s L%s %s" % [_n(front), _n(seat_y), _n(front + facing * 3.0 * k), _n(floor_y)], "none", _stroke(dark, 2.6 * k) + ' stroke-linecap="round"')
+	_path("M%s %s L%s %s" % [_n(back - facing * 1.5 * k), _n(floor_y - 9.0 * k), _n(front + facing * 1.5 * k), _n(floor_y - 9.0 * k)], "none", _stroke(dark, 1.4 * k))
+	match style:
+		"upholstered":
+			_path("M%s %s Q%s %s %s %s L%s %s Z" % [_n(back - facing * 2.0 * k), _n(seat_y), _n(back - facing * 6.0 * k), _n(seat_y - 30.0 * k), _n(back + facing * 2.0 * k), _n(seat_y - 34.0 * k), _n(back + facing * 4.0 * k), _n(seat_y)], tone, _stroke(dark, 1.2))
+			_circle(back, seat_y - 18.0 * k, 1.4 * k, dark)
+			_rect(minf(back, front) - 2.0 * k, seat_y - 6.0 * k, 26.0 * k, 7.0 * k, tone, _stroke(dark, 1.2) + ' rx="%s"' % _n(3.0 * k))
+			_rect(minf(back, front), seat_y - 6.0 * k, 22.0 * k, 2.0 * k, lit, 'opacity="0.6"')
+		"metal":
+			_path("M%s %s Q%s %s %s %s" % [_n(back), _n(seat_y), _n(back - facing * 4.0 * k), _n(seat_y - 22.0 * k), _n(back + facing * 1.0 * k), _n(seat_y - 30.0 * k)], "none", _stroke(dark, 2.2 * k) + ' stroke-linecap="round"')
+			for i in 3:
+				_path("M%s %s L%s %s" % [_n(back - facing * 1.5 * k), _n(seat_y - 8.0 * k - i * 7.0 * k), _n(back + facing * 0.5 * k), _n(seat_y - 8.0 * k - i * 7.0 * k)], "none", _stroke(dark, 1.4 * k))
+			_rect(minf(back, front) - 1.0 * k, seat_y - 3.0 * k, 24.0 * k, 3.0 * k, tone, _stroke(dark, 0.8))
+			_rect(minf(back, front) - 1.0 * k, seat_y - 3.0 * k, 24.0 * k, 1.0 * k, lit, 'opacity="0.5"')
+		_:
+			# Bentwood: the back a loop of bent wood with two spindles, the seat a thick round with its cushion.
+			_path("M%s %s Q%s %s %s %s Q%s %s %s %s" % [_n(back), _n(seat_y), _n(back - facing * 6.0 * k), _n(seat_y - 20.0 * k), _n(back - facing * 1.0 * k), _n(seat_y - 32.0 * k), _n(back + facing * 5.0 * k), _n(seat_y - 30.0 * k), _n(back + facing * 3.0 * k), _n(seat_y - 14.0 * k)], "none", _stroke(tone, 2.6 * k) + ' stroke-linecap="round"')
+			for i in 2:
+				_path("M%s %s L%s %s" % [_n(back + facing * (0.5 + i * 2.0) * k), _n(seat_y), _n(back + facing * (0.5 + i * 2.0) * k), _n(seat_y - 26.0 * k)], "none", _stroke(dark, 1.2 * k))
+			_rect(minf(back, front) - 2.0 * k, seat_y - 4.0 * k, 26.0 * k, 5.0 * k, tone, _stroke(dark, 1) + ' rx="%s"' % _n(2.0 * k))
+			_rect(minf(back, front), seat_y - 8.0 * k, 22.0 * k, 4.0 * k, "#C8302A" if tone != "#7A2E2A" else "#E8D8B0", 'rx="%s"' % _n(2.0 * k))
+			_rect(minf(back, front) - 2.0 * k, seat_y - 4.0 * k, 26.0 * k, 1.5 * k, lit, 'opacity="0.6"')
+
+
+# A café table seen from the side: a round top with its edge (a cloth falling over it in a restaurant), the pedestal and
+# its foot, and on it (`what`) a candle, a little vase of flowers or two cups. Sized `k`.
+func _bistro_table(x: float, floor_y: float, cloth: bool, what: int, k := 1.0) -> void:
+	var top_y := floor_y - 40.0 * k
+	_rect(x - 2.0 * k, top_y, 4.0 * k, 40.0 * k, "#2A2A2A")
+	_path("M%s %s Q%s %s %s %s Z" % [_n(x - 12.0 * k), _n(floor_y), _n(x), _n(floor_y - 7.0 * k), _n(x + 12.0 * k), _n(floor_y)], "#2A2A2A")
+	if cloth:
+		_path("M%s %s L%s %s L%s %s Q%s %s %s %s Z" % [_n(x - 22.0 * k), _n(top_y), _n(x + 22.0 * k), _n(top_y), _n(x + 24.0 * k), _n(top_y + 16.0 * k), _n(x), _n(top_y + 20.0 * k), _n(x - 24.0 * k), _n(top_y + 16.0 * k)], "#F4F1EA", _stroke("#C9C3B8", 1))
+		_path("M%s %s L%s %s" % [_n(x - 8.0 * k), _n(top_y + 2.0 * k), _n(x - 9.0 * k), _n(top_y + 18.0 * k)], "none", _stroke("#D8D2C6", 1))
+	else:
+		_path("M%s %s A%s %s 0 0 1 %s %s A%s %s 0 0 1 %s %s Z" % [_n(x - 22.0 * k), _n(top_y), _n(22.0 * k), _n(4.0 * k), _n(x + 22.0 * k), _n(top_y), _n(22.0 * k), _n(4.0 * k), _n(x - 22.0 * k), _n(top_y)], "#B5803E", _stroke("#6E4A26", 1))
+		_rect(x - 22.0 * k, top_y, 44.0 * k, 3.0 * k, "#6E4A26")
+	match what:
+		0:
+			_rect(x - 2.0 * k, top_y - 10.0 * k, 4.0 * k, 10.0 * k, "#F4F1EA")
+			_circle(x, top_y - 12.0 * k, 2.0 * k, "#FFD86A")
+			_circle(x, top_y - 12.0 * k, 6.0 * k, "#FFD86A", 'opacity="0.25"')
+		1:
+			_rect(x - 3.0 * k, top_y - 9.0 * k, 6.0 * k, 9.0 * k, "#BFE3F7", 'opacity="0.8"')
+			for i in 3:
+				_circle(x - 4.0 * k + i * 4.0 * k, top_y - 12.0 * k - (i % 2) * 2.0 * k, 2.2 * k, ["#E85FA0", "#F2C230", "#E04F5F"][i])
+		_:
+			for cs: float in [-1.0, 1.0]:
+				_rect(x + cs * 10.0 * k - 3.0 * k, top_y - 6.0 * k, 6.0 * k, 6.0 * k, "#F4F1EA", _stroke("#C9C3B8", 0.8))
 
 
 # An upper window's life (Julien: not every window alike): curtains, a blind half down, a plant on the sill, a window box in
@@ -6652,15 +6708,15 @@ func _shop_inside(kind: String, x: float, y: float, w: float, h: float, seed_val
 				_rect(x + 12, y + 50, 60, 44, "#2A2E2C", _stroke("#8A6A4A", 3))
 				for l in 4:
 					_rect(x + 18, y + 58 + l * 9, r.randf_range(24.0, 46.0), 2, "#E8E4DA")
-			var tx := x + 30.0
-			while tx < x + w - 30.0:
-				var cloth := "#F2F0EA" if kind == "restaurant" else "#3A2A20"
-				_rect(tx - 18, floor_y - 34, 36, 5, cloth)
-				_rect(tx - 2, floor_y - 30, 4, 30, "#2A2A2A")
-				for cs: float in [-1.0, 1.0]:
-					_rect(tx + cs * 26 - 3, floor_y - 44, 4, 44, "#3A2A20")
-					_rect(tx + cs * 26 - 8, floor_y - 22, 14, 4, "#3A2A20")
-				tx += r.randf_range(90.0, 130.0)
+			# The shop's own chairs: bentwood, upholstered or black metal, and their colour, the same all through.
+			var style: String = ["bentwood", "upholstered", "metal"][r.randi_range(0, 2)]
+			var tone: String = ["#6E4226", "#8A5A34", "#2E2A28", "#7A2E2A", "#2E4A3A"][r.randi_range(0, 4)]
+			var tx := x + 40.0
+			while tx < x + w - 40.0:
+				_bistro_table(tx, floor_y, kind == "restaurant", r.randi_range(0, 2))
+				_bistro_chair(tx - 30.0, floor_y, 1.0, style, tone)
+				_bistro_chair(tx + 30.0, floor_y, -1.0, style, tone)
+				tx += r.randf_range(110.0, 150.0)
 		"clothes":
 			_rect(x + 10, y + 46, w - 20, 3, "#8E8A82")
 			var cx := x + 20.0
@@ -6859,13 +6915,27 @@ func _juliet(x: float, w: float, y: float) -> void:
 
 
 # The narrow door to the flats upstairs, between the shops: a dark frame, a glass door, its little lamp and number.
+# A door of real proportions (Julien: not too tall, not too narrow): the leaf about 2.6 times as tall as it is wide, a glazed
+# transom over it, a stone frame and sill; the wall stays above it.
 func _res_door(x: float, top: float) -> void:
-	_rect(x - 36, top - 6, 72, ground_y - top + 6, "#C9C3B6", _stroke("#8E887E", 1.5))
-	_rect(x - 28, top + 2, 56, ground_y - top - 8, "#2B2B2E")
-	_rect(x - 22, top + 10, 44, (ground_y - top) * 0.55, "url(#glass)")
-	_rect(x - 22, top + 10, 44, 6, "url(#drop)")
-	_circle(x + 16, top + (ground_y - top) * 0.62, 2.5, "#C9A227")
-	_wall_lantern(x + 46, top + 20)
+	var leaf_h := 250.0
+	var leaf_w := 92.0
+	var frame_top := maxf(top, ground_y - leaf_h - 70.0)
+	_rect(x - leaf_w / 2.0 - 12, frame_top, leaf_w + 24, ground_y - frame_top, "#C9C3B6", _stroke("#8E887E", 1.5))
+	_rect(x - leaf_w / 2.0 - 12, frame_top, leaf_w + 24, 6, "#FFFFFF", 'opacity="0.3"')
+	# The transom, then the leaf: dark, a tall pane in its upper part, the handle, a kick plate.
+	var tr_top := frame_top + 10.0
+	var leaf_top := ground_y - leaf_h
+	_rect(x - leaf_w / 2.0, tr_top, leaf_w, leaf_top - tr_top - 6, "url(#glass)", _stroke("#2B2B2E", 3))
+	_rect(x - leaf_w / 2.0, leaf_top, leaf_w, leaf_h - 6, "#2B2B2E")
+	_rect(x - leaf_w / 2.0 + 12, leaf_top + 14, leaf_w - 24, leaf_h * 0.5, "url(#glass)")
+	_rect(x - leaf_w / 2.0 + 12, leaf_top + 14, leaf_w - 24, 6, "url(#drop)")
+	_rect(x - leaf_w / 2.0 + 8, ground_y - 46, leaf_w - 16, 30, "#3A3A3E", _stroke("#1A1A1C", 1))
+	_rect(x + leaf_w / 2.0 - 16, leaf_top + leaf_h * 0.58, 5, 22, "#C9A227")
+	# The step and the shadow of the recess.
+	_rect(x - leaf_w / 2.0 - 16, ground_y - 8, leaf_w + 32, 8, "#A9A39A", _stroke("#7E7A72", 1))
+	_rect(x - leaf_w / 2.0, leaf_top, 8, leaf_h - 6, "#000000", 'opacity="0.3"')
+	_wall_lantern(x + leaf_w / 2.0 + 26, frame_top + 24)
 
 
 # Ashlar: big blocks of grey stone in courses, each block a slightly different grey, its joints shaded under the light.
