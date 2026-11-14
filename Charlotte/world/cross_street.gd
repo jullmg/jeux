@@ -553,7 +553,8 @@ func _walls(walls: Array, front_x: float, side: float) -> void:
 					# Seen at a glancing angle: a darker shade, the further from the sun the darker.
 					_wall_quad(front_x, top, FACADE_Y, d0, d1, Color(0.1, 0.04, 0.06, 0.18 if side < 0.0 else 0.3))
 					_wall_quad(front_x, top, top + 14.0, d0, d1, col.darkened(0.35))
-				_wall_quad(front_x, top - 6.0, top + 2.0, d0, d1, col.lightened(0.2))
+				if not w.has("tex"):
+					_wall_quad(front_x, top - 6.0, top + 2.0, d0, d1, col.lightened(0.2))
 				# Where one building ends and the next begins.
 				draw_line(_at(Vector2(front_x, top), d0), _at(Vector2(front_x, FACADE_Y), d0), col.darkened(0.5), maxf(1.0, 2.5 / (1.0 + d0)))
 				if not w.has("tex"):
