@@ -570,7 +570,7 @@ func _walls(walls: Array, front_x: float, side: float) -> void:
 				# Where one building ends and the next begins.
 				draw_line(_at(Vector2(front_x, top), d0), _at(Vector2(front_x, FACADE_Y), d0), col.darkened(0.5), maxf(1.0, 2.5 / (1.0 + d0)))
 				if not w.has("tex"):
-					_wall_details(w, front_x, top, d0, d1)
+					_wall_details(w, front_x, top, d0, d1, side)
 		d0 = d1
 
 
@@ -749,7 +749,7 @@ func _end_wall(front_x: float, side: float, top: float, bottom: float, d: float,
 	draw_line(_at(Vector2(front_x, top), d), _at(Vector2(front_x, bottom), d), col.darkened(0.5), maxf(1.0, 2.0 / (1.0 + d)))
 
 
-func _wall_details(w: Dictionary, front_x: float, top: float, d0: float, d1: float) -> void:
+func _wall_details(w: Dictionary, front_x: float, top: float, d0: float, d1: float, side := 1.0) -> void:
 	var glass := Color("#6F8DA2")
 	var trim := Color("#ECE8E0")
 	var floors := maxi(1, int(round((FACADE_Y - top) / 150.0)))
@@ -800,30 +800,126 @@ func _wall_details(w: Dictionary, front_x: float, top: float, d0: float, d1: flo
 			_wall_quad(front_x, top - 6.0, top + 18.0, d0, d1, Color("#4E8C7A"))
 			_wall_quad(front_x, FACADE_Y - 60.0, FACADE_Y, d0, d1, Color("#C9C2B4"))
 		_:
-			# Each building (about 0.55 deep): a door at the top of its steps, iron balconies on the upper floors, and
-			# the outdoor stair from the first balcony down to the sidewalk.
+			# A row of plexes (each about 0.55 deep), drawn as volumes and not painted on the wall (Julien: the buildings down the
+			# cross streets looked flat): each its own shade of brick and its party wall; the windows set into the wall; the cornice
+			# jutting out along the top; then, far to near so the nearer ones cover the farther, what juts out toward the street —
+			# the iron balconies on their slabs with the shade they throw, the outdoor stair coming down in front, the door's steps.
+			var out := -side
+			var winter := Season.is_winter()
 			var count := maxi(1, int(round(span / 0.55)))
+			var bs := span / count
+			var tints := [Color(1, 1, 1, 0.07), Color(0, 0, 0, 0.07), Color(1, 0.85, 0.7, 0.07), Color(0, 0, 0, 0.0), Color(0.25, 0.1, 0.05, 0.1)]
 			for b in count:
-				var b0 := d0 + span * b / count
-				var bs := span / count
+				var b0 := d0 + bs * b
 				if b0 > DETAIL:
 					break
-				for f in range(1, floors):
-					var yb := FACADE_Y - 150.0 * f + 8.0
-					_wall_quad(front_x, yb, yb + 7.0, b0 + bs * 0.05, b0 + bs * 0.62, Color("#D8D4CC"))
-					_wall_quad(front_x, yb - 32.0, yb - 28.0, b0 + bs * 0.05, b0 + bs * 0.62, Color("#1F1F1F"))
-					for k2 in 7:
-						var bd := b0 + bs * lerpf(0.07, 0.6, k2 / 6.0)
-						draw_line(_at(Vector2(front_x, yb - 30.0), bd), _at(Vector2(front_x, yb), bd), Color("#1F1F1F"), 1.0)
-				_wall_quad(front_x, FACADE_Y - 116.0, FACADE_Y - 22.0, b0 + bs * 0.4, b0 + bs * 0.5, Color("#5E3A26"))
-				_wall_quad(front_x, FACADE_Y - 22.0, FACADE_Y, b0 + bs * 0.36, b0 + bs * 0.54, Color("#A8A196"))
-				if floors > 1:
-					var s0 := _at(Vector2(front_x, FACADE_Y - 142.0), b0 + bs * 0.62)
-					var s1 := _at(Vector2(front_x, FACADE_Y), b0 + bs * 0.95)
-					draw_line(s0, s1, Color("#1F1F1F"), maxf(1.0, 3.0 / (1.0 + b0)))
-					draw_line(s0 + Vector2(0, -30.0) / (1.0 + b0), s1 + Vector2(0, -30.0) / (1.0 + b0), Color("#1F1F1F"), 1.0)
+				_wall_quad(front_x, top, FACADE_Y, b0, b0 + bs, tints[(int(d0 * 97.0) + b * 3) % tints.size()])
+				if b > 0:
+					draw_line(_at(Vector2(front_x, top), b0), _at(Vector2(front_x, FACADE_Y), b0), Color(0, 0, 0, 0.28), maxf(1.0, 2.5 / (1.0 + b0)))
 			for f in floors:
 				_windows(front_x, top + 40.0 + f * 150.0, d0, d1, maxi(2, int(span * 5.0)), glass, trim)
+			_cornice(front_x, out, top, d0, minf(d1, DETAIL * 1.5), w.color, winter)
+			var bi := count - 1
+			while bi >= 0:
+				var b0 := d0 + bs * bi
+				bi -= 1
+				if b0 > DETAIL:
+					continue
+				for f in range(1, floors):
+					_balcony(front_x, out, FACADE_Y - 150.0 * f + 8.0, b0 + bs * 0.05, b0 + bs * 0.62, winter)
+				_wall_quad(front_x, FACADE_Y - 116.0, FACADE_Y - 22.0, b0 + bs * 0.4, b0 + bs * 0.5, Color("#5E3A26"))
+				_wall_quad(front_x, FACADE_Y - 120.0, FACADE_Y - 116.0, b0 + bs * 0.38, b0 + bs * 0.52, trim)
+				_steps(front_x, out, b0 + bs * 0.36, b0 + bs * 0.54, winter)
+				if floors > 1:
+					_outdoor_stair(front_x, out, FACADE_Y - 142.0, b0 + bs * 0.62, b0 + bs * 0.95, winter)
+
+
+# A flat plane jutting out from the wall at height y, from the wall line to `out_x`, between depths da and db (a balcony's slab,
+# a step's tread, a cornice's underside): above the horizon we see its underside, below it its top.
+func _ledge(front_x: float, out_x: float, y: float, da: float, db: float, col: Color) -> void:
+	var pts := PackedVector2Array([_at(Vector2(front_x, y), da), _at(Vector2(out_x, y), da), _at(Vector2(out_x, y), db), _at(Vector2(front_x, y), db)])
+	if absf((pts[2] - pts[0]).cross(pts[3] - pts[1])) < 0.01:
+		return
+	draw_primitive(pts, PackedColorArray([col, col, col, col]), PackedVector2Array())
+
+
+# The near end of something jutting out (square to the view at depth d), from the wall line to `out_x`, between heights.
+func _end_face(front_x: float, out_x: float, y0: float, y1: float, d: float, col: Color) -> void:
+	var pts := PackedVector2Array([_at(Vector2(front_x, y0), d), _at(Vector2(out_x, y0), d), _at(Vector2(out_x, y1), d), _at(Vector2(front_x, y1), d)])
+	if absf((pts[2] - pts[0]).cross(pts[3] - pts[1])) < 0.01:
+		return
+	draw_primitive(pts, PackedColorArray([col, col, col, col]), PackedVector2Array())
+
+
+# The cornice along the top of a row: it juts out, its underside in shade, its face, a lit edge (snow on it in winter).
+func _cornice(front_x: float, out: float, top: float, da: float, db: float, col: Color, winter: bool) -> void:
+	var ox := front_x + out * 16.0
+	_ledge(front_x, ox, top + 16.0, da, db, col.darkened(0.55))
+	_wall_quad(ox, top - 4.0, top + 16.0, da, db, col.darkened(0.15))
+	_wall_quad(ox, top + 10.0, top + 16.0, da, db, col.darkened(0.4))
+	_wall_quad(ox, top - 6.0, top - 2.0, da, db, Color("#F4F7FA") if winter else col.lightened(0.3))
+	_end_face(front_x, ox, top - 4.0, top + 16.0, da, col.lightened(0.05))
+
+
+# An iron balcony on its slab, jutting out from the wall at floor height y between depths da and db: the shade it throws on the
+# wall under it, the slab (its underside or top, its front edge, its near end), the railing's bars and rail, snow in winter.
+func _balcony(front_x: float, out: float, y: float, da: float, db: float, winter: bool) -> void:
+	var ox := front_x + out * 52.0
+	var iron := Color("#1F1F1F")
+	var slab := Color("#D8D4CC")
+	var w := maxf(1.0, 1.6 / (1.0 + da))
+	_wall_quad(front_x, y + 8.0, y + 44.0, da + 0.02, db + 0.03, Color(0, 0, 0, 0.14))
+	if y < HORIZON_Y:
+		_ledge(front_x, ox, y + 8.0, da, db, slab.darkened(0.35))
+	else:
+		_ledge(front_x, ox, y, da, db, Color("#F4F7FA") if winter else slab)
+	_wall_quad(ox, y, y + 8.0, da, db, slab.darkened(0.08))
+	_end_face(front_x, ox, y, y + 8.0, da, slab.lightened(0.05))
+	if winter:
+		_wall_quad(ox, y - 3.0, y, da, db, Color("#F4F7FA"))
+	# The railing: a top rail along the front and down the near end, bars between.
+	draw_line(_at(Vector2(ox, y - 30.0), da), _at(Vector2(ox, y - 30.0), db), iron, w)
+	draw_line(_at(Vector2(front_x, y - 30.0), da), _at(Vector2(ox, y - 30.0), da), iron, w)
+	var bars := clampi(int((db - da) * 40.0), 3, 14)
+	for k in bars + 1:
+		var bd := lerpf(da, db, float(k) / bars)
+		draw_line(_at(Vector2(ox, y - 30.0), bd), _at(Vector2(ox, y), bd), iron, maxf(1.0, w * 0.6))
+	for k in 4:
+		var bx := lerpf(front_x, ox, (k + 0.5) / 4.0)
+		draw_line(_at(Vector2(bx, y - 30.0), da), _at(Vector2(bx, y), da), iron, maxf(1.0, w * 0.6))
+
+
+# The outdoor stair from the first balcony (y) down to the sidewalk, in front of the wall: its treads, its stringer, its
+# handrail and posts, from depth da at the top to db at the foot.
+func _outdoor_stair(front_x: float, out: float, y: float, da: float, db: float, winter: bool) -> void:
+	var iron := Color("#1F1F1F")
+	var tread := Color("#F4F7FA") if winter else Color("#B9B2A6")
+	var xi := front_x + out * 18.0
+	var xo := front_x + out * 46.0
+	var n := 10
+	for k in n:
+		var t := (k + 0.5) / n
+		var ty := lerpf(y, FACADE_Y, t)
+		var td := lerpf(da, db, t)
+		draw_line(_at(Vector2(xi, ty), td), _at(Vector2(xo, ty), td), tread, maxf(1.0, 2.6 / (1.0 + td)))
+	draw_line(_at(Vector2(xo, y), da), _at(Vector2(xo, FACADE_Y), db), iron, maxf(1.0, 2.4 / (1.0 + da)))
+	draw_line(_at(Vector2(xo, y - 30.0), da), _at(Vector2(xo, FACADE_Y - 30.0), db), iron, maxf(1.0, 1.6 / (1.0 + da)))
+	for k in 5:
+		var t := float(k) / 4.0
+		var py := lerpf(y, FACADE_Y, t)
+		var pd := lerpf(da, db, t)
+		draw_line(_at(Vector2(xo, py - 30.0), pd), _at(Vector2(xo, py), pd), iron, 1.0)
+
+
+# The door's steps: two treads jutting out, their fronts, snow on them in winter.
+func _steps(front_x: float, out: float, da: float, db: float, winter: bool) -> void:
+	var stone := Color("#A8A196")
+	for k in 2:
+		var ox := front_x + out * (14.0 + k * 12.0)
+		var y := FACADE_Y - 22.0 + k * 11.0
+		_ledge(front_x, ox, y, da, db, Color("#F4F7FA") if winter else stone.lightened(0.15))
+		_wall_quad(ox, y, y + 11.0, da, db, stone.darkened(0.1))
+		_end_face(front_x, ox, y, y + 11.0, da, stone)
 
 
 # A row of `count` windows on a receding wall, each 90 px tall at the facade line.
@@ -838,7 +934,14 @@ func _windows(front_x: float, y: float, d0: float, d1: float, count: int, glass:
 		var b := d0 + step * (i + 0.75)
 		_wall_quad(front_x, y - 16.0, y - 6.0, a - step * 0.08, b + step * 0.08, trim.darkened(0.08))
 		_wall_quad(front_x, y - 4.0, y + 94.0, a - step * 0.04, b + step * 0.04, trim)
-		_wall_quad(front_x, y, y + 90.0, a, b, glass)
+		# The glass: most reflect the sky, some are lit warm, some have their curtains drawn.
+		var pick := (int(d0 * 131.0) + i * 7 + int(y)) % 9
+		var pane := Color("#F2D49A") if pick == 0 else (Color("#E8E2D6") if pick == 1 else glass)
+		_wall_quad(front_x, y, y + 90.0, a, b, pane)
+		_wall_quad(front_x, y, y + 30.0, a, b, Color(1, 1, 1, 0.12))
+		# Set into the wall: the reveal's shade along its near side and under its head.
+		_wall_quad(front_x, y, y + 90.0, a, a + (b - a) * 0.18, Color(0, 0, 0, 0.22))
+		_wall_quad(front_x, y, y + 6.0, a, b, Color(0, 0, 0, 0.18))
 		_wall_quad(front_x, y + 94.0, y + 100.0, a - step * 0.07, b + step * 0.07, trim.darkened(0.12))
 		if a < 4.0:
 			var m := (a + b) / 2.0
