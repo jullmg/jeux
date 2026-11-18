@@ -43,6 +43,16 @@ const GIVING := [
 	[0, "Je te l'avais dit, tsé, que c'tait là !"],
 	[1, "Merci, Chachoue ! Astheure, on le lit ensemble ?"],
 ]
+## In winter, after Halloween: Alphée has an idea, a movie night at Charlotte's (Cinema).
+const MOVIE := [
+	[0, "Chachoue ! Il fait ben trop frette pour jouer dehors…"],
+	[1, "On pourrait faire une soirée cinéma ! Chez vous, mettons ?"],
+	[-1, "Oh oui ! Devant la télé, avec des coussins !"],
+	[0, "Pis des grignotines ! Des chips pis des bonbons, tsé."],
+	[1, "Demande des sous à ta mère pour aller au dépanneur !"],
+	[-1, "J'y vais ! On se rejoint chez moi ?"],
+	[0, "Deal ! On arrive dès que t'as les grignotines !"],
+]
 ## Which book of the reader is hers (BookReader.BOOKS).
 const HER_BOOK := 1
 const LINE_SECONDS := 2.3
@@ -103,7 +113,7 @@ static func met() -> bool:
 func waiting() -> bool:
 	if _talking:
 		return false
-	if not met() or Quests.available("cachette") or Quests.available("livre"):
+	if not met() or Quests.available("cachette") or Quests.available("livre") or Quests.available(Cinema.QUEST):
 		return true
 	# She is bringing the book back.
 	return Quests.active("livre") and Carry.has("book")
@@ -154,6 +164,19 @@ func interact(who: Character) -> void:
 		return
 	if met() and Quests.active("livre"):
 		_say(1, "Cherche dans les croque-livres des ruelles,\nil est sûrement là !")
+		return
+	if met() and Quests.available(Cinema.QUEST):
+		_talk_through(MOVIE, func() -> void:
+			Quests.start(Cinema.QUEST)
+			Cinema.set_step(1)
+			for sister in _sisters:
+				sister.express("grin", 2.0))
+		return
+	if met() and Cinema.step() == 1:
+		_say(_clicked, "Demande des sous à ta mère\npour les grignotines !")
+		return
+	if met() and Cinema.step() == 2:
+		_say(_clicked, "Des chips pis des bonbons,\nau dépanneur !" if _clicked == 0 else "Grouille, Chachoue, on a hâte !")
 		return
 	if met():
 		_say(_clicked, LINES[_clicked][_line[_clicked] % LINES[_clicked].size()])

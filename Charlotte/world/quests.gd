@@ -5,7 +5,9 @@ extends RefCounted
 ## not there = still to discover, "active" = in her notebook, "done" = a star. The Notebook autoload shows
 ## them, and announces each new and finished one.
 
-const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween"]
+## Quests that come `after` "halloween" open the morning after it, in winter; the Halloween evening doesn't wait for them
+## (`after_halloween`).
+const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema"]
 const ALL := {
 	"milk": {
 		"title": "Maman a besoin de lait : va au dépanneur",
@@ -73,6 +75,18 @@ const ALL := {
 		"find": "Encore une affiche, sur la rue Holt…",
 		"age": 7, "after": "cat2", "reward": 3.0,
 	},
+	"chips": {
+		"title": "Des chips pour la soirée de hockey de Papa",
+		"hint": "Papa veut des Ruffles crème sure et oignons pour regarder le Canadien. Va les acheter au dépanneur Xin-Xin, au coin de Dandurand, et rapporte-lui le sac.",
+		"find": "Papa prépare sa soirée de hockey…",
+		"age": 7, "after": "halloween", "reward": 2.0,
+	},
+	"cinema": {
+		"title": "Une soirée cinéma avec les jumelles",
+		"hint": "Alphée et Constance veulent faire une soirée cinéma chez toi.",
+		"find": "Alphée et Constance ont une idée pour les soirées d'hiver…",
+		"age": 7, "after": "halloween", "reward": 3.0,
+	},
 }
 
 
@@ -80,6 +94,8 @@ const ALL := {
 static func hint(id: String) -> String:
 	if id == Halloween.QUEST and active(id):
 		return Halloween.hint()
+	if id == Cinema.QUEST and active(id):
+		return Cinema.hint()
 	return str(ALL.get(id, {}).get("hint", ""))
 
 
@@ -124,6 +140,12 @@ static func complete(id: String) -> bool:
 	GameState.money += float(ALL[id].reward)
 	_announce("done", id)
 	return true
+
+
+## Comes after the Halloween evening (waits for it, directly or through another quest), so Halloween doesn't wait for it.
+static func after_halloween(id: String) -> bool:
+	var after := str(ALL[id].get("after", ""))
+	return after == Halloween.QUEST or after != "" and after_halloween(after)
 
 
 static func stars() -> int:

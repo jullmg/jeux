@@ -104,7 +104,7 @@ static func hint() -> String:
 ## Every other quest is done: Maman can tell her it is Halloween tonight.
 static func ready() -> bool:
 	for id: String in Quests.ORDER:
-		if id != QUEST and not Quests.done(id):
+		if id != QUEST and not Quests.after_halloween(id) and not Quests.done(id):
 			return false
 	return true
 

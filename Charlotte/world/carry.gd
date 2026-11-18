@@ -2,7 +2,7 @@ class_name Carry
 extends RefCounted
 ## Everything Charlotte holds in her arms, behind ONE saved indicator: `GameState.flags.carried` = "" (hands free), or
 ## "<kind>" / "<kind>:<id>": "milk" (Mom's pint), "can" (the watering can), "cat:<quest id>" (a lost cat), "toy:<item>" (a thing
-## from her bedroom floor while she tidies). One thing at a
+## from her bedroom floor while she tidies), "book" (Constance's), "chips" (Papa's Ruffles), "snacks" (the movie night's bag). One thing at a
 ## time, enforced here for every quest:
 ##   - `Carry.take(who, kind, id)` is the only way to put something in her arms; it refuses (returns false) when her hands
 ##     are not free, so the caller just says `Carry.FULL_HANDS`;
@@ -128,6 +128,26 @@ static func _build(kind: String, id: String) -> Node2D:
 			book.name = "book"
 			book.set_meta("keep_upright", true)
 			return book
+		"chips":
+			# Papa's Ruffles crème sure et oignons, held up against her: the logo stays the right way round.
+			var chips := Sprite2D.new()
+			chips.texture = ShopArt.chip_treat(Shop.PAPAS_CHIPS)
+			chips.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			chips.scale = Vector2.ONE * 1.9
+			chips.offset = Vector2(0, -6)
+			chips.name = "chips"
+			chips.set_meta("keep_upright", true)
+			return chips
+		"snacks":
+			# The movie night's paper bag from the dépanneur, the snacks peeking out of the top.
+			var bag := Sprite2D.new()
+			bag.texture = ShopArt.paper_bag()
+			bag.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			bag.scale = Vector2.ONE * 1.15
+			bag.offset = Vector2(0, -16)
+			bag.name = "snacks"
+			bag.set_meta("keep_upright", true)
+			return bag
 		"toy":
 			# Something from her bedroom floor (the tidying quest): the same picture as on the floor, bigger in her arms.
 			var toy := Sprite2D.new()

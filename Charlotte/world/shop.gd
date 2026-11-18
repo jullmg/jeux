@@ -76,14 +76,17 @@ const PRICES := {
 	"candy": 1.25, "lollipop": 0.75, "chips": 2.99, "slush": 2.75, "chocolate": 2.25, "popsicle": 1.75, "juice": 2.25,
 	"milk": 3.29, "bread": 3.99, "coffee": 2.00,
 }
+## Papa's favourite (ShopArt.CHIPS): Ruffles crème sure et oignons.
+const PAPAS_CHIPS := 0
 var _asking := false
 
 
 # She picks something: a window shows it with its price (and what is left in her pocket) and asks first; if she says yes the
 # money goes and she gets it with the shopkeeper's thanks; if she is short the window says how much is missing.
 ## `keep` is the `Halloween.KINDS` kind it becomes once home: a sweet or a bag of chips goes into the shoebox
-## under her bed (`Stash`); a sloche or a hot chocolate is drunk on the spot and keeps `keep` empty.
-func _buy(picture: Texture2D, text: String, price: float, keep := "") -> void:
+## under her bed (`Stash`); a sloche or a hot chocolate is drunk on the spot and keeps `keep` empty. `then`, when given,
+## runs instead of the stash and the usual thanks (something bought for a quest).
+func _buy(picture: Texture2D, text: String, price: float, keep := "", then := Callable()) -> void:
 	if _asking:
 		return
 	_asking = true
@@ -98,21 +101,41 @@ func _buy(picture: Texture2D, text: String, price: float, keep := "") -> void:
 		return
 	GameState.money -= price
 	_treat(picture, "%s  − %s" % [text, Quests.money_text(price)])
+	if then.is_valid():
+		then.call()
+		return
 	if keep != "":
 		Stash.add(keep)
 	_thanks("Merci, bonne journée !")
 
 
-# A handful of candies or a lollipop, one or the other.
+# A handful of candies or a lollipop, one or the other (candy for the movie night while she still needs some).
 func _buy_candy() -> void:
+	if Cinema.needs("candy"):
+		_buy_for_movie("candy", ShopArt.treat("candy"), "Des bonbons pour la soirée !", PRICES.candy)
+		return
 	if randf() < 0.5:
 		_buy(ShopArt.treat("candy"), "Des bonbons !", PRICES.candy, "wrapped")
 	else:
 		_buy(ShopArt.treat("lollipop"), "Une sucette !", PRICES.lollipop, "lollipop")
 
 
-# A bag of chips: one of the classic flavours, picked at random (or the one she looked at).
+# A bag of chips: one of the classic flavours, picked at random (or the one she looked at). Papa's Ruffles crème sure et
+# oignons first while she is on his errand, then the movie night's bag.
 func _buy_chips() -> void:
+	if Quests.active("chips") and not Carry.has("chips"):
+		if Carry.busy():
+			_say(_charlotte, Carry.FULL_HANDS, 300.0)
+			return
+		_buy(ShopArt.chip_treat(PAPAS_CHIPS), "Des Ruffles crème sure\net oignons pour Papa !", PRICES.chips, "", func() -> void:
+			if Carry.take(_charlotte, "chips"):
+				Sfx.play("pop", _charlotte.position)
+			_say(_charlotte, "Les chips préférées de Papa !", 300.0)
+			_thanks("Bonne partie de hockey à ton père !"))
+		return
+	if Cinema.needs("chips"):
+		_buy_for_movie("chips", ShopArt.chip_treat(randi() % ShopArt.CHIPS.size()), "Des chips pour la soirée !", PRICES.chips)
+		return
 	var f := randi() % ShopArt.CHIPS.size()
 	var said: String = ShopArt.CHIPS[f].said
 	_buy(ShopArt.chip_treat(f), "%s !" % (said.substr(0, 1).to_upper() + said.substr(1)), PRICES.chips, "chips")
@@ -130,6 +153,31 @@ func _buy_milk() -> void:
 		_thanks("Bonjour à ta maman !")
 	else:
 		_buy(ShopArt.milk_pint(), "Une pinte de lait !", PRICES.milk)
+
+
+# Something for the movie night: it goes in the paper bag in her arms (taken with the first thing she buys), and once she has
+# everything she heads home.
+func _buy_for_movie(kind: String, picture: Texture2D, text: String, price: float) -> void:
+	if Carry.busy() and not Carry.has("snacks"):
+		_say(_charlotte, Carry.FULL_HANDS, 300.0)
+		return
+	_buy(picture, text, price, "", func() -> void:
+		if not Carry.has("snacks"):
+			Carry.take(_charlotte, "snacks")
+		Sfx.play("pop", _charlotte.position)
+		if Cinema.bought(kind):
+			_say(_charlotte, "J'ai tout pour la soirée cinéma !\nVite, à la maison !", 300.0, 3.4)
+			_thanks("Bon film, les filles !")
+		else:
+			_say(_charlotte, "Dans le sac ! Il me manque\nencore %s." % ("des bonbons" if kind == "chips" else "des chips"), 300.0, 3.0)
+			_thanks("Merci, bonne soirée !"))
+
+
+## The "!" over the chips gondola and the candy wall while an errand needs them (`chips_at`, `candy_at`: where they go).
+func _errand_marks(chips_at: Vector2, candy_at: Vector2) -> void:
+	add_child(QuestMark.make(chips_at, func() -> bool:
+		return Quests.active("chips") and not Carry.has("chips") or Cinema.needs("chips")))
+	add_child(QuestMark.make(candy_at, func() -> bool: return Cinema.needs("candy")))
 
 
 func _thanks(text: String) -> void:

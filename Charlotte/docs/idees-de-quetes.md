@@ -6,12 +6,13 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 
 1. **Trouver les morceaux de pizza cachés par un écureuil** (première quête de la liste)
 2. **Aller faire du jogging avec papa**
-3. **Aller acheter des chips crème sure et oignons au dépanneur** en bas de la rue, sur Dandurand
-   (le dépanneur Xin-Xin vend déjà ces chips, de marque **Ruffles** : présentoir `chips_gondola`, saveur `creme` dans `ShopArt.CHIPS`)
+3. ~~**Aller acheter des chips crème sure et oignons au dépanneur**~~ (fait : la quête `chips`, après l'Halloween ; Papa
+   donne 3 $, elle rapporte le sac de Ruffles et il met le hockey à la télé)
 4. **Aller cueillir des framboises dans la cour**
 5. **Aller cueillir des raisins dans la cour**
 6. ~~**Trouver le livre perdu d'un ami dans le croque-livre**~~ (fait : la quête `livre`, donnée par Constance après la cachette ; le livre attend dans le croque-livre de la ruelle verte et elles le lisent ensemble au retour)
-7. **Planifier une soirée cinéma avec des amis** : elle se fait d'abord donner de l'argent de poche pour aller acheter des trucs pour la soirée
+7. ~~**Planifier une soirée cinéma avec des amis**~~ (fait : la quête `cinema`, après l'Halloween ; les jumelles la proposent,
+   Maman donne 5 $, chips et bonbons au dépanneur, puis le film devant la télé du corridor, `world/cinema.gd`)
 8. **La fête d'un ami** : elle va acheter un cadeau avec Maman
 9. ~~**Jouer à la cachette avec les amis**~~ (fait : la quête `cachette`, la première des jumelles)
 

@@ -226,6 +226,7 @@ func _build_spots() -> void:
 		_buy_candy(), CANDY_X + 240.0))
 	add_child(DoorSpot.make(Rect2(CHIPS_X, 448, 374, 204), func():
 		_buy_chips(), CHIPS_X + 187.0))
+	_errand_marks(Vector2(CHIPS_X + 187.0, 420.0), Vector2(CANDY_X + 240.0, 140.0))
 	add_child(DoorSpot.make(Rect2(COFFEE_X, 340, 266, 266), func():
 		_buy(ShopArt.treat("chocolate"), "Un chocolat chaud !", PRICES.chocolate), COFFEE_X + 133.0))
 	add_child(DoorSpot.make(Rect2(FRIDGE_X, 120, 440, 360), func():

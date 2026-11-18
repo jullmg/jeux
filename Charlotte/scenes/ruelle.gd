@@ -116,8 +116,10 @@ func _ready() -> void:
 	_start = start_x
 	# No children play in the lanes by themselves any more: only the twins, once Mom has sent her to find friends.
 	# They are only there once Mom has sent her to find friends (and stay once she has met them).
+	# On the movie night they are at Charlotte's, waiting in front of her TV.
 	if lane == "middle" and (Quests.active("amies") or Quests.done("amies") or Twins.met()):
-		_build_twins()
+		if Cinema.step() != 3:
+			_build_twins()
 		_build_little_neighbours()
 	var squirrels := _build_lane_squirrels()
 	_charlotte = _spawn_charlotte(start_x)

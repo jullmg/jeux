@@ -95,6 +95,14 @@ func turn_on(index: int) -> void:
 	queue_redraw()
 
 
+## Switches it off.
+func turn_off() -> void:
+	channel = -1
+	_switching = 0.0
+	_update_glow()
+	queue_redraw()
+
+
 func _update_glow() -> void:
 	if glow:
 		glow.visible = channel >= 0

@@ -17,7 +17,11 @@ const INFO := {
 	"space": {"name": "Espace", "glow": Color(0.5, 0.5, 1.0)},
 	"music": {"name": "Musique", "glow": Color(1.0, 0.4, 0.9)},
 	"game": {"name": "Jeu télévisé", "glow": Color(1.0, 0.85, 0.3)},
+	# Not a channel of ALL: the film of the movie night (Cinema), put on by the house.
+	"film": {"name": "Le petit renard des neiges", "glow": Color(0.55, 0.65, 1.0)},
 }
+## How long the film lasts (title card, story, "FIN"), in seconds.
+const FILM_LENGTH := 24.0
 const TICKER := "Il fera beau à Montréal aujourd'hui  •  Les écureuils de la 6e Avenue font leurs provisions pour l'hiver  •  Des bonbons d'Halloween au dépanneur Xin-Xin  •  La ruelle verte est pleine de feuilles  •  "
 
 
@@ -33,6 +37,7 @@ static func draw(id: String, c: CanvasItem, t: float, on_for: float) -> void:
 		"space": _space(c, t, on_for)
 		"music": _music(c, t, on_for)
 		"game": _game(c, t, on_for)
+		"film": _film(c, t, on_for)
 
 
 static func _font() -> Font:
@@ -372,3 +377,77 @@ static func _game(c: CanvasItem, t: float, _on_for: float) -> void:
 	c.draw_circle(host + Vector2(0, -7), 7, Color("#D29A6E"))
 	c.draw_line(host + Vector2(-8, 4), host + Vector2(-16, -8 + sin(t * 8.0) * 4.0), Color("#D29A6E"), 3.0)
 	_text(c, "JEU TÉLÉVISÉ", Vector2(6, 96), 10, Color("#FFD23F"))
+
+
+# The movie night's film, an original little cartoon: a fox in a blue scarf sledding down snowy hills at night under the
+# moon, past the pines and a snowman who waves. A title card first, "FIN" at the end.
+static func _film(c: CanvasItem, t: float, on_for: float) -> void:
+	var night := Color("#16224A")
+	c.draw_rect(Rect2(Vector2.ZERO, SIZE), night)
+	c.draw_rect(Rect2(0, 36, SIZE.x, 40), Color("#24386E"))
+	for i in 18:
+		var star := Vector2(fmod(i * 47.0, SIZE.x), fmod(i * 23.0, 44.0) + 4.0)
+		var tw := 0.5 + 0.5 * sin(t * 3.0 + i)
+		c.draw_circle(star, 0.8 + tw * 0.6, Color(1, 1, 0.85, 0.5 + tw * 0.5))
+	if on_for < 3.0 or on_for > FILM_LENGTH - 3.0:
+		var title := on_for < 3.0
+		var fade := clampf(minf(on_for, 3.0 - on_for) * 2.0, 0.0, 1.0) if title else clampf((on_for - FILM_LENGTH + 3.0) * 2.0, 0.0, 1.0)
+		var ink := Color("#FFD23F", fade)
+		if title:
+			_text(c, "LE PETIT RENARD", Vector2(0, 46), 17, ink, SIZE.x, HORIZONTAL_ALIGNMENT_CENTER)
+			_text(c, "des neiges", Vector2(0, 66), 13, Color(1, 1, 1, fade), SIZE.x, HORIZONTAL_ALIGNMENT_CENTER)
+			_fox(c, Vector2(98, 90), 0.9, t, Color(1, 1, 1, fade))
+		else:
+			_text(c, "FIN", Vector2(0, 62), 30, ink, SIZE.x, HORIZONTAL_ALIGNMENT_CENTER)
+		return
+	# The moon and the hills.
+	c.draw_circle(Vector2(160, 22), 11, Color("#FFF6D0"))
+	c.draw_circle(Vector2(156, 19), 2.5, Color("#EDE2B4"))
+	c.draw_circle(Vector2(30, 150), 85, Color("#DDE8F6"))
+	c.draw_circle(Vector2(180, 168), 95, Color("#EEF4FC"))
+	for p in [Vector2(24, 64), Vector2(40, 70), Vector2(170, 72), Vector2(186, 76)]:
+		c.draw_colored_polygon(PackedVector2Array([p + Vector2(-7, 14), p + Vector2(7, 14), p + Vector2(0, -8)]), Color("#2E5A44"))
+		c.draw_colored_polygon(PackedVector2Array([p + Vector2(-3, -2), p + Vector2(3, -2), p + Vector2(0, -8)]), Color.WHITE)
+	# The snowman, waving his stick arm as the fox goes by.
+	var sm := Vector2(140, 80)
+	c.draw_circle(sm, 8, Color.WHITE)
+	c.draw_circle(sm + Vector2(0, -11), 5.5, Color.WHITE)
+	c.draw_circle(sm + Vector2(-2, -12), 0.9, Color.BLACK)
+	c.draw_circle(sm + Vector2(2, -12), 0.9, Color.BLACK)
+	c.draw_colored_polygon(PackedVector2Array([sm + Vector2(0, -10.5), sm + Vector2(0, -9), sm + Vector2(5, -9.5)]), Color("#FF8A3D"))
+	c.draw_line(sm + Vector2(6, -3), sm + Vector2(13, -9 + sin(t * 6.0) * 3.0), Color("#6E4424"), 1.2)
+	# The fox on its red sled, down the slope from the left, again and again.
+	var run := fmod((on_for - 3.0) * 26.0, SIZE.x + 70.0) - 35.0
+	var at := Vector2(run, 52.0 + run * 0.22 + sin(run * 0.08) * 3.0)
+	_fox(c, at, 1.0, t, Color.WHITE)
+	# A puff of snow behind the sled.
+	for i in 4:
+		c.draw_circle(at + Vector2(-16 - i * 5, 6 - i), 2.2 - i * 0.4, Color(1, 1, 1, 0.7 - i * 0.15))
+	# Snow falling.
+	for i in 28:
+		var x := fmod(i * 37.0 + sin(t + i) * 6.0, SIZE.x)
+		var y := fmod(i * 19.0 + t * (10.0 + i % 5 * 3.0), SIZE.y)
+		c.draw_circle(Vector2(x, y), 0.9 + (i % 3) * 0.4, Color(1, 1, 1, 0.85))
+
+
+# The little fox on his sled at `at` (the sled's middle), `k` its size, his blue scarf flapping. `tint` fades him in.
+static func _fox(c: CanvasItem, at: Vector2, k: float, t: float, tint: Color) -> void:
+	var orange := Color("#E8762C") * tint
+	c.draw_rect(Rect2(at + Vector2(-14, 2) * k, Vector2(28, 4) * k), Color("#D8352E") * tint)
+	c.draw_line(at + Vector2(-16, 8) * k, at + Vector2(14, 8) * k, Color("#5A3A22") * tint, 1.2)
+	c.draw_arc(at + Vector2(14, 5) * k, 3.0 * k, -PI / 2.0, PI / 2.0, 6, Color("#5A3A22") * tint, 1.2)
+	# Tail curling up behind, white tip.
+	c.draw_circle(at + Vector2(-12, -3) * k, 4.5 * k, orange)
+	c.draw_circle(at + Vector2(-15, -6) * k, 2.6 * k, Color.WHITE * tint)
+	c.draw_circle(at + Vector2(-1, -3) * k, 7.0 * k, orange)
+	c.draw_circle(at + Vector2(1, 0) * k, 4.0 * k, Color("#FFF1E0") * tint)
+	var head := at + Vector2(7, -11) * k
+	c.draw_circle(head, 5.5 * k, orange)
+	for e in [Vector2(-3, -4), Vector2(2.5, -5)]:
+		c.draw_colored_polygon(PackedVector2Array([head + (e + Vector2(-2, 1)) * k, head + (e + Vector2(2, 1)) * k, head + (e + Vector2(0, -5)) * k]), orange)
+	c.draw_colored_polygon(PackedVector2Array([head + Vector2(2, 0) * k, head + Vector2(9, 2) * k, head + Vector2(2, 4) * k]), Color("#FFF1E0") * tint)
+	c.draw_circle(head + Vector2(9, 2) * k, 1.0 * k, Color.BLACK * tint)
+	c.draw_circle(head + Vector2(1.5, -1) * k, 0.9 * k, Color.BLACK * tint)
+	# The scarf, its end flying out behind him.
+	c.draw_line(head + Vector2(-4, 5) * k, head + Vector2(3, 5) * k, Color("#4FA3E0") * tint, 2.2 * k)
+	c.draw_line(head + Vector2(-4, 5) * k, head + Vector2(-12, 3 + sin(t * 14.0) * 2.0) * k, Color("#4FA3E0") * tint, 1.8 * k)

@@ -85,6 +85,11 @@ var _can: Sprite2D
 var _held_can: Sprite2D
 var _can_shadows: Array[Node] = []
 var _pouring := false
+# The hallway TV (Papa's hockey, the movie night's film).
+var _tv: TvScreen
+# The movie night (Cinema, step 3): the twins waiting in front of the TV, the blanket and cushions on the floor.
+var _movie_twins: Array[Character] = []
+var _movie_nest: _Nest
 
 
 ## For the plate at the top of the screen (PlaceLabel).
@@ -114,6 +119,7 @@ func _ready() -> void:
 	_spawn_charlotte(470.0)
 	_build_chores()
 	_build_doors()
+	_build_movie_night()
 	_enter_area(BEDROOM if _charlotte.position.x >= BEDROOM.x else HALL)
 	_finish([[700.0, "plant"], [1900.0, "plant"], [2900.0, "plant"], [5400.0, "plushie"], [6250.0, "plant"]])
 	_mom_calls_for_the_candy()
@@ -180,9 +186,10 @@ func _build_family() -> void:
 		# Back from the rounds, it is Maman who counts the haul: the "!" says so.
 		return Halloween.step() == 3 and not GameState.flags.get("halloween_counted", false) \
 			or Quests.available("milk") or Quests.available("menage") or Quests.available("amies") \
-			or Quests.active("milk") and Carry.has("milk"))
+			or Quests.active("milk") and Carry.has("milk") or Cinema.step() == 1)
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
-		return Quests.available("hamster") or Quests.available("plants"))
+		return Quests.available("hamster") or Quests.available("plants") or Quests.available("chips") \
+			or Quests.active("chips") and Carry.has("chips"))
 
 
 # A parent's routine with its click area and its "!" (over whoever has a quest for Charlotte, or is waiting for what she brings).
@@ -207,6 +214,12 @@ func _talk_to_mom() -> void:
 		Carry.put_down(_charlotte)
 		_say(_mom, "Du lait ! Merci, Chachoue !", 350.0)
 		Quests.complete("milk")
+	elif Cinema.step() == 1:
+		_pocket_money_for_the_movie()
+	elif Cinema.step() == 2:
+		_say(_mom, "Des chips pis des bonbons,\npas plus, là !", 380.0)
+	elif Cinema.step() == 3:
+		_say(_mom, "Tes amies t'attendent\ndevant la télé, ma chouette !", 380.0)
 	elif Halloween.step() == 3:
 		_count_the_candy()
 	elif Halloween.step() == 2:
@@ -237,7 +250,18 @@ func _talk_to_mom() -> void:
 
 func _talk_to_dad() -> void:
 	_dad_routine.pause(4.0, _charlotte.position.x)
-	if Quests.start("hamster"):
+	if Quests.active("chips") and Carry.has("chips"):
+		_hockey_night()
+	elif Quests.start("chips"):
+		# His money pays for it: she gets the three dollars now.
+		GameState.money += 3.0
+		_say(_dad, "Le Canadien joue à soir ! Va m'acheter\ndes Ruffles crème sure et oignons chez Xin-Xin.", 390.0, 4.0)
+		var more := create_tween()
+		more.tween_interval(4.2)
+		more.tween_callback(func() -> void: _say(_dad, "Tiens, v'là 3 piasses !", 390.0))
+	elif Quests.active("chips"):
+		_say(_dad, "Des Ruffles crème sure et oignons,\nchez Xin-Xin au coin de Dandurand !", 390.0, 3.5)
+	elif Quests.start("hamster"):
 		_say(_dad, "N'oublie pas de nourrir\nton hamster !", 390.0, 3.5)
 	elif Quests.start("plants"):
 		_say(_dad, "Les plantes ont soif ! L'arrosoir\nest dans la cuisine.", 390.0, 3.5)
@@ -248,7 +272,244 @@ func _talk_to_dad() -> void:
 		_dad_line += 1
 
 
-# ── Chores: tidying her room, watering the plants ───────────
+# ── Papa's hockey night ─────────────────────────────────────
+
+# She hands Papa his chips: the quest is done, and the hockey goes on the hallway TV.
+func _hockey_night() -> void:
+	Carry.put_down(_charlotte)
+	_dad.express("laugh", 2.4)
+	_say(_dad, "Mes Ruffles ! T'es la meilleure, Chachoue !\nViens, on regarde le Canadien !", 390.0, 3.6)
+	Quests.complete("chips")
+	if _tv:
+		_tv.turn_on(maxi(_tv.channels.find("hockey"), 0))
+		Sfx.play("tv", _tv.get_global_rect().get_center())
+
+
+# ── The movie night with the twins (Cinema) ─────────────────
+
+# Where everyone sits on the cushions (x, facing), and the floor under them: in front of the hallway TV, nearer than where
+# she walks. Charlotte first, then Alphée and Constance.
+const MOVIE_SEATS := [[2545.0, 1], [2445.0, 1], [2770.0, -1]]
+const MOVIE_FLOOR := 690.0
+const CUSHION_H := 10.0
+# Where the twins wait for her before the film, and what is said during it ([seconds into the film, who: -1 Charlotte,
+# 0 Alphée, 1 Constance, words]).
+const MOVIE_WAIT := [2700.0, 2830.0]
+const MOVIE_LINES := [
+	[1.0, 1, "Chut ! Ça commence !"],
+	[6.0, -1, "Oh ! Un p'tit renard en traîneau !"],
+	[10.5, 0, "Passe-moi les chips, Chachoue !"],
+	[14.5, 1, "Hi hi ! Le bonhomme de neige\nlui fait bonjour !"],
+	[18.5, -1, "Miam, des bonbons !"],
+]
+const MOVIE_END := [
+	[0, "C'était trop bon !"],
+	[1, "Merci pour la soirée, Chachoue !"],
+	[-1, "On en refait une bientôt !"],
+]
+
+
+# Maman gives her the pocket money for the evening's snacks.
+func _pocket_money_for_the_movie() -> void:
+	GameState.money += Cinema.MONEY
+	Cinema.set_step(2)
+	_mom.express("happy", 2.4)
+	_say(_mom, "Une soirée cinéma avec les jumelles ?\nQuelle bonne idée ! Tiens, 5 $.", 400.0, 3.6)
+	Notebook.announce("step", "Maman t'a donné %s pour les grignotines !" % Quests.money_text(Cinema.MONEY))
+	var more := create_tween()
+	more.tween_interval(3.8)
+	more.tween_callback(func() -> void: _say(_mom, "Des chips pis des bonbons,\npas plus, là !", 380.0))
+
+
+# Step 3: the twins are already here (Maman let them in), standing in front of the TV with the blanket and the cushions
+# laid out on the floor. Click them to start the film.
+func _build_movie_night() -> void:
+	if Cinema.step() != 3:
+		return
+	_movie_nest = _Nest.new()
+	# Up a little from the floor they sit on, so the cushions are under their hips.
+	_movie_nest.position = Vector2(2648.0, MOVIE_FLOOR - 18.0)
+	add_child(_movie_nest)
+	var looks := [CharacterLook.alphee(), CharacterLook.constance()]
+	for i in 2:
+		var sister := Character.new()
+		sister.look = looks[i]
+		sister.fidgets = true
+		sister.scale = Vector2.ONE * CHAR_SCALE
+		sister.position = Vector2(MOVIE_WAIT[i], FEET_Y)
+		sister.facing = -1
+		add_child(sister)
+		_movie_twins.append(sister)
+	var spot := DoorSpot.make(Rect2(MOVIE_WAIT[0] - 70.0, 260.0, MOVIE_WAIT[1] - MOVIE_WAIT[0] + 140.0, 420.0), _start_movie, MOVIE_WAIT[0] - 120.0)
+	spot.condition = func() -> bool: return Cinema.step() == 3 and _control.enabled
+	add_child(spot)
+	add_child(QuestMark.make(Vector2((MOVIE_WAIT[0] + MOVIE_WAIT[1]) / 2.0, 250.0), func() -> bool: return Cinema.step() == 3 and _control.enabled))
+	# Coming in, she remembers who is waiting for her.
+	if _charlotte.position.x < BEDROOM.x:
+		var hello := create_tween()
+		hello.tween_interval(1.0)
+		hello.tween_callback(func() -> void: _say(_charlotte, "Alphée pis Constance m'attendent\ndevant la télé !", 300.0, 3.0))
+
+
+func _start_movie() -> void:
+	if not Carry.has("snacks"):
+		_say(_movie_twins[0], "As-tu les grignotines, Chachoue ?", 320.0)
+		return
+	_control.enabled = false
+	for routine in [_mom_routine, _dad_routine]:
+		routine.pause(TvShows.FILM_LENGTH + 14.0, 2650.0)
+	_say(_charlotte, "J'ai tout ! Des chips pis des bonbons !", 300.0)
+	var go := create_tween()
+	go.tween_interval(2.3)
+	go.tween_callback(func() -> void:
+		_movie_twins[0].express("grin", 2.0)
+		_say(_movie_twins[0], "Yé ! Installe-toi, ça commence !", 320.0))
+	go.tween_interval(2.3)
+	go.tween_callback(func() -> void: Transition.through_black(self, _lights_down, 0.6))
+	# The film starts when the screen is black (0.6 s); its lines come at their own time into it.
+	go.tween_interval(0.6)
+	var said := 0.0
+	for line: Array in MOVIE_LINES:
+		go.tween_interval(float(line[0]) - said)
+		go.tween_callback(_movie_say.bind(line[1], line[2]))
+		said = float(line[0])
+	go.tween_interval(TvShows.FILM_LENGTH - said + 0.5)
+	for line: Array in MOVIE_END:
+		go.tween_callback(_movie_say.bind(line[0], line[1]))
+		go.tween_interval(Twins.LINE_SECONDS)
+	go.tween_callback(func() -> void:
+		Quests.complete(Cinema.QUEST)
+		Sfx.play("chime", _charlotte.position)
+		for who: Character in [_charlotte] + _movie_twins:
+			who.express("happy", 2.4))
+	go.tween_interval(2.0)
+	go.tween_callback(func() -> void: Transition.through_black(self, _lights_up, 0.6))
+
+
+# Everyone on the cushions, the snacks in the bowl, the hall lights off and the film on.
+func _lights_down() -> void:
+	var held := _charlotte.held()
+	if held:
+		held.visible = false
+	var who: Array[Character] = [_charlotte, _movie_twins[0], _movie_twins[1]]
+	for i in 3:
+		var person := who[i]
+		person.position.x = MOVIE_SEATS[i][0]
+		person.facing = MOVIE_SEATS[i][1]
+		person.seat_h = CUSHION_H
+		person.seat_floor = MOVIE_FLOOR
+		person.sitting = true
+		person.is_walking = false
+		person.fidgets = false
+		person.modulate = Color(0.78, 0.8, 0.95)
+	_movie_nest.bowl = true
+	_movie_nest.modulate = Color(0.7, 0.72, 0.88)
+	_movie_nest.queue_redraw()
+	_movie_nest.dark = _movie_dark()
+	_movie_nest.lights = []
+	for light in _hall_lights:
+		if light.visible:
+			_movie_nest.lights.append(light)
+			light.visible = false
+	var film: Array[String] = ["film"]
+	_tv.channels = film
+	_tv.turn_on(0)
+	Sfx.play("tv", _tv.get_global_rect().get_center())
+
+
+# The film is over: the twins go home, the blanket is folded away, the lights come back on.
+func _lights_up() -> void:
+	Carry.put_down(_charlotte)
+	Cinema.clear()
+	_charlotte.sitting = false
+	_charlotte.fidgets = true
+	_charlotte.modulate = Color.WHITE
+	_charlotte.position = Vector2(MOVIE_WAIT[0] - 120.0, FEET_Y)
+	_charlotte.facing = 1
+	for sister in _movie_twins:
+		sister.queue_free()
+	_movie_twins.clear()
+	for light in _movie_nest.lights:
+		light.visible = true
+	if _movie_nest.dark:
+		_movie_nest.dark.queue_free()
+	_movie_nest.queue_free()
+	_movie_nest = null
+	_tv.turn_off()
+	_tv.channels = TvShows.ALL.duplicate()
+	_control.enabled = true
+	_say(_charlotte, "Quelle belle soirée !", 300.0)
+
+
+# A night-blue veil over the hallway, under the TV (so its picture and glow stay bright) and over the furniture.
+func _movie_dark() -> Polygon2D:
+	var dark := Polygon2D.new()
+	dark.polygon = PackedVector2Array([Vector2(VESTIBULE_END, 0), Vector2(HALL.y, 0), Vector2(HALL.y, VIEW.y), Vector2(VESTIBULE_END, VIEW.y)])
+	dark.color = Color(0.03, 0.03, 0.12, 0.5)
+	add_child(dark)
+	move_child(dark, _tv.glow.get_index())
+	return dark
+
+
+func _movie_say(who: int, text: String) -> void:
+	if who < 0:
+		_charlotte.express("talk", 1.8)
+		_say(_charlotte, text, 230.0, Twins.LINE_SECONDS)
+		if text.contains("bonbons"):
+			_charlotte.express("yum", 2.4)
+			Sfx.play("miam", _charlotte.position)
+		return
+	var sister := _movie_twins[who]
+	sister.express("talk", 1.8)
+	_say(sister, text, 250.0, Twins.LINE_SECONDS)
+	if text.contains("chips"):
+		Sfx.play("pop", sister.position)
+
+
+# The blanket and three cushions on the floor in front of the TV, and (once the film is on) the bowl of snacks between them.
+class _Nest:
+	extends Node2D
+	var bowl := false
+	var dark: Polygon2D
+	var lights: Array = []
+
+	func _draw() -> void:
+		# A plaid blanket, its near edge with a fringe.
+		var blanket := PackedVector2Array([Vector2(-250, -14), Vector2(170, -16), Vector2(196, 22), Vector2(-268, 24)])
+		draw_colored_polygon(blanket, Color("#C8445A"))
+		for i in 9:
+			var x := -240.0 + i * 50.0
+			draw_line(Vector2(x, -14), Vector2(x - 6.0, 23), Color("#E9D8B4", 0.55), 5.0)
+		for y in [-4.0, 10.0]:
+			draw_line(Vector2(-255, y), Vector2(182, y), Color("#E9D8B4", 0.45), 4.0)
+		draw_polyline(PackedVector2Array([Vector2(-250, -14), Vector2(170, -16), Vector2(196, 22), Vector2(-268, 24), Vector2(-250, -14)]), Color("#8E2A3A"), 2.0, true)
+		for i in 30:
+			var x := -264.0 + i * 15.4
+			draw_line(Vector2(x, 24), Vector2(x - 1.0, 31), Color("#E9D8B4"), 2.0)
+		# The cushions where they sit (MOVIE_SEATS, from the nest's middle at x 2648).
+		for c in [[-103.0, Color("#F2A7C9")], [-203.0, Color("#7CCBC4")], [122.0, Color("#FFD23F")]]:
+			_cushion(Vector2(c[0], 0.0), c[1])
+		if bowl:
+			# The big bowl with the chips and the candy.
+			var at := Vector2(20, 4)
+			draw_colored_polygon(PackedVector2Array([at + Vector2(-34, -10), at + Vector2(34, -10), at + Vector2(22, 10), at + Vector2(-22, 10)]), Color("#4FA3E0"))
+			for k in 9:
+				var p := at + Vector2(-26.0 + k * 6.5, -12.0 - (k % 3) * 3.0)
+				draw_circle(p, 5.0, Color("#F2C230") if k % 3 else Color("#E6B020"))
+			for k in 4:
+				draw_circle(at + Vector2(-18.0 + k * 12.0, -17.0 + (k % 2) * 4.0), 3.2, [Color("#E04F5F"), Color("#7CCB5A"), Color("#C084FC"), Color("#FF8A3D")][k])
+			draw_line(at + Vector2(-34, -10), at + Vector2(34, -10), Color("#2D6FA8"), 2.5)
+
+	func _cushion(c: Vector2, color: Color) -> void:
+		var pts := PackedVector2Array()
+		for k in 24:
+			var a := TAU * k / 24.0
+			var r := Vector2(46, 17) * (1.0 - 0.08 * absf(sin(a * 2.0)))
+			pts.append(c + Vector2(cos(a) * r.x, sin(a) * r.y - 9.0))
+		draw_colored_polygon(pts, color)
+		draw_polyline(pts + PackedVector2Array([pts[0]]), color.darkened(0.35), 1.5, true)
+		draw_circle(c + Vector2(0, -9), 2.5, color.darkened(0.3))
+
 
 func _build_chores() -> void:
 	var tidied: Array = GameState.flags.get("tidied", [])
@@ -1001,3 +1262,4 @@ func _build_tv(top_left: Vector2, s: float) -> void:
 	screen.stand_x = top_left.x + 110.0 * s
 	screen.glow = _glow(top_left + Vector2(110, 120) * s, 320.0, Color(1, 1, 1, 0.3))
 	add_child(screen)
+	_tv = screen

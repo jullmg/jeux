@@ -582,6 +582,26 @@ static func chip_treat(f: int) -> ImageTexture:
 	return _stamped(64, 64, s, [_chip_logo(f, 12, 6, 40, 52)])
 
 
+## Canvas 84x110: the dépanneur's brown paper bag with the movie night's snacks peeking out of the top (a bag of chips, a
+## lollipop, the candy bag's purple corner).
+static func paper_bag() -> ImageTexture:
+	var s := _defs()
+	# What sticks out of it, drawn first so the bag's rim goes over them.
+	s += '<g transform="rotate(-12 30 30)">' + _chip_bag(14, 4, 30, 40, 0) + '</g>'
+	s += '<rect x="56" y="10" width="3.4" height="30" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="0.8"/><circle cx="57.7" cy="12" r="10" fill="#FF7BA3" stroke="#FFFFFF" stroke-width="1.4"/><path d="M57.7 12 m-6 0 a6 6 0 1 1 12 0 a4 4 0 1 1 -8 0" stroke="#FFFFFF" stroke-width="2.2" fill="none"/>'
+	s += '<path d="M40 30 L60 26 L62 40 L42 42 Z" fill="#C084FC" stroke="#7E57C2" stroke-width="1.5"/>'
+	# The bag: kraft paper, a little wider at the bottom, the top edge cut in zigzag and folded over, creases down its sides.
+	s += '<path d="M10 34 L74 34 L78 106 L6 106 Z" fill="#C89A62" stroke="#8A6234" stroke-width="2" stroke-linejoin="round"/>'
+	s += '<path d="M10 34 l4 -4 l4 4 l4 -4 l4 4 l4 -4 l4 4 l4 -4 l4 4 l4 -4 l4 4 l4 -4 l4 4 l4 -4 l4 4 l4 -4 l4 4 L74 42 L10 42 Z" fill="#B88A54" stroke="#8A6234" stroke-width="1.4" stroke-linejoin="round"/>'
+	s += '<path d="M18 44 L14 104 M66 44 L70 104" stroke="#A97A44" stroke-width="1.5" fill="none" opacity="0.8"/>'
+	s += '<path d="M8 100 H76" stroke="#8A6234" stroke-width="1.2" opacity="0.5"/>'
+	# Light from the upper left, shade to the right.
+	s += '<path d="M12 44 L22 44 L19 104 L8 104 Z" fill="#FFFFFF" opacity="0.18"/><path d="M62 44 L74 44 L78 106 L66 106 Z" fill="#000000" opacity="0.12"/>'
+	# A red heart sticker, the shop's thanks.
+	s += '<path d="M42 66 c-4 -6 -12 -2 -8 5 l8 8 l8 -8 c4 -7 -4 -11 -8 -5 z" fill="#E04F5F" stroke="#FFFFFF" stroke-width="1.2"/>'
+	return tex(84, 110, s)
+
+
 ## Canvas 38x170: a clip strip of mini bags of chips hanging from a shelf.
 static func clip_strip() -> ImageTexture:
 	var s := _defs()
