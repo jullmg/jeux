@@ -164,11 +164,27 @@ func _synth(sound: String) -> PackedFloat32Array:
 			return _chime([1568.0, 2093.0, 1568.0], 0.08, 0.22)
 		"goodnight":
 			return _chime([1046.5, 784.0, 659.3, 523.3], 0.22, 0.2)
+		"school_bell":
+			return _school_bell()
 		"bird":
 			return _bird()
 		"wind":
 			return _wind()
 	return PackedFloat32Array()
+
+
+# The schoolyard's electric bell at the end of recess: a metal dome struck fast by its clapper (a bright inharmonic tone,
+# beaten about twenty times a second) for a second and a half, then ringing out.
+func _school_bell() -> PackedFloat32Array:
+	var out := _buffer(2.2)
+	var ring := 1.55
+	for i in out.size():
+		var t := float(i) / RATE
+		var strike := 0.55 + 0.45 * absf(sin(PI * 21.0 * t)) if t < ring else 0.0
+		var env := (1.0 if t < ring else exp(-(t - ring) * 7.0)) * minf(t * 60.0, 1.0)
+		var tone := sin(TAU * 1180.0 * t) * 0.5 + sin(TAU * 2950.0 * t) * 0.22 + sin(TAU * 4410.0 * t) * 0.1
+		out[i] = tone * env * (strike if t < ring else 1.0) * 0.32 + _noise() * env * 0.02
+	return out
 
 
 func _buffer(seconds: float) -> PackedFloat32Array:

@@ -17,6 +17,7 @@ const FRIENDS := [
 	{"name": "Constance Turcotte", "note": "La jumelle à la queue de cheval. On se voit dans la ruelle.", "flag": "met_twins"},
 	{"name": "Billie", "note": "Elle a sept ans. La grande sœur d'Auguste, dans la ruelle.", "flag": "met_billie_auguste"},
 	{"name": "Auguste", "note": "Il a cinq ans et les cheveux roux. Le petit frère de Billie.", "flag": "met_billie_auguste"},
+	{"name": "Alyzée", "note": "Elle a sept ans et les cheveux noirs. Elle est nouvelle à l'école, on joue ensemble à la récré.", "flag": "met_alyzee"},
 ]
 
 var _button: Button

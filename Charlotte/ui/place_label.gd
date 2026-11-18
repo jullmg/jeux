@@ -21,6 +21,7 @@ const NAMES := {
 	"dollarama": "Dollarama, rue Masson",
 	"jean_coutu": "Jean Coutu, rue Masson",
 	"fraichement_bon": "Fraîchement Bon, rue Masson",
+	"cour_ecole": "Cour de l'école Saint-Jean-de-Brébeuf",
 }
 
 var _plate: PanelContainer

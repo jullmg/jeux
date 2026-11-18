@@ -125,6 +125,7 @@ func _ready() -> void:
 	_enter_area(BEDROOM if _charlotte.position.x >= BEDROOM.x else HALL)
 	_finish([[700.0, "plant"], [1900.0, "plant"], [2900.0, "plant"], [5400.0, "plushie"], [6250.0, "plant"]])
 	_mom_calls_for_the_candy()
+	_mom_asks_about_school()
 
 
 # Home from the rounds with a full bag: Maman calls out from the kitchen as soon as Charlotte comes in, so it is
@@ -139,6 +140,44 @@ func _mom_calls_for_the_candy() -> void:
 			return
 		_mom_routine.pause(4.0, _charlotte.position.x)
 		_say(_mom, "Chachoue ! Viens me montrer ta récolte,\nje suis dans la cuisine !", 380.0, 4.0))
+
+
+# Back from school (the quest "ecole", step 3): she can't wait to tell, and Maman calls her to the kitchen to hear it.
+func _mom_asks_about_school() -> void:
+	if not School.just_home:
+		return
+	School.just_home = false
+	var call := create_tween()
+	call.tween_interval(1.0)
+	call.tween_callback(func() -> void: _say(_charlotte, "J'ai hâte de raconter ma journée à Maman !", 280.0, 3.0))
+	call.tween_interval(3.2)
+	call.tween_callback(func() -> void:
+		if not is_instance_valid(_mom):
+			return
+		_mom_routine.pause(4.0, _charlotte.position.x)
+		_say(_mom, "Pis, Chachoue, c'était comment l'école ?\nViens me raconter, je suis dans la cuisine !", 380.0, 4.0))
+
+
+# She tells Maman about her day and her new friend: the quest is done.
+func _tell_mom_about_school() -> void:
+	_control.enabled = false
+	_mom_routine.pause(9.0, _charlotte.position.x)
+	var lines := [
+		[_charlotte, "Maman ! J'ai une nouvelle amie : Alyzée !", 280.0],
+		[_mom, "C'est ben le fun, ma chouette !", 380.0],
+		[_charlotte, "On a joué à la tague à la récré !", 280.0],
+		[_mom, "Je suis fière de toi !", 380.0],
+	]
+	var talk := create_tween()
+	for line: Array in lines:
+		talk.tween_callback(func() -> void: _say(line[0], line[1], line[2], 3.0))
+		talk.tween_interval(Bubble.reading_time(line[1], 3.0) + 0.2)
+	talk.tween_callback(func() -> void:
+		_mom.express("happy", 2.4)
+		_charlotte.express("happy", 2.4)
+		GameState.flags.erase(School.STEP)
+		Quests.complete(School.QUEST)
+		_control.enabled = true)
 
 
 # Charlotte's own music at home (audio/music/maison-charlotte.mp3), else the generic house theme or the street's.
@@ -188,7 +227,8 @@ func _build_family() -> void:
 		# Back from the rounds, it is Maman who counts the haul: the "!" says so.
 		return Halloween.step() == 3 and not GameState.flags.get("halloween_counted", false) \
 			or Quests.available("milk") or Quests.available("menage") or Quests.available("amies") \
-			or Quests.active("milk") and Carry.has("milk") or Cinema.step() == 1)
+			or Quests.active("milk") and Carry.has("milk") or Cinema.step() == 1 \
+			or Quests.available(School.QUEST) or School.step() == 3)
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
 		return Quests.available("hamster") or Quests.available("plants") or Quests.available("chips") \
 			or Quests.active("chips") and Carry.has("chips"))
@@ -228,6 +268,17 @@ func _talk_to_mom() -> void:
 		_say(_mom, "Amuse-toi bien, ma chouette !\nReviens quand ton sac sera plein.", 400.0, 3.5)
 	elif Halloween.step() == 1:
 		_say(_mom, "Ton déguisement est dans ta commode,\nma chouette ! Vas-y !", 400.0, 3.5)
+	elif School.step() == 3:
+		_tell_mom_about_school()
+	elif School.step() == 1:
+		_say(_mom, "Je t'attends à la porte d'en avant,\nma chouette ! On part pour l'école !", 400.0, 3.5)
+	elif Quests.start(School.QUEST):
+		School.set_step(1)
+		_mom.express("happy", 2.4)
+		_say(_mom, "Chachoue, c'est l'heure de l'école !\nPrends ton sac, je t'amène.", 400.0, 3.8)
+		var more := create_tween()
+		more.tween_interval(4.0)
+		more.tween_callback(func() -> void: _say(_mom, "Je t'attends à la porte d'en avant !", 380.0))
 	elif Quests.start("amies"):
 		if Twins.met():
 			# She has already met them on her own.
@@ -768,10 +819,16 @@ func _build_switches() -> void:
 
 func _build_doors() -> void:
 	# Front door (its glass door leaf inside the vestibule frame) → back to the street.
+	# On a school morning (the quest "ecole", step 1) Maman is waiting there, and it leads to the schoolyard instead: at seven
+	# Charlotte may not cross Dandurand by herself, so Maman walks her there.
 	add_child(DoorSpot.make(Rect2(370, 204, 170, 396), func():
 		_control.enabled = false
 		Sfx.play("door")
+		if School.step() == 1:
+			Transition.change_scene_saying(self, School.YARD, "Maman t'accompagne à l'école…")
+			return
 		Transition.change_scene(self, "res://scenes/main.tscn")))
+	add_child(QuestMark.make(Vector2(455.0, 180.0), func() -> bool: return School.step() == 1 and _control.enabled))
 	add_child(DoorSpot.make(Rect2(CHACHA_DOOR_X, 170, 150, 430), func(): _go_through(BEDROOM_DOOR_X - 40.0, BEDROOM, -1)))
 	add_child(DoorSpot.make(Rect2(BEDROOM_DOOR_X, 170, 150, 430), func(): _go_through(CHACHA_DOOR_X + 75.0, HALL, 1)))
 	# The kitchen's back door: out to the yard and the lane behind the house. Shut on Halloween night like every

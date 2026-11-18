@@ -180,6 +180,29 @@ static func billie() -> CharacterLook:
 	return look
 
 
+## Alyzée, 7, new at Charlotte's school (no photo: Julien asked for black hair and her height, the rest is made up): black hair
+## in two buns, warm brown eyes, a plum dress with little stars over purple tights, red sneakers. Charlotte's own rig ("child").
+static func alyzee() -> CharacterLook:
+	var look := CharacterLook.new()
+	look.age = "child"
+	look.skin = Color("#EBC3A2")
+	look.hair_style = "space_buns"
+	look.hair_color = Color("#16110F")
+	look.eye_color = Color("#4A2F1C")
+	look.lashes = true
+	look.mouth = "smile"
+	look.outfit = "dress"
+	look.outfit_color = Color("#8E4C9E")
+	look.accent_color = Color("#FFD23F")
+	look.pattern = "stars"
+	look.sleeve = "long"
+	look.legwear = "tights"
+	look.legwear_color = Color("#5B3A70")
+	look.shoes = "sneaker"
+	look.shoe_color = Color("#D9342B")
+	return look
+
+
 ## Auguste, 5 (on the right): ginger hair in a chin-length bob with a fringe, freckles, a big grin, a red basketball jersey.
 ## Smaller than Billie.
 static func auguste() -> CharacterLook:

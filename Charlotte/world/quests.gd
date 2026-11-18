@@ -7,7 +7,7 @@ extends RefCounted
 
 ## Quests that come `after` "halloween" open the morning after it, in winter; the Halloween evening doesn't wait for them
 ## (`after_halloween`).
-const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema"]
+const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole"]
 const ALL := {
 	"milk": {
 		"title": "Maman a besoin de lait : va au dépanneur",
@@ -87,6 +87,12 @@ const ALL := {
 		"find": "Alphée et Constance ont une idée pour les soirées d'hiver…",
 		"age": 7, "after": "halloween", "reward": 3.0,
 	},
+	"ecole": {
+		"title": "Une journée à l'école",
+		"hint": "Maman t'amène à l'école. À la récré, fais-toi une nouvelle amie dans la cour.",
+		"find": "Maman a quelque chose à te dire pour demain matin…",
+		"age": 7, "after": "halloween", "reward": 3.0,
+	},
 }
 
 
@@ -96,6 +102,8 @@ static func hint(id: String) -> String:
 		return Halloween.hint()
 	if id == Cinema.QUEST and active(id):
 		return Cinema.hint()
+	if id == School.QUEST and active(id):
+		return School.hint()
 	return str(ALL.get(id, {}).get("hint", ""))
 
 

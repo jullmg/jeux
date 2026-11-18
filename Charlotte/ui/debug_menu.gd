@@ -17,7 +17,7 @@ var skip_look := false
 ## The story flags each quest leaves behind, cleared with it.
 ## Story flags that belong to no quest, cleared by "Tout effacer".
 const OTHER_FLAGS := ["met_twins", "met_billie_auguste", "devoirs", "candy_bag_kind"]
-const QUEST_FLAGS := {"amies": ["met_twins", "met_billie_auguste"], "cachette": ["cachette_found"], "livre": ["book_found", "croque_checked"], "halloween": ["halloween_step", "candy", "candy_bag", "candy_bag_kind", "halloween_doors", "halloween_counted", "halloween_total", "winter_greeting"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"], "cinema": ["cinema_step", "cinema_snacks"]}
+const QUEST_FLAGS := {"amies": ["met_twins", "met_billie_auguste"], "cachette": ["cachette_found"], "livre": ["book_found", "croque_checked"], "halloween": ["halloween_step", "candy", "candy_bag", "candy_bag_kind", "halloween_doors", "halloween_counted", "halloween_total", "winter_greeting"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"], "cinema": ["cinema_step", "cinema_snacks"], "ecole": ["ecole_step", "met_alyzee"]}
 ## What a quest puts in her arms (a lost cat's quest id is the cat's id, handled by `Carry.cat_id()`).
 const QUEST_CARRIES := {"milk": "milk", "plants": "can", "menage": "toy", "livre": "book", "chips": "chips", "cinema": "snacks"}
 
@@ -75,6 +75,7 @@ const PLACES := [
 	{"name": "Milieu", "scene": "cinquieme"},
 	{"name": "Coin Dandurand, au nord", "scene": "cinquieme", "arrive": "5e_from_dandurand"},
 	{"name": "Coin Dandurand, au sud (l'école)", "scene": "cinquieme", "arrive": "5e_from_5e_ouest_dandurand_sud"},
+	{"name": "Cour d'école (Alyzée)", "scene": "cour_ecole", "x": 1100.0},
 	{"name": "Coin Masson, au nord", "scene": "cinquieme", "arrive": "5e_from_masson"},
 	{"name": "Coin Masson, au sud", "scene": "cinquieme", "arrive": "5e_from_5e_ouest_masson_sud"},
 	{"sub": "5e Avenue, côté ouest"},

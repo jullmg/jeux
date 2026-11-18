@@ -48,6 +48,32 @@ static func change_scene(parent: Node, path: String, time := 0.35) -> void:
 	tween.tween_callback(layer.queue_free)
 
 
+## Like change_scene, with a line of words on the black for a moment before the new scene loads ("Maman t'accompagne à
+## l'école…"): time passes, or she goes somewhere she couldn't walk to by herself.
+static func change_scene_saying(parent: Node, path: String, words: String, hold := 2.2) -> void:
+	var rect := _overlay(parent, 0.0)
+	var layer := rect.get_parent()
+	layer.add_to_group("scene_change_black")
+	layer.reparent(parent.get_tree().root)
+	var label := Label.new()
+	label.text = words
+	label.add_theme_font_size_override("font_size", 40)
+	label.add_theme_color_override("font_color", Color("#FFF3C4"))
+	label.size = Vector2(1280, 720)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.modulate.a = 0.0
+	layer.add_child(label)
+	var tween := rect.create_tween()
+	tween.tween_property(rect, "color:a", 1.0, 0.5)
+	tween.tween_property(label, "modulate:a", 1.0, 0.4)
+	tween.tween_interval(hold)
+	tween.tween_property(label, "modulate:a", 0.0, 0.3)
+	tween.tween_callback(func(): rect.get_tree().change_scene_to_file(path))
+	tween.tween_interval(3.0)
+	tween.tween_callback(layer.queue_free)
+
+
 static func _overlay(parent: Node, alpha: float) -> ColorRect:
 	var layer := CanvasLayer.new()
 	layer.layer = 100
