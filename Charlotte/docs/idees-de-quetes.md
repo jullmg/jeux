@@ -15,6 +15,9 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
    Maman donne 5 $, chips et bonbons au dépanneur, puis le film devant la télé du corridor, `world/cinema.gd`)
 8. **La fête d'un ami** : elle va acheter un cadeau avec Maman
 9. ~~**Jouer à la cachette avec les amis**~~ (fait : la quête `cachette`, la première des jumelles)
+10. **L'orage et la panne d'électricité** (idée de Julien, 2026-11-18) : un orage éclate (ciel noir, éclairs, tonnerre, pluie),
+    Charlotte doit rentrer vite à la maison, et là il y a une panne d'électricité : plus de lumières ni de télé, il faut trouver
+    la lampe de poche (ou des chandelles avec Maman et Papa) et attendre que le courant revienne.
 
 ## Notes de départ (à préciser avec Julien avant de programmer)
 

@@ -132,6 +132,65 @@ func _put(tex: Texture2D, x: float, bottom: float, s := 1.0, shadow := "") -> Sp
 	return sprite
 
 
+## Snow falling past a window (`InteriorArt.window(w, h)` put as `window`): flakes drifting down behind the glass, clipped to it,
+## and the frame, bars and curtains laid again over them. Shown in winter only; returns the layer so a scene can show or hide it
+## when the season changes under it (the night Halloween turns to winter). Call it right after putting the window.
+func _window_snow(window: Sprite2D, w: float, h: float) -> Control:
+	var glass := InteriorArt.window_glass(w, h)
+	var clip := Control.new()
+	clip.position = window.position + glass.position * window.scale
+	clip.size = glass.size * window.scale
+	clip.clip_contents = true
+	clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(clip)
+	var flakes := CPUParticles2D.new()
+	flakes.texture = _flake_texture()
+	flakes.amount = int(clip.size.x * clip.size.y / 450.0) + 20
+	flakes.lifetime = 7.0
+	flakes.preprocess = 7.0
+	flakes.position = Vector2(clip.size.x / 2.0, -6.0)
+	flakes.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	flakes.emission_rect_extents = Vector2(clip.size.x * 0.6, 2.0)
+	flakes.direction = Vector2(0.15, 1.0)
+	flakes.spread = 12.0
+	flakes.gravity = Vector2(0.0, 6.0)
+	flakes.initial_velocity_min = 26.0
+	flakes.initial_velocity_max = 48.0
+	flakes.scale_amount_min = 0.35
+	flakes.scale_amount_max = 0.9
+	flakes.color = Color(1, 1, 1, 0.9)
+	# A little sway as they fall.
+	flakes.tangential_accel_min = -4.0
+	flakes.tangential_accel_max = 4.0
+	clip.add_child(flakes)
+	var frame := Sprite2D.new()
+	frame.texture = InteriorArt.window_frame(w, h)
+	frame.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	frame.centered = false
+	frame.scale = window.scale
+	frame.position = window.position
+	add_child(frame)
+	clip.set_meta("frame", frame)
+	clip.visible = Season.is_winter()
+	return clip
+
+
+## A soft round snowflake (shared by every window).
+static var _flake: ImageTexture
+
+
+static func _flake_texture() -> ImageTexture:
+	if _flake:
+		return _flake
+	var img := Image.create(12, 12, false, Image.FORMAT_RGBA8)
+	for py in 12:
+		for px in 12:
+			var d := Vector2(px + 0.5 - 6.0, py + 0.5 - 6.0).length() / 6.0
+			img.set_pixel(px, py, Color(1, 1, 1, clampf(1.0 - d * d, 0.0, 1.0)))
+	_flake = ImageTexture.create_from_image(img)
+	return _flake
+
+
 ## A light switch, or an outlet, on the wall.
 func _plate(x: float, y: float, outlet: bool) -> void:
 	_put(InteriorArt.wall_plate(outlet), x, y, 0.8)

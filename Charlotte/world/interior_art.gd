@@ -731,6 +731,26 @@ static func window(w: float, h: float) -> ImageTexture:
 	s += '<rect x="%s" y="%s" width="%s" height="%s" fill="url(#view_sky)"/>' % [gx, gy, gw, gh]
 	s += _view(gx, gy, gw, gh, night)
 	s += "</g>"
+	s += _window_frame(w, h, night)
+	return tex(w, h, s)
+
+
+## Only the frame of `window(w, h)`, its bars, sill, glare and curtains, on a clear sheet: laid over the window so whatever
+## falls outside (the winter's snow, `Interior._window_snow`) passes behind them.
+static func window_frame(w: float, h: float) -> ImageTexture:
+	return tex(w, h, _defs() + _window_frame(w, h, Halloween.night()))
+
+
+## Where the glass of `window(w, h)` is, in its picture.
+static func window_glass(w: float, h: float) -> Rect2:
+	return Rect2(16.0, 16.0, w - 32.0, h - 46.0)
+
+
+static func _window_frame(w: float, h: float, night: bool) -> String:
+	var gy := 16.0
+	var gw := w - 32.0
+	var gh := h - 46.0
+	var s := ""
 	# The frame round the glass, its bars, the sash and the sill.
 	s += '<path d="M0 0 H%s V16 H0 Z M0 %s H%s V%s H0 Z M0 16 H16 V%s H0 Z M%s 16 H%s V%s H%s Z" fill="%s" stroke="%s" stroke-width="3" stroke-linejoin="round"/>' % [
 		w, gy + gh, w, h, gy + gh, w - 16.0, w, gy + gh, w - 16.0, TRIM, TRIM_DARK]
@@ -746,7 +766,7 @@ static func window(w: float, h: float) -> ImageTexture:
 		for k in 3:
 			s += '<path d="M%s 8 q%s %s 0 %s" stroke="#E3DACB" stroke-width="1.5" fill="none"/>' % [x0 + dir * (10 + k * 10), dir * 6, h * 0.4, h - 44]
 	s += '<rect x="-10" y="0" width="%s" height="6" rx="3" fill="#B08A5A"/>' % (w + 20)
-	return tex(w, h, s)
+	return s
 
 
 # What is out there, inside the glass: the lane behind the house. Everything is laid out on the pane's own
@@ -822,6 +842,10 @@ static func _view(x: float, y: float, w: float, h: float, night: bool) -> String
 		s += '<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="%s"/>' % [x + w * px, floor_y, w * 0.035, ground - floor_y, wood]
 	s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" fill="%s"/>' % [x, floor_y, w, wall_h * 0.055, "#6E6A64" if night else "#CFC7B6"]
 	s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" fill="#1A1008" opacity="0.35"/>' % [x, floor_y + wall_h * 0.055, w, wall_h * 0.015]
+	var winter := Season.is_winter()
+	if winter:
+		# Snow piled along the gallery's edge.
+		s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" rx="2" fill="#F4F7FA"/>' % [x, floor_y - wall_h * 0.02, w, wall_h * 0.035]
 	# The stair: a sloped beam out of the gallery, its treads, and the handrail above them.
 	var st_x := x + w * 0.4
 	var st_y := floor_y
@@ -858,8 +882,14 @@ static func _view(x: float, y: float, w: float, h: float, night: bool) -> String
 		s += '<path d="M%.1f %.1f l%.1f -%.1f l%.1f %.1f z" fill="#FFE07A"/>' % [px + w * 0.001, py - w * 0.002, w * 0.014, w * 0.016, w * 0.014, w * 0.016]
 		s += '<path d="M%.1f %.1f q%.1f %.1f %.1f 0 z" fill="#FFE07A"/>' % [px - w * 0.026, py + w * 0.012, w * 0.026, w * 0.024, w * 0.052]
 	# The lane itself, then the board fence at the bottom of the yard.
-	s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" fill="%s"/>' % [x, ground, w, y + h - ground, "#3E4152" if night else "#8E9A7A"]
-	s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" fill="%s" opacity="0.5"/>' % [x, ground, w, h * 0.03, "#4C5068" if night else "#A3AE8A"]
+	s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" fill="%s"/>' % [x, ground, w, y + h - ground, "#3E4152" if night else ("#E8EEF4" if winter else "#8E9A7A")]
+	s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" fill="%s" opacity="0.5"/>' % [x, ground, w, h * 0.03, "#4C5068" if night else ("#FFFFFF" if winter else "#A3AE8A")]
+	if winter:
+		# The yard under snow: soft drifts against their wall, footprints to the stair.
+		for i in 4:
+			s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#F6F9FC"/>' % [x + w * (0.1 + i * 0.27), ground + 2.0, w * 0.16, h * 0.022]
+		for i in 5:
+			s += '<ellipse cx="%.1f" cy="%.1f" rx="2.2" ry="1.2" fill="#C9D3DE"/>' % [x + w * (0.55 + i * 0.08), ground + h * (0.03 + (i % 2) * 0.012)]
 	# The yard tree, in front of it all: a tapering trunk, three limbs, clumps of real leaves.
 	s += _view_tree(x + w * 0.78, ground + h * 0.06, w * 0.62, h * 0.52, night)
 	var board := x
@@ -869,6 +899,9 @@ static func _view(x: float, y: float, w: float, h: float, night: bool) -> String
 			board, fence_top, w * 0.062, y + h - fence_top, "#4A4030" if night else "#9A7A4E", "#3A3024" if night else "#7E6038"]
 		board += w * 0.072
 	s += '<rect x="%s" y="%.1f" width="%s" height="4" fill="%s"/>' % [x, fence_top, w, "#3A3024" if night else "#7E6038"]
+	if winter:
+		# A cap of snow along the fence's top.
+		s += '<rect x="%s" y="%.1f" width="%s" height="%.1f" rx="3" fill="#F6F9FC"/>' % [x, fence_top - 4.0, w, 7.0]
 	if not night:
 		# Birds on the wire, by day.
 		s += '<path d="M%s %.1f Q%.1f %.1f %s %.1f" stroke="#3A3A42" stroke-width="1.6" fill="none"/>' % [

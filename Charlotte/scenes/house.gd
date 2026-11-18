@@ -63,6 +63,8 @@ var _salon_pendant: Sprite2D
 # was the night).
 var _salon_window: Sprite2D
 var _bedroom_window: Sprite2D
+# The snow falling past those two windows in winter (Interior._window_snow).
+var _window_snows: Array[Control] = []
 # The front of the sofa drawn over whoever sits in it (only shown while someone does).
 var _sofa_front: Sprite2D
 var _sofa_seat: Seat
@@ -900,6 +902,9 @@ func _go_to_sleep() -> void:
 				_salon_window.texture = InteriorArt.window(170.0, 300.0)
 			if _bedroom_window:
 				_bedroom_window.texture = InteriorArt.window(180.0, 300.0)
+			# It snowed in the night: now it falls past the windows too.
+			for snow in _window_snows:
+				snow.visible = Season.is_winter()
 		words.text = "Le lendemain matin…" if not halloween_over else "Le lendemain matin… il a neigé !"
 		words.position.y = 0.0
 		moon.queue_free()
@@ -1125,6 +1130,7 @@ func _build_salon() -> void:
 	add_child(sofa_seat)
 	_put(InteriorArt.side_table(), 1390.0, 610.0, 0.8, "floor")
 	_salon_window = _put(InteriorArt.window(170.0, 300.0), 1580.0, 470.0, 1.0, "wall")
+	_window_snows.append(_window_snow(_salon_window, 170.0, 300.0))
 	_daylight(Vector2(1580.0, 170.0), 170.0, 0.12)
 	_plant("fenetre", "pothos", 1590.0, 606.0, 0.5)
 	_plate(1780.0, 330.0, false)
@@ -1177,6 +1183,7 @@ func _build_bedroom() -> void:
 	var x := BEDROOM.x
 	_put(InteriorArt.round_rug(), x + 380.0, 700.0, 1.0)
 	_bedroom_window = _put(InteriorArt.window(180.0, 300.0), x + 90.0, 420.0, 1.0, "wall")
+	_window_snows.append(_window_snow(_bedroom_window, 180.0, 300.0))
 	_daylight(Vector2(x + 90.0, 120.0), 180.0, 0.14)
 	var tank := _put(InteriorArt.terrarium(false), x + 30.0, 606.0, 0.85, "floor")
 	var hamster := Hamster.new()

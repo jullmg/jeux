@@ -327,6 +327,10 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     data (`rooms`, `chair_rails`, `posts`, `casings`, `gleams` = x of lights mirrored on the floor). Per-room wallpaper
     options: `pattern` ("stars", "dots", "stripes", "diamonds"), `pattern_color`, `pattern_alpha`, `wainscot` (Color) +
     `wainscot_height` (panelled lower wall); shops use `tile_colors`.
+  - In winter the snow falls past the windows (`Interior._window_snow(window, w, h)`, called right after putting the window: soft
+    round flakes clipped to the glass, `InteriorArt.window_glass`, and the frame, bars and curtains laid again over them,
+    `InteriorArt.window_frame`); the view out is under snow too (the yard, the gallery's edge, the fence's top). The house shows
+    it the morning after Halloween as well (`_window_snows`).
   - `InteriorArt.window(w, h)` is a sash window with a real view out over the back lane (`_view`, `_view_tree`): the
     season's sky with its clouds, and across the lane the neighbours' back, which must plainly be a **brick duplex**
     (Julien) — staggered brick courses with their heads, a cornice, a flat under each roof, and **one flat over the
