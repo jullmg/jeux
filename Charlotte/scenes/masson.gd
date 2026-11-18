@@ -563,7 +563,8 @@ func _build_doors() -> void:
 
 ## Shops she can go into: [facade, its scene, the x of its door on the facade]. The Dollarama (2836, south side by 5e) and
 ## Fraîchement Bon (2903, north side at 6e). A new shop = one line here and its scene, whose door goes back to this side.
-const SHOP_DOORS := [["masson_2836", "res://scenes/dollarama.tscn", 1150.0], ["masson_2903", "res://scenes/fraichement_bon.tscn", 360.0]]
+const SHOP_DOORS := [["masson_2836", "res://scenes/dollarama.tscn", 1150.0], ["masson_2903", "res://scenes/fraichement_bon.tscn", 360.0],
+	["masson_2716", "res://scenes/jean_coutu.tscn", 640.0]]
 
 
 func _build_shop_doors() -> void:

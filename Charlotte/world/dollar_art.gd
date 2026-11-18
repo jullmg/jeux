@@ -323,14 +323,14 @@ static func endcap(theme: String, seed_value: int) -> ImageTexture:
 
 ## The mouth of an aisle between two ends, looking down it (w × 470): the floor's tiles running back to a far wall, the two
 ## gondolas either side converging, their shelves of colour, the strip lights overhead.
-static func aisle_mouth(w: float, seed_value: int) -> ImageTexture:
+static func aisle_mouth(w: float, seed_value: int, band := GREEN, lip := YELLOW) -> ImageTexture:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
 	var h := 470.0
 	var vp := Vector2(w / 2.0, 250.0)
 	var s := _defs() + _r(0, 0, w, h, "#F7F7F5")
 	# The far wall and its green band.
-	s += _r(w * 0.36, 170, w * 0.28, 150, "#F2F1EC") + _r(w * 0.36, 170, w * 0.28, 14, GREEN)
+	s += _r(w * 0.36, 170, w * 0.28, 150, "#F2F1EC") + _r(w * 0.36, 170, w * 0.28, 14, band)
 	# The floor converging.
 	s += _p("M0 %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [h, w * 0.36, 320, w * 0.64, 320, w, h], "#E8E6E0")
 	for i in 7:
@@ -363,8 +363,8 @@ static func aisle_mouth(w: float, seed_value: int) -> ImageTexture:
 				s += _p("M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [xa, ya - hh, xc, yc - hh * 0.92, xc, yc, xa, ya], col)
 				s += _p("M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [xa, ya - hh * 0.62, xc, yc - hh * 0.58, xc, yc - hh * 0.32, xa, ya - hh * 0.36], "#FFFFFF", 'opacity="0.7"')
 				s += _p("M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [xa, ya - hh, xc, yc - hh * 0.92, xc, yc - hh * 0.8, xa, ya - hh * 0.86], "#FFFFFF", 'opacity="0.35"')
-			s += _p("M%.1f %.1f L%.1f %.1f" % [near_x, ny, far_x, fy], "none", 'stroke="%s" stroke-width="%.1f"' % [YELLOW, 5.0])
-		s += _p("M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [near_x, 20, far_x, 170, far_x, 180, near_x, 50], GREEN)
+			s += _p("M%.1f %.1f L%.1f %.1f" % [near_x, ny, far_x, fy], "none", 'stroke="%s" stroke-width="%.1f"' % [lip, 5.0])
+		s += _p("M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [near_x, 20, far_x, 170, far_x, 180, near_x, 50], band)
 	# The far end hazy with the light, and the shade between the two gondolas near the floor.
 	s += _p("M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [w * 0.2, 90, w * 0.8, 90, w * 0.8, 380, w * 0.2, 380], "#FFFFFF", 'opacity="0.28"')
 	s += _p("M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [w * 0.3, 330, w * 0.7, 330, w * 0.85, h, w * 0.15, h], "#FFFFFF", 'opacity="0.18"')
@@ -382,12 +382,12 @@ static func aisle_mouth(w: float, seed_value: int) -> ImageTexture:
 ## A checkout lane (560 × 380, its feet on the floor): the candy and gum rack at its mouth, the counter in white laminate with
 ## the green stripe, the black conveyor belt with its divider, the scanner's glass, the card terminal on its stand, the screen
 ## on its pole, the carousel of green bags, and the lane's light on a tall pole (its number is a label: `lane_light_at`).
-static func checkout(seed_value: int) -> ImageTexture:
+static func checkout(seed_value: int, main := GREEN, dark := GREEN_DARK, accent := YELLOW, bags: Array = ["#00A651", "#00843D", "#22B35E"]) -> ImageTexture:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
 	var s := _defs()
 	# The impulse rack: pegs of chocolate bars, gum and mints, a sign on top.
-	s += _r(6, 120, 70, 250, "#F4F5F6", 'stroke="%s" stroke-width="2"' % METAL_DARK) + _r(6, 120, 70, 20, GREEN)
+	s += _r(6, 120, 70, 250, "#F4F5F6", 'stroke="%s" stroke-width="2"' % METAL_DARK) + _r(6, 120, 70, 20, main)
 	for row in 7:
 		var y := 150.0 + row * 30.0
 		s += _r(10, y + 22, 62, 3, METAL_DARK)
@@ -396,13 +396,13 @@ static func checkout(seed_value: int) -> ImageTexture:
 			s += _r(13 + k * 20, y, 17, 22, c, 'rx="2"') + _r(15 + k * 20, y + 7, 13, 5, "#FFFFFF", 'opacity="0.65"')
 	s += _r(70, 120, 6, 250, "#000000", 'opacity="0.12"')
 	# The lane's light pole and its box (lit or not: the scene paints the number).
-	s += _r(538, 30, 8, 210, "url(#met)", 'stroke="%s"' % METAL_DARK) + _r(516, 0, 44, 40, GREEN_DARK, 'rx="5"') + _r(520, 4, 36, 32, "#FFFFFF", 'rx="4" opacity="0.15"')
+	s += _r(538, 30, 8, 210, "url(#met)", 'stroke="%s"' % METAL_DARK) + _r(516, 0, 44, 40, dark, 'rx="5"') + _r(520, 4, 36, 32, "#FFFFFF", 'rx="4" opacity="0.15"')
 	# The counter.
 	s += _r(80, 230, 470, 140, "#FBFBF8", 'stroke="#C9CCCC" stroke-width="2"')
 	for px in [80.0, 236.0, 392.0]:
 		s += _r(px + 4, 248, 148, 100, "#F2F3F0", 'stroke="#DCDEDB"')
-	s += _r(80, 300, 470, 12, GREEN) + _r(80, 312, 470, 4, YELLOW)
-	s += _r(80, 352, 470, 18, GREEN_DARK) + _r(80, 230, 470, 8, "#FFFFFF", 'opacity="0.7"')
+	s += _r(80, 300, 470, 12, main) + _r(80, 312, 470, 4, accent)
+	s += _r(80, 352, 470, 18, dark) + _r(80, 230, 470, 8, "#FFFFFF", 'opacity="0.7"')
 	s += _r(530, 230, 20, 140, "#000000", 'opacity="0.08"')
 	# The belt: black, a sheen, its end roller, the plastic divider, two things riding it.
 	s += _r(86, 214, 250, 18, "#26272A", 'rx="4"') + _r(90, 216, 242, 4, "#FFFFFF", 'opacity="0.12"')
@@ -414,12 +414,12 @@ static func checkout(seed_value: int) -> ImageTexture:
 	s += _r(398, 200, 6, 30, "#3A3B3F") + _r(386, 172, 30, 34, "#2B2C30", 'rx="4"') + _r(390, 176, 22, 12, "#7FD3C8") + _r(390, 192, 22, 10, "#4A4B50")
 	# The screen on its pole, the store's green on it.
 	s += _r(452, 150, 8, 82, "#3A3B3F") + _r(420, 108, 72, 50, "#202124", 'rx="4"') + _r(425, 113, 62, 40, "#E8F5EC")
-	s += _r(425, 113, 62, 10, GREEN) + _r(430, 128, 30, 4, "#5A5A5A") + _r(430, 136, 40, 4, "#5A5A5A") + _r(465, 144, 18, 6, GREEN)
+	s += _r(425, 113, 62, 10, main) + _r(430, 128, 30, 4, "#5A5A5A") + _r(430, 136, 40, 4, "#5A5A5A") + _r(465, 144, 18, 6, main)
 	# The bag carousel: three arms of green bags.
 	s += _r(503, 150, 5, 82, "url(#met)")
 	for k in 3:
 		var bx := 486.0 + k * 14.0
-		s += _p("M%.1f 158 l-6 44 q10 8 20 0 l-6 -44 z" % bx, ["#00A651", "#00843D", "#22B35E"][k], 'opacity="0.92"')
+		s += _p("M%.1f 158 l-6 44 q10 8 20 0 l-6 -44 z" % bx, bags[k % bags.size()], 'opacity="0.92"')
 		s += _r(bx - 1, 154, 10, 6, "#FFFFFF", 'opacity="0.5"')
 	return tex(560, 380, s)
 
@@ -470,7 +470,7 @@ static func wall_shelves(w: float, seed_value: int) -> ImageTexture:
 ## aluminium frame, Rue Masson outside in this season (the buildings across, the sidewalk, the road, snowbanks in winter),
 ## the reflections of the store's lights, and the stickers: the green band where the logo goes, a big yellow disc ("5 $",
 ## a label), posters.
-static func storefront(w: float) -> ImageTexture:
+static func storefront(w: float, band := GREEN, accent := YELLOW, dark := GREEN_DARK, disc := true) -> ImageTexture:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 2836
 	var h := 420.0
@@ -509,8 +509,9 @@ static func storefront(w: float) -> ImageTexture:
 		s += _p("M%.1f 0 L%.1f 0 L%.1f 330 L%.1f 330 Z" % [sx, sx + 40, sx - 60, sx - 100], "#FFFFFF", 'opacity="0.16"')
 	s += _r(0, 0, w, 330, "#FFFFFF", 'opacity="0.1"')
 	# Stickers: the green band along the top, posters taped low, a yellow disc.
-	s += _r(0, 12, w, 44, GREEN, 'opacity="0.95"') + _r(0, 52, w, 4, YELLOW)
-	s += _c(w - 90.0, 160, 58, YELLOW, 'stroke="%s" stroke-width="5"' % GREEN_DARK)
+	s += _r(0, 12, w, 44, band, 'opacity="0.95"') + _r(0, 52, w, 4, accent)
+	if disc:
+		s += _c(w - 90.0, 160, 58, accent, 'stroke="%s" stroke-width="5"' % dark)
 	for k in 2:
 		var px := 40.0 + k * 150.0
 		s += _r(px, 220, 96, 100, ["#FFFFFF", "#FFF4C2"][k], 'stroke="#C9C4B8"') + _r(px + 8, 230, 80, 40, ["#E04F5F", "#4FA3E0"][k]) + _r(px + 8, 280, 60, 8, "#5A5A5A") + _r(px + 8, 294, 44, 8, "#5A5A5A")
@@ -518,7 +519,7 @@ static func storefront(w: float) -> ImageTexture:
 	for fx in [0.0, w / 3.0, 2.0 * w / 3.0, w - 10.0]:
 		s += _r(fx, 0, 10, 340, "url(#met)", 'stroke="#8E959C"')
 	s += _r(0, 0, w, 10, "url(#met)", 'stroke="#8E959C"') + _r(0, 330, w, 14, "url(#met)", 'stroke="#8E959C"')
-	s += _r(0, 344, w, h - 344, "#F2F1EC", 'stroke="#D6D3CB"') + _r(0, h - 16, w, 16, GREEN)
+	s += _r(0, 344, w, h - 344, "#F2F1EC", 'stroke="#D6D3CB"') + _r(0, h - 16, w, 16, band)
 	return tex(w, h, s)
 
 

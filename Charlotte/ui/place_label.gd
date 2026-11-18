@@ -19,6 +19,7 @@ const NAMES := {
 	"depanneur": "Dépanneur Xin-Xin, rue Dandurand",
 	"ohbon": "Dépanneur Oh Bon!, rue Holt",
 	"dollarama": "Dollarama, rue Masson",
+	"jean_coutu": "Jean Coutu, rue Masson",
 	"fraichement_bon": "Fraîchement Bon, rue Masson",
 }
 

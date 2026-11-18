@@ -132,6 +132,17 @@ const PLACES := [
 	{"name": "Allée 4 : bonbons et collations", "scene": "dollarama", "x": 18100.0},
 	{"name": "Allée 5 : jouets et école", "scene": "dollarama", "x": 21700.0},
 	{"name": "Allée 6 : saison", "scene": "dollarama", "x": 25300.0},
+	{"sub": "Jean Coutu (rue Masson, côté sud, entre la 3e et la 4e)"},
+	{"name": "Entrée, caisses et photo", "scene": "jean_coutu"},
+	{"name": "Cosmétiques", "scene": "jean_coutu", "x": 3200.0},
+	{"name": "Dermocosmétiques et parfums", "scene": "jean_coutu", "x": 4700.0},
+	{"name": "La pharmacie", "scene": "jean_coutu", "x": 10200.0},
+	{"name": "Allée 1 : soins capillaires", "scene": "jean_coutu", "x": 12300.0},
+	{"name": "Allée 2 : soins personnels", "scene": "jean_coutu", "x": 15900.0},
+	{"name": "Allée 3 : rhume, grippe et douleur", "scene": "jean_coutu", "x": 19500.0},
+	{"name": "Allée 4 : vitamines et produits naturels", "scene": "jean_coutu", "x": 23100.0},
+	{"name": "Allée 5 : bébé", "scene": "jean_coutu", "x": 26700.0},
+	{"name": "Allée 6 : collations et boissons", "scene": "jean_coutu", "x": 30300.0},
 	{"sub": "Fraîchement Bon (rue Masson, côté nord)"},
 	{"name": "Entrée et caisse", "scene": "fraichement_bon"},
 	{"name": "Fruits et légumes", "scene": "fraichement_bon", "x": 2000.0},
@@ -140,7 +151,7 @@ const PLACES := [
 	{"name": "Écran titre", "scene": "intro"},
 ]
 ## The scenes that are indoors: a place's `x` there is where she stands inside (Transition.inside_x), not on a street.
-const INTERIORS: Array[String] = ["house", "depanneur", "ohbon", "dollarama", "fraichement_bon"]
+const INTERIORS: Array[String] = ["house", "depanneur", "ohbon", "dollarama", "fraichement_bon", "jean_coutu"]
 ## Scenes that are not places to go to (listed nowhere on purpose).
 const NOT_PLACES: Array[String] = []
 

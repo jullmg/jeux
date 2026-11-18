@@ -411,6 +411,20 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   bonbons et collations, jouets et école, saison by `Season.current`), "SORTIE" at both ends, the near gondola as the blurred
   foreground; clicking the gondola buys one of its things (`BUYS`, at most 5 $; candy, chocolate and chips go to her stash).
   `world/dollar_art.gd` draws it all (`_product` kinds). `--x=` in an aisle's range starts there (screenshots).
+- `scenes/jean_coutu.gd` (the Jean Coutu, Rue Masson 2716 between 3e and 4e, south side; its door is in `masson.gd SHOP_DOORS`),
+  built like the Dollarama (Julien: several aisles, the products of a real one). What the chain's own pages say (2023 concept):
+  cosmetics at the heart of the store, warm and upscale; the pharmacy's laboratory in plain sight; dermo-cosmetics apart;
+  "Personnelle" its own brand. From the door: the window on Masson (`DollarArt.storefront` with a palette), two checkouts in
+  navy and red (`DollarArt.checkout` with a palette) under "Jean Coutu", the photo counter (`CoutuArt.photo_kiosk`); the
+  cosmetics on warm wood (`wood_floor`, three `beauty_wall` bays under Lise Watier / Annabelle / L'Oréal Paris, the
+  `beauty_island` with its lit mirror, an advisor in black, warm pendants where the bays meet); the `dermo_wall` and the
+  `perfume_case`; six aisle ends and mouths (`CoutuArt.endcap`, `DollarArt.aisle_mouth` in navy) with navy hanging signs, each
+  aisle its own area with a `CoutuArt.gondola` (soins capillaires, soins personnels, rhume grippe et douleur, vitamines et
+  produits naturels, bébé, collations et boissons; red price flags `talkers`); at the back the pharmacy (`lab_wall`,
+  `pharmacy_counter` with "DÉPÔT DES ORDONNANCES" / "CUEILLETTE", the pharmacist in a white coat, `consult_door`, the
+  `bp_machine` she can try, the "Personnelle" display). `BUYS` per aisle (vitamins are left to her parents, `HANDS_OFF`), gloss
+  and polish at the cosmetics. `world/coutu_art.gd` draws it all (`_item` kinds). `DollarArt.checkout`, `storefront` and
+  `aisle_mouth` take a palette (default the Dollarama's green and yellow).
 - `scenes/fraichement_bon.gd` (Fraîchement Bon, Rue Masson 2903 north side at 6e): the fruiterie and fine grocery, warm wood and
   green under pendant lamps: flowers, the till and its cashier in a green apron, three tiered stands of crates of the season's
   produce under chalk price cards (`FreshArt.produce_stand`, `produce()` by `Season.current`), the misted wall rack, the bread

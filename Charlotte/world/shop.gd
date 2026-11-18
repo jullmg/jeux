@@ -57,7 +57,8 @@ func _wall_label(text: String, center: Vector2, size: int, color: Color, outline
 	settings.outline_size = outline_size
 	settings.outline_color = outline
 	label.label_settings = settings
-	label.size = Vector2(300, 40)
+	# Room enough for a big font and its accents (a capital É's accent was cut off at the top of a 40 px box).
+	label.size = Vector2(maxf(300.0, size * text.length() * 0.75), maxf(40.0, size * 1.9 + outline_size * 2.0))
 	label.position = center - label.size / 2.0
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
