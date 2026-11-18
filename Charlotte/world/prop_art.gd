@@ -71,7 +71,54 @@ const LIMB_TIPS := ('<path d="M135 388 Q118 366 104 338" stroke="#6E5A4C" stroke
 	+ '<path d="M104 338 Q98 318 101 298 M288 334 Q294 314 292 296" stroke="#6E5A4C" stroke-width="4" fill="none" stroke-linecap="round"/>')
 
 
+## A tree is slow to draw (some 1400 leaves rasterized, about 25 ms) and Rue Masson alone draws some fifty each time it loads
+## (its street trees and two for each avenue's vista). So each one drawn is kept, as a compressed PNG made on a worker thread
+## (a few hundred KB; drawing it again from that takes a few ms), by this season's palettes and the exact state of the generator
+## it was drawn from: the same state and palettes always give the same tree, and on a hit the generator is put in the state the
+## drawing would have left it in, so everything drawn after it comes out the same. At most TREE_CACHE_BYTES are kept, the
+## oldest dropped first. Memory only: nothing is kept between runs.
+const TREE_CACHE_BYTES := 64 * 1024 * 1024
+static var _tree_cache := {}
+static var _tree_order: Array[String] = []
+static var _tree_bytes := 0
+
+
 static func tree(rng: RandomNumberGenerator) -> ImageTexture:
+	var key := "%d:%d" % [str(Season.tree_palettes()).hash(), rng.state]
+	var img := Image.new()
+	if _tree_cache.has(key):
+		var hit: Array = _tree_cache[key]
+		rng.state = hit[1]
+		_tree_order.erase(key)
+		_tree_order.append(key)
+		img.load_png_from_buffer(hit[0])
+		img.generate_mipmaps()
+		return ImageTexture.create_from_image(img)
+	img.load_svg_from_string(_draw_tree(rng), 1.0)
+	var end_state := rng.state
+	var plain := img.duplicate() as Image
+	WorkerThreadPool.add_task(func() -> void:
+		var bytes := plain.save_png_to_buffer()
+		_keep_tree.call_deferred(key, bytes, end_state))
+	img.generate_mipmaps()
+	return ImageTexture.create_from_image(img)
+
+
+# Back on the main thread with the PNG: keep it, and drop the oldest while there are too many bytes.
+static func _keep_tree(key: String, bytes: PackedByteArray, end_state: int) -> void:
+	if _tree_cache.has(key):
+		return
+	_tree_cache[key] = [bytes, end_state]
+	_tree_order.append(key)
+	_tree_bytes += bytes.size()
+	while _tree_bytes > TREE_CACHE_BYTES and not _tree_order.is_empty():
+		var old: String = _tree_order.pop_front()
+		_tree_bytes -= (_tree_cache[old][0] as PackedByteArray).size()
+		_tree_cache.erase(old)
+
+
+## The tree itself, as SVG (see `tree`).
+static func _draw_tree(rng: RandomNumberGenerator) -> String:
 	var palettes := Season.tree_palettes()
 	var bare := palettes.is_empty()
 	if bare:
@@ -118,9 +165,9 @@ static func tree(rng: RandomNumberGenerator) -> ImageTexture:
 		rng.randf()
 		rng.randi()
 	if bare:
-		return tex(_svg(380, 780, _bare_crown(s, blobs)))
+		return _svg(380, 780, _bare_crown(s, blobs))
 	s += _tree_leaves(blobs, pal, int(blobs[0][0] * 37.0 + blobs[-1][1] * 91.0))
-	return tex(_svg(380, 780, s))
+	return _svg(380, 780, s)
 
 
 # The tree's leaves, from their own random numbers: as the lanes' (LaneArt._leaf), each taking its clump's colour most of the time,
