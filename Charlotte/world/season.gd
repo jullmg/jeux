@@ -128,18 +128,28 @@ static func tint() -> Vector3:
 static func add_weather(parent: Node) -> void:
 	if current != "winter":
 		return
+	# The flakes live in the world, not on the screen (Julien: when Charlotte ran, the snow ran with her): the layer follows the
+	# camera like the street does, each flake stays where it was let go (`local_coords` off), and the emitters move with the view
+	# and let flakes go over the whole of it (fading in), so a part of the street coming into view is already snowing.
 	var layer := CanvasLayer.new()
 	layer.layer = 5
+	layer.follow_viewport_enabled = true
 	parent.add_child(layer)
-	for depth in [[90, 0.5, 40.0], [60, 0.9, 70.0]]:
+	var follow := _SnowFollow.new()
+	layer.add_child(follow)
+	var fade := Gradient.new()
+	fade.offsets = PackedFloat32Array([0.0, 0.08, 0.9, 1.0])
+	fade.colors = PackedColorArray([Color(1, 1, 1, 0), Color(1, 1, 1, 0.85), Color(1, 1, 1, 0.85), Color(1, 1, 1, 0)])
+	for depth in [[140, 0.5, 40.0], [90, 0.9, 70.0]]:
 		var snow := CPUParticles2D.new()
 		snow.texture = PropArt.flake()
 		snow.amount = depth[0]
 		snow.lifetime = 12.0
 		snow.preprocess = 12.0
-		snow.position = Vector2(640, -20)
+		snow.local_coords = false
 		snow.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
-		snow.emission_rect_extents = Vector2(760, 10)
+		snow.emission_rect_extents = Vector2(900, 420)
+		snow.position = Vector2(0, -60)
 		snow.direction = Vector2(0.25, 1)
 		snow.spread = 20.0
 		snow.gravity = Vector2(4, 8)
@@ -147,8 +157,24 @@ static func add_weather(parent: Node) -> void:
 		snow.initial_velocity_max = depth[2]
 		snow.scale_amount_min = depth[1] * 0.6
 		snow.scale_amount_max = depth[1]
-		snow.color = Color(1, 1, 1, 0.85)
-		layer.add_child(snow)
+		snow.color_ramp = fade
+		follow.add_child(snow)
+
+
+## Keeps the snow's emitters on the middle of the view, wherever the camera goes.
+## On its first frame, once it stands on the view, it starts the snow over again so the flakes already in the air (`preprocess`)
+## are let go there and not where the scene's origin was.
+class _SnowFollow:
+	extends Node2D
+	var _started := false
+
+	func _process(_delta: float) -> void:
+		var cam := get_viewport().get_camera_2d()
+		position = cam.get_screen_center_position() if cam else Vector2(640, 360)
+		if not _started:
+			_started = true
+			for flakes in get_children():
+				(flakes as CPUParticles2D).restart()
 
 
 ## Adjusts a passerby's random look to the weather, without touching any random generator (so the street

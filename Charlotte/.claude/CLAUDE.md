@@ -862,7 +862,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - `world/season.gd` (`Season`): `Season.current` (default `"autumn"`, the original Halloween look) and every seasonal
   palette: tree canopies (`tree_palettes`, empty in winter = bare snowy trees), `foliage`, ground `litter` + `litter_amount`,
   `falling_colors`/`falling_texture`/`falling_amount` (leaves, petals, snow), `sky`, `sun`, grade `tint`,
-  `dress_for_weather` (passersby), `add_weather` (winter snowfall) and `decor(art)` (facade SVG path).
+  `dress_for_weather` (passersby), `add_weather` (winter snowfall, in the world and not on the screen: a layer that follows the
+  camera, flakes with `local_coords` off let go over the whole view by emitters that follow it (`_SnowFollow`, restarted on its
+  first frame), fading in, so it no longer runs along with Charlotte) and `decor(art)` (facade SVG path).
 - Elements read the season when they're built; switching reloads the scene. Seasonal code must keep **the same random draws
   in the same order** in every season (only colours/visibility change), so the street stays the same people and places.
 - Facades: the generator writes autumn to `art/decor/*.svg` and the other seasons to `art/decor/<season>/*.svg` (snow on
