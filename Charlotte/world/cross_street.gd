@@ -869,9 +869,14 @@ func _plex_row(w: Dictionary, front_x: float, top: float, d0: float, d1: float, 
 	var styles := []
 	for b in count:
 		var i := absi(int(d0 * 131.0) + b * 7 + int(front_x))
-		var brick: Color = corner if b == 0 else corner.lerp(PLEX_BRICKS[i % PLEX_BRICKS.size()], 0.7)
-		styles.append({"brick": brick, "frame": PLEX_FRAMES[(i / 3) % PLEX_FRAMES.size()], "door": PLEX_DOORS[(i / 5) % PLEX_DOORS.size()],
-			"lit": i % 4})
+		# The first building is the corner's own (its colour and material read off its front, `StreetScene._wall_look`); the
+		# others are plexes of brick of their own colour, now and then a greystone.
+		var material: String = str(w.get("material", "brick")) if b == 0 else ("stone" if i % 7 == 3 else "brick")
+		var brick: Color = corner
+		if b > 0:
+			brick = Color("#9C978E").lerp(corner, 0.15) if material == "stone" else corner.lerp(PLEX_BRICKS[i % PLEX_BRICKS.size()], 0.7)
+		styles.append({"brick": brick, "material": material, "frame": PLEX_FRAMES[(i / 3) % PLEX_FRAMES.size()],
+			"door": PLEX_DOORS[(i / 5) % PLEX_DOORS.size()], "lit": i % 4, "seed": i})
 	# ── The walls, far to near: brick, courses, base, openings, then the glancing shade over all of it.
 	var b := count - 1
 	while b >= 0:
@@ -884,7 +889,10 @@ func _plex_row(w: Dictionary, front_x: float, top: float, d0: float, d1: float, 
 		var brick: Color = st.brick
 		_wall_quad(front_x, top, ground, b0, b1, brick)
 		if b0 < DETAIL:
-			_brick_courses(front_x, top + 18.0, ground, b0, b1, brick, rng)
+			_wall_texture(front_x, top + 18.0, ground, b0, b1, brick, str(st.material), rng)
+		# The light: the top of the wall catches the sun, its foot is in the shade of the street.
+		_wall_quad(front_x, top, top + (ground - top) * 0.35, b0, b1, Color(1.0, 0.95, 0.85, 0.07))
+		_wall_quad(front_x, ground - (ground - top) * 0.25, ground, b0, b1, Color(0, 0, 0, 0.08))
 		_wall_quad(front_x, ground, FACADE_Y, b0, b1, Color("#A9A396").lerp(brick, 0.15))
 		_wall_quad(front_x, ground, ground + 3.0, b0, b1, Color("#D2CCC0"))
 		if b0 < DETAIL:
@@ -892,8 +900,9 @@ func _plex_row(w: Dictionary, front_x: float, top: float, d0: float, d1: float, 
 				var floor_y := ground - f * fh
 				var wtop := floor_y - fh * 0.8
 				var sill := floor_y - fh * 0.2
-				_plex_window(front_x, wtop, sill, b0 + bs * 0.08, b0 + bs * 0.29, st, (f + b) % 4 == st.lit)
-				_plex_window(front_x, wtop, sill, b0 + bs * 0.66, b0 + bs * 0.87, st, false)
+				var k: int = st.seed + f * 3
+				_plex_window(front_x, wtop, sill, b0 + bs * 0.08, b0 + bs * 0.29, st, (f + b) % 4 == st.lit, k)
+				_plex_window(front_x, wtop, sill, b0 + bs * 0.66, b0 + bs * 0.87, st, false, k + 1)
 				_plex_door(front_x, wtop, floor_y if f > 0 else ground - 4.0, b0 + bs * 0.38, b0 + bs * 0.54, st, f == 0)
 		_wall_quad(front_x, top, FACADE_Y, b0, b1, Color(0.1, 0.04, 0.06, 0.16 if side < 0.0 else 0.28))
 		if b0 > d0:
@@ -910,9 +919,85 @@ func _plex_row(w: Dictionary, front_x: float, top: float, d0: float, d1: float, 
 			var floor_y := ground - f * fh
 			# No posts under it (Julien).
 			_balcony(front_x, out, floor_y, b0 + bs * 0.03, b0 + bs * 0.97, winter)
+		_front_yard(front_x, out, b0 + bs * 0.03, b0 + bs * 0.33, winter)
 		_steps(front_x, out, b0 + bs * 0.36, b0 + bs * 0.56, winter)
 		if floors > 1:
 			_outdoor_stair(front_x, out, ground - fh, b0 + bs * 0.62, b0 + bs * 0.97, winter)
+
+
+# The wall's own material: brick courses, the big blocks of a greystone, or the boards of a light cladding with its white
+# corner boards.
+func _wall_texture(front_x: float, y0: float, y1: float, d0: float, d1: float, col: Color, material: String, rng: RandomNumberGenerator) -> void:
+	match material:
+		"stone":
+			var joint := Color(col.darkened(0.3), 0.5)
+			var lines := PackedVector2Array()
+			var y := y0
+			var row := 0
+			while y < y1:
+				lines.append_array([_at(Vector2(front_x, y), d0), _at(Vector2(front_x, y), minf(d1, DETAIL))])
+				var dd := d0 + (0.04 if row % 2 == 1 else 0.0)
+				while dd < minf(d1, 3.0):
+					lines.append_array([_at(Vector2(front_x, y), dd), _at(Vector2(front_x, minf(y + 22.0, y1)), dd)])
+					dd += 0.08
+				y += 22.0
+				row += 1
+			draw_multiline(lines, joint, 1.0)
+			if d0 < 2.0:
+				for i in 24:
+					var bd := rng.randf_range(d0, minf(d1, 2.0))
+					var by := y0 + float(rng.randi_range(0, int((y1 - y0) / 22.0) - 1)) * 22.0
+					_wall_quad(front_x, by + 1.0, by + 21.0, bd, bd + 0.07, Color(col.lightened(0.12), 0.5) if rng.randf() < 0.5 else Color(col.darkened(0.12), 0.5))
+		"siding":
+			var lines := PackedVector2Array()
+			var y := y0
+			while y < y1:
+				lines.append_array([_at(Vector2(front_x, y), d0), _at(Vector2(front_x, y), minf(d1, DETAIL))])
+				y += 8.0
+			draw_multiline(lines, Color(col.darkened(0.25), 0.45), 1.0)
+			for cd: float in [d0, d1 - 0.015]:
+				_wall_quad(front_x, y0 - 18.0, y1, cd, cd + 0.015, Color("#F4F2EC"))
+		_:
+			_brick_courses(front_x, y0, y1, d0, d1, col, rng)
+
+
+# The little front yard under the first window: a low iron fence at the sidewalk's edge, shrubs of the season against the
+# wall (a mound of snow in winter).
+func _front_yard(front_x: float, out: float, da: float, db: float, winter: bool) -> void:
+	if da > DETAIL:
+		return
+	# A shrub's own colours (not the street trees' canopy: in autumn those orange balls read as pumpkins).
+	var pair: Array = {"spring": [Color("#4E7E3A"), Color("#7AAE58")], "summer": [Color("#2E5E2E"), Color("#4E8A3E")],
+		"autumn": [Color("#5A5A2E"), Color("#8E7A3A")]}.get(Season.current, [Color("#5A5A2E"), Color("#8E7A3A")])
+	var d := da + 0.02
+	while d < db:
+		var at := _at(Vector2(front_x + out * 14.0, FACADE_Y - 6.0), d)
+		var r := 12.0 / (1.0 + d)
+		if winter:
+			# A low mound of snow along the wall (too far off to see, it would only be a degenerate polygon).
+			if r < 2.5:
+				d += 0.08
+				continue
+			var mound := PackedVector2Array()
+			for k in 12:
+				var ang := PI + PI * k / 11.0
+				mound.append(at + Vector2(cos(ang) * r * 1.3, sin(ang) * r * 0.55))
+			draw_colored_polygon(mound, Color("#F2F5F8"))
+		else:
+			# A clump of leaves: three lobes in shade, lit tops from the upper left.
+			for lobe: Vector2 in [Vector2(-0.55, 0.0), Vector2(0.45, -0.1), Vector2(-0.05, -0.5)]:
+				draw_circle(at + lobe * r, r * 0.62, pair[0])
+			for lobe: Vector2 in [Vector2(-0.7, -0.15), Vector2(0.3, -0.3), Vector2(-0.2, -0.65)]:
+				draw_circle(at + lobe * r, r * 0.32, pair[1])
+		d += 0.08
+	var iron := Color("#262626")
+	var fx := front_x + out * 30.0
+	draw_line(_at(Vector2(fx, FACADE_Y - 18.0), da), _at(Vector2(fx, FACADE_Y - 18.0), db), iron, maxf(1.0, 2.0 / (1.0 + da)))
+	draw_line(_at(Vector2(front_x, FACADE_Y - 18.0), db), _at(Vector2(fx, FACADE_Y - 18.0), db), iron, maxf(1.0, 2.0 / (1.0 + da)))
+	var pd := da
+	while pd <= db and pd < 3.0:
+		draw_line(_at(Vector2(fx, FACADE_Y - 18.0), pd), _at(Vector2(fx, FACADE_Y), pd), iron, 1.0)
+		pd += 0.025
 
 
 # Brick courses on a wall face: mortar lines, and up close the staggered joints and a few bricks fired darker.
@@ -942,7 +1027,7 @@ func _brick_courses(front_x: float, y0: float, y1: float, d0: float, d1: float, 
 
 # A plex window on a receding wall: a stone lintel, the frame in the building's colour, glass with the sky in it (or lit, or
 # curtained), the reveal's shade, the muntins up close, a stone sill.
-func _plex_window(front_x: float, top: float, bottom: float, a: float, b: float, st: Dictionary, lit: bool) -> void:
+func _plex_window(front_x: float, top: float, bottom: float, a: float, b: float, st: Dictionary, lit: bool, k := 0) -> void:
 	var wd := b - a
 	var frame: Color = st.frame
 	_wall_quad(front_x, top - 13.0, top - 2.0, a - wd * 0.12, b + wd * 0.12, Color("#D8D2C4"))
@@ -958,6 +1043,11 @@ func _plex_window(front_x: float, top: float, bottom: float, a: float, b: float,
 		_wall_quad(front_x, gt, gbm, ga, gb, Color("#6F8DA2"))
 		_wall_quad(front_x, gt, gt + (gbm - gt) * 0.4, ga, gb, Color("#A9C3D2"))
 		_wall_quad(front_x, gt, gt + (gbm - gt) * 0.12, ga, gb, Color(1, 1, 1, 0.25))
+	# Some have their curtains half drawn.
+	if k % 3 == 1:
+		var curtain := Color("#F2EDE2") if k % 2 == 0 else Color("#E8D2B8")
+		_wall_quad(front_x, gt, gbm, ga, ga + (gb - ga) * 0.22, curtain)
+		_wall_quad(front_x, gt, gbm, gb - (gb - ga) * 0.22, gb, curtain)
 	_wall_quad(front_x, gt, gbm, ga, ga + (gb - ga) * 0.2, Color(0, 0, 0, 0.22))
 	if a < 3.0:
 		var m := (ga + gb) / 2.0
@@ -965,6 +1055,11 @@ func _plex_window(front_x: float, top: float, bottom: float, a: float, b: float,
 		draw_line(_at(Vector2(front_x, gt + (gbm - gt) * 0.45), ga), _at(Vector2(front_x, gt + (gbm - gt) * 0.45), gb), frame, maxf(1.0, 2.5 / (1.0 + m)))
 	_wall_quad(front_x, bottom, bottom + 6.0, a - wd * 0.1, b + wd * 0.1, Color("#E0DACE"))
 	_wall_quad(front_x, bottom + 6.0, bottom + 9.0, a - wd * 0.08, b + wd * 0.08, Color(0, 0, 0, 0.15))
+	# Now and then a window box: flowers in the warm seasons, a cap of snow in winter, bare soil in autumn's end.
+	if k % 5 == 2 and a < DETAIL:
+		_wall_quad(front_x, bottom - 12.0, bottom, a - wd * 0.04, b + wd * 0.04, Color("#6E4A30"))
+		var bloom: Color = {"winter": Color("#F4F7FA"), "spring": Color("#F28CB0"), "summer": Color("#E8503A"), "autumn": Color("#E8A23A")}.get(Season.current, Color("#E8A23A"))
+		_wall_quad(front_x, bottom - 18.0, bottom - 12.0, a, b, bloom)
 
 
 # A plex door: the street door at the foot (panelled, a transom over it), or an upper flat's door out onto its balcony (glass

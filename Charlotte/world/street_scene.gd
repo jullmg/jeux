@@ -326,10 +326,12 @@ func _join_corners() -> void:
 				if float(w.get("top", top)) - top < 12.0:
 					continue
 				w.erase("tex")
-			elif absf(float(w.get("top", top)) - top) < 3.0:
-				continue
+			# Always the corner's own colour and material, even when the height already matched (a side wall of another
+			# colour than its front was the mismatch Julien saw).
 			w.top = top
-			w.color = _wall_color(tex)
+			var look := _wall_look(tex)
+			w.color = look.color
+			w.material = look.material
 
 
 ## In a debug run, says which corners she can stand on have no crosswalk over our own street (Julien: she must be able to
@@ -879,7 +881,9 @@ func _walls_along(script_path: String, from_gap: String, direction: int, ours :=
 			continue
 		var tex := _tex(art)
 		d += (tex.get_width() - 2.0 * MARGIN) * HOUSE_SCALE / 650.0
-		var wall := {"to": d, "top": HOUSE_BASE_Y - (tex.get_height() - _roof_line(tex)) * HOUSE_SCALE, "kind": _wall_kind(art), "color": _wall_color(tex), "art": art}
+		var look := _wall_look(tex)
+		var wall := {"to": d, "top": HOUSE_BASE_Y - (tex.get_height() - _roof_line(tex)) * HOUSE_SCALE, "kind": _wall_kind(art), "color": look.color,
+			"material": look.material, "art": art}
 		if wall.kind != "gap":
 			# Its real facade, laid along the wall in perspective; going back along that street's layout, its right
 			# edge is the near end.
@@ -892,7 +896,9 @@ func _walls_along(script_path: String, from_gap: String, direction: int, ours :=
 	if ours != "" and not walls.is_empty() and walls[0].kind != "gap" and walls[0].kind != "cross":
 		# The corner building's side: drawn at our corner facade's height and brick so the corner joins up.
 		walls[0].top = _house_top(ours)
-		walls[0].color = _wall_color(_tex(ours))
+		var ours_look := _wall_look(_tex(ours))
+		walls[0].color = ours_look.color
+		walls[0].material = ours_look.material
 		walls[0].erase("tex")
 	if walls.is_empty() or walls[-1].kind != "cross":
 		# The end of what is drawn: the next cross street, then the next block's plexes into the distance.
@@ -933,19 +939,62 @@ func _wall_kind(art: String) -> String:
 	return {"ohbon": "ohbon", "coin_holt": "corner_holt", "depanneur_front": "shop", "garages": "garage", "ecole": "school", "ecole_6e": "school"}.get(art, "plex")
 
 
-# A facade's brick colour: the average of points across it, keeping only brick-coloured ones (not the white
-# trim, the glass, a downspout or the dark ironwork).
-func _wall_color(tex: Texture2D) -> Color:
+## What a facade's wall is: {color, material ("brick", "stone" grey stone, "siding" a light painted cladding)}. A dense grid of
+## points over its upper floors (clear of the shop windows) without the glass and the dark openings; the colour shared by
+## most of them (and those close to it) wins. The old way averaged only a few saturated points, so a white or grey front
+## got the colour of its sign or of its windows, and its side down a vista wasn't the colour of its front. Kept per texture.
+static var _looks := {}
+
+
+func _wall_look(tex: Texture2D) -> Dictionary:
+	# By the picture's path, so the dictionary doesn't keep the textures themselves alive.
+	var id: Variant = tex.resource_path if tex.resource_path != "" else tex
+	if _looks.has(id):
+		return _looks[id]
 	var img := tex.get_image()
-	var sum := Color(0, 0, 0, 0)
-	var n := 0
-	for fx in [0.06, 0.29, 0.5, 0.6, 0.72, 0.94]:
-		for k in 6:
-			var c := img.get_pixelv(Vector2i(int(img.get_width() * fx), int(img.get_height() * lerpf(0.25, 0.6, k / 5.0))))
-			if c.a > 0.5 and c.s > 0.18 and c.v > 0.25 and c.v < 0.92:
+	if img and img.is_compressed():
+		img.decompress()
+	var samples: Array[Color] = []
+	if img:
+		for iy in 24:
+			for ix in 40:
+				var c := img.get_pixel(int(img.get_width() * lerpf(0.04, 0.96, ix / 39.0)), int(img.get_height() * lerpf(0.16, 0.6, iy / 23.0)))
+				if c.a < 0.6 or c.v < 0.2:
+					continue
+				# Glass: blue-grey, or the sky in it.
+				if c.h > 0.48 and c.h < 0.72 and c.s > 0.1:
+					continue
+				samples.append(c)
+	var look := {"color": Color("#9C5A44"), "material": "brick"}
+	if not samples.is_empty():
+		var buckets := {}
+		for c in samples:
+			var key := Vector3i(int(c.r * 10.0), int(c.g * 10.0), int(c.b * 10.0))
+			buckets[key] = buckets.get(key, 0) + 1
+		var best: Vector3i = buckets.keys()[0]
+		for key: Vector3i in buckets:
+			if buckets[key] > buckets[best]:
+				best = key
+		var centre := Color((best.x + 0.5) / 10.0, (best.y + 0.5) / 10.0, (best.z + 0.5) / 10.0)
+		var sum := Color(0, 0, 0, 0)
+		var n := 0
+		for c in samples:
+			if absf(c.r - centre.r) + absf(c.g - centre.g) + absf(c.b - centre.b) < 0.3:
 				sum += c
 				n += 1
-	return Color(sum.r / n, sum.g / n, sum.b / n) if n > 0 else Color("#9C5A44")
+		var col := Color(sum.r / n, sum.g / n, sum.b / n) if n > 0 else centre
+		var material := "brick"
+		if col.s < 0.16 and col.v > 0.78:
+			material = "siding"
+		elif col.s < 0.16:
+			material = "stone"
+		look = {"color": col, "material": material}
+	_looks[id] = look
+	return look
+
+
+func _wall_color(tex: Texture2D) -> Color:
+	return _wall_look(tex).color
 
 
 func _cross_street(art: String, street_name: String, sign_side: float) -> CrossStreet:

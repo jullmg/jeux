@@ -228,6 +228,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   the corner's colour), frames (`PLEX_FRAMES`) and door (`PLEX_DOORS`), real brick courses with staggered joints and darker
   bricks up close (`_brick_courses`, its own RNG), and a stone base (`PLEX_BASE`). Snow on ledges in winter. Other kinds (shop,
   school, garages…) keep `_wall_details`. The vista is drawn once, so this costs nothing per frame.
+  Each plex also has its material (`w.material`: "brick", "stone" or "siding"; `_wall_texture` draws brick courses, stone blocks,
+  or boards with white corner boards), a sun-to-shade gradient along its face, curtains in some windows and window boxes in
+  others, and a little front yard (`_front_yard`: season shrubs, a mound of snow in winter, a low iron fence).
 - Vista detail (`CrossStreet`): street trees drawn from two `PropArt.tree` textures (`_tree_tex`, own RNG) in their pits at the curb (`TREES_LEFT`/`TREES_RIGHT`, between the poles and lamps, `TREE_FROM_CURB`; never mid-sidewalk),
   hazier with distance; utility poles and wires down the left curb (`_poles`); sidewalk joints, gutters, a manhole
   (`_street_details`); walls with brick courses, cornice lip, building edges, window lintels/sills/mullions; plex walls
@@ -255,13 +258,16 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Cross-street vistas show the real street that runs there: `StreetScene._walls_along(script, from_gap, direction)`
   reads that street's `layout` (its scene script's `_init`) from our corner to its next cross street, giving each wall
   its building's width, height, kind (`_wall_kind`: ohbon, corner_holt, shop = Xin-Xin, garage, school, gap = lane,
-  plex) and brick colour sampled off its facade (`_wall_color`, brick-coloured points only); generic plexes beyond.
+  plex) and its wall's colour and material read off its facade (`_wall_look(tex)`, cached per texture: a dense grid over the
+  wall's middle rows, skipping glass, the most common colour wins; pale and grey = "siding" / "stone", else "brick";
+  `_wall_color` returns its colour); generic plexes beyond.
   The first wall is the corner building's side, so it takes our own corner facade's height and brick (`ours`). Only the side across the street
   (another block) is still hand-written.
 - **Every corner building shows its side down the vista, at every intersection, present and future** (Julien, 2026-11-18: a
   three-storey corner over a two-storey first wall looked flat, its top floor a cut-out): `StreetScene._join_corners()` runs
   after every street's `_build_cross_streets` and makes the first wall on each side of each cross street the side of OUR
-  building at that corner — its roof height (`_roof_line`) and brick. A wall laid with the other street's real facade keeps its
+  building at that corner — its roof height (`_roof_line`) and the same colour and material as its front (`_wall_look`,
+  always set, so a white or stone front never gets a red side; Julien, 2026-11-18). A wall laid with the other street's real facade keeps its
   picture unless it is lower than our corner (then it is drawn plain at our height); open ground at the corner (no roof line)
   becomes a "lot". Nothing to do per street: a new street gets it for free.
 - Before 8 (`StreetScene.CROSS_AGE`, `GameState.age`) Charlotte can't cross a street ("Je n'ai pas le droit de traverser
