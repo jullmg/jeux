@@ -200,43 +200,98 @@ static func _stock(theme: String) -> Array:
 
 # ── Gondolas ────────────────────────────────────────────────────
 
-## A long gondola seen face on from inside an aisle (`w` × 470): white metal uprights, five shelves stocked to the edge with
-## this department's things, the yellow price strip along each shelf's lip, a pegboard band on the second level hung with
-## carded goods, the kick plate at the bottom. Canvas w × 470.
+## How much higher than its shelves a gondola's picture goes: the overstock cartons stacked on its top.
+const GONDOLA_TOP := 70.0
+## The gondola's shelves (y in its picture, from its top edge GONDOLA_TOP above the green header).
+const GONDOLA_SHELVES := [510.0, 430.0, 350.0, 270.0, 190.0]
+const PRICES := ["1,25 $", "1,50 $", "2,00 $", "2,50 $", "3,00 $", "4,00 $", "1,00 $", "5,00 $"]
+
+
+## Where the yellow price flags stick out of a gondola `w` wide: [x, y of the shelf's lip in the picture, its price].
+static func talkers(w: float) -> Array:
+	var out := []
+	var k := 0
+	var x := 150.0
+	while x < w - 120.0:
+		out.append([x, float(GONDOLA_SHELVES[[1, 2, 3, 0, 2, 1][k % 6]]), PRICES[(k * 3) % PRICES.size()]])
+		x += 250.0 + (k % 3) * 40.0
+		k += 1
+	return out
+
+
+## A long gondola seen face on from inside an aisle (`w` × 540): overstock cartons on its top, a green header, white metal
+## uprights, a pegboard back in shadow under each shelf, five shelves stocked to the edge with this department's things in
+## facings, the yellow price strip along each lip with its little white tickets, yellow price flags sticking out
+## (`talkers`, their prices are labels in the scene), the kick plate at the bottom.
 static func gondola(theme: String, w: float, seed_value: int) -> ImageTexture:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
-	var h := 470.0
-	var s := _defs() + _r(0, 0, w, h, "#F4F5F6") + _r(0, 0, w, h, "url(#deep)")
+	var h := 540.0
+	var t := GONDOLA_TOP
+	var s := _defs()
+	# Overstock on top: brown cartons, taped, some open, in stacks of one or two.
+	var cx := 30.0
+	while cx < w - 120.0:
+		var bw := rng.randf_range(70.0, 120.0)
+		var bh := rng.randf_range(34.0, 56.0)
+		var stack := rng.randi_range(1, 2)
+		for k in stack:
+			var by := t + 30.0 - bh * (k + 1)
+			var tone: String = ["#C69A64", "#B98B55", "#D2A872"][rng.randi_range(0, 2)]
+			s += _r(cx, by, bw, bh, tone, 'stroke="#8E6A3E" stroke-width="1.5"')
+			s += _r(cx + bw * 0.45, by, bw * 0.1, bh, "#E7D9BE", 'opacity="0.8"')
+			s += _r(cx + 8, by + bh * 0.3, bw * 0.3, bh * 0.25, "#FFFFFF", 'opacity="0.55"')
+			s += _r(cx + bw - 10, by, 10, bh, "#000000", 'opacity="0.12"')
+		cx += bw + rng.randf_range(30.0, 160.0)
+	# The back: pale metal, a pegboard of little holes, darker under each shelf where its light doesn't reach.
+	s += _r(0, t + 30, w, h - t - 30, "#ECEDEE")
+	var py := t + 50.0
+	while py < h - 30.0:
+		var px := 10.0 + fmod(py, 20.0)
+		while px < w:
+			s += _c(px, py, 1.4, "#C7CACE")
+			px += 22.0
+		py += 20.0
+	for y: float in GONDOLA_SHELVES:
+		s += _r(0, y - 78.0, w, 36, "url(#deep)")
 	var stock := _stock(theme)
-	var shelves := [440.0, 360.0, 280.0, 200.0, 120.0]
-	for i in shelves.size():
-		var y: float = shelves[i]
+	for i in GONDOLA_SHELVES.size():
+		var y: float = GONDOLA_SHELVES[i]
 		var x := 8.0
 		var k := rng.randi_range(0, stock.size() - 1)
 		while x < w - 40.0:
 			var kind: String = stock[k % stock.size()]
-			# A facing of the same thing, then the next.
-			for j in rng.randi_range(2, 5):
+			# A facing of the same thing, then the next, with a little gap.
+			for j in rng.randi_range(3, 6):
 				var pr := _product(kind, x, y - 2.0, rng)
 				s += pr[0]
-				x += float(pr[1]) + 2.0
+				x += float(pr[1]) + 1.5
 				if x > w - 40.0:
 					break
-			x += 6.0
+			x += rng.randf_range(4.0, 12.0)
 			k += 1
-		s += _r(0, y, w, 10, "url(#met)", 'stroke="%s"' % METAL_DARK) + _r(0, y + 10, w, 10, YELLOW)
+		# The shelf's lip, its price strip and the tickets on it, and the shade it throws on what stands below.
+		s += _r(0, y, w, 10, "url(#met)", 'stroke="%s"' % METAL_DARK) + _r(0, y + 10, w, 11, YELLOW)
+		s += _r(0, y + 21, w, 3, "#000000", 'opacity="0.18"')
 		var tx := 30.0
 		while tx < w - 30.0:
-			s += _r(tx, y + 12, 22, 6, "#FFFFFF") + _r(tx + 3, y + 13.5, 16, 3, "#1E1E20", 'opacity="0.7"')
-			tx += rng.randf_range(70.0, 140.0)
-	# The uprights every 240 px and the kick plate.
+			s += _r(tx, y + 12, 24, 7, "#FFFFFF") + _r(tx + 3, y + 13.5, 12, 2, "#1E1E20", 'opacity="0.7"') + _r(tx + 3, y + 16.5, 8, 1.5, "#1E1E20", 'opacity="0.5"')
+			tx += rng.randf_range(60.0, 120.0)
+	# The flags: a yellow card on a clear arm, a red band at its foot.
+	for tk: Array in talkers(w):
+		var fx: float = tk[0]
+		var fy: float = tk[1]
+		s += _r(fx - 2, fy + 8, 4, 10, "#FFFFFF", 'opacity="0.6"')
+		s += _r(fx - 34, fy - 32, 68, 40, YELLOW, 'rx="4" stroke="%s" stroke-width="2"' % GREEN_DARK)
+		s += _r(fx - 34, fy - 2, 68, 10, "#E0302F", 'rx="2"')
+		s += _r(fx - 34, fy - 32, 68, 8, "#FFFFFF", 'opacity="0.35" rx="4"')
+	# The uprights every 240 px, the green header with its light from above, the kick plate.
 	var ux := 0.0
 	while ux <= w:
-		s += _r(ux - 4, 40, 8, h - 40, "url(#met)", 'stroke="%s"' % METAL_DARK)
+		s += _r(ux - 4, t + 40, 8, h - t - 40, "url(#met)", 'stroke="%s"' % METAL_DARK)
 		ux += 240.0
-	s += _r(0, 30, w, 14, GREEN) + _r(0, 30, w, 3, "#FFFFFF", 'opacity="0.3"')
-	s += _r(0, h - 18, w, 18, METAL_DARK)
+	s += _r(0, t + 30, w, 16, GREEN) + _r(0, t + 30, w, 4, "#FFFFFF", 'opacity="0.3"') + _r(0, t + 44, w, 3, GREEN_DARK)
+	s += _r(0, h - 20, w, 20, METAL_DARK) + _r(0, h - 20, w, 3, "#FFFFFF", 'opacity="0.4"')
 	return tex(w, h, s)
 
 
@@ -250,12 +305,16 @@ static func endcap(theme: String, seed_value: int) -> ImageTexture:
 	var s := _defs() + _r(0, 30, w, h - 30, "#F4F5F6", 'stroke="%s"' % METAL_DARK)
 	var stock := _stock(theme)
 	for y: float in [440.0, 350.0, 260.0, 170.0]:
-		var x := 10.0
-		var kind: String = stock[rng.randi_range(0, stock.size() - 1)]
-		while x < w - 40.0:
-			var pr := _product(kind, x, y - 2.0, rng)
+		# Stocked full: two of the department's things in facings of three, packed edge to edge.
+		s += _r(0, y - 80.0, w, 30, "url(#deep)")
+		var x := 6.0
+		var kinds := [stock[rng.randi_range(0, stock.size() - 1)], stock[rng.randi_range(0, stock.size() - 1)]]
+		var n := 0
+		while x < w - 30.0:
+			var pr := _product(kinds[(n / 3) % 2], x, y - 2.0, rng)
 			s += pr[0]
-			x += float(pr[1]) + 2.0
+			x += float(pr[1]) + 1.0
+			n += 1
 		s += _r(0, y, w, 10, "url(#met)") + _r(0, y + 10, w, 8, YELLOW)
 	s += _r(0, 30, w, 50, GREEN) + _r(70, 0, 120, 40, YELLOW, 'rx="6" stroke="%s" stroke-width="3"' % GREEN_DARK)
 	s += _r(0, h - 18, w, 18, METAL_DARK) + _r(0, 30, 8, h - 30, "#FFFFFF", 'opacity="0.4"') + _r(w - 12, 30, 12, h - 30, "#000000", 'opacity="0.12"')
@@ -296,10 +355,19 @@ static func aisle_mouth(w: float, seed_value: int) -> ImageTexture:
 				var xb := lerpf(near_x, far_x, b)
 				var ya := lerpf(ny, fy, a)
 				var yb := lerpf(ny, fy, b)
-				var hh := lerpf(46.0, 18.0, a)
-				s += _p("M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [xa, ya - hh, xb, yb - hh * 0.9, xb, yb, xa, ya], _bright(rng), 'opacity="0.9"')
+				# One product, a facing seen along the aisle: its colour, a white label across it, its lit top, a gap after.
+				var hh := lerpf(46.0, 18.0, a) * rng.randf_range(0.6, 1.0)
+				var xc := lerpf(xa, xb, 0.82)
+				var yc := lerpf(ya, yb, 0.82)
+				var col := _bright(rng)
+				s += _p("M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [xa, ya - hh, xc, yc - hh * 0.92, xc, yc, xa, ya], col)
+				s += _p("M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [xa, ya - hh * 0.62, xc, yc - hh * 0.58, xc, yc - hh * 0.32, xa, ya - hh * 0.36], "#FFFFFF", 'opacity="0.7"')
+				s += _p("M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [xa, ya - hh, xc, yc - hh * 0.92, xc, yc - hh * 0.8, xa, ya - hh * 0.86], "#FFFFFF", 'opacity="0.35"')
 			s += _p("M%.1f %.1f L%.1f %.1f" % [near_x, ny, far_x, fy], "none", 'stroke="%s" stroke-width="%.1f"' % [YELLOW, 5.0])
 		s += _p("M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [near_x, 20, far_x, 170, far_x, 180, near_x, 50], GREEN)
+	# The far end hazy with the light, and the shade between the two gondolas near the floor.
+	s += _p("M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [w * 0.2, 90, w * 0.8, 90, w * 0.8, 380, w * 0.2, 380], "#FFFFFF", 'opacity="0.28"')
+	s += _p("M%.1f %.1f L%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % [w * 0.3, 330, w * 0.7, 330, w * 0.85, h, w * 0.15, h], "#FFFFFF", 'opacity="0.18"')
 	# The strip lights down the middle.
 	for i in 4:
 		var t := float(i) / 4.0
@@ -307,6 +375,204 @@ static func aisle_mouth(w: float, seed_value: int) -> ImageTexture:
 		var hw := lerpf(60.0, 14.0, t)
 		s += _r(vp.x - hw, y, hw * 2.0, lerpf(8.0, 3.0, t), "#FFFFFF", 'opacity="0.95"')
 	return tex(w, h, s)
+
+
+# ── The front of the store ─────────────────────────────────────
+
+## A checkout lane (560 × 380, its feet on the floor): the candy and gum rack at its mouth, the counter in white laminate with
+## the green stripe, the black conveyor belt with its divider, the scanner's glass, the card terminal on its stand, the screen
+## on its pole, the carousel of green bags, and the lane's light on a tall pole (its number is a label: `lane_light_at`).
+static func checkout(seed_value: int) -> ImageTexture:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var s := _defs()
+	# The impulse rack: pegs of chocolate bars, gum and mints, a sign on top.
+	s += _r(6, 120, 70, 250, "#F4F5F6", 'stroke="%s" stroke-width="2"' % METAL_DARK) + _r(6, 120, 70, 20, GREEN)
+	for row in 7:
+		var y := 150.0 + row * 30.0
+		s += _r(10, y + 22, 62, 3, METAL_DARK)
+		for k in 3:
+			var c: String = ["#5E3A22", "#C8202A", "#1D4F91", "#7CCB5A", YELLOW, "#E04F5F", "#C084FC"][(row * 3 + k) % 7]
+			s += _r(13 + k * 20, y, 17, 22, c, 'rx="2"') + _r(15 + k * 20, y + 7, 13, 5, "#FFFFFF", 'opacity="0.65"')
+	s += _r(70, 120, 6, 250, "#000000", 'opacity="0.12"')
+	# The lane's light pole and its box (lit or not: the scene paints the number).
+	s += _r(538, 30, 8, 210, "url(#met)", 'stroke="%s"' % METAL_DARK) + _r(516, 0, 44, 40, GREEN_DARK, 'rx="5"') + _r(520, 4, 36, 32, "#FFFFFF", 'rx="4" opacity="0.15"')
+	# The counter.
+	s += _r(80, 230, 470, 140, "#FBFBF8", 'stroke="#C9CCCC" stroke-width="2"')
+	for px in [80.0, 236.0, 392.0]:
+		s += _r(px + 4, 248, 148, 100, "#F2F3F0", 'stroke="#DCDEDB"')
+	s += _r(80, 300, 470, 12, GREEN) + _r(80, 312, 470, 4, YELLOW)
+	s += _r(80, 352, 470, 18, GREEN_DARK) + _r(80, 230, 470, 8, "#FFFFFF", 'opacity="0.7"')
+	s += _r(530, 230, 20, 140, "#000000", 'opacity="0.08"')
+	# The belt: black, a sheen, its end roller, the plastic divider, two things riding it.
+	s += _r(86, 214, 250, 18, "#26272A", 'rx="4"') + _r(90, 216, 242, 4, "#FFFFFF", 'opacity="0.12"')
+	s += _c(92, 223, 7, "#3A3B3F") + _r(180, 204, 60, 10, "#E9EAEC", 'rx="3" stroke="%s"' % METAL_DARK)
+	s += _r(120, 190, 30, 24, _bright(rng), 'rx="3"') + _r(256, 182, 24, 32, _bright(rng), 'rx="4"')
+	# The scanner's glass, red line glowing.
+	s += _r(342, 216, 46, 16, "#1E2A30", 'rx="2"') + _r(346, 223, 38, 2, "#FF3B30", 'opacity="0.9"')
+	# The card terminal on its stand.
+	s += _r(398, 200, 6, 30, "#3A3B3F") + _r(386, 172, 30, 34, "#2B2C30", 'rx="4"') + _r(390, 176, 22, 12, "#7FD3C8") + _r(390, 192, 22, 10, "#4A4B50")
+	# The screen on its pole, the store's green on it.
+	s += _r(452, 150, 8, 82, "#3A3B3F") + _r(420, 108, 72, 50, "#202124", 'rx="4"') + _r(425, 113, 62, 40, "#E8F5EC")
+	s += _r(425, 113, 62, 10, GREEN) + _r(430, 128, 30, 4, "#5A5A5A") + _r(430, 136, 40, 4, "#5A5A5A") + _r(465, 144, 18, 6, GREEN)
+	# The bag carousel: three arms of green bags.
+	s += _r(503, 150, 5, 82, "url(#met)")
+	for k in 3:
+		var bx := 486.0 + k * 14.0
+		s += _p("M%.1f 158 l-6 44 q10 8 20 0 l-6 -44 z" % bx, ["#00A651", "#00843D", "#22B35E"][k], 'opacity="0.92"')
+		s += _r(bx - 1, 154, 10, 6, "#FFFFFF", 'opacity="0.5"')
+	return tex(560, 380, s)
+
+
+## Where a checkout's light box is, in its picture (centre), for the lane's number.
+const LANE_LIGHT_AT := Vector2(538, 20)
+
+
+## The wall behind the checkouts (w × 380, its foot on the floor): white shelving stocked with a bit of everything, a green
+## header with a yellow lip, a pegboard back, the yellow price strips.
+static func wall_shelves(w: float, seed_value: int) -> ImageTexture:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var h := 380.0
+	var s := _defs() + _r(0, 30, w, h - 30, "#EEEFF0")
+	var py := 50.0
+	while py < h - 20.0:
+		var px := 10.0 + fmod(py, 20.0)
+		while px < w:
+			s += _c(px, py, 1.3, "#CDD0D3")
+			px += 22.0
+		py += 20.0
+	var all := []
+	for theme: String in STOCK:
+		all.append_array(STOCK[theme])
+	for y: float in [360.0, 285.0, 210.0, 135.0]:
+		s += _r(0, y - 70.0, w, 30, "url(#deep)")
+		var x := 10.0
+		while x < w - 40.0:
+			var kind: String = all[rng.randi_range(0, all.size() - 1)]
+			for j in rng.randi_range(2, 4):
+				var pr := _product(kind, x, y - 2.0, rng)
+				s += pr[0]
+				x += float(pr[1]) + 1.5
+				if x > w - 40.0:
+					break
+			x += 8.0
+		s += _r(0, y, w, 8, "url(#met)") + _r(0, y + 8, w, 9, YELLOW)
+	var ux := 0.0
+	while ux <= w:
+		s += _r(ux - 4, 30, 8, h - 30, "url(#met)", 'stroke="%s"' % METAL_DARK)
+		ux += 230.0
+	s += _r(0, 0, w, 32, GREEN) + _r(0, 28, w, 5, YELLOW) + _r(0, 0, w, 6, "#FFFFFF", 'opacity="0.25"')
+	return tex(w, h, s)
+
+
+## The storefront window beside the door (w × 420, its foot on the floor): a low white wall, then the glass in three panes of
+## aluminium frame, Rue Masson outside in this season (the buildings across, the sidewalk, the road, snowbanks in winter),
+## the reflections of the store's lights, and the stickers: the green band where the logo goes, a big yellow disc ("5 $",
+## a label), posters.
+static func storefront(w: float) -> ImageTexture:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 2836
+	var h := 420.0
+	var winter := Season.current == "winter"
+	var sky: String = {"winter": "#C9D6E2", "spring": "#BFE0F4", "summer": "#AFDAF7", "autumn": "#D9E4EE"}.get(Season.current, "#C9DCEB")
+	var s := _defs()
+	s += _r(0, 0, w, 330, sky)
+	# Across Masson: a row of brick and stone buildings, windows lit or dark, a shop band.
+	var bx := -10.0
+	while bx < w:
+		var bw := rng.randf_range(110.0, 170.0)
+		var top := rng.randf_range(40.0, 110.0)
+		var brick: String = ["#A8473A", "#9C5A44", "#B88A6A", "#C9B9A0", "#7E4436"][rng.randi_range(0, 4)]
+		s += _r(bx, top, bw, 240 - top, brick)
+		var wy := top + 18.0
+		while wy < 190.0:
+			var wx := bx + 14.0
+			while wx < bx + bw - 26.0:
+				s += _r(wx, wy, 18, 26, "#3E4A56" if rng.randf() < 0.7 else "#F6D88A")
+				wx += 34.0
+			wy += 44.0
+		s += _r(bx, 200, bw, 18, ["#1D4F91", "#C8202A", "#3E8E5A", "#2B2B33"][rng.randi_range(0, 3)])
+		s += _r(bx + bw * 0.2, 218, bw * 0.6, 22, "#6F8DA2")
+		bx += bw + 4.0
+	# Their sidewalk, the road, ours.
+	s += _r(0, 240, w, 20, "#E9EEF2" if winter else "#C9C6C0") + _r(0, 260, w, 50, "#5B5D61") + _r(0, 310, w, 20, "#E9EEF2" if winter else "#CFCCC6")
+	for k in 6:
+		s += _r(20 + k * w / 6.0, 283, 40, 4, "#E8E4D8", 'opacity="0.8"')
+	if winter:
+		for k in 5:
+			s += '<ellipse cx="%.1f" cy="262" rx="%.1f" ry="12" fill="#F4F7FA"/>' % [rng.randf_range(0, w), rng.randf_range(40, 90)]
+			s += '<ellipse cx="%.1f" cy="312" rx="%.1f" ry="10" fill="#F4F7FA"/>' % [rng.randf_range(0, w), rng.randf_range(40, 90)]
+	# The store's light on the glass: broad streaks, and the ceiling lights mirrored.
+	for k in 4:
+		var sx := rng.randf_range(0.0, w)
+		s += _p("M%.1f 0 L%.1f 0 L%.1f 330 L%.1f 330 Z" % [sx, sx + 40, sx - 60, sx - 100], "#FFFFFF", 'opacity="0.16"')
+	s += _r(0, 0, w, 330, "#FFFFFF", 'opacity="0.1"')
+	# Stickers: the green band along the top, posters taped low, a yellow disc.
+	s += _r(0, 12, w, 44, GREEN, 'opacity="0.95"') + _r(0, 52, w, 4, YELLOW)
+	s += _c(w - 90.0, 160, 58, YELLOW, 'stroke="%s" stroke-width="5"' % GREEN_DARK)
+	for k in 2:
+		var px := 40.0 + k * 150.0
+		s += _r(px, 220, 96, 100, ["#FFFFFF", "#FFF4C2"][k], 'stroke="#C9C4B8"') + _r(px + 8, 230, 80, 40, ["#E04F5F", "#4FA3E0"][k]) + _r(px + 8, 280, 60, 8, "#5A5A5A") + _r(px + 8, 294, 44, 8, "#5A5A5A")
+	# The frame: three panes, a sill, the low wall under the glass.
+	for fx in [0.0, w / 3.0, 2.0 * w / 3.0, w - 10.0]:
+		s += _r(fx, 0, 10, 340, "url(#met)", 'stroke="#8E959C"')
+	s += _r(0, 0, w, 10, "url(#met)", 'stroke="#8E959C"') + _r(0, 330, w, 14, "url(#met)", 'stroke="#8E959C"')
+	s += _r(0, 344, w, h - 344, "#F2F1EC", 'stroke="#D6D3CB"') + _r(0, h - 16, w, 16, GREEN)
+	return tex(w, h, s)
+
+
+## A bouquet of helium balloons tied to a weight by the till (220 × 460): foil star and heart, a rainbow foil round, latex
+## balloons in the store's colours, curling ribbons down to a little weight.
+static func balloon_bouquet() -> ImageTexture:
+	var s := _defs()
+	var weight := Vector2(110, 440)
+	var balloons := [[60.0, 70.0, "star", YELLOW], [150.0, 60.0, "heart", "#E0302F"], [105.0, 40.0, "round", "rainbow"],
+		[30.0, 130.0, "latex", GREEN], [190.0, 125.0, "latex", "#4FA3E0"], [80.0, 150.0, "latex", "#FF7BA3"], [140.0, 160.0, "latex", "#C084FC"]]
+	for b: Array in balloons:
+		var at := Vector2(b[0], b[1])
+		s += _p("M%.1f %.1f Q%.1f %.1f %.1f %.1f" % [at.x, at.y + 30.0, (at.x + weight.x) / 2.0 + 20.0, (at.y + weight.y) / 2.0, weight.x, weight.y - 14.0], "none", 'stroke="#D8D4CC" stroke-width="1.2"')
+	for b: Array in balloons:
+		var at := Vector2(b[0], b[1])
+		match b[2]:
+			"star":
+				var pts := ""
+				for k in 10:
+					var r := 34.0 if k % 2 == 0 else 15.0
+					var p := at + Vector2.from_angle(-PI / 2.0 + TAU * k / 10.0) * r
+					pts += "%.1f,%.1f " % [p.x, p.y]
+				s += '<polygon points="%s" fill="%s" stroke="#C9A200" stroke-width="2"/>' % [pts, b[3]]
+			"heart":
+				s += _p("M%.1f %.1f c-16 -26 -46 -6 -30 16 l30 26 l30 -26 c16 -22 -14 -42 -30 -16 z" % [at.x, at.y - 6.0], b[3], 'stroke="#A51E22" stroke-width="2"')
+			"round":
+				var cols := ["#E0302F", "#FF8A3D", YELLOW, "#7CCB5A", "#4FA3E0", "#C084FC"]
+				for k in 6:
+					s += _c(at.x, at.y, 30.0 - k * 4.5, cols[k])
+				s += _c(at.x, at.y, 30.0, "none", 'stroke="#B9BCC0" stroke-width="2"')
+			_:
+				s += '<ellipse cx="%.1f" cy="%.1f" rx="22" ry="27" fill="%s"/>' % [at.x, at.y, b[3]]
+				s += _p("M%.1f %.1f l-4 7 l8 0 z" % [at.x, at.y + 26.0], b[3])
+		s += '<ellipse cx="%.1f" cy="%.1f" rx="6" ry="9" fill="#FFFFFF" opacity="0.55" transform="rotate(-25 %.1f %.1f)"/>' % [at.x - 9.0, at.y - 10.0, at.x - 9.0, at.y - 10.0]
+	# The weight: a little pink heart on the floor.
+	s += _p("M%.1f %.1f c-6 -10 -20 -2 -12 8 l12 10 l12 -10 c8 -10 -6 -18 -12 -8 z" % [weight.x, weight.y - 8.0], "#FF7BA3", 'stroke="#C94F7A" stroke-width="1.5"')
+	return tex(220, 460, s)
+
+
+## A promotional card hanging from the ceiling (240 × 84): yellow, a green border and the string's two eyelets (its words are
+## a label in the scene).
+static func promo_card() -> ImageTexture:
+	var s := _defs()
+	s += _r(4, 8, 232, 72, YELLOW, 'rx="8" stroke="%s" stroke-width="5"' % GREEN)
+	s += _r(4, 8, 232, 18, "#FFFFFF", 'opacity="0.3" rx="8"')
+	s += _c(40, 18, 4, "#FFFFFF", 'stroke="%s" stroke-width="2"' % GREEN_DARK) + _c(200, 18, 4, "#FFFFFF", 'stroke="%s" stroke-width="2"' % GREEN_DARK)
+	return tex(240, 84, s)
+
+
+## A carton an employee carries to fill the shelves (60 × 46).
+static func carton() -> ImageTexture:
+	var s := _r(2, 6, 56, 38, "#C69A64", 'stroke="#8E6A3E" stroke-width="2"') + _r(26, 6, 8, 38, "#E7D9BE")
+	s += _p("M2 6 L12 0 L48 0 L58 6 Z", "#D2A872", 'stroke="#8E6A3E" stroke-width="1.5"') + _r(8, 20, 14, 8, "#FFFFFF", 'opacity="0.6"')
+	return tex(60, 46, s)
 
 
 ## What she buys, as a small picture (96 × 96).

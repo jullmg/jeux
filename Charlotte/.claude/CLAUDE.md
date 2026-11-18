@@ -387,10 +387,17 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   taped along the bottom, the street in the pane, a projecting sill), the meter on its board with its mast and the service cable
   (`_depanneur_fittings`), and the Dandurand balcony poking round the corner with its green corrugated awning (`_depanneur_corner`).
 - `scenes/dollarama.gd` (the Dollarama, Rue Masson 2836 south side by 5e; its door is `masson.gd _build_shop_doors`): a big bright
-  store of SIX aisles (Julien). The front of the store (`FRONT`: glass door, carts, baskets, two checkouts and the cashier in green,
-  the store's logo) then each aisle's stocked end (`DollarArt.endcap`) and its mouth running back in perspective
+  store of SIX aisles (Julien). The front of the store (`FRONT`): the glass door, the storefront window with Masson outside in the
+  season and the store's stickers (`DollarArt.storefront`, the logo and "5 $" as sprite and labels), carts and baskets, the wall of
+  stocked shelves behind the checkouts under the big logo (`wall_shelves`), two checkout lanes (`checkout`: candy rack, belt,
+  scanner, card terminal, screen, bag carousel, the lane light with its number, lane 1 lit) and the cashier behind the belt, a
+  bobbing helium balloon bouquet (`balloon_bouquet`), yellow promo cards swaying from the ceiling over the front (`PROMOS`,
+  `promo_card`), then each aisle's stocked end (`DollarArt.endcap`, its price on the yellow card) and its mouth running back in
+  perspective (products in facings, the far end hazy)
   (`DollarArt.aisle_mouth`) under a green sign with its number in a yellow disc (`_aisle_sign`). Click a mouth or ↑ to go in: each
-  aisle is its own area (`_aisle_area`) with one long gondola of its department (`DollarArt.gondola`: fête, cuisine, entretien,
+  aisle is its own area (`_aisle_area`) with one long gondola of its department (`DollarArt.gondola`, 540 tall: overstock cartons
+  on top, a pegboard back, yellow price flags whose prices are labels, `talkers`; an employee restocking aisle 3 with a carton
+  and a hand truck, `_build_stocker`; fête, cuisine, entretien,
   bonbons et collations, jouets et école, saison by `Season.current`), "SORTIE" at both ends, the near gondola as the blurred
   foreground; clicking the gondola buys one of its things (`BUYS`, at most 5 $; candy, chocolate and chips go to her stash).
   `world/dollar_art.gd` draws it all (`_product` kinds). `--x=` in an aisle's range starts there (screenshots).
