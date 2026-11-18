@@ -217,12 +217,17 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   the red "OH / BON!" neon in the big window, a generic "BIÈRE" neon, in `holt.gd`, no real logos on it yet; `world/neon_sign.gd`,
   `NeonSign`: glowing, flickering window neon) and the Holt-side
   `ruelle` entrance (iron stair, conduits, tags, garage door, one-way sign, the post for the "RALENTISSEZ" sign).
-- **Generic plexes down a vista are volumes, not paint** (Julien, 2026-11-18: "drastically better"): `CrossStreet._wall_details`
-  default case draws each building in its own shade with its party wall, windows set into the wall (reveal shade, some lit, some
-  curtained), then what juts toward the street, far to near: a projecting cornice (`_cornice`), iron balconies on slabs with
-  their underside or top by the horizon and the shade they throw (`_balcony`), the outdoor stair in front (`_outdoor_stair`), the
-  door's steps (`_steps`); snow on all of it in winter. Helpers `_ledge` (a plane jutting out) and `_end_face` (its near end).
-  The vista is drawn once, so this costs nothing per frame.
+- **Generic plexes down a vista are volumes, not paint** (Julien, 2026-11-18, twice: "drastically better", then "the textures
+  aren't pretty and the balconies are right in front of the windows"): a wall of kind "plex" is drawn whole by
+  `CrossStreet._plex_row` on ONE floor height (`fh`): each storey has its floor line, two windows (`_plex_window`: stone lintel,
+  frame in the building's colour, sky or lit glass, the reveal's shade, muntins up close, sill) and a door (`_plex_door`: the
+  street door at the foot, an upper flat's glazed door onto its balcony); the balcony of an upper storey sits ON its floor in
+  front of that door, so its railing hides the bottom of the windows as on a real plex, **with no posts under it** (Julien),
+  its underside shaded with joists when above the horizon (`_balcony`); the outdoor stair comes down from the first one, the
+  door's steps (`_steps`), a bracketed cornice (`_cornice`). Each building has its own brick (`PLEX_BRICKS`, the first one keeps
+  the corner's colour), frames (`PLEX_FRAMES`) and door (`PLEX_DOORS`), real brick courses with staggered joints and darker
+  bricks up close (`_brick_courses`, its own RNG), and a stone base (`PLEX_BASE`). Snow on ledges in winter. Other kinds (shop,
+  school, garages…) keep `_wall_details`. The vista is drawn once, so this costs nothing per frame.
 - Vista detail (`CrossStreet`): street trees drawn from two `PropArt.tree` textures (`_tree_tex`, own RNG) in their pits at the curb (`TREES_LEFT`/`TREES_RIGHT`, between the poles and lamps, `TREE_FROM_CURB`; never mid-sidewalk),
   hazier with distance; utility poles and wires down the left curb (`_poles`); sidewalk joints, gutters, a manhole
   (`_street_details`); walls with brick courses, cornice lip, building edges, window lintels/sills/mullions; plex walls
