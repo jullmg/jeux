@@ -176,7 +176,9 @@ func _process(delta: float) -> void:
 					_timer = randf_range(1.0, 3.0)
 	# Up a pole or on the wire it is in front of the poles (and the houses behind them), but not down among the people.
 	z_index = 1 if (_state in ["pole_up", "pole_down", "wire", "wire_sit"] and position.y < 520.0) else 0
-	queue_redraw()
+	# Only redrawn near the view (OnScreen); off it, it goes on about its business unseen.
+	if OnScreen.near(self):
+		queue_redraw()
 
 
 # Back to the bag only when Charlotte is well away from it.

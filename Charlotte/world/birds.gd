@@ -25,7 +25,8 @@ func _process(delta: float) -> void:
 	var cam := get_viewport().get_camera_2d()
 	if cam and position.x < cam.get_screen_center_position().x - 900.0:
 		_respawn()
-	queue_redraw()
+	if OnScreen.near(self, 900.0):
+		queue_redraw()
 
 
 func _draw() -> void:

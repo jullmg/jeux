@@ -84,7 +84,9 @@ func _process(delta: float) -> void:
 	if wander:
 		_behave(delta)
 	_apply_facing()
-	queue_redraw()
+	# Only redrawn near the view (OnScreen): a cat down the street keeps wandering, unseen.
+	if OnScreen.near(self):
+		queue_redraw()
 
 
 ## Curled up in someone's arms (see Character.carry): loafing, purring with hearts, not going anywhere.

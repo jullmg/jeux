@@ -926,6 +926,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   or a product photo such as Open Food Facts), write where it comes from in `art/brands/SOURCES.md`, and lay it over the drawn
   art with `ShopArt._stamped(w, h, svg, [[file, Rect2i]])` (or as a Sprite/label in a scene). Chips: crème sure et oignons is
   always **Ruffles**. Not covered by this: TV shows and characters stay original (see the TV catalogue).
+- **Nothing animated off screen is redrawn or posed** (2026-11-18: the streets went from about 45 to 66 fps, Masson from 30 to
+  42, on the M1 Pro): `OnScreen.near(item, margin)` (`world/on_screen.gd`) says whether something is in or near the view;
+  stray cats, dogs, squirrels, cyclists, the window neighbour, the sky birds only `queue_redraw()` when it is true, the wire
+  birds skip the birds away from the view in `_draw`, `Character` skips `_apply_pose` far off screen (its walking and timers go
+  on), the dream moon and the crossing guard's paddle only when shown. **A new animated thing does the same.** Still to do if
+  needed: cache the runtime-built textures between scenes (load times 0.5–2.7 s) and cut Masson's draw calls (about 4,500).
 - Performance: a `_draw()` node spanning the whole street is never culled and redraws every command each frame, and every
   `draw_set_transform` breaks batching. Thousands of small shapes (leaves, grit) therefore go into one vertex-coloured mesh
   (`Street._Batch`); before that the street ran at about 35 fps on an M1. Check with

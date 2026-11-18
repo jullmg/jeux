@@ -29,7 +29,8 @@ func _process(delta: float) -> void:
 		var dx := charlotte.global_position.x - (global_position.x + size.x / 2.0)
 		target = clampf(dx / 300.0, -1.0, 1.0) if absf(dx) < 500.0 else sin(_t * 0.3) * 0.3
 	_look = move_toward(_look, target, delta * 1.5)
-	queue_redraw()
+	if OnScreen.near(self):
+		queue_redraw()
 
 
 func _draw() -> void:

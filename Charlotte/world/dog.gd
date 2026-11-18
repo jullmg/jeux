@@ -111,7 +111,9 @@ func _process(delta: float) -> void:
 			facing = 1 if v > 0.0 else -1
 			_step = fmod(_step + absf(v) * delta / (14.0 + float(_b.leg) * 1.6), 1.0)
 	scale = Vector2(facing * size, size)
-	queue_redraw()
+	# Only redrawn near the view (OnScreen); it keeps up with its walker either way.
+	if OnScreen.near(self):
+		queue_redraw()
 
 
 func _update_petting(delta: float) -> void:

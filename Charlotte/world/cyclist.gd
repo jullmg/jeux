@@ -102,9 +102,10 @@ func _process(delta: float) -> void:
 	var gone := screen_x > get_viewport_rect().size.x + 200.0 if direction > 0.0 else screen_x < -200.0
 	if gone and ((direction > 0.0 and position.x > until_x) or (direction < 0.0 and position.x < until_x)):
 		queue_free()
-	queue_redraw()
-	if _bike:
-		_bike.queue_redraw()
+	if OnScreen.near(self):
+		queue_redraw()
+		if _bike:
+			_bike.queue_redraw()
 
 
 # Behind the rider: the shadow on the asphalt and the far crank and pedal.

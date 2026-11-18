@@ -66,9 +66,14 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
+	# Only the birds near the view: the cable runs the length of the street, and each bird is its own transform.
+	var view := get_viewport().get_canvas_transform().affine_inverse() * get_viewport_rect()
+	view = view.grow(200.0)
 	for b in _birds:
-		var body := Color("#6E7480") if b.pigeon else Color("#8A6A4A")
 		var p: Vector2 = b.pos
+		if not view.has_point(to_global(p)):
+			continue
+		var body := Color("#6E7480") if b.pigeon else Color("#8A6A4A")
 		var f: float = b.facing
 		if b.state == "perch":
 			var bob := sin(_t * 3.0 + b.phase)

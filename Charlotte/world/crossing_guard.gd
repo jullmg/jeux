@@ -69,7 +69,7 @@ class _Paddle:
 		visible = guard._holding
 		if visible:
 			position = guard.to_local(guard.hand_position())
-		queue_redraw()
+			queue_redraw()
 
 	func _draw() -> void:
 		draw_line(Vector2.ZERO, Vector2(0, -150), Color("#C9CED6"), 8.0)

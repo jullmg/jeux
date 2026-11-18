@@ -447,6 +447,10 @@ func _process(delta: float) -> void:
 	var target := -lerpf(0.07, 0.26, _run) if is_walking else 0.0
 	_hair_vel += ((target - _hair_angle) * 60.0 - _hair_vel * 7.0) * delta
 	_hair_angle += _hair_vel * delta
+	# Far off the screen, nobody sees the pose: it is set again as soon as they come near (OnScreen). Their walking, timers and
+	# the rest above carry on.
+	if not OnScreen.near(self, 400.0):
+		return
 	_apply_pose()
 
 
