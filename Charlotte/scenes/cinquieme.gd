@@ -34,6 +34,10 @@ func _start_x() -> float:
 		return _starts[layout.find("rue_dandurand") + 1] + 40.0
 	if _arriving("5e_from_5e_ouest_masson"):
 		return _starts[layout.find("rue_masson")] - 40.0
+	if _arriving("5e_from_5e_ouest_holt_nord"):
+		return _starts[layout.find("rue_holt")] - 40.0
+	if _arriving("5e_from_5e_ouest_masson_sud"):
+		return _starts[layout.find("rue_masson") + 1] + 40.0
 	if _arriving("5e_from_holt"):
 		return _starts[layout.find("rue_holt") + 1] + 40.0
 	if _arriving("5e_from_dandurand"):
@@ -90,13 +94,16 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 
 
 func _build_doors() -> void:
-	_add_corner(_cross_streets[0], "res://scenes/holt.tscn", "holt_from_5e", false)
+	_add_corner(_cross_streets[0], "res://scenes/holt.tscn", "holt_from_5e", false, 1)
 	_add_corner(_cross_streets[1], "res://scenes/dandurand.tscn", "dandurand_from_5e", false, -1)
 	# Over 5e Avenue to its west side (cinquieme_ouest), at every corner.
 	_add_across(_cross_streets[0], "res://scenes/cinquieme_ouest.tscn", "5e_ouest_from_5e_holt", 1)
 	_add_across(_cross_streets[1], "res://scenes/cinquieme_ouest.tscn", "5e_ouest_from_5e_dandurand", -1)
 	_add_across(_cross_streets[1], "res://scenes/cinquieme_ouest.tscn", "5e_ouest_from_5e_dandurand_sud", 1)
 	_add_across(_cross_streets[2], "res://scenes/cinquieme_ouest.tscn", "5e_ouest_from_5e_masson", -1)
+	# And from the corners across Holt and Masson (both corners of every cross street, Julien).
+	_add_across(_cross_streets[0], "res://scenes/cinquieme_ouest.tscn", "5e_ouest_from_5e_holt_nord", -1)
+	_add_across(_cross_streets[2], "res://scenes/cinquieme_ouest.tscn", "5e_ouest_from_5e_masson_sud", 1)
 	# On Masson at the 5e corner of the church's block (the north side, right of 5e).
 	_add_corner(_cross_streets[2], "res://scenes/masson_impair.tscn", "masson_impair_from_rue_5e_5e_6e", false, -1)
 	_add_lane("ruelle")

@@ -46,6 +46,10 @@ func _start_x() -> float:
 		return _starts[layout.find("rue_dandurand") + 1] + 40.0
 	if _arriving("6e_est_from_6e_masson") or _arriving("6e_est_from_masson"):
 		return _starts[layout.find("rue_masson")] - 40.0
+	if _arriving("6e_est_from_6e_holt_nord"):
+		return _starts[layout.find("rue_holt")] - 40.0
+	if _arriving("6e_est_from_6e_masson_sud"):
+		return _starts[layout.find("rue_masson") + 1] + 40.0
 	if not is_nan(Transition.street_x):
 		var x := Transition.street_x
 		Transition.street_x = NAN
@@ -104,6 +108,9 @@ func _build_doors() -> void:
 	_add_across(dandurand, "res://scenes/main.tscn", "6e_from_6e_est_dandurand", -1)
 	_add_across(dandurand, "res://scenes/main.tscn", "6e_from_6e_est_dandurand_sud", 1)
 	_add_across(masson, "res://scenes/main.tscn", "6e_from_6e_est_masson", -1)
+	# And from the corners across Holt and Masson (both corners of every cross street, Julien).
+	_add_across(holt, "res://scenes/main.tscn", "6e_from_6e_est_holt_nord", -1)
+	_add_across(masson, "res://scenes/main.tscn", "6e_from_6e_est_masson_sud", 1)
 	for art in ["ruelle_impair_holt", "ruelle_impair_dandurand", "ruelle_six_est_sud"]:
 		var i := layout.find(art)
 		var w := _tex(art).get_width()

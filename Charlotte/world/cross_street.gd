@@ -68,10 +68,12 @@ var lane_side := 1.0
 ## distant city fades in slowly, leaving the sun (see _horizon).
 var from_lane := false
 
-## The crosswalk over OUR street at this corner (the one that goes toward the camera), painted at the edge of the
-## intersection on the block's side: -1 = along the gap's left edge, 1 = its right edge, 0 = none. Set on the GROUND
-## part by `StreetScene._add_corner`, which also makes it clickable (`own_crosswalk_rect`).
-var own_crosswalk := 0.0
+## The crosswalks over OUR street at this intersection (the ones that go toward the camera), one at each corner that has
+## one: -1 = along the gap's left edge, 1 = its right edge. Every corner she can stand on gets one (Julien: she must be
+## able to cross on both sides of the cross street). Set on the GROUND part with `add_own(side)` by
+## `StreetScene._add_corner` / `_add_across` (and Masson's `_masson_crossing`), which also make it clickable
+## (`own_crosswalk_rect(side)`).
+var own_sides: Array[float] = []
 const OWN_CROSSWALK_W := 88.0
 const OWN_CROSSWALK_TOP := 664.0
 
@@ -112,9 +114,9 @@ func _fan(x: float, y: float) -> float:
 ## sidewalk's curb outward over the corner. Below the curb both its edges run toward the vanishing point, the very lines of the
 ## cross street's curb and sidewalk carried on, so it widens as it comes toward us; the planted curb extension beside it is
 ## moved out of its way (`own_clear`).
-func _own_ends() -> Vector2:
+func _own_ends(side: float) -> Vector2:
 	var curbs := road_x(OWN_CROSSWALK_TOP)
-	if own_crosswalk < 0.0:
+	if side < 0.0:
 		return Vector2(curbs.x - OWN_CROSSWALK_W, curbs.x)
 	return Vector2(curbs.y, curbs.y + OWN_CROSSWALK_W)
 
@@ -128,23 +130,27 @@ func _own_edge(x: float, y: float) -> float:
 ## How far the crosswalk over our own street reaches along the curb on `side` (-1 the gap's left, 1 its right), down to the
 ## bottom of the view, plus a little room: a planted curb extension on that side starts beyond it.
 func own_clear(side: float) -> float:
-	var e := _own_ends_for(side)
+	var e := _own_ends(side)
 	if side < 0.0:
 		return minf(e.x, _own_edge(e.x, VIEW_BOTTOM)) - 14.0
 	return maxf(e.y, _own_edge(e.y, VIEW_BOTTOM)) + 14.0
 
 
-func _own_ends_for(side: float) -> Vector2:
-	var keep := own_crosswalk
-	own_crosswalk = side
-	var e := _own_ends()
-	own_crosswalk = keep
-	return e
+## Paints the crosswalk over our own street at the corner on `side` (-1 left, 1 right of the gap).
+func add_own(side: float) -> void:
+	if not own_sides.has(side):
+		own_sides.append(side)
+	queue_redraw()
 
 
-## Where the crosswalk over our own street lies (world rectangle, from the corner's dropped curb to the bottom of the view).
-func own_crosswalk_rect() -> Rect2:
-	var e := _own_ends()
+func has_own(side: float) -> bool:
+	return own_sides.has(side)
+
+
+## Where the crosswalk over our own street at the corner on `side` lies (world rectangle, from the corner's dropped curb to
+## the bottom of the view).
+func own_crosswalk_rect(side: float) -> Rect2:
+	var e := _own_ends(side)
 	var l := minf(e.x, _own_edge(e.x, VIEW_BOTTOM))
 	var r := maxf(e.y, _own_edge(e.y, VIEW_BOTTOM))
 	return Rect2(l - 4.0, OWN_CROSSWALK_TOP - 14.0, r - l + 8.0, VIEW_BOTTOM - OWN_CROSSWALK_TOP + 14.0)
@@ -892,8 +898,8 @@ func _draw_ground() -> void:
 	# with its warning dots, like the ramps of the crosswalk above; its edges run to the vanishing point like the cross
 	# street's, so it widens as it comes nearer; and its bars lie along the curb, each thicker and further from the last
 	# as the road comes toward us, until it runs off the bottom of the view.
-	if own_crosswalk != 0.0:
-		var e := _own_ends()
+	for own_side in own_sides:
+		var e := _own_ends(own_side)
 		var ramp_top := OWN_CROSSWALK_TOP - 12.0
 		draw_colored_polygon(PackedVector2Array([Vector2(e.x + 6.0, ramp_top), Vector2(e.y - 6.0, ramp_top),
 			Vector2(e.y, OWN_CROSSWALK_TOP + 1.0), Vector2(e.x, OWN_CROSSWALK_TOP + 1.0)]), Color("#BDB7AD"))

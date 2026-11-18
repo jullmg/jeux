@@ -37,8 +37,14 @@ func _start_x() -> float:
 		return _starts[layout.find("rue_dandurand")] - 40.0
 	if _arriving("5e_ouest_from_5e_dandurand"):
 		return _starts[layout.find("rue_dandurand") + 1] + 40.0
-	if _arriving("5e_ouest_from_5e_holt"):
+	if _arriving("5e_ouest_from_5e_holt") or _arriving("5e_ouest_from_holt"):
 		return _starts[layout.find("rue_holt")] - 40.0
+	if _arriving("5e_ouest_from_5e_masson_sud"):
+		return _starts[layout.find("rue_masson")] - 40.0
+	if _arriving("5e_ouest_from_5e_holt_nord"):
+		return _starts[layout.find("rue_holt") + 1] + 40.0
+	if _arriving("5e_ouest_from_dandurand"):
+		return _starts[layout.find("rue_dandurand") + 1] + 40.0
 	if not is_nan(Transition.street_x):
 		var x := Transition.street_x
 		Transition.street_x = NAN
@@ -92,6 +98,12 @@ func _build_doors() -> void:
 	_add_across(dandurand, "res://scenes/cinquieme.tscn", "5e_from_5e_ouest_dandurand_sud", -1)
 	_add_across(dandurand, "res://scenes/cinquieme.tscn", "5e_from_5e_ouest_dandurand", 1)
 	_add_across(holt, "res://scenes/cinquieme.tscn", "5e_from_5e_ouest_holt", -1)
+	# And from the corners across Masson and Holt (both corners of every cross street, Julien).
+	_add_across(masson, "res://scenes/cinquieme.tscn", "5e_from_5e_ouest_masson_sud", -1)
+	_add_across(holt, "res://scenes/cinquieme.tscn", "5e_from_5e_ouest_holt_nord", 1)
+	# Round onto Holt and Dandurand from the corners of their stretches west of 5e (holt.tscn, dandurand.tscn).
+	_add_corner(holt, "res://scenes/holt.tscn", "holt_from_5e_ouest", false, -1)
+	_add_corner(dandurand, "res://scenes/dandurand.tscn", "dandurand_from_5e_ouest", false, 1)
 	for art in ["ruelle_cinq_ouest_masson", "ruelle_cinq_ouest_sud", "ruelle_cinq_ouest_dandurand", "ruelle_cinq_ouest_holt"]:
 		var i := layout.find(art)
 		var w := _tex(art).get_width()

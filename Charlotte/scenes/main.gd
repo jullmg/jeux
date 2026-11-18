@@ -46,6 +46,10 @@ func _start_x() -> float:
 		return _starts[layout.find("rue_masson") + 1] + 40.0
 	if _arriving("6e_from_holt") or _arriving("6e_from_6e_est_holt"):
 		return _starts[layout.find("rue_holt")] - 40.0
+	if _arriving("6e_from_6e_est_masson_sud"):
+		return _starts[layout.find("rue_masson")] - 40.0
+	if _arriving("6e_from_6e_est_holt_nord"):
+		return _starts[layout.find("rue_holt") + 1] + 40.0
 	var lane := _from_lane()
 	if not is_nan(lane):
 		return lane
@@ -126,6 +130,9 @@ func _build_doors() -> void:
 	_add_across(dandurand, "res://scenes/sixieme_est.tscn", "6e_est_from_6e_dandurand_sud", -1)
 	_add_across(dandurand, "res://scenes/sixieme_est.tscn", "6e_est_from_6e_dandurand", 1)
 	_add_across(holt, "res://scenes/sixieme_est.tscn", "6e_est_from_6e_holt", -1)
+	# And from the corners across Masson and Holt from the block (both corners of every cross street, Julien).
+	_add_across(masson, "res://scenes/sixieme_est.tscn", "6e_est_from_6e_masson_sud", -1)
+	_add_across(holt, "res://scenes/sixieme_est.tscn", "6e_est_from_6e_holt_nord", 1)
 	_add_lane("ruelle_verte")
 	_add_lane("ruelle")
 	var origin := _house_origin(layout.find("duplex_charlotte"))

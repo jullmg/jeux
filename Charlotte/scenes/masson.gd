@@ -391,6 +391,13 @@ func _other_side() -> String:
 	return "res://scenes/masson_%s.tscn" % ("pair" if side == "impair" else "impair")
 
 
+## What a corner of the avenue at layout index `i` is called in the crossing keys: the block on that side (`after`: right of
+## it), or "bout" past the last avenue at either end of the street, where no block of ours begins.
+func _corner_name(i: int, after: bool) -> String:
+	var b := _block_beside(i, after)
+	return b if b != "" else "bout"
+
+
 ## The block whose buildings start just past layout index `i` or end just before it (an avenue's gap at `i`), on side `after`.
 func _block_beside(i: int, after: bool) -> String:
 	for b: String in _side_data.blocks:
@@ -406,8 +413,7 @@ func _start_x() -> float:
 		var gap: String = a[0]
 		var i := layout.find(gap)
 		for after: bool in [true, false]:
-			var b := _block_beside(i, after)
-			if b != "" and _arriving("%s_from_%s_%s" % [street_key, gap, b]):
+			if _arriving("%s_from_%s_%s" % [street_key, gap, _corner_name(i, after)]):
 				return _starts[i + 1] + 40.0 if after else _starts[i] - 40.0
 	if not is_nan(Transition.street_x):
 		var x := Transition.street_x
@@ -534,21 +540,16 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 		_label(p[2], at, Vector2(60, 20), int(p[5]), Color(p[3]), Color(p[4]))
 
 
-# Over Masson at every avenue, to the other side of the street at the same corner: the crosswalk is painted on the corner of
-# the block to the right of the avenue, and leads from that stretch of sidewalk to the same block across the street.
+# Over Masson at every avenue, to the other side of the street at the same corner: a crosswalk at BOTH corners of each avenue
+# (Julien), each leading from its stretch of sidewalk to the same corner across the street.
 func _build_doors() -> void:
 	_build_shop_doors()
 	var other := "pair" if side == "impair" else "impair"
 	for cs in _cross_streets:
 		var i := _starts.find(cs.x0)
 		var gap: String = layout[i]
-		var b := _block_beside(i, true)
-		var right := true
-		if b == "":
-			b = _block_beside(i, false)
-			right = false
-		if b != "":
-			_masson_crossing(cs, right, "masson_%s_from_%s_%s" % [other, gap, b])
+		for right: bool in [true, false]:
+			_masson_crossing(cs, right, "masson_%s_from_%s_%s" % [other, gap, _corner_name(i, right)])
 		# From the north side, 6e Avenue runs up toward Dandurand: turn into it on either side of the avenue, the church's
 		# side (main.tscn) from the corner left of it, the other side (sixieme_est) from the corner right of it.
 		# Up 5e Avenue: its east side (cinquieme) from the corner right of it.
@@ -589,9 +590,8 @@ func _masson_crossing(cs: CrossStreet, right: bool, arrive: String) -> void:
 	var ground: CrossStreet = _grounds.get(cs)
 	if ground == null:
 		return
-	ground.own_crosswalk = 1.0 if right else -1.0
-	ground.queue_redraw()
-	var over := DoorSpot.make(ground.own_crosswalk_rect(), func():
+	ground.add_own(1.0 if right else -1.0)
+	var over := DoorSpot.make(ground.own_crosswalk_rect(1.0 if right else -1.0), func():
 		if DebugMenu.blocked(GameState.age < CROSS_AGE):
 			Bubble.say(self, _charlotte.position + Vector2(0, -190), CANT_CROSS, 2.6)
 			return

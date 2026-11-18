@@ -24,6 +24,8 @@ func _start_x() -> float:
 		return _starts[layout.find("rue_5e") + 1] + 40.0
 	if _arriving("dandurand_from_6e_est"):
 		return _starts[layout.find("rue_6e") + 1] + 40.0
+	if _arriving("dandurand_from_5e_ouest"):
+		return _starts[layout.find("rue_5e")] - 40.0
 	if not is_nan(Transition.street_x):
 		var x := Transition.street_x
 		Transition.street_x = NAN
@@ -74,10 +76,13 @@ func _logo(house: Sprite2D, file: String, at: Vector2, height: float) -> void:
 
 
 func _build_doors() -> void:
-	_add_corner(_cross_streets[0], "res://scenes/cinquieme.tscn", "5e_from_dandurand")
-	_add_corner(_cross_streets[1], "res://scenes/main.tscn", "6e_from_dandurand")
+	_add_corner(_cross_streets[0], "res://scenes/cinquieme.tscn", "5e_from_dandurand", true, 1)
+	_add_corner(_cross_streets[1], "res://scenes/main.tscn", "6e_from_dandurand", true, -1)
 	# Across 6e from her block, round onto the other side of 6e Avenue (sixieme_est).
-	_add_corner(_cross_streets[1], "res://scenes/sixieme_est.tscn", "6e_est_from_dandurand", false, 1)
+	# With its crosswalk over Dandurand at that corner too (both corners of every cross street, Julien): she comes out on 6e's
+	# east side and crosses Dandurand there. Likewise past 5e, onto 5e's west side.
+	_add_corner(_cross_streets[1], "res://scenes/sixieme_est.tscn", "6e_est_from_dandurand", true, 1)
+	_add_corner(_cross_streets[0], "res://scenes/cinquieme_ouest.tscn", "5e_ouest_from_dandurand", true, -1)
 	# The dépanneur's glass door, at the top of its steps.
 	var origin := _house_origin(layout.find("depanneur_front"))
 	var area := Rect2(origin + Vector2(338.0, 503.0) * HOUSE_SCALE, Vector2(104.0, 97.0) * HOUSE_SCALE)

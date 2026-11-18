@@ -142,9 +142,10 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `texts` painted on a wall, `panels` = small boards) in the order `ORDER` gives: shared avenues once, the inner corner side walls
   dropped, indices shifted (`_side_data`, `blocks` = where each block's buildings run). **A new block = one BLOCKS entry per
   side, its place in ORDER, its facades in the generator.** The plate names the block she is in (`room_name()`, read by
-  PlaceLabel); the map puts her at the sheet's foot between the 1re and the 9e. Every avenue has a crosswalk over Masson at its
-  corner on the block to its right (`_masson_crossing`, from that stretch only): it loads the other side with her at the same
-  corner (keys "masson_<side>_from_<gap>_<block>", also the F1 menu's entries). The avenues aren't turned into yet, and Masson
+  PlaceLabel); the map puts her at the sheet's foot between the 1re and the 9e. Every avenue has a crosswalk over Masson at BOTH
+  its corners (`_masson_crossing`, each from its own stretch): it loads the other side with her at the same corner (keys
+  "masson_<side>_from_<gap>_<block>", the block on that side of the avenue, or "bout" past the last avenue at either end:
+  `_corner_name`; also the F1 menu's entries). The avenues aren't turned into yet, and Masson
   isn't reached from her block yet (only the debug menu). Facades: the generator's "Rue Masson" section, kinds `commerce` (`_commerce`: brick or `upper: "frame"`
   flats over a row of `_shopfront`s with sign bands, awnings, gooseneck lamps, fruit crates, a residential door, the lily
   mural; options `upper: "stone"` rusticated grey stone, shop `ribs` a corrugated sign band, `stone_frame` pale stone piers and
@@ -237,6 +238,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   plex) and brick colour sampled off its facade (`_wall_color`, brick-coloured points only); generic plexes beyond.
   The first wall is the corner building's side, so it takes our own corner facade's height and brick (`ours`). Only the side across the street
   (another block) is still hand-written.
+- **Every corner building shows its side down the vista, at every intersection, present and future** (Julien, 2026-11-18: a
+  three-storey corner over a two-storey first wall looked flat, its top floor a cut-out): `StreetScene._join_corners()` runs
+  after every street's `_build_cross_streets` and makes the first wall on each side of each cross street the side of OUR
+  building at that corner — its roof height (`_roof_line`) and brick. A wall laid with the other street's real facade keeps its
+  picture unless it is lower than our corner (then it is drawn plain at our height); open ground at the corner (no roof line)
+  becomes a "lot". Nothing to do per street: a new street gets it for free.
 - Before 8 (`StreetScene.CROSS_AGE`, `GameState.age`) Charlotte can't cross a street ("Je n'ai pas le droit de traverser
   toute seule !"), so her world is the block: its four corners and the lane. It goes through `DebugMenu.blocked()` like
   every other limit (see **Limits on where she may go** under the debug menu).
@@ -269,13 +276,17 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   walks one stretch at a time. Every crosswalk is clickable (`_add_crossing`, automatic): she goes to the curb on her side,
   says "Je regarde des deux côtés !" and looks both ways, then walks across on her own (`PlayerControl.hands_off`) to the
   other stretch. **A corner has two crosswalks and both work (Julien)**: the one over the cross street (above), and the
-  one over the street she is on, which leaves toward the camera so this view cannot show her walking it. It is painted
-  at the block's corner of each gap (`CrossStreet.own_crosswalk`, set on the GROUND part kept in `StreetScene._grounds`):
+  one over the street she is on, which leaves toward the camera so this view cannot show her walking it. **Every corner she
+  can stand on has that second one, on BOTH sides of every cross street** (Julien, 2026-11-18, for every intersection and every
+  future one): `CrossStreet.own_sides` (-1 the gap's left corner, 1 its right; `add_own(side)`, `has_own`,
+  `own_crosswalk_rect(side)`), set on the GROUND part kept in `StreetScene._grounds`. A debug run warns about any corner left
+  without one (`StreetScene._check_corners`), so a new street or corner can't forget it; always pass the stretch (`side` /
+  `stretch` -1 or 1) to `_add_corner` / `_add_across`, never rely on the stretch she started on. It is painted:
   a dropped curb with its warning dots, **in line with the cross street's sidewalk** (Julien: `_own_ends`, from that sidewalk's
   curb outward), then bars lying along the curb, each thicker and further from the last as the road comes toward us, its
   edges the cross street's curb and sidewalk lines carried on toward the vanishing point (`_own_edge`); the planted curb
   extension on that side starts beyond it (`own_clear`, read by `_build_curb_gardens`) and no utility pole stands on its
-  dropped curb (`_build_utility_poles`), yellow in the school zone and made clickable by `_add_corner` (`own_crosswalk_rect`): a
+  dropped curb (`_build_utility_poles`), yellow in the school zone and made clickable by `_add_corner` (`own_crosswalk_rect(side)`): a
   click takes her round into the cross street's scene with `Transition.crossing` = the arrive key, and that scene walks
   her straight over its gap for our street (`_cross_on_arrival`, looking both ways as usual) — one click for what used
   to be "turn the corner, then cross". Same age rule as any crosswalk (`CANT_CROSS`, through `DebugMenu.blocked`).

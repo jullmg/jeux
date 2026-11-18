@@ -102,6 +102,7 @@ func _ready() -> void:
 	DepthBlur.far(self)
 	add_child(Birds.new())
 	_build_cross_streets()
+	_join_corners()
 	for cs in _cross_streets:
 		add_child(cs)
 		DepthBlur.vista(self, cs)
@@ -136,6 +137,7 @@ func _ready() -> void:
 	_control.walk_top = HOUSE_BASE_Y - 200.0
 	add_child(_control)
 	_build_doors()
+	_check_corners()
 	for cs in _cross_streets:
 		_add_crossing(cs)
 	if crossing:
@@ -289,6 +291,62 @@ func _build_doors() -> void:
 	pass
 
 
+## The kinds of vista wall that are a building (the others are open: a lane, a lot, a park, the next street).
+const BUILDING_WALLS := ["plex", "shop", "school", "corner_holt", "ohbon", "garage"]
+
+
+## Every corner building shows its side down the cross street (Julien: a three-storey corner over a two-storey first wall
+## looked like a flat cut-out, its top floor with no side to it). The first wall on each side of every cross street is the
+## side of the building at that corner of our street, so it takes that building's roof height and brick. A wall laid with
+## the other street's real facade keeps its picture unless it is lower than our corner, which would leave our top floors
+## flat: then it is drawn plain, at our corner's height, like `_walls_along`'s `ours`. Runs for every street after
+## `_build_cross_streets`, so no street (and no future one) has to remember it.
+func _join_corners() -> void:
+	for cs in _cross_streets:
+		var gi := _starts.find(cs.x0)
+		for side in [-1, 1]:
+			var walls: Array = cs.left_walls if side < 0 else cs.right_walls
+			var ci: int = gi + side
+			if gi < 0 or walls.is_empty() or ci < 0 or ci >= layout.size():
+				continue
+			var art: String = layout[ci]
+			var w: Dictionary = walls[0]
+			if _wall_kind(art) == "gap" or not BUILDING_WALLS.has(str(w.get("kind", ""))) or w.get("crop", false):
+				continue
+			var tex := _tex(art)
+			var top := HOUSE_BASE_Y - (tex.get_height() - _roof_line(tex)) * HOUSE_SCALE
+			# Open ground at the corner (a lot, a site hoarding): open ground down the vista beside it too.
+			if top > HOUSE_BASE_Y - 40.0:
+				walls[0] = {"to": w.to, "top": CrossStreet.FACADE_Y, "kind": "lot", "color": w.get("color", Color("#9C5A44"))}
+				continue
+			# Far higher than any building (a picture whose roof line can't be read): leave the wall as it was.
+			if top < -400.0:
+				continue
+			if w.has("tex"):
+				if float(w.get("top", top)) - top < 12.0:
+					continue
+				w.erase("tex")
+			elif absf(float(w.get("top", top)) - top) < 3.0:
+				continue
+			w.top = top
+			w.color = _wall_color(tex)
+
+
+## In a debug run, says which corners she can stand on have no crosswalk over our own street (Julien: she must be able to
+## cross on both sides of every cross street, and a new street or corner must not forget it).
+func _check_corners() -> void:
+	if not OS.is_debug_build():
+		return
+	for cs in _cross_streets:
+		var ground: CrossStreet = _grounds.get(cs)
+		if ground == null:
+			continue
+		for side in [-1.0, 1.0]:
+			var stretch := _segment_at(cs.x0 - 1.0) if side < 0.0 else _segment_at(cs.x1 + 1.0)
+			if stretch.y - stretch.x > 120.0 and not ground.has_own(side):
+				push_warning("%s: no crosswalk over our street at the %s corner of %s" % [street_key, "left" if side < 0.0 else "right", cs.street_name])
+
+
 ## Turning the corner: click a cross street and Charlotte walks to the curb on her side, then `scene` (another
 ## street) loads with Transition.arrive = `arrive`, so that street knows which corner she comes round.
 ## Only from the sidewalk Charlotte started on (the block the corner belongs to); the crosswalk below is for crossing.
@@ -326,9 +384,10 @@ func _add_corner(cs: CrossStreet, scene: String, arrive: String, own_crossing :=
 	var ground: CrossStreet = _grounds.get(cs)
 	if ground == null:
 		return
-	ground.own_crosswalk = -1.0 if cs.x0 > _start else 1.0
-	ground.queue_redraw()
-	var over := DoorSpot.make(ground.own_crosswalk_rect(), func():
+	# The corner of the stretch it is turned from: the gap's left edge for a stretch left of it, else its right edge.
+	var own_side := -1.0 if (cs.x0 + cs.x1) / 2.0 > home.y else 1.0
+	ground.add_own(own_side)
+	var over := DoorSpot.make(ground.own_crosswalk_rect(own_side), func():
 		if DebugMenu.blocked(GameState.age < CROSS_AGE):
 			Bubble.say(self, _charlotte.position + Vector2(0, -190), CANT_CROSS, 2.6)
 			return
@@ -360,9 +419,8 @@ func _add_across(cs: CrossStreet, scene: String, arrive: String, stretch := 0) -
 	var ground: CrossStreet = _grounds.get(cs)
 	if ground == null:
 		return
-	ground.own_crosswalk = -1.0 if left_corner else 1.0
-	ground.queue_redraw()
-	var over := DoorSpot.make(ground.own_crosswalk_rect(), func():
+	ground.add_own(-1.0 if left_corner else 1.0)
+	var over := DoorSpot.make(ground.own_crosswalk_rect(-1.0 if left_corner else 1.0), func():
 		if DebugMenu.blocked(GameState.age < CROSS_AGE):
 			Bubble.say(self, _charlotte.position + Vector2(0, -190), CANT_CROSS, 2.6)
 			return
@@ -1082,12 +1140,12 @@ func _build_utility_poles() -> void:
 		blocked.append(Vector2(cs.x0 - 40.0, cs.x1 + 40.0))
 		# Nor on the dropped curb of the crosswalk over our own street.
 		var ground: CrossStreet = _grounds.get(cs)
-		if ground != null and ground.own_crosswalk != 0.0:
-			var side := ground.own_crosswalk
-			if side < 0.0:
-				blocked.append(Vector2(minf(cs.x0 - 40.0, ground.own_clear(side) - 30.0), cs.x1 + 40.0))
-			else:
-				blocked.append(Vector2(cs.x0 - 40.0, maxf(cs.x1 + 40.0, ground.own_clear(side) + 30.0)))
+		if ground != null:
+			for side in ground.own_sides:
+				if side < 0.0:
+					blocked.append(Vector2(minf(cs.x0 - 40.0, ground.own_clear(side) - 30.0), cs.x1 + 40.0))
+				else:
+					blocked.append(Vector2(cs.x0 - 40.0, maxf(cs.x1 + 40.0, ground.own_clear(side) + 30.0)))
 	# A pole is tall, so it keeps clear of a tree's whole canopy, not only its pit.
 	for i in trees_after.size():
 		var reach := 130.0 * _tree_scales[i] + 35.0
@@ -1139,7 +1197,7 @@ func _build_curb_gardens() -> void:
 			# Where the crosswalk over our own street leaves this corner, the bed starts beyond it, so the crosswalk stays in
 			# line with the cross street's sidewalk.
 			var ground: CrossStreet = _grounds.get(cs)
-			if ground != null and ground.own_crosswalk == side:
+			if ground != null and ground.has_own(side):
 				var clear := ground.own_clear(side)
 				garden.position.x = maxf(garden.position.x, clear + garden.width) if side > 0.0 else minf(garden.position.x, clear - garden.width)
 			garden.seed_value = seed_value * 13 + i
