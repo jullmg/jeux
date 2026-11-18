@@ -5,7 +5,10 @@ extends RefCounted
 ## (CharacterLook) and her drawings (DrawingPad) in its own folder, `slot_dir()`. Test runs (--screenshot=, --x=,
 ## -s scripts) never touch the saves.
 
-const SLOTS := 3
+## How many games can be kept side by side (Julien wanted more than three); each can be given a name.
+const SLOTS := 10
+## The longest name a game can be given.
+const NAME_MAX := 28
 const START_MONEY := 5.0
 const START_AGE := 7
 ## Where the last game played is remembered (with the other settings).
@@ -15,6 +18,8 @@ const OLD_SAVE := "user://save.json"
 
 ## Which game is being played (1..SLOTS).
 static var slot := 1
+## The name the player gave this game ("" = none yet: it shows as "Partie <slot>", `title()`).
+static var game_name := ""
 ## Charlotte's age: she starts at 7 and grows up slowly (a whole year of seasons and many quests).
 static var age := START_AGE
 static var money := START_MONEY
@@ -75,7 +80,28 @@ static func _remember_slot() -> void:
 	cfg.save(SETTINGS)
 
 
-## What a saved game looks like, for the list of games: {season, age, money, stars}, or {} if the slot is empty.
+## What game `n` is called: its name, or "Partie n" when it has none.
+static func title(n: int, name: String) -> String:
+	return name.strip_edges() if name.strip_edges() != "" else "Partie %d" % n
+
+
+## Gives saved game `n` a new name (written into its save straight away; the game being played takes it too).
+static func rename(n: int, name: String) -> void:
+	name = name.strip_edges().left(NAME_MAX)
+	if n == slot:
+		game_name = name
+	if not enabled() or not has_save(n):
+		return
+	var data = JSON.parse_string(FileAccess.get_file_as_string(save_path(n)))
+	if not data is Dictionary:
+		return
+	data["name"] = name
+	var file := FileAccess.open(save_path(n), FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data, "\t"))
+
+
+## What a saved game looks like, for the list of games: {name, season, age, money, stars}, or {} if the slot is empty.
 static func summary(n: int) -> Dictionary:
 	if not has_save(n):
 		return {}
@@ -86,7 +112,7 @@ static func summary(n: int) -> Dictionary:
 	for state in (data.get("quests", {}) as Dictionary).values():
 		if state == "done":
 			stars += 1
-	return {"season": str(data.get("season", "autumn")), "age": int(data.get("age", START_AGE)),
+	return {"name": str(data.get("name", "")), "season": str(data.get("season", "autumn")), "age": int(data.get("age", START_AGE)),
 		"money": float(data.get("money", START_MONEY)), "stars": stars}
 
 
@@ -109,7 +135,7 @@ static func save_game(scene: String, x: float) -> void:
 	if not enabled() or scene.is_empty():
 		return
 	var data := {
-		"version": 4, "scene": scene, "x": x,
+		"version": 4, "name": game_name, "scene": scene, "x": x,
 		"day": Season.day, "season": Season.current, "age": age,
 		"money": money, "quests": quests, "flags": flags,
 	}
@@ -127,6 +153,7 @@ static func load_game(n: int) -> String:
 	if not data is Dictionary:
 		return ""
 	slot = n
+	game_name = str(data.get("name", ""))
 	_remember_slot()
 	CharacterLook.reload_outfit()
 	Season.day = int(data.get("day", 1))
@@ -177,8 +204,9 @@ static func _merged_scene(scene: String, x: float) -> Array:
 
 
 ## A fresh start in slot `n`: day 1 in autumn, starting money, no quests done, her usual dress, a bare fridge.
-static func new_game(n := 1) -> void:
+static func new_game(n := 1, name := "") -> void:
 	slot = n
+	game_name = name.strip_edges().left(NAME_MAX)
 	Season.day = 1
 	Season.current = "autumn"
 	age = START_AGE

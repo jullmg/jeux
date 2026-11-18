@@ -795,14 +795,17 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 ## Saving
 
 - `world/game_state.gd` (`GameState`): the game in progress (pocket `money`, `quests`, story `flags`, plus `Season.day` /
-  `Season.current`). Several games side by side: `GameState.SLOTS` (3) slots, `GameState.slot` the current one; each
+  `Season.current`). Several games side by side: `GameState.SLOTS` (10) slots, `GameState.slot` the current one, each with a name the
+  player gives it (`GameState.game_name`, saved as "name" in its save.json; `title(n, name)` = the name or "Partie n";
+  `rename(n, name)`, `NAME_MAX`; the game menu's info line shows it); each
   keeps `save.json` (scene path + Charlotte's x), her outfit (`CharacterLook.outfit_path()`) and her fridge drawings
   (`DrawingPad.folder()`) in `user://slots/<n>/` (`slot_dir()`); the last one played is in `user://settings.cfg`
   [game] last_slot. `migrate()` moves an old single `user://save.json` into slot 1. `world/saver.gd` (`Saver`), added by
   `StreetScene` and `Interior`, autosaves 1 s after a scene opens, every 10 s, on leaving it and on window close.
-- Title screen: "Continuer" (`GameState.load_game(last_slot())`) and "Mes parties" (a card per slot: season, age, stars,
-  money, "Jouer" / "Effacer" with a confirmation, or "Nouvelle partie" in a free slot, `GameState.new_game(n)`); with no
-  save at all, just "Nouvelle partie" (slot 1).
+- Title screen: "Continuer" (`GameState.load_game(last_slot())`) and "Mes parties" (a scrolling list, a card per slot: its
+  name, season, age, stars, money, "Jouer" / ✎ (rename, in place) / "Effacer" with a confirmation, or "Nouvelle partie" in a
+  free slot, which first asks the game's name, `_open_games(n)`, then `GameState.new_game(n, name)`); with no save at all, just
+  "Nouvelle partie" (slot 1, named the same way).
 - `GameState.enabled()` is false for test runs (`--screenshot=`, `--x=`, `-s` scripts), so they never write or wipe the save.
   A plain scene run (no such args) does save: back up `user://` first if you must test that way.
 

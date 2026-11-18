@@ -108,7 +108,7 @@ func toggle() -> void:
 	_page.visible = _open
 	if _open:
 		var seasons := {"autumn": "Automne", "winter": "Hiver", "spring": "Printemps", "summer": "Été"}
-		_info.text = "Charlotte, %d ans  ·  %s  ·  %s" % [GameState.age, Quests.money_text(GameState.money), seasons.get(Season.current, "")]
+		_info.text = "« %s »  ·  Charlotte, %d ans  ·  %s  ·  %s" % [GameState.title(GameState.slot, GameState.game_name), GameState.age, Quests.money_text(GameState.money), seasons.get(Season.current, "")]
 	_show(_main)
 	if _open:
 		# The card pops up, a little bouncy.

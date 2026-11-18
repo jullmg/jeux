@@ -452,8 +452,9 @@ func _on_continue_pressed() -> void:
 	_play(GameState.last_slot())
 
 
+# The very first game: its card opens, asking what to call it.
 func _on_new_game_pressed() -> void:
-	_start(1)
+	_open_games(1)
 
 
 func _play(n: int) -> void:
@@ -461,14 +462,18 @@ func _play(n: int) -> void:
 	get_tree().change_scene_to_file(scene if ResourceLoader.exists(scene) else MAIN_SCENE)
 
 
-func _start(n: int) -> void:
-	GameState.new_game(n)
+func _start(n: int, name := "") -> void:
+	GameState.new_game(n, name)
 	get_tree().change_scene_to_file(MAIN_SCENE)
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _games:
 		if event.is_action_pressed("ui_cancel"):
+			if _naming != 0:
+				_open_games()
+				get_viewport().set_input_as_handled()
+				return
 			_close_games()
 			get_viewport().set_input_as_handled()
 		return
@@ -484,12 +489,16 @@ func _unhandled_input(event: InputEvent) -> void:
 # ─────────────────────────────────────────────────────────────
 
 var _games: Control
+# The card being named (a new game) or renamed: its slot, 0 for none.
+var _naming := 0
 
 
-# A card per game: a saved one shows its season, Charlotte's age, her stars and pocket money, with "Jouer" and
-# "Effacer" (asks first); an empty one starts a new game.
-func _open_games() -> void:
+# A card per game, in a list that scrolls (GameState.SLOTS of them): a saved one shows its name, season, Charlotte's age, her
+# stars and pocket money, with "Jouer", "Effacer" (asks first) and ✎ to rename it; an empty one starts a new game, asking
+# for its name first.
+func _open_games(naming := 0) -> void:
 	_close_games()
+	_naming = naming
 	_games = Control.new()
 	_games.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui_layer.add_child(_games)
@@ -503,67 +512,119 @@ func _open_games() -> void:
 	box.border_color = Color("#1D4F91")
 	box.set_border_width_all(4)
 	box.set_corner_radius_all(18)
-	box.set_content_margin_all(24)
+	box.set_content_margin_all(22)
 	box.shadow_color = Color(0, 0, 0, 0.3)
 	box.shadow_size = 14
 	panel.add_theme_stylebox_override("panel", box)
 	_games.add_child(panel)
-	var list := VBoxContainer.new()
-	list.add_theme_constant_override("separation", 14)
-	panel.add_child(list)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 12)
+	panel.add_child(column)
 	var title := Label.new()
 	title.text = "Mes parties"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 34)
+	title.add_theme_font_size_override("font_size", 32)
 	title.add_theme_color_override("font_color", Color("#1D4F91"))
-	list.add_child(title)
+	column.add_child(title)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(700, 470)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	column.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 10)
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(list)
+	var focus: Control = null
 	for n in range(1, GameState.SLOTS + 1):
-		list.add_child(_game_card(n))
+		var card := _game_card(n)
+		list.add_child(card)
+		if n == naming:
+			focus = card
 	var back := _card_button("Retour", Color("#8A7A68"), _close_games)
 	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	list.add_child(back)
+	column.add_child(back)
 	panel.reset_size()
 	panel.position = (VIEW - panel.size) / 2.0
+	if focus:
+		scroll.ensure_control_visible.call_deferred(focus)
 
 
 func _game_card(n: int) -> Control:
 	var card := PanelContainer.new()
+	var game := GameState.summary(n)
 	var box := StyleBoxFlat.new()
-	box.bg_color = Color("#E8DDD0") if GameState.has_save(n) else Color("#F2ECE2")
-	box.border_color = Color("#C9B9A4")
-	box.set_border_width_all(2)
+	box.bg_color = Color("#E8DDD0") if not game.is_empty() else Color("#F2ECE2")
+	box.border_color = Color("#1D4F91") if n == _naming else Color("#C9B9A4")
+	box.set_border_width_all(3 if n == _naming else 2)
 	box.set_corner_radius_all(12)
-	box.set_content_margin_all(14)
+	box.set_content_margin_all(12)
 	card.add_theme_stylebox_override("panel", box)
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 14)
+	row.add_theme_constant_override("separation", 12)
 	card.add_child(row)
 	var info := VBoxContainer.new()
-	info.custom_minimum_size = Vector2(330, 0)
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(info)
-	var heading := Label.new()
-	heading.text = "Partie %d" % n
-	heading.add_theme_font_size_override("font_size", 24)
-	heading.add_theme_color_override("font_color", Color("#1D4F91"))
-	info.add_child(heading)
-	var line := Label.new()
-	var game := GameState.summary(n)
-	if game.is_empty():
-		line.text = "Libre"
-	else:
-		line.text = "%s · %d ans · %d ★ · %s" % [Season.NAMES.get(game.season, game.season), game.age, game.stars, Quests.money_text(game.money)]
-	line.add_theme_font_size_override("font_size", 18)
-	line.add_theme_color_override("font_color", Color("#5A4A3A"))
-	info.add_child(line)
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 8)
 	buttons.alignment = BoxContainer.ALIGNMENT_END
 	buttons.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(buttons)
+	if n == _naming:
+		# Naming it: a box to type in, then start (a free slot) or keep the new name (a saved game).
+		var name_box := LineEdit.new()
+		name_box.placeholder_text = "Le nom de ta partie"
+		name_box.text = str(game.get("name", ""))
+		name_box.max_length = GameState.NAME_MAX
+		name_box.custom_minimum_size = Vector2(320, 0)
+		name_box.add_theme_font_size_override("font_size", 20)
+		for state in ["normal", "focus"]:
+			var field := StyleBoxFlat.new()
+			field.bg_color = Color("#FFFDF8")
+			field.border_color = Color("#1D4F91") if state == "focus" else Color("#C9B9A4")
+			field.set_border_width_all(2)
+			field.set_corner_radius_all(8)
+			field.set_content_margin_all(8)
+			name_box.add_theme_stylebox_override(state, field)
+		name_box.add_theme_color_override("font_color", Color("#1D4F91"))
+		name_box.add_theme_color_override("font_placeholder_color", Color("#A89884"))
+		name_box.add_theme_color_override("caret_color", Color("#1D4F91"))
+		info.add_child(name_box)
+		var hint := Label.new()
+		hint.text = "Partie %d · Entrée pour valider" % n
+		hint.add_theme_font_size_override("font_size", 15)
+		hint.add_theme_color_override("font_color", Color("#8A7A68"))
+		info.add_child(hint)
+		var done := func() -> void:
+			if game.is_empty():
+				_start(n, name_box.text)
+			else:
+				GameState.rename(n, name_box.text)
+				_open_games()
+		name_box.text_submitted.connect(func(_t: String) -> void: done.call())
+		buttons.add_child(_card_button("C'est parti !" if game.is_empty() else "OK", Color("#1D4F91"), done))
+		buttons.add_child(_card_button("Annuler", Color("#8A7A68"), _open_games))
+		name_box.grab_focus.call_deferred()
+		return card
+	var heading := Label.new()
+	heading.text = GameState.title(n, str(game.get("name", ""))) if not game.is_empty() else "Partie %d" % n
+	heading.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	heading.add_theme_font_size_override("font_size", 23)
+	heading.add_theme_color_override("font_color", Color("#1D4F91"))
+	info.add_child(heading)
+	var line := Label.new()
 	if game.is_empty():
-		buttons.add_child(_card_button("Nouvelle partie", Color("#1D4F91"), _start.bind(n)))
+		line.text = "Libre"
+	else:
+		line.text = "%s · %d ans · %d ★ · %s" % [Season.NAMES.get(game.season, game.season), game.age, game.stars, Quests.money_text(game.money)]
+	line.add_theme_font_size_override("font_size", 17)
+	line.add_theme_color_override("font_color", Color("#5A4A3A"))
+	info.add_child(line)
+	if game.is_empty():
+		buttons.add_child(_card_button("Nouvelle partie", Color("#1D4F91"), _open_games.bind(n)))
 	else:
 		buttons.add_child(_card_button("▶ Jouer", Color("#1D4F91"), _play.bind(n)))
+		buttons.add_child(_card_button("✎", Color("#3E8E5A"), _open_games.bind(n)))
 		buttons.add_child(_card_button("Effacer", Color("#B8433A"), _ask_erase.bind(n, buttons)))
 	return card
 
@@ -606,6 +667,7 @@ func _card_button(label: String, color: Color, on_press: Callable) -> Button:
 
 
 func _close_games() -> void:
+	_naming = 0
 	if _games:
 		_games.queue_free()
 		_games = null
