@@ -13,6 +13,8 @@ const STEP := "cinema_step"
 const SNACKS := "cinema_snacks"
 ## What she must buy for the evening.
 const NEEDS := ["chips", "candy"]
+## What the notes of its steps are headed with (Notebook.announce).
+const HEADING := "🍿  Soirée cinéma"
 ## Maman's pocket money for it.
 const MONEY := 5.0
 

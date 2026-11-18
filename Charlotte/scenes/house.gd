@@ -317,7 +317,7 @@ func _pocket_money_for_the_movie() -> void:
 	Cinema.set_step(2)
 	_mom.express("happy", 2.4)
 	_say(_mom, "Une soirée cinéma avec les jumelles ?\nQuelle bonne idée ! Tiens, 5 $.", 400.0, 3.6)
-	Notebook.announce("step", "Maman t'a donné %s pour les grignotines !" % Quests.money_text(Cinema.MONEY))
+	Notebook.announce("step", "Maman t'a donné %s pour les grignotines !" % Quests.money_text(Cinema.MONEY), Cinema.HEADING)
 	var more := create_tween()
 	more.tween_interval(3.8)
 	more.tween_callback(func() -> void: _say(_mom, "Des chips pis des bonbons,\npas plus, là !", 380.0))

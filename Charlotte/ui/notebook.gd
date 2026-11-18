@@ -90,9 +90,10 @@ func toggle() -> void:
 	Sfx.play("page")
 
 
-## Called by Quests when one starts ("start") or is done ("done"): a note slides down from the top.
-func announce(what: String, id: String) -> void:
-	_toasts.append([what, id])
+## Called by Quests when one starts ("start") or is done ("done"): a note slides down from the top. A step of a long
+## quest ("step") gives its own words as `id` and names its quest in `heading` (Halloween's when none is given).
+func announce(what: String, id: String, heading := "") -> void:
+	_toasts.append([what, id, heading])
 	_wiggle = 1.2
 	if not _toasting:
 		_next_toast()
@@ -298,7 +299,7 @@ func _next_toast() -> void:
 	if item[0] == "devoirs":
 		heading = "★  Devoirs de la semaine finis !"
 	elif item[0] == "step":
-		heading = "🎃  Halloween"
+		heading = str(item[2]) if str(item[2]) != "" else "🎃  Halloween"
 	elif done:
 		heading = "★  Quête réussie !"
 	var head := _label(heading, 22, BLUE)
