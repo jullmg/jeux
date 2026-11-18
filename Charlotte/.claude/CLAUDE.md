@@ -932,12 +932,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   42, on the M1 Pro): `OnScreen.near(item, margin)` (`world/on_screen.gd`) says whether something is in or near the view;
   stray cats, dogs, squirrels, cyclists, the window neighbour, the sky birds only `queue_redraw()` when it is true, the wire
   birds skip the birds away from the view in `_draw`, `Character` skips `_apply_pose` far off screen (its walking and timers go
-  on), the dream moon and the crossing guard's paddle only when shown. **A new animated thing does the same.**
-- **Trees are cached between scenes** (`PropArt.tree`): drawing one (1,400 leaves) took about 25 ms and Masson drew some fifty
-  per load. Each tree is kept as a PNG (about 110 KB, encoded on a worker thread) under the season's palettes and the
-  generator's exact state; a hit puts the generator in the state the drawing would have left it in, so the street draws the
-  same after it. `TREE_CACHE_BYTES` (64 MB) bounds it. Loading a street the second time: 6e 555 → 200 ms, Masson 1.55 → 0.48 s.
-  Still to do if needed: the first frames after a load (the vistas' drawing, 170–450 ms) and Masson's draw calls (about 4,500).
+  on), the dream moon and the crossing guard's paddle only when shown. **A new animated thing does the same.** Still to do if
+  needed: cache the runtime-built textures between scenes (load times 0.5–2.7 s) and cut Masson's draw calls (about 4,500).
 - Performance: a `_draw()` node spanning the whole street is never culled and redraws every command each frame, and every
   `draw_set_transform` breaks batching. Thousands of small shapes (leaves, grit) therefore go into one vertex-coloured mesh
   (`Street._Batch`); before that the street ran at about 35 fps on an M1. Check with
