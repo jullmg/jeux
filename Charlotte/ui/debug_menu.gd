@@ -22,85 +22,125 @@ const QUEST_FLAGS := {"amies": ["met_twins", "met_billie_auguste"], "cachette": 
 const QUEST_CARRIES := {"milk": "milk", "plants": "can", "menage": "toy", "livre": "book", "chips": "chips", "cinema": "snacks"}
 
 ## The places to teleport to, in the order of the menu: {name, scene, and where: `x` (Charlotte's x in the scene), or `arrive`
-## (the Transition.arrive key of a corner or lane opening), or nothing for the scene's usual start}. A line with only a
-## "group" is a heading. Add a line here for each new place (a new street, room, shop, lane, a spot inside a building).
+## (the Transition.arrive key of a corner or lane opening), or nothing for the scene's usual start}. Sorted like the map:
+## {"group": …} is a category (folds open and shut), {"sub": …} one street side, one building or one lane inside it; the
+## avenues' corners run north to south (Holt, Dandurand, Masson), Masson's blocks west to east (D'Iberville to Saint-Michel),
+## each corner "au nord" / "au sud" when there is one on both sides of the cross street. **Add a line in its place for each new
+## place** (a new street, room, shop, lane, corner, a spot inside a building); a scene left out shows under "Autres lieux".
 const PLACES := [
-	{"group": "Rues"},
-	{"name": "6e Avenue, côté ouest : chez Charlotte", "scene": "main"},
-	{"name": "6e Avenue, côté ouest : coin Masson", "scene": "main", "arrive": "6e_from_masson"},
-	{"name": "6e Avenue, côté ouest : coin Dandurand, vers Masson", "scene": "main", "arrive": "6e_from_6e_est_dandurand_sud"},
-	{"name": "6e Avenue, côté ouest : coin Dandurand", "scene": "main", "arrive": "6e_from_dandurand"},
-	{"name": "6e Avenue, côté ouest : coin Holt", "scene": "main", "arrive": "6e_from_holt"},
-	{"name": "6e Avenue, côté est : milieu", "scene": "sixieme_est"},
-	{"name": "6e Avenue, côté est : coin Holt", "scene": "sixieme_est", "arrive": "6e_est_from_6e_holt"},
-	{"name": "6e Avenue, côté est : coin Dandurand", "scene": "sixieme_est", "arrive": "6e_est_from_6e_dandurand"},
-	{"name": "6e Avenue, côté est : coin Dandurand, vers Masson", "scene": "sixieme_est", "arrive": "6e_est_from_6e_dandurand_sud"},
-	{"name": "6e Avenue, côté est : coin Masson", "scene": "sixieme_est", "arrive": "6e_est_from_masson"},
-	{"name": "Rue Dandurand : dépanneur Xin-Xin", "scene": "dandurand"},
-	{"name": "Rue Dandurand : coin 6e", "scene": "dandurand", "arrive": "dandurand_from_6e"},
-	{"name": "Rue Dandurand : coin 5e", "scene": "dandurand", "arrive": "dandurand_from_5e"},
-	{"name": "5e Avenue : milieu", "scene": "cinquieme"},
-	{"name": "5e Avenue : coin Holt", "scene": "cinquieme", "arrive": "5e_from_holt"},
-	{"name": "5e Avenue : coin Dandurand", "scene": "cinquieme", "arrive": "5e_from_dandurand"},
-	{"name": "5e Avenue : coin Masson", "scene": "cinquieme", "arrive": "5e_from_masson"},
-	{"name": "Dollarama (rue Masson)", "scene": "dollarama"},
-	{"name": "Fraîchement Bon (rue Masson)", "scene": "fraichement_bon"},
-	{"name": "5e Avenue, côté ouest : milieu", "scene": "cinquieme_ouest"},
-	{"name": "5e Avenue, côté ouest : coin Masson", "scene": "cinquieme_ouest", "arrive": "5e_ouest_from_masson"},
-	{"name": "5e Avenue, côté ouest : coin Dandurand", "scene": "cinquieme_ouest", "arrive": "5e_ouest_from_5e_dandurand"},
-	{"name": "5e Avenue, côté ouest : coin Holt", "scene": "cinquieme_ouest", "arrive": "5e_ouest_from_5e_holt"},
-	{"name": "Rue Holt : dépanneur Oh Bon!", "scene": "holt"},
-	{"name": "Rue Holt : coin 6e", "scene": "holt", "arrive": "holt_from_6e"},
-	{"name": "Rue Holt : coin 5e", "scene": "holt", "arrive": "holt_from_5e"},
-	{"name": "Rue Masson, côté nord : coin D'Iberville", "scene": "masson_impair", "arrive": "masson_impair_from_rue_iberville_iberville_molson"},
-	{"name": "Rue Masson, côté nord : entre Molson et la 1re", "scene": "masson_impair", "arrive": "masson_impair_from_rue_molson_molson_1re"},
-	{"name": "Rue Masson, côté nord : entre la 1re et la 2e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_1re_1re_2e"},
-	{"name": "Rue Masson, côté nord : entre la 2e et la 3e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_2e_2e_3e"},
-	{"name": "Rue Masson, côté nord : entre la 3e et la 4e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_3e_3e_4e"},
-	{"name": "Rue Masson, côté nord : entre la 4e et la 5e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_4e_4e_5e"},
-	{"name": "Rue Masson, côté nord : entre la 5e et la 6e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_5e_5e_6e"},
-	{"name": "Rue Masson, côté nord : entre la 6e et la 7e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_6e_6e_7e"},
-	{"name": "Rue Masson, côté nord : entre la 7e et la 8e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_7e_7e_8e"},
-	{"name": "Rue Masson, côté nord : entre la 8e et la 9e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_8e_8e_9e"},
-	{"name": "Rue Masson, côté nord : entre la 9e et la 10e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_9e_9e_10e"},
-	{"name": "Rue Masson, côté nord : coin Saint-Michel", "scene": "masson_impair", "arrive": "masson_impair_from_rue_stmichel_10e_stmichel"},
-	{"name": "Rue Masson, côté sud : coin Saint-Michel", "scene": "masson_pair", "arrive": "masson_pair_from_rue_stmichel_10e_stmichel"},
-	{"name": "Rue Masson, côté sud : entre la 10e et la 9e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_10e_9e_10e"},
-	{"name": "Rue Masson, côté sud : entre la 1re et la 2e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_2e_1re_2e"},
-	{"name": "Rue Masson, côté sud : le parc, entre la 1re et Molson", "scene": "masson_pair", "arrive": "masson_pair_from_rue_1re_molson_1re"},
-	{"name": "Rue Masson, côté sud : coin D'Iberville", "scene": "masson_pair", "arrive": "masson_pair_from_rue_iberville_iberville_molson"},
-	{"name": "Rue Masson, côté sud : entre la 2e et la 3e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_3e_2e_3e"},
-	{"name": "Rue Masson, côté sud : entre la 3e et la 4e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_4e_3e_4e"},
-	{"name": "Rue Masson, côté sud : entre la 4e et la 5e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_5e_4e_5e"},
-	{"name": "Rue Masson, côté sud : entre la 5e et la 6e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_6e_5e_6e"},
-	{"name": "Rue Masson, côté sud : entre la 6e et la 7e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_7e_6e_7e"},
-	{"name": "Rue Masson, côté sud : entre la 7e et la 8e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_8e_7e_8e"},
-	{"name": "Rue Masson, côté sud : entre la 8e et la 9e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_9e_8e_9e"},
-	{"group": "Ruelles"},
-	{"name": "Ruelle du milieu (cour de Charlotte)", "scene": "ruelle"},
-	{"name": "Ruelle du milieu (les jumelles y sont si la quête « amies » est lancée)", "scene": "ruelle", "x": 2400.0},
-	{"name": "Ruelle verte (parallèle à Dandurand)", "scene": "ruelle_dandurand"},
-	{"name": "Ruelle près de Holt", "scene": "ruelle_holt"},
-	{"group": "Chez Charlotte"},
+	{"group": "Mon bloc"},
+	{"sub": "Chez Charlotte"},
 	{"name": "Vestibule", "scene": "house", "x": 300.0},
 	{"name": "Salon", "scene": "house", "x": 1500.0},
 	{"name": "Corridor (télé)", "scene": "house", "x": 2900.0},
-	{"name": "Cuisine (Maman, arrosoir)", "scene": "house", "x": 3700.0},
+	{"name": "Cuisine (Maman, arrosoir, porte de la cour)", "scene": "house", "x": 3700.0},
 	{"name": "Chambre de Charlotte", "scene": "house", "x": 5700.0},
-	{"group": "Dépanneur Xin-Xin"},
+	{"sub": "6e Avenue, côté ouest (sa maison)"},
+	{"name": "Devant chez Charlotte", "scene": "main"},
+	{"name": "Coin Holt, au nord", "scene": "main", "arrive": "6e_from_6e_est_holt_nord"},
+	{"name": "Coin Holt, au sud", "scene": "main", "arrive": "6e_from_holt"},
+	{"name": "Coin Dandurand, au nord (Xin-Xin)", "scene": "main", "arrive": "6e_from_dandurand"},
+	{"name": "Coin Dandurand, au sud (l'école)", "scene": "main", "arrive": "6e_from_6e_est_dandurand_sud"},
+	{"name": "Coin Masson, au nord (l'église)", "scene": "main", "arrive": "6e_from_masson"},
+	{"name": "Coin Masson, au sud", "scene": "main", "arrive": "6e_from_6e_est_masson_sud"},
+	{"sub": "Les ruelles"},
+	{"name": "Ruelle du milieu (la cour de Charlotte)", "scene": "ruelle"},
+	{"name": "Ruelle du milieu (les jumelles)", "scene": "ruelle", "x": 2400.0},
+	{"name": "Ruelle près de Holt", "scene": "ruelle_holt"},
+	{"name": "Ruelle verte (près de Dandurand)", "scene": "ruelle_dandurand"},
+	{"group": "Autour du bloc"},
+	{"sub": "Rue Holt (côté sud)"},
+	{"name": "Coin 6e, côté est", "scene": "holt", "arrive": "holt_from_6e_est"},
+	{"name": "Coin 6e (dépanneur Oh Bon!)", "scene": "holt", "arrive": "holt_from_6e"},
+	{"name": "Milieu", "scene": "holt"},
+	{"name": "Coin 5e", "scene": "holt", "arrive": "holt_from_5e"},
+	{"name": "Coin 5e, côté ouest", "scene": "holt", "arrive": "holt_from_5e_ouest"},
+	{"sub": "Rue Dandurand (côté nord)"},
+	{"name": "Coin 5e, côté ouest", "scene": "dandurand", "arrive": "dandurand_from_5e_ouest"},
+	{"name": "Coin 5e", "scene": "dandurand", "arrive": "dandurand_from_5e"},
+	{"name": "Dépanneur Xin-Xin", "scene": "dandurand"},
+	{"name": "Coin 6e", "scene": "dandurand", "arrive": "dandurand_from_6e"},
+	{"name": "Coin 6e, côté est", "scene": "dandurand", "arrive": "dandurand_from_6e_est"},
+	{"sub": "6e Avenue, côté est"},
+	{"name": "Coin Holt, au nord", "scene": "sixieme_est", "arrive": "6e_est_from_6e_holt_nord"},
+	{"name": "Coin Holt, au sud", "scene": "sixieme_est", "arrive": "6e_est_from_6e_holt"},
+	{"name": "Milieu", "scene": "sixieme_est"},
+	{"name": "Coin Dandurand, au nord", "scene": "sixieme_est", "arrive": "6e_est_from_6e_dandurand"},
+	{"name": "Coin Dandurand, au sud", "scene": "sixieme_est", "arrive": "6e_est_from_6e_dandurand_sud"},
+	{"name": "Coin Masson, au nord", "scene": "sixieme_est", "arrive": "6e_est_from_masson"},
+	{"name": "Coin Masson, au sud", "scene": "sixieme_est", "arrive": "6e_est_from_6e_masson_sud"},
+	{"sub": "5e Avenue, côté est (le dos du bloc)"},
+	{"name": "Coin Holt, au nord", "scene": "cinquieme", "arrive": "5e_from_5e_ouest_holt_nord"},
+	{"name": "Coin Holt, au sud", "scene": "cinquieme", "arrive": "5e_from_holt"},
+	{"name": "Milieu", "scene": "cinquieme"},
+	{"name": "Coin Dandurand, au nord", "scene": "cinquieme", "arrive": "5e_from_dandurand"},
+	{"name": "Coin Dandurand, au sud (l'école)", "scene": "cinquieme", "arrive": "5e_from_5e_ouest_dandurand_sud"},
+	{"name": "Coin Masson, au nord", "scene": "cinquieme", "arrive": "5e_from_masson"},
+	{"name": "Coin Masson, au sud", "scene": "cinquieme", "arrive": "5e_from_5e_ouest_masson_sud"},
+	{"sub": "5e Avenue, côté ouest"},
+	{"name": "Coin Holt, au nord", "scene": "cinquieme_ouest", "arrive": "5e_ouest_from_5e_holt_nord"},
+	{"name": "Coin Holt, au sud", "scene": "cinquieme_ouest", "arrive": "5e_ouest_from_5e_holt"},
+	{"name": "Milieu", "scene": "cinquieme_ouest"},
+	{"name": "Coin Dandurand, au nord", "scene": "cinquieme_ouest", "arrive": "5e_ouest_from_5e_dandurand"},
+	{"name": "Coin Dandurand, au sud", "scene": "cinquieme_ouest", "arrive": "5e_ouest_from_5e_dandurand_sud"},
+	{"name": "Coin Masson, au nord", "scene": "cinquieme_ouest", "arrive": "5e_ouest_from_masson"},
+	{"name": "Coin Masson, au sud", "scene": "cinquieme_ouest", "arrive": "5e_ouest_from_5e_masson_sud"},
+	{"group": "Rue Masson"},
+	{"sub": "Côté nord (numéros impairs)"},
+	{"name": "Coin D'Iberville", "scene": "masson_impair", "arrive": "masson_impair_from_rue_iberville_iberville_molson"},
+	{"name": "Entre Molson et la 1re", "scene": "masson_impair", "arrive": "masson_impair_from_rue_molson_molson_1re"},
+	{"name": "Entre la 1re et la 2e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_1re_1re_2e"},
+	{"name": "Entre la 2e et la 3e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_2e_2e_3e"},
+	{"name": "Entre la 3e et la 4e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_3e_3e_4e"},
+	{"name": "Entre la 4e et la 5e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_4e_4e_5e"},
+	{"name": "Entre la 5e et la 6e (l'église)", "scene": "masson_impair", "arrive": "masson_impair_from_rue_5e_5e_6e"},
+	{"name": "Entre la 6e et la 7e (Fraîchement Bon)", "scene": "masson_impair", "arrive": "masson_impair_from_rue_6e_6e_7e"},
+	{"name": "Entre la 7e et la 8e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_7e_7e_8e"},
+	{"name": "Entre la 8e et la 9e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_8e_8e_9e"},
+	{"name": "Entre la 9e et la 10e", "scene": "masson_impair", "arrive": "masson_impair_from_rue_9e_9e_10e"},
+	{"name": "Entre la 10e et Saint-Michel", "scene": "masson_impair", "arrive": "masson_impair_from_rue_stmichel_10e_stmichel"},
+	{"sub": "Côté sud (numéros pairs)"},
+	{"name": "Coin D'Iberville", "scene": "masson_pair", "arrive": "masson_pair_from_rue_iberville_iberville_molson"},
+	{"name": "Entre Molson et la 1re (le parc)", "scene": "masson_pair", "arrive": "masson_pair_from_rue_1re_molson_1re"},
+	{"name": "Entre la 1re et la 2e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_2e_1re_2e"},
+	{"name": "Entre la 2e et la 3e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_3e_2e_3e"},
+	{"name": "Entre la 3e et la 4e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_4e_3e_4e"},
+	{"name": "Entre la 4e et la 5e (Dollarama)", "scene": "masson_pair", "arrive": "masson_pair_from_rue_5e_4e_5e"},
+	{"name": "Entre la 5e et la 6e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_6e_5e_6e"},
+	{"name": "Entre la 6e et la 7e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_7e_6e_7e"},
+	{"name": "Entre la 7e et la 8e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_8e_7e_8e"},
+	{"name": "Entre la 8e et la 9e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_9e_8e_9e"},
+	{"name": "Entre la 9e et la 10e", "scene": "masson_pair", "arrive": "masson_pair_from_rue_10e_9e_10e"},
+	{"name": "Entre la 10e et Saint-Michel", "scene": "masson_pair", "arrive": "masson_pair_from_rue_stmichel_10e_stmichel"},
+	{"group": "Magasins"},
+	{"sub": "Dépanneur Xin-Xin (rue Dandurand)"},
 	{"name": "Entrée", "scene": "depanneur"},
 	{"name": "Comptoir", "scene": "depanneur", "x": 1000.0},
 	{"name": "Bonbons et chips", "scene": "depanneur", "x": 1750.0},
 	{"name": "Sloche et café", "scene": "depanneur", "x": 2450.0},
 	{"name": "Frigos et lait", "scene": "depanneur", "x": 3100.0},
-	{"group": "Dépanneur Oh Bon!"},
+	{"sub": "Dépanneur Oh Bon! (rue Holt)"},
 	{"name": "Entrée", "scene": "ohbon"},
 	{"name": "Comptoir et télé", "scene": "ohbon", "x": 1100.0},
 	{"name": "Bonbons et chips", "scene": "ohbon", "x": 1900.0},
 	{"name": "Frigos et lait", "scene": "ohbon", "x": 2800.0},
+	{"sub": "Dollarama (rue Masson, côté sud)"},
+	{"name": "Entrée et caisses", "scene": "dollarama"},
+	{"name": "Allée 1 : fête", "scene": "dollarama", "x": 7300.0},
+	{"name": "Allée 2 : cuisine", "scene": "dollarama", "x": 10900.0},
+	{"name": "Allée 3 : entretien", "scene": "dollarama", "x": 14500.0},
+	{"name": "Allée 4 : bonbons et collations", "scene": "dollarama", "x": 18100.0},
+	{"name": "Allée 5 : jouets et école", "scene": "dollarama", "x": 21700.0},
+	{"name": "Allée 6 : saison", "scene": "dollarama", "x": 25300.0},
+	{"sub": "Fraîchement Bon (rue Masson, côté nord)"},
+	{"name": "Entrée et caisse", "scene": "fraichement_bon"},
+	{"name": "Fruits et légumes", "scene": "fraichement_bon", "x": 2000.0},
+	{"name": "Épicerie fine et fromages", "scene": "fraichement_bon", "x": 3700.0},
 	{"group": "Autres"},
 	{"name": "Écran titre", "scene": "intro"},
 ]
+## The scenes that are indoors: a place's `x` there is where she stands inside (Transition.inside_x), not on a street.
+const INTERIORS: Array[String] = ["house", "depanneur", "ohbon", "dollarama", "fraichement_bon"]
 ## Scenes that are not places to go to (listed nowhere on purpose).
 const NOT_PLACES: Array[String] = []
 
@@ -179,34 +219,106 @@ func _open() -> void:
 	_places_list(columns)
 
 
-# A scrolling list of buttons, one per place (see PLACES), then any scene nobody listed.
+# The places (see PLACES): a search box, then each category folded open or shut (a click on its heading), the street sides,
+# buildings and lanes inside it, and last any scene nobody listed.
 func _places_list(parent: Control) -> void:
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(300, 600)
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	parent.add_child(scroll)
-	var list := VBoxContainer.new()
-	list.add_theme_constant_override("separation", 4)
-	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(list)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 6)
+	parent.add_child(column)
 	var title := Label.new()
 	title.text = "Aller à…"
 	title.add_theme_color_override("font_color", Color("#FFD23F"))
 	title.add_theme_font_size_override("font_size", 20)
-	list.add_child(title)
-	list.add_child(_no_limits_button())
-	list.add_child(_skip_look_button())
-	var known := {}
+	column.add_child(title)
+	column.add_child(_no_limits_button())
+	column.add_child(_skip_look_button())
+	var search := LineEdit.new()
+	search.placeholder_text = "Chercher un lieu…"
+	search.text = _search
+	search.clear_button_enabled = true
+	search.add_theme_font_size_override("font_size", 15)
+	column.add_child(search)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(340, 520)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	column.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 3)
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(list)
+	search.text_changed.connect(func(text: String) -> void:
+		_search = text
+		_fill_places(list))
+	_fill_places(list)
+
+
+## Which categories are open (this session); the one holding the current scene opens by itself the first time.
+static var _open_groups := {}
+static var _search := ""
+
+
+func _fill_places(list: VBoxContainer) -> void:
+	for child in list.get_children():
+		child.queue_free()
+	var here := get_tree().current_scene.scene_file_path.get_file().get_basename() if get_tree().current_scene else ""
+	var needle := _search.strip_edges().to_lower()
+	# Split PLACES into categories, each a list of its subheadings and places.
+	var groups: Array = []
 	for place: Dictionary in PLACES:
 		if place.has("group"):
-			var head := Label.new()
-			head.text = place.group
-			head.add_theme_color_override("font_color", Color("#9FD4F0"))
-			head.add_theme_font_size_override("font_size", 15)
-			list.add_child(head)
+			groups.append({"name": place.group, "items": []})
+		elif not groups.is_empty():
+			groups[-1].items.append(place)
+	var known := {}
+	for g: Dictionary in groups:
+		var shown: Array = []
+		var sub := ""
+		var sub_shown := ""
+		for item: Dictionary in g.items:
+			if item.has("sub"):
+				sub = item.sub
+				continue
+			known[item.scene] = true
+			if needle != "" and not ("%s %s %s" % [g.name, sub, item.name]).to_lower().contains(needle):
+				continue
+			if sub != sub_shown:
+				shown.append({"sub": sub})
+				sub_shown = sub
+			shown.append(item)
+		if shown.is_empty():
 			continue
-		known[place.scene] = true
-		list.add_child(_place_button(place.name, place))
+		if not _open_groups.has(g.name):
+			_open_groups[g.name] = g.items.any(func(p: Dictionary) -> bool: return str(p.get("scene", "")) == here)
+		var open: bool = needle != "" or _open_groups[g.name]
+		var count := shown.filter(func(p: Dictionary) -> bool: return not p.has("sub")).size()
+		var head := Button.new()
+		head.text = "%s %s  (%d)" % ["▾" if open else "▸", g.name, count]
+		head.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		head.flat = true
+		head.add_theme_font_size_override("font_size", 17)
+		head.add_theme_color_override("font_color", Color("#FFD23F"))
+		head.add_theme_color_override("font_hover_color", Color("#FFE680"))
+		var group_name: String = g.name
+		head.pressed.connect(func() -> void:
+			_open_groups[group_name] = not _open_groups[group_name]
+			_fill_places(list))
+		list.add_child(head)
+		if not open:
+			continue
+		for item: Dictionary in shown:
+			if item.has("sub"):
+				if item.sub == "":
+					continue
+				var label := Label.new()
+				label.text = "   " + item.sub
+				label.add_theme_color_override("font_color", Color("#9FD4F0"))
+				label.add_theme_font_size_override("font_size", 14)
+				list.add_child(label)
+				continue
+			var b := _place_button(("      " if g.items.any(func(p: Dictionary) -> bool: return p.has("sub")) else "   ") + item.name, item)
+			if str(item.scene) == here:
+				b.add_theme_color_override("font_color", Color("#9AE6A1"))
+			list.add_child(b)
 	var lost: Array[String] = []
 	var dir := DirAccess.open("res://scenes")
 	if dir:
@@ -275,7 +387,7 @@ func _teleport(place: Dictionary) -> void:
 	Transition.crossing = ""
 	var scene_name := str(place.scene)
 	if place.has("x"):
-		if scene_name in ["house", "depanneur", "ohbon"]:
+		if scene_name in INTERIORS:
 			Transition.inside_x = float(place.x)
 		else:
 			Transition.street_x = float(place.x)

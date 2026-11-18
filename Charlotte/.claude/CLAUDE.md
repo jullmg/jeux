@@ -866,8 +866,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - `ui/debug_menu.gd` is the `DebugMenu` autoload: reads `--season=` and `--halloween` (the evening of the Halloween
   quest, step 2, for a screenshot or a test run), and in debug builds F1 opens a "Saisons" menu that
   switches season while playing (reloads the scene; Charlotte keeps her x via `Transition.street_x` / `Transition.inside_x`),
-  teleports to any place (`DebugMenu.PLACES`: streets, corners, lanes, rooms of her flat, spots in the shop; **when you add a new
-  place, add it to `PLACES`** — a scene missing from the list shows under "Autres lieux" anyway),
+  teleports to any place (`DebugMenu.PLACES`, sorted like the map: categories "Mon bloc", "Autour du bloc", "Rue Masson",
+  "Magasins", "Autres" that fold open and shut (`{"group": …}`, the one she is in opens by itself), each street side, building
+  or lane a `{"sub": …}` heading, the avenues' corners north to south, Masson's blocks west to east, "au nord" / "au sud" when a
+  cross street has a corner on both sides; a search box filters them all; `INTERIORS` lists the indoor scenes, where `x` is
+  `Transition.inside_x`; **when you add a new place, add its line in its place in `PLACES`** — a scene missing from the list
+  shows under "Autres lieux" anyway),
   and lists every quest with "Effacer" (not started, its flags in `QUEST_FLAGS` cleared) / "Activer" / "Finir" (done, reward paid) / "Tout effacer" to test them again, plus a "devoirs n/n" row for the week's homework ("Effacer" = `Homework.reset()`, reward and all; "Tout finir" = `finish_all()`).
 - Nothing stands behind Mount Royal: the cross-street vista paints open sky over the distant city first. Mount Royal (`CrossStreet._mountain_picture`, cached per season: ridge, woods in clumps, mist at its foot, cross and tower) shows only when the street runs west (`CrossStreet.facing = "west"`, Montreal compass); other ways end in sky and clouds.
 
