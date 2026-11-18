@@ -108,6 +108,32 @@ func _build_doors() -> void:
 	_add_corner(_cross_streets[2], "res://scenes/masson_impair.tscn", "masson_impair_from_rue_5e_5e_6e", false, -1)
 	_add_lane("ruelle")
 	_add_lane("ruelle_verte")
+	_build_school_door()
+
+
+## The school's door on 5e (reference/ecole.png): the one Charlotte takes to the daycare (service de garde). Its little plate
+## beside it; a click for now only has her say so — the daycare's own scene will go through here.
+func _build_school_door() -> void:
+	var dx := _door_x("cinq_ecole")
+	var plate := ColorRect.new()
+	plate.color = Color.WHITE
+	plate.size = Vector2(62, 26)
+	plate.position = Vector2(dx + 50.0, HOUSE_BASE_Y - 128.0)
+	add_child(plate)
+	var edge := ReferenceRect.new()
+	edge.border_color = Color("#1D4F91")
+	edge.border_width = 1.5
+	edge.editor_only = false
+	edge.size = plate.size
+	edge.position = plate.position
+	add_child(edge)
+	_label("SERVICE\nDE GARDE", plate.position + plate.size / 2.0, plate.size, 8, Color("#1D4F91"), Color(1, 1, 1, 0))
+	add_child(DoorSpot.make(Rect2(dx - 30.0, HOUSE_BASE_Y - 190.0, 60.0, 180.0), func() -> void:
+		_say_at_door("C'est la porte du service de garde !\nJ'y vais avant pis après l'école."), dx))
+
+
+func _say_at_door(text: String) -> void:
+	Bubble.say(self, _charlotte.position + Vector2(0, -190), text, 3.2)
 
 
 ## Where Rue Dandurand crosses, as a fraction of the street: the town map puts her on her block before it, toward Masson after.
