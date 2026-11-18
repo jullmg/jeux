@@ -82,9 +82,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `coin_5e_dandurand`, `dandurand_sud` (`VARIANTS` is 36: plex_27 on Dandurand, plex_28 on Holt, plex_29–36 on 5e, counted from the Google map).
 - **The school's side on 5e Avenue at Dandurand** (`cinq_ecole`, kind `school_5e`, `_school_5e`, from Julien's picture
   `reference/ecole.png`): orange-red brick on three floors over a pale parged basement, the basket-weave band under a white
-  stone water table, red double-hung windows with small panes (`_red_sash`), two narrow bays between pilasters with brick
+  stone water table, red double-hung windows with small panes (`_red_sash`: a flat arch of bricks on end, the reveal's shade, blinds in the lower
+  sash, a deep sill and its shadow; spaced as on the picture, half a window of brick between two, a little over half a floor
+  tall: Julien found the first ones packed one on the other), two narrow bays between pilasters with brick
   diamonds (a red louvred vent in the first), the stone plaque, the lower right wing, and **the door Charlotte takes to the
-  daycare (service de garde)**: black under a grilled transom, in its stone surround and hood, up three steps (`door_x` 865 in
+  daycare (service de garde)**: black under a grilled transom, in its stone surround and hood, up three steps (`door_x` 820 in
   `doors.json`). In `cinquieme.gd` it has a "SERVICE DE GARDE" plate beside it and a click (`_build_school_door`): for now she
   only says so; the daycare's scene will go through that DoorSpot. The 6e side (`ecole_6e`, `_school_side`) is unchanged.
 - **5e Avenue, both sides, drawn from Street View** (`reference/streetview/5e-avenue/`, walk `5e-avenue-massonholt`, 2026-11-14):

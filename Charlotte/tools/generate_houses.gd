@@ -373,7 +373,7 @@ const HOUSES := [
 	# plaque, and the door Charlotte will take to the daycare (service de garde): black, under a grilled transom, in a stone
 	# surround with its hood, up three concrete steps. The right wing is a little lower. `school_5e`.
 	{
-		"name": "cinq_ecole", "kind": "school_5e", "width": 1400.0, "floors": 3, "top": 104.0, "door_x": 865.0,
+		"name": "cinq_ecole", "kind": "school_5e", "width": 1400.0, "floors": 3, "top": 64.0, "door_x": 820.0,
 		"bricks": ["#B9583E", "#C2634A", "#AE5038", "#C86C50", "#B35640"], "mortar": "#DCCFC2",
 		"trim": "#ECE8E0", "trim_dark": "#A9A398", "lintel": "#E4DFD4", "lintel_dark": "#A8A296",
 		"basement": [], "fence": "", "halloween": false,
@@ -4213,11 +4213,11 @@ func _school_side() -> void:
 # double-hung windows (small panes in the upper sash) on stone sills, the cornice and its stone coping.
 func _school_5e() -> void:
 	var top := _top()
-	var wing_x := X1 - 260.0
-	var wing_top := top + 60.0
-	var stone_top := base_y - 92.0
-	var basement_top := stone_top - 30.0
-	var weave_top := basement_top - 74.0
+	var wing_x := X1 - 230.0
+	var wing_top := top + 56.0
+	var stone_top := base_y - 72.0
+	var basement_top := stone_top - 18.0
+	var weave_top := basement_top - 56.0
 	var water := weave_top - 14.0
 	var door_cx: float = k.door_x
 	# The brick: the main block up to its roof, the lower wing up to its own (X1 narrowed for the main block, then a patch).
@@ -4248,9 +4248,9 @@ func _school_5e() -> void:
 	stain.seed = 5501
 	for i in 8:
 		_rect(stain.randf_range(X0, X1 - 140), basement_top + 10, stain.randf_range(60, 140), stain.randf_range(30, 70), "#8E8A82", 'opacity="0.12"')
-	for bx: float in [X0 + 150.0, X0 + 330.0, X0 + 1010.0, X0 + 1200.0]:
-		_rect(bx, base_y - 64, 84, 34, "#3A3631", _stroke("#6E6A62", 2))
-		_rect(bx - 5, base_y - 30, 94, 7, "#D6D2CA", _stroke("#9A968E", 1))
+	for bx: float in [X0 + 150.0, X0 + 370.0, X0 + 960.0, X0 + 1190.0]:
+		_rect(bx, base_y - 54, 84, 30, "#3A3631", _stroke("#6E6A62", 2))
+		_rect(bx - 5, base_y - 24, 94, 7, "#D6D2CA", _stroke("#9A968E", 1))
 	# ── The basket-weave band and the white stone water table over it.
 	_rect(X0, weave_top, X1 - X0, basement_top - weave_top, k.bricks[2])
 	var wy := weave_top + 3.0
@@ -4270,14 +4270,15 @@ func _school_5e() -> void:
 	_rect(X0 - 4, water + 16, X1 - X0 + 8, 5, "#000000", 'opacity="0.12"')
 	_snow(X0 - 4, X1 - X0 + 8, water)
 	# ── The floors: ground floor sills on the water table, the two above.
-	var floor_h := (water - top - 50.0) / 3.0
-	var sills: Array[float] = [water - 4.0, water - floor_h - 6.0, water - 2.0 * floor_h - 8.0]
-	var wh := floor_h * 0.7
-	# The bays: [x, width, is it a narrow bay].
-	var main_bays: Array = [[X0 + 50.0, 104.0], [X0 + 182.0, 104.0], [X0 + 314.0, 104.0], [X0 + 446.0, 104.0],
-		[X0 + 690.0, 82.0], [X0 + 790.0, 82.0], [X0 + 890.0, 82.0], [X0 + 990.0, 82.0]]
-	var narrow: Array[float] = [X0 + 606.0, X0 + 1096.0]
-	var wing_bays: Array = [[wing_x + 30.0, 64.0], [wing_x + 112.0, 64.0], [wing_x + 194.0, 64.0]]
+	# Room between the floors and between the windows, as on the picture: a window is a little over half its floor's height,
+	# and there is half a window of brick between two of them (the first drawing packed them one on the other).
+	var floor_h := (water - top - 40.0) / 3.0
+	var sills: Array[float] = [water - 4.0, water - floor_h - 4.0, water - 2.0 * floor_h - 4.0]
+	var wh := floor_h * 0.58
+	# The bays: [x, width].
+	var main_bays: Array = [[X0 + 50.0, 100.0], [X0 + 200.0, 100.0], [X0 + 350.0, 100.0], [X0 + 610.0, 100.0], [X0 + 890.0, 100.0]]
+	var narrow: Array[float] = [X0 + 497.0, X0 + 1032.0]
+	var wing_bays: Array = [[wing_x + 28.0, 80.0], [wing_x + 128.0, 80.0]]
 	for f in 3:
 		var sill: float = sills[f]
 		for b: Array in main_bays:
@@ -4313,11 +4314,11 @@ func _school_5e() -> void:
 				_path("M%s %s l10 -16 l10 16 l-10 16 z" % [_n(dc.x - 10.0), _n(dc.y)], k.bricks[4], _stroke("#8A3A28", 1))
 	# ── The stone plaque over the door.
 	var plaque_y := sills[1] - wh * 0.62
-	_rect(door_cx - 86.0, plaque_y, 172, 72, k.lintel, _stroke(k.lintel_dark, 2))
-	_rect(door_cx - 76.0, plaque_y + 10.0, 152, 52, "#D8D2C4")
+	_rect(door_cx - 74.0, plaque_y, 148, 72, k.lintel, _stroke(k.lintel_dark, 2))
+	_rect(door_cx - 64.0, plaque_y + 10.0, 128, 52, "#D8D2C4")
 	for ly: float in [plaque_y + 24.0, plaque_y + 42.0]:
-		_rect(door_cx - 58.0, ly, 116, 5, "#A8A08E")
-	_rect(door_cx - 86.0, plaque_y + 72.0, 172, 6, "#000000", 'opacity="0.12"')
+		_rect(door_cx - 48.0, ly, 96, 5, "#A8A08E")
+	_rect(door_cx - 74.0, plaque_y + 72.0, 148, 6, "#000000", 'opacity="0.12"')
 	# ── The door: stone surround with its pilasters and scrolled brackets, a hood, the grilled transom, the black door, the steps.
 	var door_top := sills[0] - wh - 6.0
 	var door_bottom := base_y - 58.0
@@ -4368,23 +4369,43 @@ func _school_5e() -> void:
 	_foundation()
 
 
-# A double-hung window of the school on 5e: red frame, small panes in the upper sash (three by two), two in the lower, a
-# white stone sill.
+# A double-hung window of the school on 5e (reference/ecole.png): set into the brick under a flat arch of bricks on end, the
+# shade of the reveal along its top and left, a slim red frame, the upper sash in small panes (three by two), the lower sash in
+# two, the sky and the blinds in the glass, and a deep white stone sill throwing its shadow on the wall.
 func _red_sash(x: float, y: float, w: float, h: float) -> void:
-	_rect(x - 7, y + h, w + 14, 11, k.lintel, _stroke(k.lintel_dark, 1.2))
-	_snow(x - 7, w + 14, y + h)
-	_rect(x, y, w, h, "#A8322A", _stroke("#6E1E18", 1.5))
-	_rect(x + 5, y + 5, w - 10, h - 10, "#DCE6EA")
-	_rect(x + 5, y + h * 0.5, w - 10, h * 0.5 - 5, "#B9C9D0")
-	_rect(x + 5, y + 5, w - 10, h * 0.3, "#FFFFFF", 'opacity="0.35"')
+	# The flat arch: a course of bricks on end, a shade darker, a little wider than the opening.
+	var ax := x - 6.0
+	while ax < x + w + 6.0:
+		_rect(ax, y - 16, minf(9.0, x + w + 6.0 - ax), 15, k.bricks[4], _stroke("#7A3020", 0.6))
+		ax += 10.0
+	# The reveal's shade, then the frame.
+	_rect(x - 3, y - 2, w + 6, h + 4, "#5A1E16", 'opacity="0.55"')
+	_rect(x, y, w, h, "#B33A2E", _stroke("#6E1E18", 1.2))
+	var gx := x + 4.0
+	var gw := w - 8.0
+	var top_h := (h - 12.0) * 0.46
+	var bot_y := y + 4.0 + top_h + 4.0
+	var bot_h := h - 8.0 - top_h - 4.0
+	# Glass: the sky up top, the blinds half down in the lower sash, a soft reflection.
+	_rect(gx, y + 4, gw, top_h, "#CFE0E8")
+	_rect(gx, y + 4, gw, top_h * 0.5, "#E8F0F4")
+	_rect(gx, bot_y, gw, bot_h, "#9FB8C4")
+	_rect(gx, bot_y, gw, bot_h * 0.38, "#EDE6D8")
+	for bl in 4:
+		_rect(gx, bot_y + bot_h * 0.38 * (bl + 1) / 5.0, gw, 1.2, "#C9C0B0")
+	_path("M%s %s l%s 0 l%s %s z" % [_n(gx + 2), _n(y + 6), _n(gw * 0.5), _n(-gw * 0.5), _n(h * 0.55)], "#FFFFFF", 'opacity="0.22"')
 	# The muntins: three by two up top, one bar down the lower sash, the meeting rail.
 	for c in 2:
-		var mx := x + 5 + (w - 10) * (c + 1) / 3.0
-		_rect(mx - 1.2, y + 5, 2.4, h * 0.5 - 5, "#A8322A")
-	_rect(x + 5, y + 5 + (h * 0.5 - 5) / 2.0 - 1.2, w - 10, 2.4, "#A8322A")
-	_rect(x + w / 2.0 - 1.5, y + h * 0.5, 3, h * 0.5 - 5, "#A8322A")
-	_rect(x + 3, y + h * 0.5 - 3, w - 6, 6, "#A8322A")
-	_path("M%s %s l%s 0 l%s %s z" % [_n(x + 6), _n(y + 6), _n(w * 0.45), _n(-w * 0.45), _n(h * 0.3)], "#FFFFFF", 'opacity="0.3"')
+		_rect(gx + gw * (c + 1) / 3.0 - 1.1, y + 4, 2.2, top_h, "#B33A2E")
+	_rect(gx, y + 4 + top_h / 2.0 - 1.1, gw, 2.2, "#B33A2E")
+	_rect(gx + gw / 2.0 - 1.4, bot_y, 2.8, bot_h, "#B33A2E")
+	_rect(x + 2, y + 4 + top_h, w - 4, 4, "#9A2E24")
+	_rect(x + 2, y + 4 + top_h, w - 4, 1.2, "#E06A5A", 'opacity="0.7"')
+	# The sill: deep white stone, its lit top and the shadow it throws.
+	_rect(x - 8, y + h, w + 16, 12, k.lintel, _stroke(k.lintel_dark, 1.2))
+	_rect(x - 8, y + h, w + 16, 3, "#FFFFFF", 'opacity="0.55"')
+	_rect(x - 4, y + h + 12, w + 8, 7, "#000000", 'opacity="0.16"')
+	_snow(x - 8, w + 16, y + h)
 
 
 # A double-hung sash of the school's side: dark maroon frame, light blinds behind the glass, a meeting rail, a stone sill.
