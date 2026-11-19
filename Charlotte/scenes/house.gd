@@ -191,10 +191,11 @@ func _build_family() -> void:
 		return Halloween.step() == 3 and not GameState.flags.get("halloween_counted", false) \
 			or Quests.available("milk") or Quests.available("menage") or Quests.available("amies") \
 			or Quests.active("milk") and Carry.has("milk") or Cinema.step() == 1 \
-			or Quests.available(School.QUEST) or Quests.available(Party.QUEST) and School.step() == 0)
+			or Quests.available(School.QUEST) or Quests.available(Party.QUEST) and School.step() == 0 \
+			or Snowman.needs("boutons") and not Carry.busy())
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
 		return Quests.available("hamster") or Quests.available("plants") or Quests.available("chips") \
-			or Quests.active("chips") and Carry.has("chips"))
+			or Quests.active("chips") and Carry.has("chips") or Snowman.needs("tuque") and not Carry.busy())
 
 
 # A parent's routine with its click area and its "!" (over whoever has a quest for Charlotte, or is waiting for what she brings).
@@ -231,6 +232,8 @@ func _talk_to_mom() -> void:
 		_say(_mom, "Amuse-toi bien, ma chouette !\nReviens quand ton sac sera plein.", 400.0, 3.5)
 	elif Halloween.step() == 1:
 		_say(_mom, "Ton déguisement est dans ta commode,\nma chouette ! Vas-y !", 400.0, 3.5)
+	elif Snowman.needs("boutons"):
+		_give_for_snowman(_mom, "boutons", "Des boutons pour un bonhomme de neige ?\nTiens, ma vieille boîte à biscuits !", 400.0)
 	elif School.step() == 1:
 		_say(_mom, "Je t'attends à la porte d'en avant,\nma chouette ! On part pour l'école !", 400.0, 3.5)
 	elif Quests.start(School.QUEST):
@@ -274,6 +277,8 @@ func _talk_to_dad() -> void:
 	_dad_routine.pause(4.0, _charlotte.position.x)
 	if Quests.active("chips") and Carry.has("chips"):
 		_hockey_night()
+	elif Snowman.needs("tuque"):
+		_give_for_snowman(_dad, "tuque", "Une tuque pour le bonhomme ? Prends ma vieille\ntuque du Canadien. Y va être champion !", 390.0)
 	elif Quests.start("chips"):
 		# His money pays for it: she gets the three dollars now.
 		GameState.money += 3.0
@@ -292,6 +297,16 @@ func _talk_to_dad() -> void:
 	else:
 		_say(_dad, DAD_LINES[_dad_line % DAD_LINES.size()], 360.0)
 		_dad_line += 1
+
+
+# Maman or Papa gives her something for Billie and Auguste's snowman (`Snowman`): the button tin, the old tuque.
+func _give_for_snowman(who: Character, part: String, line: String, height: float) -> void:
+	if not Carry.take(_charlotte, "bonhomme", part):
+		_say(_charlotte, Carry.FULL_HANDS, 200.0)
+		return
+	who.express("happy", 2.0)
+	_say(who, line, height, 3.6)
+	Sfx.play("pop", _charlotte.position + Vector2(0, -80))
 
 
 # ── Papa's hockey night ─────────────────────────────────────
@@ -916,7 +931,8 @@ func _build_doors() -> void:
 	# The fridge: a snack.
 	add_child(DoorSpot.make(Rect2(KITCHEN_START + 4.0, 240, 104, 356), _open_fridge, KITCHEN_START + 140.0))
 	# The drawing from the service de garde, waiting to go up on it.
-	add_child(QuestMark.make(Vector2(KITCHEN_START + 56.0, 210.0), func() -> bool: return Carry.has("drawing") and _control.enabled))
+	add_child(QuestMark.make(Vector2(KITCHEN_START + 56.0, 210.0), func() -> bool:
+		return (Carry.has("drawing") or Snowman.needs("carotte") and not Carry.busy()) and _control.enabled))
 	# Her bed: sleep until the next morning.
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 360.0, 380, 448, 228), _go_to_sleep, BEDROOM.x + 600.0))
 	# Under it, her hiding place: the shoebox of junk food.
@@ -997,8 +1013,12 @@ func _open_fridge() -> void:
 	move_child(open, _fridge_art.get_index() + 1)
 	var cold := _glow(Vector2(KITCHEN_START + 60.0, 420.0), 220.0, Color(0.75, 0.9, 1.0, 0.35))
 	move_child(cold, open.get_index() + 1)
-	var pick: Array = SNACKS[randi() % SNACKS.size()]
-	_treat(InteriorArt.snack(pick[0]), "%s Miam !" % pick[1], 0.6)
+	if Snowman.needs("carotte") and Carry.take(_charlotte, "bonhomme", "carotte"):
+		# Not a snack this time: the snowman's nose.
+		_say(_charlotte, "Une belle carotte pour le nez\ndu bonhomme de neige !", 200.0)
+	else:
+		var pick: Array = SNACKS[randi() % SNACKS.size()]
+		_treat(InteriorArt.snack(pick[0]), "%s Miam !" % pick[1], 0.6)
 	var tween := create_tween()
 	tween.tween_interval(3.0)
 	tween.tween_callback(func():

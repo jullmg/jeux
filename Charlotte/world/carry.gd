@@ -2,7 +2,7 @@ class_name Carry
 extends RefCounted
 ## Everything Charlotte holds in her arms, behind ONE saved indicator: `GameState.flags.carried` = "" (hands free), or
 ## "<kind>" / "<kind>:<id>": "milk" (Mom's pint), "can" (the watering can), "cat:<quest id>" (a lost cat), "toy:<item>" (a thing
-## from her bedroom floor while she tidies), "book" (Constance's), "chips" (Papa's Ruffles), "snacks" (the movie night's bag), "drawing" (the one she made at the service de garde for the fridge), "gift" (Alyzée's birthday present). One thing at a
+## from her bedroom floor while she tidies), "book" (Constance's), "chips" (Papa's Ruffles), "snacks" (the movie night's bag), "drawing" (the one she made at the service de garde for the fridge), "gift" (Alyzée's birthday present), "bonhomme:<part>" (the carrot, the tin of buttons or the tuque for the snowman). One thing at a
 ## time, enforced here for every quest:
 ##   - `Carry.take(who, kind, id)` is the only way to put something in her arms; it refuses (returns false) when her hands
 ##     are not free, so the caller just says `Carry.FULL_HANDS`;
@@ -176,6 +176,16 @@ static func _build(kind: String, id: String) -> Node2D:
 			box.name = "gift"
 			box.set_meta("keep_upright", true)
 			return box
+		"bonhomme":
+			# What the snowman lacks: the carrot, Maman's button tin, Papa's tuque.
+			var part := Sprite2D.new()
+			part.texture = Snowman.item(id)
+			part.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			part.scale = Vector2.ONE * 1.25
+			part.offset = Vector2(0, -12)
+			part.name = "bonhomme"
+			part.set_meta("keep_upright", true)
+			return part
 		"toy":
 			# Something from her bedroom floor (the tidying quest): the same picture as on the floor, bigger in her arms.
 			var toy := Sprite2D.new()

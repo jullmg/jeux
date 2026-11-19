@@ -3,6 +3,7 @@ extends Node2D
 ## Billie (7) and Auguste (5), sister and brother, two little neighbours, smaller than Charlotte (reference/personnages/billie_et_auguste.jpg).
 ## They live in the lane, a few houses toward Dandurand, and are there once Mom's "amies" quest has started (like the twins).
 ## The first click is the meeting (`flags.met_billie_auguste`); after that the one clicked says a line. Quests go in `interact`.
+## Their first one is the snowman (`Snowman`, winter): they roll its balls beside them and Charlotte brings the rest.
 
 const SPREAD := 74.0
 ## The top of each one's head, in their own units (Billie, Auguste).
@@ -18,6 +19,36 @@ const MEETING := [
 	[0, "On est amis, astheure ! Reviens nous voir !"],
 ]
 const LINE_SECONDS := 2.3
+## Where their snowman stands, in their units (right of Auguste).
+const SNOWMAN_X := 330.0
+const SNOWMAN_ASK := [
+	[0, "Chachoue ! As-tu vu toute la neige ?"],
+	[1, "On fait un bonhomme de neige ! Un GROS !"],
+	[-1, "Oh oui ! Je vous aide !"],
+	[0, "On roule les boules, nous autres. Regarde !"],
+]
+const SNOWMAN_LACKS := [
+	[1, "Y'a pas de nez ! Pis pas de boutons !"],
+	[0, "Pis y va avoir frette aux oreilles : y faut une tuque."],
+	[-1, "Je vais chercher ça chez nous ! Une carotte dans le frigo…"],
+	[-1, "…des boutons à Maman pis une tuque à Papa !"],
+]
+## What each says as the part goes on: [who puts it on, their line, Charlotte's answer].
+const SNOWMAN_PUT := {
+	"carotte": [1, "C'est moi qui mets le nez ! Pouic !", "Y'a l'air d'un vrai, astheure !"],
+	"boutons": [0, "Un, deux, trois boutons ! Y est ben chic !", "Rouge, bleu, jaune !"],
+	"tuque": [1, "La tuque du Canadien ! Go Habs go !", "Y aura pas frette aux oreilles !"],
+}
+const SNOWMAN_DONE := [
+	[0, "Y est fini ! C'est le plus beau bonhomme de la ruelle !"],
+	[1, "On l'appelle Monsieur Carotte !"],
+	[-1, "Bonjour, Monsieur Carotte !"],
+	[0, "Merci, Chachoue ! T'es ben fine."],
+]
+const SNOWMAN_LINES := [
+	["Monsieur Carotte a pas fondu ! Y fait trop frette !", "Demain, on y fait une blonde !"],
+	["Y me regarde, Monsieur Carotte !", "Chu plus grand que lui ? Non ? Pas encore !"],
+]
 const LINES := [
 	["Salut, Chachoue !", "J'ai mangé une crème glacée, c'tait ben bon !", "Mon p'tit frère court plus vite que moi, mais pas longtemps !"],
 	["Regarde mon chandail ! C'est un vrai !", "Chu capable de compter jusqu'à vingt, tsé !", "Ma sœur est ben fine, mais a me gosse des fois !"],
@@ -30,6 +61,7 @@ var _charlotte: Character
 var _clicked := 0
 var _line := [0, 0]
 var _talking := false
+var _snowman: Snowman
 
 
 func _ready() -> void:
@@ -43,6 +75,8 @@ func _ready() -> void:
 		kid.facing = 1 if i == 0 else -1
 		add_child(kid)
 		_kids.append(kid)
+	if Snowman.standing():
+		_build_snowman()
 	add_to_group("interactable")
 
 
@@ -50,9 +84,12 @@ static func met() -> bool:
 	return GameState.flags.get(FLAG, false)
 
 
-## They have something to say and aren't saying it yet (the "!" over them).
+## They have something to say and aren't saying it yet (the "!" over them): the meeting, the snowman to ask for, or
+## something for it in her arms.
 func waiting() -> bool:
-	return not met() and not _talking
+	if _talking:
+		return false
+	return not met() or Snowman.can_start() or Quests.active(Snowman.QUEST) and Carry.has("bonhomme")
 
 
 func can_interact() -> bool:
@@ -89,11 +126,20 @@ func interact(who: Character) -> void:
 	_charlotte = who
 	for kid in _kids:
 		kid.facing = 1 if who.position.x > kid.global_position.x else -1
-	if met():
-		_say(_clicked, LINES[_clicked][_line[_clicked] % LINES[_clicked].size()])
+	if not met():
+		_meet()
+	elif Snowman.can_start():
+		_ask_for_snowman()
+	elif Quests.active(Snowman.QUEST) and Carry.has("bonhomme"):
+		_put_on_snowman(Carry.id())
+	elif Quests.active(Snowman.QUEST) and Snowman.missing().is_empty():
+		_snowman_done()
+	elif Quests.active(Snowman.QUEST):
+		_say(_clicked, "Y manque encore %s !" % ", ".join(Snowman.missing().map(func(p: String) -> String: return Snowman.NAMES[p])))
+	else:
+		var lines: Array = SNOWMAN_LINES[_clicked] if Snowman.standing() and _line[_clicked] % 2 == 1 else LINES[_clicked]
+		_say(_clicked, lines[_line[_clicked] % lines.size()])
 		_line[_clicked] += 1
-		return
-	_meet()
 
 
 func _meet() -> void:
@@ -112,6 +158,82 @@ func _meet() -> void:
 		for kid in _kids:
 			kid.express("happy", 2.0)
 		_charlotte.express("happy", 2.0))
+
+
+# ── The snowman ─────────────────────────────────────────────
+
+func _build_snowman() -> void:
+	_snowman = Snowman.new()
+	_snowman.position = Vector2(SNOWMAN_X, 0)
+	add_child(_snowman)
+	move_child(_snowman, 0)
+
+
+# They ask her, roll the three balls (the snowman grows out of the snow, ball by ball), and say what it lacks.
+func _ask_for_snowman() -> void:
+	_talk_through(SNOWMAN_ASK, func() -> void:
+		Quests.start(Snowman.QUEST)
+		_build_snowman()
+		_snowman.scale = Vector2(0.2, 0.05)
+		_talking = true
+		if control:
+			control.hands_off = true
+		var grow := create_tween()
+		for k in 3:
+			grow.tween_callback(Sfx.play.bind("pop", to_global(_snowman.position)))
+			grow.tween_property(_snowman, "scale", Vector2.ONE * (0.45 + k * 0.275), 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			grow.tween_interval(0.35)
+		grow.tween_callback(func() -> void:
+			_talking = false
+			for kid in _kids:
+				kid.express("grin", 1.6)
+			_talk_through(SNOWMAN_LACKS, func() -> void:
+				Notebook.announce("step", "Trouve une carotte, des boutons pis une tuque pour le bonhomme !", Snowman.HEADING))))
+
+
+# She hands them what she brought: it goes on the snowman, and with the last one it is finished.
+func _put_on_snowman(part: String) -> void:
+	var put: Array = SNOWMAN_PUT.get(part, [0, "Merci !", "Voilà !"])
+	Carry.put_down(_charlotte)
+	_charlotte.pet(0.8, 0.0)
+	Snowman.add_part(part)
+	if _snowman:
+		_snowman.refresh()
+		var bump := create_tween()
+		bump.tween_property(_snowman, "scale", Vector2(1.06, 0.95), 0.12)
+		bump.tween_property(_snowman, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	Sfx.play("pop", to_global(_snowman.position) if _snowman else global_position)
+	_kids[put[0]].express("grin", 2.0)
+	var lines := [[put[0], put[1]], [-1, put[2]]]
+	_talk_through(lines, func() -> void:
+		if Snowman.missing().is_empty():
+			_snowman_done()
+		else:
+			Notebook.announce("step", "Il manque encore %s." % ", ".join(Snowman.missing().map(func(p: String) -> String: return Snowman.NAMES[p])), Snowman.HEADING))
+
+
+func _snowman_done() -> void:
+	Sfx.play("chime", global_position)
+	_talk_through(SNOWMAN_DONE, func() -> void:
+		for kid in _kids:
+			kid.express("laugh", 2.0)
+		_charlotte.express("happy", 2.0)
+		Quests.complete(Snowman.QUEST))
+
+
+func _talk_through(lines: Array, after: Callable) -> void:
+	_talking = true
+	if control:
+		control.hands_off = true
+	var steps := create_tween()
+	for step: Array in lines:
+		steps.tween_callback(_say.bind(step[0], step[1]))
+		steps.tween_interval(LINE_SECONDS)
+	steps.tween_callback(func() -> void:
+		_talking = false
+		if control:
+			control.hands_off = false
+		after.call())
 
 
 func _say(speaker: int, text: String) -> void:
