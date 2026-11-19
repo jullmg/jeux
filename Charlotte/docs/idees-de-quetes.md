@@ -24,6 +24,7 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
     il faut d'abord emprunter un traîneau.
 13. **La souffleuse passe la nuit** (choisie par Julien, 2026-11-19) : après une tempête, Charlotte aide Papa à pelleter
     l'escalier ; les voitures sont parties pour le déneigement et les gros camions (souffleuse, camions) passent dans la rue.
+14. **Faire le sapin de Noël** (Julien, 2026-11-19) : décorer le sapin de Noël à la maison.
 
 ## Notes de départ (à préciser avec Julien avant de programmer)
 
@@ -46,5 +47,9 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
   que par la quête de l'école. Le traîneau à emprunter : aux jumelles, à Alyzée, ou au service de garde ?
 - La souffleuse : les voitures ont été retirées des rues (2026-10-31, voir l'historique git) ; il faudrait dessiner la
   souffleuse, les camions et les pancartes orange de déneigement, et pelleter l'escalier extérieur de son duplex.
+- Le sapin de Noël : à préciser. Le sapin s'achète-t-il (un vendeur de sapins sur le trottoir, comme à Montréal en
+  décembre) ou sort-il de la boîte ? Où va-t-il (le salon) ? Les décorations : boules, guirlandes, lumières, l'étoile ou
+  l'ange en haut (Papa la soulève ?), une à la fois depuis une boîte comme le ménage de sa chambre. Le sapin reste décoré
+  ensuite (un flag), allumé le soir.
 - Le livre perdu (fait) : Constance le demande, il est dans le croque-livre de la ruelle verte (`ruelle.gd` `BOOK_LANE`), Charlotte le porte dans ses bras
   (`Carry` « book », `LaneArt.lost_book`) et le `BookReader` s'ouvre sur « Minou et la lune » quand elle le rapporte.
