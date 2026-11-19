@@ -57,6 +57,16 @@ const MOVIE := [
 const HER_BOOK := 1
 const LINE_SECONDS := 2.3
 const FOUND_FLAG := "cachette_found"
+## Once the quest is done she can ask them for another game whenever she likes (Julien): a game on (`AGAIN_FLAG`), and how
+## many she has asked for (`ROUND_FLAG`), which picks other fences to hide behind each time (`spots_for`).
+const AGAIN_FLAG := "cachette_again"
+const ROUND_FLAG := "cachette_round"
+const AGAIN := [
+	[-1, "On joue à la cachette ?"],
+	[0, "Ouiii ! Mais cette fois-ci, on se cache\nben mieux, tu nous trouveras jamais !"],
+	[1, "Ferme les yeux pis compte jusqu'à dix !"],
+	[-1, "Un, deux, trois, quatre…"],
+]
 ## How much of a hiding sister shows over her fence.
 const PEEK := 120.0
 const FOUND_LINES := ["Oh non, tu m'as trouvée ! Cherche Constance !", "Trouvée ! Il reste Alphée !"]
@@ -74,6 +84,8 @@ var _charlotte: Character
 var _clicked := 0
 var _line := [0, 0]
 var _talking := false
+## Gives the hiding places for a game (the scene's, by round number); empty = keep `hide_spots`.
+var spots_for: Callable
 
 
 func _ready() -> void:
@@ -102,7 +114,7 @@ func spawn_hidden() -> void:
 
 
 static func hiding() -> bool:
-	return Quests.active("cachette")
+	return Quests.active("cachette") or bool(GameState.flags.get(AGAIN_FLAG, false))
 
 
 static func met() -> bool:
@@ -178,11 +190,34 @@ func interact(who: Character) -> void:
 	if met() and Cinema.step() == 2:
 		_say(_clicked, "Des chips pis des bonbons,\nau dépanneur !" if _clicked == 0 else "Grouille, Chachoue, on a hâte !")
 		return
+	if met() and Quests.done("cachette"):
+		_ask_what_to_do()
+		return
 	if met():
-		_say(_clicked, LINES[_clicked][_line[_clicked] % LINES[_clicked].size()])
-		_line[_clicked] += 1
+		_chat()
 		return
 	_meet()
+
+
+func _chat() -> void:
+	_say(_clicked, LINES[_clicked][_line[_clicked] % LINES[_clicked].size()])
+	_line[_clicked] += 1
+
+
+# Once they have played once: another game of hide and seek, or just a word.
+func _ask_what_to_do() -> void:
+	if control:
+		control.enabled = false
+	var card := ChoiceCard.ask(get_parent(), "Qu'est-ce que tu veux faire ?", [
+		{"text": "On joue à la cachette ?", "note": "Alphée pis Constance se cachent, tu les cherches"},
+		{"text": "Juste jaser"}])
+	card.chose.connect(func(i: int) -> void:
+		if control:
+			control.enabled = true
+		if i == 0:
+			_play_hide_and_seek(true)
+		elif i == 1:
+			_chat())
 
 
 func _meet() -> void:
@@ -206,18 +241,26 @@ func _meet() -> void:
 
 # ── Hide and seek ───────────────────────────────────────────
 
-func _play_hide_and_seek() -> void:
+func _play_hide_and_seek(again := false) -> void:
 	_talking = true
 	if control:
 		control.hands_off = true
 	var steps := create_tween()
-	for step: Array in COUNTING:
+	for step: Array in (AGAIN if again else COUNTING):
 		steps.tween_callback(_say.bind(step[0], step[1]))
 		steps.tween_interval(LINE_SECONDS)
 	steps.tween_callback(func() -> void:
 		_charlotte.express("sleep", 1.6)
 		Transition.through_black(get_parent(), func() -> void:
-			Quests.start("cachette")
+			if again:
+				# Somewhere else this time.
+				GameState.flags[AGAIN_FLAG] = true
+				GameState.flags[ROUND_FLAG] = int(GameState.flags.get(ROUND_FLAG, 0)) + 1
+				GameState.flags.erase(FOUND_FLAG)
+				if spots_for.is_valid():
+					hide_spots = spots_for.call(int(GameState.flags[ROUND_FLAG]))
+			else:
+				Quests.start("cachette")
 			_show_sisters(false)
 			spawn_hidden(), 0.7))
 	steps.tween_interval(1.5)
@@ -314,7 +357,9 @@ func _found(i: int, at: Vector2) -> void:
 	Sfx.play("chime", at)
 	if both:
 		GameState.flags.erase(FOUND_FLAG)
-		Quests.complete("cachette")
+		GameState.flags.erase(AGAIN_FLAG)
+		if Quests.active("cachette"):
+			Quests.complete("cachette")
 		_show_sisters(true)
 
 

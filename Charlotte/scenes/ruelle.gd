@@ -565,14 +565,25 @@ func _build_lane_squirrels() -> Array[Squirrel]:
 
 
 # Where the twins hide for hide and seek: behind a solid fence, one each side of where they play and well away from it.
-func _hide_spots() -> Array:
+# Each new game she asks for (`round`, Twins.ROUND_FLAG) draws other fences.
+func _hide_spots(round := 0) -> Array:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_value + 73
+	rng.seed = seed_value + 73 + round * 101
 	var sides: Array = [[], []]
+	# A game she asked for again may also use the tôle fences, and the two may hide on the same side.
+	var solid := ["boards", "cedar"] if round == 0 else ["boards", "cedar", "tole"]
 	for i: int in _front_sprites:
-		if _kinds[i] in ["boards", "cedar"] and i != _own and absi(i - TWINS_LOT) >= HIDE_FROM and i != KIDS_LOT:
+		if _kinds[i] in solid and i != _own and absi(i - TWINS_LOT) >= HIDE_FROM and i != KIDS_LOT:
 			sides[0 if i < TWINS_LOT else 1].append(i)
 	var picks: Array = []
+	if round > 0:
+		var all: Array = sides[0] + sides[1]
+		for k in all.size():
+			var j := rng.randi_range(k, all.size() - 1)
+			var swap: int = all[k]
+			all[k] = all[j]
+			all[j] = swap
+		sides = [all.slice(0, 1), all.slice(1, 2)]
 	for side: Array in sides:
 		if not side.is_empty():
 			picks.append(side[rng.randi_range(0, side.size() - 1)])
@@ -604,7 +615,8 @@ func _build_twins() -> void:
 	twins.position = Vector2((_lots[TWINS_LOT].x + _lots[TWINS_LOT].y) / 2.0, NEIGHBOUR_Y + 10.0)
 	twins.scale = Vector2.ONE * CHAR_SCALE
 	twins.control = _control
-	twins.hide_spots = _hide_spots()
+	twins.hide_spots = _hide_spots(int(GameState.flags.get(Twins.ROUND_FLAG, 0)))
+	twins.spots_for = _hide_spots
 	add_child(twins)
 	twins.spawn_hidden()
 	add_child(QuestMark.make(twins.position + Vector2(0, -190), twins.waiting))
