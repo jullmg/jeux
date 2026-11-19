@@ -41,8 +41,6 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 - Alphée et Constance Turcotte (`world/twins.gd`) ont déjà donné la cachette et le livre perdu ; la soirée cinéma et la fête leur iraient bien aussi.
 - Soirée cinéma : le dépanneur vend déjà de quoi grignoter (`Shop._buy`, `Shop.PRICES`) et l'argent de poche existe (`GameState.money`) ; il faudrait que Maman ou Papa lui en donne (nouveau), et un lieu où regarder le film (la télé du corridor, `TvScreen`).
 - La fête : il n'y a pas encore de magasin de cadeaux, et Maman ne sort pas encore de la maison (elle marche seulement à l'intérieur, `FamilyRoutine`). À décider.
-  l'ange en haut (Papa la soulève ?), une à la fois depuis une boîte comme le ménage de sa chambre. Le sapin reste décoré
-  ensuite (un flag), allumé le soir.
 - Noël : à préciser avec Julien. Pistes : une longue quête en étapes comme l'Halloween (`world/halloween.gd`) ; la lettre au
   père Noël (le cahier à dessin ou l'écriture), les biscuits pour lui avec Maman, le réveillon le soir (la nuit déjà faite pour
   l'Halloween), les cadeaux sous le sapin au matin, les amis qui passent dire « Joyeux Noël ». Les façades ont déjà leurs
