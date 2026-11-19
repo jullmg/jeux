@@ -384,6 +384,8 @@ class _Kid:
 		body.look = look
 		body.facing = facing
 		body.fidgets = mode == "idle"
+		if mode == "rope":
+			body.task = "skip"
 		# Their legs keep time with how fast they go (as Charlotte's do).
 		body.walk_speed = 130.0
 		add_child(body)
@@ -404,8 +406,10 @@ class _Kid:
 			"tag":
 				_tag(delta)
 			"rope":
-				# A hop as the rope comes under the feet.
-				body.position.y = -pow(maxf(cos(_t * TAU * 1.1), 0.0), 3.0) * 34.0
+				# A hop as the rope comes under the feet, her hands on the handles.
+				body.position.y = -pow(maxf(-cos(_rope_phase()), 0.0), 1.6) * HOP
+				var h := handles()
+				body.work = [to_global(h[0]), to_global(h[1])]
 				if OnScreen.near(self, 200.0):
 					for r in _rope:
 						r.queue_redraw()
@@ -481,6 +485,8 @@ class _Kid:
 		body.sitting = false
 		body.fidgets = false
 		body.position.y = 0.0
+		body.task = ""
+		body.work = []
 		if _ball:
 			_ball.visible = false
 		for r in _rope:
@@ -531,15 +537,41 @@ class _Kid:
 		say(lines[_line % lines.size()])
 		_line += 1
 
+	## Turns of the rope a second, and how high she hops over it (her own units).
+	const ROPE_TURNS := 1.25
+	const HOP := 38.0
+
+	## Where the rope is in its turn: 0 straight over her head, PI under her feet. It comes down in front of her and goes
+	## back up behind (sin > 0 = in front).
+	func _rope_phase() -> float:
+		return fmod(_t * TAU * ROPE_TURNS, TAU)
+
+	## Where her hands go, in her own units (front hand's first): out beside her hips, the wrists turning a small circle with
+	## the rope, highest when it is overhead.
+	func handles() -> Array:
+		var phase := _rope_phase()
+		var out: Array = []
+		for i: int in [1, 0]:
+			var shoulder := to_local(body.shoulder_position(i))
+			var side := signf(shoulder.x) if absf(shoulder.x) > 1.0 else (-1.0 if i == 1 else 1.0)
+			out.append(shoulder + Vector2(side * (40.0 + sin(phase) * 6.0), 78.0 - cos(phase) * 10.0))
+		return out
+
+	## The rope's ends (where it leaves each handle), how far its middle has swung from the line between them (+ down, - up),
+	## and whether it is in front of her.
 	func rope_points() -> Array:
-		var hand := to_local(body.hand_position())
-		# The handles held well out from her sides, so the rope swings clear of her and can be seen.
-		var left := Vector2(-absf(hand.x) - 70.0, hand.y + 10.0)
-		var right := Vector2(absf(hand.x) + 70.0, hand.y + 10.0)
-		# The middle of the rope swings round a circle seen edge-on: down under the feet, then up over the head.
-		var phase := fmod(_t * TAU * 1.1, TAU)
-		var mid := (left + right) / 2.0 + Vector2(0, cos(phase) * 260.0 - 60.0)
-		return [left, mid, right, cos(phase) > 0.0]
+		var phase := _rope_phase()
+		# The handles are in her fists, wherever the arms really got to.
+		var h := [to_local(body.hand_at(1)), to_local(body.hand_at(0))]
+		var a: Vector2 = h[0] + Vector2(signf(h[0].x - h[1].x) * 10.0, 22.0)
+		var b: Vector2 = h[1] + Vector2(signf(h[1].x - h[0].x) * 10.0, 22.0)
+		var hands_y := (a.y + b.y) / 2.0
+		# Down to just over the ground under her feet, up well over her head (and her hop), round a loop seen edge-on.
+		var down := -hands_y - 4.0
+		var up := hands_y - head + 40.0
+		var c := -cos(phase)
+		var swing := c * (down if c > 0.0 else up)
+		return [a, b, swing, sin(phase) > 0.0, h]
 
 	func ball_position() -> Vector2:
 		return Vector2(70.0, -30.0 - absf(sin(_t * 3.2)) * 190.0)
@@ -552,15 +584,24 @@ class _Rope:
 
 	func _draw() -> void:
 		var pts: Array = kid.rope_points()
-		if pts[3] != front:
-			return
-		var line := PackedVector2Array()
-		for k in 17:
-			var t := k / 16.0
-			line.append((pts[0] as Vector2).lerp(pts[1], t).lerp((pts[1] as Vector2).lerp(pts[2], t), t))
-		draw_polyline(line, Color("#E85FA0"), 13.0, true)
-		for p: Vector2 in [pts[0], pts[2]]:
-			draw_rect(Rect2(p - Vector2(8, 18), Vector2(16, 36)), Color("#F2C230"))
+		if pts[3] == front:
+			# The loop: lifted most at its middle, rounder than a sag so it reads as a rope swung wide.
+			var a: Vector2 = pts[0]
+			var b: Vector2 = pts[1]
+			var line := PackedVector2Array()
+			for k in 25:
+				var t := k / 24.0
+				line.append(a.lerp(b, t) + Vector2(0.0, pts[2] * pow(sin(PI * t), 0.75)))
+			var color := Color("#E85FA0") if front else Color("#C9468A")
+			draw_polyline(line, color, 11.0, true)
+		# The handles in her fists, in front of her hands whichever way the rope goes, pointing down toward the rope.
+		if front:
+			for i in 2:
+				var hand: Vector2 = pts[4][i]
+				var tip: Vector2 = pts[i]
+				var dir := (tip - hand).normalized()
+				draw_line(hand - dir * 12.0, tip, Color("#C99A1E"), 18.0, true)
+				draw_line(hand - dir * 12.0, tip, Color("#F2C230"), 13.0, true)
 
 
 class _Ball:

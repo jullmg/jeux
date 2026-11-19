@@ -22,7 +22,7 @@ const SIT_THIGH := -88.0
 const SIT_THICK := 7.0
 ## What the face does while a chore goes on.
 const TASK_FACES := {"piano": "happy", "pottery": "focus", "bike": "focus", "jog": "effort", "stir": "happy", "read": "focus", "phone": "talk", "type": "focus", "wash": "focus", "drink": "normal", "fridge": "wonder",
-	"exercise": "effort", "watch": "happy", "daydream": "blank"}
+	"exercise": "effort", "skip": "happy", "watch": "happy", "daydream": "blank"}
 
 var look: CharacterLook
 var walk_speed := 200.0
@@ -87,7 +87,7 @@ var fidgets := false
 ## The front hand's shape when it has nothing special to do ("grip" for a passerby holding a leash, say); "" = relaxed.
 var hand_mode := ""
 ## A chore she is doing in place (a family member's routine): "stir", "read", "phone", "type", "wash", "drink", "fridge",
-## "exercise", "watch" or "daydream" (Dad gazing at nothing); "" = none. Poses the arms and head; the routine adds the prop in her hand.
+## "exercise", "skip" (a skipping rope), "watch" or "daydream" (Dad gazing at nothing); "" = none. Poses the arms and head; the routine adds the prop in her hand.
 var task := ""
 ## Where the hands work, in world coordinates (front hand first, back hand second): the bowl on the table, the keys, the clay. Set by
 ## a family routine; a task with no points uses the old fixed arm angles.
@@ -283,6 +283,16 @@ func is_petting() -> bool:
 
 func hand_position() -> Vector2:
 	return _hands[1].to_global(Vector2(0, _rig.hand_center))
+
+
+## Where a hand (the middle of its palm) is in the world (0 the back hand, 1 the front one).
+func hand_at(i: int) -> Vector2:
+	return _hands[i].to_global(Vector2(0, _rig.hand_center))
+
+
+## Where a shoulder is in the world (0 the back arm's, 1 the front one's).
+func shoulder_position(i: int) -> Vector2:
+	return _arms[i].global_position
 
 
 # An arm chain in the body: the upper arm at the shoulder, the forearm at its elbow, the hand at the wrist. Returns the upper arm.
@@ -796,6 +806,18 @@ func _task_pose() -> void:
 			_aim(0, -24.0, 0.96)
 			_hand_goal = ["relaxed", "grip"]
 			_body.rotation += 0.05 * f
+		"skip":
+			# Skipping rope: each hand holds a handle (`work`, set by whoever turns the rope), fists closed; the knees tuck while
+			# she is off the ground (her own `position.y`, lifted by the hop).
+			if _has_work(2):
+				_reach_to(1, work[0])
+				_reach_to(0, work[1])
+			_hand_goal = ["grip", "grip"]
+			var tuck := clampf(-position.y / 30.0, 0.0, 1.0)
+			_leg_front.rotation -= 0.18 * tuck
+			_leg_back.rotation -= 0.12 * tuck
+			_shin_front.rotation += 0.55 * tuck
+			_shin_back.rotation += 0.45 * tuck
 		"exercise":
 			var s := sin(t * 4.0)
 			_aim(1, -95.0 - s * 58.0, 0.94)
