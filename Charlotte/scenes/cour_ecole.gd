@@ -146,6 +146,17 @@ func _build_backdrop() -> void:
 
 
 func _build_furniture() -> void:
+	# A bike rack by the gate, with a bike or two out of winter.
+	var rack := _sprite(PropArt.rack(), 0.8)
+	rack.position = Vector2(GATE_X + 120.0, WALL_FOOT + 30.0 - 90.0 * 0.8)
+	add_child(rack)
+	if not Season.is_winter():
+		var bikes := RandomNumberGenerator.new()
+		bikes.seed = seed_value + 5
+		for hoop in [42.0, 182.0]:
+			var bike := _sprite(PropArt.bike(bikes), 0.85)
+			bike.position = Vector2(rack.position.x + hoop * 0.8 - 75.0 * 0.85, WALL_FOOT + 32.0 - 90.0 * 0.85)
+			add_child(bike)
 	var frame := _sprite(SchoolYardArt.climbing_frame(), 1.0)
 	frame.position = Vector2(FRAME_X, 612.0 - 260.0)
 	add_child(frame)

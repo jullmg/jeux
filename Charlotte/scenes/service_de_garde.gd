@@ -86,9 +86,9 @@ func _build_room() -> void:
 	var art := RandomNumberGenerator.new()
 	art.seed = 5511
 	for wx in [430.0, 1700.0]:
-		var window := _put(InteriorArt.window(160.0, 120.0), wx, 200.0, 1.0, "wall")
+		var window := _put(InteriorArt.window(160.0, 120.0), wx, 340.0, 1.0, "wall")
 		_window_snow(window, 160.0, 120.0)
-		_daylight(Vector2(wx, 80.0), 160.0, 0.12)
+		_daylight(Vector2(wx, 220.0), 160.0, 0.12)
 	_put(ClassArt.mural(560.0, 240.0), 820.0, 420.0, 1.0)
 	_put(ClassArt.door("#9CC9E8"), DOOR_X - 75.0, 606.0, 0.85)
 	_put(ClassArt.cubbies(300.0, art), 220.0, 606.0, 0.85, "floor")
@@ -109,6 +109,11 @@ func _build_room() -> void:
 	words.size = banner.size
 	words.position = banner.position
 	add_child(words)
+	for lx in [500.0, 1300.0, 2100.0]:
+		_ceiling_light(lx)
+	_put(ClassArt.cork_board(art), 1960.0, 400.0, 0.85, "wall")
+	_put(ClassArt.toy_shelf(), 2380.0, 620.0, 0.85, "floor")
+	_put(ClassArt.easel(art), 880.0, 650.0, 0.95, "floor")
 	_put(ClassArt.craft_table(), CRAFT_X - 150.0, 660.0, 1.0, "floor")
 	_blocks = _put(ClassArt.block_tower(_level), BLOCKS_X - 85.0, 668.0, 1.0)
 	_put(ClassArt.snack_table(), SNACK_X - 120.0, 660.0, 1.0, "floor")

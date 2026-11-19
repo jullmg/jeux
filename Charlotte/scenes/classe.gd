@@ -85,6 +85,11 @@ func _build_walls() -> void:
 		_window_snow(window, 170.0, 250.0)
 		_daylight(Vector2(wx, 160.0), 170.0, 0.16)
 	_put(InteriorArt.wall_clock(), 2010.0, 100.0, 0.55, "wall")
+	_put(ClassArt.seasons_poster(), 1041.0, 380.0, 0.8, "wall")
+	_put(ClassArt.number_line(1180.0), 570.0, 500.0, 1.0)
+	_sticker_chart()
+	for lx in [600.0, 1300.0, 2000.0, 2600.0]:
+		_ceiling_light(lx)
 	# The board, and what is written on it: today's date, then each question.
 	_put(ClassArt.blackboard(BOARD.size.x, BOARD.size.y), BOARD.position.x, BOARD.end.y, 1.0, "wall")
 	var now := Time.get_date_dict_from_system()
@@ -92,6 +97,31 @@ func _build_walls() -> void:
 	_chalk(date.capitalize() if false else date[0].to_upper() + date.substr(1), Vector2(BOARD.get_center().x, BOARD.position.y + 44.0), 24)
 	_board_text = _chalk("Bonjour, les amis !", Vector2(BOARD.get_center().x, BOARD.position.y + 140.0), 30)
 	_alphabet()
+
+
+# The class's sticker chart between the windows and the board: a row per child, Charlotte's stars are her stickers.
+func _sticker_chart() -> void:
+	var names := ["Charlotte", "Alyzée", "Léo", "Maya", "Noah", "Zoé"]
+	var mine := int(GameState.flags.get(School.STICKERS, 0))
+	var stars := [mine, 2, 4, 3, 1, 5]
+	var at := Vector2(1462.0, 200.0)
+	var k := 0.88
+	_put(ClassArt.sticker_chart(stars), at.x, at.y + 210.0 * k, k, "wall")
+	var title := Label.new()
+	title.text = "Nos autocollants"
+	title.add_theme_font_size_override("font_size", 17)
+	title.add_theme_color_override("font_color", Color.WHITE)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.size = Vector2(340.0 * k, 30.0 * k)
+	title.position = at + Vector2(0, 2)
+	add_child(title)
+	for r in names.size():
+		var name_label := Label.new()
+		name_label.text = names[r]
+		name_label.add_theme_font_size_override("font_size", 13)
+		name_label.add_theme_color_override("font_color", Color("#1D4F91") if r == 0 else Color("#3A3A48"))
+		name_label.position = at + Vector2(12.0, (44.0 + r * (210.0 - 54.0) / names.size()) * k)
+		add_child(name_label)
 
 
 # Words in chalk on the board.
@@ -155,6 +185,9 @@ func _build_people() -> void:
 	var looks := RandomNumberGenerator.new()
 	looks.seed = 4413
 	var chair_colors := ["#E04F5F", "#4A6FA5", "#FFB42E", "#3E8E5A", "#7E57C2"]
+	# Backpacks left on the floor behind the chairs.
+	for i in SEATS.size():
+		_put(ClassArt.backpack(["#E04F5F", "#1FB5C4", "#FFD23F", "#7E57C2", "#3E8E5A"][i]), SEATS[i] - 112.0, FEET_Y - 8.0, 0.8)
 	for i in SEATS.size():
 		_put(ClassArt.pupil_chair(chair_colors[i]), SEATS[i] - 46.0, FEET_Y + 2.0, 1.0)
 	var k := 0

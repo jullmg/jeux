@@ -99,11 +99,33 @@ static func back_wall(w: float, door_x: float, rng: RandomNumberGenerator) -> Im
 		for k in 5:
 			s += _rect(px - 3.0, COPING + 40.0 + k * 90.0, 15.0, 5.0, "#5F6164")
 		s += _rect(px - 6.0, h - 12.0, 21.0, 8.0, "#5F6164")
+	# The children's handprints painted along the base, and the wall's two corners in shade (its returns are seen a little).
+	var hands := ["#E04F5F", "#FFD23F", "#4A9AD8", "#3E8E5A", "#FF8A3D", "#7E57C2", "#F7A9C4"]
+	var hx := 80.0
+	while hx < w - 80.0:
+		if absf(hx - door_x) > DOOR_W:
+			s += _handprint(hx, table_y + rng.randf_range(30.0, 58.0), hands[rng.randi_range(0, hands.size() - 1)], rng.randf_range(-0.4, 0.4))
+		hx += rng.randf_range(34.0, 60.0)
 	s += _rect(0, 0, w, h, "url(#sun)")
+	s += _rect(0, 0, 10, h, "#2A1A20", 'fill-opacity="0.28"')
+	s += _rect(w - 14.0, 0, 14, h, "#2A1A20", 'fill-opacity="0.38"')
+	s += _rect(10, 0, 2, h, "#FFFFFF", 'fill-opacity="0.15"')
 	if Season.is_winter():
 		s += _snow_line(0.0, w, 0.0, 6.0, rng)
 		s += _snow_line(0.0, w, table_y, 4.0, rng)
 	return PropArt.tex(_svg(w, h, s))
+
+
+# A child's hand painted on the wall: the palm and five fingers, a little crooked.
+static func _handprint(cx: float, cy: float, color: String, tilt: float) -> String:
+	var s := '<g transform="rotate(%.1f %.1f %.1f)" fill="%s" fill-opacity="0.85">' % [rad_to_deg(tilt), cx, cy, color]
+	s += '<ellipse cx="%.1f" cy="%.1f" rx="8" ry="9"/>' % [cx, cy]
+	for k in 5:
+		var a := -PI * 0.95 + k * PI * 0.22
+		var fx := cx + cos(a) * 12.0
+		var fy := cy + sin(a) * 12.0
+		s += '<ellipse cx="%.1f" cy="%.1f" rx="2.6" ry="5" transform="rotate(%.1f %.1f %.1f)"/>' % [fx, fy, rad_to_deg(a) + 90.0, fx, fy]
+	return s + '</g>'
 
 
 # A double-hung window in a maroon frame under a flat arch of bricks on end, its stone sill and the shade it throws.
