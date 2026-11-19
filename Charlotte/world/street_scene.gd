@@ -237,9 +237,11 @@ func _spawn_cyclists(delta: float) -> void:
 	bike.scale = Vector2.ONE * 1.15
 	_traffic.add_child(bike)
 	if _bike_rng.randf() < 0.3:
-		get_tree().create_timer(_bike_rng.randf_range(1.0, 2.5)).timeout.connect(func():
-			if is_instance_valid(bike):
-				Sfx.play("bell", bike.global_position, -10.0, 1.4))
+		# The delay belongs to the bike, so it goes with it (a timer of the tree's outlived it when she left the street, and
+		# Godot complained that the lambda's captured bike was freed).
+		var ring := bike.create_tween()
+		ring.tween_interval(_bike_rng.randf_range(1.0, 2.5))
+		ring.tween_callback(func(): Sfx.play("bell", bike.global_position, -10.0, 1.4))
 
 
 # ── Hooks for the street ────────────────────────────────────────
@@ -739,7 +741,10 @@ func _add_lost_cat(id: String) -> void:
 			return
 		cat.on_pet = Callable()
 		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Je te tiens, %s !\nOn rentre chez toi." % LostCats.ALL[id].name, 2.6)
-		get_tree().create_timer(StrayCat.PET_TIME).timeout.connect(func():
+		# Bound to the cat, so it can't outlive it (or the street) the way a timer of the tree did.
+		var lift := cat.create_tween()
+		lift.tween_interval(StrayCat.PET_TIME)
+		lift.tween_callback(func():
 			cat.queue_free()
 			Carry.take(_charlotte, "cat", id))
 	_animals.add_child(cat)
