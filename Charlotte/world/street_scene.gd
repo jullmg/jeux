@@ -1093,6 +1093,11 @@ const NO_CANDY := ["duplex_charlotte", "depanneur", "depanneur_front", "ohbon", 
 	"ruelle_impair_holt", "ruelle_impair_dandurand"]
 
 
+## How far above the facade's foot the "!" over a Halloween door floats: just over the door, where she clicks (Julien: it was
+## up at the first floor's windows, 262).
+const DOOR_MARK_UP := 168.0
+
+
 ## The evening of the Halloween quest: the dark, the lit houses with their decorations, the other children, and a
 ## doorbell at every front door (`HalloweenNight`). Nothing at all on an ordinary night.
 func _build_halloween() -> void:
@@ -1106,7 +1111,7 @@ func _build_halloween() -> void:
 		if cross_streets.has(art) or NO_CANDY.has(art):
 			# Her own front door gets a "!" of its own once the bag is full, so she can see where to go home.
 			if art == "duplex_charlotte" and not is_nan(_door_x(art)):
-				add_child(QuestMark.make(Vector2(_door_x(art), HOUSE_BASE_Y - 262.0), func() -> bool:
+				add_child(QuestMark.make(Vector2(_door_x(art), HOUSE_BASE_Y - DOOR_MARK_UP), func() -> bool:
 					return Halloween.night() and Halloween.step() == 3, 0.62))
 			continue
 		var x := _door_x(art)
@@ -1117,7 +1122,7 @@ func _build_halloween() -> void:
 		var bell := DoorSpot.make(Rect2(x - 46.0, HOUSE_BASE_Y - 236.0, 92.0, 180.0), _ring.bind(key, gives, x), x)
 		add_child(bell)
 		if gives:
-			add_child(QuestMark.make(Vector2(x, HOUSE_BASE_Y - 262.0), func() -> bool:
+			add_child(QuestMark.make(Vector2(x, HOUSE_BASE_Y - DOOR_MARK_UP), func() -> bool:
 				return Halloween.night() and not Halloween.knocked().has(key), 0.62))
 
 
