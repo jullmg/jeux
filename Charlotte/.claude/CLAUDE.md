@@ -768,9 +768,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
        on the card (`School.draw_shape`, `ChoiceCard.ask(…, picture)`), then an addition and a subtraction made up for the day
        (`School._sum`, 3e-année level: carrying and borrowing, up to `SUM_MAX`; the wrong answers are the usual slips), read out
        by `Voice` (`say`: "plus" / "moins"), answered on a `ChoiceCard` ("Presque ! Essaie encore." when wrong), a sticker (`flags.ecole_stickers`), the bell;
-       4. the service de garde (`scenes/service_de_garde.gd`): Jade the educator, a craft of the season, blocks that grow
-       and tumble, a snack, snakes and ladders with Alyzée; Papa comes `PAPA_AFTER` seconds after her first activity (or
-       `PAPA_LATEST`), she tells him about her day (the first day: her new friend, and the quest is done) and "Papa te ramène
+       4. the service de garde (`scenes/service_de_garde.gd`): Jade the educator asks for **a drawing for her parents** (Julien):
+       the craft table ("!") opens the `DrawingPad` (`done_text` "Pour Papa et Maman !"), the drawing is kept apart
+       (`DrawingPad.pending`, `slot_dir()/dessin_a_rapporter.png`) and carried home in her arms (`Carry` "drawing"), she shows
+       it to Papa, and at home a click on the fridge ("!") puts it up (`house.gd _drawing_on_fridge`, `put_pending_on_fridge`);
+       then a craft of the season, blocks that grow and tumble, a snack, snakes and ladders with Alyzée; Papa comes
+       `PAPA_AFTER` seconds after the drawing is done (Jade reminds her every `REMIND_EVERY` s), she tells him about her day (the first day: her new friend, and the quest is done) and "Papa te ramène
        à la maison…". After the first day the front door asks once a day "À l'école" / "Jouer dehors" (`School.available_today`,
        `flags.ecole_today_done`, cleared at bedtime). Art: `world/class_art.gd` (`ClassArt`).
   - A step of a long quest announces itself with `Notebook.announce("step", words, heading)`: the heading names its quest

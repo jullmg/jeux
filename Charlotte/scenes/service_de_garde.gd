@@ -2,9 +2,11 @@ extends Interior
 # The school's service de garde, after class (a school day's step 4, world/school.gd): a big bright room in the basement under
 # a paper garland, a rainbow painted on the wall. Left to right: the door Papa comes in by, the coat hooks, the craft table,
 # the block corner, the snack table with Jade the educator, and the games table where Alyzée waits. Each thing she does there is
-# a little moment (a craft of the season, a tower that grows and tumbles, a snack, a game with Alyzée). Once she has done
-# something (or after a while) Papa comes to pick her up; clicking him, she tells him about her day (on the first day, her
-# new friend: the quest is done) and "Papa te ramène à la maison…".
+# a little moment (a craft of the season, a tower that grows and tumbles, a snack, a game with Alyzée). Every day she has a
+# drawing to make for her parents first (Julien): Jade asks for it, the craft table opens the drawing pad, and she carries
+# the drawing home (`Carry` "drawing", `DrawingPad.pending`), where it goes up on the fridge. Papa comes once it is done; she
+# shows it to him and tells him about her day (on the first day, her new friend: the quest is done), and "Papa te ramène à
+# la maison…".
 
 const ROOM := Vector2(0.0, 2600.0)
 const DOOR_X := 110.0
@@ -14,9 +16,13 @@ const SNACK_X := 1540.0
 const JADE_X := 1860.0
 const GAME_X := 2060.0
 const ALYZEE_X := 2330.0
-## Papa comes this long after she has done her first thing, or after `PAPA_LATEST` anyway.
+## Papa comes this long after she has finished her drawing for her parents.
 const PAPA_AFTER := 5.0
-const PAPA_LATEST := 40.0
+## Jade reminds her of the drawing every so often until it is done.
+const REMIND_EVERY := 25.0
+const JADE_ASKS := "Aujourd'hui, on fait un dessin\npour nos parents ! Va à la table de bricolage."
+const JADE_REMINDS := ["N'oublie pas ton dessin pour ton papa\npis ta maman, Chachoue !", "La table de bricolage t'attend !\nTon dessin pour tes parents ?"]
+const JADE_LIKES := ["Wow ! C'est magnifique, Chachoue !\nTes parents vont capoter !", "Quel beau dessin !\nIl va être ben beau sur le frigo."]
 const JADE_LINES := ["Bienvenue au service de garde, Chachoue !", "On se lave les mains avant la collation !",
 	"On range les blocs quand on a fini, OK ?", "Ton papa va arriver bientôt."]
 const ALYZEE_GAME := [
@@ -41,6 +47,11 @@ var _papa_here := false
 var _leaving := false
 var _busy := false
 var _jade_line := 0
+## Her drawing for her parents is done (and in her arms), and when; how long since Jade last reminded her.
+var _drew := false
+var _drew_at := 0.0
+var _reminded := 0.0
+var _played := false
 
 
 func _ready() -> void:
@@ -61,6 +72,8 @@ func _ready() -> void:
 	var hello := create_tween()
 	hello.tween_interval(1.0)
 	hello.tween_callback(_jade_says.bind(JADE_LINES[0]))
+	hello.tween_interval(3.0)
+	hello.tween_callback(_jade_says.bind(JADE_ASKS, 3.6))
 
 
 func _music() -> Array:
@@ -76,8 +89,12 @@ func _process(delta: float) -> void:
 	if _papa_here:
 		return
 	_wait += delta
-	if _did and _wait > PAPA_AFTER or _wait > PAPA_LATEST:
-		_papa_arrives()
+	if _drew:
+		if _wait - _drew_at > PAPA_AFTER:
+			_papa_arrives()
+	elif _wait - _reminded > REMIND_EVERY and _wait > 10.0 and _control.enabled and not _busy:
+		_reminded = _wait
+		_jade_says(JADE_REMINDS[int(_wait) % JADE_REMINDS.size()], 3.0)
 
 
 # ── The room ────────────────────────────────────────────────────
@@ -190,11 +207,12 @@ func _build_spots() -> void:
 		if not _papa_here:
 			_say(_charlotte, "J'attends Papa.\nIl va venir me chercher !", 200.0)
 		, DOOR_X + 80.0))
-	add_child(QuestMark.make(Vector2(ALYZEE_X, FEET_Y - 190.0), func() -> bool: return not _did and not _papa_here))
+	add_child(QuestMark.make(Vector2(CRAFT_X, 470.0), func() -> bool: return not _drew and _control.enabled))
+	add_child(QuestMark.make(Vector2(ALYZEE_X, FEET_Y - 190.0), func() -> bool: return _drew and not _played and not _papa_here))
 
 
-func _jade_says(text: String) -> void:
-	_say(_jade, text, 290.0, 2.6)
+func _jade_says(text: String, seconds := 2.6) -> void:
+	_say(_jade, text, 290.0, seconds)
 
 
 func _alyzee_says(text: String) -> void:
@@ -206,12 +224,38 @@ func _alyzee_says(text: String) -> void:
 func _make_craft() -> void:
 	if _busy:
 		return
+	if not _drew:
+		_draw_for_parents()
+		return
 	_did = true
 	_charlotte.facing = 1
 	_charlotte.pet(1.2, 0.0)
 	var words := {"winter": "J'ai fait un flocon en papier !", "autumn": "J'ai fait une feuille d'automne !",
 		"spring": "J'ai fait une tulipe en papier !"}
 	_treat(ClassArt.craft(), str(words.get(Season.current, "J'ai fait un beau soleil !")), 1.0)
+
+
+# The drawing pad, its button "Pour Papa et Maman !": the drawing is kept for home and she carries it in her arms.
+func _draw_for_parents() -> void:
+	_control.enabled = false
+	_charlotte.facing = 1
+	var pad := DrawingPad.new()
+	pad.done_text = "Pour Papa et Maman !"
+	pad.closed.connect(func(drawing: Image) -> void:
+		_control.enabled = true
+		if drawing == null:
+			_say(_charlotte, "Je vais le finir tantôt…", 200.0)
+			return
+		DrawingPad.hold_pending(drawing)
+		_drew = true
+		_drew_at = _wait
+		_did = true
+		if not Carry.busy():
+			Carry.take(_charlotte, "drawing")
+		_charlotte.express("happy", 2.0)
+		Sfx.play("chime")
+		_jade_says(JADE_LIKES[randi() % JADE_LIKES.size()], 3.0))
+	add_child(pad)
 
 
 # The tower grows a block at each click; past six it tumbles down and she starts again.
@@ -244,6 +288,7 @@ func _play_game() -> void:
 		return
 	_busy = true
 	_did = true
+	_played = true
 	_alyzee.facing = -1 if _charlotte.position.x < _alyzee.position.x else 1
 	var steps := create_tween()
 	for line: Array in ALYZEE_GAME:
@@ -298,12 +343,15 @@ func _go_home_with_papa() -> void:
 	_control.enabled = false
 	_papa.facing = 1 if _charlotte.position.x > _papa.position.x else -1
 	var lines: Array = []
+	if Carry.has("drawing"):
+		lines = [[_charlotte, "Regarde, Papa ! J'ai fait un dessin\npour toi pis Maman !"],
+			[_papa, "Il est magnifique ! On va le mettre\nsur le frigo en arrivant."]]
 	if School.first_day():
-		lines = [[_charlotte, "Papa ! J'ai une nouvelle amie !\nElle s'appelle Alyzée !"],
+		lines += [[_charlotte, "Papa ! J'ai une nouvelle amie !\nElle s'appelle Alyzée !"],
 			[_papa, "Une nouvelle amie ? Wow !\nBravo, ma grande !"]]
 	else:
 		var stickers := int(GameState.flags.get(School.STICKERS, 0))
-		lines = [[_charlotte, "Madame Nadia m'a donné un autocollant !\nJ'en ai %d, astheure !" % stickers],
+		lines += [[_charlotte, "Madame Nadia m'a donné un autocollant !\nJ'en ai %d, astheure !" % stickers],
 			[_papa, "T'es ben bonne, ma Chachoue !"]]
 	var talk := create_tween()
 	for line: Array in lines:

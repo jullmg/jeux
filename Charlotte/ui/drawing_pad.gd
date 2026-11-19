@@ -29,6 +29,8 @@ const STAMP_R := [16.0, 28.0, 44.0]
 const TEXT_SIZE := [18, 28, 44]
 const UNDO := 15
 
+## The words on the button that keeps the drawing ("Pour Papa et Maman !" at the service de garde).
+var done_text := "Sur le frigo !"
 var _image: Image
 var _texture: ImageTexture
 var _paper: TextureRect
@@ -141,7 +143,7 @@ func _ready() -> void:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.add_child(spacer)
 	_action(bar, "Annuler", func(): _close(null))
-	var done := _action(bar, "Sur le frigo !", func(): _close(_image))
+	var done := _action(bar, done_text, func(): _close(_image))
 	done.add_theme_stylebox_override("normal", _box(YELLOW, BLUE, 3, 16))
 
 
@@ -488,6 +490,28 @@ static func forget_all() -> void:
 		return
 	for n in dir.get_files():
 		dir.remove(n)
+
+
+## The drawing she made at the service de garde for her parents, until it is on the fridge (kept apart from the fridge's).
+static func pending_path() -> String:
+	return GameState.slot_dir() + "/dessin_a_rapporter.png"
+
+
+static func hold_pending(img: Image) -> void:
+	DirAccess.make_dir_recursive_absolute(GameState.slot_dir())
+	img.save_png(pending_path())
+
+
+static func pending() -> Image:
+	return Image.load_from_file(pending_path()) if FileAccess.file_exists(pending_path()) else null
+
+
+## Home: the drawing she brought goes up on the fridge.
+static func put_pending_on_fridge() -> void:
+	var img := pending()
+	if img:
+		keep(img)
+		DirAccess.remove_absolute(pending_path())
 
 
 ## Keeps a new drawing, dropping the oldest beyond KEEP.

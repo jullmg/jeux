@@ -2,7 +2,7 @@ class_name Carry
 extends RefCounted
 ## Everything Charlotte holds in her arms, behind ONE saved indicator: `GameState.flags.carried` = "" (hands free), or
 ## "<kind>" / "<kind>:<id>": "milk" (Mom's pint), "can" (the watering can), "cat:<quest id>" (a lost cat), "toy:<item>" (a thing
-## from her bedroom floor while she tidies), "book" (Constance's), "chips" (Papa's Ruffles), "snacks" (the movie night's bag). One thing at a
+## from her bedroom floor while she tidies), "book" (Constance's), "chips" (Papa's Ruffles), "snacks" (the movie night's bag), "drawing" (the one she made at the service de garde for the fridge). One thing at a
 ## time, enforced here for every quest:
 ##   - `Carry.take(who, kind, id)` is the only way to put something in her arms; it refuses (returns false) when her hands
 ##     are not free, so the caller just says `Carry.FULL_HANDS`;
@@ -99,6 +99,10 @@ static func _hold(who: Character) -> void:
 	who.carry_grip = CAN_HANDLE if what() == "can" else Vector2.ZERO
 
 
+## How big the daycare drawing is in her arms (the paper is DrawingPad.PAPER).
+const DRAWING_SCALE := 0.36
+
+
 # The node for each kind of thing: add a case for a new one.
 static func _build(kind: String, id: String) -> Node2D:
 	match kind:
@@ -148,6 +152,20 @@ static func _build(kind: String, id: String) -> Node2D:
 			bag.name = "snacks"
 			bag.set_meta("keep_upright", true)
 			return bag
+		"drawing":
+			# The drawing from the service de garde, held up in front of her, the right way round, on its white sheet.
+			var sheet := Sprite2D.new()
+			var img := DrawingPad.pending()
+			if img == null:
+				img = Image.create(DrawingPad.PAPER.x, DrawingPad.PAPER.y, false, Image.FORMAT_RGBA8)
+				img.fill(DrawingPad.PAPER_COLOR)
+			sheet.texture = ImageTexture.create_from_image(img)
+			sheet.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			sheet.scale = Vector2.ONE * DRAWING_SCALE
+			sheet.offset = Vector2(0, -40)
+			sheet.name = "drawing"
+			sheet.set_meta("keep_upright", true)
+			return sheet
 		"toy":
 			# Something from her bedroom floor (the tidying quest): the same picture as on the floor, bigger in her arms.
 			var toy := Sprite2D.new()

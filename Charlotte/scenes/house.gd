@@ -809,6 +809,8 @@ func _build_doors() -> void:
 		Transition.change_scene(self, "res://scenes/ruelle.tscn"), KITCHEN_START + 300.0))
 	# The fridge: a snack.
 	add_child(DoorSpot.make(Rect2(KITCHEN_START + 4.0, 240, 104, 356), _open_fridge, KITCHEN_START + 140.0))
+	# The drawing from the service de garde, waiting to go up on it.
+	add_child(QuestMark.make(Vector2(KITCHEN_START + 56.0, 210.0), func() -> bool: return Carry.has("drawing") and _control.enabled))
 	# Her bed: sleep until the next morning.
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 360.0, 380, 448, 228), _go_to_sleep, BEDROOM.x + 600.0))
 	# Under it, her hiding place: the shoebox of junk food.
@@ -873,6 +875,9 @@ func _costume_chosen() -> void:
 func _open_fridge() -> void:
 	if _fridge_busy:
 		return
+	if Carry.has("drawing"):
+		_drawing_on_fridge()
+		return
 	_fridge_busy = true
 	_charlotte.facing = -1
 	Sfx.play("fridge", Vector2(KITCHEN_START + 60.0, 420.0))
@@ -894,6 +899,24 @@ func _open_fridge() -> void:
 		open.queue_free()
 		cold.queue_free()
 		_fridge_busy = false)
+
+
+# The drawing she brought from the service de garde goes up on the fridge door, with a magnet; Maman loves it.
+func _drawing_on_fridge() -> void:
+	_charlotte.facing = -1
+	_charlotte.pet(0.8, 0.0)
+	Carry.put_down(_charlotte)
+	DrawingPad.put_pending_on_fridge()
+	_show_fridge_drawings()
+	Sfx.play("pop", Vector2(KITCHEN_START + 60.0, 380.0))
+	_charlotte.express("happy", 2.0)
+	_say(_charlotte, "Voilà ! Mon dessin est sur le frigo !", 200.0)
+	if _mom and is_instance_valid(_mom):
+		var later := create_tween()
+		later.tween_interval(2.6)
+		later.tween_callback(func() -> void:
+			_mom.express("happy", 2.0)
+			_say(_mom, "Oh, qu'il est beau, ma Chachoue !\nMerci, mon cœur.", 280.0, 3.0))
 
 
 # Bedtime (nothing is asked of her first): the room goes night-blue and moonlit, she's tucked in ("Bonne nuit"), little z's float up from the
