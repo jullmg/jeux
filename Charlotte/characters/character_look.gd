@@ -204,6 +204,29 @@ static func alyzee() -> CharacterLook:
 	return look
 
 
+## Jade, the educator: young, auburn hair in a ponytail, a teal hoodie, jeans, sneakers.
+static func jade() -> CharacterLook:
+	var look := CharacterLook.new()
+	look.age = "adult"
+	look.skin = Color("#F3D3BC")
+	look.hair_style = "ponytail"
+	look.hair_color = Color("#8A3B1E")
+	look.eye_color = Color("#3F9B45")
+	look.lashes = true
+	look.freckles = true
+	look.mouth = "open_smile"
+	look.outfit = "hoodie"
+	look.outfit_color = Color("#1FB5C4")
+	look.accent_color = Color("#FFD23F")
+	look.pattern = "none"
+	look.sleeve = "long"
+	look.legwear = "pants"
+	look.legwear_color = Color("#4A6FA5")
+	look.shoes = "sneaker"
+	look.shoe_color = Color("#F4F1EA")
+	return look
+
+
 ## Auguste, 5 (on the right): ginger hair in a chin-length bob with a fringe, freckles, a big grin, a red basketball jersey.
 ## Smaller than Billie.
 static func auguste() -> CharacterLook:

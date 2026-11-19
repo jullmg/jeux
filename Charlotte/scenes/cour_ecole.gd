@@ -7,6 +7,8 @@ extends StreetScene
 # Maman says goodbye at the gate on step 1 → 2 of the quest; meeting Alyzée and playing tag rings the bell; everyone goes in
 # through the door and "Après l'école…" takes her home. Reuses StreetScene's helpers (sky, Charlotte, camera, wind, grade)
 # but builds its own scene, like the lanes.
+# After class, the service de garde can come out here to slide (`Sledding`, quest "glissade"): then Jade stands by the door
+# instead of the supervisor, there is no bell and no Alyzée (she stays in), and the snow hill is Charlotte's to slide down.
 
 const YARD_W := 2600.0
 ## The school's back wall (world x of its left end, its width) and the line where the yard meets it.
@@ -28,6 +30,15 @@ const RECESS := 35.0
 
 const SUPERVISOR_LINES := ["Pas de bousculade, les amis !", "On reste dans la cour, hein !", "Attention en haut de la glissoire !"]
 const WINTER_SUPERVISOR := "Pas de balles de neige, les amis !"
+const JADE_LINES := ["Un à la fois sur la butte, les amis !", "Glisse, Chachoue ! Je te regarde.", "On garde nos mitaines, hein !"]
+## The sled under her: its size, and how high it holds her hips over the snow (world px).
+const SLED_SCALE := 0.8
+const SLED_SEAT := 0.0
+## How far over the snow the sled's rim comes (world px): her boots' height once she sits, so the tray hides her coat's hem.
+const SLED_RIM := 10.0
+## Charlotte's way up and down the hill (world): from the top, down its worn track on the right, out onto the flat.
+const SLIDE_PATH := [Vector2(2190, 462), Vector2(2260, 486), Vector2(2320, 544), Vector2(2370, 590), Vector2(2400, 612),
+	Vector2(2440, 632), Vector2(2490, 638)]
 
 var _alyzee: Alyzee
 var _kids: Array[_Kid] = []
@@ -35,10 +46,15 @@ var _supervisor: _Kid
 var _mom: Character
 var _bell_rung := false
 var _recess := 0.0
+## The garde is out sliding (`Sledding.in_yard()`), not recess.
+var _garde := false
+var _sled: Sprite2D
+var _sliding := false
 
 
 func _ready() -> void:
 	street_key = "cour_ecole"
+	_garde = Sledding.in_yard()
 	seed_value = 7313
 	_rng.seed = seed_value
 	_street_width = YARD_W
@@ -52,7 +68,8 @@ func _ready() -> void:
 	add_child(ground)
 	_build_furniture()
 	_build_classmates()
-	_build_alyzee()
+	if not _garde:
+		_build_alyzee()
 	var start_x := START_X
 	# A saved game, or the debug menu, brings her back where she was.
 	if not is_nan(Transition.street_x):
@@ -67,7 +84,8 @@ func _ready() -> void:
 	_control.bounds = Vector2(80.0, YARD_W - 80.0)
 	_control.walk_top = WALL_FOOT - 260.0
 	add_child(_control)
-	_alyzee.control = _control
+	if _alyzee:
+		_alyzee.control = _control
 	_build_doors()
 	var saver := Saver.new()
 	saver.who = _charlotte
@@ -92,6 +110,8 @@ func _ready() -> void:
 	Transition.fade_in(self)
 	if School.step() == 1:
 		_mom_says_goodbye()
+	elif _garde:
+		_build_sledding()
 	var shot := _arg("--screenshot=")
 	if not shot.is_empty():
 		_save_screenshot(shot)
@@ -184,7 +204,10 @@ func _build_classmates() -> void:
 		{"x": 1010.0, "y": 612.0 - 112.0, "mode": "idle", "lines": ["Chu le roi de la montagne !", "Regarde, je vais glisser !"]},
 		{"x": 1830.0, "mode": "rope", "lines": ["Un, deux, trois, quatre… j'en suis à cinquante !", "Veux-tu tourner la corde ?"]},
 	]
-	if winter:
+	if winter and _garde:
+		# The hill is Charlotte's: this one watches from its foot.
+		plan.append({"x": HILL_X - 70.0, "mode": "idle", "lines": ["Vas-y, Chachoue ! Glisse !", "Wouhou ! T'es allée vite en malade !"]})
+	elif winter:
 		plan.append({"x": HILL_X + 200.0, "y": 616.0 - 156.0, "mode": "slide",
 			"lines": ["Wouhou ! Ça glisse en malade !", "Mes pantalons de neige sont tout mouillés !"]})
 	else:
@@ -221,6 +244,12 @@ func _build_classmates() -> void:
 	_supervisor.look = grown
 	_supervisor.mode = "idle"
 	_supervisor.lines = SUPERVISOR_LINES + ([WINTER_SUPERVISOR] if winter else [])
+	if _garde:
+		# Out with the service de garde: Jade, in her winter coat.
+		var jade := CharacterLook.jade()
+		Season.dress_for_weather(jade)
+		_supervisor.look = jade
+		_supervisor.lines = JADE_LINES
 	_supervisor.position = Vector2(DOOR_X + 130.0, KID_Y - 4.0)
 	_supervisor.scale = Vector2.ONE * CHAR_SCALE
 	_supervisor.facing = -1
@@ -244,11 +273,131 @@ func _build_alyzee() -> void:
 func _build_doors() -> void:
 	add_child(DoorSpot.make(Rect2(GATE_X - 60.0, WALL_FOOT - 220.0, 120.0, 230.0), _leave_by_gate, GATE_X + 60.0))
 	add_child(DoorSpot.make(Rect2(DOOR_X - 60.0, WALL_FOOT - 140.0, 120.0, 150.0), func() -> void:
+		if _garde:
+			_charlotte_says("Encore une glissade avant de rentrer !")
+			return
 		if not _bell_rung:
 			_charlotte_says("La cloche a pas encore sonné !\nC'est encore la récré !")
 			return
 		_go_to_class(), DOOR_X))
 	add_child(QuestMark.make(Vector2(DOOR_X, WALL_FOOT - 170.0), func() -> bool: return _bell_rung and _control.enabled))
+
+
+# ── Sliding with the service de garde ───────────────────────────
+
+func _build_sledding() -> void:
+	add_child(DoorSpot.make(Rect2(HILL_X + 40.0, 616.0 - 170.0, 380.0, 190.0), _slide, SLIDE_PATH[5].x))
+	add_child(QuestMark.make(Vector2(HILL_X + 200.0, 616.0 - 220.0), func() -> bool:
+		return Sledding.step() == 2 and not _sliding and _control.enabled))
+	var hello := create_tween()
+	hello.tween_interval(1.0)
+	hello.tween_callback(func() -> void: _supervisor.say("Allez, Chachoue ! La butte est à toi !\nGlisse trois fois, pis on rentre.", 3.4))
+
+
+# Up the hill on foot (the sled in her arms), sit on it at the top, down the track on her own speed and out onto the flat.
+func _slide() -> void:
+	if _sliding or Sledding.step() != 2:
+		return
+	_sliding = true
+	_control.hands_off = true
+	var path: Array = SLIDE_PATH
+	var climb := create_tween()
+	_charlotte.facing = -1
+	_charlotte.is_walking = true
+	var up := path.slice(0, 6)
+	up.reverse()
+	climb.tween_method(func(u: float) -> void: _charlotte.position = _along(up, u), 0.0, 1.0, 2.4)
+	climb.tween_callback(func() -> void:
+		_charlotte.is_walking = false
+		_charlotte.facing = 1
+		# The sled out of her arms and under her.
+		_charlotte.carry(null)
+		_sled = Sprite2D.new()
+		_sled.texture = Sledding.sled()
+		_sled.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		_sled.scale = Vector2.ONE * SLED_SCALE
+		# In front of her: she sits down in the tray, its rim at her hips (the canvas's middle line, y 30).
+		_sled.offset = Vector2(24, 0)
+		add_child(_sled)
+		_charlotte.sitting = true
+		_charlotte.sit_on_ground = true
+		# Her hips in the tray, its rim at her waist hiding her coat's hem.
+		_charlotte.seat_h = SLED_SEAT
+		_follow_sled())
+	climb.tween_interval(0.6)
+	climb.tween_callback(func() -> void:
+		_charlotte.express("grin", 2.0)
+		_charlotte_says("Wiiiii !")
+		Sfx.play("swoosh", _charlotte.position))
+	climb.tween_method(func(u: float) -> void:
+		_charlotte.position = _along(path, ease(u, 1.7))
+		_follow_sled(), 0.0, 1.0, 1.8)
+	climb.tween_interval(0.5)
+	climb.tween_callback(_landed)
+
+
+# Sled under her: on the slope's angle, a little under her feet (the tray she sits in).
+func _follow_sled() -> void:
+	if _sled == null:
+		return
+	var at := _charlotte.position
+	var ahead := _along(SLIDE_PATH, clampf(_progress(at) + 0.04, 0.0, 1.0))
+	var back := _along(SLIDE_PATH, clampf(_progress(at) - 0.04, 0.0, 1.0))
+	_sled.rotation = clampf((ahead - back).angle(), -0.45, 0.45) if ahead.distance_to(back) > 1.0 else 0.0
+	# Its rim at her boots, its bottom a little into the snow.
+	_sled.position = at + Vector2(0, -SLED_RIM).rotated(_sled.rotation)
+
+
+func _landed() -> void:
+	_charlotte.sitting = false
+	_charlotte.sit_on_ground = false
+	_charlotte.seat_h = 0.0
+	_charlotte.position.y = CHARLOTTE_Y
+	if _sled:
+		_sled.queue_free()
+		_sled = null
+	Carry.restore(_charlotte)
+	Sledding.add_run()
+	_sliding = false
+	_charlotte.express("laugh", 2.0)
+	if Sledding.runs() < Sledding.RUNS:
+		var again := ["Encore ! Encore !", "C'est trop l'fun !", "J'ai de la neige dans le cou !"]
+		_charlotte_says(again[(Sledding.runs() - 1) % again.size()])
+		_control.hands_off = false
+		return
+	_back_inside()
+
+
+# The third time down: Jade takes the sled back, the star, and in they go to warm up.
+func _back_inside() -> void:
+	var steps := create_tween()
+	steps.tween_interval(0.6)
+	steps.tween_callback(func() -> void:
+		_supervisor.say("Bravo, Chachoue ! T'as glissé comme une championne !\nOn rentre se réchauffer.", 3.4))
+	steps.tween_interval(3.8)
+	steps.tween_callback(func() -> void:
+		Carry.put_down(_charlotte)
+		Quests.complete(Sledding.QUEST)
+		_charlotte_says("Merci, Jade !"))
+	steps.tween_interval(2.2)
+	steps.tween_callback(func() -> void:
+		Sledding.just_back = true
+		_control.enabled = false
+		Sfx.play("door")
+		Transition.change_scene_saying(self, Sledding.GARDE, "On rentre au service de garde…", 1.2))
+
+
+# How far along the path a point is (0 at the top, 1 out on the flat), by its x.
+func _progress(at: Vector2) -> float:
+	var first: Vector2 = SLIDE_PATH[0]
+	var last: Vector2 = SLIDE_PATH[SLIDE_PATH.size() - 1]
+	return clampf((at.x - first.x) / (last.x - first.x), 0.0, 1.0)
+
+
+static func _along(path: Array, u: float) -> Vector2:
+	var f := clampf(u, 0.0, 1.0) * (path.size() - 1)
+	var i := mini(int(f), path.size() - 2)
+	return (path[i] as Vector2).lerp(path[i + 1], f - i)
 
 
 func _leave_by_gate() -> void:
@@ -456,6 +605,7 @@ class _Kid:
 		var top: Vector2 = hill + path[0] - Vector2(0, 170)
 		if _slide < 2.5:
 			body.sitting = true
+			body.sit_on_ground = true
 			body.seat_h = 0.0
 			body.facing = 1
 			position = top

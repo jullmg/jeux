@@ -22,6 +22,11 @@ const PAPA_AFTER := 5.0
 const REMIND_EVERY := 25.0
 const JADE_ASKS := "Aujourd'hui, on fait un dessin\npour nos parents ! Va à la table de bricolage."
 const JADE_REMINDS := ["N'oublie pas ton dessin pour ton papa\npis ta maman, Chachoue !", "La table de bricolage t'attend !\nTon dessin pour tes parents ?"]
+## The sliding (`Sledding`, quest "glissade"): what Jade says when there is snow to slide on, as she lends the sled, and
+## when they come back in.
+const JADE_SLED := "Il a neigé en masse ! Avant le bricolage,\non sort glisser dans la cour. Viens me voir !"
+const JADE_LENDS := "Tiens, un traîneau ! Mets ta tuque\npis sors par la porte, là-bas."
+const JADE_BACK := "Ouf ! On a les joues ben rouges !\nAstheure, un dessin pour vos parents."
 const JADE_LIKES := ["Wow ! C'est magnifique, Chachoue !\nTes parents vont capoter !", "Quel beau dessin !\nIl va être ben beau sur le frigo."]
 const JADE_LINES := ["Bienvenue au service de garde, Chachoue !", "On se lave les mains avant la collation !",
 	"On range les blocs quand on a fini, OK ?", "Ton papa va arriver bientôt."]
@@ -71,7 +76,17 @@ func _ready() -> void:
 	_finish([[1000.0, "plushie"], [2000.0, "plant"]])
 	var hello := create_tween()
 	hello.tween_interval(1.0)
-	hello.tween_callback(_jade_says.bind(JADE_LINES[0]))
+	if Sledding.just_back:
+		# In from the sliding: cheeks red, now the drawing.
+		Sledding.just_back = false
+		hello.tween_callback(_jade_says.bind(JADE_BACK, 3.0))
+	elif Sledding.can_start():
+		hello.tween_callback(_jade_says.bind(JADE_LINES[0]))
+		hello.tween_interval(3.0)
+		hello.tween_callback(_jade_says.bind(JADE_SLED, 3.6))
+		return
+	else:
+		hello.tween_callback(_jade_says.bind(JADE_LINES[0]))
 	hello.tween_interval(3.0)
 	hello.tween_callback(_jade_says.bind(JADE_ASKS, 3.6))
 
@@ -92,7 +107,8 @@ func _process(delta: float) -> void:
 	if _drew:
 		if _wait - _drew_at > PAPA_AFTER:
 			_papa_arrives()
-	elif _wait - _reminded > REMIND_EVERY and _wait > 10.0 and _control.enabled and not _busy:
+	elif _wait - _reminded > REMIND_EVERY and _wait > 10.0 and _control.enabled and not _busy and Sledding.step() == 0 \
+			and not Sledding.can_start():
 		_reminded = _wait
 		_jade_says(JADE_REMINDS[int(_wait) % JADE_REMINDS.size()], 3.0)
 
@@ -151,7 +167,7 @@ func _build_people() -> void:
 		add_child(kid)
 		_kids.append(kid)
 	_jade = Character.new()
-	_jade.look = _jade_look()
+	_jade.look = CharacterLook.jade()
 	_jade.fidgets = true
 	_jade.scale = Vector2.ONE * CHAR_SCALE * 1.15
 	_jade.position = Vector2(JADE_X, FEET_Y - 10.0)
@@ -166,49 +182,62 @@ func _build_people() -> void:
 	add_child(_alyzee)
 
 
-## Jade, the educator: young, auburn hair in a ponytail, a teal hoodie, jeans, sneakers.
-static func _jade_look() -> CharacterLook:
-	var look := CharacterLook.new()
-	look.age = "adult"
-	look.skin = Color("#F3D3BC")
-	look.hair_style = "ponytail"
-	look.hair_color = Color("#8A3B1E")
-	look.eye_color = Color("#3F9B45")
-	look.lashes = true
-	look.freckles = true
-	look.mouth = "open_smile"
-	look.outfit = "hoodie"
-	look.outfit_color = Color("#1FB5C4")
-	look.accent_color = Color("#FFD23F")
-	look.pattern = "none"
-	look.sleeve = "long"
-	look.legwear = "pants"
-	look.legwear_color = Color("#4A6FA5")
-	look.shoes = "sneaker"
-	look.shoe_color = Color("#F4F1EA")
-	return look
-
-
 func _build_spots() -> void:
 	add_child(DoorSpot.make(Rect2(CRAFT_X - 150.0, 540.0, 300.0, 130.0), _make_craft, CRAFT_X - 60.0))
 	add_child(DoorSpot.make(Rect2(BLOCKS_X - 85.0, 420.0, 170.0, 250.0), _build_tower, BLOCKS_X - 120.0))
 	add_child(DoorSpot.make(Rect2(SNACK_X - 120.0, 520.0, 240.0, 150.0), _have_snack, SNACK_X - 40.0))
 	add_child(DoorSpot.make(Rect2(GAME_X - 100.0, 550.0, 200.0, 120.0), _play_game, GAME_X - 140.0))
 	add_child(DoorSpot.make(Rect2(ALYZEE_X - 55.0, 500.0, 110.0, 170.0), _play_game, ALYZEE_X - 120.0))
-	add_child(DoorSpot.make(Rect2(JADE_X - 55.0, 380.0, 110.0, 290.0), func() -> void:
-		_jade_line += 1
-		_jade_says(JADE_LINES[_jade_line % JADE_LINES.size()]), JADE_X - 110.0))
+	add_child(DoorSpot.make(Rect2(JADE_X - 55.0, 380.0, 110.0, 290.0), _talk_to_jade, JADE_X - 110.0))
 	for i in _kids.size():
 		var kid := _kids[i]
 		add_child(DoorSpot.make(Rect2(kid.position.x - 50.0, FEET_Y - 170.0, 100.0, 170.0), func() -> void:
 			var lines: Array = KID_LINES[i]
 			_say(kid, lines[randi() % lines.size()], 175.0), kid.position.x - 100.0))
 	add_child(DoorSpot.make(Rect2(DOOR_X - 70.0, 330.0, 140.0, 280.0), func() -> void:
-		if not _papa_here:
+		if Sledding.step() == 1:
+			_out_to_slide()
+		elif not _papa_here:
 			_say(_charlotte, "J'attends Papa.\nIl va venir me chercher !", 200.0)
 		, DOOR_X + 80.0))
-	add_child(QuestMark.make(Vector2(CRAFT_X, 470.0), func() -> bool: return not _drew and _control.enabled))
+	add_child(QuestMark.make(Vector2(CRAFT_X, 470.0), func() -> bool:
+		return not _drew and _control.enabled and Sledding.step() == 0 and not Sledding.can_start()))
+	add_child(QuestMark.make(Vector2(JADE_X, FEET_Y - 330.0), func() -> bool: return Sledding.can_start() and not _drew))
+	add_child(QuestMark.make(Vector2(DOOR_X, 300.0), func() -> bool: return Sledding.step() == 1 and _control.enabled))
 	add_child(QuestMark.make(Vector2(ALYZEE_X, FEET_Y - 190.0), func() -> bool: return _drew and not _played and not _papa_here))
+
+
+func _talk_to_jade() -> void:
+	if Sledding.can_start() and not _drew:
+		_lend_sled()
+	elif Sledding.step() == 1:
+		_jade_says("La porte est là-bas, Chachoue !\nLes amis t'attendent dehors.")
+	else:
+		_jade_line += 1
+		_jade_says(JADE_LINES[_jade_line % JADE_LINES.size()])
+
+
+# Jade lends her a sled for the schoolyard's snow hill (quest "glissade").
+func _lend_sled() -> void:
+	if not Carry.take(_charlotte, "traineau"):
+		_say(_charlotte, Carry.FULL_HANDS, 200.0)
+		return
+	Quests.start(Sledding.QUEST)
+	Sledding.set_step(1)
+	Sfx.play("pop", _charlotte.position + Vector2(0, -80))
+	_jade.express("happy", 2.0)
+	_charlotte.express("grin", 2.0)
+	_jade_says(JADE_LENDS, 3.2)
+	Notebook.announce("step", "Jade t'a prêté un traîneau ! Sors dans la cour.", Sledding.HEADING)
+
+
+# Out through the garde's door to the schoolyard, sled in her arms.
+func _out_to_slide() -> void:
+	_control.enabled = false
+	Sledding.set_step(2)
+	Sfx.play("door")
+	Transition.street_x = Sledding.YARD_START
+	Transition.change_scene_saying(self, Sledding.YARD, "Le service de garde sort glisser dans la cour…", 1.4)
 
 
 func _jade_says(text: String, seconds := 2.6) -> void:
@@ -223,6 +252,9 @@ func _alyzee_says(text: String) -> void:
 
 func _make_craft() -> void:
 	if _busy:
+		return
+	if Sledding.step() == 1:
+		_say(_charlotte, "On va glisser avant !\nLe dessin, ce sera après.", 200.0)
 		return
 	if not _drew:
 		_draw_for_parents()

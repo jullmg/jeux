@@ -96,6 +96,9 @@ var work: Array[Vector2] = []
 ## (0 = the feet stay on the floor, a chair her size; a taller seat leaves her feet dangling). Eased in and out through `_sit`.
 var sitting := false
 var seat_h := 0.0
+## Sitting right on the ground or a sled (the schoolyard's snow hill): the hips come down to `seat_h` world px over the floor
+## and the legs stretch out in front instead of hanging.
+var sit_on_ground := false
 var _sit := 0.0
 # 0 the mug is down by their side, 1 it is at their lips (the chore "drink"), so what they hold can tip with it.
 var _sip := 0.0
@@ -515,7 +518,8 @@ func _apply_pose() -> void:
 			_hand_goal[1] = "grip"
 	var bounce := sin(walk_phase * TAU * 2.0)
 	# Running: a little hop at each push-off instead of the walk's dip.
-	_body.position.y = _stance_drop() * (1.0 - _run) - absf(bounce) * 6.0 * _run - _sit_lift() * _sit
+	_body.position.y = _stance_drop() * (1.0 - _run) - absf(bounce) * 6.0 * _run - _sit_lift() * _sit \
+		+ ((_ground_drop() - _stance_drop() * (1.0 - _run)) * _sit if sit_on_ground else 0.0)
 	_body.rotation = ((_rig.lean as float) + deg_to_rad(10.0) * _pet + deg_to_rad(9.0) * _run) * facing
 	var tilt := bounce if is_walking else sin(_time * 2.2) * 0.6
 	_head.rotation = deg_to_rad(2.0) * tilt + deg_to_rad(10.0) * _pet - deg_to_rad(4.0) * _run
@@ -625,6 +629,13 @@ func seated_amount() -> float:
 func _sit_legs() -> void:
 	if _sit <= 0.0:
 		return
+	if sit_on_ground:
+		# Legs out in front, the knees barely bent.
+		for leg: Node2D in [_leg_front, _leg_back]:
+			leg.rotation = lerpf(leg.rotation, deg_to_rad(SIT_THIGH + (6.0 if leg == _leg_back else 0.0)), _sit)
+		_shin_front.rotation = lerpf(_shin_front.rotation, deg_to_rad(-6.0), _sit)
+		_shin_back.rotation = lerpf(_shin_back.rotation, deg_to_rad(-2.0), _sit)
+		return
 	var dangle := minf(_sit_lift() / 40.0, 1.0)
 	var swing := sin(_time * 2.4) * deg_to_rad(9.0) * dangle
 	_leg_front.rotation = lerpf(_leg_front.rotation, deg_to_rad(SIT_THIGH), _sit)
@@ -637,6 +648,11 @@ func _sit_legs() -> void:
 func _sit_lift() -> float:
 	var shin := (_rig.leg_len as float) + 5.0 - (_rig.knee_y as float)
 	return maxf(seat_h / absf(scale.y) + SIT_THICK - shin, 0.0)
+
+
+# Sitting on the ground: how far the hips come down from standing height (the whole leg, less the seat's height).
+func _ground_drop() -> float:
+	return maxf((_rig.leg_len as float) - 4.0 - seat_h / absf(scale.y), 0.0)
 
 
 # How far the hips sit below standing height so that the lower foot stays on the ground (a lunge, a bent knee).
