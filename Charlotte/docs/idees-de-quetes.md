@@ -25,6 +25,7 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 13. **La souffleuse passe la nuit** (choisie par Julien, 2026-11-19) : après une tempête, Charlotte aide Papa à pelleter
     l'escalier ; les voitures sont parties pour le déneigement et les gros camions (souffleuse, camions) passent dans la rue.
 14. **Faire le sapin de Noël** (Julien, 2026-11-19) : décorer le sapin de Noël à la maison.
+15. **Noël** (Julien, 2026-11-19) : la grande quête de l'hiver, après le sapin, comme l'Halloween l'est pour l'automne.
 
 ## Notes de départ (à préciser avec Julien avant de programmer)
 
@@ -51,5 +52,9 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
   décembre) ou sort-il de la boîte ? Où va-t-il (le salon) ? Les décorations : boules, guirlandes, lumières, l'étoile ou
   l'ange en haut (Papa la soulève ?), une à la fois depuis une boîte comme le ménage de sa chambre. Le sapin reste décoré
   ensuite (un flag), allumé le soir.
+- Noël : à préciser avec Julien. Pistes : une longue quête en étapes comme l'Halloween (`world/halloween.gd`) ; la lettre au
+  père Noël (le cahier à dessin ou l'écriture), les biscuits pour lui avec Maman, le réveillon le soir (la nuit déjà faite pour
+  l'Halloween), les cadeaux sous le sapin au matin, les amis qui passent dire « Joyeux Noël ». Les façades ont déjà leurs
+  lumières de Noël et leurs couronnes en hiver.
 - Le livre perdu (fait) : Constance le demande, il est dans le croque-livre de la ruelle verte (`ruelle.gd` `BOOK_LANE`), Charlotte le porte dans ses bras
   (`Carry` « book », `LaneArt.lost_book`) et le `BookReader` s'ouvre sur « Minou et la lune » quand elle le rapporte.
