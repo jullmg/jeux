@@ -191,7 +191,7 @@ func _build_family() -> void:
 		return Halloween.step() == 3 and not GameState.flags.get("halloween_counted", false) \
 			or Quests.available("milk") or Quests.available("menage") or Quests.available("amies") \
 			or Quests.active("milk") and Carry.has("milk") or Cinema.step() == 1 \
-			or Quests.available(School.QUEST))
+			or Quests.available(School.QUEST) or Quests.available(Party.QUEST) and School.step() == 0)
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
 		return Quests.available("hamster") or Quests.available("plants") or Quests.available("chips") \
 			or Quests.active("chips") and Carry.has("chips"))
@@ -257,6 +257,10 @@ func _talk_to_mom() -> void:
 		_say(_mom, "As-tu fini de ranger\nta chambre ?", 380.0)
 	elif Quests.active("amies"):
 		_say(_mom, "Les enfants jouent dans la ruelle du milieu,\nderrière chez nous !", 400.0)
+	elif Party.step() == 1:
+		_say(_mom, "Je t'attends à la porte d'en avant,\nma chouette ! On va au Jean Coutu.", 400.0, 3.4)
+	elif Quests.available(Party.QUEST) and School.step() == 0:
+		_invitation()
 	elif Cinema.can_ask():
 		_ask_mom()
 	elif School.available_today():
@@ -355,6 +359,19 @@ const MOVIE_END := [
 	[1, "Merci pour la soirée, Chachoue !"],
 	[-1, "On en refait une bientôt !"],
 ]
+
+
+# Alyzée's birthday (Party): Maman found the invitation in her school bag, and they will go and buy a present.
+func _invitation() -> void:
+	Quests.start(Party.QUEST)
+	Party.set_step(1)
+	_mom.express("happy", 2.4)
+	_say(_mom, "Regarde ce que j'ai trouvé dans ton sac d'école :\nune invitation ! C'est la fête d'Alyzée !", 400.0, 3.8)
+	_treat(PartyArt.invitation(), "Une invitation !", 0.6)
+	var more := create_tween()
+	more.tween_interval(4.2)
+	more.tween_callback(func() -> void:
+		_say(_mom, "On va lui acheter un cadeau au Jean Coutu,\nsur la rue Masson. Je t'attends à la porte !", 400.0, 3.8))
 
 
 func _mom_about_school() -> void:
@@ -871,11 +888,17 @@ func _build_doors() -> void:
 		if School.step() == 1:
 			_off_to_school()
 			return
+		if Party.step() == 1:
+			# Off to Rue Masson with Maman for Alyzée's present: she can't go there alone at seven.
+			Party.set_step(2)
+			Transition.street_x = Party.COUTU_X
+			Transition.change_scene_saying(self, Party.COUTU, "Maman t'amène au Jean Coutu, sur la rue Masson…")
+			return
 		if School.available_today():
 			_school_or_play()
 			return
 		Transition.change_scene(self, "res://scenes/main.tscn")))
-	add_child(QuestMark.make(Vector2(455.0, 180.0), func() -> bool: return School.step() == 1 and _control.enabled))
+	add_child(QuestMark.make(Vector2(455.0, 180.0), func() -> bool: return (School.step() == 1 or Party.step() == 1) and _control.enabled))
 	add_child(DoorSpot.make(Rect2(CHACHA_DOOR_X, 170, 150, 430), func(): _go_through(BEDROOM_DOOR_X - 40.0, BEDROOM, -1)))
 	add_child(DoorSpot.make(Rect2(BEDROOM_DOOR_X, 170, 150, 430), func(): _go_through(CHACHA_DOOR_X + 75.0, HALL, 1)))
 	# The kitchen's back door: out to the yard and the lane behind the house. Shut on Halloween night like every

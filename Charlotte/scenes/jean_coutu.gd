@@ -97,6 +97,8 @@ func _ready() -> void:
 	_add_customers(4, [1300.0, 2700.0, 3300.0, 3900.0, 4500.0, 6000.0, 7800.0, 9900.0, 10500.0], 2716)
 	_spawn_charlotte(DOOR_X + 260.0)
 	_build_spots()
+	if Party.step() == 2:
+		_build_party_errand()
 	# A screenshot or a debug run asked for an x in one of the aisles starts there.
 	var start := FRONT
 	for i in CoutuArt.AISLES.size():
@@ -357,10 +359,17 @@ func _build_lighting() -> void:
 func _build_spots() -> void:
 	# The door: back out onto Masson (Transition.street_x, set on the way in, puts her at the shop door).
 	add_child(DoorSpot.make(Rect2(DOOR_X + 20.0, 170, 170, 430), func():
+		if Party.step() == 2:
+			# Maman is here for Alyzée's present: they leave together, for the party.
+			_say(_maman, "On s'en va pas avant d'avoir\ntrouvé le cadeau d'Alyzée !", 330.0, 3.0)
+			return
 		_control.enabled = false
 		Sfx.play("bell")
 		Transition.change_scene(self, "res://scenes/masson_pair.tscn"), DOOR_X + 110.0))
 	add_child(DoorSpot.make(Rect2(CHECK_X + 270.0, 280, 120, 190), func():
+		if Party.step() == 2 and GameState.flags.has(Party.GIFT) and not Carry.has("gift"):
+			_pay_for_gift()
+			return
 		_say(_clerk, HELLOS[_hello % HELLOS.size()], 230.0)
 		_hello += 1, CHECK_X + 200.0))
 	add_child(DoorSpot.make(Rect2(PHOTO_X, 330, 260, 320), func():
@@ -430,3 +439,88 @@ func _measure_pressure() -> void:
 	steps.tween_callback(func() -> void:
 		_bp_busy = false
 		_control.enabled = true)
+
+
+# ── Alyzée's present (Party, step 2) ────────────────────────────
+
+const STAND_X := 600.0
+var _maman: Character
+
+
+## Maman came with her: she waits by the door, the "Idées cadeaux" stand stands by the carts, and a "!" says where to go.
+func _build_party_errand() -> void:
+	_maman = Character.new()
+	var look := CharacterLook.mom()
+	Season.dress_for_weather(look)
+	_maman.look = look
+	_maman.fidgets = true
+	_maman.scale = Vector2.ONE * CHAR_SCALE * 1.18
+	_maman.position = Vector2(DOOR_X + 150.0, FEET_Y - 10.0)
+	_maman.facing = 1
+	add_child(_maman)
+	var stand := _put(PartyArt.gift_stand(), STAND_X, 652.0, 0.8, "floor")
+	_wall_label("IDÉES CADEAUX", stand.position + Vector2(120.0, 17.0), 17, Color.WHITE, Color(0, 0, 0, 0), 0)
+	add_child(DoorSpot.make(Rect2(STAND_X, 410.0, 240.0, 240.0), _choose_gift, STAND_X + 120.0))
+	add_child(QuestMark.make(Vector2(STAND_X + 120.0, 380.0), func() -> bool:
+		return not GameState.flags.has(Party.GIFT) and _control.enabled))
+	add_child(QuestMark.make(Vector2(CHECK_X + 330.0, 250.0), func() -> bool:
+		return GameState.flags.has(Party.GIFT) and not Carry.has("gift") and _control.enabled))
+	var hello := create_tween()
+	hello.tween_interval(1.2)
+	hello.tween_callback(func() -> void:
+		_say(_maman, "Choisis un beau cadeau pour Alyzée !\nRegarde les idées cadeaux, là-bas.", 330.0, 3.4))
+
+
+func _choose_gift() -> void:
+	if Party.step() != 2 or Carry.has("gift"):
+		_say(_charlotte, "Des idées cadeaux !", 300.0)
+		return
+	_control.enabled = false
+	var choices: Array = []
+	for g: Array in Party.GIFTS:
+		choices.append({"text": g[1], "note": g[2]})
+	var card := ChoiceCard.ask(self, "Quel cadeau pour Alyzée ?", choices)
+	card.chose.connect(func(i: int) -> void:
+		_control.enabled = true
+		if i < 0:
+			return
+		var g: Array = Party.GIFTS[i]
+		GameState.flags[Party.GIFT] = g[0]
+		_treat(PartyArt.gift(g[0]), "%s !" % g[1])
+		var more := create_tween()
+		more.tween_interval(2.6)
+		more.tween_callback(func() -> void:
+			_maman.express("happy", 2.0)
+			_say(_maman, "Bon choix ! Elle va l'adorer.\nOn va payer à la caisse.", 330.0, 3.0)
+			_walk_maman(CHECK_X + 120.0)))
+
+
+func _walk_maman(x: float) -> void:
+	_maman.facing = 1 if x > _maman.position.x else -1
+	_maman.is_walking = true
+	var t := create_tween()
+	t.tween_property(_maman, "position:x", x, absf(x - _maman.position.x) / 170.0 + 0.05)
+	t.tween_callback(func() -> void: _maman.is_walking = false)
+
+
+# Maman pays, the cashier wraps it in pink paper with a gold bow, and they are off to the party.
+func _pay_for_gift() -> void:
+	_control.enabled = false
+	var g: Array = Party.gift()
+	_walk_maman(CHECK_X + 140.0)
+	var steps := create_tween()
+	steps.tween_callback(func() -> void: _say(_charlotte, "%s, s'il vous plaît !\nC'est pour la fête de mon amie." % g[1], 300.0, 3.0))
+	steps.tween_interval(3.2)
+	steps.tween_callback(func() -> void:
+		Sfx.play("chime", _clerk.position)
+		_say(_clerk, "Une fête ? Je te l'emballe\nen papier de fête, d'abord !", 230.0, 3.0))
+	steps.tween_interval(3.2)
+	steps.tween_callback(func() -> void:
+		Sfx.play("swoosh", _clerk.position)
+		Carry.take(_charlotte, "gift")
+		_charlotte.express("happy", 2.4)
+		_say(_maman, "C'est moi qui paie, ma chouette.\nDirection chez Alyzée !", 330.0, 3.0))
+	steps.tween_interval(3.2)
+	steps.tween_callback(func() -> void:
+		Party.set_step(3)
+		Transition.change_scene_saying(self, Party.PARTY, "Maman t'amène chez Alyzée…", 1.6))

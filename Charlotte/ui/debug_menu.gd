@@ -17,9 +17,9 @@ var skip_look := false
 ## The story flags each quest leaves behind, cleared with it.
 ## Story flags that belong to no quest, cleared by "Tout effacer".
 const OTHER_FLAGS := ["met_twins", "met_billie_auguste", "devoirs", "candy_bag_kind"]
-const QUEST_FLAGS := {"amies": ["met_twins", "met_billie_auguste"], "cachette": ["cachette_found", "cachette_again", "cachette_round"], "livre": ["book_found", "croque_checked"], "halloween": ["halloween_step", "candy", "candy_bag", "candy_bag_kind", "halloween_doors", "halloween_counted", "halloween_total", "winter_greeting"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"], "cinema": ["cinema_step", "cinema_snacks", "cinema_again"], "ecole": ["ecole_step", "met_alyzee", "ecole_today_done", "ecole_seen", "ecole_stickers"]}
+const QUEST_FLAGS := {"amies": ["met_twins", "met_billie_auguste"], "cachette": ["cachette_found", "cachette_again", "cachette_round"], "livre": ["book_found", "croque_checked"], "halloween": ["halloween_step", "candy", "candy_bag", "candy_bag_kind", "halloween_doors", "halloween_counted", "halloween_total", "winter_greeting"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"], "cinema": ["cinema_step", "cinema_snacks", "cinema_again"], "ecole": ["ecole_step", "met_alyzee", "ecole_today_done", "ecole_seen", "ecole_stickers"], "fete": ["fete_step", "fete_gift"]}
 ## What a quest puts in her arms (a lost cat's quest id is the cat's id, handled by `Carry.cat_id()`).
-const QUEST_CARRIES := {"milk": "milk", "plants": "can", "menage": "toy", "livre": "book", "chips": "chips", "cinema": "snacks"}
+const QUEST_CARRIES := {"milk": "milk", "plants": "can", "menage": "toy", "livre": "book", "chips": "chips", "cinema": "snacks", "fete": "gift"}
 
 ## The places to teleport to, in the order of the menu: {name, scene, and where: `x` (Charlotte's x in the scene), or `arrive`
 ## (the Transition.arrive key of a corner or lane opening), or nothing for the scene's usual start}. Sorted like the map:
@@ -101,6 +101,8 @@ const PLACES := [
 	{"name": "Cour d'école (Alyzée)", "scene": "cour_ecole", "x": 1100.0},
 	{"name": "Classe de Madame Nadia", "scene": "classe", "x": 900.0},
 	{"name": "Service de garde", "scene": "service_de_garde", "x": 1200.0},
+	{"sub": "Chez Alyzée"},
+	{"name": "La fête d'Alyzée", "scene": "fete_alyzee", "x": 900.0},
 	{"group": "Rue Masson"},
 	{"sub": "Côté nord (numéros impairs)"},
 	{"name": "Coin D'Iberville", "scene": "masson_impair", "arrive": "masson_impair_from_rue_iberville_iberville_molson"},
@@ -167,7 +169,7 @@ const PLACES := [
 	{"name": "Écran titre", "scene": "intro"},
 ]
 ## The scenes that are indoors: a place's `x` there is where she stands inside (Transition.inside_x), not on a street.
-const INTERIORS: Array[String] = ["house", "depanneur", "ohbon", "dollarama", "fraichement_bon", "jean_coutu", "classe", "service_de_garde"]
+const INTERIORS: Array[String] = ["house", "depanneur", "ohbon", "dollarama", "fraichement_bon", "jean_coutu", "classe", "service_de_garde", "fete_alyzee"]
 ## Scenes that are not places to go to (listed nowhere on purpose).
 const NOT_PLACES: Array[String] = []
 
