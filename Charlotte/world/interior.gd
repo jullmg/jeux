@@ -56,6 +56,9 @@ func _spawn_charlotte(x: float, facing := 1) -> void:
 	if not x_arg.is_empty():
 		_charlotte.position.x = x_arg.to_float()
 	add_child(_charlotte)
+	# Home from the rounds, her bag of candy is still in her hand until Maman has counted it.
+	if Halloween.night() and not GameState.flags.get("halloween_counted", false):
+		CandyBag.give(_charlotte, CandyBag.charlotte_kind())
 	_control.charlotte = _charlotte
 	_control.walk_top = WALL_BASE - 260.0
 	add_child(_control)

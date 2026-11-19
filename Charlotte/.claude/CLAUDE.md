@@ -865,7 +865,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
      through her own yard.
   3. **Rentrer**: the counting is Maman's, and the game says so three times over — the notebook's hint names her and the
      kitchen, the notice when the bag fills says to go and show her, a "!" sits over Charlotte's own front door on 6e
-     and over Maman indoors, and Maman calls out from the kitchen the moment Charlotte comes in. Then Maman counts the
+     and over Maman indoors, and Maman calls out from the kitchen the moment Charlotte comes in. She comes in with her bag still in her hand (`Interior._spawn_charlotte` gives it back
+     until `halloween_counted`; she puts it down when the count is done). Then Maman counts the
      haul (`ui/candy_count.gd`, `CandyCount`: each kind drawn as a real little object — twisted wrapper, swirl lollipop,
      bar half out of its wrapper, stick of gum sliding out of its paper, crimped bag of chips — and the total), then bed.
      Her own little lantern lights the few steps around her all evening, the back lanes go dark too

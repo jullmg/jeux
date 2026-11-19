@@ -1005,6 +1005,11 @@ func _count_the_candy() -> void:
 		var sheet := CandyCount.new()
 		sheet.closed.connect(func() -> void:
 			_control.enabled = true
+			# The bag is emptied: she puts it down, her hand free again.
+			for bag in _charlotte.get_children():
+				if bag is CandyBag:
+					bag.queue_free()
+			_charlotte.hand_mode = ""
 			# The whole haul goes into the shoebox under her bed, where everything sweet ends up.
 			Stash.from_halloween()
 			_say(_charlotte, "Je cache tout ça sous mon lit,\npis je vais me coucher !", 300.0, 3.6)
