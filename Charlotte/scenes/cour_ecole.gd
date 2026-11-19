@@ -4,6 +4,7 @@ extends StreetScene
 # her through on the left), the painted games on the asphalt (under snow in winter, when the plough's snow hill stands at the
 # right end), the climbing frame, a bench, the basketball hoop. Her classmates play (tag, skipping, a ball, the slide or the
 # snow hill), a supervisor keeps an eye on them, and Alyzée, new at school, sits alone on the bench.
+# On a Saturday in December the school sells Christmas trees in the yard (`TreeSale`, quest "sapin"): Papa brings her.
 # Maman says goodbye at the gate on step 1 → 2 of the quest; meeting Alyzée and playing tag rings the bell; everyone goes in
 # through the door and "Après l'école…" takes her home. Reuses StreetScene's helpers (sky, Charlotte, camera, wind, grade)
 # but builds its own scene, like the lanes.
@@ -48,6 +49,8 @@ var _bell_rung := false
 var _recess := 0.0
 ## The garde is out sliding (`Sledding.in_yard()`), not recess.
 var _garde := false
+## A Saturday: the school's Christmas tree sale (`XmasTree`, step 2), no pupils.
+var _sale: TreeSale
 var _sled: Sprite2D
 var _sliding := false
 
@@ -67,9 +70,14 @@ func _ready() -> void:
 	ground.seed_value = seed_value
 	add_child(ground)
 	_build_furniture()
-	_build_classmates()
-	if not _garde:
-		_build_alyzee()
+	if XmasTree.step() == 2:
+		_sale = TreeSale.new()
+		_sale.scene = self
+		add_child(_sale)
+	else:
+		_build_classmates()
+		if not _garde:
+			_build_alyzee()
 	var start_x := START_X
 	# A saved game, or the debug menu, brings her back where she was.
 	if not is_nan(Transition.street_x):
@@ -108,7 +116,9 @@ func _ready() -> void:
 	Sfx.ambience(self)
 	Music.play(_music())
 	Transition.fade_in(self)
-	if School.step() == 1:
+	if _sale:
+		_sale.build_spots()
+	elif School.step() == 1:
 		_mom_says_goodbye()
 	elif _garde:
 		_build_sledding()
@@ -276,6 +286,9 @@ func _build_doors() -> void:
 		if _garde:
 			_charlotte_says("Encore une glissade avant de rentrer !")
 			return
+		if _sale:
+			_charlotte_says("C'est fermé, c'est samedi !\nOn est venus pour les sapins.")
+			return
 		if not _bell_rung:
 			_charlotte_says("La cloche a pas encore sonné !\nC'est encore la récré !")
 			return
@@ -401,6 +414,9 @@ static func _along(path: Array, u: float) -> Vector2:
 
 
 func _leave_by_gate() -> void:
+	if _sale:
+		_charlotte_says("On choisit notre sapin d'abord !")
+		return
 	if not School.can_leave():
 		_charlotte_says("Je reste à l'école jusqu'à la fin de la journée.\nC'est Papa qui vient me chercher !")
 		return

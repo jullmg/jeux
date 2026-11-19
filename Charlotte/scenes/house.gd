@@ -71,6 +71,14 @@ var _sofa_seat: Seat
 var _floor_lamp: Array = []
 var _hall_lights: Array = []
 var _bedroom_lights: FairyLights
+# The Christmas tree in front of the salon window (quest "sapin"), its box of decorations, the glow of its lights.
+const XMAS_X := 1690.0
+const XMAS_SCALE := 0.95
+const XMAS_BOX_X := 1520.0
+var _xmas_tree: Sprite2D
+var _xmas_box: Sprite2D
+var _xmas_busy := false
+
 # Charlotte's drawings stuck on the fridge door with magnets.
 var _fridge_art: Node2D
 var _fridge_busy := false
@@ -123,6 +131,7 @@ func _ready() -> void:
 	_spawn_charlotte(470.0)
 	_build_chores()
 	_build_doors()
+	_build_xmas_spots()
 	_build_movie_night()
 	_enter_area(BEDROOM if _charlotte.position.x >= BEDROOM.x else HALL)
 	_finish([[700.0, "plant"], [1900.0, "plant"], [2900.0, "plant"], [5400.0, "plushie"], [6250.0, "plant"]])
@@ -196,7 +205,7 @@ func _build_family() -> void:
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
 		return Quests.available("hamster") or Quests.available("plants") or Quests.available("chips") \
 			or Quests.active("chips") and Carry.has("chips") or Snowman.needs("tuque") and not Carry.busy() \
-			or Snowstorm.step() == 1)
+			or Snowstorm.step() == 1 or XmasTree.can_start() or XmasTree.step() == 4)
 	# The morning after the storm, Papa is out front shovelling.
 	if Snowstorm.dad_outside():
 		_dad.visible = false
@@ -296,8 +305,18 @@ func _talk_to_dad() -> void:
 			_dad_routine.process_mode = Node.PROCESS_MODE_DISABLED
 			_dad_routine.spot.queue_free()
 			_dad_routine.mark.queue_free())
+	elif XmasTree.step() == 4:
+		_the_star()
+	elif XmasTree.step() == 3:
+		_say(_dad, "Décore-le, ma grande !\nJe t'aiderai pour l'étoile.", 390.0)
+	elif XmasTree.step() == 1:
+		_say(_dad, "Je t'attends à la porte d'en avant !\nOn va choisir notre sapin.", 390.0)
 	elif Snowman.needs("tuque"):
 		_give_for_snowman(_dad, "tuque", "Une tuque pour le bonhomme ? Prends ma vieille\ntuque du Canadien. Y va être champion !", 390.0)
+	elif XmasTree.can_start() and Quests.start(XmasTree.QUEST):
+		XmasTree.set_step(1)
+		_dad.express("happy", 2.4)
+		_say(_dad, "C'est le temps du sapin, Chachoue ! L'école en vend\ndans la cour. Viens, je t'attends à la porte d'en avant !", 400.0, 4.2)
 	elif Quests.start("chips"):
 		# His money pays for it: she gets the three dollars now.
 		GameState.money += 3.0
@@ -326,6 +345,145 @@ func _give_for_snowman(who: Character, part: String, line: String, height: float
 	who.express("happy", 2.0)
 	_say(who, line, height, 3.6)
 	Sfx.play("pop", _charlotte.position + Vector2(0, -80))
+
+
+# ── The Christmas tree ──────────────────────────────────────
+
+# The tree in its stand in front of the salon window, wearing what she has put on it; while she decorates, the box beside it.
+# Once it is done, its lights are on.
+func _build_xmas_tree() -> void:
+	var wears: Array = XmasTree.decos().duplicate()
+	if Quests.done(XmasTree.QUEST):
+		wears = ["lumieres", "guirlande", "boules", "cannes", "etoile"]
+	_xmas_tree = _put(XmasTree.picture(XmasTree.choice(), wears), XMAS_X - XmasTree.W / 2.0 * XMAS_SCALE, 606.0 + 14.0, XMAS_SCALE, "floor")
+	if Quests.done(XmasTree.QUEST):
+		_xmas_lights()
+	elif XmasTree.step() == 3:
+		_xmas_box = _put(XmasTree.box(XmasTree.DECOS.size() - XmasTree.decos().size()), XMAS_BOX_X, 690.0, 0.9)
+
+
+func _build_xmas_spots() -> void:
+	if _xmas_tree == null or Quests.done(XmasTree.QUEST):
+		return
+	add_child(DoorSpot.make(Rect2(XMAS_X - 100.0, 300.0, 200.0, 320.0), _xmas_tree_clicked, XMAS_X - 140.0))
+	add_child(QuestMark.make(Vector2(XMAS_X, 250.0), func() -> bool:
+		return Carry.has("deco") and _control.enabled and not _xmas_busy))
+	if _xmas_box:
+		add_child(DoorSpot.make(Rect2(XMAS_BOX_X, 600.0, 110.0, 90.0), _take_deco, XMAS_BOX_X - 40.0))
+		add_child(QuestMark.make(Vector2(XMAS_BOX_X + 54.0, 570.0), func() -> bool:
+			return XmasTree.step() == 3 and not Carry.busy() and XmasTree.next_deco() != "" and _control.enabled))
+
+
+# One decoration out of the box, into her arms.
+func _take_deco() -> void:
+	var next := XmasTree.next_deco()
+	if next == "":
+		_say(_charlotte, "La boîte est vide ! Il manque juste\nl'étoile… Papa va m'aider.", 300.0, 3.0)
+		return
+	if Carry.has("deco"):
+		_say(_charlotte, "J'en ai déjà une dans les mains !", 300.0)
+		return
+	if not Carry.take(_charlotte, "deco", next):
+		_say(_charlotte, Carry.FULL_HANDS, 300.0)
+		return
+	Sfx.play("pop", _charlotte.position + Vector2(0, -60))
+	for d: Array in XmasTree.DECOS:
+		if d[0] == next:
+			_say(_charlotte, d[1], 300.0)
+	_xmas_box.texture = XmasTree.box(XmasTree.DECOS.size() - XmasTree.decos().size() - 1)
+
+
+func _xmas_tree_clicked() -> void:
+	if _xmas_busy:
+		return
+	if Carry.has("deco"):
+		var id := Carry.id()
+		_charlotte.facing = 1
+		_charlotte.pet(0.9, 0.0)
+		Carry.put_down(_charlotte)
+		XmasTree.add_deco(id)
+		_xmas_tree.texture = XmasTree.picture(XmasTree.choice(), XmasTree.decos())
+		Sfx.play("chime", Vector2(XMAS_X, 420.0))
+		for d: Array in XmasTree.DECOS:
+			if d[0] == id:
+				_say(_charlotte, d[2], 300.0)
+		if XmasTree.next_deco() == "":
+			XmasTree.set_step(4)
+			Notebook.announce("step", "Il manque l'étoile ! Demande à Papa de te soulever.", XmasTree.HEADING)
+		return
+	if XmasTree.step() == 4:
+		_the_star()
+	else:
+		_say(_charlotte, "Il faut prendre une décoration\ndans la boîte !", 300.0)
+
+
+# Papa comes over and lifts her up to the top of the tree; the star goes on, then the lights; Maman comes to see.
+func _the_star() -> void:
+	if _xmas_busy or not _xmas_tree:
+		return
+	_xmas_busy = true
+	_control.enabled = false
+	_dad_routine.pause(16.0, XMAS_X)
+	var under := XMAS_X - 70.0
+	var steps := create_tween()
+	steps.tween_callback(func() -> void:
+		_say(_dad, "L'étoile ! Viens ici, ma grande,\nje te soulève.", 390.0, 2.6)
+		_dad.is_walking = true
+		_dad.facing = 1 if under > _dad.position.x else -1
+		_charlotte.is_walking = true
+		_charlotte.facing = 1 if under + 30.0 > _charlotte.position.x else -1)
+	steps.tween_property(_dad, "position:x", under - 30.0, 1.4)
+	steps.parallel().tween_property(_charlotte, "position:x", under + 30.0, 1.4)
+	steps.tween_callback(func() -> void:
+		_dad.is_walking = false
+		_charlotte.is_walking = false
+		_dad.facing = 1
+		_charlotte.facing = 1
+		_dad.pet(2.6, 0.0)
+		Carry.clear()
+		Carry.restore(_charlotte))
+	# Up she goes.
+	steps.tween_property(_charlotte, "position:y", _charlotte.position.y - 170.0, 0.9).set_trans(Tween.TRANS_SINE)
+	steps.tween_callback(func() -> void:
+		_charlotte.pet(0.8, 0.0)
+		Sfx.play("chime", Vector2(XMAS_X, 260.0))
+		_xmas_tree.texture = XmasTree.picture(XmasTree.choice(), ["lumieres", "guirlande", "boules", "cannes", "etoile"])
+		_charlotte.express("laugh", 2.0)
+		_say(_charlotte, "L'étoile est en haut !", 300.0))
+	steps.tween_interval(1.4)
+	steps.tween_property(_charlotte, "position:y", FEET_Y, 0.8).set_trans(Tween.TRANS_SINE)
+	steps.tween_interval(0.6)
+	steps.tween_callback(func() -> void: _say(_dad, "Pis maintenant… on allume !", 390.0, 2.2))
+	steps.tween_interval(2.0)
+	steps.tween_callback(func() -> void:
+		_xmas_lights()
+		Sfx.play("goodnight", Vector2(XMAS_X, 400.0))
+		_charlotte.express("wonder", 3.0)
+		_dad.express("happy", 3.0))
+	steps.tween_interval(1.8)
+	steps.tween_callback(func() -> void:
+		_say(_charlotte, "Wooow ! Y est tellement beau !", 300.0, 2.6)
+		if is_instance_valid(_mom):
+			_mom.express("happy", 3.0))
+	steps.tween_interval(2.8)
+	steps.tween_callback(func() -> void:
+		if is_instance_valid(_mom):
+			_say(_mom, "Oh ! Le plus beau sapin du quartier !", 350.0, 3.0)
+		Quests.complete(XmasTree.QUEST)
+		_xmas_busy = false
+		_control.enabled = true)
+
+
+# Its lights on: a warm glow on each bulb and a halo round the tree.
+func _xmas_lights() -> void:
+	var origin := _xmas_tree.position
+	var colours := [Color(1.0, 0.35, 0.3), Color(1.0, 0.85, 0.3), Color(0.35, 0.65, 1.0), Color(0.4, 0.9, 0.5), Color(1.0, 0.55, 0.9)]
+	var i := 0
+	for p: Vector2 in XmasTree.bulbs(XmasTree.choice()):
+		_glow(origin + p * XMAS_SCALE, 16.0, Color(colours[i % colours.size()], 0.6))
+		i += 1
+	_glow(origin + XmasTree.top_of(XmasTree.choice()) * XMAS_SCALE, 46.0, Color(1.0, 0.9, 0.5, 0.55))
+	_glow(origin + Vector2(XmasTree.W / 2.0, XmasTree.H * 0.55) * XMAS_SCALE, 190.0, Color(1.0, 0.8, 0.5, 0.18))
 
 
 # ── Papa's hockey night ─────────────────────────────────────
@@ -922,6 +1080,12 @@ func _build_doors() -> void:
 		if School.step() == 1:
 			_off_to_school()
 			return
+		if XmasTree.step() == 1:
+			# With Papa to the school's tree sale: across Dandurand, which she may not cross alone at seven.
+			XmasTree.set_step(2)
+			Transition.street_x = TreeSale.PAPA_X + 70.0
+			Transition.change_scene_saying(self, XmasTree.YARD, "Papa t'amène à la vente de sapins de l'école…")
+			return
 		if Party.step() == 1:
 			# Off to Rue Masson with Maman for Alyzée's present: she can't go there alone at seven.
 			Party.set_step(2)
@@ -932,7 +1096,8 @@ func _build_doors() -> void:
 			_school_or_play()
 			return
 		Transition.change_scene(self, "res://scenes/main.tscn")))
-	add_child(QuestMark.make(Vector2(455.0, 180.0), func() -> bool: return (School.step() == 1 or Party.step() == 1) and _control.enabled))
+	add_child(QuestMark.make(Vector2(455.0, 180.0), func() -> bool:
+		return (School.step() == 1 or Party.step() == 1 or XmasTree.step() == 1) and _control.enabled))
 	add_child(DoorSpot.make(Rect2(CHACHA_DOOR_X, 170, 150, 430), func(): _go_through(BEDROOM_DOOR_X - 40.0, BEDROOM, -1)))
 	add_child(DoorSpot.make(Rect2(BEDROOM_DOOR_X, 170, 150, 430), func(): _go_through(CHACHA_DOOR_X + 75.0, HALL, 1)))
 	# The kitchen's back door: out to the yard and the lane behind the house. Shut on Halloween night like every
@@ -1359,6 +1524,8 @@ func _build_salon() -> void:
 	_put(InteriorArt.dining_table(), 1780.0, 606.0, 0.85, "floor")
 	_salon_pendant = _pendant(1984.0, 310.0)
 	_put(InteriorArt.black_shelf(), 2110.0, WALL_BASE, 0.7, "floor")
+	if XmasTree.in_salon():
+		_build_xmas_tree()
 
 
 func _build_hallway() -> void:

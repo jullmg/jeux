@@ -2,7 +2,7 @@ class_name Carry
 extends RefCounted
 ## Everything Charlotte holds in her arms, behind ONE saved indicator: `GameState.flags.carried` = "" (hands free), or
 ## "<kind>" / "<kind>:<id>": "milk" (Mom's pint), "can" (the watering can), "cat:<quest id>" (a lost cat), "toy:<item>" (a thing
-## from her bedroom floor while she tidies), "book" (Constance's), "chips" (Papa's Ruffles), "snacks" (the movie night's bag), "drawing" (the one she made at the service de garde for the fridge), "gift" (Alyzée's birthday present), "bonhomme:<part>" (the carrot, the tin of buttons or the tuque for the snowman), "traineau" (the sled the service de garde lends her), "pelle" (her little snow shovel, the morning after the storm). One thing at a
+## from her bedroom floor while she tidies), "book" (Constance's), "chips" (Papa's Ruffles), "snacks" (the movie night's bag), "drawing" (the one she made at the service de garde for the fridge), "gift" (Alyzée's birthday present), "bonhomme:<part>" (the carrot, the tin of buttons or the tuque for the snowman), "traineau" (the sled the service de garde lends her), "pelle" (her little snow shovel, the morning after the storm), "deco:<id>" (a decoration for the Christmas tree). One thing at a
 ## time, enforced here for every quest:
 ##   - `Carry.take(who, kind, id)` is the only way to put something in her arms; it refuses (returns false) when her hands
 ##     are not free, so the caller just says `Carry.FULL_HANDS`;
@@ -206,6 +206,15 @@ static func _build(kind: String, id: String) -> Node2D:
 			shovel.offset = Vector2(0, 26)
 			shovel.name = "pelle"
 			return shovel
+		"deco":
+			# A decoration out of the box, for the Christmas tree.
+			var deco := Sprite2D.new()
+			deco.texture = XmasTree.deco_item(id)
+			deco.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			deco.scale = Vector2.ONE * 1.3
+			deco.offset = Vector2(0, -12)
+			deco.name = "deco"
+			return deco
 		"toy":
 			# Something from her bedroom floor (the tidying quest): the same picture as on the floor, bigger in her arms.
 			var toy := Sprite2D.new()
