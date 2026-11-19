@@ -91,6 +91,8 @@ var _pouring := false
 var _tv: TvScreen
 # The movie night (Cinema, step 3): the twins waiting in front of the TV, the blanket and cushions on the floor.
 var _movie_twins: Array[Character] = []
+## The film on tonight (a TvShows id).
+var _film := "film"
 var _movie_nest: _Nest
 
 
@@ -255,8 +257,10 @@ func _talk_to_mom() -> void:
 		_say(_mom, "As-tu fini de ranger\nta chambre ?", 380.0)
 	elif Quests.active("amies"):
 		_say(_mom, "Les enfants jouent dans la ruelle du milieu,\nderrière chez nous !", 400.0)
+	elif Cinema.can_ask():
+		_ask_mom()
 	elif School.available_today():
-		_say(_mom, "Veux-tu aller à l'école aujourd'hui ?\nJe t'amène : passe par la porte d'en avant !", 400.0, 3.6)
+		_mom_about_school()
 	else:
 		_say(_mom, MOM_LINES[_mom_line % MOM_LINES.size()], 350.0)
 		_mom_line += 1
@@ -309,13 +313,43 @@ const CUSHION_H := 10.0
 # Where the twins wait for her before the film, and what is said during it ([seconds into the film, who: -1 Charlotte,
 # 0 Alphée, 1 Constance, words]).
 const MOVIE_WAIT := [2700.0, 2830.0]
-const MOVIE_LINES := [
-	[1.0, 1, "Chut ! Ça commence !"],
-	[6.0, -1, "Oh ! Un p'tit renard en traîneau !"],
-	[10.5, 0, "Passe-moi les chips, Chachoue !"],
-	[14.5, 1, "Hi hi ! Le bonhomme de neige\nlui fait bonjour !"],
-	[18.5, -1, "Miam, des bonbons !"],
-]
+const MOVIE_LINES := {
+	"film": [
+		[1.0, 1, "Chut ! Ça commence !"],
+		[6.0, -1, "Oh ! Un p'tit renard en traîneau !"],
+		[10.5, 0, "Passe-moi les chips, Chachoue !"],
+		[14.5, 1, "Hi hi ! Le bonhomme de neige\nlui fait bonjour !"],
+		[18.5, -1, "Miam, des bonbons !"],
+	],
+	"grinch": [
+		[1.0, 0, "Chut ! C'est mon préféré !"],
+		[6.0, 1, "Y descend de sa montagne\nen cachette !"],
+		[11.0, -1, "Passe-moi les chips !"],
+		[15.0, -1, "Oh ! Son cœur grandit !"],
+		[19.0, 0, "Awww… C'est beau, Noël."],
+	],
+	"maison": [
+		[1.0, 1, "J'adore ce film-là !"],
+		[5.5, 0, "Y sont partis sans lui !"],
+		[10.5, -1, "Ha ha ! Le pot de peinture !"],
+		[15.0, 1, "Les voleurs sont ben poches !"],
+		[19.0, -1, "Miam, des bonbons !"],
+	],
+	"ratatouille": [
+		[1.0, -1, "Chut ! Ça commence !"],
+		[6.0, 1, "Paris, c'est donc ben beau !"],
+		[11.0, 0, "Un rat qui fait à manger ?\nHi hi !"],
+		[15.5, -1, "Ça me donne faim…\nPasse-moi les chips !"],
+		[19.5, 1, "Moi aussi je veux être chef !"],
+	],
+	"reine": [
+		[1.0, 0, "Oh, c'est celui avec le château de glace !"],
+		[7.0, -1, "Wow ! Toute la neige tourne !"],
+		[11.5, 1, "Je connais la chanson !"],
+		[15.5, 0, "Passe-moi les bonbons, Chachoue !"],
+		[19.5, -1, "Je veux un château comme ça !"],
+	],
+}
 const MOVIE_END := [
 	[0, "C'était trop bon !"],
 	[1, "Merci pour la soirée, Chachoue !"],
@@ -323,12 +357,42 @@ const MOVIE_END := [
 ]
 
 
-# Maman gives her the pocket money for the evening's snacks.
-func _pocket_money_for_the_movie() -> void:
+func _mom_about_school() -> void:
+	_say(_mom, "Veux-tu aller à l'école aujourd'hui ?\nJe t'amène : passe par la porte d'en avant !", 400.0, 3.6)
+
+
+# Once the first movie night is done, what she can ask Maman: another one, or just a word.
+func _ask_mom() -> void:
+	_control.enabled = false
+	var school := School.available_today()
+	var choices: Array = [{"text": "On fait une soirée cinéma ?", "note": "avec Alphée pis Constance"}]
+	if school:
+		choices.append({"text": "Je vais à l'école ?"})
+	choices.append({"text": "Juste un câlin !"})
+	var card := ChoiceCard.ask(self, "Qu'est-ce que tu dis à Maman ?", choices)
+	card.chose.connect(func(i: int) -> void:
+		_control.enabled = true
+		_mom_routine.pause(4.0, _charlotte.position.x)
+		if i == 0:
+			Cinema.start_again()
+			_pocket_money_for_the_movie(true)
+		elif i == 1 and school:
+			_mom_about_school()
+		elif i >= 1:
+			_mom.express("happy", 2.0)
+			_say(_mom, MOM_LINES[_mom_line % MOM_LINES.size()], 350.0)
+			_mom_line += 1)
+
+
+# Maman gives her the pocket money for the evening's snacks (`again`: a movie night Charlotte asked for, after the quest).
+func _pocket_money_for_the_movie(again := false) -> void:
 	GameState.money += Cinema.MONEY
 	Cinema.set_step(2)
 	_mom.express("happy", 2.4)
-	_say(_mom, "Une soirée cinéma avec les jumelles ?\nQuelle bonne idée ! Tiens, 5 $.", 400.0, 3.6)
+	if again:
+		_say(_mom, "Encore une soirée cinéma ? Bonne idée !\nJ'appelle les jumelles. Tiens, 5 $.", 400.0, 3.6)
+	else:
+		_say(_mom, "Une soirée cinéma avec les jumelles ?\nQuelle bonne idée ! Tiens, 5 $.", 400.0, 3.6)
 	Notebook.announce("step", "Maman t'a donné %s pour les grignotines !" % Quests.money_text(Cinema.MONEY), Cinema.HEADING)
 	var more := create_tween()
 	more.tween_interval(3.8)
@@ -370,6 +434,24 @@ func _start_movie() -> void:
 		_say(_movie_twins[0], "As-tu les grignotines, Chachoue ?", 320.0)
 		return
 	_control.enabled = false
+	if not Cinema.again():
+		_roll_film("film")
+		return
+	# A movie night she asked for: she picks the film.
+	var choices: Array = []
+	for id: String in Cinema.FILMS:
+		choices.append({"text": TvShows.INFO[id].name})
+	var card := ChoiceCard.ask(self, "Quel film on regarde ?", choices)
+	card.chose.connect(func(i: int) -> void:
+		if i < 0:
+			_control.enabled = true
+			return
+		_roll_film(Cinema.FILMS[i]))
+
+
+# The evening itself with the film `id` (a TvShows id): everyone sits, the lights go down, the film plays with its lines.
+func _roll_film(id: String) -> void:
+	_film = id
 	for routine in [_mom_routine, _dad_routine]:
 		routine.pause(TvShows.FILM_LENGTH + 14.0, 2650.0)
 	_say(_charlotte, "J'ai tout ! Des chips pis des bonbons !", 300.0)
@@ -383,7 +465,7 @@ func _start_movie() -> void:
 	# The film starts when the screen is black (0.6 s); its lines come at their own time into it.
 	go.tween_interval(0.6)
 	var said := 0.0
-	for line: Array in MOVIE_LINES:
+	for line: Array in MOVIE_LINES.get(id, MOVIE_LINES.film):
 		go.tween_interval(float(line[0]) - said)
 		go.tween_callback(_movie_say.bind(line[1], line[2]))
 		said = float(line[0])
@@ -392,7 +474,8 @@ func _start_movie() -> void:
 		go.tween_callback(_movie_say.bind(line[0], line[1]))
 		go.tween_interval(Twins.LINE_SECONDS)
 	go.tween_callback(func() -> void:
-		Quests.complete(Cinema.QUEST)
+		if Quests.active(Cinema.QUEST):
+			Quests.complete(Cinema.QUEST)
 		Sfx.play("chime", _charlotte.position)
 		for who: Character in [_charlotte] + _movie_twins:
 			who.express("happy", 2.4))
@@ -425,7 +508,7 @@ func _lights_down() -> void:
 		if light.visible:
 			_movie_nest.lights.append(light)
 			light.visible = false
-	var film: Array[String] = ["film"]
+	var film: Array[String] = [_film]
 	_tv.channels = film
 	_tv.turn_on(0)
 	Sfx.play("tv", _tv.get_global_rect().get_center())

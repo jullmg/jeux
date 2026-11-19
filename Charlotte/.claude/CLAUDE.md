@@ -753,7 +753,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     `ShopArt.paper_bag`); then the twins wait at her place in front of the hallway TV (not in the lane), on a blanket with
     three cushions (`house.gd _build_movie_night`, `_Nest`); clicking them starts the film: everyone on the cushions, the hall
     dimmed, the TV on `TvShows` "film" (« Le petit renard des neiges », an original cartoon, `FILM_LENGTH`, not in `ALL`),
-    a few lines (`MOVIE_LINES`), then the quest is done and the twins go home. `Shop._errand_marks` puts the "!" over the
+    a few lines (`MOVIE_LINES`, per film), then the quest is done and the twins go home. **Once it is done she can ask Maman for
+    another one** (Julien): Maman's `ChoiceCard` (`house.gd _ask_mom`: soirée cinéma / école if not yet today / câlin) runs the
+    same evening again from step 2 (`Cinema.start_again`, flag `cinema_again`), and in front of the TV she picks the film
+    (`Cinema.FILMS`: « Le Grinch », « Maman, j'ai raté l'avion », « Ratatouille », « La Reine des neiges » and the fox; the real
+    titles, but the pictures are scenes of our own, `TvShows._grinch` …, no character of theirs). `Shop._errand_marks` puts the "!" over the
     chips and the candy while an errand needs them. `Shop._buy(…, then)` runs `then` instead of the stash for quest purchases.
   - ecole, the first day at school, then school every day (`world/school.gd`, `School`; the day's step in `flags.ecole_step`):
     1. Maman gives it, then waits at the front door; on step 1 the vestibule's door leads to the schoolyard instead of the

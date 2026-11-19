@@ -7,6 +7,8 @@ extends RefCounted
 ##   3. she has both: the twins wait for her at home, in front of the hallway TV (`house.gd _build_movie_night`), and the
 ##      film plays (`TvShows` "film") with the three of them on the cushions.
 ## The step is `GameState.flags.cinema_step`, what she has bought `flags.cinema_snacks`.
+## Once the quest is done she can ask Maman for another one whenever she likes (Julien): `start_again` (flag
+## `cinema_again`) runs the same evening from step 2 (Maman's 5 $), and in front of the TV she picks the film (`FILMS`).
 
 const QUEST := "cinema"
 const STEP := "cinema_step"
@@ -17,11 +19,31 @@ const NEEDS := ["chips", "candy"]
 const HEADING := "🍿  Soirée cinéma"
 ## Maman's pocket money for it.
 const MONEY := 5.0
+const AGAIN := "cinema_again"
+## The films she can choose from on a movie night she asked for (TvShows ids); the first night is always "film".
+const FILMS: Array[String] = ["grinch", "maison", "ratatouille", "reine", "film"]
 
 
 ## 0 = not started (or done), else the step she is on (1 for a quest switched on by the debug menu).
 static func step() -> int:
-	return int(GameState.flags.get(STEP, 1)) if Quests.active(QUEST) else 0
+	return int(GameState.flags.get(STEP, 1)) if Quests.active(QUEST) or again() else 0
+
+
+## A movie night she asked Maman for, after the quest.
+static func again() -> bool:
+	return bool(GameState.flags.get(AGAIN, false))
+
+
+## Maman may organise one: the quest is done and no evening is on.
+static func can_ask() -> bool:
+	return Quests.done(QUEST) and step() == 0
+
+
+## Another movie night: Maman gives the pocket money, the twins are invited (step 2).
+static func start_again() -> void:
+	GameState.flags[AGAIN] = true
+	GameState.flags.erase(SNACKS)
+	set_step(2)
 
 
 static func set_step(n: int) -> void:
@@ -50,6 +72,7 @@ static func bought(kind: String) -> bool:
 static func clear() -> void:
 	GameState.flags.erase(STEP)
 	GameState.flags.erase(SNACKS)
+	GameState.flags.erase(AGAIN)
 
 
 ## What the notebook says to do next.
