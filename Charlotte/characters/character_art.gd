@@ -386,13 +386,9 @@ func _mouth_svg(kind: String) -> String:
 	var cx := 123.0
 	match kind:
 		"grin":
-			s += _f('<path d="M103 163 Q123 196 143 163 Q123 170 103 163 Z" fill="{mouth}" stroke="{mouth_line}" stroke-width="2.2" stroke-linejoin="round"/>')
-			s += '<path d="M107 165 Q123 172 139 165 L138 170 Q123 176 108 170 Z" fill="#FFFFFF"/>'
-			s += _f('<path d="M114 182 Q123 176 132 182 Q123 189 114 182 Z" fill="{tongue}"/>')
+			s += _open_smile("grin", 15.0, 164.0, 22.0)
 		"laugh":
-			s += _f('<path d="M100 160 Q123 202 146 160 Q123 168 100 160 Z" fill="{mouth}" stroke="{mouth_line}" stroke-width="2.2" stroke-linejoin="round"/>')
-			s += '<path d="M105 162 Q123 171 141 162 L140 168 Q123 176 106 168 Z" fill="#FFFFFF"/>'
-			s += _f('<path d="M111 186 Q123 177 135 186 Q123 195 111 186 Z" fill="{tongue}"/>')
+			s += _open_smile("laugh", 18.0, 162.0, 31.0)
 		"yum":
 			s += _f('<path d="M106 164 Q123 190 140 164 Q123 169 106 164 Z" fill="{mouth}" stroke="{mouth_line}" stroke-width="2" stroke-linejoin="round"/>')
 			s += _f('<path d="M126 176 Q137 177 138 186 Q130 190 124 182 Z" fill="{tongue}" stroke="{mouth_line}" stroke-width="1.4" stroke-linejoin="round"/>')
@@ -430,6 +426,31 @@ func _mouth_svg(kind: String) -> String:
 				s += _f('<path d="M110 167 Q123 177 136 167" stroke="{mouth_line}" stroke-width="3" fill="none" stroke-linecap="round"/>')
 	if look.facial_hair in ["beard", "mustache"]:
 		s += _f('<path d="M104 161 Q114 152 123 158 Q132 152 142 161 Q132 166 123 162 Q114 166 104 161 Z" fill="{hair}" stroke="{hair_line}" stroke-width="2"/>')
+	return s
+
+
+## An open smile (the happy face, a grin, a laugh): its corners `half` either side of the middle at height `y`, the upper lip
+## curving gently, the lower one round and `depth` deep (its lowest point about three quarters of that); the upper teeth and the
+## tongue are clipped to the mouth so they never spill onto the chin, and a little crease turns up at each corner.
+func _open_smile(id: String, half: float, y: float, depth: float) -> String:
+	var cx := 123.0
+	var l := cx - half
+	var r := cx + half
+	var shape := "M%s %s Q%s %s %s %s C%s %s %s %s %s %s Z" % [l, y, cx, y + 6.0, r, y, r - half * 0.12, y + depth, l + half * 0.12, y + depth, l, y]
+	var bottom := y + depth * 0.75
+	var s := '<defs><clipPath id="smile_%s"><path d="%s"/></clipPath></defs>' % [id, shape]
+	s += _f('<path d="%s" fill="{mouth}"/>' % shape)
+	s += '<g clip-path="url(#smile_%s)">' % id
+	# The back of the mouth darker, the tongue resting low, the upper teeth in a band under the lip.
+	s += _f('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="{mouth_line}" opacity="0.55"/>' % [cx, y + 5.0, half * 0.9, depth * 0.22])
+	s += _f('<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="{tongue}"/>' % [cx + 1.5, bottom + 1.5, half * 0.62, depth * 0.3])
+	s += '<path d="M%s %s Q%s %s %s %s L%s %s Q%s %s %s %s Z" fill="#FFFFFF"/>' % [l, y - 1.0, cx, y + 5.0, r, y - 1.0, r, y + 4.0, cx, y + 11.0, l, y + 4.0]
+	s += '</g>'
+	s += _f('<path d="%s" fill="none" stroke="{mouth_line}" stroke-width="2" stroke-linejoin="round"/>' % shape)
+	for side: float in [-1.0, 1.0]:
+		var c := cx + side * half
+		s += _f('<path d="M%s %s Q%s %s %s %s" stroke="{mouth_line}" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.6"/>' % [
+			c + side * 0.5, y - 0.5, c + side * 2.0, y - 1.0, c + side * 2.2, y - 3.2])
 	return s
 
 
