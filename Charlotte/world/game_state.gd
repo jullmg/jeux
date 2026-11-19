@@ -135,7 +135,7 @@ static func save_game(scene: String, x: float) -> void:
 	if not enabled() or scene.is_empty():
 		return
 	var data := {
-		"version": 4, "name": game_name, "scene": scene, "x": x,
+		"version": 5, "name": game_name, "scene": scene, "x": x,
 		"day": Season.day, "season": Season.current, "age": age,
 		"money": money, "quests": quests, "flags": flags,
 	}
@@ -175,6 +175,9 @@ static func load_game(n: int) -> String:
 			x += MASSON_NORTH_GAINED
 		elif scene.ends_with("/scenes/masson_pair.tscn"):
 			x += MASSON_SOUTH_GAINED
+	if int(data.get("version", 1)) < 5 and scene.ends_with("/scenes/dandurand.tscn"):
+		# Rue Dandurand's north side grew from 5e–6e to 3e–7e (version 5, 2026-11-19): she starts again in front of Xin-Xin.
+		x = NAN
 	if scene.contains("/scenes/house") or scene.contains("/scenes/depanneur") or scene.contains("/scenes/ohbon"):
 		Transition.inside_x = x
 	else:

@@ -45,6 +45,8 @@ const WORLD := Rect2(IBERVILLE_X - 120.0, 0.0, STMICHEL_X + 120.0 - (IBERVILLE_X
 const MASSON_GAPS := {"rue_iberville": IBERVILLE_X, "rue_molson": MOLSON_X, "rue_1re": FOUR_X - 3.0 * AVE_STEP,
 	"rue_2e": FOUR_X - 2.0 * AVE_STEP, "rue_3e": FOUR_X - AVE_STEP, "rue_4e": FOUR_X, "rue_5e": FIVE_X, "rue_6e": SIX_X,
 	"rue_7e": SEVEN_X, "rue_8e": EIGHT_X, "rue_9e": FOUR_X + 5.0 * AVE_STEP, "rue_10e": TEN_X, "rue_stmichel": STMICHEL_X}
+## Rue Dandurand's cross streets on the map (`_here`, the scenes `dandurand` and `dandurand_sud`).
+const DAND_GAPS := {"rue_3e": FOUR_X - AVE_STEP, "rue_4e": FOUR_X, "rue_5e": FIVE_X, "rue_6e": SIX_X, "rue_7e": SEVEN_X}
 
 ## Charlotte on the sidewalks round her block.
 const WALK_W := FIVE_X + 14.0
@@ -191,8 +193,13 @@ func _here() -> Dictionary:
 			if f < dand4:
 				return {"at": Vector2(wx, lerpf(MASSON_Y - ST_W / 2.0 - 10.0, DAND_Y + ST_W / 2.0 + 10.0, f / dand4)), "say": "Je suis sur la 5e, vers Masson !"}
 			return {"at": Vector2(wx, lerpf(DAND_Y - ST_W / 2.0 - 6.0, HOLT_Y + ST_W / 2.0 + 6.0, (f - dand4) / (1.0 - dand4))), "say": "Je suis sur la 5e, en face de mon bloc !"}
-		"dandurand":
-			return {"at": Vector2(lerpf(WALK_W, WALK_E, f), WALK_S), "say": "Je suis ici !"}
+		"dandurand", "dandurand_sud":
+			# Rue Dandurand, 3e to 7e: between the two avenues she stands between (each block at its own scale), on the side she is on.
+			var dx := _street_map_x(scene, who.position.x if who is Node2D else 0.0, DAND_GAPS)
+			if key == "dandurand_sud":
+				return {"at": Vector2(dx, DAND_Y + ST_W / 2.0 + 8.0), "say": "Je suis sur Dandurand, du bord de l'école !"}
+			var home := dx > FIVE_X and dx < SIX_X
+			return {"at": Vector2(dx, WALK_S if home else DAND_Y - ST_W / 2.0 - 8.0), "say": "Je suis ici !" if home else "Je suis sur la rue Dandurand !"}
 		"ruelle":
 			return {"at": Vector2(LANE_X, lerpf(LANE_T, LANE_B, f)), "say": "Je suis dans la ruelle !"}
 		"ruelle_dandurand":
@@ -231,12 +238,18 @@ func _here() -> Dictionary:
 
 ## Where x in a Masson scene lies on the map: between the map positions of the two crossings round it.
 func _masson_x(scene: Node, x: float) -> float:
+	return _street_map_x(scene, x, MASSON_GAPS)
+
+
+## Where x in a street scene lies on the map: between the map positions (`gaps`: its cross streets' x on the map) of the two
+## crossings round it.
+func _street_map_x(scene: Node, x: float, gap_xs: Dictionary) -> float:
 	var starts: Array = scene.get("_starts")
 	var lay: Array = scene.get("layout")
 	var pts := []
 	for i in lay.size():
-		if MASSON_GAPS.has(lay[i]):
-			pts.append([(starts[i] + starts[i + 1]) / 2.0, MASSON_GAPS[lay[i]]])
+		if gap_xs.has(lay[i]):
+			pts.append([(starts[i] + starts[i + 1]) / 2.0, gap_xs[lay[i]]])
 	if pts.size() < 2:
 		return SIX_X
 	for i in range(pts.size() - 1):
@@ -284,10 +297,12 @@ func _set_pan(pan: Vector2) -> void:
 
 
 ## The baked map only changes with what is greyed out: her age (may she cross?), the debug menu's "Sans limites", and whether
-## she stands on her block, on 6e south of Dandurand or on Masson (`_Sheet._reachable`).
+## she stands on her block, on 6e south of Dandurand, on Masson or on Dandurand off her block (`_Sheet._reachable`).
 func _bake_key() -> String:
 	var zone := 0
-	if _sheet.here.y > MASSON_Y - 70.0:
+	if absf(_sheet.here.y - DAND_Y) < 40.0 and (_sheet.here.x < FIVE_X or _sheet.here.x > SIX_X):
+		zone = 3
+	elif _sheet.here.y > MASSON_Y - 70.0:
 		zone = 2
 	elif _sheet.here.y > DAND_Y + ST_W / 2.0:
 		zone = 1
@@ -869,9 +884,14 @@ class _Sheet:
 			return [WORLD]
 		var south := Rect2(left - 70.0, 0.0, right - left + 140.0, MASSON_Y)
 		var masson := Rect2(IBERVILLE_X - 20.0, MASSON_Y - 70.0, STMICHEL_X - IBERVILLE_X + 40.0, 140.0)
+		# Rue Dandurand from 3e to 7e, both sides.
+		var dandurand := Rect2(FOUR_X - AVE_STEP - 60.0, DAND_Y - 60.0, SEVEN_X - FOUR_X + AVE_STEP + 120.0, 120.0)
 		if GameState.age >= StreetScene.CROSS_AGE:
-			return [south, masson]
+			return [south, masson, dandurand]
 		var open := [Rect2(left, top, right - left, bottom - top)]
+		# On Dandurand off her block (only through the debug menu before 8): the street she is on isn't greyed.
+		if absf(here.y - DAND_Y) < 40.0 and (here.x < left or here.x > right):
+			open.append(dandurand)
 		if here.y > MASSON_Y - 70.0:
 			open.append(masson)
 		elif here.y > bottom:

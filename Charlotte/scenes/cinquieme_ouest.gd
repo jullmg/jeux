@@ -33,7 +33,7 @@ func _init() -> void:
 func _start_x() -> float:
 	if _arriving("5e_ouest_from_5e_masson") or _arriving("5e_ouest_from_masson"):
 		return _starts[layout.find("rue_masson") + 1] + 40.0
-	if _arriving("5e_ouest_from_5e_dandurand_sud"):
+	if _arriving("5e_ouest_from_5e_dandurand_sud") or _arriving("5e_ouest_from_dandurand_sud"):
 		return _starts[layout.find("rue_dandurand")] - 40.0
 	if _arriving("5e_ouest_from_5e_dandurand"):
 		return _starts[layout.find("rue_dandurand") + 1] + 40.0
@@ -52,8 +52,8 @@ func _start_x() -> float:
 	return _street_x(layout.find("ouest_5694") + 0.5)
 
 
-# The cross streets run west from here, toward the mountain. Masson's real buildings both sides; Dandurand and Holt west of 5e
-# aren't drawn yet.
+# The cross streets run west from here, toward the mountain. Masson's and Dandurand's real buildings both sides; Holt west of 5e
+# isn't drawn yet.
 func _build_cross_streets() -> void:
 	var masson := _cross_street("rue_masson", "Rue Masson", 1.0)
 	masson.along_name = "5e Avenue"
@@ -63,16 +63,9 @@ func _build_cross_streets() -> void:
 	var dandurand := _cross_street("rue_dandurand", "Rue Dandurand", 1.0)
 	dandurand.along_name = "5e Avenue"
 	dandurand.facing = "west"
-	dandurand.left_walls = [
-		{"to": 0.9, "top": _house_top("ouest_5594"), "kind": "plex", "color": Color("#A8473A")},
-		{"to": 2.4, "top": 300.0, "kind": "plex", "color": Color("#B5603F")},
-		{"to": CrossStreet.FAR, "top": 290.0, "kind": "plex", "color": Color("#9C5A44")},
-	]
-	dandurand.right_walls = [
-		{"to": 1.0, "top": _house_top("ouest_5608"), "kind": "plex", "color": Color("#B8946E")},
-		{"to": 2.6, "top": 290.0, "kind": "plex", "color": Color("#8A4A3A")},
-		{"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": Color("#B5603F")},
-	]
+	# Dandurand west of 5e, both sides, from the Street View pictures (dandurand_sud, dandurand).
+	dandurand.left_walls = _walls_along("res://scenes/dandurand_sud.gd", "rue_5e", 1)
+	dandurand.right_walls = _walls_along("res://scenes/dandurand.gd", "rue_5e", -1)
 	var holt := _cross_street("rue_holt", "Rue Holt", -1.0)
 	holt.along_name = "5e Avenue"
 	holt.facing = "west"
@@ -104,6 +97,7 @@ func _build_doors() -> void:
 	# Round onto Holt and Dandurand from the corners of their stretches west of 5e (holt.tscn, dandurand.tscn).
 	_add_corner(holt, "res://scenes/holt.tscn", "holt_from_5e_ouest", false, -1)
 	_add_corner(dandurand, "res://scenes/dandurand.tscn", "dandurand_from_5e_ouest", false, 1)
+	_add_corner(dandurand, "res://scenes/dandurand_sud.tscn", "dandurand_sud_from_rue_5e_o", false, -1)
 	for art in ["ruelle_cinq_ouest_masson", "ruelle_cinq_ouest_sud", "ruelle_cinq_ouest_dandurand", "ruelle_cinq_ouest_holt"]:
 		var i := layout.find(art)
 		var w := _tex(art).get_width()

@@ -42,7 +42,7 @@ func _start_x() -> float:
 		return _starts[layout.find("rue_holt") + 1] + 40.0
 	if _arriving("6e_est_from_6e_dandurand") or _arriving("6e_est_from_dandurand"):
 		return _starts[layout.find("rue_dandurand")] - 40.0
-	if _arriving("6e_est_from_6e_dandurand_sud"):
+	if _arriving("6e_est_from_6e_dandurand_sud") or _arriving("6e_est_from_dandurand_sud"):
 		return _starts[layout.find("rue_dandurand") + 1] + 40.0
 	if _arriving("6e_est_from_6e_masson") or _arriving("6e_est_from_masson"):
 		return _starts[layout.find("rue_masson")] - 40.0
@@ -57,7 +57,8 @@ func _start_x() -> float:
 	return _street_x(layout.find("impair_5669") + 0.5)
 
 
-# The cross streets run east from here: no mountain, sky and clouds. Their far sides aren't drawn from photographs yet.
+# The cross streets run east from here: no mountain, sky and clouds. Dandurand's and Masson's real buildings both sides; Holt
+# east of 6e isn't drawn from photographs yet.
 func _build_cross_streets() -> void:
 	var holt := _cross_street("rue_holt", "Rue Holt", 1.0)
 	holt.along_name = "6e Avenue"
@@ -75,16 +76,9 @@ func _build_cross_streets() -> void:
 	var dandurand := _cross_street("rue_dandurand", "Rue Dandurand", -1.0)
 	dandurand.along_name = "6e Avenue"
 	dandurand.facing = "east"
-	dandurand.left_walls = [
-		{"to": 1.0, "top": _house_top("impair_5601"), "kind": "plex", "color": Color("#C98A64")},
-		{"to": 2.6, "top": 290.0, "kind": "plex", "color": Color("#9C5A44")},
-		{"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": Color("#B5603F")},
-	]
-	dandurand.right_walls = [
-		{"to": 0.8, "top": _house_top("six_est_sud_5595"), "kind": "plex", "color": Color("#B84A3E")},
-		{"to": 2.2, "top": 290.0, "kind": "plex", "color": Color("#A8473A")},
-		{"to": CrossStreet.FAR, "top": 310.0, "kind": "plex", "color": Color("#7E4436")},
-	]
+	# Dandurand east of 6e, both sides, from the Street View pictures (dandurand, dandurand_sud).
+	dandurand.left_walls = _walls_along("res://scenes/dandurand.gd", "rue_6e", 1)
+	dandurand.right_walls = _walls_along("res://scenes/dandurand_sud.gd", "rue_6e", -1)
 	# Down Masson toward 7e, its real buildings (Julien): the north side (masson_impair), Fraîchement Bon first, on the left, the
 	# south side (masson_pair) on the right.
 	var masson := _cross_street("rue_masson", "Rue Masson", -1.0)
@@ -103,6 +97,7 @@ func _build_doors() -> void:
 	var masson := _cross_streets[2]
 	_add_corner(holt, "res://scenes/holt.tscn", "holt_from_6e_est", false, 1)
 	_add_corner(dandurand, "res://scenes/dandurand.tscn", "dandurand_from_6e_est", false, -1)
+	_add_corner(dandurand, "res://scenes/dandurand_sud.tscn", "dandurand_sud_from_rue_6e_e", false, 1)
 	_add_corner(masson, "res://scenes/masson_impair.tscn", "masson_impair_from_rue_6e_6e_7e", false, -1)
 	_add_across(holt, "res://scenes/main.tscn", "6e_from_6e_est_holt", 1)
 	_add_across(dandurand, "res://scenes/main.tscn", "6e_from_6e_est_dandurand", -1)

@@ -40,7 +40,7 @@ func _init() -> void:
 func _start_x() -> float:
 	if _arriving("6e_from_dandurand") or _arriving("6e_from_6e_est_dandurand"):
 		return _starts[layout.find("depanneur")] + 60.0
-	if _arriving("6e_from_6e_est_dandurand_sud"):
+	if _arriving("6e_from_6e_est_dandurand_sud") or _arriving("6e_from_dandurand_sud"):
 		return _starts[layout.find("rue_dandurand")] - 40.0
 	if _arriving("6e_from_masson") or _arriving("6e_from_6e_est_masson"):
 		return _starts[layout.find("rue_masson") + 1] + 40.0
@@ -76,11 +76,8 @@ func _build_cross_streets() -> void:
 	var dandurand := _cross_street("rue_dandurand", "Rue Dandurand", 1.0)
 	dandurand.school = true
 	dandurand.guard = true
-	dandurand.left_walls = [
-		# The school's front on Dandurand (`ecole`), its real facade laid along the street.
-		{"to": _wall_depth("ecole"), "top": _house_top("ecole_6e"), "kind": "school", "color": Color("#A9472F"), "tex": _tex("ecole")},
-		{"to": CrossStreet.FAR, "top": 330.0, "kind": "plex", "color": Color("#9C5A44")},
-	]
+	# The south side of Dandurand (dandurand_sud): the school's front, then its real buildings past 5e.
+	dandurand.left_walls = _walls_along("res://scenes/dandurand_sud.gd", "rue_6e", 1)
 	# Along Dandurand the first wall is Xin-Xin's own front (its door, its sign, its Coors logos' band), not a plain side: it keeps
 	# its real facade (no `ours`).
 	dandurand.right_walls = _walls_along("res://scenes/dandurand.gd", "rue_6e", -1)
@@ -125,6 +122,7 @@ func _build_doors() -> void:
 	var holt := _cross_streets[2]
 	_add_corner(masson, "res://scenes/masson_impair.tscn", "masson_impair_from_rue_6e_5e_6e", false, 1)
 	_add_corner(dandurand, "res://scenes/dandurand.tscn", "dandurand_from_6e", false, 1)
+	_add_corner(dandurand, "res://scenes/dandurand_sud.tscn", "dandurand_sud_from_rue_6e_o", false, -1)
 	_add_corner(holt, "res://scenes/holt.tscn", "holt_from_6e", false, -1)
 	# Over 6e Avenue itself, to the other side of the street (the odd numbers, sixieme_est), at the matching corner.
 	_add_across(masson, "res://scenes/sixieme_est.tscn", "6e_est_from_6e_masson", 1)

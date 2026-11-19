@@ -48,6 +48,11 @@
 			"our_side": "left",
 			"from": "5e Avenue & Rue Masson",
 			"to": "5e Avenue & Rue Holt"
+		},
+		{
+			"name": "Rue Dandurand 3e–7e",
+			"from": "Rue Dandurand & 3e Avenue",
+			"to": "Rue Dandurand & 7e Avenue"
 		}
 	],
 	"addresses": [
@@ -56,5 +61,19 @@
 		"5716 6e Avenue",
 		"5679 5e Avenue",
 		"2655 Rue Holt"
+	],
+	"ranges": [
+		{
+			"street": "Rue Dandurand",
+			"from": 2650,
+			"to": 3050,
+			"parity": "odd"
+		},
+		{
+			"street": "Rue Dandurand",
+			"from": 2650,
+			"to": 3050,
+			"parity": "even"
+		}
 	]
 }

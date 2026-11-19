@@ -30,7 +30,7 @@ func _start_x() -> float:
 		return _starts[layout.find("rue_holt") + 1] + 40.0
 	if _arriving("5e_from_5e_ouest_dandurand"):
 		return _starts[layout.find("rue_dandurand")] - 40.0
-	if _arriving("5e_from_5e_ouest_dandurand_sud"):
+	if _arriving("5e_from_5e_ouest_dandurand_sud") or _arriving("5e_from_dandurand_sud"):
 		return _starts[layout.find("rue_dandurand") + 1] + 40.0
 	if _arriving("5e_from_5e_ouest_masson"):
 		return _starts[layout.find("rue_masson")] - 40.0
@@ -70,11 +70,8 @@ func _build_cross_streets() -> void:
 	dandurand.facing = "east"
 	dandurand.school = true
 	dandurand.left_walls = _walls_along("res://scenes/dandurand.gd", "rue_5e", 1, "coin_5e_dandurand")
-	dandurand.right_walls = [
-		# The school's front on Dandurand (`ecole`), its real facade laid along the street from its other end.
-		{"to": _wall_depth("ecole"), "top": _house_top("cinq_ecole"), "kind": "school", "color": Color("#A9472F"), "tex": _tex("ecole"), "flip": true},
-		{"to": CrossStreet.FAR, "top": 330.0, "kind": "plex", "color": Color("#9C5A44")},
-	]
+	# The south side of Dandurand (dandurand_sud): the school's front from its other end, then its real buildings past 6e.
+	dandurand.right_walls = _walls_along("res://scenes/dandurand_sud.gd", "rue_5e", -1)
 	# Down Masson toward 6e, its real buildings: the presbytery and the church on the left (the north side), the south side on
 	# the right.
 	var masson := _cross_street("rue_masson", "Rue Masson", -1.0)
@@ -97,6 +94,7 @@ func _decorate_house(i: int, house: Sprite2D) -> void:
 func _build_doors() -> void:
 	_add_corner(_cross_streets[0], "res://scenes/holt.tscn", "holt_from_5e", false, 1)
 	_add_corner(_cross_streets[1], "res://scenes/dandurand.tscn", "dandurand_from_5e", false, -1)
+	_add_corner(_cross_streets[1], "res://scenes/dandurand_sud.tscn", "dandurand_sud_from_rue_5e_e", false, 1)
 	# Over 5e Avenue to its west side (cinquieme_ouest), at every corner.
 	_add_across(_cross_streets[0], "res://scenes/cinquieme_ouest.tscn", "5e_ouest_from_5e_holt", 1)
 	_add_across(_cross_streets[1], "res://scenes/cinquieme_ouest.tscn", "5e_ouest_from_5e_dandurand", -1)

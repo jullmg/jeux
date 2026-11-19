@@ -76,7 +76,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `scenes/main.gd` (6e Avenue, `street_key` "6e", plate "6e Avenue, côté ouest": its whole west side, Masson left, Dandurand, her
   block, Holt right), `scenes/holt.gd` (Rue Holt: 6e left, 5e right,
   plex_13–16, 28), `scenes/cinquieme.gd` (5e Avenue: Holt left, Dandurand right, the school across it; plex_17–26 and 29–36 and both lane
-  entrances), `scenes/dandurand.gd` (Rue Dandurand: 5e left, dépanneur Xin-Xin's real front `depanneur_front`, 6e right).
+  entrances), `scenes/dandurand.gd` (Rue Dandurand's north side, 3e left to 7e right, dépanneur Xin-Xin's real front `depanneur_front` on her block; see
+  **Rue Dandurand, 3e to 7e** below).
   Cross-street `facing` by Montreal's compass: from 6e they run west (Mount Royal), from Dandurand north, from 5e east,
   from Holt south. New corner/side walls in the generator: `holt_nord`, `holt_sud`, `cinq_holt_ouest`, `coin_5e_holt`,
   `coin_5e_dandurand`, `dandurand_sud` (`VARIANTS` is 36: plex_27 on Dandurand, plex_28 on Holt, plex_29–36 on 5e, counted from the Google map).
@@ -212,6 +213,28 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   "over" layer). The school's four drawn sides and the gym are aged too (2026-11-18): `_masson_wear(y0, y1, brick, xa, xb)` takes
   an optional x range for a front made of blocks of different heights. Other kinds with a drawing of their own (`modern`,
   `infill`, `gables`, the dépanneurs…) are not aged yet.
+- **Rue Dandurand, 3e to 7e, both sides** (2026-11-19, from `reference/streetview/`: INDEX.md "Rue Dandurand 2650–3050 (impairs / pairs)",
+  ranges with close-ups, and the walk "Rue Dandurand 3e–7e" for the corners; both are in `utils/streetview/places.json`). One scene per side:
+  `scenes/dandurand.gd` (north side, odd numbers, `street_key` "dandurand", plate "Rue Dandurand, côté nord": the corner across 3e,
+  3e, the dépanneur 7 jours at the corner (`dand_2701`, `shop_span`, its words a label), buff and salmon triplexes with pale quoined
+  window surrounds, two duplexes of the 1970s over their garages, 4e, the grey stone triplex with the blue stair, the red rows with
+  their crests, the tan triplexes, 5e, her block: 2851 (the Dandurand face of `cinq_5605`), 2853, 2865, 2879 (they replaced the
+  invented plex_11, 12, 10, 27) and Xin-Xin **(never touched)**, 6e, the walk-ups and the 1970s block to 7e, the corner across 7e) and
+  `scenes/dandurand_sud.gd` (south side, even numbers, `street_key` "dandurand_sud", plate "côté sud", 7e on the LEFT since it is seen
+  from the north sidewalk: the corner across 7e, the triplexes to the painted red corner at 6e, 6e, **the school's front `ecole`, the
+  whole block**, 5e, the long side of 5594 5e Av. (`dand_2828`, `dand_2820`), the duplexes to 4e, 4e, the triplexes to 3e, the corner
+  across 3e). Facades `dand_*` are the generator's `const DANDURAND` (appended to the configs in `_init`). Generator options added for
+  them (off by default): `lintel_style: "quoin"` (the pale quoined surround), `shop_span: [x0, x1]` on a plex (`_corner_shop`), and the
+  kind `garage_plex` (`_garage_plex`: two flats over a parged garage level; `windows`, `doors`, `garages`, `porches`, `balconies`,
+  `stone_panels`, `awnings`, `quoins`). The spiral stairs some of them have are drawn as curved stairs (spirals are the lanes').
+  Corners: she turns onto 5e and 6e from both sides (keys "5e_from_dandurand_sud", "6e_est_from_dandurand_sud"…; the avenue scenes
+  turn into the south side with "dandurand_sud_from_rue_5e_e" etc.); **every corner's crosswalk over Dandurand goes to the other side
+  at the same corner** (`_add_across`; keys "dandurand_sud_from_nord_<gap>_<o|e>" and "dandurand_from_sud_<gap>_<o|e>", o = the corner
+  west of that avenue). 3e, 4e and 7e have no scene yet: generic vistas, crossings only. On the south side the school's front door
+  only gets a line from her (`SCHOOL_DOOR`: the pupils go in by the yard), its name board stands on the lawn (`SchoolBoard`), two young
+  trees on the lawn (`tree_shift`). The town map places her by the avenues round her (`TownMap.DAND_GAPS`, `_street_map_x`, shared with
+  Masson) and opens Dandurand 3e–7e from 8 years old. Saves from before (version < 5) in `dandurand.tscn` start again in front of
+  Xin-Xin. Pistache's `found_at` is 18.6 (`dand_2853`).
 - The 6e/Holt corner follows `reference/coin_holt/6eme_coin_holt.png`, `reference/coin_holt/holt_coin_6eme.png` and `reference/ruelle/entree_ruelle_6eme_coin_holt.png`:
   generator kinds `corner_holt` (`coin_holt`: long brown three-storey, stepped white lintels, diamonds, the beige
   corrugated annex with its shingle awning, the red corner window), `ohbon` (dépanneur Oh Bon! on Holt: red storefront,
@@ -333,7 +356,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   staples and torn posters) and all wires; `StreetScene._build_utility_poles()` (in `_build_props`) puts them at the curb
   (foot y 662, in front of people, like the lamps; the lane's stand at its fences), every 650-780 px clear of cross streets, trees, lamps, hydrants, racks (own RNG); the lane
   uses them too. Lost-cat posters are stapled to the pole nearest the street's second lamp (`_poster_spot`).
-  **École Saint-Jean-de-Brébeuf, all round** (2026-11-18): its front on Dandurand (`ecole`, `_school`, from `reference/coin_dandurand/School_on_dandurand.jpg`) is in no street's layout: it is drawn at its real length (3000 px, 5e to 6e) and laid as its real picture down the Dandurand vistas of `main.gd` and `cinquieme.gd` (`"tex": _tex("ecole")`, length `StreetScene._wall_depth(art)`). Two tall pavilions with the diamond lattice in relief in a sunk panel, brick piers with stone caps, lower links set back, the centre's thirteen bays between pilasters (white sashes `_front_sash`, brick panels `_spandrel`, children's drawings in the ground floor `_kid_art`), copper cornices (`_school_copper`, shared by every side and the yard), the parapet's copper balustrade, cartouche and cross, the entrance up its flight of steps with the flag at the window over it (`_school_entrance`), the stone basement (`_school_basement`), the iron fence. The 6e side (`ecole_6e`), the 5e side (`cinq_ecole`), the yard's back wall (`SchoolYardArt.back_wall`) and the gym (`_gym`) share its copper, its stone and its age. `layout` runs: `rue_dandurand`, Charlotte's block (`depanneur`: the
+  **École Saint-Jean-de-Brébeuf, all round** (2026-11-18): its front on Dandurand (`ecole`, `_school`, from `reference/coin_dandurand/School_on_dandurand.jpg`) stands in `dandurand_sud.gd`'s layout, the whole block from 6e to 5e, at its real length (3000 px), and the Dandurand vistas of `main.gd`, `cinquieme.gd`, `sixieme_est.gd` and `cinquieme_ouest.gd` lay it (and the real buildings past it) through `_walls_along("res://scenes/dandurand_sud.gd", …)`. Two tall pavilions with the diamond lattice in relief in a sunk panel, brick piers with stone caps, lower links set back, the centre's bays between pilasters (nine wide ones and a narrow one at each end, as on the Street View fronts 2846…–2870…: `edges`) (white sashes `_front_sash`, brick panels `_spandrel`, children's drawings in the ground floor `_kid_art`), copper cornices (`_school_copper`, shared by every side and the yard), the parapet's copper balustrade, cartouche and cross, the entrance up its flight of steps with the flag at the window over it (`_school_entrance`), the stone basement (`_school_basement`) with its low openings painted red under the centre only (the pavilions stand on plain stone), the iron fence. The 6e side (`ecole_6e`), the 5e side (`cinq_ecole`), the yard's back wall (`SchoolYardArt.back_wall`) and the gym (`_gym`) share its copper, its stone and its age. `layout` runs: `rue_dandurand`, Charlotte's block (`depanneur`: the
   side of dépanneur Xin-Xin, which fronts Dandurand; `garages`; `ruelle_verte`, the green lane with its sign; … `ruelle`, `coin_holt`),
   `rue_holt`, `coin_holt_est`. The Holt-side lane entrance on 6e has the neighbours' yellow "RALENTISSEZ ! ENFANTS EN
   LIBERTÉ !" sign (`PropArt.slow_sign`, words as labels). The first three buildings of the block are drawn from the photos in `reference/` (the user wants

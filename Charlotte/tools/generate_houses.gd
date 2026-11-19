@@ -34,6 +34,348 @@ const DEFAULTS := {
 	"shop_sign": "#2E5E3E", "bins": false, "halloween": true,
 }
 
+# ── Rue Dandurand, 3e to 7e Avenue, both sides, from reference/streetview/ (INDEX.md "Rue Dandurand 2650–3050" and the walk
+# "Rue Dandurand 3e–7e", 2026-11-19). Cars, bins, bikes, scaffolding, trees, the Canada Post truck and Halloween decorations in
+# the pictures are left out; the spiral stairs some of them have are drawn as the street's curved stairs (spirals are the lanes').
+const DANDURAND := [
+	# Across 3e Avenue on the north side: the side of the modern red-brick block at its corner (2701_rue-dandurand_left_EN2eKLKk).
+	{
+		"name": "dand_n_coin_3e", "bricks": ["#7A3328", "#84392D", "#6E2E24", "#8E4033", "#763127"], "mortar": "#9C8E84",
+		"kind": "side_wall", "width": 560.0, "floors": 3, "parapet": "flat", "windows": [[90.0, 110.0], [330.0, 110.0]],
+		"basement": [], "downspout": 520.0,
+	},
+	# 2701, the corner at 3e: grey-buff brick with the pale quoined surrounds, its pressed cornice, blue iron balconies, the
+	# dépanneur 7 jours at the corner end of the ground floor (2701…, 2699… close-ups), the stair down on the right.
+	{
+		"name": "dand_2701", "bricks": ["#B9AE96", "#AFA48C", "#C3B8A0", "#A69B84", "#BDB29A"], "mortar": "#D8D2C4",
+		"width": 680.0, "floors": 3, "windows": [[60.0, 100.0], [480.0, 100.0]], "door_cx": 300.0, "balcony": [200.0, 440.0],
+		"porch": [220.0, 420.0], "stair": [Vector2(440, 336), Vector2(520, 380), Vector2(570, 520), Vector2(540, 696)],
+		"basement": [], "lintel_style": "quoin", "lintel": "#F2EFE8", "lintel_dark": "#C9C4BA", "shop_span": [30.0, 200.0],
+		"shop_sign": "#E8812E", "metal": "#3A5A8C", "door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel",
+		"cornice": "#D9D6CF", "cornice_dark": "#A9A69E", "fence": "", "halloween": false,
+	},
+	# 2711–2715: buff brick, white quoined surrounds, white doors, the stair down on the left (2711…, 2715…, 2717…).
+	{
+		"name": "dand_2711", "bricks": ["#C9B48E", "#BFA984", "#D2BD98", "#B49F7A", "#CDB892"], "mortar": "#E2D8C6",
+		"width": 620.0, "floors": 3, "windows": [[60.0, 100.0], [460.0, 100.0]], "door_cx": 300.0, "balcony": [190.0, 430.0],
+		"porch": [210.0, 410.0], "stair": [Vector2(190, 336), Vector2(110, 380), Vector2(60, 520), Vector2(90, 696)],
+		"basement": [], "lintel_style": "quoin", "lintel": "#F2EFE8", "lintel_dark": "#C9C4BA", "door": "#F4F1EA",
+		"door_dark": "#B9B2A5", "door_style": "panel", "cornice": "#C9C2B4", "cornice_dark": "#9E978A", "fence": "black",
+	},
+	# 2727: grey-buff brick and white quoins, its balconies stacked on the right under an aluminium canopy, the stair down
+	# on the left of them (2713…, 2727…).
+	{
+		"name": "dand_2727", "bricks": ["#BDB4A0", "#B3AA96", "#C7BEAA", "#A9A08C", "#C1B8A4"], "mortar": "#DCD6CA",
+		"width": 600.0, "floors": 3, "windows": [[60.0, 100.0], [210.0, 100.0]], "door_cx": 450.0, "balcony": [330.0, 560.0],
+		"porch": [350.0, 540.0], "stair": [Vector2(330, 336), Vector2(250, 380), Vector2(200, 520), Vector2(230, 696)],
+		"basement": [], "lintel_style": "quoin", "lintel": "#F2EFE8", "lintel_dark": "#C9C4BA", "canopy": "#E8E6E0",
+		"metal": "#7E8186", "door": "#F4F1EA", "door_dark": "#B9B2A5", "parapet": "flat", "fence": "black",
+	},
+	# 2733: salmon brick with buff quoins, black iron balconies and French doors, the stair down on the left (2733…, 2735…).
+	{
+		"name": "dand_2733", "bricks": ["#D08A6A", "#C67F60", "#D99474", "#BC765A", "#D48E6E"], "mortar": "#E8DCCB",
+		"width": 620.0, "floors": 3, "windows": [[70.0, 100.0], [450.0, 100.0]], "door_cx": 290.0, "balcony": [180.0, 420.0],
+		"porch": [200.0, 400.0], "stair": [Vector2(180, 336), Vector2(100, 380), Vector2(50, 520), Vector2(80, 696)],
+		"basement": [], "lintel_style": "quoin", "lintel": "#E8D9B8", "lintel_dark": "#B9AA88", "parapet": "corbel",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "fence": "black",
+	},
+	# 2751: a brown-brick duplex of the 1970s over its garage, white aluminium rails (2751…).
+	{
+		"name": "dand_2751", "bricks": ["#7E4A36", "#8A5440", "#724030", "#966048", "#7A4434"], "mortar": "#BFB0A0",
+		"kind": "garage_plex", "width": 560.0, "floors": 2, "halloween": false, "window_style": "slider",
+		"windows": [[50.0, 140.0], [370.0, 140.0]], "doors": [280.0], "garages": [[60.0, 150.0]], "porches": [[210.0, 350.0]],
+		"balconies": [[210.0, 520.0]], "metal": "#F2F0EA", "metal_light": true, "door": "#F4F1EA", "door_dark": "#B9B2A5",
+		"door_style": "panel", "step": "#B9B4AA", "step_dark": "#8E8A82",
+	},
+	# 2755–2783, to the 4e corner: the long duplex of the 1970s over its garages, two flats each side of the pale stone
+	# panel with the paired doors up the concrete steps, striped awnings, white rails (2755…, 2765…, 2771…, 2783…).
+	{
+		"name": "dand_2767", "bricks": ["#8A4A3A", "#7E4234", "#96523F", "#6E3A2E", "#A05A46"], "mortar": "#BFB2A3",
+		"kind": "garage_plex", "width": 1000.0, "floors": 2, "halloween": false, "window_style": "slider",
+		"windows": [[60.0, 170.0], [270.0, 110.0], [620.0, 110.0], [770.0, 170.0]], "doors": [455.0, 545.0],
+		"garages": [[80.0, 170.0], [750.0, 170.0]], "porches": [[390.0, 610.0]], "balconies": [[400.0, 600.0]],
+		"stone_panels": [[395.0, 605.0]], "awnings": "#6E7C76", "metal": "#F2F0EA", "metal_light": true, "door": "#F4F1EA",
+		"door_dark": "#B9B2A5", "door_style": "slots", "step": "#B9B4AA", "step_dark": "#8E8A82",
+	},
+	# 2801, at the 4e corner: a grey stone front, orange wooden doors, the blue iron stair curling down on the right (2801…,
+	# 2811…).
+	{
+		"name": "dand_2801", "bricks": ["#A8A49C", "#B2AEA6", "#9E9A92", "#BCB8B0", "#A49F96"], "mortar": "#8E8A82",
+		"width": 640.0, "floors": 3, "windows": [[60.0, 100.0], [470.0, 100.0]], "door_cx": 300.0, "balcony": [180.0, 440.0],
+		"porch": [200.0, 420.0], "stair": [Vector2(440, 336), Vector2(520, 380), Vector2(570, 520), Vector2(540, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "metal": "#2B4A9C", "door": "#B5652B",
+		"door_dark": "#7A4019", "door_style": "panel", "cornice": "#8E9196", "cornice_dark": "#5E6166", "fence": "black",
+	},
+	# 2813–2817: red brick, white windows under stone lintels, the stair down on the right (2813…, 2817…).
+	{
+		"name": "dand_2813", "bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
+		"width": 600.0, "floors": 3, "windows": [[60.0, 110.0], [430.0, 110.0]], "door_cx": 280.0, "balcony": [170.0, 400.0],
+		"porch": [190.0, 380.0], "stair": [Vector2(400, 336), Vector2(480, 380), Vector2(530, 520), Vector2(500, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "fence": "black",
+	},
+	# 2819–2823: red-brown brick, the balconies under a white aluminium canopy, the stair down on the left (2819…, 2821…).
+	{
+		"name": "dand_2819", "bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#C9BBAC",
+		"width": 640.0, "floors": 3, "windows": [[60.0, 110.0], [480.0, 100.0]], "door_cx": 330.0, "balcony": [200.0, 450.0],
+		"porch": [220.0, 430.0], "stair": [Vector2(200, 336), Vector2(120, 380), Vector2(70, 520), Vector2(100, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "canopy": "#F2F0EA", "parapet": "flat", "fence": "black",
+	},
+	# 2827: red brick under its little crest and corbelled parapet, black balconies and stair (2827…, 2829…).
+	{
+		"name": "dand_2827", "bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
+		"width": 640.0, "floors": 3, "windows": [[60.0, 100.0], [470.0, 100.0]], "door_cx": 300.0, "balcony": [190.0, 430.0],
+		"porch": [210.0, 410.0], "stair": [Vector2(430, 336), Vector2(510, 380), Vector2(560, 520), Vector2(530, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "corbel", "crest": true, "fence": "black",
+	},
+	# 2831: the same row in red-brown brick, its crest, the stair down on the left (2831…).
+	{
+		"name": "dand_2831", "bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#C9BBAC",
+		"width": 600.0, "floors": 3, "windows": [[60.0, 100.0], [440.0, 100.0]], "door_cx": 280.0, "balcony": [180.0, 410.0],
+		"porch": [200.0, 390.0], "stair": [Vector2(180, 336), Vector2(100, 380), Vector2(50, 520), Vector2(80, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "corbel", "crest": true, "fence": "black",
+	},
+	# 2833: tan brick over a stone ground floor, the stair down on the right (2833…, 2839…).
+	{
+		"name": "dand_2833", "bricks": ["#B8865A", "#AE7C52", "#C29064", "#A4744C", "#BC8A5E"], "mortar": "#D8C8B0",
+		"width": 620.0, "floors": 3, "windows": [[60.0, 100.0], [450.0, 100.0]], "door_cx": 290.0, "balcony": [190.0, 420.0],
+		"porch": [210.0, 400.0], "stair": [Vector2(420, 336), Vector2(500, 380), Vector2(550, 520), Vector2(520, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "lower_stone": true, "fence": "black",
+	},
+	# 2839–2849, at the 5e corner: tan brick, black stairs, a white lattice under the porch (2839…, 2849…).
+	{
+		"name": "dand_2849", "bricks": ["#B8865A", "#AE7C52", "#C29064", "#A4744C", "#BC8A5E"], "mortar": "#D8C8B0",
+		"width": 600.0, "floors": 3, "windows": [[60.0, 100.0], [430.0, 100.0]], "door_cx": 300.0, "balcony": [180.0, 420.0],
+		"porch": [200.0, 400.0], "stair": [Vector2(180, 336), Vector2(100, 380), Vector2(50, 520), Vector2(80, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat", "fence": "white",
+	},
+	# 2851, the corner at 5e: the Dandurand face of 5605 5e Avenue (`cinq_5605`): orange-brown brick, the white top storey set
+	# back, the porch with its glass rail (2840…, 2851…, 2853…).
+	{
+		"name": "dand_2851", "bricks": ["#9C5A40", "#A8644A", "#905038", "#B06C50", "#985640"], "mortar": "#C9B8A6",
+		"kind": "infill", "width": 640.0, "floors": 3, "halloween": false, "cols": [90.0, 300.0], "doors": [480.0],
+		"white_top": [[60.0, 580.0]], "garages": [],
+	},
+	# 2853–2859: a row of red-brick duplexes, its little crest, iron balconies, black glazed doors (2853…, 2859…).
+	# (It replaces the invented plex_12, as the three after it replace plex_11, plex_10 and plex_27.)
+	{
+		"name": "dand_2853", "bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
+		"width": 700.0, "floors": 2, "windows": [[60.0, 100.0], [540.0, 100.0]], "door_cx": 330.0, "balcony": [200.0, 470.0],
+		"porch": [220.0, 450.0], "stair": [], "basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "corbel",
+		"crest": true, "door": "#2A2622", "door_dark": "#100D0B", "door_style": "double", "fence": "black",
+	},
+	# 2865–2869: red brick, a red door below, bowed iron balconies (2865…, 2869…).
+	{
+		"name": "dand_2865", "bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#C9BBAC",
+		"width": 640.0, "floors": 2, "windows": [[60.0, 100.0], [480.0, 100.0]], "door_cx": 300.0, "balcony": [180.0, 440.0],
+		"porch": [200.0, 420.0], "stair": [], "basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "corbel",
+		"door": "#C8302A", "door_dark": "#8A1E1A", "door_style": "panel", "fence": "black",
+	},
+	# 2879–2881, beside Xin-Xin: red-brown brick, iron balconies, a little white awning over a door upstairs (2879…, 2881…).
+	{
+		"name": "dand_2879", "bricks": ["#8E4836", "#9A5240", "#82402F", "#A45C48", "#8A4434"], "mortar": "#C9BBAC",
+		"width": 640.0, "floors": 2, "windows": [[60.0, 100.0], [480.0, 100.0]], "door_cx": 320.0, "balcony": [200.0, 450.0],
+		"porch": [220.0, 430.0], "stair": [], "basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "flat",
+		"door": "#F4F1EA", "door_dark": "#B9B2A5", "fence": "black",
+	},
+	# 2901–2905, the corner at 6e: brown brick of the 1980s, sliding windows, black balconies and stair, a white fence
+	# (2903…).
+	{
+		"name": "dand_2901", "bricks": ["#8A5038", "#7E4834", "#965A40", "#744230", "#905440"], "mortar": "#C4B4A2",
+		"width": 640.0, "floors": 3, "windows": [[60.0, 120.0], [460.0, 120.0]], "door_cx": 300.0, "balcony": [180.0, 440.0],
+		"porch": [200.0, 420.0], "stair": [Vector2(440, 336), Vector2(520, 380), Vector2(570, 520), Vector2(540, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "window_style": "slider", "parapet": "flat",
+		"fence": "white",
+	},
+	# 2907: a walk-up of orange-tan brick (2907…, 2915…).
+	{
+		"name": "dand_2907", "bricks": ["#C08850", "#B67E48", "#CA925A", "#AC7442", "#C48C54"], "mortar": "#E0D0B8",
+		"kind": "walkup", "width": 560.0, "floors": 3, "halloween": false, "lintel": "#D8CFC0", "lintel_dark": "#A39A8A",
+		"cols": [70.0, 190.0, 370.0, 460.0], "doors": [290.0], "door": "#5E3A22", "door_dark": "#3E2414", "door_style": "panel",
+	},
+	# 2915: a walk-up of red-brown brick, its door in a stone surround (2907…, 2915…).
+	{
+		"name": "dand_2915", "bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#C9BBAC",
+		"kind": "walkup", "width": 560.0, "floors": 3, "halloween": false, "lintel": "#D8CFC0", "lintel_dark": "#A39A8A",
+		"cols": [70.0, 190.0, 370.0, 460.0], "doors": [290.0], "door": "#3A2A22", "door_dark": "#1E1410", "door_style": "panel",
+		"door_surround": "lintel",
+	},
+	# 2919–2927: grey-buff brick with white quoined surrounds, white doors, black balconies, the stair down on the left
+	# (2919…, 2927…).
+	{
+		"name": "dand_2919", "bricks": ["#B4A890", "#AA9E86", "#BEB29A", "#A09480", "#B8AC94"], "mortar": "#D6CFC0",
+		"width": 740.0, "floors": 3, "windows": [[60.0, 100.0], [590.0, 100.0]], "door_cx": 370.0, "balcony": [200.0, 540.0],
+		"porch": [220.0, 520.0], "stair": [Vector2(200, 336), Vector2(120, 380), Vector2(70, 520), Vector2(100, 696)],
+		"basement": [], "lintel_style": "quoin", "lintel": "#F2EFE8", "lintel_dark": "#C9C4BA", "door": "#F4F1EA",
+		"door_dark": "#B9B2A5", "door_style": "panel", "fence": "black",
+	},
+	# 2935–2949, to the 7e corner: a red-brick block of the 1970s over its garages, the balconies stacked in the middle,
+	# white quoins at its corners (2935…, 2939…, 2945…, 2949…).
+	{
+		"name": "dand_2939", "bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
+		"kind": "garage_plex", "width": 780.0, "floors": 2, "halloween": false, "window_style": "slider", "quoins": true,
+		"windows": [[60.0, 170.0], [560.0, 170.0]], "doors": [360.0, 430.0], "garages": [[60.0, 150.0], [230.0, 120.0]],
+		"porches": [[300.0, 500.0]], "balconies": [[300.0, 500.0]], "door": "#2A2622", "door_dark": "#100D0B",
+		"door_style": "panel", "step": "#B9B4AA", "step_dark": "#8E8A82",
+	},
+	# Across 7e Avenue on the north side: the side of the red-brick corner block (2981…).
+	{
+		"name": "dand_n_coin_7e", "bricks": ["#8E4A36", "#9A5440", "#82402F", "#A45C48", "#88462F"], "mortar": "#CDBFB0",
+		"kind": "side_wall", "width": 560.0, "floors": 3, "parapet": "flat", "windows": [[100.0, 100.0], [320.0, 100.0]],
+		"basement": [], "downspout": 40.0,
+	},
+	# Across 7e Avenue on the south side: the side of the corner triplex, stone lintels (2984…).
+	{
+		"name": "dand_s_coin_7e", "bricks": ["#7E4A36", "#8A5440", "#724030", "#966048", "#7A4434"], "mortar": "#BFB0A0",
+		"kind": "side_wall", "width": 580.0, "floors": 3, "parapet": "flat", "lintel": "#D8CFC0", "lintel_dark": "#A39A8A",
+		"windows": [[90.0, 110.0], [330.0, 110.0]], "basement": [], "downspout": 530.0,
+	},
+	# 2968, the corner at 7e: red brick, white double-hung windows, black doors in pairs, the stair down on the right (2968…).
+	{
+		"name": "dand_2968", "bricks": ["#A0503A", "#94483A", "#AA5A44", "#8C4434", "#9C4C38"], "mortar": "#CDBFB0",
+		"width": 700.0, "floors": 3, "windows": [[60.0, 130.0], [500.0, 100.0]], "door_cx": 330.0, "balcony": [220.0, 460.0],
+		"porch": [240.0, 440.0], "stair": [Vector2(460, 336), Vector2(540, 380), Vector2(590, 520), Vector2(560, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "window_style": "hung", "hung_frame": "#F2F0EA",
+		"parapet": "corbel", "door": "#2A2622", "door_dark": "#100D0B", "door_style": "double", "fence": "black",
+	},
+	# 2948–2952: red-brown brick under a corbelled parapet, black doors in pairs, iron balconies (2948…, 2952…).
+	{
+		"name": "dand_2948", "bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#C9BBAC",
+		"width": 640.0, "floors": 3, "windows": [[60.0, 100.0], [470.0, 100.0]], "door_cx": 300.0, "balcony": [190.0, 430.0],
+		"porch": [210.0, 410.0], "stair": [Vector2(190, 336), Vector2(110, 380), Vector2(60, 520), Vector2(90, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "corbel", "door": "#2A2622",
+		"door_dark": "#100D0B", "door_style": "double", "fence": "black",
+	},
+	# 2936: its neighbour in the same brick, the stair down on the right (2936…).
+	{
+		"name": "dand_2936", "bricks": ["#8A4A3A", "#7E4234", "#96523F", "#6E3A2E", "#A05A46"], "mortar": "#BFB2A3",
+		"width": 640.0, "floors": 3, "windows": [[60.0, 100.0], [470.0, 100.0]], "door_cx": 300.0, "balcony": [190.0, 430.0],
+		"porch": [210.0, 410.0], "stair": [Vector2(430, 336), Vector2(510, 380), Vector2(560, 520), Vector2(530, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "corbel", "door": "#2A2622",
+		"door_dark": "#100D0B", "door_style": "double", "fence": "black",
+	},
+	# 2920–2934: red-brown brick, a wooden door, white aluminium balconies and stair (2920…, 2934…).
+	{
+		"name": "dand_2920", "bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#C9BBAC",
+		"width": 620.0, "floors": 3, "windows": [[60.0, 100.0], [460.0, 100.0]], "door_cx": 300.0, "balcony": [180.0, 430.0],
+		"porch": [200.0, 410.0], "stair": [Vector2(180, 336), Vector2(100, 380), Vector2(50, 520), Vector2(80, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "metal": "#F2F0EA", "metal_light": true,
+		"parapet": "corbel", "door": "#7A4019", "door_dark": "#4E2810", "door_style": "arched_panels", "fence": "white",
+	},
+	# 2912–2918: red-brown brick, white aluminium balconies and stair, a glazed white door (2912…, 2918…).
+	{
+		"name": "dand_2918", "bricks": ["#8A4A3A", "#7E4234", "#96523F", "#A05A46", "#864838"], "mortar": "#CDBFB0",
+		"width": 640.0, "floors": 3, "windows": [[60.0, 100.0], [480.0, 100.0]], "door_cx": 320.0, "balcony": [200.0, 450.0],
+		"porch": [220.0, 430.0], "stair": [Vector2(450, 336), Vector2(530, 380), Vector2(580, 520), Vector2(550, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "metal": "#F2F0EA", "metal_light": true,
+		"parapet": "corbel", "crest": true, "door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "grid", "fence": "white",
+	},
+	# 2910: painted red brick under a slate parapet, white doors under fanlights, a grey-white stair (2902…, 2910…).
+	{
+		"name": "dand_2910", "bricks": ["#B5413A", "#AD3C35", "#BC4740", "#A8382F", "#B23F38"], "mortar": "#A63C34",
+		"width": 620.0, "floors": 3, "windows": [[60.0, 110.0], [460.0, 110.0]], "door_cx": 300.0, "balcony": [180.0, 440.0],
+		"porch": [200.0, 420.0], "stair": [Vector2(180, 336), Vector2(100, 380), Vector2(50, 520), Vector2(80, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "mansard", "door": "#F4F1EA",
+		"door_dark": "#B9B2A5", "door_style": "fan_top", "door_surround": "arch", "metal": "#C9CCD0", "fence": "black",
+	},
+	# 2900–2902, the corner at 6e: painted red brick under its slate parapet, a black balcony, black doors, the stair down
+	# on the left (2900…, 2902…; the side on 6e is `six_est_sud_5595`).
+	{
+		"name": "dand_2902", "bricks": ["#B5413A", "#AD3C35", "#BC4740", "#A8382F", "#B23F38"], "mortar": "#A63C34",
+		"width": 600.0, "floors": 3, "windows": [[60.0, 110.0], [440.0, 110.0]], "door_cx": 300.0, "balcony": [180.0, 420.0],
+		"porch": [200.0, 400.0], "stair": [Vector2(180, 336), Vector2(100, 380), Vector2(50, 520), Vector2(80, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "parapet": "mansard", "window_style": "hung",
+		"hung_frame": "#F2F0EA", "door": "#2A2622", "door_dark": "#100D0B", "fence": "black",
+	},
+	# 2824–2828, past 5e: the long side of 5594 5e Avenue (`ouest_5594`), red brick, stone lintels and sills, a tall parged
+	# base (2820…, 2824…, 2828…).
+	{
+		"name": "dand_2828", "bricks": ["#9A4A38", "#8E4232", "#A65440", "#843C2E", "#A04E3A"], "mortar": "#C9BBAC",
+		"kind": "side_wall", "width": 900.0, "floors": 3, "parapet": "flat", "lintel": "#D8CFC0", "lintel_dark": "#A39A8A",
+		"windows": [[90.0, 90.0], [300.0, 90.0], [560.0, 90.0], [780.0, 90.0]], "basement": [180.0, 620.0], "downspout": 860.0,
+		"halloween": false,
+	},
+	# 2816–2820: its lower wing, two storeys, the big window of the ground floor (2816…, 2820…).
+	{
+		"name": "dand_2820", "bricks": ["#9A4A38", "#8E4232", "#A65440", "#843C2E", "#A04E3A"], "mortar": "#C9BBAC",
+		"kind": "side_wall", "width": 520.0, "parapet": "flat", "lintel": "#D8CFC0", "lintel_dark": "#A39A8A",
+		"windows": [[60.0, 180.0], [330.0, 90.0]], "basement": [], "halloween": false,
+	},
+	# 2812: brown brick, a white aluminium balcony, white rails and stair (2812…, 2816…).
+	{
+		"name": "dand_2812", "bricks": ["#7E4A36", "#8A5440", "#724030", "#966048", "#7A4434"], "mortar": "#BFB0A0",
+		"width": 620.0, "floors": 2, "windows": [[60.0, 110.0], [450.0, 110.0]], "door_cx": 300.0, "balcony": [180.0, 440.0],
+		"porch": [200.0, 420.0], "stair": [Vector2(440, 336), Vector2(520, 380), Vector2(570, 520), Vector2(540, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "metal": "#F2F0EA", "metal_light": true, "parapet": "flat",
+		"fence": "white",
+	},
+	# 2806–2808: red-brown brick, orange wooden double doors, the stair down on the left (2806…, 2808…).
+	{
+		"name": "dand_2808", "bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#C9BBAC",
+		"width": 640.0, "floors": 2, "windows": [[60.0, 110.0], [470.0, 110.0]], "door_cx": 330.0, "balcony": [200.0, 460.0],
+		"porch": [220.0, 440.0], "stair": [Vector2(200, 336), Vector2(120, 380), Vector2(70, 520), Vector2(100, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "door": "#B5652B", "door_dark": "#7A4019",
+		"door_style": "double", "metal": "#5E3A2A", "fence": "black",
+	},
+	# 2794–2802, the corner at 4e: dark brown brick, red casement windows, stone sills, no balcony (2794…, 2802…).
+	{
+		"name": "dand_2802", "bricks": ["#6E3E2E", "#7A4636", "#5F3428", "#84503E", "#6A3A2C"], "mortar": "#B8AA9A",
+		"width": 620.0, "floors": 2, "windows": [[60.0, 120.0], [440.0, 120.0]], "door_cx": 290.0, "balcony": [200.0, 380.0],
+		"porch": [220.0, 360.0], "stair": [], "basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A",
+		"window_style": "casement", "frame": "#B8302A", "balcony_floors": [], "door_floors": [0], "parapet": "flat", "door": "#7A2E2A",
+		"door_dark": "#4E1C1A", "fence": "black",
+	},
+	# 2730–2736, the corner at 4e: brown brick, its porches on columns, black stairs (2730…, 2736…).
+	{
+		"name": "dand_2736", "bricks": ["#7A4A38", "#6E4232", "#86543F", "#643A2C", "#7E4C3A"], "mortar": "#BCAC9A",
+		"width": 640.0, "floors": 2, "windows": [[60.0, 110.0], [470.0, 110.0]], "door_cx": 300.0, "balcony": [180.0, 440.0],
+		"porch": [200.0, 420.0], "stair": [Vector2(180, 336), Vector2(100, 380), Vector2(50, 520), Vector2(80, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "columns": true, "door": "#3A2A22", "door_dark": "#1E1410",
+		"fence": "black",
+	},
+	# 2726: newer, red brick below and a white top storey (2716…, 2726…).
+	{
+		"name": "dand_2726", "bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
+		"kind": "modern", "width": 640.0, "door_x": 240.0, "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "step": "#B9B4AA",
+		"step_dark": "#8E8A82", "windows": [[100.0, 140.0], [380.0, 140.0]], "ground_window": [400.0, 110.0], "door_cx": 240.0,
+		"basement": [], "roof_rail": true,
+	},
+	# 2712–2722: red brick behind its trees, sliding windows, the balconies under a canopy, a pale stair (2712…, 2718…, 2722…).
+	{
+		"name": "dand_2716", "bricks": ["#9E4A3A", "#A85440", "#94423A", "#B05C48", "#A04C3C"], "mortar": "#CDBFB0",
+		"width": 640.0, "floors": 3, "windows": [[70.0, 120.0], [450.0, 120.0]], "door_cx": 300.0, "balcony": [180.0, 440.0],
+		"porch": [200.0, 420.0], "stair": [Vector2(180, 336), Vector2(100, 380), Vector2(50, 520), Vector2(80, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "window_style": "slider", "canopy": "#ECEAE4",
+		"metal": "#C9CCD0", "parapet": "flat", "fence": "black",
+	},
+	# 2708: cream brick, the black stair down on the right (2706…).
+	{
+		"name": "dand_2708", "bricks": ["#D9CBB0", "#CFC1A6", "#E2D4BA", "#C6B89C", "#D4C6AA"], "mortar": "#ECE4D4",
+		"width": 560.0, "floors": 3, "windows": [[60.0, 100.0], [400.0, 100.0]], "door_cx": 260.0, "balcony": [160.0, 380.0],
+		"porch": [180.0, 360.0], "stair": [Vector2(380, 336), Vector2(460, 380), Vector2(510, 520), Vector2(480, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "fence": "black",
+	},
+	# 2706: red-brown brick, white windows under stone lintels, a white door, the balconies on the right (2706…).
+	{
+		"name": "dand_2706", "bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#C9BBAC",
+		"width": 620.0, "floors": 3, "windows": [[60.0, 90.0], [210.0, 90.0]], "door_cx": 450.0, "balcony": [340.0, 570.0],
+		"porch": [360.0, 550.0], "stair": [], "basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A",
+		"window_style": "hung", "hung_frame": "#F2F0EA", "door": "#F4F1EA", "door_dark": "#B9B2A5", "fence": "black",
+	},
+	# 2700–2702, the corner at 3e: under scaffolding in the pictures (2700…, 2702…), drawn as a plain red-brown triplex.
+	{
+		"name": "dand_2700", "bricks": ["#8A4A3A", "#96523F", "#7E4234", "#A05A46", "#864838"], "mortar": "#C9BBAC",
+		"width": 660.0, "floors": 3, "windows": [[60.0, 110.0], [490.0, 110.0]], "door_cx": 330.0, "balcony": [200.0, 460.0],
+		"porch": [220.0, 440.0], "stair": [Vector2(200, 336), Vector2(120, 380), Vector2(70, 520), Vector2(100, 696)],
+		"basement": [], "lintel": "#D8CFC0", "lintel_dark": "#A39A8A", "fence": "black",
+	},
+	# Across 3e Avenue on the south side: the side of the red-brick corner building (2688…).
+	{
+		"name": "dand_s_coin_3e", "bricks": ["#9A4232", "#A64C3A", "#8E3A2C", "#B0543F", "#94402F"], "mortar": "#CDBFB0",
+		"kind": "side_wall", "width": 600.0, "floors": 3, "parapet": "flat", "windows": [[90.0, 100.0], [330.0, 100.0]],
+		"basement": [], "downspout": 40.0,
+	},
+]
+
 const AUTUMN_BUSHES := ["#B5442E", "#D9682B", "#E3A33A", "#7E8F3A", "#9C3B2A", "#5F7F3A"]
 const MUMS := ["#F2B632", "#E0782E", "#8E2A3A", "#F4E3B0"]
 
@@ -2434,6 +2776,7 @@ var split := 0
 
 func _init() -> void:
 	var configs: Array = HOUSES.duplicate()
+	configs.append_array(DANDURAND)
 	for i in VARIANTS:
 		configs.append(_variant(i))
 	for s in ["autumn", "spring", "summer", "winter"]:
@@ -2629,6 +2972,8 @@ func _svg() -> void:
 			_gym()
 		"mural_wall":
 			_mural_wall()
+		"garage_plex":
+			_garage_plex()
 		_:
 			_building()
 	out.append('</svg>')
@@ -2676,11 +3021,17 @@ func _building() -> void:
 	if k.crest:
 		_crest(k.door_cx, top + 6.0)
 	var first_floor := 1 if k.kind == "shop" else 0
+	var shop: Array = k.get("shop_span", [])
 	for f in range(first_floor, floors):
 		for w in k.windows:
+			# A corner shop on the ground floor (`shop_span`: [x0, x1]) has its own window there.
+			if f == 0 and not shop.is_empty() and w[0] + w[1] > shop[0] and w[0] < shop[1]:
+				continue
 			if aged:
 				_window_under(w[0], _win_y(f), w[1], 160.0)
 			_window(w[0], _win_y(f), w[1], 160.0)
+	if not shop.is_empty():
+		_corner_shop(shop[0], shop[1])
 	# Everything from here on (doors, balconies, porch, stair, railings, fence, garden) is the house's "over" layer.
 	split = out.size()
 	match k.kind:
@@ -2923,6 +3274,21 @@ func _window(x: float, y: float, w: float, h: float) -> void:
 			_path(d, "none", _stroke(k.lintel, 13) + ' stroke-dasharray="7 2"')
 		"none":
 			pass
+		"quoin":
+			# The pale quoined surround of the 1910s triplexes on Rue Dandurand (2711, 2733, 2919…): a lintel, then blocks
+			# long and short up both sides of the window, a hair proud of the brick.
+			_rect(x - 18, y - 24, w + 36, 24, k.lintel, _stroke(k.lintel_dark, 1.2))
+			_rect(x - 18, y - 24, w + 36, 3, "#FFFFFF", 'opacity="0.35"')
+			var qy := y
+			var qi := 0
+			while qy < y + h - 4.0:
+				var qw := 20.0 if qi % 2 == 0 else 12.0
+				var qh := minf(22.0, y + h - qy)
+				for qx: float in [x - qw, x + w]:
+					_rect(qx, qy, qw, qh - 2.0, k.lintel, _stroke(k.lintel_dark, 1))
+				_rect(x + w + qw, qy + 2.0, 3, qh - 4.0, "#000000", 'opacity="0.14"')
+				qy += 22.0
+				qi += 1
 		_:
 			_rect(x - 12, y - 20, w + 24, 20, k.lintel, _stroke(k.lintel_dark, 1.5))
 	if k.keystone:
@@ -4035,9 +4401,15 @@ func _school() -> void:
 	var stone_top := weave_top + 34.0
 	var sills: Array[float] = [water, water - 195.0, water - 390.0]
 	var wh := 140.0
-	var ww := 60.0
-	var bays := 13
-	var bw := (c1 - c0) / float(bays)
+	var ww := 78.0
+	# Nine wide bays and a narrow one at each end, as on the Street View fronts (2846…–2870… Dandurand): the edges of each bay,
+	# its window as wide as the bay allows.
+	var bays := 11
+	var bw := (c1 - c0) / 10.1
+	var edges: Array[float] = [c0, c0 + bw * 0.55]
+	for i in 9:
+		edges.append(edges[-1] + bw)
+	edges.append(c1)
 	var door_bay := bays / 2
 	# ── The brick of each block, its light and its age.
 	for p: Array in pavilions:
@@ -4110,7 +4482,7 @@ func _school() -> void:
 		_school_copper(a - 4.0, b + 4.0, link_top, copper, copper_dark, copper_light)
 	# ── The centre: pilasters, windows and the brick panels under them.
 	for i in range(bays + 1):
-		var px := c0 + i * bw - 9.0
+		var px := edges[i] - 9.0
 		var pw := 18.0
 		if i == 0:
 			px = c0
@@ -4132,30 +4504,31 @@ func _school() -> void:
 	_rect(c0, cornice + 60.0, c1 - c0, 8, stone, _stroke(stone_dark, 1))
 	_snow(c0, c1 - c0, cornice + 60.0)
 	for i in bays:
-		var cx := c0 + (i + 0.5) * bw
+		var cx := (edges[i] + edges[i + 1]) / 2.0
+		var sw := 38.0 if i == 0 or i == bays - 1 else 78.0
 		for f in 3:
 			if i == door_bay and f == 0:
 				continue
 			var y: float = sills[f] - wh
 			if i == door_bay and f == 1:
 				# The window over the door, in its stone frame.
-				_rect(cx - ww / 2.0 - 16.0, y - 18.0, ww + 32.0, wh + 30.0, stone, _stroke(stone_dark, 1.5))
-				_rect(cx - ww / 2.0 - 16.0, y - 18.0, ww + 32.0, 4, "#FFFFFF", 'opacity="0.4"')
-				_rect(cx + ww / 2.0 + 12.0, y - 14.0, 4, wh + 26.0, "#000000", 'opacity="0.14"')
-				_front_sash(cx - ww / 2.0, y, ww, wh, false)
+				_rect(cx - sw / 2.0 - 16.0, y - 18.0, sw + 32.0, wh + 30.0, stone, _stroke(stone_dark, 1.5))
+				_rect(cx - sw / 2.0 - 16.0, y - 18.0, sw + 32.0, 4, "#FFFFFF", 'opacity="0.4"')
+				_rect(cx + sw / 2.0 + 12.0, y - 14.0, 4, wh + 26.0, "#000000", 'opacity="0.14"')
+				_front_sash(cx - sw / 2.0, y, sw, wh, false)
 				continue
-			_window_under(cx - ww / 2.0, y, ww, wh)
-			_front_sash(cx - ww / 2.0, y, ww, wh)
+			_window_under(cx - sw / 2.0, y, sw, wh)
+			_front_sash(cx - sw / 2.0, y, sw, wh)
 			if f == 0:
-				_kid_art(cx - ww / 2.0, y, ww, wh)
+				_kid_art(cx - sw / 2.0, y, sw, wh)
 			if f > 0:
-				_spandrel(cx - ww / 2.0 - 4.0, sills[f] + 16.0, ww + 8.0, 36.0)
+				_spandrel(cx - sw / 2.0 - 4.0, sills[f] + 16.0, sw + 8.0, 36.0)
 	# ── The parapet over the centre: copper balustrade panels between the piers, the cartouche and the cross.
 	for i in bays:
 		if i == door_bay:
 			continue
-		var bx := c0 + i * bw + 16.0
-		var bpw := bw - 32.0
+		var bx := edges[i] + 16.0
+		var bpw := edges[i + 1] - edges[i] - 32.0
 		var by := top + 12.0
 		var bh := cornice - top - 18.0
 		_rect(bx, by, bpw, bh, "#22302C")
@@ -4207,18 +4580,17 @@ func _school() -> void:
 	_rect(X0 - 4, stone_top - 4, X1 - X0 + 8, 8, stone, _stroke(stone_dark, 1))
 	_snow(X0 - 4, X1 - X0 + 8, stone_top - 4)
 	_school_basement(stone_top + 4.0)
-	var bxs: Array[float] = []
-	for p: Array in pavilions:
-		for j in 3:
-			bxs.append(float(p[0]) + 110.0 + j * 150.0)
-	for i in bays:
-		if absi(i - door_bay) > 1:
-			bxs.append(c0 + (i + 0.5) * bw)
-	for bx: float in bxs:
-		_rect(bx - 34.0, 846, 68, 44, "#C4532E", _stroke("#7E2E18", 1.5))
-		_rect(bx - 29.0, 851, 58, 34, "url(#glass)", 'opacity="0.75"')
-		_rect(bx - 1.5, 851, 3, 34, "#C4532E")
-		_rect(bx - 40.0, 890, 80, 7, stone, _stroke(stone_dark, 1))
+	# The basement's openings, under the centre only (the pavilions stand on plain stone): low panels painted red in their
+	# stone reveal, as on the Street View fronts.
+	for i in range(1, bays - 1):
+		if absi(i - door_bay) <= 1:
+			continue
+		var bx := (edges[i] + edges[i + 1]) / 2.0
+		_rect(bx - 38.0, 846, 76, 44, "#6E6A62")
+		_rect(bx - 34.0, 849, 68, 38, "#D04A2C", _stroke("#7E2E18", 1.5))
+		_rect(bx - 34.0, 849, 68, 5, "#000000", 'opacity="0.2"')
+		_rect(bx - 28.0, 857, 56, 24, "none", _stroke("#9E3420", 1.2))
+		_rect(bx - 42.0, 890, 84, 7, stone, _stroke(stone_dark, 1))
 	for l: Array in links:
 		var lx := (float(l[0]) + float(l[1])) / 2.0
 		_rect(lx - 28.0, 858, 56, ground_y - 858, "#B0402E", _stroke("#6E2018", 2))
@@ -9918,3 +10290,125 @@ func _bloom(x: float, y: float, r: float, color: String) -> void:
 		var a := TAU * i / 5.0 - PI / 2.0
 		_circle(x + cos(a) * r * 0.7, y + sin(a) * r * 0.7, r * 0.52, color)
 	_circle(x, y, r * 0.4, "#F2C230" if color != "#FFD23F" else "#E8812E")
+
+
+# ── Rue Dandurand, 3e to 7e Avenue ─────────────────────────────────────────────────────────────────────────────────────────
+
+# A corner shop on a plex's ground floor (`shop_span`: [x0, x1], the dépanneur 7 jours at 2701 Dandurand, by 3e): the ground
+# floor there painted grey in grooved courses, the sign band (`shop_sign`; its words are a label in the scene), a glass door
+# and a window with the shop's light, its shelves and the street in the glass.
+func _corner_shop(x0: float, x1: float) -> void:
+	var y0 := _door_top(0) - 40.0
+	var y1 := _fb(0) + 8.0
+	_rect(x0, y0, x1 - x0, base_y - y0, "#8E9196")
+	var gy := y0 + 6.0
+	while gy < base_y:
+		_rect(x0, gy, x1 - x0, 2, "#6E7176", 'opacity="0.6"')
+		gy += 16.0
+	var sign: String = k.get("shop_sign", "#E8812E")
+	_rect(x0 + 6, y0 - 4, x1 - x0 - 12, 40, sign, _stroke("#7A3A12", 2))
+	_rect(x0 + 6, y0 - 4, x1 - x0 - 12, 8, "#FFFFFF", 'opacity="0.35"')
+	_rect(x0 + 14, y0 + 6, (x1 - x0) * 0.42, 22, "#F4F1EA", _stroke("#7A3A12", 1))
+	var wx := x0 + 18.0
+	var ww := (x1 - x0) * 0.5
+	var wy := y0 + 52.0
+	_rect(wx - 6, wy - 6, ww + 12, y1 - wy + 6, "#3A3D42")
+	_rect(wx, wy, ww, y1 - wy - 6, "#2A2E36")
+	_shop_glass_glow(wx, wy, ww, y1 - wy - 6, int(x0) + 27)
+	_shop_glass_goods(wx, wy, ww, y1 - wy - 6, int(x0) + 31)
+	_shop_glass_shine(wx, wy, ww, y1 - wy - 6)
+	var dx := wx + ww + 16.0
+	var dw := minf(x1 - dx - 12.0, 90.0)
+	_rect(dx - 5, wy - 6, dw + 10, base_y - wy + 6, "#3A3D42")
+	_rect(dx, wy, dw, base_y - wy, "url(#glass)")
+	_shop_glass_glow(dx, wy, dw, base_y - wy, int(x0) + 29)
+	_rect(dx + dw - 14, wy + (base_y - wy) * 0.5, 4, 26, "#C9CCD2")
+	_rect(x0, base_y, x1 - x0, ground_y - base_y, "#A39D93")
+	_rect(dx - 10, base_y, dw + 20, 16, k.step, _stroke(k.step_dark, 1.2))
+
+
+# A duplex of the 1970s over its garages (Rue Dandurand 2755–2783 and 2935–2949): brick on two flats raised over a parged garage
+# level, wide aluminium sliding windows under striped awnings, the ground flat's doors up a straight flight of concrete steps
+# onto a porch with a white aluminium rail, the upper flat's doors onto a balcony, a pale stone panel up the front between the
+# entrances, a flat roof with its aluminium coping. Its own geometry (lower than a plex):
+# - `windows`: [x, w] on both flats; `doors`: x of each pair of doors (the ground flat's and the upper flat's);
+# - `garages`: [x, w]; `porches` / `balconies`: [x0, x1] spans; `stone_panels`: [x0, x1]; `awnings`: the stripe colour, or "".
+func _garage_plex() -> void:
+	var top: float = k.top if k.top > 0.0 else 62.0
+	var y1 := 548.0  # the ground flat's floor
+	var y2 := 318.0  # the upper flat's floor
+	var garage_top := 552.0
+	_bricks(top, ground_y)
+	_wall_shading(top)
+	_masson_wear(top, y1, true)
+	for sp: Array in k.get("stone_panels", []):
+		_rect(sp[0], top, sp[1] - sp[0], y1 - top, "#D9D2C2", _stroke("#B3AA98", 1))
+		var sy := top + 8.0
+		while sy < y1:
+			_rect(sp[0], sy, sp[1] - sp[0], 1.5, "#B3AA98", 'opacity="0.7"')
+			sy += 46.0
+		_rect(sp[1] - 4, top, 4, y1 - top, "#000000", 'opacity="0.1"')
+	if k.get("quoins", false):
+		_corner_quoins(X0, top, y1)
+		_corner_quoins(X1 - 44.0, top, y1)
+	# The parged garage level.
+	_rect(X0, y1 + 10.0, X1 - X0, ground_y - y1 - 10.0, "#D6D2C8")
+	_rect(X0, y1 + 10.0, X1 - X0, 8, "#000000", 'opacity="0.12"')
+	_rect(X0, ground_y - 30.0, X1 - X0, 30, "#000000", 'opacity="0.06"')
+	_rect(X0 - 4, y1, X1 - X0 + 8, 12, "#C9C3B8", _stroke("#9E978A", 1.2))
+	# The flat roof and its coping.
+	_rect(X0 - 6, top - 14, X1 - X0 + 12, 14, "#E4E2DC", _stroke("#A9A69E", 1.2))
+	_rect(X0 - 6, top, X1 - X0 + 12, 8, "#000000", 'opacity="0.14"')
+	_snow(X0 - 6, X1 - X0 + 12, top - 14)
+	for w: Array in k.windows:
+		for fy: float in [y2 - 190.0, y1 - 190.0]:
+			_window_under(w[0], fy, w[1], 120.0)
+			_modern_window(w[0], fy, w[1], 120.0, true)
+			_rect(w[0] - 8, fy + 120.0, w[1] + 16, 9, "#CFCBC2", _stroke("#9E978A", 1))
+	for g: Array in k.get("garages", []):
+		var gx: float = g[0]
+		var gw: float = g[1]
+		_rect(gx - 6, garage_top + 18.0, gw + 12, ground_y - garage_top - 18.0, "#9E978A")
+		_rect(gx, garage_top + 24.0, gw, ground_y - garage_top - 24.0, "#ECEAE4", _stroke("#B5B1A8", 1.2))
+		var ry := garage_top + 40.0
+		while ry < ground_y - 6.0:
+			_rect(gx, ry, gw, 2, "#B5B1A8")
+			ry += 22.0
+		_rect(gx, garage_top + 24.0, gw, 10, "#000000", 'opacity="0.12"')
+	split = out.size()
+	for dx: float in k.get("doors", []):
+		_door(dx, y2 - 208.0, y2)
+		_door(dx, y1 - 208.0, y1)
+	var stripe: String = k.get("awnings", "")
+	if stripe != "":
+		for w: Array in k.windows:
+			for fy: float in [y2 - 190.0, y1 - 190.0]:
+				_stripe_awning(w[0] - 6, w[0] + w[1] + 6, fy - 52.0, stripe)
+	for sp: Array in k.get("balconies", []):
+		_balcony(sp[0], sp[1], y2, [])
+	for sp: Array in k.get("porches", []):
+		var gaps := []
+		for dx: float in k.get("doors", []):
+			if dx > sp[0] and dx < sp[1]:
+				gaps.append([dx - 40.0, dx + 40.0])
+		_balcony(sp[0], sp[1], y1, gaps)
+		# The concrete steps up from the sidewalk to each door on this porch, between their rails.
+		for gp: Array in gaps:
+			var cx: float = (gp[0] + gp[1]) / 2.0
+			var count := 8
+			var sh := (ground_y - y1 - 16.0) / count
+			for i in count:
+				var sw := 84.0 + i * 4.0
+				var sy := y1 + 16.0 + i * sh
+				_rect(cx - sw / 2.0, sy, sw, sh, k.step, _stroke(k.step_dark, 1.2))
+				_rect(cx - sw / 2.0, sy, sw, 2.5, "#FFFFFF", 'opacity="0.3"')
+				if season == "winter":
+					_rect(cx - sw / 2.0 + 4, sy - 2, sw - 8, 4, "#F7F9FB")
+			for side: float in [-1.0, 1.0]:
+				var a := Vector2(cx + side * 44.0, y1 - RAIL_H)
+				var b := Vector2(cx + side * 60.0, ground_y - RAIL_H)
+				_line("M%s %s L%s %s" % [_n(a.x), _n(a.y), _n(b.x), _n(b.y)], 4.0)
+				for i in 6:
+					var pt := a.lerp(b, (i + 1) / 7.0)
+					_rect(pt.x - 1.2, pt.y, 2.4, RAIL_H, k.metal, _metal_stroke())
+
