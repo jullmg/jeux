@@ -51,13 +51,22 @@ static func candy() -> int:
 	return int(GameState.flags.get(CANDY, 0))
 
 
-## Adds `n` sweets to her bag, each of a kind picked at the door.
-static func add_candy(n: int) -> void:
+## What one of each kind is called, and several: the little note that shows what she has just been given.
+const ONE := {"wrapped": "bonbon", "lollipop": "suçon", "chocolate": "barre de chocolat", "gum": "gomme", "chips": "petit sac de chips"}
+const MANY := {"wrapped": "bonbons", "lollipop": "suçons", "chocolate": "barres de chocolat", "gum": "gommes", "chips": "petits sacs de chips"}
+
+
+## Adds `n` sweets to her bag, each of a kind picked at the door, and gives back the kinds she got.
+static func add_candy(n: int) -> Array:
 	GameState.flags[CANDY] = candy() + n
 	var bag: Array = GameState.flags.get(BAG, [])
+	var got: Array = []
 	for i in n:
-		bag.append(KINDS[randi() % KINDS.size()])
+		var kind: String = KINDS[randi() % KINDS.size()]
+		bag.append(kind)
+		got.append(kind)
 	GameState.flags[BAG] = bag
+	return got
 
 
 ## How many of each kind she has, for the counting on the kitchen table.

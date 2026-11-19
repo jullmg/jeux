@@ -1151,8 +1151,7 @@ func _ring(key: String, gives: bool, door_x: float) -> void:
 			_control.enabled = true
 			return
 		Halloween.knock(key)
-		var got := randi_range(1, 3)
-		Halloween.add_candy(got)
+		var got := Halloween.add_candy(randi_range(1, 3))
 		Sfx.play("pop", _charlotte.position)
 		_charlotte.express("yum", 2.4)
 		Bubble.say(self, Vector2(door_x, HOUSE_BASE_Y - 250.0), HalloweenNight.NEIGHBOUR_LINES[randi() % HalloweenNight.NEIGHBOUR_LINES.size()], 2.6)
@@ -1168,22 +1167,53 @@ func _ring(key: String, gives: bool, door_x: float) -> void:
 
 
 # The candy she just got floats up over her head.
-func _candy_pop(n: int) -> void:
+func _candy_pop(kinds: Array) -> void:
+	# On a layer of its own over the night (the street is tinted deep blue): each sweet she was given, drawn as itself, and
+	# what they are, rising from over her head.
+	var counts := {}
+	for kind: String in kinds:
+		counts[kind] = int(counts.get(kind, 0)) + 1
+	var layer := CanvasLayer.new()
+	layer.layer = 55
+	add_child(layer)
+	var box := Control.new()
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Beside her, at the height of her shoulders: the speech bubbles (hers and the neighbour's at the door) are all above her.
+	var screen := get_viewport().get_canvas_transform() * _charlotte.position
+	var side := 1.0 if screen.x < VIEW.x - 300.0 else -1.0
+	box.position = screen + Vector2(side * 190.0, -60.0)
+	layer.add_child(box)
+	var icon := 66.0
+	for i in kinds.size():
+		var pic := CandyIcon.new()
+		pic.kind = kinds[i]
+		pic.size = Vector2(icon, icon)
+		pic.scale_factor = 0.9
+		pic.tilt = (i - (kinds.size() - 1) / 2.0) * 0.25
+		pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		pic.position = Vector2((i - kinds.size() / 2.0) * (icon - 6.0), -icon - 26.0)
+		box.add_child(pic)
+	var words: Array[String] = []
+	for kind: String in counts:
+		var n: int = counts[kind]
+		words.append("+%d %s" % [n, Halloween.ONE[kind] if n == 1 else Halloween.MANY[kind]])
 	var label := Label.new()
-	label.text = "+%d bonbon%s" % [n, "s" if n > 1 else ""]
-	label.add_theme_font_size_override("font_size", 22)
+	label.text = "\n".join(words)
+	label.add_theme_font_size_override("font_size", 20)
 	label.add_theme_color_override("font_color", Color("#FFD23F"))
 	label.add_theme_color_override("font_outline_color", Color("#3A2A12"))
 	label.add_theme_constant_override("outline_size", 6)
-	label.position = _charlotte.position + Vector2(-70.0, -250.0)
-	label.size = Vector2(140, 30)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.z_index = 7
-	add_child(label)
-	var rise := create_tween()
-	rise.tween_property(label, "position:y", label.position.y - 60.0, 1.6)
-	rise.parallel().tween_property(label, "modulate:a", 0.0, 1.6).set_delay(0.6)
-	rise.tween_callback(label.queue_free)
+	label.size = Vector2(320, 30)
+	label.position = Vector2(-160.0, -22.0)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(label)
+	box.modulate.a = 0.0
+	var rise := box.create_tween()
+	rise.tween_property(box, "modulate:a", 1.0, 0.2)
+	rise.parallel().tween_property(box, "position:y", box.position.y - 50.0, 2.6)
+	rise.parallel().tween_property(box, "modulate:a", 0.0, 0.5).set_delay(2.3)
+	rise.tween_callback(layer.queue_free)
 
 
 # ── Utility poles ───────────────────────────────────────────────
