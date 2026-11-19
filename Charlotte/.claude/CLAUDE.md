@@ -763,9 +763,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
        the bell (`Sfx` "school_bell"); on later days the bell rings after `RECESS` seconds; the classmates line up and go in,
        and the pupils' door takes her in; 3. the class (`scenes/classe.gd`): Madame Nadia (invented: bun, round glasses,
        mustard cardigan) at the board with today's date in chalk; Charlotte sits at her desk beside Alyzée's (`Seat`, "!") and
-       the lesson starts: the first day the class welcomes Alyzée, then three questions (`School.LESSONS`, written for school,
-       not the homework; `School.lesson` picks ones not seen yet, `flags.ecole_seen`), on the board, read out by `Voice`,
-       answered on a `ChoiceCard` ("Presque ! Essaie encore." when wrong), a sticker (`flags.ecole_stickers`), the bell;
+       the lesson starts: the first day the class welcomes Alyzée, then four questions (Julien: shapes, then sums): two on shapes from `School.SHAPE_QUESTIONS` (carré, rectangle, triangle,
+       losange, trapèze, parallélogramme; not seen yet, `flags.ecole_seen`), the shape drawn in chalk on the board and on a slate
+       on the card (`School.draw_shape`, `ChoiceCard.ask(…, picture)`), then an addition and a subtraction made up for the day
+       (`School._sum`, 3e-année level: carrying and borrowing, up to `SUM_MAX`; the wrong answers are the usual slips), read out
+       by `Voice` (`say`: "plus" / "moins"), answered on a `ChoiceCard` ("Presque ! Essaie encore." when wrong), a sticker (`flags.ecole_stickers`), the bell;
        4. the service de garde (`scenes/service_de_garde.gd`): Jade the educator, a craft of the season, blocks that grow
        and tumble, a snack, snakes and ladders with Alyzée; Papa comes `PAPA_AFTER` seconds after her first activity (or
        `PAPA_LATEST`), she tells him about her day (the first day: her new friend, and the quest is done) and "Papa te ramène

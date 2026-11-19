@@ -28,6 +28,7 @@ var _alyzee: Character
 var _kids: Array[Character] = []
 var _seat: Seat
 var _board_text: Label
+var _board_shape: _BoardShape
 var _lesson: Array = []
 var _asked := 0
 var _started := false
@@ -96,6 +97,10 @@ func _build_walls() -> void:
 	var date := "%s %d %s" % [DAYS[int(now.weekday)], int(now.day), MONTHS[int(now.month) - 1]]
 	_chalk(date.capitalize() if false else date[0].to_upper() + date.substr(1), Vector2(BOARD.get_center().x, BOARD.position.y + 44.0), 24)
 	_board_text = _chalk("Bonjour, les amis !", Vector2(BOARD.get_center().x, BOARD.position.y + 140.0), 30)
+	# The shape Madame Nadia draws under a question about shapes.
+	_board_shape = _BoardShape.new()
+	_board_shape.position = Vector2(BOARD.get_center().x, BOARD.position.y + 212.0)
+	add_child(_board_shape)
 	_alphabet()
 
 
@@ -323,15 +328,28 @@ func _start_lesson() -> void:
 
 func _ask() -> void:
 	var q: Dictionary = _lesson[_asked]
-	_board_text.text = q.ask
+	# On the board: the sum in big chalk, or the question with the shape drawn under it.
+	_board_text.text = q.board
+	_board_text.add_theme_font_size_override("font_size", 30 if q.shape != "" or q.board.length() > 24 else 44)
+	_board_text.position.y = BOARD.position.y + (110.0 if q.shape != "" else 140.0) - _board_text.size.y / 2.0
+	_board_shape.kind = q.shape
+	_board_shape.queue_redraw()
 	_teacher.facing = -1
 	_teacher_says(q.ask, 3.0)
-	Voice.say(q.ask)
+	Voice.say(q.say)
+	_card_for(q).chose.connect(_answered)
+
+
+# The card with the answers; the shape again on a little slate when there is one (the card hides the board).
+func _card_for(q: Dictionary) -> ChoiceCard:
 	var choices: Array = []
 	for answer: String in q.answers:
 		choices.append({"text": answer})
-	var card := ChoiceCard.ask(self, q.ask, choices)
-	card.chose.connect(_answered)
+	var slate: Control = null
+	if q.shape != "":
+		slate = _Slate.new()
+		slate.kind = q.shape
+	return ChoiceCard.ask(self, q.ask, choices, slate)
 
 
 func _answered(i: int) -> void:
@@ -355,16 +373,16 @@ func _answered(i: int) -> void:
 
 
 func _ask_again() -> void:
-	var q: Dictionary = _lesson[_asked]
-	var choices: Array = []
-	for answer: String in q.answers:
-		choices.append({"text": answer})
-	ChoiceCard.ask(self, q.ask, choices).chose.connect(_answered)
+	_card_for(_lesson[_asked]).chose.connect(_answered)
 
 
 # Three right answers: a sticker, the bell, and down to the service de garde with Alyzée.
 func _end_lesson() -> void:
 	_board_text.text = "Bravo, la classe !"
+	_board_text.add_theme_font_size_override("font_size", 30)
+	_board_text.position.y = BOARD.position.y + 140.0 - _board_text.size.y / 2.0
+	_board_shape.kind = ""
+	_board_shape.queue_redraw()
 	_teacher_says("Super travail ! Voici un autocollant\npour toi, Charlotte.", 3.0)
 	GameState.flags[School.STICKERS] = int(GameState.flags.get(School.STICKERS, 0)) + 1
 	_treat(ClassArt.sticker(), "Un autocollant !", 1.0)
@@ -384,6 +402,32 @@ func _end_lesson() -> void:
 		if School.step() > 0:
 			School.set_step(4)
 		Transition.change_scene_saying(self, School.GARDE, "Au service de garde…", 1.4))
+
+
+# A shape in chalk on the board (School.draw_shape), and the same on a little slate on the answer card.
+class _BoardShape:
+	extends Node2D
+	var kind := ""
+
+	func _draw() -> void:
+		School.draw_shape(self, kind, Vector2.ZERO, 100.0)
+
+
+class _Slate:
+	extends Control
+	var kind := ""
+
+	func _init() -> void:
+		custom_minimum_size = Vector2(260, 140)
+
+	func _draw() -> void:
+		var box := StyleBoxFlat.new()
+		box.bg_color = Color("#2F4A3A")
+		box.border_color = Color("#8A5A32")
+		box.set_border_width_all(6)
+		box.set_corner_radius_all(10)
+		draw_style_box(box, Rect2(Vector2.ZERO, size))
+		School.draw_shape(self, kind, size / 2.0, 92.0)
 
 
 # ── The fish in the aquarium ────────────────────────────────────

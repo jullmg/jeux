@@ -16,13 +16,16 @@ const COLORS := [Color("#8FCBF2"), Color("#FFD866"), Color("#B8E986"), Color("#F
 
 var question := ""
 var choices: Array[Dictionary] = []
+## Something to look at between the question and the answers (a shape drawn on a little slate, say); null = none.
+var picture: Control
 var _card: PanelContainer
 
 
 ## Puts the card up under `parent` and gives it back, so its `chose` can be connected.
-static func ask(parent: Node, question_text: String, which: Array) -> ChoiceCard:
+static func ask(parent: Node, question_text: String, which: Array, picture_control: Control = null) -> ChoiceCard:
 	var card := ChoiceCard.new()
 	card.question = question_text
+	card.picture = picture_control
 	for one in which:
 		card.choices.append(one as Dictionary)
 	parent.add_child(card)
@@ -62,6 +65,9 @@ func _ready() -> void:
 	title.add_theme_color_override("font_color", BLUE)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	words.add_child(title)
+	if picture:
+		picture.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		words.add_child(picture)
 	for i in choices.size():
 		words.add_child(_button(i))
 	var cancel := Label.new()

@@ -30,33 +30,36 @@ const HOME_X := 300.0
 ## What the notes of its steps are headed with (Notebook.announce).
 const HEADING := "🏫  L'école"
 const TEACHER := "Madame Nadia"
-## How many questions a lesson has.
-const PER_LESSON := 3
+## How many questions a lesson has: the shapes first (`SHAPES_PER_LESSON`), then the sums.
+const PER_LESSON := 4
+const SHAPES_PER_LESSON := 2
 
-## Madame Nadia's questions at the board: what she says, the right answer first, then the wrong ones (shuffled on the card).
-## Grade one and two: counting, letters and sounds, rhymes, the seasons, animals, Montréal and Québec.
-const LESSONS := [
-	["Combien font 3 + 4 ?", "7", "6", "8"],
-	["Combien font 10 − 3 ?", "7", "6", "13"],
-	["Combien font 5 + 5 ?", "10", "55", "9"],
-	["Combien font 2 + 6 ?", "8", "4", "9"],
-	["Combien de pattes a une araignée ?", "8", "6", "4"],
-	["Combien de côtés a un triangle ?", "3", "4", "5"],
-	["Combien y a-t-il de jours dans une semaine ?", "7", "5", "10"],
-	["Quelle lettre vient après B ?", "C", "D", "A"],
-	["Quel mot commence par le son « ch » ?", "chat", "rat", "lune"],
-	["Quel mot rime avec « bateau » ?", "gâteau", "maison", "soleil"],
-	["Quel mot rime avec « souris » ?", "tapis", "chaise", "pomme"],
-	["Quel est le pluriel de « un cheval » ?", "des chevaux", "des chevals", "des chevaus"],
-	["Quelle saison vient après l'automne ?", "l'hiver", "l'été", "le printemps"],
-	["En quelle saison les feuilles tombent-elles ?", "l'automne", "l'été", "l'hiver"],
-	["Quel animal pond des œufs ?", "la poule", "le chat", "la vache"],
-	["Quel animal fait « meuh » ?", "la vache", "le mouton", "le cochon"],
-	["Comment s'appelle la montagne au milieu de Montréal ?", "le mont Royal", "le mont Blanc", "le mont Everest"],
-	["De quelles couleurs est le drapeau du Québec ?", "bleu et blanc", "rouge et blanc", "vert et jaune"],
-	["Que fait-on quand le feu est rouge ?", "on s'arrête", "on traverse", "on court"],
-	["Quel fruit est jaune et courbé ?", "la banane", "la fraise", "le raisin"],
+## Madame Nadia's questions on shapes (Julien: losange, triangle, trapèze, parallélogramme, rectangle, carré): what she asks,
+## the shape she draws on the board ("" = none), the right answer, then the wrong ones (shuffled on the card).
+## A shape to draw is one of `SHAPES`, drawn by `draw_shape`.
+const SHAPE_QUESTIONS := [
+	["Quelle est cette forme ?", "carre", "un carré", "un losange", "un rectangle"],
+	["Quelle est cette forme ?", "rectangle", "un rectangle", "un carré", "un parallélogramme"],
+	["Quelle est cette forme ?", "triangle", "un triangle", "un trapèze", "un losange"],
+	["Quelle est cette forme ?", "losange", "un losange", "un carré", "un parallélogramme"],
+	["Quelle est cette forme ?", "trapeze", "un trapèze", "un parallélogramme", "un rectangle"],
+	["Quelle est cette forme ?", "parallelogramme", "un parallélogramme", "un trapèze", "un losange"],
+	["Combien de côtés a un triangle ?", "", "3", "4", "5"],
+	["Combien de côtés a un trapèze ?", "trapeze", "4", "3", "5"],
+	["Combien de sommets a un losange ?", "losange", "4", "2", "6"],
+	["Quelle forme a 4 côtés égaux\net 4 angles droits ?", "", "un carré", "un losange", "un trapèze"],
+	["Quelle forme a 4 côtés égaux,\nmais pas d'angles droits ?", "", "un losange", "un carré", "un rectangle"],
+	["Quelle forme a 4 angles droits,\n2 longs côtés et 2 courts ?", "", "un rectangle", "un carré", "un losange"],
+	["Quelle forme a seulement\n2 côtés parallèles ?", "", "un trapèze", "un parallélogramme", "un carré"],
+	["Quelle forme a ses côtés opposés\nparallèles deux à deux, sans angles droits ?", "", "un parallélogramme", "un trapèze", "un triangle"],
+	["Un carré, c'est aussi\nune sorte de…", "", "rectangle", "triangle", "trapèze"],
+	["Combien d'angles droits\na un rectangle ?", "rectangle", "4", "2", "0"],
 ]
+const SHAPES := ["carre", "rectangle", "triangle", "losange", "trapeze", "parallelogramme"]
+
+## The sums (Julien: additions and subtractions, the level of a 3e année): numbers to 999, carrying and borrowing.
+## `SUM_MAX` is the largest answer an addition gives; raise it (and the ranges in `_sum`) for older pupils.
+const SUM_MAX := 999
 
 
 ## 0 = no school today (or the day is over), else the step of the day she is on (1 for the quest switched on by the debug menu).
@@ -100,27 +103,126 @@ static func indoors(look: CharacterLook) -> CharacterLook:
 	return look
 
 
-## Today's questions: ones she hasn't had yet, as long as there are; the order of the answers shuffled.
+## Today's questions: two on shapes she hasn't had yet (as long as there are), then an addition and a subtraction made up
+## for the day, in either order; the order of the answers shuffled. Each is {ask (on the card), say (read out), board (in
+## chalk), shape (to draw, or ""), answers, right}.
 static func lesson(rng: RandomNumberGenerator) -> Array:
 	var seen: Array = GameState.flags.get(SEEN, [])
 	var fresh: Array = []
-	for i in LESSONS.size():
+	for i in SHAPE_QUESTIONS.size():
 		if not seen.has(i):
 			fresh.append(i)
-	if fresh.size() < PER_LESSON:
+	if fresh.size() < SHAPES_PER_LESSON:
 		seen = []
-		fresh = range(LESSONS.size())
+		fresh = range(SHAPE_QUESTIONS.size())
 	var out: Array = []
-	for k in PER_LESSON:
+	for k in SHAPES_PER_LESSON:
 		var i: int = fresh.pop_at(rng.randi_range(0, fresh.size() - 1))
 		seen.append(i)
-		var q: Array = LESSONS[i]
-		var answers: Array = q.slice(1)
-		var right: String = answers[0]
-		answers.shuffle()
-		out.append({"ask": q[0], "answers": answers, "right": answers.find(right)})
+		var q: Array = SHAPE_QUESTIONS[i]
+		var ask: String = q[0]
+		out.append(_question(ask.replace("\n", " "), ask.replace("\n", " "), ask, q[1], q.slice(2)))
 	GameState.flags[SEEN] = seen
+	var adding_first := rng.randf() < 0.5
+	for k in PER_LESSON - SHAPES_PER_LESSON:
+		out.append(_sum(rng, (k % 2 == 0) == adding_first))
 	return out
+
+
+static func _question(ask: String, say: String, board: String, shape: String, answers: Array) -> Dictionary:
+	var right: String = answers[0]
+	var mixed := answers.duplicate()
+	mixed.shuffle()
+	return {"ask": ask, "say": say, "board": board, "shape": shape, "answers": mixed, "right": mixed.find(right)}
+
+
+## An addition with a carry (a 2- or 3-digit number and a 2-digit one), or a subtraction with a borrow; the wrong answers are
+## the slips a pupil makes: the carry or the borrow forgotten, ten too many or too few, one off.
+static func _sum(rng: RandomNumberGenerator, adding: bool) -> Dictionary:
+	var a := 0
+	var b := 0
+	var answer := 0
+	var slip := 0
+	if adding:
+		# The units add up past ten, so there is something to carry.
+		while true:
+			a = rng.randi_range(24, 680) if rng.randf() < 0.6 else rng.randi_range(24, 89)
+			b = rng.randi_range(13, 89)
+			if a % 10 + b % 10 >= 10 and a + b <= SUM_MAX:
+				break
+		answer = a + b
+		slip = answer - 10
+	else:
+		# The units of the second are bigger, so she has to borrow.
+		while true:
+			a = rng.randi_range(42, 900) if rng.randf() < 0.6 else rng.randi_range(42, 99)
+			b = rng.randi_range(13, mini(a - 10, 89))
+			if b % 10 > a % 10 and a - b > 0:
+				break
+		answer = a - b
+		# Taking the small unit from the big one instead of borrowing.
+		slip = _no_borrow(a, b)
+	var wrong: Array = []
+	for w: int in [slip, answer + 10, answer - 1, answer + 1, answer - 10]:
+		if w > 0 and w != answer and not wrong.has(w):
+			wrong.append(w)
+		if wrong.size() == 2:
+			break
+	var sign := "+" if adding else "−"
+	var word := "plus" if adding else "moins"
+	return _question("Combien font %d %s %d ?" % [a, sign, b], "Combien font %d %s %d ?" % [a, word, b],
+		"%d %s %d = ?" % [a, sign, b], "", [str(answer), str(wrong[0]), str(wrong[1])])
+
+
+## The answer of a subtraction done without borrowing: in each column the small digit taken from the big one.
+static func _no_borrow(a: int, b: int) -> int:
+	var out := 0
+	var place := 1
+	while a > 0 or b > 0:
+		out += absi(a % 10 - b % 10) * place
+		a /= 10
+		b /= 10
+		place *= 10
+	return out
+
+
+## Draws one of `SHAPES` in chalk on `canvas`, centred on `at`, about `size` px tall: a wobbly double stroke like chalk, and
+## the little squares of the right angles on the square and the rectangle.
+static func draw_shape(canvas: CanvasItem, kind: String, at: Vector2, size: float, color := Color(1, 1, 1, 0.92)) -> void:
+	var k := size / 100.0
+	var pts: Array = []
+	match kind:
+		"carre":
+			pts = [Vector2(-50, -50), Vector2(50, -50), Vector2(50, 50), Vector2(-50, 50)]
+		"rectangle":
+			pts = [Vector2(-90, -45), Vector2(90, -45), Vector2(90, 45), Vector2(-90, 45)]
+		"triangle":
+			pts = [Vector2(0, -52), Vector2(62, 48), Vector2(-62, 48)]
+		"losange":
+			pts = [Vector2(0, -52), Vector2(66, 0), Vector2(0, 52), Vector2(-66, 0)]
+		"trapeze":
+			pts = [Vector2(-45, -45), Vector2(45, -45), Vector2(90, 45), Vector2(-90, 45)]
+		"parallelogramme":
+			pts = [Vector2(-50, -45), Vector2(95, -45), Vector2(50, 45), Vector2(-95, 45)]
+		_:
+			return
+	var line := PackedVector2Array()
+	for p: Vector2 in pts:
+		line.append(at + p * k)
+	line.append(line[0])
+	var faint := Color(color, color.a * 0.35)
+	canvas.draw_polyline(line, color, maxf(3.0, 4.0 * k), true)
+	var shifted := PackedVector2Array()
+	for p: Vector2 in line:
+		shifted.append(p + Vector2(1.5, 1.2) * k)
+	canvas.draw_polyline(shifted, faint, maxf(1.5, 2.0 * k), true)
+	if kind in ["carre", "rectangle"]:
+		var m := 12.0 * k
+		for i in 4:
+			var c: Vector2 = line[i]
+			var to_next: Vector2 = (line[i + 1] - c).normalized() * m
+			var to_prev: Vector2 = (line[(i + 3) % 4] - c).normalized() * m
+			canvas.draw_polyline(PackedVector2Array([c + to_next, c + to_next + to_prev, c + to_prev]), faint, maxf(1.5, 2.0 * k), true)
 
 
 ## What the notebook says to do next.
