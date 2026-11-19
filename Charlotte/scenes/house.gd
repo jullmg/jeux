@@ -78,6 +78,13 @@ const XMAS_BOX_X := 1520.0
 var _xmas_tree: Sprite2D
 var _xmas_box: Sprite2D
 var _xmas_busy := false
+# Christmas (quest "noel"): what lies under the tree (Santa's plate, the presents), the first of the tree's glows (the
+# réveillon's veil goes just under them).
+const NOEL_TABLE := Rect2(1780.0, 440.0, 290.0, 170.0)
+var _noel_plate: Sprite2D
+var _noel_presents: Array[Sprite2D] = []
+var _xmas_glow_from := -1
+var _noel_busy := false
 
 # Charlotte's drawings stuck on the fridge door with magnets.
 var _fridge_art: Node2D
@@ -201,7 +208,8 @@ func _build_family() -> void:
 			or Quests.available("milk") or Quests.available("menage") or Quests.available("amies") \
 			or Quests.active("milk") and Carry.has("milk") or Cinema.step() == 1 \
 			or Quests.available(School.QUEST) or Quests.available(Party.QUEST) and School.step() == 0 \
-			or Snowman.needs("boutons") and not Carry.busy())
+			or Snowman.needs("boutons") and not Carry.busy() \
+			or Christmas.can_start() or Christmas.step() == 1 and Carry.has("lettre"))
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
 		return Quests.available("hamster") or Quests.available("plants") or Quests.available("chips") \
 			or Quests.active("chips") and Carry.has("chips") or Snowman.needs("tuque") and not Carry.busy() \
@@ -248,6 +256,25 @@ func _talk_to_mom() -> void:
 		_say(_mom, "Amuse-toi bien, ma chouette !\nReviens quand ton sac sera plein.", 400.0, 3.5)
 	elif Halloween.step() == 1:
 		_say(_mom, "Ton déguisement est dans ta commode,\nma chouette ! Vas-y !", 400.0, 3.5)
+	elif Christmas.step() == 1 and Carry.has("lettre"):
+		_letter_to_mom()
+	elif Christmas.step() == 1:
+		_say(_mom, "Ta lettre au père Noël, ma chouette !\nÀ ton bureau, dans ta chambre.", 400.0, 3.2)
+	elif Christmas.step() == 2 and not Carry.has("biscuits"):
+		_mom.express("happy", 2.0)
+		_say(_mom, "On fait les biscuits ? Viens au comptoir,\nà côté du frigo !", 400.0, 3.2)
+	elif Christmas.step() == 2:
+		_say(_mom, "Mets-les sous le sapin, dans le salon !", 380.0)
+	elif Christmas.step() == 3:
+		_say(_mom, "Viens à table, c'est le réveillon !", 380.0)
+	elif Christmas.step() == 4:
+		_say(_mom, "Au lit, ma chouette ! Sinon le père Noël\npassera pas.", 400.0, 3.2)
+	elif Christmas.step() == 5:
+		_say(_mom, "Joyeux Noël, mon cœur !\nVa voir sous le sapin !", 380.0, 3.0)
+	elif Christmas.can_start() and Quests.start(Christmas.QUEST):
+		Christmas.set_step(1)
+		_mom.express("happy", 2.4)
+		_say(_mom, "Noël s'en vient, Chachoue ! As-tu écrit ta lettre\nau père Noël ? Va l'écrire à ton bureau.", 410.0, 4.0)
 	elif Snowman.needs("boutons"):
 		_give_for_snowman(_mom, "boutons", "Des boutons pour un bonhomme de neige ?\nTiens, ma vieille boîte à biscuits !", 400.0)
 	elif School.step() == 1:
@@ -358,14 +385,18 @@ func _build_xmas_tree() -> void:
 	_xmas_tree = _put(XmasTree.picture(XmasTree.choice(), wears), XMAS_X - XmasTree.W / 2.0 * XMAS_SCALE, 606.0 + 14.0, XMAS_SCALE, "floor")
 	if Quests.done(XmasTree.QUEST):
 		_xmas_lights()
+		_noel_under_tree()
 	elif XmasTree.step() == 3:
 		_xmas_box = _put(XmasTree.box(XmasTree.DECOS.size() - XmasTree.decos().size()), XMAS_BOX_X, 690.0, 0.9)
 
 
 func _build_xmas_spots() -> void:
-	if _xmas_tree == null or Quests.done(XmasTree.QUEST):
+	if _xmas_tree == null:
 		return
 	add_child(DoorSpot.make(Rect2(XMAS_X - 100.0, 300.0, 200.0, 320.0), _xmas_tree_clicked, XMAS_X - 140.0))
+	_build_noel_spots()
+	if Quests.done(XmasTree.QUEST):
+		return
 	add_child(QuestMark.make(Vector2(XMAS_X, 250.0), func() -> bool:
 		return Carry.has("deco") and _control.enabled and not _xmas_busy))
 	if _xmas_box:
@@ -394,7 +425,13 @@ func _take_deco() -> void:
 
 
 func _xmas_tree_clicked() -> void:
-	if _xmas_busy:
+	if _xmas_busy or _noel_busy:
+		return
+	if Christmas.step() == 2 and Carry.has("biscuits"):
+		_cookies_under_tree()
+		return
+	if Quests.done(XmasTree.QUEST):
+		_say(_charlotte, "Y est beau, notre sapin !" if Christmas.step() != 5 else "Les cadeaux ! Vite, je les ouvre !", 300.0)
 		return
 	if Carry.has("deco"):
 		var id := Carry.id()
@@ -477,6 +514,7 @@ func _the_star() -> void:
 # Its lights on: a warm glow on each bulb and a halo round the tree.
 func _xmas_lights() -> void:
 	var origin := _xmas_tree.position
+	_xmas_glow_from = get_child_count()
 	var colours := [Color(1.0, 0.35, 0.3), Color(1.0, 0.85, 0.3), Color(0.35, 0.65, 1.0), Color(0.4, 0.9, 0.5), Color(1.0, 0.55, 0.9)]
 	var i := 0
 	for p: Vector2 in XmasTree.bulbs(XmasTree.choice()):
@@ -484,6 +522,267 @@ func _xmas_lights() -> void:
 		i += 1
 	_glow(origin + XmasTree.top_of(XmasTree.choice()) * XMAS_SCALE, 46.0, Color(1.0, 0.9, 0.5, 0.55))
 	_glow(origin + Vector2(XmasTree.W / 2.0, XmasTree.H * 0.55) * XMAS_SCALE, 190.0, Color(1.0, 0.8, 0.5, 0.18))
+
+
+# ── Christmas ───────────────────────────────────────────────
+
+func _build_noel_spots() -> void:
+	# The kitchen counter, for the cookies.
+	add_child(DoorSpot.make(Rect2(KITCHEN_START + 120.0, 380.0, 190.0, 220.0), _bake, KITCHEN_START + 210.0))
+	add_child(QuestMark.make(Vector2(KITCHEN_START + 215.0, 330.0), func() -> bool:
+		return Christmas.step() == 2 and not Carry.has("biscuits") and _control.enabled and not _noel_busy))
+	add_child(QuestMark.make(Vector2(XMAS_X, 250.0), func() -> bool:
+		return Christmas.step() == 2 and Carry.has("biscuits") and _control.enabled))
+	# The dining table, for the réveillon.
+	add_child(DoorSpot.make(NOEL_TABLE, _reveillon, NOEL_TABLE.position.x - 30.0))
+	add_child(QuestMark.make(NOEL_TABLE.get_center() - Vector2(0, 110), func() -> bool:
+		return Christmas.step() == 3 and _control.enabled and not _noel_busy))
+	# The desk (the letter) and the bed (Christmas Eve).
+	add_child(QuestMark.make(Vector2(BEDROOM.x + 1260.0, 380.0), func() -> bool:
+		return Christmas.step() == 1 and not Carry.has("lettre") and _control.enabled))
+	add_child(QuestMark.make(Vector2(BEDROOM.x + 584.0, 340.0), func() -> bool:
+		return Christmas.step() == 4 and _control.enabled))
+
+
+# What lies under the tree: Santa's plate (full on Christmas Eve, crumbs and his note in the morning), and the presents.
+func _noel_under_tree() -> void:
+	if _xmas_tree == null:
+		return
+	var step := Christmas.step()
+	if _noel_plate == null and step >= 3:
+		_noel_plate = _put(Christmas.cookies(step >= 5), XMAS_X - 170.0, 676.0, 0.9)
+	elif _noel_plate and step >= 5:
+		_noel_plate.texture = Christmas.cookies(true)
+	if step == 5 and _noel_presents.is_empty():
+		for i in Christmas.PRESENTS.size():
+			var id: String = Christmas.PRESENTS[i][0]
+			var box := _put(Christmas.present(i, id in Christmas.opened()), XMAS_X - 40.0 + i * 92.0, 684.0, 0.85)
+			_noel_presents.append(box)
+			add_child(DoorSpot.make(Rect2(box.position, Vector2(85, 80)), _open_present.bind(i), box.position.x - 30.0))
+			add_child(QuestMark.make(box.position + Vector2(42, -30), func() -> bool:
+				return Christmas.step() == 5 and id not in Christmas.opened() and _control.enabled and not _noel_busy, 0.7))
+
+
+# The drawing pad on her desk, for the letter: when it is done it goes in an envelope, in her arms.
+func _write_to_santa() -> void:
+	if Carry.busy():
+		_say(_charlotte, Carry.FULL_HANDS, 300.0)
+		return
+	_control.enabled = false
+	var pad := DrawingPad.new()
+	pad.done_text = "Pour le père Noël !"
+	pad.closed.connect(func(drawing: Image) -> void:
+		_control.enabled = true
+		if drawing == null:
+			_say(_charlotte, "Je vais la finir tantôt…", 300.0)
+			return
+		Carry.take(_charlotte, "lettre")
+		Sfx.play("chime")
+		_charlotte.express("happy", 2.0)
+		_say(_charlotte, "Ma lettre est finie ! Je la donne à Maman.", 300.0)
+		Notebook.announce("step", "Ta lettre est prête ! Donne-la à Maman.", Christmas.HEADING))
+	add_child(pad)
+
+
+func _letter_to_mom() -> void:
+	Carry.put_down(_charlotte)
+	Christmas.set_step(2)
+	_mom.express("happy", 2.4)
+	_say(_mom, "Je vais la poster au Pôle Nord :\ncode postal H0H 0H0 !", 400.0, 3.4)
+	var more := create_tween()
+	more.tween_interval(3.6)
+	more.tween_callback(func() -> void:
+		_say(_mom, "Pis astheure, on fait des biscuits\npour le père Noël ! Viens au comptoir.", 400.0, 3.4)
+		Notebook.announce("step", "Fais des biscuits avec Maman, au comptoir de la cuisine !", Christmas.HEADING))
+
+
+# One step of the cookies at the counter, Maman beside her; the last one puts the plate and the milk in her arms.
+func _bake() -> void:
+	if Christmas.step() != 2 or _noel_busy or Carry.has("biscuits"):
+		return
+	var done := Christmas.baked()
+	if done >= Christmas.BAKE.size():
+		if Carry.take(_charlotte, "biscuits"):
+			_say(_charlotte, "L'assiette pis le verre de lait,\nsous le sapin !", 300.0)
+		else:
+			_say(_charlotte, Carry.FULL_HANDS, 300.0)
+		return
+	_noel_busy = true
+	_mom_routine.pause(6.0, _charlotte.position.x)
+	_charlotte.facing = 1
+	_charlotte.pet(1.2, 0.0)
+	Sfx.play("swoosh" if done < 2 else "pop", Vector2(KITCHEN_START + 215.0, 450.0))
+	var line: Array = Christmas.BAKE[done]
+	_say(_charlotte, line[0], 300.0)
+	GameState.flags[Christmas.BAKED] = done + 1
+	var more := create_tween()
+	more.tween_interval(2.0)
+	more.tween_callback(func() -> void:
+		_say(_mom, line[1], 380.0)
+		_noel_busy = false
+		if Christmas.baked() >= Christmas.BAKE.size():
+			Sfx.play("chime")
+			_treat(Christmas.cookies(), "Des biscuits pour le père Noël !", 0.4)
+			Carry.take(_charlotte, "biscuits"))
+
+
+func _cookies_under_tree() -> void:
+	_charlotte.facing = 1
+	_charlotte.pet(0.9, 0.4)
+	Carry.put_down(_charlotte)
+	Christmas.set_step(3)
+	_noel_under_tree()
+	Sfx.play("pop", Vector2(XMAS_X - 130.0, 640.0))
+	_say(_charlotte, "Voilà, père Noël ! Bon appétit !", 300.0)
+	Notebook.announce("step", "C'est le réveillon ! Va à table, dans le salon.", Christmas.HEADING)
+
+
+# The réveillon: the salon goes evening-dark round the lit tree, candles on the table, the family round it; then to bed.
+func _reveillon() -> void:
+	if Christmas.step() != 3 or _noel_busy:
+		return
+	_noel_busy = true
+	_control.enabled = false
+	_mom_routine.pause(40.0, NOEL_TABLE.get_center().x)
+	_dad_routine.pause(40.0, NOEL_TABLE.get_center().x)
+	var mom_was := _mom.position.x
+	var black := ColorRect.new()
+	black.color = Color(0, 0, 0, 0)
+	black.size = VIEW
+	var layer := CanvasLayer.new()
+	layer.layer = 49
+	layer.add_child(black)
+	add_child(layer)
+	var veil := Polygon2D.new()
+	var pie := Sprite2D.new()
+	var steps := create_tween()
+	steps.tween_property(black, "color:a", 1.0, 0.6)
+	steps.tween_callback(func() -> void:
+		# Evening: everything but the tree's lights and the candles under a night-blue veil.
+		veil.polygon = PackedVector2Array([Vector2(VESTIBULE_END, 0), Vector2(SALON_END, 0), Vector2(SALON_END, VIEW.y), Vector2(VESTIBULE_END, VIEW.y)])
+		veil.color = Color(0.04, 0.05, 0.16, 0.45)
+		add_child(veil)
+		if _xmas_glow_from >= 0:
+			move_child(veil, _xmas_glow_from)
+		pie.texture = Christmas.tourtiere()
+		pie.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		pie.position = Vector2(NOEL_TABLE.get_center().x, NOEL_TABLE.position.y + 30.0)
+		pie.scale = Vector2.ONE * 0.8
+		add_child(pie)
+		for cx in [NOEL_TABLE.position.x + 70.0, NOEL_TABLE.end.x - 70.0]:
+			_candle(Vector2(cx, NOEL_TABLE.position.y + 14.0), 70.0)
+		# Round the table, clear of the tree.
+		_mom.position.x = NOEL_TABLE.position.x + 40.0
+		_mom.facing = 1
+		_charlotte.position.x = NOEL_TABLE.position.x + 130.0
+		_charlotte.facing = 1
+		_dad.position.x = NOEL_TABLE.end.x + 40.0
+		_dad.facing = -1
+		for who: Character in [_mom, _charlotte, _dad]:
+			who.is_walking = false
+			who.modulate = Color(0.86, 0.84, 0.95)
+		_camera.position.x = NOEL_TABLE.get_center().x - 120.0)
+	steps.tween_property(black, "color:a", 0.0, 0.8)
+	for line: Array in Christmas.REVEILLON:
+		var who: Character = _dad if line[0] == 0 else (_mom if line[0] == 1 else _charlotte)
+		var height := 390.0 if line[0] == 0 else (380.0 if line[0] == 1 else 300.0)
+		steps.tween_callback(_say.bind(who, line[1], height, 3.2))
+		steps.tween_interval(3.4)
+		if line[1].begins_with("Pis une bûche"):
+			steps.tween_callback(func() -> void: _treat(Christmas.buche(), "Miam ! De la bûche de Noël !"))
+			steps.tween_interval(3.0)
+	steps.tween_property(black, "color:a", 1.0, 0.6)
+	steps.tween_callback(func() -> void:
+		veil.queue_free()
+		pie.queue_free()
+		_mom.position.x = mom_was
+		for who: Character in [_mom, _charlotte, _dad]:
+			who.modulate = Color.WHITE
+		Christmas.set_step(4)
+		Notebook.announce("step", "Au lit ! Le père Noël passe quand les enfants dorment.", Christmas.HEADING))
+	steps.tween_property(black, "color:a", 0.0, 0.6)
+	steps.tween_callback(func() -> void:
+		layer.queue_free()
+		_noel_busy = false
+		_control.enabled = true
+		_mom_routine.pause(0.1, _mom.position.x)
+		_dad_routine.pause(0.1, _dad.position.x))
+
+
+# Christmas morning: she opens a present; with the last one, merry Christmas all round and the quest is done.
+func _open_present(i: int) -> void:
+	var id: String = Christmas.PRESENTS[i][0]
+	if Christmas.step() != 5 or _noel_busy or id in Christmas.opened():
+		return
+	_charlotte.facing = 1
+	_charlotte.pet(0.9, 0.5)
+	Christmas.open_present(id)
+	_noel_presents[i].texture = Christmas.present(i, true)
+	Sfx.play("swoosh", _noel_presents[i].position)
+	_treat(Christmas.capybara_plush() if id == "capybara" else Christmas.crayons(), Christmas.PRESENTS[i][1], 0.2)
+	if Christmas.opened().size() < Christmas.PRESENTS.size():
+		return
+	_noel_busy = true
+	GameState.flags[Christmas.PLUSH] = true
+	var steps := create_tween()
+	steps.tween_interval(3.6)
+	steps.tween_callback(func() -> void:
+		_dad_routine.pause(8.0, _charlotte.position.x)
+		_dad.express("happy", 3.0)
+		_say(_dad, "Joyeux Noël, ma Chachoue !", 390.0, 2.8))
+	steps.tween_interval(3.0)
+	steps.tween_callback(func() -> void:
+		_charlotte.express("laugh", 2.4)
+		_say(_charlotte, "Joyeux Noël, Papa ! Merci, père Noël !", 300.0, 2.8))
+	steps.tween_interval(3.0)
+	steps.tween_callback(func() -> void:
+		Sfx.play("goodnight")
+		Quests.complete(Christmas.QUEST)
+		_noel_busy = false)
+
+
+## Santa's sleigh going by in the night sky, behind its reindeer, gold against the dark, a trail of sparkles behind.
+class _Sleigh:
+	extends Node2D
+	var _t := 0.0
+
+	func _process(delta: float) -> void:
+		_t += delta
+		if _t > 4.0:
+			queue_free()
+			return
+		queue_redraw()
+
+	func _draw() -> void:
+		var u := _t / 4.0
+		var at := Vector2(lerpf(1380.0, -260.0, u), 150.0 + sin(u * PI * 2.0) * 26.0 - u * 40.0)
+		var gold := Color(1.0, 0.86, 0.45, 0.95)
+		# The trail.
+		for k in 18:
+			var back := at + Vector2(130.0 + k * 22.0, -sin((u - k * 0.012) * PI * 2.0) * 10.0 + k * 1.5)
+			draw_circle(back, 3.0 - k * 0.14, Color(1.0, 0.95, 0.7, 0.8 - k * 0.04))
+		# The sleigh: its curled runner, its body, Santa's round shape and his sack.
+		draw_arc(at + Vector2(54, 18), 12.0, PI * 0.5, PI * 1.4, 10, gold, 3.0, true)
+		draw_line(at + Vector2(54, 30), at + Vector2(120, 30), gold, 3.0, true)
+		draw_colored_polygon(PackedVector2Array([at + Vector2(60, 26), at + Vector2(118, 26), at + Vector2(122, 4), at + Vector2(96, 8), at + Vector2(66, 10)]), gold)
+		draw_circle(at + Vector2(90, -4), 11.0, gold)
+		draw_circle(at + Vector2(90, -18), 7.0, gold)
+		draw_circle(at + Vector2(110, -6), 10.0, gold)
+		# The reins and four reindeer ahead, legs mid-leap.
+		draw_line(at + Vector2(62, 8), at + Vector2(-140, 0), Color(gold, 0.6), 1.5, true)
+		for r in 4:
+			var d := at + Vector2(30.0 - r * 46.0, sin(_t * 8.0 + r) * 3.0)
+			draw_set_transform(d, 0.0, Vector2(1.0, 0.55))
+			draw_circle(Vector2.ZERO, 12.0, gold)
+			draw_set_transform(Vector2.ZERO)
+			draw_circle(d + Vector2(-13, -8), 5.0, gold)
+			draw_line(d + Vector2(-14, -12), d + Vector2(-20, -22), gold, 2.0, true)
+			draw_line(d + Vector2(-12, -12), d + Vector2(-8, -22), gold, 2.0, true)
+			var kick := sin(_t * 10.0 + r) * 6.0
+			draw_line(d + Vector2(-8, 4), d + Vector2(-14 - kick, 16), gold, 2.0, true)
+			draw_line(d + Vector2(8, 4), d + Vector2(14 + kick, 16), gold, 2.0, true)
+			if r == 3:
+				draw_circle(d + Vector2(-18, -7), 2.6, Color(1.0, 0.3, 0.3, 1.0))
 
 
 # ── Papa's hockey night ─────────────────────────────────────
@@ -1244,7 +1543,8 @@ func _go_to_sleep() -> void:
 	dark.mouse_filter = Control.MOUSE_FILTER_STOP
 	night.add_child(dark)
 	var moon := _glow(Vector2(BEDROOM.x + 180.0, 280.0), 260.0, Color(0.6, 0.75, 1.0, 0.0))
-	var words := _night_label("Bonne nuit, Chachoue…", 40)
+	var christmas_eve := Christmas.step() == 4
+	var words := _night_label("Bonne nuit, Chachoue…" if not christmas_eve else "Bonne nuit… le père Noël s'en vient !", 40)
 	words.position.y = -170.0
 	night.add_child(words)
 	# The z's rise from her pillow.
@@ -1262,6 +1562,14 @@ func _go_to_sleep() -> void:
 	tween.tween_property(words, "modulate:a", 1.0, 0.6)
 	tween.parallel().tween_property(zs, "modulate:a", 1.0, 0.6)
 	tween.parallel().tween_property(zs, "position:y", pillow.y - 110.0, 2.6)
+	if christmas_eve:
+		# Sleigh bells, and Santa's sleigh going by in the night sky.
+		tween.tween_callback(func() -> void:
+			var sleigh := _Sleigh.new()
+			night.add_child(sleigh)
+			for k in 3:
+				get_tree().create_timer(k * 0.7).timeout.connect(func() -> void: Sfx.play("bell", Vector2.INF, -4.0, 1.0 + k * 0.08)))
+		tween.tween_interval(4.2)
 	tween.tween_property(dark, "color", Color(0.02, 0.02, 0.05, 1.0), 0.9)
 	tween.parallel().tween_property(words, "modulate:a", 0.0, 0.5)
 	tween.parallel().tween_property(zs, "modulate:a", 0.0, 0.5)
@@ -1287,7 +1595,13 @@ func _go_to_sleep() -> void:
 			# It snowed in the night: now it falls past the windows too.
 			for snow in _window_snows:
 				snow.visible = Season.is_winter()
+		if christmas_eve:
+			Christmas.set_step(5)
+			_noel_under_tree()
+			Notebook.announce("step", "C'est le matin de Noël ! Va voir sous le sapin.", Christmas.HEADING)
 		words.text = "Le lendemain matin… il a neigé !" if halloween_over else ("Le lendemain matin… quelle tempête !" if storm else "Le lendemain matin…")
+		if christmas_eve:
+			words.text = "Le matin de Noël !"
 		words.position.y = 0.0
 		moon.queue_free()
 		_charlotte.position.x = BEDROOM.x + 840.0
@@ -1392,6 +1706,9 @@ func _open_books() -> void:
 
 # Her desk does two things, so it asks: her homework, or drawing.
 func _use_desk() -> void:
+	if Christmas.step() == 1 and not Carry.has("lettre"):
+		_write_to_santa()
+		return
 	_control.enabled = false
 	var left := Homework.exercises().size() - Homework.done_count()
 	var note := "Tout est fait !" if left == 0 else "Il te reste %d question%s" % [left, "s" if left > 1 else ""]
@@ -1611,6 +1928,9 @@ func _build_bedroom() -> void:
 		add_child(star)
 	_plant("chambre", "lily", x + 272.0, 606.0, 0.5)
 	_put(InteriorArt.bed(), x + 360.0, 608.0, 0.8, "floor")
+	# Her capybara plush from Christmas, sitting on her bed by the pillow.
+	if Christmas.has_plush():
+		_put(Christmas.capybara_plush(), x + 610.0, 512.0, 0.85)
 	# Her hiding place: the shoebox of junk food, half pulled out from under the bed (it laps over the bed's skirt,
 	# which is what says "under there"), and a little in the shade.
 	_put(InteriorArt.stash_box(), x + 575.0, 634.0, 0.7, "floor").modulate = Color(0.86, 0.82, 0.84)

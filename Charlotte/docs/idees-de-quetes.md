@@ -26,7 +26,8 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
     tempête au coucher, les quatre tas sur le perron et les marches avec Papa, puis la souffleuse et son camion)
 14. ~~**Faire le sapin de Noël**~~ (fait : la quête `sapin`, `world/xmas_tree.gd` et `world/tree_sale.gd` ; la vente de sapins
     dans la cour d'école avec Papa, puis les décorations une à une et l'étoile)
-15. **Noël** (Julien, 2026-11-19) : la grande quête de l'hiver, après le sapin, comme l'Halloween l'est pour l'automne.
+15. ~~**Noël**~~ (fait : la quête `noel`, `world/christmas.gd` ; la lettre au père Noël, les biscuits avec Maman, le réveillon,
+    le traîneau dans la nuit, les cadeaux du matin de Noël)
 
 ## Notes de départ (à préciser avec Julien avant de programmer)
 
@@ -41,9 +42,5 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 - Alphée et Constance Turcotte (`world/twins.gd`) ont déjà donné la cachette et le livre perdu ; la soirée cinéma et la fête leur iraient bien aussi.
 - Soirée cinéma : le dépanneur vend déjà de quoi grignoter (`Shop._buy`, `Shop.PRICES`) et l'argent de poche existe (`GameState.money`) ; il faudrait que Maman ou Papa lui en donne (nouveau), et un lieu où regarder le film (la télé du corridor, `TvScreen`).
 - La fête : il n'y a pas encore de magasin de cadeaux, et Maman ne sort pas encore de la maison (elle marche seulement à l'intérieur, `FamilyRoutine`). À décider.
-- Noël : à préciser avec Julien. Pistes : une longue quête en étapes comme l'Halloween (`world/halloween.gd`) ; la lettre au
-  père Noël (le cahier à dessin ou l'écriture), les biscuits pour lui avec Maman, le réveillon le soir (la nuit déjà faite pour
-  l'Halloween), les cadeaux sous le sapin au matin, les amis qui passent dire « Joyeux Noël ». Les façades ont déjà leurs
-  lumières de Noël et leurs couronnes en hiver.
 - Le livre perdu (fait) : Constance le demande, il est dans le croque-livre de la ruelle verte (`ruelle.gd` `BOOK_LANE`), Charlotte le porte dans ses bras
   (`Carry` « book », `LaneArt.lost_book`) et le `BookReader` s'ouvre sur « Minou et la lune » quand elle le rapporte.

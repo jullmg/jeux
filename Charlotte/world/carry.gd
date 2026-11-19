@@ -2,7 +2,7 @@ class_name Carry
 extends RefCounted
 ## Everything Charlotte holds in her arms, behind ONE saved indicator: `GameState.flags.carried` = "" (hands free), or
 ## "<kind>" / "<kind>:<id>": "milk" (Mom's pint), "can" (the watering can), "cat:<quest id>" (a lost cat), "toy:<item>" (a thing
-## from her bedroom floor while she tidies), "book" (Constance's), "chips" (Papa's Ruffles), "snacks" (the movie night's bag), "drawing" (the one she made at the service de garde for the fridge), "gift" (Alyzée's birthday present), "bonhomme:<part>" (the carrot, the tin of buttons or the tuque for the snowman), "traineau" (the sled the service de garde lends her), "pelle" (her little snow shovel, the morning after the storm), "deco:<id>" (a decoration for the Christmas tree). One thing at a
+## from her bedroom floor while she tidies), "book" (Constance's), "chips" (Papa's Ruffles), "snacks" (the movie night's bag), "drawing" (the one she made at the service de garde for the fridge), "gift" (Alyzée's birthday present), "bonhomme:<part>" (the carrot, the tin of buttons or the tuque for the snowman), "traineau" (the sled the service de garde lends her), "pelle" (her little snow shovel, the morning after the storm), "deco:<id>" (a decoration for the Christmas tree), "lettre" (her letter to Santa), "biscuits" (the cookies and milk for Santa). One thing at a
 ## time, enforced here for every quest:
 ##   - `Carry.take(who, kind, id)` is the only way to put something in her arms; it refuses (returns false) when her hands
 ##     are not free, so the caller just says `Carry.FULL_HANDS`;
@@ -215,6 +215,16 @@ static func _build(kind: String, id: String) -> Node2D:
 			deco.offset = Vector2(0, -12)
 			deco.name = "deco"
 			return deco
+		"lettre", "biscuits":
+			# Her letter to Santa, or his plate of cookies and glass of milk, held up in front of her.
+			var thing := Sprite2D.new()
+			thing.texture = Christmas.letter() if kind == "lettre" else Christmas.cookies()
+			thing.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			thing.scale = Vector2.ONE * (1.2 if kind == "lettre" else 1.1)
+			thing.offset = Vector2(0, -14)
+			thing.name = kind
+			thing.set_meta("keep_upright", true)
+			return thing
 		"toy":
 			# Something from her bedroom floor (the tidying quest): the same picture as on the floor, bigger in her arms.
 			var toy := Sprite2D.new()
