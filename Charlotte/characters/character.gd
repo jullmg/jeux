@@ -107,6 +107,8 @@ var fidget_moves: Array[String] = ["wave", "hop", "stretch", "look", "look"]
 ## Charlotte's own list: standing still a few seconds, she is as likely as not to drift off "dans la lune", the way
 ## her father does over his chores.
 const CHARLOTTE_FIDGETS: Array[String] = ["wave", "hop", "stretch", "look", "look", "daydream", "daydream"]
+## She only falls "dans la lune" after standing still this long (seconds); before that she picks another gesture.
+const DAYDREAM_AFTER := 25.0
 ## The face: `expression` forces one ("" = whatever she is doing, see `_auto_expression`); `express(name, seconds)` shows one for a moment
 ## (talking, a treat, an oops). Each is an eyes + brows + mouth picture (`EXPRESSIONS`), swapped on the face layers.
 var expression := ""
@@ -377,6 +379,9 @@ func _fidget(delta: float) -> void:
 	_idle += delta
 	if _idle >= _next_gesture:
 		_gesture = fidget_moves[randi() % fidget_moves.size()]
+		if _gesture == "daydream" and _idle < DAYDREAM_AFTER:
+			var awake := fidget_moves.filter(func(g: String) -> bool: return g != "daydream")
+			_gesture = awake[randi() % awake.size()] if not awake.is_empty() else "look"
 		_gesture_len = {"wave": 1.6, "hop": 0.9, "stretch": 1.4, "look": 2.2, "daydream": 5.5}[_gesture]
 		_gesture_t = _gesture_len
 		_next_gesture = _idle + randf_range(7.0, 14.0)
