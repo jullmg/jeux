@@ -197,10 +197,10 @@ func _fill() -> void:
 	var next := Quests.ORDER.filter(func(id: String) -> bool: return Quests.available(id))
 	var later := Quests.ORDER.size() - on.size() - done.size() - next.size()
 	_section("En cours", on, "active", "title", "hint")
-	_section("Réussies  ★ %d" % done.size(), done, "done", "title", "")
 	_section("À découvrir", next, "unknown", "find", "")
 	if later > 0:
 		_list.add_child(_label("… et d'autres quand tu seras plus grande !", 17, Color(INK, 0.6)))
+	_section("Réussies  ★ %d" % done.size(), done, "done", "title", "")
 	if on.is_empty() and done.is_empty() and next.is_empty():
 		_list.add_child(_label("Rien pour l'instant. Va jouer dehors !", 20, INK))
 
