@@ -180,13 +180,14 @@ static func billie() -> CharacterLook:
 	return look
 
 
-## Alyzée, 7, new at Charlotte's school (no photo: Julien asked for black hair and her height, the rest is made up): black hair
-## in two buns, warm brown eyes, a plum dress with little stars over purple tights, red sneakers. Charlotte's own rig ("child").
+## Alyzée, 7, new at Charlotte's school (no photo: Julien asked for black hair and her height, then very pale skin and long hair;
+## the rest is made up): long straight black hair, very fair skin, warm brown eyes, a plum dress with little stars over purple
+## tights, red sneakers. Charlotte's own rig ("child").
 static func alyzee() -> CharacterLook:
 	var look := CharacterLook.new()
 	look.age = "child"
-	look.skin = Color("#EBC3A2")
-	look.hair_style = "space_buns"
+	look.skin = Color("#FCEDE4")
+	look.hair_style = "long_straight"
 	look.hair_color = Color("#16110F")
 	look.eye_color = Color("#4A2F1C")
 	look.lashes = true

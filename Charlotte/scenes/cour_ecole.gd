@@ -23,9 +23,8 @@ const HOOP_X := 2190.0
 ## Where the classmates stand, a little behind Charlotte (so she passes in front of them), and the yard's own people.
 const KID_Y := 624.0
 const START_X := 340.0
-const HOME := "res://scenes/house.tscn"
-## The vestibule, where she comes in at home.
-const HOME_X := 300.0
+## How long the children play before the bell on an ordinary school day (seconds).
+const RECESS := 35.0
 
 const SUPERVISOR_LINES := ["Pas de bousculade, les amis !", "On reste dans la cour, hein !", "Attention en haut de la glissoire !"]
 const WINTER_SUPERVISOR := "Pas de balles de neige, les amis !"
@@ -35,6 +34,7 @@ var _kids: Array[_Kid] = []
 var _supervisor: _Kid
 var _mom: Character
 var _bell_rung := false
+var _recess := 0.0
 
 
 func _ready() -> void:
@@ -97,8 +97,13 @@ func _ready() -> void:
 		_save_screenshot(shot)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_follow_charlotte()
+	# On an ordinary school day (Alyzée is already her friend) the bell rings by itself after a while of play.
+	if School.step() == 2 and Alyzee.met() and not _bell_rung and _control.enabled and not _control.hands_off:
+		_recess += delta
+		if _recess > RECESS:
+			_ring_the_bell()
 
 
 # ── What stands in the yard ─────────────────────────────────────
@@ -230,13 +235,14 @@ func _build_doors() -> void:
 	add_child(DoorSpot.make(Rect2(DOOR_X - 60.0, WALL_FOOT - 140.0, 120.0, 150.0), func() -> void:
 		if not _bell_rung:
 			_charlotte_says("La cloche a pas encore sonné !\nC'est encore la récré !")
-		, DOOR_X))
+			return
+		_go_to_class(), DOOR_X))
 	add_child(QuestMark.make(Vector2(DOOR_X, WALL_FOOT - 170.0), func() -> bool: return _bell_rung and _control.enabled))
 
 
 func _leave_by_gate() -> void:
 	if not School.can_leave():
-		_charlotte_says("Maman vient me chercher après l'école.\nEn attendant, je vais jouer !")
+		_charlotte_says("Je reste à l'école jusqu'à la fin de la journée.\nC'est Papa qui vient me chercher !")
 		return
 	_go_home()
 
@@ -291,29 +297,36 @@ func _ring_the_bell() -> void:
 		for i in _kids.size():
 			_kids[i].go_in(DOOR_X + 40.0 + i * 16.0))
 	steps.tween_interval(3.0)
+	var first := School.first_day()
 	steps.tween_callback(func() -> void:
 		_alyzee.kid.facing = 1 if _charlotte.position.x > _alyzee.position.x else -1
-		_alyzee.say("Viens, Chachoue !\nOn s'assoit ensemble en classe ?"))
+		_alyzee.say("Viens, Chachoue !\nOn s'assoit ensemble en classe ?" if first else "Viens, Chachoue ! On rentre !"))
 	steps.tween_interval(3.2)
-	steps.tween_callback(func() -> void:
-		_charlotte.facing = 1 if _alyzee.position.x > _charlotte.position.x else -1
-		_charlotte_says("Oui ! T'es mon amie, astheure !"))
-	steps.tween_interval(2.6)
+	if first:
+		steps.tween_callback(func() -> void:
+			_charlotte.facing = 1 if _alyzee.position.x > _charlotte.position.x else -1
+			_charlotte_says("Oui ! T'es mon amie, astheure !"))
+		steps.tween_interval(2.6)
 	steps.tween_callback(func() -> void:
 		_control.hands_off = false
 		_charlotte_says("On rentre en classe !"))
 
 
-# Through the door (after the bell) or the gate: the school day passes, and Maman takes her home.
+# In through the pupils' door after the bell: the classroom (step 3).
+func _go_to_class() -> void:
+	_control.enabled = false
+	Sfx.play("door")
+	if School.step() == 2:
+		School.set_step(3)
+	Transition.change_scene(self, School.CLASS)
+
+
+# Out by the gate when it isn't a school day (only the debug menu brings her here then): home.
 func _go_home() -> void:
 	_control.enabled = false
 	Sfx.play("door")
-	# At home she tells Maman about her new friend, and that finishes the quest (`house.gd _tell_mom_about_school`).
-	if School.step() == 2:
-		School.set_step(3)
-		School.just_home = true
-	Transition.inside_x = HOME_X
-	Transition.change_scene_saying(self, HOME, "Après l'école, Maman vient te chercher…")
+	Transition.inside_x = School.HOME_X
+	Transition.change_scene_saying(self, School.HOME, "Tu rentres à la maison…", 1.2)
 
 
 func _charlotte_says(text: String) -> void:

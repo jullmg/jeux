@@ -540,7 +540,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `shaders/character_shade.gdshader` (lit from the left, follows `facing`), hair strands clipped to each hairstyle (`CharacterArt._strands`), clothing folds
   (dress gathers and hem, top creases, elbow and knee creases), idle gestures when `fidgets` (wave, hop,
   stretch, look round, and for Charlotte **daydream** — `Character.CHARLOTTE_FIDGETS`, set by `StreetScene._spawn_charlotte`
-  and `Interior._spawn_charlotte`: standing still 5 to 10 seconds she falls "dans la lune" like her father, blank face,
+  and `Interior._spawn_charlotte`: standing still `Character.DAYDREAM_AFTER` (25) seconds or more she may fall "dans la lune" like her father, blank face,
   head up, the loose-armed pose, and the little crescent moon of `world/dream_moon.gd` (`DreamMoon`, shared with
   `FamilyRoutine`'s "daydream" task) floating in front of her for about five seconds); `set_look()` rebuilds it), `PlayerControl` (keys and
   click/tap-to-walk, walks to interactables and calls them; used by the street and the house), `CharacterArt` (generates the
@@ -730,14 +730,22 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     dimmed, the TV on `TvShows` "film" (« Le petit renard des neiges », an original cartoon, `FILM_LENGTH`, not in `ALL`),
     a few lines (`MOVIE_LINES`), then the quest is done and the twins go home. `Shop._errand_marks` puts the "!" over the
     chips and the candy while an errand needs them. `Shop._buy(…, then)` runs `then` instead of the stash for quest purchases.
-  - ecole, a day at school (`world/school.gd`, `School`, steps in `flags.ecole_step`): Maman gives it ("c'est l'heure de
-    l'école"), then waits at the front door; on step 1 the vestibule's door leads to the schoolyard instead of the street
-    (`Transition.change_scene_saying`: "Maman t'accompagne à l'école…" on the black), since at 7 she may not cross Dandurand
-    alone. In the yard (`scenes/cour_ecole.gd`) Maman says goodbye and leaves by the gate (step 2); Alyzée sits alone on the
-    bench, a "!" over her; the meeting and a game of tag (`world/alyzee.gd`, `Alyzee`, `flags.met_alyzee`) end with the bell
-    (`Sfx` "school_bell"), the classmates line up and go in, Alyzée asks her to sit with her in class; the door (or the gate)
-    then takes her home ("Après l'école, Maman vient te chercher…", step 3, `School.just_home`) and telling Maman about her new
-    friend in the kitchen finishes it (`house.gd _tell_mom_about_school`). The gate refuses until she has met Alyzée.
+  - ecole, the first day at school, then school every day (`world/school.gd`, `School`; the day's step in `flags.ecole_step`):
+    1. Maman gives it, then waits at the front door; on step 1 the vestibule's door leads to the schoolyard instead of the
+       street (`Transition.change_scene_saying`: "Maman t'accompagne à l'école…" on the black), since at 7 she may not cross
+       Dandurand alone; 2. the yard (`scenes/cour_ecole.gd`): Maman says goodbye and leaves by the gate; the first day Alyzée
+       sits alone on the bench ("!"), they meet and play tag (`world/alyzee.gd`, `Alyzee`, `flags.met_alyzee`), and that rings
+       the bell (`Sfx` "school_bell"); on later days the bell rings after `RECESS` seconds; the classmates line up and go in,
+       and the pupils' door takes her in; 3. the class (`scenes/classe.gd`): Madame Nadia (invented: bun, round glasses,
+       mustard cardigan) at the board with today's date in chalk; Charlotte sits at her desk beside Alyzée's (`Seat`, "!") and
+       the lesson starts: the first day the class welcomes Alyzée, then three questions (`School.LESSONS`, written for school,
+       not the homework; `School.lesson` picks ones not seen yet, `flags.ecole_seen`), on the board, read out by `Voice`,
+       answered on a `ChoiceCard` ("Presque ! Essaie encore." when wrong), a sticker (`flags.ecole_stickers`), the bell;
+       4. the service de garde (`scenes/service_de_garde.gd`): Jade the educator, a craft of the season, blocks that grow
+       and tumble, a snack, snakes and ladders with Alyzée; Papa comes `PAPA_AFTER` seconds after her first activity (or
+       `PAPA_LATEST`), she tells him about her day (the first day: her new friend, and the quest is done) and "Papa te ramène
+       à la maison…". After the first day the front door asks once a day "À l'école" / "Jouer dehors" (`School.available_today`,
+       `flags.ecole_today_done`, cleared at bedtime). Art: `world/class_art.gd` (`ClassArt`).
   - A step of a long quest announces itself with `Notebook.announce("step", words, heading)`: the heading names its quest
     ("🍿  Soirée cinéma", "🏫  L'école"; Halloween's when none is given).
 - The twins' house, `duplex_jumelles` (generator entry, 5716 6e Avenue, `reference/maison_jumelles/`, replaces `plex_08` in `main.gd`'s layout, the second house before the Holt lane): warm brown brick with dark mortar, black-framed windows under brick arches, a glass door (door style `glass`), white concrete balcony, black open-tread stair curving to the right, low black fence; Halloween decorations kept.
@@ -752,9 +760,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   snow in winter, with one long snowbank along the wall shovelled clear at the door), the climbing frame and slide, the hoop
   (or in winter the plough's snow hill with a child sliding down it), the bench. Classmates (`_Kid`: "tag" pair, "rope",
   "ball", "slide", "idle", each with two lines) and a supervisor by the door. Reached only through the quest (and the debug
-  menu, "Cour d'école"); the map puts her on the "cour d'école".
-- Alyzée (`CharacterLook.alyzee()`, no photo: Julien asked for black hair and Charlotte's height, rig "child"; two black buns,
-  plum star dress, purple tights, red sneakers), new at school; on the notebook's friends page once met. **Her later quests go
+  menu, "Cour d'école"); the map puts her on the "cour d'école". Its gate only lets her out when it isn't a school day.
+- Alyzée (`CharacterLook.alyzee()`, no photo: Julien asked for black hair, Charlotte's height, very pale skin and long hair,
+  rig "child"; long straight black hair, plum star dress, purple tights, red sneakers), new at school; on the notebook's friends page once met. **Her later quests go
   in `Alyzee.interact`.**
 - Julien's list of quest ideas for later is in `docs/idees-de-quetes.md` (pizza hidden by a squirrel, jogging with Dad,
   buying sour-cream-and-onion chips at the dépanneur…): read it before inventing new quests, and tick them off there.

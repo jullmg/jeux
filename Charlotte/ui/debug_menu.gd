@@ -17,7 +17,7 @@ var skip_look := false
 ## The story flags each quest leaves behind, cleared with it.
 ## Story flags that belong to no quest, cleared by "Tout effacer".
 const OTHER_FLAGS := ["met_twins", "met_billie_auguste", "devoirs", "candy_bag_kind"]
-const QUEST_FLAGS := {"amies": ["met_twins", "met_billie_auguste"], "cachette": ["cachette_found"], "livre": ["book_found", "croque_checked"], "halloween": ["halloween_step", "candy", "candy_bag", "candy_bag_kind", "halloween_doors", "halloween_counted", "halloween_total", "winter_greeting"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"], "cinema": ["cinema_step", "cinema_snacks"], "ecole": ["ecole_step", "met_alyzee"]}
+const QUEST_FLAGS := {"amies": ["met_twins", "met_billie_auguste"], "cachette": ["cachette_found"], "livre": ["book_found", "croque_checked"], "halloween": ["halloween_step", "candy", "candy_bag", "candy_bag_kind", "halloween_doors", "halloween_counted", "halloween_total", "winter_greeting"], "hamster": ["hamster_fed"], "menage": ["tidied"], "plants": ["watered"], "cinema": ["cinema_step", "cinema_snacks"], "ecole": ["ecole_step", "met_alyzee", "ecole_today_done", "ecole_seen", "ecole_stickers"]}
 ## What a quest puts in her arms (a lost cat's quest id is the cat's id, handled by `Carry.cat_id()`).
 const QUEST_CARRIES := {"milk": "milk", "plants": "can", "menage": "toy", "livre": "book", "chips": "chips", "cinema": "snacks"}
 
@@ -75,7 +75,6 @@ const PLACES := [
 	{"name": "Milieu", "scene": "cinquieme"},
 	{"name": "Coin Dandurand, au nord", "scene": "cinquieme", "arrive": "5e_from_dandurand"},
 	{"name": "Coin Dandurand, au sud (l'école)", "scene": "cinquieme", "arrive": "5e_from_5e_ouest_dandurand_sud"},
-	{"name": "Cour d'école (Alyzée)", "scene": "cour_ecole", "x": 1100.0},
 	{"name": "Coin Masson, au nord", "scene": "cinquieme", "arrive": "5e_from_masson"},
 	{"name": "Coin Masson, au sud", "scene": "cinquieme", "arrive": "5e_from_5e_ouest_masson_sud"},
 	{"sub": "5e Avenue, côté ouest"},
@@ -86,6 +85,10 @@ const PLACES := [
 	{"name": "Coin Dandurand, au sud", "scene": "cinquieme_ouest", "arrive": "5e_ouest_from_5e_dandurand_sud"},
 	{"name": "Coin Masson, au nord", "scene": "cinquieme_ouest", "arrive": "5e_ouest_from_masson"},
 	{"name": "Coin Masson, au sud", "scene": "cinquieme_ouest", "arrive": "5e_ouest_from_5e_masson_sud"},
+	{"sub": "L'école Saint-Jean-de-Brébeuf"},
+	{"name": "Cour d'école (Alyzée)", "scene": "cour_ecole", "x": 1100.0},
+	{"name": "Classe de Madame Nadia", "scene": "classe", "x": 900.0},
+	{"name": "Service de garde", "scene": "service_de_garde", "x": 1200.0},
 	{"group": "Rue Masson"},
 	{"sub": "Côté nord (numéros impairs)"},
 	{"name": "Coin D'Iberville", "scene": "masson_impair", "arrive": "masson_impair_from_rue_iberville_iberville_molson"},
@@ -152,7 +155,7 @@ const PLACES := [
 	{"name": "Écran titre", "scene": "intro"},
 ]
 ## The scenes that are indoors: a place's `x` there is where she stands inside (Transition.inside_x), not on a street.
-const INTERIORS: Array[String] = ["house", "depanneur", "ohbon", "dollarama", "fraichement_bon", "jean_coutu"]
+const INTERIORS: Array[String] = ["house", "depanneur", "ohbon", "dollarama", "fraichement_bon", "jean_coutu", "classe", "service_de_garde"]
 ## Scenes that are not places to go to (listed nowhere on purpose).
 const NOT_PLACES: Array[String] = []
 

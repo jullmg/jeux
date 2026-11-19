@@ -201,6 +201,9 @@ func _here() -> Dictionary:
 			return {"at": Vector2(lerpf(WALK_E, WALK_W, f), LANE_T), "say": "Je suis dans la ruelle !"}
 		"house":
 			return {"at": Vector2(HOUSE_X, HOUSE_Y - 10.0), "say": "Je suis chez moi !"}
+		"classe", "service_de_garde":
+			# Inside the school, on Dandurand.
+			return {"at": Vector2(LANE_X + 30.0, DAND_Y + 120.0), "say": "Je suis à l'école !"}
 		"cour_ecole":
 			# The schoolyard, where the map writes "cour d'école", south of Dandurand.
 			return {"at": Vector2(LANE_X + 30.0, DAND_Y + 345.0), "say": "Je suis à l'école !"}
