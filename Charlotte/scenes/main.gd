@@ -77,7 +77,8 @@ func _build_cross_streets() -> void:
 	dandurand.school = true
 	dandurand.guard = true
 	dandurand.left_walls = [
-		{"to": 2.6, "top": _house_top("ecole_6e"), "kind": "school", "color": Color("#A9472F")},
+		# The school's front on Dandurand (`ecole`), its real facade laid along the street.
+		{"to": _wall_depth("ecole"), "top": _house_top("ecole_6e"), "kind": "school", "color": Color("#A9472F"), "tex": _tex("ecole")},
 		{"to": CrossStreet.FAR, "top": 330.0, "kind": "plex", "color": Color("#9C5A44")},
 	]
 	# Along Dandurand the first wall is Xin-Xin's own front (its door, its sign, its Coors logos' band), not a plain side: it keeps

@@ -892,9 +892,10 @@ const HOUSES := [
 		"bricks": ["#7A4A3A", "#6E4234", "#865243", "#5F392D", "#8E5A48"], "mortar": "#C2B6A8",
 		"parapet": "flat", "windows": [[110.0, 90.0], [320.0, 90.0]], "basement": [], "downspout": 40.0,
 	},
-	# Across Rue Dandurand: école Saint-Jean-de-Brébeuf, seen from 6e Avenue (its side).
+	# École Saint-Jean-de-Brébeuf's front on Rue Dandurand, at its real length: the vistas down Dandurand from 6e and 5e lay it
+	# along the street (`_school`).
 	{
-		"name": "ecole", "kind": "school", "width": 1400.0, "floors": 3, "top": 104.0,
+		"name": "ecole", "kind": "school", "width": 3000.0, "floors": 3, "top": 87.0,
 		"bricks": ["#A9472F", "#9C4029", "#B44F35", "#943B26", "#B85A3E"], "mortar": "#C9B7A4",
 		"trim": "#ECE8E0", "trim_dark": "#A9A398", "lintel": "#D8CFC0", "lintel_dark": "#A39A8A",
 		"basement": [120.0, 420.0, 720.0], "fence": "black", "halloween": false,
@@ -3997,146 +3998,437 @@ func _storefront() -> void:
 	_front_steps(cx)
 
 
-# A big red-brick school (from reference/coin_dandurand/School_on_dandurand.jpg): a long wing of tall paired windows
-# and, near the corner, a tall pavilion with a diamond lattice in the brick. Stone sills and bands,
-# green copper cornices, a small cross on the parapet.
+# École Saint-Jean-de-Brébeuf's front on Rue Dandurand (reference/coin_dandurand/School_on_dandurand.jpg), drawn at its real
+# length (it runs from 5e to 6e), since the vistas down Dandurand from both avenues lay it along the street. Left to right: a
+# tall pavilion, a lower link set back, the long centre, the other link and the other pavilion.
+# - The pavilions: blank brick with the great diamond lattice laid in relief in a sunk panel, brick corner piers with stone
+#   caps and plinths, a stone band and the green copper cornice.
+# - The links: two floors of windows in the shade, a copper cap, the red basement door.
+# - The centre: thirteen bays between brick pilasters, a tall white double-hung window in each under a flat arch of bricks on
+#   end with its stone ears and sill, a panel of patterned brick under each upper window, the frieze with a stone block over
+#   each pilaster, the copper cornice, and above it the brick parapet with its copper balustrade and the stone cartouche under
+#   the copper cross.
+# - The entrance in the middle bay: stone surround and cornice, the red door, up its flight of steps with black handrails;
+#   over it the window in its stone frame, where the Québec flag hangs from its pole.
+# - Bottom: the stone water table, a band of basket-weave brick, the grey stone basement and its red-orange windows, the
+#   black iron fence along the sidewalk. Aged like the rest of the street (`_masson_wear`, `_window_under`), one block at a time.
 func _school() -> void:
-	# École Saint-Jean-de-Brébeuf, from reference/coin_dandurand/School_on_dandurand.jpg: a long red-brick block between two
-	# blank end pavilions patterned with a brick diamond lattice, a green copper cornice stepping up over them, the centre
-	# entrance with its stone surround, red doors, steps and flagpole, and the cross on the parapet over it.
-	var top := _top()
-	var copper := "#4E8C7A"
+	var copper := "#5A9A84"
 	var copper_dark := "#2F5E50"
-	var copper_light := "#7FB8A4"
-	var pav := 300.0
-	var l1 := X0 + pav
-	var r1 := X1 - pav
-	var stone_top := base_y - 92.0
-	_bricks(top, base_y)
-	_wall_shading(top)
-	# ── The two end pavilions: blank walls with the big diamond lattice, a hair forward of the centre.
-	for side in [[X0, l1], [r1, X1]]:
-		var a: float = side[0]
-		var b: float = side[1]
-		var id := "pav%d" % int(a)
-		out.append('<clipPath id="%s"><rect x="%s" y="%s" width="%s" height="%s"/></clipPath>' % [id, _n(a), _n(top - 34), _n(b - a), _n(stone_top - top + 34)])
-		_rect(a, top - 34, b - a, stone_top - top + 34, k.bricks[0])
+	var copper_light := "#8CC4AE"
+	var stone: String = k.lintel
+	var stone_dark: String = k.lintel_dark
+	var mid := (X0 + X1) / 2.0
+	var pav := 600.0
+	var link := 130.0
+	var pavilions := [[X0, X0 + pav], [X1 - pav, X1]]
+	var c0 := X0 + pav + link
+	var c1 := X1 - pav - link
+	var links := [[X0 + pav, c0], [c1, X1 - pav]]
+	# Heights, all on the same brick courses (13 px apart) so the blocks' bricks line up.
+	var pav_top := 48.0
+	var top := pav_top + 13.0 * 3.0
+	var cornice := pav_top + 13.0 * 7.0
+	var link_top := pav_top + 13.0 * 22.0
+	var water := 749.0
+	var weave_top := water + 14.0
+	var stone_top := weave_top + 34.0
+	var sills: Array[float] = [water, water - 195.0, water - 390.0]
+	var wh := 140.0
+	var ww := 60.0
+	var bays := 13
+	var bw := (c1 - c0) / float(bays)
+	var door_bay := bays / 2
+	# ── The brick of each block, its light and its age.
+	for p: Array in pavilions:
+		_brick_patch(p[0], pav_top, p[1] - p[0], weave_top - pav_top)
+	for l: Array in links:
+		_brick_patch(l[0], link_top, l[1] - l[0], weave_top - link_top)
+	_brick_patch(c0, top, c1 - c0, weave_top - top)
+	for p: Array in pavilions:
+		_rect(p[0], pav_top, p[1] - p[0], weave_top - pav_top, "url(#shade)")
+		_masson_wear(pav_top + 14.0, water, true, p[0], p[1])
+	_rect(c0, top, c1 - c0, weave_top - top, "url(#shade)")
+	_masson_wear(cornice + 34.0, water, true, c0, c1)
+	for l: Array in links:
+		_masson_wear(link_top + 10.0, water, true, l[0], l[1])
+		# Set back from the pavilion and the centre: in their shade, and the one on its left throws its shadow over it.
+		_rect(l[0], link_top, l[1] - l[0], weave_top - link_top, "#1A0C08", 'opacity="0.16"')
+		_rect(l[0], link_top, 30, weave_top - link_top, "#1A0C08", 'opacity="0.22"')
+	# ── The pavilions: the sunk panel and its lattice, the corner piers, the stone band, the copper cornice.
+	for p: Array in pavilions:
+		var a: float = p[0]
+		var b: float = p[1]
+		var px0 := a + 76.0
+		var px1 := b - 76.0
+		var py0 := pav_top + 130.0
+		var py1 := water - 56.0
+		_rect(px0, py0, px1 - px0, py1 - py0, "#1A0C08", 'opacity="0.07"')
+		var id := "lattice%d" % int(a)
+		out.append('<clipPath id="%s"><rect x="%s" y="%s" width="%s" height="%s"/></clipPath>' % [id, _n(px0), _n(py0), _n(px1 - px0), _n(py1 - py0)])
 		out.append('<g clip-path="url(#%s)">' % id)
-		var d := -700.0
-		while d < 1000.0:
-			_path("M%s %s l800 800" % [_n(a + d), _n(top - 34)], "none", _stroke("#8E3A26", 7) + ' opacity="0.75"')
-			_path("M%s %s l-800 800" % [_n(a + d + 800), _n(top - 34)], "none", _stroke("#8E3A26", 7) + ' opacity="0.75"')
-			_path("M%s %s l800 800" % [_n(a + d + 7), _n(top - 34)], "none", _stroke("#C46A50", 3) + ' opacity="0.45"')
-			d += 110.0
+		var run := (py1 - py0) / 1.6
+		var d := px0 - run - 60.0
+		while d < px1 + 60.0:
+			for ln: Array in [[d, py0, d + run, py1], [d + run, py0, d, py1]]:
+				var seg := "M%s %s L%s %s" % [_n(ln[0]), _n(ln[1]), _n(ln[2]), _n(ln[3])]
+				var shadow := "M%s %s L%s %s" % [_n(ln[0] + 2.5), _n(ln[1] + 2.5), _n(ln[2] + 2.5), _n(ln[3] + 2.5)]
+				_path(shadow, "none", _stroke("#2A0E06", 8) + ' opacity="0.35"')
+				_path(seg, "none", _stroke("#BE6046", 9) + ' stroke-dasharray="11 2"')
+				_path("M%s %s L%s %s" % [_n(ln[0] - 2.5), _n(ln[1] - 2.5), _n(ln[2] - 2.5), _n(ln[3] - 2.5)], "none", _stroke("#FFE2CC", 1.5) + ' opacity="0.4"')
+			d += 128.0
 		out.append('</g>')
-		# The pavilion's corners, and the shadow it throws on the recessed centre.
-		for cx in [a, b - 20.0]:
-			_rect(cx, top - 34, 20, stone_top - top + 34, k.bricks[2])
-	_rect(l1, top - 20, 10, stone_top - top + 20, "#000000", 'opacity="0.2"')
-	_rect(r1 - 10, top - 20, 10, stone_top - top + 20, "#000000", 'opacity="0.14"')
-	# ── The centre: three floors of wide windows between brick piers, stone sill bands, decorative brick in the spandrels.
-	var floor_h := (stone_top - top - 40.0) / 3.0
-	var groups := int((r1 - l1 - 120.0) / 230.0)
-	var gap := (r1 - l1 - 60.0) / float(groups)
-	for f in 3:
-		var fy := stone_top - 26.0 - f * floor_h
-		var wh := floor_h * 0.62
-		# The sill band runs the whole way across.
-		_rect(l1 + 6, fy + 6, r1 - l1 - 12, 8, k.lintel, _stroke(k.lintel_dark, 1.2))
-		_snow(l1 + 6, r1 - l1 - 12, fy + 6)
-		for g in groups:
-			var gx := l1 + 30.0 + g * gap
-			var n := 3 if gap > 200.0 else 2
-			var ww := (gap - 76.0) / float(n)
-			for j in n:
-				var wx := gx + j * (ww + 8.0)
-				if wx + ww > r1 - 30.0:
-					break
-				_school_window(wx, fy - wh, ww, wh)
-			# A brick pier between the groups, a little proud of the wall.
-			if g > 0:
-				_rect(gx - 26, fy - floor_h + 10, 14, floor_h, k.bricks[3], 'opacity="0.8"')
-		# Between the floors, a course of brick diamonds like the photo's.
-		if f < 2:
-			var dx := l1 + 40.0
-			while dx < r1 - 40.0:
-				_path("M%s %s l12 -12 l12 12 l-12 12 z" % [_n(dx), _n(fy - wh - 26)], "#8E3A26", 'opacity="0.5"')
-				dx += 40.0
-	# ── The centre entrance: stone surround, red double doors, steps, handrails, the flag over the door.
-	var cx := (l1 + r1) / 2.0
-	var dt := stone_top - 150.0
-	_rect(cx - 86, dt - 26, 172, 26, k.lintel, _stroke(k.lintel_dark, 1.5))
-	_rect(cx - 74, dt, 148, base_y - dt, k.lintel, _stroke(k.lintel_dark, 1.5))
-	_rect(cx - 70, dt - 42, 140, 18, k.lintel, _stroke(k.lintel_dark, 1.5))
-	_rect(cx - 52, dt + 16, 104, base_y - dt - 16, "#A8382A", _stroke("#6E2018", 2.5))
-	_path("M%s %s V%s" % [_n(cx), _n(dt + 16), _n(base_y)], "none", _stroke("#6E2018", 2))
+		# The panel's edges: shade along its top and left, light on its lower and right lips.
+		_rect(px0, py0, px1 - px0, 6, "#1A0C08", 'opacity="0.22"')
+		_rect(px0, py0, 5, py1 - py0, "#1A0C08", 'opacity="0.18"')
+		_rect(px0, py1 - 3, px1 - px0, 3, "#FFF0E0", 'opacity="0.22"')
+		_rect(px1 - 3, py0, 3, py1 - py0, "#FFF0E0", 'opacity="0.14"')
+		# The corner piers, a hair proud of the wall, with their stone caps and plinths.
+		for px: float in [a, b - 58.0]:
+			_rect(px, pav_top + 14.0, 58, water - pav_top - 14.0, "#FFF0E0", 'opacity="0.06"')
+			_rect(px + 58.0, pav_top + 14.0, 5, water - pav_top - 14.0, "#1A0C08", 'opacity="0.2"')
+			_rect(px, pav_top + 14.0, 2, water - pav_top - 14.0, "#FFF0E0", 'opacity="0.25"')
+			_rect(px - 6.0, pav_top + 88.0, 70, 26, stone, _stroke(stone_dark, 1.2))
+			_rect(px - 6.0, pav_top + 88.0, 70, 4, "#FFFFFF", 'opacity="0.4"')
+			_rect(px - 6.0, pav_top + 114.0, 70, 8, "#000000", 'opacity="0.14"')
+			_rect(px - 6.0, water - 40.0, 70, 40, stone, _stroke(stone_dark, 1.2))
+			_rect(px - 6.0, water - 40.0, 70, 4, "#FFFFFF", 'opacity="0.4"')
+		# The stone band under the cornice.
+		_rect(a - 4.0, pav_top + 62.0, b - a + 8.0, 12, stone, _stroke(stone_dark, 1.2))
+		_rect(a - 4.0, pav_top + 62.0, b - a + 8.0, 3, "#FFFFFF", 'opacity="0.4"')
+		_rect(a, pav_top + 74.0, b - a, 8, "#000000", 'opacity="0.12"')
+		_snow(a - 4.0, b - a + 8.0, pav_top + 62.0)
+		_school_copper(a - 10.0, b + 10.0, pav_top, copper, copper_dark, copper_light)
+	# ── The links: two floors of windows, the copper cap, the basement door.
+	for l: Array in links:
+		var a: float = l[0]
+		var b: float = l[1]
+		var lx := (a + b) / 2.0
+		for f in 2:
+			_window_under(lx - 26.0, sills[f] - wh, 52.0, wh)
+			_front_sash(lx - 26.0, sills[f] - wh, 52.0, wh)
+		_school_copper(a - 4.0, b + 4.0, link_top, copper, copper_dark, copper_light)
+	# ── The centre: pilasters, windows and the brick panels under them.
+	for i in range(bays + 1):
+		var px := c0 + i * bw - 9.0
+		var pw := 18.0
+		if i == 0:
+			px = c0
+			pw = 24.0
+		elif i == bays:
+			px = c1 - 24.0
+			pw = 24.0
+		_rect(px, cornice + 34.0, pw, water - cornice - 34.0, "#FFF0E0", 'opacity="0.07"')
+		_rect(px + pw, cornice + 34.0, 4, water - cornice - 34.0, "#1A0C08", 'opacity="0.2"')
+		_rect(px, cornice + 34.0, 2, water - cornice - 34.0, "#FFF0E0", 'opacity="0.22"')
+		# Its stone block in the frieze.
+		_rect(px - 4.0, cornice + 36.0, pw + 8.0, 26, stone, _stroke(stone_dark, 1.2))
+		_rect(px - 4.0, cornice + 36.0, pw + 8.0, 4, "#FFFFFF", 'opacity="0.4"')
+	# The frieze: a row of brick diamonds between the blocks, the stone band under it.
+	var fx := c0 + 30.0
+	while fx < c1 - 30.0:
+		_path("M%s %s l8 -8 l8 8 l-8 8 z" % [_n(fx), _n(cornice + 48.0)], "#6E2818", 'opacity="0.45"')
+		fx += 24.0
+	_rect(c0, cornice + 60.0, c1 - c0, 8, stone, _stroke(stone_dark, 1))
+	_snow(c0, c1 - c0, cornice + 60.0)
+	for i in bays:
+		var cx := c0 + (i + 0.5) * bw
+		for f in 3:
+			if i == door_bay and f == 0:
+				continue
+			var y: float = sills[f] - wh
+			if i == door_bay and f == 1:
+				# The window over the door, in its stone frame.
+				_rect(cx - ww / 2.0 - 16.0, y - 18.0, ww + 32.0, wh + 30.0, stone, _stroke(stone_dark, 1.5))
+				_rect(cx - ww / 2.0 - 16.0, y - 18.0, ww + 32.0, 4, "#FFFFFF", 'opacity="0.4"')
+				_rect(cx + ww / 2.0 + 12.0, y - 14.0, 4, wh + 26.0, "#000000", 'opacity="0.14"')
+				_front_sash(cx - ww / 2.0, y, ww, wh, false)
+				continue
+			_window_under(cx - ww / 2.0, y, ww, wh)
+			_front_sash(cx - ww / 2.0, y, ww, wh)
+			if f == 0:
+				_kid_art(cx - ww / 2.0, y, ww, wh)
+			if f > 0:
+				_spandrel(cx - ww / 2.0 - 4.0, sills[f] + 16.0, ww + 8.0, 36.0)
+	# ── The parapet over the centre: copper balustrade panels between the piers, the cartouche and the cross.
+	for i in bays:
+		if i == door_bay:
+			continue
+		var bx := c0 + i * bw + 16.0
+		var bpw := bw - 32.0
+		var by := top + 12.0
+		var bh := cornice - top - 18.0
+		_rect(bx, by, bpw, bh, "#22302C")
+		var sx := bx + 4.0
+		while sx < bx + bpw - 6.0:
+			_rect(sx, by + 4.0, 5, bh - 8.0, copper, _stroke(copper_dark, 0.8))
+			_rect(sx, by + 4.0, 1.5, bh - 8.0, copper_light, 'opacity="0.7"')
+			sx += 10.0
+		_rect(bx - 2.0, by, bpw + 4.0, 5, copper, _stroke(copper_dark, 1))
+		_rect(bx - 2.0, by + bh - 5.0, bpw + 4.0, 5, copper, _stroke(copper_dark, 1))
+	_rect(c0 - 6.0, top - 9.0, c1 - c0 + 12.0, 10, copper_light, _stroke(copper_dark, 1.2))
+	_snow(c0 - 6.0, c1 - c0 + 12.0, top - 9.0)
+	# The cartouche: a stone tablet with its garland, the medallion, and the copper cross over it.
+	var ct := top - 22.0
+	_rect(mid - 76.0, ct, 152, cornice - ct, stone, _stroke(stone_dark, 1.5))
+	_rect(mid - 76.0, ct, 152, 4, "#FFFFFF", 'opacity="0.4"')
+	_rect(mid - 84.0, ct - 8.0, 168, 10, stone, _stroke(stone_dark, 1.2))
+	_path("M%s %s q30 26 60 6 q30 20 60 -6" % [_n(mid - 60.0), _n(ct + 14.0)], "none", _stroke(stone_dark, 3) + ' stroke-linecap="round"')
+	for gx: float in [mid - 60.0, mid, mid + 60.0]:
+		_circle(gx, ct + 15.0 + (6.0 if gx == mid else 0.0), 5, stone, _stroke(stone_dark, 1.2))
+	_circle(mid, ct + 12.0, 10, stone, _stroke(stone_dark, 1.5))
+	_snow(mid - 84.0, 168, ct - 8.0)
+	var cross_y := ct - 8.0
+	_rect(mid - 5.0, cross_y - 52.0, 10, 52, copper_light, _stroke(copper_dark, 1.5))
+	_rect(mid - 19.0, cross_y - 40.0, 38, 9, copper_light, _stroke(copper_dark, 1.5))
+	for e: Vector2 in [Vector2(mid, cross_y - 54.0), Vector2(mid - 20.0, cross_y - 35.5), Vector2(mid + 20.0, cross_y - 35.5)]:
+		_circle(e.x, e.y, 4.5, copper_light, _stroke(copper_dark, 1.2))
+	# The copper cornice over the centre, and the green the rain has washed out of it down the frieze.
+	_school_copper(c0 - 12.0, c1 + 12.0, cornice, copper, copper_dark, copper_light)
+	# ── The water table, the basket-weave band, the stone basement.
+	_rect(X0 - 4, water, X1 - X0 + 8, 14, stone, _stroke(stone_dark, 1.5))
+	_rect(X0 - 4, water, X1 - X0 + 8, 4, "#FFFFFF", 'opacity="0.4"')
+	_snow(X0 - 4, X1 - X0 + 8, water)
+	_rect(X0, weave_top, X1 - X0, stone_top - weave_top, k.bricks[2])
+	var wy := weave_top + 2.0
+	var row := 0
+	while wy < stone_top - 8.0:
+		var wx := X0 + (18.0 if row % 2 == 1 else 0.0)
+		while wx < X1:
+			for j in 3:
+				_rect(wx + 1, wy + j * 5.0 + 1, maxf(minf(34.0, X1 - wx - 1.0), 0.0), 3.8, k.bricks[(j + row) % 5], _stroke("#5A2418", 0.6))
+			for j in 3:
+				if wx + 47.0 + j * 12.0 <= X1:
+					_rect(wx + 37 + j * 12.0, wy + 1, 10, 14, k.bricks[(j + 2 + row) % 5], _stroke("#5A2418", 0.6))
+			wx += 72.0
+		wy += 17.0
+		row += 1
+	_rect(X0, weave_top, X1 - X0, 8, "#000000", 'opacity="0.16"')
+	_rect(X0 - 4, stone_top - 4, X1 - X0 + 8, 8, stone, _stroke(stone_dark, 1))
+	_snow(X0 - 4, X1 - X0 + 8, stone_top - 4)
+	_school_basement(stone_top + 4.0)
+	var bxs: Array[float] = []
+	for p: Array in pavilions:
+		for j in 3:
+			bxs.append(float(p[0]) + 110.0 + j * 150.0)
+	for i in bays:
+		if absi(i - door_bay) > 1:
+			bxs.append(c0 + (i + 0.5) * bw)
+	for bx: float in bxs:
+		_rect(bx - 34.0, 846, 68, 44, "#C4532E", _stroke("#7E2E18", 1.5))
+		_rect(bx - 29.0, 851, 58, 34, "url(#glass)", 'opacity="0.75"')
+		_rect(bx - 1.5, 851, 3, 34, "#C4532E")
+		_rect(bx - 40.0, 890, 80, 7, stone, _stroke(stone_dark, 1))
+	for l: Array in links:
+		var lx := (float(l[0]) + float(l[1])) / 2.0
+		_rect(lx - 28.0, 858, 56, ground_y - 858, "#B0402E", _stroke("#6E2018", 2))
+		_rect(lx - 20.0, 868, 40, 36, "url(#glass)", _stroke("#6E2018", 1.5))
+		_rect(lx + 14.0, 918, 4, 16, "#D8D4CA")
+		_rect(lx - 36.0, 848, 72, 10, stone, _stroke(stone_dark, 1))
+	# ── The entrance.
+	_school_entrance(mid, sills[0] - wh - 10.0, weave_top, sills[1] - wh, ww, stone, stone_dark)
+	var gates := []
+	for l: Array in links:
+		var lx := (float(l[0]) + float(l[1])) / 2.0
+		gates.append([lx - 44.0, lx + 44.0])
+	gates.insert(1, [mid - 150.0, mid + 150.0])
+	_fence(gates)
+
+
+# A copper cornice from x0 to x1 at the top y of the brick under it: the coping, the fascia and its modillions, the drip, the
+# shade under it on the wall and the green streaks the rain has washed down from it; snow on it in winter.
+func _school_copper(x0: float, x1: float, y: float, copper: String, dark: String, light: String) -> void:
+	_rect(x0 + 6.0, y + 14.0, x1 - x0 - 12.0, 26, "url(#drop)")
+	for i in int((x1 - x0) / 90.0):
+		var sw := _wr.randf_range(4.0, 12.0)
+		_rect(_wr.randf_range(x0 + 10.0, x1 - 20.0), y + 14.0, sw, _wr.randf_range(30.0, 110.0), copper, 'opacity="%s"' % _n(_wr.randf_range(0.08, 0.2)))
+	_rect(x0, y - 26.0, x1 - x0, 9, light, _stroke(dark, 1.2))
+	_rect(x0 + 4.0, y - 17.0, x1 - x0 - 8.0, 24, copper, _stroke(dark, 1.5))
+	_rect(x0 + 4.0, y - 17.0, x1 - x0 - 8.0, 4, light, 'opacity="0.6"')
+	var mx := x0 + 12.0
+	while mx < x1 - 16.0:
+		_rect(mx, y - 11.0, 7, 15, dark, 'opacity="0.45"')
+		mx += 20.0
+	_rect(x0, y + 7.0, x1 - x0, 7, dark)
+	_snow(x0, x1 - x0, y - 26.0)
+
+
+# A tall double-hung window of the school's front: a flat arch of bricks on end with a stone ear at each end, the reveal's
+# shade, a white frame, the sky in the upper sash, a blind let down a little or a lot (`_wr`), the meeting rail, a deep stone
+# sill and its shadow.
+func _front_sash(x: float, y: float, w: float, h: float, arch := true) -> void:
+	if arch:
+		var ax := x - 4.0
+		while ax < x + w + 4.0:
+			_rect(ax, y - 15, minf(8.0, x + w + 4.0 - ax), 14, k.bricks[3], _stroke("#6E2A1A", 0.5))
+			ax += 9.5
+		for ex: float in [x - 12.0, x + w + 2.0]:
+			_rect(ex, y - 17.0, 10, 17, k.lintel, _stroke(k.lintel_dark, 1))
+	_rect(x - 3, y - 2, w + 6, h + 4, "#3A140C", 'opacity="0.55"')
+	_rect(x, y, w, h, "#EDEAE2", _stroke("#9A968C", 1))
+	var gh := (h - 14.0) / 2.0
+	_rect(x + 5, y + 5, w - 10, gh, "#7E98A8")
+	_rect(x + 5, y + 5, w - 10, gh * 0.55, "#C9DCE6", 'opacity="0.75"')
+	_rect(x + 5, y + 9 + gh, w - 10, gh, "#5E7A8A")
+	var blind := _wr.randf_range(0.0, 1.0)
+	if blind > 0.25:
+		var bh := gh * (blind - 0.2) * 1.2
+		_rect(x + 5, y + 5, w - 10, bh, "#EEE7D6")
+		for bl in int(bh / 6.0):
+			_rect(x + 5, y + 5 + bl * 6.0 + 5.0, w - 10, 0.8, "#C9C0AE")
+	_rect(x + 5, y + 5, 4, h - 10, "#000000", 'opacity="0.12"')
+	_rect(x + 2, y + 5 + gh, w - 4, 4, "#D8D4CA")
+	_path("M%s %s l%s 0 l%s %s z" % [_n(x + 6), _n(y + 6), _n(w * 0.45), _n(-w * 0.45), _n(h * 0.42)], "#FFFFFF", 'opacity="0.18"')
+	_rect(x - 8, y + h, w + 16, 11, k.lintel, _stroke(k.lintel_dark, 1.2))
+	_rect(x - 8, y + h, w + 16, 3, "#FFFFFF", 'opacity="0.5"')
+	_rect(x - 4, y + h + 11, w + 8, 6, "#000000", 'opacity="0.16"')
+	_snow(x - 8, w + 16, y + h)
+
+
+# The children's drawings taped up inside a ground-floor window: a sheet or two, each with a crayon sun, heart or house.
+func _kid_art(x: float, y: float, w: float, h: float) -> void:
+	for i in _wr.randi_range(0, 2):
+		var sx := x + 7.0 + i * (w - 14.0) / 2.0 + _wr.randf_range(-2.0, 2.0)
+		var sy := y + h * 0.56 + _wr.randf_range(0.0, h * 0.18)
+		var sw := (w - 18.0) / 2.0
+		_rect(sx, sy, sw, sw * 1.25, "#FBF8F0", 'opacity="0.95"')
+		var col: String = ["#E04F5F", "#FFB42E", "#4A9AD8", "#3E8E5A", "#7E57C2"][_wr.randi_range(0, 4)]
+		match _wr.randi_range(0, 2):
+			0:
+				_circle(sx + sw / 2.0, sy + sw * 0.6, sw * 0.24, col)
+			1:
+				_path("M%s %s l%s %s l%s %s z" % [_n(sx + sw * 0.2), _n(sy + sw * 0.7), _n(sw * 0.3), _n(-sw * 0.4), _n(sw * 0.3), _n(sw * 0.4)], col)
+				_rect(sx + sw * 0.28, sy + sw * 0.7, sw * 0.44, sw * 0.4, col, 'opacity="0.7"')
+			_:
+				_path("M%s %s q%s %s %s 0 q%s %s %s 0 l%s %s z" % [_n(sx + sw * 0.2), _n(sy + sw * 0.55), _n(sw * 0.15), _n(-sw * 0.25), _n(sw * 0.3),
+					_n(sw * 0.15), _n(-sw * 0.25), _n(sw * 0.3), _n(-sw * 0.3), _n(sw * 0.45)], col)
+
+
+# The panel of patterned brick under a window: sunk a little, a diamond of bricks on end in its middle and a half one each side.
+func _spandrel(x: float, y: float, w: float, h: float) -> void:
+	_rect(x, y, w, h, "#1A0C08", 'opacity="0.1"')
+	_rect(x, y, w, 3, "#1A0C08", 'opacity="0.2"')
+	_rect(x, y + h - 2, w, 2, "#FFF0E0", 'opacity="0.2"')
+	var cx := x + w / 2.0
+	var cy := y + h / 2.0
+	_path("M%s %s l%s %s l%s %s l%s %s z" % [_n(cx - h * 0.42), _n(cy), _n(h * 0.42), _n(-h * 0.42), _n(h * 0.42), _n(h * 0.42), _n(-h * 0.42), _n(h * 0.42)],
+		"none", _stroke(k.bricks[4], 4.5))
+	_path("M%s %s l%s %s l%s %s z" % [_n(cx - h * 0.14), _n(cy), _n(h * 0.14), _n(-h * 0.14), _n(h * 0.14), _n(h * 0.14)], k.bricks[3])
+	_path("M%s %s l%s %s l%s %s z" % [_n(cx - h * 0.14), _n(cy), _n(h * 0.14), _n(h * 0.14), _n(h * 0.14), _n(-h * 0.14)], k.bricks[3])
+	for sx: float in [x + 3.0, x + w - 3.0]:
+		var d := 1.0 if sx < cx else -1.0
+		_path("M%s %s l%s %s M%s %s l%s %s" % [_n(sx), _n(cy - h * 0.34), _n(d * h * 0.34), _n(h * 0.34), _n(sx + d * h * 0.34), _n(cy), _n(-d * h * 0.34), _n(h * 0.34)],
+			"none", _stroke(k.bricks[4], 4))
+
+
+# The school's grey stone basement from y down to the sidewalk: courses of dressed blocks, their joints, stains, and the shade
+# the water table throws over its top.
+func _school_basement(y: float) -> void:
+	_rect(X0, y, X1 - X0, ground_y - y, "#B6B1A7")
+	var row := 0
+	var by := y
+	while by < ground_y - 4.0:
+		var bh := minf(30.0, ground_y - by)
+		_rect(X0, by + bh - 1.5, X1 - X0, 1.5, "#8E897F", 'opacity="0.7"')
+		var bx := X0 + (45.0 if row % 2 == 1 else 0.0)
+		while bx < X1:
+			_rect(bx, by, 1.5, bh, "#8E897F", 'opacity="0.6"')
+			_rect(bx + 1.5, by, 88, 2, "#FFFFFF", 'opacity="0.18"')
+			bx += 90.0
+		by += 30.0
+		row += 1
+	for i in int((X1 - X0) / 160.0):
+		_rect(_wr.randf_range(X0, X1 - 120.0), y + _wr.randf_range(0.0, 60.0), _wr.randf_range(30.0, 120.0), _wr.randf_range(30.0, 110.0), "#5E5A52", 'opacity="0.1"')
+	_rect(X0, y, X1 - X0, 16, "url(#drop)")
+
+
+# The front entrance at cx: a stone surround with its cornice and scrolls, the red door with its transom and glass, a lamp, the
+# flight of steps down to the sidewalk with a black handrail each side, and the Québec flag hanging from its pole at the window
+# over the door (whose top is `flag_y`).
+func _school_entrance(cx: float, door_top: float, floor_y: float, flag_y: float, ww: float, stone: String, stone_dark: String) -> void:
+	_rect(cx - 72.0, door_top - 30.0, 144, floor_y - door_top + 30.0, stone, _stroke(stone_dark, 2))
+	_rect(cx - 72.0, door_top - 30.0, 14, floor_y - door_top + 30.0, "#FFFFFF", 'opacity="0.3"')
+	_rect(cx + 58.0, door_top - 30.0, 14, floor_y - door_top + 30.0, "#000000", 'opacity="0.12"')
+	_rect(cx - 86.0, door_top - 54.0, 172, 24, stone, _stroke(stone_dark, 1.5))
+	_rect(cx - 96.0, door_top - 66.0, 192, 12, stone, _stroke(stone_dark, 1.5))
+	_rect(cx - 96.0, door_top - 66.0, 192, 3, "#FFFFFF", 'opacity="0.45"')
+	_rect(cx - 86.0, door_top - 30.0, 172, 6, "#000000", 'opacity="0.15"')
+	for sx: float in [cx - 90.0, cx + 90.0]:
+		_circle(sx, door_top - 74.0, 8, stone, _stroke(stone_dark, 1.5))
+		_circle(sx + (3.0 if sx < cx else -3.0), door_top - 76.0, 3, stone_dark, 'opacity="0.5"')
+	_snow(cx - 96.0, 192, door_top - 66.0)
+	# The door.
+	var dw := 80.0
+	_rect(cx - dw / 2.0 - 4.0, door_top - 4.0, dw + 8.0, floor_y - door_top + 4.0, "#3A140C", 'opacity="0.5"')
+	_rect(cx - dw / 2.0, door_top, dw, floor_y - door_top, "#A8382A", _stroke("#5E1A12", 2))
+	_rect(cx - dw / 2.0 + 5.0, door_top + 5.0, dw - 10.0, 30, "url(#glass)", _stroke("#5E1A12", 1.5))
+	for t in 2:
+		_rect(cx - dw / 2.0 + 5.0 + (dw - 10.0) * (t + 1) / 3.0 - 1.0, door_top + 5.0, 2, 30, "#A8382A")
+	_rect(cx - dw / 2.0, door_top + 38.0, dw, 5, "#5E1A12")
 	for j in 2:
-		_rect(cx - 44 + j * 54, dt + 26, 36, 54, "url(#glass)", _stroke("#6E2018", 2))
-		_rect(cx - 44 + j * 54, dt + 96, 36, 46, "#8E2C20", _stroke("#6E2018", 1.5))
-	# The flagpole with the Québec flag, out over the door.
-	_path("M%s %s l54 -16" % [_n(cx + 4), _n(dt - 50)], "none", _stroke("#8E8A82", 4))
-	var fx := cx + 18.0
-	var fy2 := dt - 60.0
-	_rect(fx, fy2, 70, 46, "#1D4F91", _stroke("#143A6E", 1.5))
-	_rect(fx + 31, fy2, 8, 46, "#FFFFFF")
-	_rect(fx, fy2 + 19, 70, 8, "#FFFFFF")
+		var lx := cx - dw / 2.0 + 8.0 + j * (dw / 2.0 - 4.0)
+		_rect(lx, door_top + 50.0, dw / 2.0 - 12.0, 50, "url(#glass)", _stroke("#5E1A12", 1.5))
+		_rect(lx, door_top + 108.0, dw / 2.0 - 12.0, floor_y - door_top - 118.0, "#922E22", _stroke("#5E1A12", 1.2))
+	_rect(cx + dw / 2.0 - 12.0, door_top + 96.0, 4, 18, "#D8D4CA")
+	_rect(cx - dw / 2.0 + 4.0, door_top + 4.0, 4, floor_y - door_top - 8.0, "#FFFFFF", 'opacity="0.15"')
+	# A lamp on the wall beside it.
+	_rect(cx + 82.0, door_top + 24.0, 14, 20, "#2A2A2A")
+	_rect(cx + 84.0, door_top + 28.0, 10, 12, "#F4E6B8")
+	# The flight of steps.
+	var n := 8
+	var sh := (ground_y - floor_y) / float(n)
+	for st in n:
+		var sw := 160.0 + st * 16.0
+		var sy := floor_y + st * sh
+		_rect(cx - sw / 2.0, sy, sw, sh + 1.0, "#C9C4BA" if st % 2 == 0 else "#C0BBB1", _stroke("#8E8A82", 1.1))
+		_rect(cx - sw / 2.0, sy, sw, 3, "#FFFFFF", 'opacity="0.35"')
+		_snow(cx - sw / 2.0, sw, sy)
+	for side: float in [-1.0, 1.0]:
+		var hx0 := cx + side * 86.0
+		var hx1 := cx + side * (86.0 + (n - 1) * 8.0)
+		_path("M%s %s L%s %s" % [_n(hx0), _n(floor_y - 40.0), _n(hx1), _n(ground_y - 44.0)], "none", _stroke("#1F1F1F", 4) + ' stroke-linecap="round"')
+		for t: float in [0.0, 0.5, 1.0]:
+			var px := lerpf(hx0, hx1, t)
+			var py := lerpf(floor_y - 40.0, ground_y - 44.0, t)
+			_rect(px - 1.5, py, 3, lerpf(floor_y, ground_y, t) - py + (sh if t < 1.0 else 0.0), "#1F1F1F")
+	# The flag: its pole out of the window over the door, the fleurdelisé hanging from it.
+	var pole0 := Vector2(cx + ww / 2.0 - 4.0, flag_y + 60.0)
+	var pole1 := pole0 + Vector2(74.0, -58.0)
+	_path("M%s %s L%s %s" % [_n(pole0.x), _n(pole0.y), _n(pole1.x), _n(pole1.y)], "none", _stroke("#B8B4AC", 4) + ' stroke-linecap="round"')
+	_circle(pole1.x, pole1.y, 4, "#D8C060")
+	out.append('<g transform="rotate(-38 %s %s)">' % [_n(pole1.x), _n(pole1.y)])
+	var fx := pole1.x - 66.0
+	var fy := pole1.y + 2.0
+	_path("M%s %s L%s %s Q%s %s %s %s L%s %s Q%s %s %s %s Z" % [_n(fx), _n(fy), _n(fx + 66.0), _n(fy), _n(fx + 70.0), _n(fy + 26.0), _n(fx + 64.0), _n(fy + 46.0),
+		_n(fx - 2.0), _n(fy + 46.0), _n(fx + 4.0), _n(fy + 22.0), _n(fx), _n(fy)], "#1D4F91", _stroke("#143A6E", 1.2))
+	_rect(fx + 29.0, fy, 8, 46, "#FFFFFF")
+	_rect(fx + 1.0, fy + 19.0, 66, 8, "#FFFFFF")
 	for j in 4:
-		_path("M%s %s l4 -7 l4 7 l-4 4 z" % [_n(fx + 12 + (j % 2) * 42), _n(fy2 + 12 + int(j / 2) * 26)], "#FFFFFF")
-	# Steps down to the sidewalk, with their handrails.
-	for i in range(1, 4):
-		var w := 150.0 + i * 16.0
-		_rect(cx - w / 2, base_y + (i - 1) * 22.0, w, 22, "#BDB7AD", _stroke("#8E8A82", 1.2))
-		_rect(cx - w / 2, base_y + (i - 1) * 22.0, w, 3, "#D9D4C8")
-	for hx in [cx - 92.0, cx + 86.0]:
-		_path("M%s %s L%s %s" % [_n(hx), _n(base_y + 62), _n(hx + 6), _n(dt + 10)], "none", _stroke("#1F1F1F", 4))
-	# ── The stone base course along the whole facade, with the basement windows.
-	_rect(X0, stone_top, X1 - X0, base_y - stone_top, "#C9C4B8", _stroke("#A39D93", 1.5))
-	_rect(X0, stone_top, X1 - X0, 6, "#E2DED4")
-	_snow(X0, X1 - X0, stone_top)
-	var bx := X0 + 70.0
-	while bx < X1 - 90.0:
-		if absf(bx - cx) > 110.0:
-			_rect(bx, stone_top + 22, 70, 42, "#A8382A", _stroke("#6E2018", 1.5))
-			_rect(bx + 5, stone_top + 27, 60, 32, "url(#glass)", 'opacity="0.7"')
-		bx += 150.0
-	# ── The copper cornice: along the centre, stepping up over each pavilion.
-	for c in [[l1 - 6.0, r1 + 6.0, top + 6.0], [X0 - 6.0, l1 + 6.0, top - 34.0], [r1 - 6.0, X1 + 6.0, top - 34.0]]:
-		var a: float = c[0]
-		var b: float = c[1]
-		var cy: float = c[2]
-		_rect(a, cy - 10, b - a, 10, copper_light, _stroke(copper_dark, 1.5))
-		_rect(a + 4, cy, b - a - 8, 22, copper, _stroke(copper_dark, 2))
-		var dt2: float = a + 10.0
-		while dt2 < b - 14.0:
-			_rect(dt2, cy + 3, 7, 16, copper_dark, 'opacity="0.45"')
-			dt2 += 20.0
-		_rect(a, cy + 22, b - a, 7, copper_dark)
-		_rect(a + 4, cy + 29, b - a - 8, 26, "url(#drop)")
-		_snow(a, b - a, cy - 10)
-	# ── Over the entrance: the stone cartouche on the parapet and the cross.
-	_rect(cx - 104, top - 30, 208, 36, k.bricks[1], _stroke("#7E3424", 1.5))
-	_rect(cx - 110, top - 40, 220, 12, copper, _stroke(copper_dark, 1.5))
-	_path("M%s %s q%s -26 %s 0 z" % [_n(cx - 54), _n(top - 2), _n(54), _n(108)], k.lintel, _stroke(k.lintel_dark, 1.5))
-	_circle(cx, top - 14, 9, k.lintel, _stroke(k.lintel_dark, 1.2))
-	_rect(cx - 5, top - 96, 10, 58, copper_light, _stroke(copper_dark, 1.5))
-	_rect(cx - 19, top - 82, 38, 10, copper_light, _stroke(copper_dark, 1.5))
-	_snow(cx - 110, 220, top - 40)
-	_foundation()
-	_fence([])
+		_path("M%s %s l4 -7 l4 7 l-4 4 z" % [_n(fx + 10.0 + (j % 2) * 40.0), _n(fy + 11.0 + int(j / 2) * 26.0)], "#FFFFFF")
+	_path("M%s %s l26 0 l-8 46 l-22 0 z" % [_n(fx + 40.0), _n(fy)], "#000000", 'opacity="0.12"')
+	out.append('</g>')
 
 
 # École Saint-Jean-de-Brébeuf's side on 6e Avenue (6e-avenue/5578…, 5582…, 5586… and close-ups): red-brown brick on three
-# floors over a tall basement of grey parging, cracked and stained; a pale stone water table, a band of basket-weave brick
-# over it and a stone sill course; the windows in pairs, double-hung in dark maroon frames, light blinds behind the glass,
-# pale stone sills; the plain corner at Dandurand (the right end) a little proud, with stone at its foot; a dark brown
-# cornice band under a stone coping. Left out: the grey insulation panels pinned to the wall in the pictures (works).
+# floors over a tall basement of grey parging, cracked and stained, its small windows behind bars; a pale stone water table, a
+# band of basket-weave brick over it and a stone sill course; the windows in pairs, double-hung in dark maroon frames under a
+# flat arch of bricks on end, light blinds behind the glass, pale stone sills; the green copper cornice of the front carried
+# round. The Dandurand end (the right) is the side of the front's corner pavilion (`_school`): proud of the wall and taller,
+# under the pavilion's own copper cornice and stone band, with brick piers and their stone caps. Aged like the front.
+# Left out: the grey insulation panels pinned to the wall in the pictures (works).
 func _school_side() -> void:
+	var copper := "#5A9A84"
+	var copper_dark := "#2F5E50"
+	var copper_light := "#8CC4AE"
 	var top := _top()
+	var pav_top := 48.0
 	var stone_top := base_y - 92.0
 	var basement_top := stone_top - 40.0
 	var weave_top := basement_top - 70.0
+	var corner := X1 - 230.0
 	_bricks(top, weave_top + 4.0)
 	_wall_shading(top)
+	_masson_wear(top + 14.0, weave_top - 12.0, true, X0, corner)
 	# ── The basement: grey parging over the stone, cracks, stains, small dark windows behind their bars.
 	_rect(X0, basement_top, X1 - X0, ground_y - basement_top, "#A9A69E")
 	var crack := RandomNumberGenerator.new()
@@ -4149,9 +4441,21 @@ func _school_side() -> void:
 			"none", _stroke("#6E6A62", 1.4) + ' opacity="0.6"')
 	for i in 10:
 		_rect(crack.randf_range(X0, X1 - 120), basement_top + 6, crack.randf_range(40, 120), crack.randf_range(30, 90), "#5E5A52", 'opacity="0.12"')
+	# The parging's trowel marks and the rain's dirt along its foot.
+	for i in 30:
+		_rect(crack.randf_range(X0, X1 - 80), crack.randf_range(basement_top + 14, ground_y - 12), crack.randf_range(30, 90), 1.2, "#FFFFFF", 'opacity="0.18"')
+	_rect(X0, ground_y - 30.0, X1 - X0, 30, "#5E5A52", 'opacity="0.12"')
+	_rect(X0, basement_top, X1 - X0, 18, "url(#drop)")
 	var bx := X0 + 120.0
 	while bx < X1 - 200.0:
+		_rect(bx - 3, base_y - 73, 102, 46, "#7E7A72", 'opacity="0.5"')
 		_rect(bx, base_y - 70, 96, 40, "#2E2A26", _stroke("#5E5A52", 2))
+		_rect(bx + 4, base_y - 66, 88, 10, "#5E6E78", 'opacity="0.5"')
+		var bar := bx + 10.0
+		while bar < bx + 92.0:
+			_rect(bar, base_y - 72, 3, 44, "#1E1C1A")
+			_rect(bar, base_y - 72, 1, 44, "#8E8A82", 'opacity="0.6"')
+			bar += 14.0
 		_rect(bx - 6, base_y - 30, 108, 8, "#BDB7AD", _stroke("#8E8A82", 1))
 		bx += 230.0
 	# ── The water table, the basket-weave band, the sill course.
@@ -4166,19 +4470,34 @@ func _school_side() -> void:
 		while wx < X1:
 			# Three bricks laid one way, three the other: the basket weave.
 			for j in 3:
-				_rect(wx + 1, wy + j * 6.0 + 1, 34, 4.5, k.bricks[j % 3], _stroke("#5A2418", 0.6))
+				_rect(wx + 1, wy + j * 6.0 + 1, maxf(minf(34.0, X1 - wx - 1.0), 0.0), 4.5, k.bricks[j % 3], _stroke("#5A2418", 0.6))
 			for j in 3:
-				_rect(wx + 37 + j * 12.0, wy + 1, 10, 17, k.bricks[(j + 1) % 3], _stroke("#5A2418", 0.6))
+				if wx + 47.0 + j * 12.0 <= X1:
+					_rect(wx + 37 + j * 12.0, wy + 1, 10, 17, k.bricks[(j + 1) % 3], _stroke("#5A2418", 0.6))
 			wx += 72.0
 		wy += 20.0
 		row += 1
+	_rect(X0, weave_top, X1 - X0, 8, "#000000", 'opacity="0.16"')
 	_rect(X0 - 4, weave_top - 12, X1 - X0 + 8, 12, k.lintel, _stroke(k.lintel_dark, 1.2))
+	_rect(X0 - 4, weave_top - 12, X1 - X0 + 8, 3, "#FFFFFF", 'opacity="0.35"')
 	_snow(X0 - 4, X1 - X0 + 8, weave_top - 12)
-	# ── The corner at Dandurand, a little proud of the wall, stone at its foot.
-	var corner := X1 - 230.0
-	_rect(corner, top - 20, X1 - corner, weave_top - top + 20, k.bricks[1])
-	_rect(corner, top - 20, 12, weave_top - top + 20, "#000000", 'opacity="0.18"')
-	_rect(corner - 6, weave_top - 50, X1 - corner + 10, 40, k.lintel, _stroke(k.lintel_dark, 1.2))
+	# ── The pavilion's side at Dandurand: proud of the wall and taller, its brick, the shadow it throws to its right… on itself,
+	# and on the wall to its left the shade of its edge; brick piers at both its corners with their stone caps.
+	_brick_patch(corner, pav_top, X1 - corner, weave_top - 12.0 - pav_top)
+	_rect(corner, pav_top, X1 - corner, weave_top - 12.0 - pav_top, "url(#shade)")
+	_masson_wear(pav_top + 14.0, weave_top - 12.0, true, corner, X1)
+	_rect(corner - 12.0, top + 14.0, 12, weave_top - 12.0 - top - 14.0, "#000000", 'opacity="0.14"')
+	_rect(corner, pav_top, 2, weave_top - 12.0 - pav_top, "#FFF0E0", 'opacity="0.3"')
+	for px: float in [corner, X1 - 36.0]:
+		_rect(px, pav_top + 14.0, 36, weave_top - 26.0 - pav_top, "#FFF0E0", 'opacity="0.06"')
+		_rect(px + 36.0, pav_top + 14.0, 4, weave_top - 26.0 - pav_top, "#1A0C08", 'opacity="0.18"')
+		_rect(px - 6.0, pav_top + 88.0, 48, 26, k.lintel, _stroke(k.lintel_dark, 1.2))
+		_rect(px - 6.0, pav_top + 88.0, 48, 4, "#FFFFFF", 'opacity="0.4"')
+		_rect(px - 6.0, weave_top - 52.0, 48, 40, k.lintel, _stroke(k.lintel_dark, 1.2))
+		_rect(px - 6.0, weave_top - 52.0, 48, 4, "#FFFFFF", 'opacity="0.4"')
+	_rect(corner - 4.0, pav_top + 62.0, X1 - corner + 8.0, 12, k.lintel, _stroke(k.lintel_dark, 1.2))
+	_rect(corner - 4.0, pav_top + 62.0, X1 - corner + 8.0, 3, "#FFFFFF", 'opacity="0.4"')
+	_snow(corner - 4.0, X1 - corner + 8.0, pav_top + 62.0)
 	# ── Three floors of windows in pairs, maroon frames, pale stone sills.
 	var floor_h := (weave_top - 12.0 - top - 40.0) / 3.0
 	for f in 3:
@@ -4190,20 +4509,30 @@ func _school_side() -> void:
 			xs.append(x)
 			xs.append(x + 88.0)
 			x += 250.0
-		xs.append(corner + 40.0)
+		xs.append(corner + 54.0)
 		xs.append(corner + 128.0)
 		for wx2: float in xs:
-			_school_sash(wx2, sill - wh, 72.0, wh)
-	# ── The cornice: a dark brown band with its dentils under a pale stone coping.
-	_rect(X0 - 6, top - 24, X1 - X0 + 12, 26, "#4A3028", _stroke("#2A1A14", 1.5))
-	var dx := X0
-	while dx < X1:
-		_rect(dx + 4, top - 4, 8, 10, "#4A3028")
-		dx += 22.0
-	_rect(X0 - 10, top - 36, X1 - X0 + 20, 12, k.lintel, _stroke(k.lintel_dark, 1.2))
-	_rect(X0 - 10, top - 36, X1 - X0 + 20, 3, "#FFFFFF", 'opacity="0.35"')
-	_snow(X0 - 10, X1 - X0 + 20, top - 36)
-	_foundation()
+			var w2 := 72.0 if wx2 < corner else 58.0
+			_window_under(wx2, sill - wh, w2, wh)
+			_school_sash(wx2, sill - wh, w2, wh)
+	# A downpipe from the cornice where the pavilion stands out.
+	_rect(corner - 26.0, top + 10.0, 10, ground_y - top - 14.0, "#7D7F82")
+	_rect(corner - 26.0, top + 10.0, 3, ground_y - top - 14.0, "#A9ABAE")
+	for j in 6:
+		_rect(corner - 29.0, top + 60.0 + j * 120.0, 16, 5, "#5F6164")
+	_rect(corner - 32.0, ground_y - 12.0, 22, 8, "#5F6164")
+	# ── The cornices: the main wall's copper over a stone band, the pavilion's higher one.
+	_rect(X0, top + 36.0, corner - X0, 9, k.lintel, _stroke(k.lintel_dark, 1))
+	_rect(X0, top + 36.0, corner - X0, 3, "#FFFFFF", 'opacity="0.35"')
+	_snow(X0, corner - X0, top + 36.0)
+	_school_copper(X0 - 8.0, corner, top + 4.0, copper, copper_dark, copper_light)
+	_school_copper(corner - 10.0, X1 + 10.0, pav_top, copper, copper_dark, copper_light)
+	_foundation_line()
+
+
+# Where the school's parged basement meets the sidewalk: a darker strip of concrete (it has no stone `_foundation`).
+func _foundation_line() -> void:
+	_rect(X0, ground_y - 6.0, X1 - X0, 6, "#8E8A82")
 
 
 # The school's side on 5e Avenue at Dandurand (reference/ecole.png). Left to right from the Dandurand corner: the corner pier,
@@ -4241,6 +4570,8 @@ func _school_5e() -> void:
 		brow += 1
 	_rect(wing_x, wing_top, X1 - wing_x, base_y - wing_top, "url(#shade)")
 	_rect(X1 - 3, wing_top, 3, base_y - wing_top, "#000000", 'opacity="0.25"')
+	_masson_wear(top - 8.0, weave_top, true, X0, wing_x)
+	_masson_wear(wing_top - 8.0, weave_top, true, wing_x, X1)
 	# ── The basement: pale grey parging, a few stains, its small dark windows.
 	_rect(X0, basement_top, X1 - X0, ground_y - basement_top, "#C9C6BF")
 	_rect(X0, basement_top, X1 - X0, 8, "#B3AFA7")
@@ -4248,6 +4579,20 @@ func _school_5e() -> void:
 	stain.seed = 5501
 	for i in 8:
 		_rect(stain.randf_range(X0, X1 - 140), basement_top + 10, stain.randf_range(60, 140), stain.randf_range(30, 70), "#8E8A82", 'opacity="0.12"')
+	# Laid in big dressed blocks: their joints, a lit top edge on each course.
+	var jy := basement_top + 8.0
+	var jrow := 0
+	while jy < ground_y - 6.0:
+		_rect(X0, jy, X1 - X0, 1.5, "#9A968E", 'opacity="0.8"')
+		_rect(X0, jy + 1.5, X1 - X0, 1.5, "#FFFFFF", 'opacity="0.25"')
+		var jx := X0 + (70.0 if jrow % 2 == 1 else 0.0)
+		while jx < X1:
+			_rect(jx, jy, 1.5, minf(36.0, ground_y - jy), "#9A968E", 'opacity="0.7"')
+			jx += 140.0
+		jy += 36.0
+		jrow += 1
+	_rect(X0, basement_top + 8.0, X1 - X0, 14, "url(#drop)")
+	_rect(X0, ground_y - 26.0, X1 - X0, 26, "#5E5A52", 'opacity="0.1"')
 	for bx: float in [X0 + 150.0, X0 + 370.0, X0 + 960.0, X0 + 1190.0]:
 		_rect(bx, base_y - 54, 84, 30, "#3A3631", _stroke("#6E6A62", 2))
 		_rect(bx - 5, base_y - 24, 94, 7, "#D6D2CA", _stroke("#9A968E", 1))
@@ -4259,9 +4604,10 @@ func _school_5e() -> void:
 		var wx := X0 + (18.0 if row % 2 == 1 else 0.0)
 		while wx < X1:
 			for j in 3:
-				_rect(wx + 1, wy + j * 6.0 + 1, 34, 4.5, k.bricks[(j + row) % 5], _stroke("#7A3424", 0.6))
+				_rect(wx + 1, wy + j * 6.0 + 1, maxf(minf(34.0, X1 - wx - 1.0), 0.0), 4.5, k.bricks[(j + row) % 5], _stroke("#7A3424", 0.6))
 			for j in 3:
-				_rect(wx + 37 + j * 12.0, wy + 1, 10, 17, k.bricks[(j + 2 + row) % 5], _stroke("#7A3424", 0.6))
+				if wx + 47.0 + j * 12.0 <= X1:
+					_rect(wx + 37 + j * 12.0, wy + 1, 10, 17, k.bricks[(j + 2 + row) % 5], _stroke("#7A3424", 0.6))
 			wx += 72.0
 		wy += 20.0
 		row += 1
@@ -4297,6 +4643,10 @@ func _school_5e() -> void:
 			_rect(px, top - 20.0, 16, water - top + 20.0, k.bricks[3], _stroke("#8A3A28", 1))
 			_rect(px + 6, top - 20.0, 4, water - top + 20.0, k.lintel, 'opacity="0.85"')
 			_rect(px + 14, top - 20.0, 4, water - top + 20.0, "#000000", 'opacity="0.15"')
+			_rect(px - 4, top - 6.0, 24, 22, k.lintel, _stroke(k.lintel_dark, 1))
+			_rect(px - 4, top - 6.0, 24, 4, "#FFFFFF", 'opacity="0.4"')
+			_rect(px - 6, water - 34.0, 28, 34, k.lintel, _stroke(k.lintel_dark, 1))
+			_rect(px - 6, water - 34.0, 28, 4, "#FFFFFF", 'opacity="0.4"')
 		for f in 3:
 			var sill: float = sills[f]
 			if f == 0 and nx < door_cx:
@@ -4373,6 +4723,7 @@ func _school_5e() -> void:
 # shade of the reveal along its top and left, a slim red frame, the upper sash in small panes (three by two), the lower sash in
 # two, the sky and the blinds in the glass, and a deep white stone sill throwing its shadow on the wall.
 func _red_sash(x: float, y: float, w: float, h: float) -> void:
+	_window_under(x, y, w, h)
 	# The flat arch: a course of bricks on end, a shade darker, a little wider than the opening.
 	var ax := x - 6.0
 	while ax < x + w + 6.0:
@@ -4410,7 +4761,13 @@ func _red_sash(x: float, y: float, w: float, h: float) -> void:
 
 # A double-hung sash of the school's side: dark maroon frame, light blinds behind the glass, a meeting rail, a stone sill.
 func _school_sash(x: float, y: float, w: float, h: float) -> void:
+	var ax := x - 5.0
+	while ax < x + w + 5.0:
+		_rect(ax, y - 15, minf(8.0, x + w + 5.0 - ax), 14, k.bricks[4], _stroke("#4A1C12", 0.5))
+		ax += 9.5
+	_rect(x - 3, y - 2, w + 6, h + 4, "#2A0E08", 'opacity="0.5"')
 	_rect(x - 6, y + h, w + 12, 10, k.lintel, _stroke(k.lintel_dark, 1.2))
+	_rect(x - 3, y + h + 10, w + 6, 6, "#000000", 'opacity="0.16"')
 	_snow(x - 6, w + 12, y + h)
 	_rect(x, y, w, h, "#6E2620", _stroke("#4A1814", 1.5))
 	_rect(x + 5, y + 5, w - 10, h * 0.5 - 7, "#C9D2D6")
@@ -4418,21 +4775,6 @@ func _school_sash(x: float, y: float, w: float, h: float) -> void:
 	_rect(x + 5, y + h * 0.5 + 2, w - 10, (h * 0.5 - 7) * 0.4, "#E4E8EA", 'opacity="0.7"')
 	_rect(x + 3, y + h * 0.5 - 2, w - 6, 5, "#6E2620")
 	_path("M%s %s l%s 0 l%s %s z" % [_n(x + 6), _n(y + 6), _n(w * 0.45), _n(-w * 0.45), _n(h * 0.3)], "#FFFFFF", 'opacity="0.3"')
-
-
-# A school window: a tall dark-framed sash with a transom, a stone sill under it (reference/coin_dandurand).
-func _school_window(x: float, y: float, w: float, h: float) -> void:
-	_rect(x - 5, y + h, w + 10, 9, k.lintel, _stroke(k.lintel_dark, 1.2))
-	_snow(x - 5, w + 10, y + h)
-	_rect(x, y, w, h, "#2E2A26", _stroke("#1A1714", 1.5))
-	_rect(x + 3, y + 3, w - 6, h * 0.26, "#6E8898")
-	_rect(x + 3, y + h * 0.3, w - 6, h * 0.68 - 3, "#60808F")
-	_rect(x + 3, y + h * 0.3, w - 6, h * 0.3, "#89A4B0", 'opacity="0.8"')
-	var bar := x + w / 2.0
-	_rect(bar - 1.5, y + 3, 3, h - 6, "#2E2A26")
-	_rect(x + 3, y + h * 0.26 + 2, w - 6, 3, "#2E2A26")
-	# The light caught in the top corner of the glass.
-	_path("M%s %s l%s 0 l%s %s z" % [_n(x + 4), _n(y + 5), _n(w * 0.5), _n(-w * 0.5), _n(h * 0.42)], "#FFFFFF", 'opacity="0.3"')
 
 
 # Grey stone quoins down a corner of the wall, alternating long and short.
@@ -6423,12 +6765,15 @@ const UNTOUCHED := ["duplex_charlotte", "duplex_jumelles", "duplex_voisin_gauche
 
 # A wall's age, from y0 (under the coping) to y1: the coping's shade, the soot the rain has run down from under it, and on
 # brick (`brick`) single bricks fired darker or paler on the wall's own courses and a patch or two of newer, repointed brick.
-func _masson_wear(y0: float, y1: float, brick: bool) -> void:
-	var w := X1 - X0
-	_rect(X0, y0, w, 30, "url(#drop)")
+func _masson_wear(y0: float, y1: float, brick: bool, xa := X0, xb := -1.0) -> void:
+	# `xa`..`xb`: only that stretch of the wall (a block standing taller or lower than its neighbours); the whole wall by default.
+	var x0 := xa
+	var x1 := X1 if xb < 0.0 else xb
+	var w := x1 - x0
+	_rect(x0, y0, w, 30, "url(#drop)")
 	for i in int(w / 150.0) + 1:
 		var sw := _wr.randf_range(16.0, 58.0)
-		var sx := _wr.randf_range(X0, X1 - sw)
+		var sx := _wr.randf_range(x0, x1 - sw)
 		var sh := _wr.randf_range(70.0, maxf(minf(240.0, y1 - y0), 80.0))
 		_rect(sx, y0, sw, minf(sh, y1 - y0), "url(#drop)", 'opacity="%s"' % _n(_wr.randf_range(0.35, 0.75)))
 	if not brick:
@@ -6439,17 +6784,17 @@ func _masson_wear(y0: float, y1: float, brick: bool) -> void:
 	var pale_wall := Color(k.bricks[0]).get_luminance() > 0.6
 	for i in 1 + int(w / 700.0):
 		var pw := _wr.randf_range(90.0, 220.0)
-		var px := _wr.randf_range(X0, maxf(X1 - pw, X0 + 1.0))
+		var px := _wr.randf_range(x0, maxf(x1 - pw, x0 + 1.0))
 		var prow := _wr.randi_range(2, maxi(rows - 8, 3))
 		for j in _wr.randi_range(3, 6):
-			var jx := maxf(px + _wr.randf_range(-18.0, 18.0), X0)
+			var jx := maxf(px + _wr.randf_range(-18.0, 18.0), x0)
 			if prow + j < rows:
-				_rect(jx, y0 + (prow + j) * 13.0 - 1.0, minf(pw, X1 - jx), 13, "#FFF6E6", 'opacity="0.09"')
+				_rect(jx, y0 + (prow + j) * 13.0 - 1.0, minf(pw, x1 - jx), 13, "#FFF6E6", 'opacity="0.09"')
 	for i in int(w * (y1 - y0) / 5200.0):
 		var row := _wr.randi_range(0, rows - 1)
-		var bx := X0 + _wr.randi_range(0, int(w / 36.0)) * 36.0 - (18.0 if row % 2 == 1 else 0.0)
-		var a := maxf(bx, X0)
-		var b := minf(bx + 34.0, X1)
+		var bx := x0 + _wr.randi_range(0, int(w / 36.0)) * 36.0 - (18.0 if row % 2 == 1 else 0.0)
+		var a := maxf(bx, x0)
+		var b := minf(bx + 34.0, x1)
 		var dark := _wr.randf() < 0.62
 		var strength := _wr.randf_range(0.08, 0.24) * (0.55 if pale_wall and dark else 1.0)
 		if b - a > 2.0:
@@ -9233,32 +9578,86 @@ func _apartments() -> void:
 		_rect(bx + 52, g - 52, 4, 20, "#3A3A3A")
 
 
-# The school's gym on 6e (5522…, 5524…, 5534…, 5544…): a long low wall of orange-brown brick with a beige band, tall slit windows,
-# and the entrance in a beige stone block with dark glass doors under a small canopy (`entrance`).
+# The school's gym on 6e (5522…, 5524…, 5534…, 5544…, 5578…): a long low wall of orange-brown brick under a stone coping with
+# its joints, a beige band, tall slit windows set deep in the brick on stone sills, and the entrance (`entrance`) in a block of
+# beige stone laid in courses: high up the black louvred vent of the gym's air, under it the dark metal canopy with its light,
+# the aluminium glass doors with their push bars, the little lit sign over them, a concrete apron. Aged like the school.
 func _gym() -> void:
 	var g := ground_y
 	var top := g - 430.0
 	_bricks(top, g - 6.0)
 	_wall_shading(top)
+	_masson_wear(top + 2.0, g - 150.0, true)
 	_rect(X0 - 4, top - 14, X1 - X0 + 8, 16, "#B9A88E", _stroke("#8E7E66", 1))
+	_rect(X0 - 4, top - 14, X1 - X0 + 8, 3, "#FFFFFF", 'opacity="0.35"')
+	var jx := X0 + 80.0
+	while jx < X1:
+		_rect(jx, top - 14, 1.5, 16, "#8E7E66", 'opacity="0.8"')
+		jx += 160.0
 	_snow(X0 - 4, X1 - X0 + 8, top - 14)
 	_rect(X0, g - 150, X1 - X0, 16, "#D8C8A8")
+	_rect(X0, g - 150, X1 - X0, 3, "#FFFFFF", 'opacity="0.4"')
+	_rect(X0, g - 134, X1 - X0, 10, "url(#drop)")
+	_snow(X0, X1 - X0, g - 150)
+	_rect(X0, g - 30, X1 - X0, 30, "#3A2A20", 'opacity="0.12"')
 	var ex: float = k.get("entrance", -1.0)
 	var x := X0 + 60.0
 	while x < X1 - 40.0:
 		if ex < 0.0 or absf(x - ex) > 160.0:
+			_window_under(x, top + 60, 18, 160)
+			_rect(x - 4, top + 56, 26, 168, "#3A1A10", 'opacity="0.35"')
 			_rect(x, top + 60, 18, 160, "#2B2E32")
 			_rect(x + 3, top + 63, 12, 154, "url(#glass)")
+			_rect(x + 3, top + 63, 4, 154, "#FFFFFF", 'opacity="0.2"')
+			_rect(x - 6, top + 220, 30, 9, "#D8C8A8", _stroke("#A89A80", 1))
+			_snow(x - 6, 30, top + 220)
 		x += 150.0
 	split = out.size()
 	if ex > 0.0:
+		# The stone block, its courses, the shadow it throws on the brick to its right.
+		_rect(ex + 120, top - 30, 14, g - top + 24, "#000000", 'opacity="0.16"')
 		_rect(ex - 120, top - 30, 240, g - top + 24, "#D8CCB4", _stroke("#A89A80", 1.5))
-		_rect(ex - 80, top + 40, 40, 90, "#2B2E32")
-		_rect(ex + 40, top + 40, 40, 90, "#2B2E32")
-		_rect(ex - 70, g - 200, 140, 194, "#1E2226")
-		_rect(ex - 64, g - 194, 62, 182, "url(#glass)")
-		_rect(ex + 2, g - 194, 62, 182, "url(#glass)")
-		_rect(ex - 90, g - 222, 180, 14, "#3A3A3A")
+		var cy := top - 30.0 + 46.0
+		var crow := 0
+		while cy < g - 6.0:
+			_rect(ex - 120, cy, 240, 1.5, "#B5A88E")
+			var cx := ex - 120.0 + (60.0 if crow % 2 == 1 else 0.0)
+			while cx < ex + 120.0:
+				if cx > ex - 120.0:
+					_rect(cx, cy - 46.0, 1.5, 46, "#B5A88E", 'opacity="0.7"')
+				cx += 120.0
+			cy += 46.0
+			crow += 1
+		_rect(ex - 120, top - 30, 240, 14, "#FFFFFF", 'opacity="0.2"')
+		_rect(ex - 120, top - 30, 6, g - top + 24, "#FFFFFF", 'opacity="0.25"')
+		for i in 6:
+			_rect(_wr.randf_range(ex - 110.0, ex + 80.0), top - 16.0, _wr.randf_range(8.0, 24.0), _wr.randf_range(40.0, 160.0), "url(#drop)", 'opacity="0.5"')
+		# The louvred vent.
+		_rect(ex - 46, top + 30, 92, 120, "#1E2226", _stroke("#0E1012", 2))
+		for v in 11:
+			_rect(ex - 42, top + 36 + v * 10.0, 84, 5, "#3A4046")
+			_rect(ex - 42, top + 36 + v * 10.0, 84, 1.2, "#6A7076")
+		_rect(ex - 52, top + 150, 104, 8, "#C9BCA2", _stroke("#A89A80", 1))
+		# The doors: an aluminium frame, two glass leaves, push bars, the transom.
+		_rect(ex - 74, g - 204, 148, 198, "#2A2E32", _stroke("#0E1012", 2))
+		_rect(ex - 68, g - 198, 136, 26, "url(#glass)", _stroke("#4A5056", 1.5))
+		for j in 2:
+			var lx := ex - 68.0 + j * 69.0
+			_rect(lx, g - 168, 67, 158, "#3A4046")
+			_rect(lx + 5, g - 163, 57, 148, "url(#glass)")
+			_path("M%s %s l26 0 l-30 70 l-26 0 z" % [_n(lx + 10), _n(g - 160)], "#FFFFFF", 'opacity="0.16"')
+			_rect(lx + 8, g - 92, 51, 6, "#C9CCD0", _stroke("#7A7E84", 1))
+		# The little lit sign over the doors, and the canopy with its light and its shade.
+		_rect(ex - 34, g - 246, 68, 20, "#F4F2EA", _stroke("#4A5056", 2))
+		_rect(ex - 26, g - 240, 52, 3, "#1D4F91")
+		_rect(ex - 20, g - 234, 40, 3, "#1D4F91", 'opacity="0.6"')
+		_rect(ex - 96, g - 224, 192, 16, "#2A2E32", _stroke("#0E1012", 1.5))
+		_rect(ex - 96, g - 224, 192, 3, "#5A6066")
+		_rect(ex - 92, g - 208, 184, 18, "url(#drop)")
+		_rect(ex - 8, g - 208, 16, 4, "#FFF4C8")
+		_snow(ex - 96, 192, g - 224)
+		# The concrete apron at the door.
+		_rect(ex - 100, g - 8, 200, 8, "#BDB7AD", _stroke("#8E8A82", 1))
 
 
 # ── What every lane entrance seen from the street gets ───────────────────────

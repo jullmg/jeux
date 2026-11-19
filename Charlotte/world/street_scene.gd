@@ -856,6 +856,12 @@ func _house_top(art: String) -> float:
 	return _house_origin(layout.find(art)).y + 40.0 * HOUSE_SCALE
 
 
+## How far down a vista a facade runs when its picture is laid along the street (`CrossStreet` depth units), as `_walls_along`
+## measures each building.
+func _wall_depth(art: String) -> float:
+	return (_tex(art).get_width() - 2.0 * MARGIN) * HOUSE_SCALE / 650.0
+
+
 ## The walls along a cross street, built from the street that really runs there (its scene script's layout): from
 ## our corner, its gap `from_gap`, going `direction` (+1 / -1 along its layout) to its next cross street; each building
 ## with its width, height, colour (sampled off its facade) and kind; then the next block, generic, into the distance.

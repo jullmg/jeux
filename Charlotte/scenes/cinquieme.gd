@@ -71,7 +71,8 @@ func _build_cross_streets() -> void:
 	dandurand.school = true
 	dandurand.left_walls = _walls_along("res://scenes/dandurand.gd", "rue_5e", 1, "coin_5e_dandurand")
 	dandurand.right_walls = [
-		{"to": 2.6, "top": _house_top("ecole"), "kind": "school", "color": Color("#A9472F")},
+		# The school's front on Dandurand (`ecole`), its real facade laid along the street from its other end.
+		{"to": _wall_depth("ecole"), "top": _house_top("cinq_ecole"), "kind": "school", "color": Color("#A9472F"), "tex": _tex("ecole"), "flip": true},
 		{"to": CrossStreet.FAR, "top": 330.0, "kind": "plex", "color": Color("#9C5A44")},
 	]
 	# Down Masson toward 6e, its real buildings: the presbytery and the church on the left (the north side), the south side on

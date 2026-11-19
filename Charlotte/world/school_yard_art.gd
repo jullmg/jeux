@@ -1,7 +1,8 @@
 class_name SchoolYardArt
 extends RefCounted
 ## The schoolyard of école Saint-Jean-de-Brébeuf, drawn as SVG at runtime (scenes/cour_ecole.gd): the school's back wall seen
-## from the yard (the same red-brown brick, grey parged base, stone water table and maroon windows as its side on 6e, `ecole_6e`),
+## from the yard (the same red-brown brick, grey parged base, stone water table, maroon windows and green copper cornice as its
+## side on 6e, `ecole_6e`, brick piers between the bays, and the age of a wall a hundred years old),
 ## the chain-link fences at both ends with the street beyond, the climbing frame and its slide, the basketball hoop, the bench
 ## and, in winter, the yard's snow hill. Each texture is in world pixels (raster 1), light from the upper left, the season's
 ## snow on its ledges. Words (the door's plate) are labels in the scene: SVG text doesn't render in these textures.
@@ -14,6 +15,9 @@ const PARGE := "#B5AFA5"
 const FRAME := "#6E2A2A"
 const SNOW := "#F4F8FC"
 const SNOW_SHADE := "#C9D6E6"
+const COPPER := "#5A9A84"
+const COPPER_DARK := "#2F5E50"
+const COPPER_LIGHT := "#8CC4AE"
 
 ## The back wall: its height and where its storeys and its door are (in the texture, whose foot is the yard).
 const WALL_H := 470.0
@@ -59,15 +63,47 @@ static func back_wall(w: float, door_x: float, rng: RandomNumberGenerator) -> Im
 		var by := brick_top + float(rng.randi_range(0, int((table_y - brick_top) / 7.0) - 1)) * 7.0 + 1.0
 		var tone := BRICK_DARK if rng.randf() < 0.6 else "#B0614A"
 		s += _rect(bx, by, 15.0, 5.5, tone, 'fill-opacity="0.55"')
-	# The stone coping, its shade on the brick under it, the water table and the parged base.
-	s += _rect(0, 0, w, COPING, STONE)
-	s += _rect(0, COPING - 3.0, w, 3.0, "#A79E8C")
-	s += _rect(0, COPING, w, 14.0, "url(#drop)")
+	# Its age, from a generator of its own so the rest of the yard draws what it always did: the soot run down from under the
+	# cornice, the green the rain has washed out of the copper, a patch of newer, paler brick.
+	var wear := RandomNumberGenerator.new()
+	wear.seed = 6113
+	for i in int(w / 120.0):
+		var sw := wear.randf_range(14.0, 50.0)
+		s += _rect(wear.randf_range(0.0, w - sw), COPING + 6.0, sw, wear.randf_range(50.0, 190.0), "url(#drop)", 'opacity="%.2f"' % wear.randf_range(0.3, 0.7))
+	for i in int(w / 160.0):
+		s += _rect(wear.randf_range(0.0, w - 10.0), COPING + 6.0, wear.randf_range(4.0, 10.0), wear.randf_range(24.0, 80.0), COPPER, 'fill-opacity="%.2f"' % wear.randf_range(0.08, 0.18))
+	for i in 2:
+		var pw := wear.randf_range(80.0, 180.0)
+		var px := wear.randf_range(0.0, w - pw)
+		var py := brick_top + 7.0 * float(wear.randi_range(8, 40))
+		for j in wear.randi_range(3, 6):
+			s += _rect(px + wear.randf_range(-14.0, 14.0), py + j * 7.0, pw, 7.0, "#FFF4E0", 'fill-opacity="0.08"')
+	# Brick piers between the bays, a hair proud of the wall: lit on their left, their shade on their right.
+	var piers := int(floor(w / BAY))
+	var pier_margin := (w - piers * BAY) / 2.0
+	for b in piers + 1:
+		var px := pier_margin + BAY * b - 8.0
+		s += _rect(px, brick_top, 16.0, table_y - brick_top, "#FFF0E0", 'fill-opacity="0.07"')
+		s += _rect(px, brick_top, 2.0, table_y - brick_top, "#FFF0E0", 'fill-opacity="0.2"')
+		s += _rect(px + 16.0, brick_top, 4.0, table_y - brick_top, "#1A0C08", 'fill-opacity="0.2"')
+	# The copper cornice and the shade it throws, the water table and the parged base.
+	s += _rect(0, COPING + 6.0, w, 18.0, "url(#drop)")
+	s += _rect(0, 0, w, 6.0, COPPER_LIGHT)
+	s += _rect(0, 6.0, w, 14.0, COPPER)
+	s += _rect(0, 6.0, w, 2.5, COPPER_LIGHT, 'fill-opacity="0.6"')
+	var mx := 8.0
+	while mx < w - 8.0:
+		s += _rect(mx, 9.0, 6.0, 9.0, COPPER_DARK, 'fill-opacity="0.45"')
+		mx += 18.0
+	s += _rect(0, 20.0, w, 4.0, COPPER_DARK)
 	s += _rect(0, table_y, w, 10.0, STONE)
+	s += _rect(0, table_y, w, 2.5, "#FFFFFF", 'fill-opacity="0.4"')
 	s += _rect(0, table_y + 8.0, w, 2.0, "#9C9484")
 	s += _rect(0, table_y + 10.0, w, BASE_H, PARGE)
+	s += _rect(0, table_y + 10.0, w, 10.0, "url(#drop)")
 	for i in int(w / 40.0):
 		s += _rect(rng.randf_range(0.0, w - 60.0), table_y + rng.randf_range(16.0, BASE_H - 10.0), rng.randf_range(20.0, 70.0), 1.2, "#9E978C", 'fill-opacity="0.5"')
+	s += _rect(0, h - 22.0, w, 22.0, "#5E5A52", 'fill-opacity="0.12"')
 	# The windows: three storeys of them in pairs, one bay after another, the pupils' door in its own bay.
 	var bays := int(floor(w / BAY))
 	var margin := (w - bays * BAY) / 2.0
@@ -141,7 +177,10 @@ static func _window(x: float, y: float, w: float, h: float) -> String:
 	s += _rect(x + 5.0, y + 5.0, w - 10.0, 12.0, "#E9E2D0", 'fill-opacity="0.9"')
 	s += '<polygon points="%.1f,%.1f %.1f,%.1f %.1f,%.1f" fill="#FFFFFF" fill-opacity="0.22"/>' % [x + 8.0, y + 20.0, x + 26.0, y + 20.0, x + 8.0, y + 44.0]
 	s += _rect(x - 5.0, y + h, w + 10.0, 7.0, STONE)
+	s += _rect(x - 5.0, y + h, w + 10.0, 2.0, "#FFFFFF", 'fill-opacity="0.45"')
 	s += _rect(x - 5.0, y + h + 7.0, w + 10.0, 8.0, "url(#drop)")
+	for ex in [x - 6.0, x + w - 4.0]:
+		s += _rect(ex, y + h + 7.0, 9.0, 34.0, "url(#drop)", 'opacity="0.55"')
 	if Season.is_winter():
 		s += '<path d="M%.1f %.1f q%.1f -6 %.1f 0 z" fill="%s"/>' % [x - 5.0, y + h, (w + 10.0) / 2.0, w + 10.0, SNOW]
 	return s
