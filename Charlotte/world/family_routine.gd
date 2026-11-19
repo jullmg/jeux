@@ -183,6 +183,10 @@ func _follow_hand() -> void:
 		_prop.position = who.hand_position()
 		_prop.scale = Vector2(float(who.facing), 1.0) * HELD_SCALE
 		if _prop.kind == "mug":
+			# The cup goes ahead of the hand, toward the way they face (toward the lips when they drink), the handle on the
+			# hand's side: the mug is drawn with its cup to the left of the handle, so it is mirrored against `facing` (Julien
+			# saw them drinking from the handle's side).
+			_prop.scale = Vector2(-float(who.facing), 1.0) * HELD_SCALE
 			# The cup tips toward the lips as they drink (the rotation is in the parent's space, so it is turned by hand).
 			_prop.sip = who.sip_amount()
 			_prop.rotation = _prop.sip * 0.5 * who.facing
