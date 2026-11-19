@@ -170,7 +170,40 @@ func _synth(sound: String) -> PackedFloat32Array:
 			return _bird()
 		"wind":
 			return _wind()
+		"shovel":
+			return _shovel()
+		"snowblower":
+			return _snowblower()
 	return PackedFloat32Array()
+
+
+# A shovel pushed into the snow and thrown: a short scrape of the blade on the step, then the soft whump of the snow.
+func _shovel() -> PackedFloat32Array:
+	var out := _buffer(0.5)
+	var y := 0.0
+	var a := _lp(2600.0)
+	for i in out.size():
+		var t := float(i) / RATE
+		y += a * (_noise() - y)
+		var scrape := (0.6 + 0.4 * sin(TAU * 38.0 * t)) * minf(t * 40.0, 1.0) * exp(-t * 9.0) if t < 0.28 else 0.0
+		var whump := sin(TAU * 90.0 * (t - 0.3)) * exp(-(t - 0.3) * 18.0) * 0.35 if t > 0.3 else 0.0
+		out[i] = y * scrape * 0.5 + whump
+	return out
+
+
+# The snow blower going by: a deep diesel rumble beating a little, the roar of its auger and fan, about four seconds that
+# swell and fade (played several times as it passes).
+func _snowblower() -> PackedFloat32Array:
+	var out := _buffer(4.0)
+	var y := 0.0
+	var a := _lp(900.0)
+	for i in out.size():
+		var t := float(i) / RATE
+		y += a * (_noise() - y)
+		var env := sin(PI * t / 4.0)
+		var engine := (fmod(t * 48.0, 1.0) * 2.0 - 1.0) * (0.6 + 0.4 * sin(TAU * 3.0 * t)) * 0.18
+		out[i] = (engine + y * 0.55) * env * 0.6
+	return out
 
 
 # The schoolyard's electric bell at the end of recess: a metal dome struck fast by its clapper (a bright inharmonic tone,

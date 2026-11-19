@@ -143,6 +143,17 @@ func _build_doors() -> void:
 		Transition.change_scene(self, "res://scenes/house.tscn")))
 
 
+# The morning after the storm (quest "souffleuse"): Papa shovelling, the heaps on her steps, the windrow, the snow removal.
+# In front of the people, with the lamps and the traffic.
+func _build_props() -> void:
+	super()
+	if Snowstorm.dad_outside():
+		var removal := SnowRemoval.new()
+		removal.scene = self
+		removal.door_x = _door_x("duplex_charlotte")
+		add_child(removal)
+
+
 ## How far along the scene Rue Dandurand is (0..1), for the town map (`TownMap._here`).
 func _dandurand_f() -> float:
 	return (_starts[layout.find("rue_dandurand")] + _starts[layout.find("rue_dandurand") + 1]) / 2.0 / _street_width

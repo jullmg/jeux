@@ -7,7 +7,7 @@ extends RefCounted
 
 ## Quests that come `after` "halloween" open the morning after it, in winter; the Halloween evening doesn't wait for them
 ## (`after_halloween`).
-const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole", "fete", "bonhomme", "glissade"]
+const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole", "fete", "bonhomme", "glissade", "souffleuse"]
 const ALL := {
 	"milk": {
 		"title": "Maman a besoin de lait : va au dépanneur",
@@ -111,6 +111,12 @@ const ALL := {
 		"find": "Il a neigé en masse… le service de garde a peut-être un plan.",
 		"age": 7, "after": "ecole", "reward": 2.0,
 	},
+	"souffleuse": {
+		"title": "La tempête et la souffleuse",
+		"hint": "Aide Papa à pelleter l'escalier après la tempête, pis regarde passer la souffleuse.",
+		"find": "Le ciel est ben gris… une tempête s'en vient peut-être.",
+		"age": 7, "after": "halloween", "reward": 2.0,
+	},
 }
 
 
@@ -128,6 +134,8 @@ static func hint(id: String) -> String:
 		return Snowman.hint()
 	if id == Sledding.QUEST and active(id):
 		return Sledding.hint()
+	if id == Snowstorm.QUEST and active(id):
+		return Snowstorm.hint()
 	return str(ALL.get(id, {}).get("hint", ""))
 
 

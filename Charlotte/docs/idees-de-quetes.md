@@ -22,8 +22,8 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
     frigo, les boutons de Maman, la tuque du Canadien de Papa)
 12. ~~**La glissade dans la cour d'école**~~ (fait : la quête `glissade`, `world/sledding.gd` ; Jade prête le traîneau au
     service de garde, trois descentes sur la butte de la cour)
-13. **La souffleuse passe la nuit** (choisie par Julien, 2026-11-19) : après une tempête, Charlotte aide Papa à pelleter
-    l'escalier ; les voitures sont parties pour le déneigement et les gros camions (souffleuse, camions) passent dans la rue.
+13. ~~**La souffleuse passe la nuit**~~ (fait : la quête `souffleuse`, `world/snowstorm.gd` et `world/snow_removal.gd` ; la
+    tempête au coucher, les quatre tas sur le perron et les marches avec Papa, puis la souffleuse et son camion)
 14. **Faire le sapin de Noël** (Julien, 2026-11-19) : décorer le sapin de Noël à la maison.
 15. **Noël** (Julien, 2026-11-19) : la grande quête de l'hiver, après le sapin, comme l'Halloween l'est pour l'automne.
 
@@ -40,8 +40,6 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 - Alphée et Constance Turcotte (`world/twins.gd`) ont déjà donné la cachette et le livre perdu ; la soirée cinéma et la fête leur iraient bien aussi.
 - Soirée cinéma : le dépanneur vend déjà de quoi grignoter (`Shop._buy`, `Shop.PRICES`) et l'argent de poche existe (`GameState.money`) ; il faudrait que Maman ou Papa lui en donne (nouveau), et un lieu où regarder le film (la télé du corridor, `TvScreen`).
 - La fête : il n'y a pas encore de magasin de cadeaux, et Maman ne sort pas encore de la maison (elle marche seulement à l'intérieur, `FamilyRoutine`). À décider.
-- La souffleuse : les voitures ont été retirées des rues (2026-10-31, voir l'historique git) ; il faudrait dessiner la
-  souffleuse, les camions et les pancartes orange de déneigement, et pelleter l'escalier extérieur de son duplex.
 - Le sapin de Noël : Julien : il s'achète à la vente de sapins dans la cour d'école. Où va-t-il (le salon) ? Les décorations : boules, guirlandes, lumières, l'étoile ou
   l'ange en haut (Papa la soulève ?), une à la fois depuis une boîte comme le ménage de sa chambre. Le sapin reste décoré
   ensuite (un flag), allumé le soir.

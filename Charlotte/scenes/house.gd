@@ -195,7 +195,14 @@ func _build_family() -> void:
 			or Snowman.needs("boutons") and not Carry.busy())
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
 		return Quests.available("hamster") or Quests.available("plants") or Quests.available("chips") \
-			or Quests.active("chips") and Carry.has("chips") or Snowman.needs("tuque") and not Carry.busy())
+			or Quests.active("chips") and Carry.has("chips") or Snowman.needs("tuque") and not Carry.busy() \
+			or Snowstorm.step() == 1)
+	# The morning after the storm, Papa is out front shovelling.
+	if Snowstorm.dad_outside():
+		_dad.visible = false
+		_dad_routine.process_mode = Node.PROCESS_MODE_DISABLED
+		_dad_routine.spot.queue_free()
+		_dad_routine.mark.queue_free()
 
 
 # A parent's routine with its click area and its "!" (over whoever has a quest for Charlotte, or is waiting for what she brings).
@@ -277,6 +284,18 @@ func _talk_to_dad() -> void:
 	_dad_routine.pause(4.0, _charlotte.position.x)
 	if Quests.active("chips") and Carry.has("chips"):
 		_hockey_night()
+	elif Snowstorm.step() == 1:
+		_dad.express("happy", 2.0)
+		_say(_dad, "Toute une bordée de neige, Chachoue !\nViens m'aider à pelleter l'escalier. Je t'attends dehors !", 390.0, 4.0)
+		Snowstorm.set_step(2)
+		Notebook.announce("step", "Papa t'attend dehors pour pelleter, devant la maison !", Snowstorm.HEADING)
+		var out := create_tween()
+		out.tween_interval(4.2)
+		out.tween_callback(func() -> void:
+			_dad.visible = false
+			_dad_routine.process_mode = Node.PROCESS_MODE_DISABLED
+			_dad_routine.spot.queue_free()
+			_dad_routine.mark.queue_free())
 	elif Snowman.needs("tuque"):
 		_give_for_snowman(_dad, "tuque", "Une tuque pour le bonhomme ? Prends ma vieille\ntuque du Canadien. Y va être champion !", 390.0)
 	elif Quests.start("chips"):
@@ -1088,6 +1107,10 @@ func _go_to_sleep() -> void:
 		if Quests.done(School.QUEST):
 			GameState.flags.erase(School.STEP)
 		var halloween_over: bool = Halloween.step() == 3 and GameState.flags.get("halloween_counted", false)
+		# A storm blew all night (quest "souffleuse"): Papa will need a hand with the shovel.
+		var storm := not halloween_over and Snowstorm.storm_tonight()
+		if storm and Quests.start(Snowstorm.QUEST):
+			Snowstorm.set_step(1)
 		if halloween_over:
 			_end_halloween()
 			# Her two windows were drawn for last night, Halloween's own dark blue with its moon and its
@@ -1099,7 +1122,7 @@ func _go_to_sleep() -> void:
 			# It snowed in the night: now it falls past the windows too.
 			for snow in _window_snows:
 				snow.visible = Season.is_winter()
-		words.text = "Le lendemain matin…" if not halloween_over else "Le lendemain matin… il a neigé !"
+		words.text = "Le lendemain matin… il a neigé !" if halloween_over else ("Le lendemain matin… quelle tempête !" if storm else "Le lendemain matin…")
 		words.position.y = 0.0
 		moon.queue_free()
 		_charlotte.position.x = BEDROOM.x + 840.0

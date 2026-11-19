@@ -222,8 +222,8 @@ func _open_street() -> void:
 
 # Now and then someone rides by in the traffic lane, from one end of the view to the other (rarer in winter).
 func _spawn_cyclists(delta: float) -> void:
-	# Nobody rides by on Halloween night: the street belongs to the children.
-	if _traffic == null or Halloween.night():
+	# Nobody rides by on Halloween night (the street belongs to the children), nor the morning of the snow removal.
+	if _traffic == null or Halloween.night() or Snowstorm.dad_outside():
 		return
 	_bike_timer -= delta
 	if _bike_timer > 0.0:
