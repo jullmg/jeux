@@ -18,6 +18,12 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 10. **L'orage et la panne d'électricité** (idée de Julien, 2026-11-18) : un orage éclate (ciel noir, éclairs, tonnerre, pluie),
     Charlotte doit rentrer vite à la maison, et là il y a une panne d'électricité : plus de lumières ni de télé, il faut trouver
     la lampe de poche (ou des chandelles avec Maman et Papa) et attendre que le courant revienne.
+11. **Le bonhomme de neige avec Billie et Auguste** (choisie par Julien, 2026-11-19) : leur première quête. Charlotte rassemble
+    une carotte (au Fraîchement Bon), des boutons et une tuque, puis on monte le bonhomme dans la ruelle.
+12. **La glissade dans la cour d'école** (choisie par Julien, 2026-11-19) : la butte de neige de la cour est déjà dessinée ;
+    il faut d'abord emprunter un traîneau.
+13. **La souffleuse passe la nuit** (choisie par Julien, 2026-11-19) : après une tempête, Charlotte aide Papa à pelleter
+    l'escalier ; les voitures sont parties pour le déneigement et les gros camions (souffleuse, camions) passent dans la rue.
 
 ## Notes de départ (à préciser avec Julien avant de programmer)
 
@@ -32,5 +38,13 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 - Alphée et Constance Turcotte (`world/twins.gd`) ont déjà donné la cachette et le livre perdu ; la soirée cinéma et la fête leur iraient bien aussi.
 - Soirée cinéma : le dépanneur vend déjà de quoi grignoter (`Shop._buy`, `Shop.PRICES`) et l'argent de poche existe (`GameState.money`) ; il faudrait que Maman ou Papa lui en donne (nouveau), et un lieu où regarder le film (la télé du corridor, `TvScreen`).
 - La fête : il n'y a pas encore de magasin de cadeaux, et Maman ne sort pas encore de la maison (elle marche seulement à l'intérieur, `FamilyRoutine`). À décider.
+- Le bonhomme de neige : Billie et Auguste (`world/billie_auguste.gd`) attendent leur première quête dans `BillieAuguste.interact`.
+  La carotte au Fraîchement Bon pose problème : il est sur Masson, qu'on n'atteint pas encore depuis son bloc, et il faut
+  traverser (8 ans). Avant 8 ans : la carotte chez Xin-Xin ou Oh Bon!, ou dans le frigo de Maman. Les boutons et la tuque
+  pourraient venir de la maison (sa commode, la penderie de l'entrée). Une chose à la fois dans les bras (`Carry`).
+- La glissade : la butte de neige est dans `SchoolYardArt` (hiver, avec un enfant qui glisse déjà) ; la cour n'est atteinte
+  que par la quête de l'école. Le traîneau à emprunter : aux jumelles, à Alyzée, ou au service de garde ?
+- La souffleuse : les voitures ont été retirées des rues (2026-10-31, voir l'historique git) ; il faudrait dessiner la
+  souffleuse, les camions et les pancartes orange de déneigement, et pelleter l'escalier extérieur de son duplex.
 - Le livre perdu (fait) : Constance le demande, il est dans le croque-livre de la ruelle verte (`ruelle.gd` `BOOK_LANE`), Charlotte le porte dans ses bras
   (`Carry` « book », `LaneArt.lost_book`) et le `BookReader` s'ouvre sur « Minou et la lune » quand elle le rapporte.
