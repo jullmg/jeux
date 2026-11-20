@@ -547,6 +547,18 @@ static func craft() -> ImageTexture:
 	return _svg(64, 64, s)
 
 
+## Canvas 64 × 64: a concha, the Mexican sweet bread (Emilia's mamá bakes them), on a paper napkin: a round golden bun under a
+## pink sugar crust scored like a shell.
+static func concha() -> ImageTexture:
+	var s := '<ellipse cx="32" cy="44" rx="29" ry="11" fill="#FFFFFF" stroke="#C9C2B4" stroke-width="2"/>'
+	s += '<ellipse cx="32" cy="37" rx="22" ry="14" fill="#E6B26B" stroke="#B9823F" stroke-width="2"/>'
+	s += '<path d="M12 33 a20 13 0 0 1 40 0 q-20 6 -40 0 z" fill="#F7B6C8" stroke="#D9849F" stroke-width="2"/>'
+	for k in 5:
+		var x := 17.0 + k * 7.5
+		s += '<path d="M%.1f 24 q%.1f 7 %.1f 14" fill="none" stroke="#FFF1F5" stroke-width="2" stroke-linecap="round"/>' % [x, (k - 2) * -1.5, (k - 2) * 2.0]
+	return _svg(64, 64, s)
+
+
 ## Canvas 64 × 64: the snack on its paper plate: apple slices and crackers.
 static func snack() -> ImageTexture:
 	var s := '<ellipse cx="32" cy="40" rx="28" ry="12" fill="#FFFFFF" stroke="#C9C2B4" stroke-width="2"/>'

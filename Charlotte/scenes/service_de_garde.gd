@@ -16,6 +16,8 @@ const SNACK_X := 1540.0
 const JADE_X := 1860.0
 const GAME_X := 2060.0
 const ALYZEE_X := 2330.0
+## Emilia (quest "emilia"), between the snack table and Jade.
+const EMILIA_X := 1700.0
 ## Papa comes this long after she has finished her drawing for her parents.
 const PAPA_AFTER := 5.0
 ## Jade reminds her of the drawing every so often until it is done.
@@ -37,11 +39,23 @@ const ALYZEE_GAME := [
 	[-1, "Ah non ! Moi, je glisse sur le serpent…"],
 	[0, "Hi hi ! On en refait une demain ?"],
 ]
+## Emilia shares her mamá's concha (quest "emilia"): [who (0 Emilia, -1 Charlotte), what].
+const EMILIA_SHARE := [
+	[0, "Chachoue ! Ma mamá m'a donné des conchas\npour la collation. J'en ai une pour toi !"],
+	[0, "C'est du pain sucré mexicain, avec une croûte\nde sucre rose qui ressemble à un coquillage."],
+	[-1, "Wow ! Je peux goûter ?"],
+]
+const EMILIA_AFTER := [
+	[0, "¿Te gusta ? Ça veut dire : t'aimes ça ?"],
+	[-1, "Oui ! C'est super bon ! Gracias, Emilia !"],
+	[0, "¡De nada ! Ça veut dire : y'a pas de quoi."],
+]
 const KID_LINES := [["Regarde mon bricolage !", "J'ai mis ben trop de colle…"], ["On fait la plus grande tour du monde !"],
 	["Les pommes, c'est ma collation préférée !"]]
 
 var _jade: Character
 var _alyzee: Character
+var _emilia: Character
 var _papa: Character
 var _kids: Array[Character] = []
 var _blocks: Sprite2D
@@ -105,7 +119,9 @@ func _process(delta: float) -> void:
 		return
 	_wait += delta
 	if _drew:
-		if _wait - _drew_at > PAPA_AFTER:
+		# On Emilia's day Papa waits until the concha has been shared (and a talk in progress is over).
+		var ready := not Emilia.day() or (Emilia.shared() and not _busy)
+		if _wait - _drew_at > PAPA_AFTER and ready:
 			_papa_arrives()
 	elif _wait - _reminded > REMIND_EVERY and _wait > 10.0 and _control.enabled and not _busy and Sledding.step() == 0 \
 			and not Sledding.can_start():
@@ -180,6 +196,14 @@ func _build_people() -> void:
 	_alyzee.position = Vector2(ALYZEE_X, FEET_Y - 4.0)
 	_alyzee.facing = -1
 	add_child(_alyzee)
+	if Emilia.day() or Emilia.met():
+		_emilia = Character.new()
+		_emilia.look = School.indoors(CharacterLook.emilia())
+		_emilia.fidgets = true
+		_emilia.scale = Vector2.ONE * CHAR_SCALE
+		_emilia.position = Vector2(EMILIA_X, FEET_Y - 4.0)
+		_emilia.facing = -1
+		add_child(_emilia)
 
 
 func _build_spots() -> void:
@@ -189,6 +213,10 @@ func _build_spots() -> void:
 	add_child(DoorSpot.make(Rect2(GAME_X - 100.0, 550.0, 200.0, 120.0), _play_game, GAME_X - 140.0))
 	add_child(DoorSpot.make(Rect2(ALYZEE_X - 55.0, 500.0, 110.0, 170.0), _play_game, ALYZEE_X - 120.0))
 	add_child(DoorSpot.make(Rect2(JADE_X - 55.0, 380.0, 110.0, 290.0), _talk_to_jade, JADE_X - 110.0))
+	if _emilia:
+		add_child(DoorSpot.make(Rect2(EMILIA_X - 55.0, 500.0, 110.0, 170.0), _talk_to_emilia, EMILIA_X - 120.0))
+		add_child(QuestMark.make(Vector2(EMILIA_X, FEET_Y - 190.0), func() -> bool:
+			return Emilia.day() and not Emilia.shared() and _control.enabled and not _busy))
 	for i in _kids.size():
 		var kid := _kids[i]
 		add_child(DoorSpot.make(Rect2(kid.position.x - 50.0, FEET_Y - 170.0, 100.0, 170.0), func() -> void:
@@ -238,6 +266,41 @@ func _out_to_slide() -> void:
 	Sfx.play("door")
 	Transition.street_x = Sledding.YARD_START
 	Transition.change_scene_saying(self, Sledding.YARD, "Le service de garde sort glisser dans la cour…", 1.4)
+
+
+# Emilia: on the quest's day she shares a concha with her (and Papa waits for it); otherwise a line of hers.
+func _talk_to_emilia() -> void:
+	if _busy:
+		return
+	_emilia.facing = -1 if _charlotte.position.x < _emilia.position.x else 1
+	if not Emilia.day() or Emilia.shared():
+		_say(_emilia, Emilia.LINES[randi() % Emilia.LINES.size()], 175.0, 2.6)
+		return
+	_busy = true
+	_did = true
+	var steps := create_tween()
+	_emilia_lines(steps, EMILIA_SHARE)
+	steps.tween_callback(func() -> void:
+		Sfx.play("pop", _charlotte.position + Vector2(0, -80))
+		_treat(ClassArt.concha(), "Miam ! Une concha !", 0.6))
+	steps.tween_interval(2.2)
+	_emilia_lines(steps, EMILIA_AFTER)
+	steps.tween_callback(func() -> void:
+		GameState.flags[Emilia.SHARED] = true
+		_emilia.express("happy", 2.0)
+		_charlotte.express("happy", 2.0)
+		Notebook.announce("step", "Emilia t'a fait goûter une concha ! Attends Papa pour lui raconter ta journée.", Emilia.HEADING)
+		_busy = false)
+
+
+func _emilia_lines(steps: Tween, lines: Array) -> void:
+	for line: Array in lines:
+		steps.tween_callback(func() -> void:
+			if line[0] < 0:
+				_say(_charlotte, line[1], 200.0, 2.4)
+			else:
+				_say(_emilia, line[1], 175.0, 2.4))
+		steps.tween_interval(Bubble.reading_time(line[1], 2.4) + 0.2)
 
 
 func _jade_says(text: String, seconds := 2.6) -> void:
@@ -381,6 +444,11 @@ func _go_home_with_papa() -> void:
 	if School.first_day():
 		lines += [[_charlotte, "Papa ! J'ai une nouvelle amie !\nElle s'appelle Alyzée !"],
 			[_papa, "Une nouvelle amie ? Wow !\nBravo, ma grande !"]]
+	elif Emilia.day():
+		lines += [[_charlotte, "Papa ! Je me suis fait une amie : Emilia !\nSa mamá vient du Mexique !"],
+			[_papa, "Une nouvelle amie ? Quelle belle journée !"],
+			[_charlotte, "Elle m'a fait goûter une concha,\npis elle m'a appris « mariposa » !"],
+			[_papa, "Une concha ? Ça a l'air délicieux !\nBravo, ma grande !"]]
 	else:
 		var stickers := int(GameState.flags.get(School.STICKERS, 0))
 		lines += [[_charlotte, "Madame Nadia m'a donné un autocollant !\nJ'en ai %d, astheure !" % stickers],
@@ -393,8 +461,13 @@ func _go_home_with_papa() -> void:
 	talk.tween_callback(func() -> void:
 		if School.first_day():
 			Quests.complete(School.QUEST)
+		elif Emilia.day():
+			Quests.complete(Emilia.QUEST)
 		_alyzee.facing = -1
-		_alyzee_says("Bye, Chachoue ! À demain !"))
+		_alyzee_says("Bye, Chachoue ! À demain !")
+		if _emilia:
+			_emilia.facing = -1
+			_say(_emilia, "¡Adiós, Chachoue ! À demain !", 175.0, 2.4))
 	talk.tween_interval(3.4)
 	talk.tween_callback(func() -> void:
 		School.end_day()

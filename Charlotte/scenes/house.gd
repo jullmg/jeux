@@ -1340,6 +1340,9 @@ func _invitation() -> void:
 
 
 func _mom_about_school() -> void:
+	if Quests.available(Emilia.QUEST):
+		_say(_mom, "Il paraît qu'une nouvelle élève arrive à ton école !\nVeux-tu y aller ? Passe par la porte d'en avant.", 400.0, 4.0)
+		return
 	_say(_mom, "Veux-tu aller à l'école aujourd'hui ?\nJe t'amène : passe par la porte d'en avant !", 400.0, 3.6)
 
 
@@ -1914,6 +1917,8 @@ func _school_or_play() -> void:
 	])
 	card.chose.connect(func(i: int) -> void:
 		if i == 0:
+			# A new pupil is starting at school: the quest "emilia" begins on this morning.
+			Quests.start(Emilia.QUEST)
 			School.set_step(1)
 			_off_to_school()
 		elif i == 1:

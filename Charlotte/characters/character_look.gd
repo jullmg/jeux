@@ -204,6 +204,29 @@ static func alyzee() -> CharacterLook:
 	return look
 
 
+## Emilia, seven, of Mexican heritage (her mamá comes from Puebla, her papa is from Montréal; no photo, invented): warm
+## brown skin, long dark braids, big dark eyes, a turquoise flowered dress with a coral accent, white tights, red sneakers.
+static func emilia() -> CharacterLook:
+	var look := CharacterLook.new()
+	look.age = "child"
+	look.skin = Color("#E0AC80")
+	look.hair_style = "braids"
+	look.hair_color = Color("#241510")
+	look.eye_color = Color("#3B2314")
+	look.lashes = true
+	look.mouth = "smile"
+	look.outfit = "dress"
+	look.outfit_color = Color("#1FA39B")
+	look.accent_color = Color("#F0556B")
+	look.pattern = "flowers"
+	look.sleeve = "short"
+	look.legwear = "tights"
+	look.legwear_color = Color("#F4F1EA")
+	look.shoes = "sneaker"
+	look.shoe_color = Color("#D9342B")
+	return look
+
+
 ## Jade, the educator: young, auburn hair in a ponytail, a teal hoodie, jeans, sneakers.
 static func jade() -> CharacterLook:
 	var look := CharacterLook.new()

@@ -26,6 +26,8 @@ const HOOP_X := 2190.0
 ## Where the classmates stand, a little behind Charlotte (so she passes in front of them), and the yard's own people.
 const KID_Y := 624.0
 const START_X := 340.0
+## Where Emilia draws in chalk (quest "emilia"), between the bench and the skipping rope.
+const EMILIA_X := 1640.0
 ## How long the children play before the bell on an ordinary school day (seconds).
 const RECESS := 35.0
 
@@ -42,6 +44,7 @@ const SLIDE_PATH := [Vector2(2190, 462), Vector2(2260, 486), Vector2(2320, 544),
 	Vector2(2440, 632), Vector2(2490, 638)]
 
 var _alyzee: Alyzee
+var _emilia: Emilia
 var _kids: Array[_Kid] = []
 var _supervisor: _Kid
 var _mom: Character
@@ -78,6 +81,8 @@ func _ready() -> void:
 		_build_classmates()
 		if not _garde:
 			_build_alyzee()
+			if Emilia.day() or Emilia.met():
+				_build_emilia()
 	var start_x := START_X
 	# A saved game, or the debug menu, brings her back where she was.
 	if not is_nan(Transition.street_x):
@@ -94,6 +99,8 @@ func _ready() -> void:
 	add_child(_control)
 	if _alyzee:
 		_alyzee.control = _control
+	if _emilia:
+		_emilia.control = _control
 	_build_doors()
 	var saver := Saver.new()
 	saver.who = _charlotte
@@ -130,7 +137,8 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_follow_charlotte()
 	# On an ordinary school day (Alyzée is already her friend) the bell rings by itself after a while of play.
-	if School.step() == 2 and Alyzee.met() and not _bell_rung and _control.enabled and not _control.hands_off:
+	if School.step() == 2 and Alyzee.met() and (Emilia.met() or not Emilia.day()) and not _bell_rung and _control.enabled \
+			and not _control.hands_off:
 		_recess += delta
 		if _recess > RECESS:
 			_ring_the_bell()
@@ -277,6 +285,18 @@ func _build_alyzee() -> void:
 	add_child(_alyzee)
 	_alyzee.played.connect(_ring_the_bell)
 	add_child(QuestMark.make(_alyzee.position + Vector2(0, -150), _alyzee.waiting))
+
+
+# Emilia (quest "emilia"): on the quest's day she sits on the asphalt drawing a chalk butterfly, a "!" over her; once she is a
+# friend she stands by the climbing frame's end of the yard. Meeting her rings the bell, as playing tag with Alyzée does.
+func _build_emilia() -> void:
+	_emilia = Emilia.new()
+	_emilia.position = Vector2(EMILIA_X, KID_Y)
+	_emilia.scale = Vector2.ONE * CHAR_SCALE
+	_emilia.bounds = Vector2(380.0, DOOR_X - 60.0)
+	add_child(_emilia)
+	_emilia.played.connect(_ring_the_bell)
+	add_child(QuestMark.make(_emilia.position + Vector2(0, -130), _emilia.waiting))
 
 
 # The gate (back home, once school is over) and the pupils' door (not before the bell).
@@ -478,6 +498,11 @@ func _ring_the_bell() -> void:
 		_alyzee.kid.facing = 1 if _charlotte.position.x > _alyzee.position.x else -1
 		_alyzee.say("Viens, Chachoue !\nOn s'assoit ensemble en classe ?" if first else "Viens, Chachoue ! On rentre !"))
 	steps.tween_interval(3.2)
+	if _emilia and Emilia.day():
+		steps.tween_callback(func() -> void:
+			_emilia.kid.facing = -1
+			_emilia.say("¡Vamos ! On rentre\nensemble, les amigas !", 2.6))
+		steps.tween_interval(2.8)
 	if first:
 		steps.tween_callback(func() -> void:
 			_charlotte.facing = 1 if _alyzee.position.x > _charlotte.position.x else -1

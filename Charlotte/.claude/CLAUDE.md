@@ -792,6 +792,18 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
        `flags.ecole_today_done`, cleared at bedtime). Art: `world/class_art.gd` (`ClassArt`).
   - A step of a long quest announces itself with `Notebook.announce("step", words, heading)`: the heading names its quest
     ("🍿  Soirée cinéma", "🏫  L'école"; Halloween's when none is given).
+  - emilia, a second school day (after "ecole"; `world/emilia.gd`, `Emilia`, `CharacterLook.emilia()`): started by the front door's
+    "À l'école" (`house.gd _school_or_play`, `Quests.start`) the first morning after the first day; Maman's line hints at "une nouvelle
+    élève". It runs on the school's own steps (`School.step()`), `Emilia.day()` = the quest is active and she is at school: 2. in the yard
+    Emilia (seven, Mexican heritage, braids, turquoise flowered dress, a mamá from Puebla and an abuela in Mexico) sits on the asphalt
+    drawing a monarch butterfly in chalk (`Emilia._Chalk`, half done), a "!" over her; the meeting (`MEETING`: "mariposa", the
+    monarchs flying to Mexico, Charlotte draws the other wing, "amigas") sets `flags.met_emilia` (the notebook's friends page) and rings
+    the bell (`played`); the recess's own timer waits for the meeting; 3. in class she has the second desk (`classe.gd EMILIA`, there
+    every day once met), Madame Nadia welcomes her, she says « ¡Buenos días, la clase ! », and the lesson ends with a fifth question
+    on the Spanish word (`Emilia.word_question`: papillon = mariposa); 4. at the garde she shares a concha, her mamá's sweet bread
+    (`ClassArt.concha`, `service_de_garde.gd _talk_to_emilia`, `flags.emilia_shared`): Papa doesn't come before; she tells him and the
+    quest is done. After that she is in the yard, the class and the garde with her `Emilia.LINES`. Not yet a guest in
+    `Birthday.GUESTS` (it needs a gift picture of its own).
   - fete, Alyzée's birthday (after "ecole"; `world/party.gd`, `Party`, step in `flags.fete_step`, the present in `flags.fete_gift`):
     1. Maman finds the invitation in her school bag (`house.gd _invitation`, `PartyArt.invitation`) and waits at the front door;
     2. the front door takes them to the Jean Coutu ("Maman t'amène au Jean Coutu…"; `jean_coutu.gd _build_party_errand`): Maman

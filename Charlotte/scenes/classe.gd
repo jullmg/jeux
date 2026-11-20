@@ -13,6 +13,8 @@ const DOOR_X := 70.0
 const SEATS := [640.0, 880.0, 1120.0, 1360.0, 1600.0]
 const MINE := 2
 const HERS := 3
+## Emilia's desk (quest "emilia"), the second from the left: she is there once she has become Charlotte's friend.
+const EMILIA := 1
 const SEAT_H := 50.0
 const BOARD := Rect2(1780.0, 110.0, 560.0, 300.0)
 const TEACHER_X := 2150.0
@@ -25,6 +27,7 @@ const MONTHS := ["janvier", "février", "mars", "avril", "mai", "juin", "juillet
 
 var _teacher: Character
 var _alyzee: Character
+var _emilia: Character
 var _kids: Array[Character] = []
 var _seat: Seat
 var _board_text: Label
@@ -200,6 +203,10 @@ func _build_people() -> void:
 		if i == MINE:
 			continue
 		var look := CharacterLook.alyzee() if i == HERS else School.indoors(CharacterLook.random(looks, "child"))
+		# Her desk goes to Emilia (the random look is still drawn, so the other pupils stay the same).
+		var emilia_here := i == EMILIA and (Emilia.met() or Emilia.day())
+		if emilia_here:
+			look = School.indoors(CharacterLook.emilia())
 		var kid := Character.new()
 		kid.look = look
 		kid.scale = Vector2.ONE * CHAR_SCALE
@@ -211,6 +218,11 @@ func _build_people() -> void:
 		seat.sit(kid)
 		if i == HERS:
 			_alyzee = kid
+		elif emilia_here:
+			_emilia = kid
+			add_child(DoorSpot.make(Rect2(SEATS[i] - 50.0, FEET_Y - 150.0, 100.0, 150.0), func() -> void:
+				_emilia.facing = -1 if _charlotte.position.x < _emilia.position.x else 1
+				_say(_emilia, Emilia.LINES[randi() % Emilia.LINES.size()], 175.0, 2.6), SEATS[i] - 110.0))
 		else:
 			_kids.append(kid)
 			add_child(DoorSpot.make(Rect2(SEATS[i] - 50.0, FEET_Y - 150.0, 100.0, 150.0), _kid_says.bind(kid, k), SEATS[i] - 110.0))
@@ -321,9 +333,34 @@ func _start_lesson() -> void:
 			_alyzee.express("happy", 2.0)
 			_alyzee_says("Merci !"))
 		intro.tween_interval(2.0)
+	if Emilia.day():
+		_welcome_emilia(intro)
+		_lesson.append(Emilia.word_question())
 	intro.tween_callback(_teacher_says.bind("On commence ! Charlotte, tu veux répondre ?", 3.0))
 	intro.tween_interval(3.2)
 	intro.tween_callback(_ask)
+
+
+# Madame Nadia welcomes Emilia; she greets the class in Spanish, which the last question will come back to (quest "emilia").
+func _welcome_emilia(intro: Tween) -> void:
+	intro.tween_callback(_teacher_says.bind("Aujourd'hui, on accueille aussi une nouvelle\nélève : Emilia ! Dis-nous un petit mot.", 3.6))
+	intro.tween_interval(4.2)
+	intro.tween_callback(func() -> void:
+		_emilia.express("happy", 2.2)
+		_say(_emilia, "¡Buenos días, la clase !", 175.0, 2.2))
+	intro.tween_interval(2.6)
+	intro.tween_callback(func() -> void:
+		for kid in _kids:
+			kid.express("happy", 2.0)
+		_teacher_says("« Buenos días », ça veut dire « bonjour »\nen espagnol. Emilia parle deux langues !", 3.8))
+	intro.tween_interval(4.4)
+	intro.tween_callback(func() -> void:
+		_say(_emilia, "Chez nous, on parle espagnol pis français.\nMa mamá vient du Mexique !", 175.0, 3.4))
+	intro.tween_interval(3.8)
+	intro.tween_callback(func() -> void:
+		_charlotte.express("happy", 2.0)
+		_say(_charlotte, "Moi, j'ai hâte d'apprendre\ndes mots en espagnol !", 200.0, 2.8))
+	intro.tween_interval(3.0)
 
 
 func _ask() -> void:
@@ -396,7 +433,10 @@ func _end_lesson() -> void:
 	bell.tween_interval(4.0)
 	bell.tween_callback(func() -> void:
 		_alyzee.express("happy", 2.0)
-		_alyzee_says("Viens, Chachoue ! On va au service de garde !"))
+		_alyzee_says("Viens, Chachoue ! On va au service de garde !")
+		if Emilia.day():
+			_emilia.express("happy", 2.0)
+			_say(_emilia, "¡Vamos ! J'ai une surprise\npour vous deux !", 175.0, 2.6))
 	bell.tween_interval(3.2)
 	bell.tween_callback(func() -> void:
 		if School.step() > 0:

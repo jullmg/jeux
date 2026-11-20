@@ -7,7 +7,7 @@ extends RefCounted
 
 ## Quests that come `after` "halloween" open the morning after it, in winter; the Halloween evening doesn't wait for them
 ## (`after_halloween`).
-const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole", "fete", "bonhomme", "glissade", "souffleuse", "sapin", "noel", "jourdelan", "fort", "dent", "anniversaire"]
+const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole", "emilia", "fete", "bonhomme", "glissade", "souffleuse", "sapin", "noel", "jourdelan", "fort", "dent", "anniversaire"]
 const ALL := {
 	"milk": {
 		"title": "Maman a besoin de lait : va au dépanneur",
@@ -93,6 +93,12 @@ const ALL := {
 		"find": "Maman a quelque chose à te dire pour demain matin…",
 		"age": 7, "after": "halloween", "reward": 3.0,
 	},
+	"emilia": {
+		"title": "Une nouvelle amie : Emilia",
+		"hint": "Une nouvelle élève arrive à l'école. À la récré, va voir qui dessine toute seule dans la cour.",
+		"find": "Il paraît qu'une nouvelle élève arrive à l'école…",
+		"age": 7, "after": "ecole", "reward": 2.0,
+	},
 	"fete": {
 		"title": "La fête d'Alyzée",
 		"hint": "Alyzée t'invite à sa fête ! Achète-lui un cadeau au Jean Coutu avec Maman, pis va fêter chez elle.",
@@ -164,6 +170,8 @@ static func hint(id: String) -> String:
 		return Cinema.hint()
 	if id == School.QUEST and active(id):
 		return School.hint()
+	if id == Emilia.QUEST and active(id):
+		return Emilia.hint()
 	if id == Party.QUEST and active(id):
 		return Party.hint()
 	if id == Snowman.QUEST and active(id):
