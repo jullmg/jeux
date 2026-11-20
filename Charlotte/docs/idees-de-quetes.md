@@ -29,6 +29,14 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 15. ~~**Noël**~~ (fait : la quête `noel`, `world/christmas.gd` ; la lettre au père Noël, les biscuits avec Maman, le réveillon,
     le traîneau dans la nuit, les cadeaux du matin de Noël)
 
+16. **Le jour de l'an** (Julien, 2026-11-19, après Noël) : la veillée à la maison, le Bye Bye à la télé, le compte à rebours à
+    minuit, les feux d'artifice par la fenêtre, les souhaits le matin.
+17. **Le fort de neige** (Julien, 2026-11-19) : bâtir un fort avec les jumelles dans la ruelle, puis une bataille de balles de
+    neige contre Billie et Auguste.
+18. **La dent qui branle** (Julien, 2026-11-19) : sa dent tombe, sous l'oreiller, la fée des dents laisse des sous.
+19. **La fête de Charlotte, le 1er février** (Julien, 2026-11-19) : elle choisit les amis qu'elle invite, cinq au plus. Elle
+    garde 7 ans pour l'instant (pas encore le droit de traverser seule).
+
 ## Notes de départ (à préciser avec Julien avant de programmer)
 
 - La quête des chips peut se donner par Maman ou Papa et se rapporter à la maison, comme le lait ; elle ne mettrait rien
