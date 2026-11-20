@@ -64,12 +64,12 @@ func _build_cross_streets() -> void:
 		{"to": 2.3, "top": 290.0, "kind": "plex", "color": Color("#B5603F")},
 		{"to": CrossStreet.FAR, "top": 300.0, "kind": "plex", "color": Color("#C2A07A")},
 	]
-	holt.right_walls = _walls_along("res://scenes/holt.gd", "rue_5e", -1, "coin_5e_holt")
+	holt.right_walls = _walls_along("res://scenes/holt.gd", "rue_5e", -1)
 	var dandurand := _cross_street("rue_dandurand", "Rue Dandurand", -1.0)
 	dandurand.along_name = "5e Avenue"
 	dandurand.facing = "east"
 	dandurand.school = true
-	dandurand.left_walls = _walls_along("res://scenes/dandurand.gd", "rue_5e", 1, "coin_5e_dandurand")
+	dandurand.left_walls = _walls_along("res://scenes/dandurand.gd", "rue_5e", 1)
 	# The south side of Dandurand (dandurand_sud): the school's front from its other end, then its real buildings past 6e.
 	dandurand.right_walls = _walls_along("res://scenes/dandurand_sud.gd", "rue_5e", -1)
 	# Down Masson toward 6e, its real buildings: the presbytery and the church on the left (the north side), the south side on
@@ -77,8 +77,8 @@ func _build_cross_streets() -> void:
 	var masson := _cross_street("rue_masson", "Rue Masson", -1.0)
 	masson.along_name = "5e Avenue"
 	masson.facing = "east"
-	masson.left_walls = _walls_along("res://scenes/masson.gd", "rue_5e", 1, "", {"side": "impair"})
-	masson.right_walls = _walls_along("res://scenes/masson.gd", "rue_5e", -1, "", {"side": "pair"})
+	masson.left_walls = _walls_along("res://scenes/masson.gd", "rue_5e", 1, {"side": "impair"})
+	masson.right_walls = _walls_along("res://scenes/masson.gd", "rue_5e", -1, {"side": "pair"})
 	# The church's great tower turns its west face toward us past the presbytery (masson_presbytere 1200 wide, the tower at
 	# 1610–1990 of masson_eglise).
 	var front := _tex("masson_eglise")

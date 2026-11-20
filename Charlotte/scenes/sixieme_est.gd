@@ -84,8 +84,8 @@ func _build_cross_streets() -> void:
 	var masson := _cross_street("rue_masson", "Rue Masson", -1.0)
 	masson.along_name = "6e Avenue"
 	masson.facing = "east"
-	masson.left_walls = _walls_along("res://scenes/masson.gd", "rue_6e", 1, "", {"side": "impair"})
-	masson.right_walls = _walls_along("res://scenes/masson.gd", "rue_6e", -1, "", {"side": "pair"})
+	masson.left_walls = _walls_along("res://scenes/masson.gd", "rue_6e", 1, {"side": "impair"})
+	masson.right_walls = _walls_along("res://scenes/masson.gd", "rue_6e", -1, {"side": "pair"})
 
 
 # Round the corners onto Holt and Dandurand east of 6e (the stretches of those streets across 6e from her block) and onto

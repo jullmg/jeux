@@ -564,6 +564,11 @@ func _walls(walls: Array, front_x: float, side: float) -> void:
 					_plex_row(w, front_x, top, d0, d1, side)
 					d0 = d1
 					continue
+				elif w.kind == "side":
+					# The corner building's flank (`StreetScene._join_corners`): no door, balcony or stair on it.
+					_side_wall(w, front_x, top, d0, d1, side)
+					d0 = d1
+					continue
 				else:
 					_wall_quad(front_x, top, FACADE_Y, d0, d1, col)
 					_bricks(front_x, top, d0, d1, col)
@@ -691,6 +696,11 @@ func _textured_wall(front_x: float, w: Dictionary, d0: float, d1: float, side :=
 	var tw := float(tex.get_width())
 	var th := float(tex.get_height())
 	var top := FACADE_Y - th * StreetScene.HOUSE_SCALE
+	# `fit_top`: the corner building's other face, its roof brought to our corner's (`StreetScene._join_corners`): the
+	# picture is stretched a little, top to bottom, so its roof line lands there.
+	if w.has("fit_top") and w.has("roof"):
+		var k := (FACADE_Y - float(w.fit_top)) / maxf((th - float(w.roof)) * StreetScene.HOUSE_SCALE, 1.0)
+		top = FACADE_Y - th * StreetScene.HOUSE_SCALE * k
 	# `crop`: only up to its roof line, so a tower that really stands elsewhere (see `towers`) isn't painted on the wall.
 	var v_top := 0.0
 	if w.get("crop", false):
@@ -959,6 +969,32 @@ func _wall_texture(front_x: float, y0: float, y1: float, d0: float, d1: float, c
 				_wall_quad(front_x, y0 - 18.0, y1, cd, cd + 0.015, Color("#F4F2EC"))
 		_:
 			_brick_courses(front_x, y0, y1, d0, d1, col, rng)
+
+
+# A corner building's side wall down the cross street: its own brick (or stone, or siding), the light at its top and the
+# shade at its foot, its parged base, the coping, and a few windows per floor near the front, as a plex's flank has; never a
+# door, a balcony or a stair (those are on its front, on our street).
+func _side_wall(w: Dictionary, front_x: float, top: float, d0: float, d1: float, side: float) -> void:
+	var col: Color = w.color
+	var ground := FACADE_Y - PLEX_BASE
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(d0 * 1000.0) + int(front_x) * 5
+	_wall_quad(front_x, top, ground, d0, d1, col)
+	if d0 < DETAIL:
+		_wall_texture(front_x, top + 18.0, ground, d0, d1, col, str(w.get("material", "brick")), rng)
+	_wall_quad(front_x, top, top + (ground - top) * 0.35, d0, d1, Color(1.0, 0.95, 0.85, 0.07))
+	_wall_quad(front_x, ground - (ground - top) * 0.25, ground, d0, d1, Color(0, 0, 0, 0.08))
+	_wall_quad(front_x, ground, FACADE_Y, d0, d1, Color("#A9A396").lerp(col, 0.15))
+	_wall_quad(front_x, ground, ground + 3.0, d0, d1, Color("#D2CCC0"))
+	var floors := maxi(1, int(round((ground - top) / 150.0)))
+	var fh := (ground - top) / floors
+	var near := d0 + (d1 - d0) * 0.55
+	for f in floors:
+		_windows(front_x, top + fh * f + fh * 0.3, d0, near, 2, Color("#6F8DA2"), Color("#ECE8E0"))
+	_wall_quad(front_x, top, FACADE_Y, d0, d1, Color(0.1, 0.04, 0.06, 0.18 if side < 0.0 else 0.3))
+	_wall_quad(front_x, top - 6.0, top + 2.0, d0, d1, col.lightened(0.2))
+	_wall_quad(front_x, top, top + 14.0, d0, d1, col.darkened(0.35))
+	draw_line(_at(Vector2(front_x, top), d1), _at(Vector2(front_x, FACADE_Y), d1), col.darkened(0.5), maxf(1.0, 2.5 / (1.0 + d1)))
 
 
 # The little front yard under the first window: a low iron fence at the sidewalk's edge, shrubs of the season against the

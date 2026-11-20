@@ -58,8 +58,8 @@ func _build_cross_streets() -> void:
 	var masson := _cross_street("rue_masson", "Rue Masson", 1.0)
 	masson.along_name = "5e Avenue"
 	masson.facing = "west"
-	masson.left_walls = _walls_along("res://scenes/masson.gd", "rue_5e", 1, "", {"side": "pair"})
-	masson.right_walls = _walls_along("res://scenes/masson.gd", "rue_5e", -1, "", {"side": "impair"})
+	masson.left_walls = _walls_along("res://scenes/masson.gd", "rue_5e", 1, {"side": "pair"})
+	masson.right_walls = _walls_along("res://scenes/masson.gd", "rue_5e", -1, {"side": "impair"})
 	var dandurand := _cross_street("rue_dandurand", "Rue Dandurand", 1.0)
 	dandurand.along_name = "5e Avenue"
 	dandurand.facing = "west"

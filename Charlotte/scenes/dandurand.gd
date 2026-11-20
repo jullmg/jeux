@@ -67,16 +67,16 @@ func _build_cross_streets() -> void:
 	fifth.facing = "north"
 	fifth.school = true
 	# The west side of 5e Avenue, from the Street View pictures (cinquieme_ouest).
-	fifth.left_walls = _walls_along("res://scenes/cinquieme_ouest.gd", "rue_dandurand", 1, "dand_2849")
-	fifth.right_walls = _walls_along("res://scenes/cinquieme.gd", "rue_dandurand", -1, "dand_2851")
+	fifth.left_walls = _walls_along("res://scenes/cinquieme_ouest.gd", "rue_dandurand", 1)
+	fifth.right_walls = _walls_along("res://scenes/cinquieme.gd", "rue_dandurand", -1)
 	var sixth := _cross_street("rue_6e", "6e Avenue", 1.0)
 	sixth.along_name = "Rue Dandurand"
 	# 6e Avenue runs north from here: no mountain that way, just sky.
 	sixth.facing = "north"
 	sixth.school = true
-	sixth.left_walls = _walls_along("res://scenes/main.gd", "rue_dandurand", 1, "depanneur_front")
+	sixth.left_walls = _walls_along("res://scenes/main.gd", "rue_dandurand", 1)
 	# The odd side of 6e Avenue, from the Street View pictures (sixieme_est).
-	sixth.right_walls = _walls_along("res://scenes/sixieme_est.gd", "rue_dandurand", -1, "dand_2901")
+	sixth.right_walls = _walls_along("res://scenes/sixieme_est.gd", "rue_dandurand", -1)
 	var seventh := _cross_street("rue_7e", "7e Avenue", -1.0)
 	_generic_vista(seventh, "#9C5A44", "#B4513F")
 

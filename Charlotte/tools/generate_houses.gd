@@ -531,9 +531,10 @@ const HOUSES := [
 		"parapet": "flat", "windows": [[110.0, 90.0], [330.0, 90.0]], "basement": [], "downspout": 40.0,
 	},
 	# Round the block (6e, Dandurand, 5e, Holt): corner buildings' side walls, on the block and across the streets.
-	# Across 6e Avenue on Rue Holt.
+	# Across 6e Avenue on Rue Holt: the Holt side of the corner house with its fenced yard on 6e (`impair_coin_holt`, 5721…), two
+	# floors like it.
 	{
-		"name": "holt_nord", "kind": "side_wall", "width": 560.0, "floors": 3,
+		"name": "holt_nord", "kind": "side_wall", "width": 560.0, "floors": 2,
 		"bricks": ["#A8473A", "#9A3F33", "#B4513F", "#8E3A2F", "#B85C48"], "mortar": "#CDBFB0",
 		"parapet": "flat", "windows": [[90.0, 90.0], [300.0, 90.0]], "basement": [], "downspout": 500.0,
 	},
@@ -1632,9 +1633,10 @@ const HOUSES := [
 			{"x0": 820.0, "x1": 1070.0, "sign": "#FFE600", "frame": "#2E3236", "door": 945.0, "inside": "phones", "transom": "none"}],
 		"res_doors": [660.0], "basement": [],
 	},
-	# Across 6e from 2902: the corner of the next block, its side.
+	# Across 6e from 2902: the corner of the next block, its side: the Banque Nationale's (`masson_2888`), two floors like its
+	# front on Masson, so the corner is the same building seen from either street.
 	{
-		"name": "masson_2892_cote", "kind": "side_wall", "width": 580.0, "floors": 3,
+		"name": "masson_2892_cote", "kind": "side_wall", "width": 580.0, "floors": 2,
 		"bricks": ["#7E4436", "#8A4A3A", "#6E3A2E", "#94543F", "#743F33"], "mortar": "#BFB2A3",
 		"parapet": "flat", "windows": [[100.0, 90.0], [320.0, 90.0]], "basement": [], "downspout": 40.0,
 	},
@@ -2602,9 +2604,10 @@ const HOUSES := [
 		"bricks": ["#C98A64", "#BE805A", "#D2946E", "#B47650"], "mortar": "#E6DCCB",
 		"parapet": "flat", "windows": [[110.0, 100.0], [330.0, 100.0]], "basement": [], "downspout": 520.0,
 	},
-	# 5591–5595, at Dandurand: two floors of brick painted red, a white door, no outdoor stair (5591…, 5595…).
+	# 5591–5595, at Dandurand: brick painted red, a white door, no outdoor stair (5591…, 5595…). Three floors: it is the side of
+	# 2900–2902 Dandurand (`dand_2902`), the same building (the wall rises a floor over the upper window on 5595…).
 	{
-		"name": "six_est_sud_5595",
+		"name": "six_est_sud_5595", "floors": 3,
 		"bricks": ["#B84A3E", "#B04438", "#BE5044", "#A84236"], "mortar": "#C9A49A", "trim": "#F7F5F0", "trim_dark": "#C9C5BC", "lintel": "#E8E0D0", "lintel_dark": "#B9AE98",
 		"door": "#F4F1EA", "door_dark": "#B9B2A5", "door_style": "panel", "parapet": "flat", "windows": [[80.0, 140.0], [480.0, 140.0]],
 		"door_cx": 340.0, "balcony": [250.0, 430.0], "porch": [260.0, 420.0], "stair": [], "fence": "", "basement": [], "halloween": false,

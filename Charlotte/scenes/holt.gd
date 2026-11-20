@@ -40,14 +40,14 @@ func _build_cross_streets() -> void:
 	sixth.along_name = "Rue Holt"
 	sixth.facing = "south"
 	# The odd side of 6e Avenue, from the Street View pictures (sixieme_est).
-	sixth.left_walls = _walls_along("res://scenes/sixieme_est.gd", "rue_holt", 1, "holt_nord")
-	sixth.right_walls = _walls_along("res://scenes/main.gd", "rue_holt", -1, "ohbon")
+	sixth.left_walls = _walls_along("res://scenes/sixieme_est.gd", "rue_holt", 1)
+	sixth.right_walls = _walls_along("res://scenes/main.gd", "rue_holt", -1)
 	var fifth := _cross_street("rue_5e", "5e Avenue", -1.0)
 	fifth.along_name = "Rue Holt"
 	fifth.facing = "south"
-	fifth.left_walls = _walls_along("res://scenes/cinquieme.gd", "rue_holt", 1, "plex_16")
+	fifth.left_walls = _walls_along("res://scenes/cinquieme.gd", "rue_holt", 1)
 	# The west side of 5e Avenue, from the Street View pictures (cinquieme_ouest).
-	fifth.right_walls = _walls_along("res://scenes/cinquieme_ouest.gd", "rue_holt", -1, "holt_sud")
+	fifth.right_walls = _walls_along("res://scenes/cinquieme_ouest.gd", "rue_holt", -1)
 
 
 # Dépanneur Oh Bon! (reference/coin_holt/holt_coin_6eme.png): the words on its light-box sign, "OH BON!" in red neon in the big

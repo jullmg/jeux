@@ -297,12 +297,26 @@ func _build_doors() -> void:
 const BUILDING_WALLS := ["plex", "shop", "school", "corner_holt", "ohbon", "garage"]
 
 
-## Every corner building shows its side down the cross street (Julien: a three-storey corner over a two-storey first wall
-## looked like a flat cut-out, its top floor with no side to it). The first wall on each side of every cross street is the
-## side of the building at that corner of our street, so it takes that building's roof height and brick. A wall laid with
-## the other street's real facade keeps its picture unless it is lower than our corner, which would leave our top floors
-## flat: then it is drawn plain, at our corner's height, like `_walls_along`'s `ours`. Runs for every street after
-## `_build_cross_streets`, so no street (and no future one) has to remember it.
+## Every corner building shows its side down the cross street (Julien, 2026-11-18 and 2026-11-19: the side of a corner seen
+## down the cross street must be that same building, not a plex of another look). The first wall on each side of every cross
+## street is the corner building's other face:
+##   - when the cross street is drawn, that wall is the other street's own picture of the building (its first facade from
+##     the corner, `_walls_along`); it is ALWAYS kept, its roof fitted to our corner's (`fit_top`, a small stretch of the
+##     picture), so the corner joins up; if the two pictures of the building differ by more than `CORNER_FIT`, the two streets
+##     draw it differently: `corner_mismatches` lists it and a debug run warns (fix the generator so both faces agree);
+##   - when it is not drawn (a generic vista), the wall nearest the corner is that building's flank (`"side"`: our facade's
+##     colour and material, its roof height, a few windows, no door, balcony or stair), then the plexes beyond.
+## Open ground at the corner (no roof line) becomes a "lot". Runs for every street after `_build_cross_streets`, so no street
+## (and no future one) has to remember it.
+const CORNER_FIT := 0.2
+## Corners whose two pictures can't be compared by their roof lines: Église Saint-Esprit, whose great tower in the middle of
+## its Masson front throws that front's roof line off (it looks right down Masson; checked 2026-11-19).
+const CORNER_FIT_EXEMPT := ["six_sud_eglise", "masson_eglise"]
+## How far a corner building's flank runs down a generic vista before the plexes beyond (CrossStreet depth units).
+const SIDE_DEPTH := 0.7
+var corner_mismatches: Array[String] = []
+
+
 func _join_corners() -> void:
 	for cs in _cross_streets:
 		var gi := _starts.find(cs.x0)
@@ -313,7 +327,7 @@ func _join_corners() -> void:
 				continue
 			var art: String = layout[ci]
 			var w: Dictionary = walls[0]
-			if _wall_kind(art) == "gap" or not BUILDING_WALLS.has(str(w.get("kind", ""))) or w.get("crop", false):
+			if _wall_kind(art) == "gap" or w.get("crop", false) or str(w.get("kind", "")) in ["gap", "cross", "park", "lot"]:
 				continue
 			var tex := _tex(art)
 			var top := HOUSE_BASE_Y - (tex.get_height() - _roof_line(tex)) * HOUSE_SCALE
@@ -325,15 +339,22 @@ func _join_corners() -> void:
 			if top < -400.0:
 				continue
 			if w.has("tex"):
-				if float(w.get("top", top)) - top < 12.0:
-					continue
-				w.erase("tex")
-			# Always the corner's own colour and material, even when the height already matched (a side wall of another
-			# colour than its front was the mismatch Julien saw).
-			w.top = top
+				var theirs := float(w.top)
+				var ratio := (HOUSE_BASE_Y - top) / maxf(HOUSE_BASE_Y - theirs, 1.0)
+				if absf(ratio - 1.0) > CORNER_FIT and art not in CORNER_FIT_EXEMPT and str(w.get("art", "")) not in CORNER_FIT_EXEMPT:
+					corner_mismatches.append("%s, corner of %s: %s here is %d px tall, its face %s on the cross street %d px" % [
+						street_key, cs.street_name, art, int(HOUSE_BASE_Y - top), str(w.get("art", "?")), int(HOUSE_BASE_Y - theirs)])
+				if absf(ratio - 1.0) > 0.02:
+					w.fit_top = top
+				w.top = top
+				continue
+			# No picture: our building's flank, then whatever the wall was beyond it.
 			var look := _wall_look(tex)
-			w.color = look.color
-			w.material = look.material
+			var flank := {"to": minf(float(w.to), SIDE_DEPTH), "top": top, "kind": "side", "color": look.color, "material": look.material}
+			if float(w.to) > SIDE_DEPTH + 0.2:
+				walls.insert(0, flank)
+			else:
+				walls[0] = flank
 
 
 ## In a debug run, says which corners she can stand on have no crosswalk over our own street (Julien: she must be able to
@@ -341,6 +362,8 @@ func _join_corners() -> void:
 func _check_corners() -> void:
 	if not OS.is_debug_build():
 		return
+	for m in corner_mismatches:
+		push_warning("Corner building drawn differently on the two streets: " + m)
 	for cs in _cross_streets:
 		var ground: CrossStreet = _grounds.get(cs)
 		if ground == null:
@@ -865,9 +888,10 @@ func _wall_depth(art: String) -> float:
 ## The walls along a cross street, built from the street that really runs there (its scene script's layout): from
 ## our corner, its gap `from_gap`, going `direction` (+1 / -1 along its layout) to its next cross street; each building
 ## with its width, height, colour (sampled off its facade) and kind; then the next block, generic, into the distance.
-## The first one is the corner building's side, the same building as `ours` (our facade at that corner): it takes our
-## facade's height and brick, so the corner joins up.
-func _walls_along(script_path: String, from_gap: String, direction: int, ours := "", setup := {}) -> Array:
+## The first one is the other face of the building at our corner (the other street's own picture of that same building):
+## `_join_corners` fits its roof to ours, so nothing here names the corner by hand (a stale hand-written name once gave a
+## corner the height and brick of a building that had been replaced).
+func _walls_along(script_path: String, from_gap: String, direction: int, setup := {}) -> Array:
 	var other: Node = load(script_path).new()
 	# A street drawn as one scene per side (Rue Masson) is told which side to lay out.
 	for key in setup:
@@ -894,7 +918,7 @@ func _walls_along(script_path: String, from_gap: String, direction: int, ours :=
 		d += (tex.get_width() - 2.0 * MARGIN) * HOUSE_SCALE / 650.0
 		var look := _wall_look(tex)
 		var wall := {"to": d, "top": HOUSE_BASE_Y - (tex.get_height() - _roof_line(tex)) * HOUSE_SCALE, "kind": _wall_kind(art), "color": look.color,
-			"material": look.material, "art": art}
+			"material": look.material, "art": art, "roof": _roof_line(tex)}
 		if wall.kind != "gap":
 			# Its real facade, laid along the wall in perspective; going back along that street's layout, its right
 			# edge is the near end.
@@ -904,13 +928,6 @@ func _walls_along(script_path: String, from_gap: String, direction: int, ours :=
 		if wall.kind != "gap":
 			last = wall.color
 		i += direction
-	if ours != "" and not walls.is_empty() and walls[0].kind != "gap" and walls[0].kind != "cross":
-		# The corner building's side: drawn at our corner facade's height and brick so the corner joins up.
-		walls[0].top = _house_top(ours)
-		var ours_look := _wall_look(_tex(ours))
-		walls[0].color = ours_look.color
-		walls[0].material = ours_look.material
-		walls[0].erase("tex")
 	if walls.is_empty() or walls[-1].kind != "cross":
 		# The end of what is drawn: the next cross street, then the next block's plexes into the distance.
 		walls.append({"to": d + 0.5, "kind": "cross"})

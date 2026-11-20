@@ -288,13 +288,23 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `_wall_color` returns its colour); generic plexes beyond.
   The first wall is the corner building's side, so it takes our own corner facade's height and brick (`ours`). Only the side across the street
   (another block) is still hand-written.
-- **Every corner building shows its side down the vista, at every intersection, present and future** (Julien, 2026-11-18: a
-  three-storey corner over a two-storey first wall looked flat, its top floor a cut-out): `StreetScene._join_corners()` runs
-  after every street's `_build_cross_streets` and makes the first wall on each side of each cross street the side of OUR
-  building at that corner — its roof height (`_roof_line`) and the same colour and material as its front (`_wall_look`,
-  always set, so a white or stone front never gets a red side; Julien, 2026-11-18). A wall laid with the other street's real facade keeps its
-  picture unless it is lower than our corner (then it is drawn plain at our height); open ground at the corner (no roof line)
-  becomes a "lot". Nothing to do per street: a new street gets it for free.
+- **Every corner building shows its side down the vista, at every intersection, present and future, and it is THE SAME
+  building seen from either street** (Julien, 2026-11-18 and 2026-11-19: a three-storey corner over a two-storey first wall
+  looked flat; then the corner of Dandurand and 5e showed down 5e a grey clapboard plex with balconies instead of its own brick,
+  charcoal and white face): `StreetScene._join_corners()` runs after every street's `_build_cross_streets` and settles the first
+  wall on each side of each cross street, finding our corner building in our own `layout` (never name it by hand: `_walls_along`
+  has no `ours` any more, a stale hand-written name gave a corner the look of a building since replaced):
+  - when the cross street is drawn, that wall is the other street's own picture of the building (its first facade from the
+    corner) and it is ALWAYS kept, its roof fitted to ours (`fit_top`: `CrossStreet._textured_wall` stretches the picture a little);
+  - when it isn't (a generic vista), it is the building's flank (`kind` "side", `CrossStreet._side_wall`: our front's colour and
+    material, a few windows, never a door, a balcony or a stair) for `SIDE_DEPTH`, then the plexes beyond;
+  - open ground at the corner (no roof line) becomes a "lot".
+  **The two faces of a corner building must agree** (height, materials): when a building at a corner is drawn or changed, run
+  `Godot --headless --path . -s res://tools/check_corners.gd -- --no-save`, which loads every street and lists the corners whose
+  two pictures differ by more than `CORNER_FIT` (`StreetScene.corner_mismatches`; a debug run of a street warns too), and fix the
+  generator until it prints "OK" (exceptions with a reason in `CORNER_FIT_EXEMPT`: the church). Fixed that way on 2026-11-19:
+  `six_est_sud_5595` (3 floors, the side of `dand_2902`), `holt_nord` (2 floors, the Holt side of `impair_coin_holt`),
+  `masson_2892_cote` (2 floors, the Banque Nationale's side).
 - Before 8 (`StreetScene.CROSS_AGE`, `GameState.age`) Charlotte can't cross a street ("Je n'ai pas le droit de traverser
   toute seule !"), so her world is the block: its four corners and the lane. It goes through `DebugMenu.blocked()` like
   every other limit (see **Limits on where she may go** under the debug menu).

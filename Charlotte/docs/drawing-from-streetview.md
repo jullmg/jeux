@@ -201,6 +201,17 @@ with the Street View picture**: same number of windows, same door and stair side
 light, same proportions. Fix and repeat until you can't tell what differs; an item you left out on purpose
 goes in the report. The user judges by eye and wants every detail as close to the pictures as possible.
 
+**A building at a corner has two faces, one in each street's scene, and they must be the same building** (Julien,
+2026-11-19): the same number of storeys, the same materials. Down the cross street the game lays the other street's picture
+of it as its side, fitted to its height (`StreetScene._join_corners`). After drawing or changing any corner building, run
+
+```
+Godot --headless --path . -s res://tools/check_corners.gd -- --no-save
+```
+
+which goes through every intersection of every street and must print "OK"; otherwise fix the face it names (count the
+storeys on both pictures) until it does. Then screenshot that corner from both streets.
+
 Finally: update `Charlotte/.claude/CLAUDE.md` for what changed (building, new generator option, new
 surrounding), commit one task at a time on `main` (never push unless asked), and list in your report the
 pictures used (file names from INDEX.md) so the user can check.

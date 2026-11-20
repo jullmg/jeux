@@ -67,8 +67,8 @@ func _build_cross_streets() -> void:
 	# (masson_impair) on the right.
 	var masson := _cross_street("rue_masson", "Rue Masson", 1.0)
 	masson.facing = "west"
-	masson.left_walls = _walls_along("res://scenes/masson.gd", "rue_6e", 1, "", {"side": "pair"})
-	masson.right_walls = _walls_along("res://scenes/masson.gd", "rue_6e", -1, "", {"side": "impair"})
+	masson.left_walls = _walls_along("res://scenes/masson.gd", "rue_6e", 1, {"side": "pair"})
+	masson.right_walls = _walls_along("res://scenes/masson.gd", "rue_6e", -1, {"side": "impair"})
 	# The church's great tower, flush with its front: down Masson it turns its east face toward us, over the corner block.
 	var front := _tex("masson_eglise")
 	masson.towers.append({"side": 1.0, "d": (2870.0 - 1990.0) * HOUSE_SCALE / 650.0, "back": 380.0 * HOUSE_SCALE,
@@ -78,11 +78,11 @@ func _build_cross_streets() -> void:
 	dandurand.guard = true
 	# The south side of Dandurand (dandurand_sud): the school's front, then its real buildings past 5e.
 	dandurand.left_walls = _walls_along("res://scenes/dandurand_sud.gd", "rue_6e", 1)
-	# Along Dandurand the first wall is Xin-Xin's own front (its door, its sign, its Coors logos' band), not a plain side: it keeps
-	# its real facade (no `ours`).
+	# Along Dandurand the first wall is Xin-Xin's own front (its door, its sign, its Coors logos' band): like every corner, it
+	# keeps its real facade (`_join_corners`).
 	dandurand.right_walls = _walls_along("res://scenes/dandurand.gd", "rue_6e", -1)
 	var holt := _cross_street("rue_holt", "Rue Holt", -1.0)
-	holt.left_walls = _walls_along("res://scenes/holt.gd", "rue_6e", 1, "coin_holt")
+	holt.left_walls = _walls_along("res://scenes/holt.gd", "rue_6e", 1)
 	holt.right_walls = [
 		{"to": 0.7, "top": _house_top("coin_holt_est"), "kind": "plex", "color": Color("#9C6B4E")},
 		{"to": 2.0, "top": 270.0, "kind": "plex", "color": Color("#8E3A2F")},
