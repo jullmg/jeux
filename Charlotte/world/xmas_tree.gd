@@ -75,9 +75,9 @@ static func can_start() -> bool:
 	return Season.is_winter() and Quests.available(QUEST)
 
 
-## The tree stands in the salon: from the moment it is home, and all winter after.
+## The tree stands in the salon: from the moment it is home until the holidays are over (New Year's Day done: it goes out).
 static func in_salon() -> bool:
-	return Season.is_winter() and (step() >= 3 or Quests.done(QUEST))
+	return Season.is_winter() and (step() >= 3 or Quests.done(QUEST)) and not Quests.done(NewYear.QUEST)
 
 
 static func clear() -> void:

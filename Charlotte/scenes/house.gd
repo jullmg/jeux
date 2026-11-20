@@ -85,6 +85,14 @@ var _noel_plate: Sprite2D
 var _noel_presents: Array[Sprite2D] = []
 var _xmas_glow_from := -1
 var _noel_busy := false
+# Her birthday (quest "anniversaire"): the decorations up, the guests, the cake.
+const PARTY_TABLE_X := 1760.0
+const GUEST_XS := [1010.0, 1100.0, 1190.0, 1280.0, 1370.0]
+var _party_decor := {}
+var _guests := {}
+var _party_cake: Sprite2D
+var _party_flames: Array[Sprite2D] = []
+var _party_busy := false
 
 # Charlotte's drawings stuck on the fridge door with magnets.
 var _fridge_art: Node2D
@@ -140,6 +148,7 @@ func _ready() -> void:
 	_build_doors()
 	_build_xmas_spots()
 	_build_new_year()
+	_build_birthday()
 	_build_movie_night()
 	_enter_area(BEDROOM if _charlotte.position.x >= BEDROOM.x else HALL)
 	_finish([[700.0, "plant"], [1900.0, "plant"], [2900.0, "plant"], [5400.0, "plushie"], [6250.0, "plant"]])
@@ -211,7 +220,8 @@ func _build_family() -> void:
 			or Quests.available(School.QUEST) or Quests.available(Party.QUEST) and School.step() == 0 \
 			or Snowman.needs("boutons") and not Carry.busy() \
 			or Christmas.can_start() or Christmas.step() == 1 and Carry.has("lettre") \
-			or NewYear.can_start() or NewYear.step() == 3 or Tooth.can_start())
+			or NewYear.can_start() or NewYear.step() == 3 or Tooth.can_start() \
+			or Birthday.can_start() or Birthday.step() == 1)
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
 		return Quests.available("hamster") or Quests.available("plants") or Quests.available("chips") \
 			or Quests.active("chips") and Carry.has("chips") or Snowman.needs("tuque") and not Carry.busy() \
@@ -258,6 +268,19 @@ func _talk_to_mom() -> void:
 		_say(_mom, "Amuse-toi bien, ma chouette !\nReviens quand ton sac sera plein.", 400.0, 3.5)
 	elif Halloween.step() == 1:
 		_say(_mom, "Ton déguisement est dans ta commode,\nma chouette ! Vas-y !", 400.0, 3.5)
+	elif Birthday.step() == 1:
+		_invite_friends()
+	elif Birthday.step() == 2:
+		_say(_mom, "On décore le salon pour ta fête !\nLa bannière, les ballons pis la table.", 400.0, 3.2)
+	elif Birthday.step() == 3:
+		_say(_mom, "Bonne fête, ma grande !\nOuvre les cadeaux de tes amis !", 380.0, 3.0)
+	elif Birthday.can_start() and Quests.start(Birthday.QUEST):
+		Birthday.set_step(1)
+		_mom.express("happy", 2.4)
+		_say(_mom, "Le 1er février, c'est ta fête, Chachoue !\nOn fait une fête ici. Qui veux-tu inviter ?", 410.0, 3.6)
+		var card := create_tween()
+		card.tween_interval(3.8)
+		card.tween_callback(_invite_friends)
 	elif Tooth.step() == 1:
 		_say(_mom, "Croque dans une belle pomme, ma chouette !\nY en a dans le frigo.", 400.0, 3.0)
 	elif Tooth.step() == 2:
@@ -546,6 +569,215 @@ func _xmas_lights() -> void:
 		i += 1
 	_glow(origin + XmasTree.top_of(XmasTree.choice()) * XMAS_SCALE, 46.0, Color(1.0, 0.9, 0.5, 0.55))
 	_glow(origin + Vector2(XmasTree.W / 2.0, XmasTree.H * 0.55) * XMAS_SCALE, 190.0, Color(1.0, 0.8, 0.5, 0.18))
+
+
+# ── Her birthday ────────────────────────────────────────────
+
+func _build_birthday() -> void:
+	var step := Birthday.step()
+	if step < 2:
+		return
+	for d: Array in Birthday.DECOR:
+		if d[0] in Birthday.decorated():
+			_party_decoration(d[0])
+	if step == 2:
+		var spots := {"banniere": Rect2(1000.0, 110.0, 380.0, 120.0), "ballons": Rect2(670.0, 300.0, 150.0, 300.0),
+			"table": Rect2(PARTY_TABLE_X - 230.0, 470.0, 460.0, 200.0)}
+		for id: String in spots:
+			var r: Rect2 = spots[id]
+			add_child(DoorSpot.make(r, _decorate.bind(id), r.get_center().x))
+			add_child(QuestMark.make(Vector2(r.get_center().x, r.position.y - 20.0), func() -> bool:
+				return Birthday.step() == 2 and id not in Birthday.decorated() and _control.enabled))
+	elif step == 3:
+		_guests_arrive(false)
+
+
+# The invitation card: she ticks the friends she invites (five at most).
+func _invite_friends() -> void:
+	_control.enabled = false
+	var card := Birthday.InviteCard.new()
+	card.sent.connect(func(ids: Array) -> void:
+		_control.enabled = true
+		GameState.flags[Birthday.INVITES] = ids
+		Birthday.set_step(2)
+		var names: Array = ids.map(func(id: String) -> String: return Birthday.guest(id)[1])
+		_say(_mom, "Les invitations sont parties !\nAstheure, on décore le salon.", 400.0, 3.2)
+		Notebook.announce("step", "Invité%s : %s. Décore le salon !" % ["s" if ids.size() > 1 else "", ", ".join(names)], Birthday.HEADING)
+		_build_birthday_spots_now())
+	add_child(card)
+
+
+# The decoration spots, built as soon as the invitations are out (the scene was built before).
+func _build_birthday_spots_now() -> void:
+	if Birthday.step() == 2:
+		_build_birthday()
+
+
+func _decorate(id: String) -> void:
+	if Birthday.step() != 2 or id in Birthday.decorated():
+		return
+	_charlotte.pet(0.9, 0.0)
+	Birthday.mark(Birthday.DECORATED, id)
+	_party_decoration(id)
+	Sfx.play("pop", _charlotte.position + Vector2(0, -100))
+	for d: Array in Birthday.DECOR:
+		if d[0] == id:
+			_say(_charlotte, d[1], 300.0)
+	if Birthday.decorated().size() < Birthday.DECOR.size():
+		return
+	Birthday.set_step(3)
+	var later := create_tween()
+	later.tween_interval(2.4)
+	later.tween_callback(_guests_arrive.bind(true))
+
+
+func _party_decoration(id: String) -> void:
+	if _party_decor.has(id):
+		return
+	match id:
+		"banniere":
+			var banner := ColorRect.new()
+			banner.color = Color("#E86BB0")
+			banner.size = Vector2(380, 46)
+			banner.position = Vector2(1000.0, 140.0)
+			add_child(banner)
+			var words := _label_here("BONNE FÊTE CHACHOUE !", banner.position + banner.size / 2.0, Vector2(380, 46), 24)
+			_party_decor[id] = [banner, words]
+		"ballons":
+			_party_decor[id] = [_put(PartyArt.balloons(31), 680.0, 606.0, 0.95), _put(PartyArt.balloons(57), 1430.0, 606.0, 0.9)]
+		"table":
+			_party_decor[id] = [_put(PartyArt.party_table(), PARTY_TABLE_X - 220.0, 676.0, 1.0, "floor")]
+
+
+func _label_here(text: String, center: Vector2, size: Vector2, font_size: int) -> Label:
+	var settings := LabelSettings.new()
+	settings.font_size = font_size
+	settings.font_color = Color.WHITE
+	settings.outline_size = 4
+	settings.outline_color = Color("#A23A78")
+	var label := Label.new()
+	label.text = text
+	label.label_settings = settings
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.size = size
+	label.position = center - size / 2.0
+	add_child(label)
+	return label
+
+
+# The doorbell: her friends come in and stand in the salon, each with a present for her.
+func _guests_arrive(ring: bool) -> void:
+	if not _guests.is_empty():
+		return
+	if ring:
+		Sfx.play("bell")
+		Notebook.announce("step", "Tes amis arrivent ! Ouvre leurs cadeaux.", Birthday.HEADING)
+	_mom_routine.pause(600.0, 1300.0)
+	_mom.position.x = 1560.0
+	_mom.facing = -1
+	var ids: Array = Birthday.invites()
+	for i in ids.size():
+		var id: String = ids[i]
+		var kid := Character.new()
+		var look := Birthday.look(id)
+		look = School.indoors(look)
+		kid.look = look
+		kid.fidgets = true
+		kid.scale = Vector2.ONE * CHAR_SCALE
+		kid.position = Vector2(GUEST_XS[i], FEET_Y - 6.0)
+		kid.facing = 1
+		add_child(kid)
+		_guests[id] = kid
+		var head := -380.0 if id in ["alphee", "constance"] else -330.0
+		add_child(DoorSpot.make(Rect2(kid.position + Vector2(-45, head * CHAR_SCALE), Vector2(90, -head * CHAR_SCALE)), _open_birthday_present.bind(id), kid.position.x + 80.0))
+		add_child(QuestMark.make(kid.position + Vector2(0, head * CHAR_SCALE - 20.0), func() -> bool:
+			return Birthday.step() == 3 and id not in Birthday.opened() and _control.enabled and not _party_busy, 0.7))
+	if ring:
+		var hello := create_tween()
+		hello.tween_interval(0.6)
+		hello.tween_callback(func() -> void:
+			for kid: Character in _guests.values():
+				kid.express("grin", 2.0)
+			_say(_guests.values()[0], "BONNE FÊTE, CHACHOUE !", 240.0, 2.6))
+
+
+func _open_birthday_present(id: String) -> void:
+	if Birthday.step() != 3 or _party_busy or id in Birthday.opened():
+		return
+	_party_busy = true
+	var g: Array = Birthday.guest(id)
+	var kid: Character = _guests[id]
+	kid.express("talk", 2.0)
+	_say(kid, g[3], 240.0, 2.6)
+	var steps := create_tween()
+	steps.tween_interval(2.6)
+	steps.tween_callback(func() -> void:
+		_charlotte.pet(0.8, 0.3)
+		Sfx.play("swoosh", _charlotte.position)
+		Birthday.mark(Birthday.OPENED, id)
+		_treat(Birthday.present_picture(g[4]), g[5], 0.2)
+		kid.express("happy", 2.4)
+		_party_busy = false
+		if Birthday.opened().size() >= Birthday.invites().size():
+			var cake := create_tween()
+			cake.tween_interval(3.8)
+			cake.tween_callback(_birthday_cake))
+
+
+# Maman brings the cake: lights down, everyone sings, she blows out her candles, a slice; then her friends go home.
+func _birthday_cake() -> void:
+	_party_busy = true
+	_control.enabled = false
+	_party_cake = _put(PartyArt.cake(true), PARTY_TABLE_X - 65.0, 566.0)
+	for k in 8:
+		_party_flames.append(_glow(_party_cake.position + Vector2(31.0 + k * 9.7 + 1.75, 23.0), 16.0, Color(1.0, 0.75, 0.4, 0.55)))
+	_say(_mom, "Le gâteau !", 380.0, 1.8)
+	var everyone: Array = [_mom, _dad] + _guests.values()
+	var song := create_tween()
+	song.tween_interval(2.0)
+	for k in Birthday.SONG.size():
+		var who: Character = everyone[k % everyone.size()]
+		song.tween_callback(func() -> void:
+			for person: Character in everyone:
+				person.express("talk", 1.6)
+			_say(who, Birthday.SONG[k], 380.0 if who == _mom or who == _dad else 240.0, 1.9))
+		song.tween_interval(2.1)
+	song.tween_callback(func() -> void: _say(_mom, "Fais un vœu, ma chouette !", 380.0, 2.0))
+	song.tween_interval(2.2)
+	song.tween_callback(func() -> void:
+		_charlotte.express("effort", 1.2)
+		_say(_charlotte, "Fffffffffff !", 300.0, 1.2))
+	song.tween_interval(1.0)
+	song.tween_callback(func() -> void:
+		_party_cake.texture = PartyArt.cake(false)
+		for f in _party_flames:
+			f.queue_free()
+		_party_flames.clear()
+		Sfx.play("swoosh", _party_cake.position)
+		for person: Character in [_charlotte] + everyone:
+			person.express("laugh", 2.4)
+		_say(_dad, "Hourra ! Bonne fête, ma grande !", 390.0, 2.2))
+	song.tween_interval(2.4)
+	song.tween_callback(func() -> void: _treat(PartyArt.cake_slice(), "Miam ! Du gâteau au chocolat !"))
+	song.tween_interval(3.6)
+	song.tween_callback(func() -> void:
+		_say(_guests.values()[0], "Merci pour la fête, Chachoue !\nC'était la plus belle !", 240.0, 3.0))
+	song.tween_interval(3.2)
+	song.tween_callback(func() -> void:
+		_say(_charlotte, "Merci d'être venus, mes amis !", 300.0, 2.6)
+		for kid: Character in _guests.values():
+			create_tween().tween_property(kid, "modulate:a", 0.0, 1.2).set_delay(1.4))
+	song.tween_interval(3.0)
+	song.tween_callback(func() -> void:
+		for kid: Character in _guests.values():
+			kid.queue_free()
+		_guests.clear()
+		Sfx.play("goodnight")
+		Quests.complete(Birthday.QUEST)
+		_mom_routine.pause(0.1, _mom.position.x)
+		_party_busy = false
+		_control.enabled = true)
 
 
 # ── The wobbly tooth ────────────────────────────────────────
