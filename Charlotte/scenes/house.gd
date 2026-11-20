@@ -211,7 +211,7 @@ func _build_family() -> void:
 			or Quests.available(School.QUEST) or Quests.available(Party.QUEST) and School.step() == 0 \
 			or Snowman.needs("boutons") and not Carry.busy() \
 			or Christmas.can_start() or Christmas.step() == 1 and Carry.has("lettre") \
-			or NewYear.can_start() or NewYear.step() == 3)
+			or NewYear.can_start() or NewYear.step() == 3 or Tooth.can_start())
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
 		return Quests.available("hamster") or Quests.available("plants") or Quests.available("chips") \
 			or Quests.active("chips") and Carry.has("chips") or Snowman.needs("tuque") and not Carry.busy() \
@@ -258,6 +258,13 @@ func _talk_to_mom() -> void:
 		_say(_mom, "Amuse-toi bien, ma chouette !\nReviens quand ton sac sera plein.", 400.0, 3.5)
 	elif Halloween.step() == 1:
 		_say(_mom, "Ton déguisement est dans ta commode,\nma chouette ! Vas-y !", 400.0, 3.5)
+	elif Tooth.step() == 1:
+		_say(_mom, "Croque dans une belle pomme, ma chouette !\nY en a dans le frigo.", 400.0, 3.0)
+	elif Tooth.step() == 2:
+		_say(_mom, "Mets ta dent sous ton oreiller ! La fée des dents\npasse juste quand on dort.", 410.0, 3.4)
+	elif Tooth.can_start() and Quests.start(Tooth.QUEST):
+		Tooth.set_step(1)
+		_wobbly_tooth()
 	elif NewYear.step() == 1:
 		_say(_mom, "Viens dans le corridor, ma chouette !\nLe Bye Bye commence à la télé.", 400.0, 3.2)
 	elif NewYear.step() == 2:
@@ -541,6 +548,58 @@ func _xmas_lights() -> void:
 	_glow(origin + Vector2(XmasTree.W / 2.0, XmasTree.H * 0.55) * XMAS_SCALE, 190.0, Color(1.0, 0.8, 0.5, 0.18))
 
 
+# ── The wobbly tooth ────────────────────────────────────────
+
+# Her bed: the tooth fairy's coin under her pillow the morning after, the tooth going under it at bedtime, else sleep.
+func _bed_clicked() -> void:
+	if Tooth.step() == 3:
+		_under_the_pillow()
+		return
+	if Tooth.step() == 2:
+		_say(_charlotte, "Je mets ma dent sous mon oreiller…", 300.0, 2.0)
+		var later := create_tween()
+		later.tween_interval(2.0)
+		later.tween_callback(_go_to_sleep)
+		return
+	_go_to_sleep()
+
+
+func _wobbly_tooth() -> void:
+	_mom.express("surprised", 2.0)
+	_say(_mom, "Chachoue, souris-moi… Oh !\nTa dent d'en avant branle !", 400.0, 3.2)
+	var more := create_tween()
+	more.tween_interval(3.4)
+	more.tween_callback(func() -> void:
+		_charlotte.express("surprised", 2.0)
+		_say(_charlotte, "Elle bouge toute seule !", 300.0))
+	more.tween_interval(2.4)
+	more.tween_callback(func() -> void:
+		_say(_mom, "Croque dans une belle pomme, a va peut-être tomber.\nY en a dans le frigo.", 420.0, 3.6)
+		Notebook.announce("step", "Croque dans une pomme du frigo !", Tooth.HEADING))
+
+
+# The apple from the fridge: a big bite, and out comes the tooth.
+func _bite_the_apple() -> void:
+	_treat(InteriorArt.snack("apple"), "Crounch !", 0.4)
+	Sfx.play("nibble", _charlotte.position)
+	var later := create_tween()
+	later.tween_interval(2.4)
+	later.tween_callback(func() -> void:
+		Tooth.set_step(2)
+		Sfx.play("pop", _charlotte.position + Vector2(0, -120))
+		_charlotte.express("grin", 2.4)
+		_treat(Tooth.tooth(), "Ma dent est tombée !", 0.0)
+		Notebook.announce("step", "Mets ta dent sous ton oreiller, pis dodo !", Tooth.HEADING))
+
+
+# In the morning, under the pillow: the toonie.
+func _under_the_pillow() -> void:
+	_charlotte.pet(0.8, 0.3)
+	Sfx.play("chime")
+	_treat(Tooth.toonie(), "Un 2 $ ! La fée des dents est passée !", 0.2)
+	Quests.complete(Tooth.QUEST)
+
+
 # ── New Year's Eve and Day ──────────────────────────────────
 
 func _build_new_year() -> void:
@@ -552,7 +611,7 @@ func _build_new_year() -> void:
 	add_child(QuestMark.make(_tv.get_global_rect().get_center() - Vector2(0, 90), func() -> bool:
 		return NewYear.step() == 1 and _control.enabled))
 	add_child(QuestMark.make(Vector2(BEDROOM.x + 584.0, 340.0), func() -> bool:
-		return NewYear.step() == 2 and _control.enabled))
+		return (NewYear.step() == 2 or Tooth.step() == 2 or Tooth.step() == 3) and _control.enabled))
 
 
 # The Bye Bye in the dimmed hall with her parents, the countdown, the wishes, then the fireworks through the salon window.
@@ -1598,9 +1657,9 @@ func _build_doors() -> void:
 	add_child(DoorSpot.make(Rect2(KITCHEN_START + 4.0, 240, 104, 356), _open_fridge, KITCHEN_START + 140.0))
 	# The drawing from the service de garde, waiting to go up on it.
 	add_child(QuestMark.make(Vector2(KITCHEN_START + 56.0, 210.0), func() -> bool:
-		return (Carry.has("drawing") or Snowman.needs("carotte") and not Carry.busy()) and _control.enabled))
+		return (Carry.has("drawing") or Snowman.needs("carotte") and not Carry.busy() or Tooth.step() == 1) and _control.enabled))
 	# Her bed: sleep until the next morning.
-	add_child(DoorSpot.make(Rect2(BEDROOM.x + 360.0, 380, 448, 228), _go_to_sleep, BEDROOM.x + 600.0))
+	add_child(DoorSpot.make(Rect2(BEDROOM.x + 360.0, 380, 448, 228), _bed_clicked, BEDROOM.x + 600.0))
 	# Under it, her hiding place: the shoebox of junk food.
 	# Only the part showing below the bed is clickable, or a click on the box would send her to bed.
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 575.0, 606, 105, 30), _open_stash, BEDROOM.x + 640.0))
@@ -1679,7 +1738,9 @@ func _open_fridge() -> void:
 	move_child(open, _fridge_art.get_index() + 1)
 	var cold := _glow(Vector2(KITCHEN_START + 60.0, 420.0), 220.0, Color(0.75, 0.9, 1.0, 0.35))
 	move_child(cold, open.get_index() + 1)
-	if Snowman.needs("carotte") and Carry.take(_charlotte, "bonhomme", "carotte"):
+	if Tooth.step() == 1:
+		_bite_the_apple()
+	elif Snowman.needs("carotte") and Carry.take(_charlotte, "bonhomme", "carotte"):
 		# Not a snack this time: the snowman's nose.
 		_say(_charlotte, "Une belle carotte pour le nez\ndu bonhomme de neige !", 200.0)
 	else:
@@ -1728,7 +1789,15 @@ func _go_to_sleep() -> void:
 	var moon := _glow(Vector2(BEDROOM.x + 180.0, 280.0), 260.0, Color(0.6, 0.75, 1.0, 0.0))
 	var christmas_eve := Christmas.step() == 4
 	var new_year := NewYear.step() == 2
-	var words := _night_label("Bonne nuit… le père Noël s'en vient !" if christmas_eve else ("Bonne nuit… pis bonne année !" if new_year else "Bonne nuit, Chachoue…"), 40)
+	var tooth_night := Tooth.step() == 2
+	var good_night := "Bonne nuit, Chachoue…"
+	if christmas_eve:
+		good_night = "Bonne nuit… le père Noël s'en vient !"
+	elif new_year:
+		good_night = "Bonne nuit… pis bonne année !"
+	elif tooth_night:
+		good_night = "Bonne nuit… pis bonne visite, la fée des dents !"
+	var words := _night_label(good_night, 40)
 	words.position.y = -170.0
 	night.add_child(words)
 	# The z's rise from her pillow.
@@ -1753,6 +1822,13 @@ func _go_to_sleep() -> void:
 			night.add_child(sleigh)
 			for k in 3:
 				get_tree().create_timer(k * 0.7).timeout.connect(func() -> void: Sfx.play("bell", Vector2.INF, -4.0, 1.0 + k * 0.08)))
+		tween.tween_interval(4.2)
+	elif tooth_night:
+		# The tooth fairy, a tinkle of bells.
+		tween.tween_callback(func() -> void:
+			night.add_child(Tooth.Fairy.new())
+			for k in 4:
+				get_tree().create_timer(k * 0.5).timeout.connect(func() -> void: Sfx.play("bell", Vector2.INF, -8.0, 1.4 + k * 0.1)))
 		tween.tween_interval(4.2)
 	tween.tween_property(dark, "color", Color(0.02, 0.02, 0.05, 1.0), 0.9)
 	tween.parallel().tween_property(words, "modulate:a", 0.0, 0.5)
@@ -1786,6 +1862,10 @@ func _go_to_sleep() -> void:
 		words.text = "Le lendemain matin… il a neigé !" if halloween_over else ("Le lendemain matin… quelle tempête !" if storm else "Le lendemain matin…")
 		if christmas_eve:
 			words.text = "Le matin de Noël !"
+		if tooth_night:
+			Tooth.set_step(3)
+			words.text = "Le lendemain matin… regarde sous ton oreiller !"
+			Notebook.announce("step", "Regarde sous ton oreiller !", Tooth.HEADING)
 		if new_year:
 			NewYear.set_step(3)
 			words.text = "Le jour de l'an !"

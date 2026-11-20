@@ -7,7 +7,7 @@ extends RefCounted
 
 ## Quests that come `after` "halloween" open the morning after it, in winter; the Halloween evening doesn't wait for them
 ## (`after_halloween`).
-const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole", "fete", "bonhomme", "glissade", "souffleuse", "sapin", "noel", "jourdelan", "fort"]
+const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole", "fete", "bonhomme", "glissade", "souffleuse", "sapin", "noel", "jourdelan", "fort", "dent"]
 const ALL := {
 	"milk": {
 		"title": "Maman a besoin de lait : va au dépanneur",
@@ -141,6 +141,12 @@ const ALL := {
 		"find": "Alphée pis Constance regardent la neige avec un drôle d'air…",
 		"age": 7, "after": "jourdelan", "reward": 2.0,
 	},
+	"dent": {
+		"title": "La dent qui branle",
+		"hint": "Ta dent branle ! Fais-la tomber, mets-la sous ton oreiller, pis attends la fée des dents.",
+		"find": "Quelque chose bouge dans ta bouche…",
+		"age": 7, "after": "fort", "reward": 2.0,
+	},
 }
 
 
@@ -168,6 +174,8 @@ static func hint(id: String) -> String:
 		return NewYear.hint()
 	if id == SnowFort.QUEST and active(id):
 		return SnowFort.hint()
+	if id == Tooth.QUEST and active(id):
+		return Tooth.hint()
 	return str(ALL.get(id, {}).get("hint", ""))
 
 
