@@ -26,6 +26,8 @@ const INFO := {
 	"maison": {"name": "Maman, j'ai raté l'avion", "glow": Color(1.0, 0.75, 0.5)},
 	"ratatouille": {"name": "Ratatouille", "glow": Color(1.0, 0.85, 0.6)},
 	"reine": {"name": "La Reine des neiges", "glow": Color(0.6, 0.85, 1.0)},
+	# Not a channel of ALL: the New Year's Eve show (NewYear), the real title over a stage of our own.
+	"byebye": {"name": "Bye Bye", "glow": Color(1.0, 0.75, 0.95)},
 }
 ## How long the film lasts (title card, story, "FIN"), in seconds.
 const FILM_LENGTH := 24.0
@@ -49,6 +51,7 @@ static func draw(id: String, c: CanvasItem, t: float, on_for: float) -> void:
 		"maison": _maison(c, t, on_for)
 		"ratatouille": _ratatouille(c, t, on_for)
 		"reine": _reine(c, t, on_for)
+		"byebye": _byebye(c, t, on_for)
 
 
 static func _font() -> Font:
@@ -462,6 +465,80 @@ static func _fox(c: CanvasItem, at: Vector2, k: float, t: float, tint: Color) ->
 	# The scarf, its end flying out behind him.
 	c.draw_line(head + Vector2(-4, 5) * k, head + Vector2(3, 5) * k, Color("#4FA3E0") * tint, 2.2 * k)
 	c.draw_line(head + Vector2(-4, 5) * k, head + Vector2(-12, 3 + sin(t * 14.0) * 2.0) * k, Color("#4FA3E0") * tint, 1.8 * k)
+
+
+# ── New Year's Eve: the year-end variety show ─────────────────
+
+## A stage under sweeping spotlights, the year's sketches one after the other (a host at the mic, a skater, a dancing
+## snowman, a singer), confetti, and "BYE BYE" in lights over the stage.
+static func _byebye(c: CanvasItem, t: float, on_for: float) -> void:
+	c.draw_rect(Rect2(Vector2.ZERO, SIZE), Color("#1A1033"))
+	# Spotlights sweeping from the floor.
+	for i in 3:
+		var a := sin(t * 0.9 + i * 2.1) * 0.5
+		var foot := Vector2(30.0 + i * 68.0, SIZE.y)
+		var tip := foot + Vector2(sin(a), -cos(a)) * 140.0
+		var side := Vector2(cos(a), sin(a)) * 22.0
+		c.draw_colored_polygon(PackedVector2Array([foot, tip - side, tip + side]), Color(1.0, 0.85, 1.0, 0.13))
+	# The curtain at both sides, the stage floor.
+	for x in [0.0, SIZE.x - 22.0]:
+		c.draw_rect(Rect2(x, 0, 22, SIZE.y), Color("#8E1A3A"))
+		for k in 3:
+			c.draw_line(Vector2(x + 5.0 + k * 6.0, 0), Vector2(x + 5.0 + k * 6.0, SIZE.y), Color("#B5305A"), 1.5)
+	c.draw_rect(Rect2(0, 86, SIZE.x, 22), Color("#3A2A5A"))
+	c.draw_line(Vector2(0, 86), Vector2(SIZE.x, 86), Color("#FFD23F"), 1.5)
+	# The marquee: BYE BYE in bulbs that chase round.
+	_text(c, "BYE BYE", Vector2(0, 22), 18, Color("#FFD23F"), SIZE.x, HORIZONTAL_ALIGNMENT_CENTER)
+	for i in 16:
+		var on := (int(t * 8.0) + i) % 3 == 0
+		c.draw_circle(Vector2(52.0 + i * 6.0, 28.0), 1.4, Color("#FFF6C8") if on else Color("#7A5A2A"))
+	# The sketch of the moment, one every six seconds.
+	var sketch := int(maxf(on_for, 0.0) / 6.0) % 4
+	var mid := Vector2(SIZE.x / 2.0, 86.0)
+	match sketch:
+		0:
+			# The host at the mic, waving.
+			c.draw_rect(Rect2(mid + Vector2(-8, -30), Vector2(16, 24)), Color("#2A2A2A"))
+			c.draw_circle(mid + Vector2(0, -38), 7.0, Color("#F1C8A0"))
+			c.draw_line(mid + Vector2(8, -26), mid + Vector2(16, -38 + sin(t * 8.0) * 3.0), Color("#2A2A2A"), 3.0)
+			c.draw_line(mid + Vector2(-14, -6), mid + Vector2(-14, -28), Color("#9A9A9A"), 1.5)
+			c.draw_circle(mid + Vector2(-14, -30), 2.5, Color("#5A5A5A"))
+			c.draw_rect(Rect2(mid + Vector2(-6, -6), Vector2(5, 6)), Color("#1E1E1E"))
+			c.draw_rect(Rect2(mid + Vector2(1, -6), Vector2(5, 6)), Color("#1E1E1E"))
+		1:
+			# A skater twirling.
+			var spin := sin(t * 6.0)
+			c.draw_circle(mid + Vector2(0, -36), 6.0, Color("#F1C8A0"))
+			c.draw_colored_polygon(PackedVector2Array([mid + Vector2(-10 * spin, -12), mid + Vector2(10 * spin, -12), mid + Vector2(0, -30)]), Color("#E86BB0"))
+			c.draw_line(mid + Vector2(0, -12), mid + Vector2(0, -2), Color("#F1C8A0"), 2.0)
+			c.draw_line(mid + Vector2(-5, -1), mid + Vector2(5, -1), Color("#C9CED6"), 1.5)
+			c.draw_line(mid + Vector2(-2, -26), mid + Vector2(-16 * spin, -30), Color("#F1C8A0"), 1.6)
+			c.draw_line(mid + Vector2(2, -26), mid + Vector2(16 * spin, -30), Color("#F1C8A0"), 1.6)
+		2:
+			# A snowman doing a little dance.
+			var hop := absf(sin(t * 5.0)) * 4.0
+			c.draw_circle(mid + Vector2(0, -9 - hop), 10.0, Color.WHITE)
+			c.draw_circle(mid + Vector2(0, -25 - hop), 7.0, Color.WHITE)
+			c.draw_circle(mid + Vector2(-2.5, -27 - hop), 1.0, Color.BLACK)
+			c.draw_circle(mid + Vector2(2.5, -27 - hop), 1.0, Color.BLACK)
+			c.draw_colored_polygon(PackedVector2Array([mid + Vector2(0, -25 - hop), mid + Vector2(0, -23 - hop), mid + Vector2(6, -24 - hop)]), Color("#FF8A3D"))
+			c.draw_rect(Rect2(mid + Vector2(-6, -38 - hop), Vector2(12, 6)), Color("#1E1E1E"))
+			c.draw_line(mid + Vector2(8, -14 - hop), mid + Vector2(16, -22 + sin(t * 8.0) * 4.0 - hop), Color("#6E4424"), 1.5)
+			c.draw_line(mid + Vector2(-8, -14 - hop), mid + Vector2(-16, -22 - sin(t * 8.0) * 4.0 - hop), Color("#6E4424"), 1.5)
+		3:
+			# A singer in a sparkly dress, notes floating up.
+			c.draw_circle(mid + Vector2(0, -38), 6.0, Color("#C99A6E"))
+			c.draw_colored_polygon(PackedVector2Array([mid + Vector2(-10, 0), mid + Vector2(10, 0), mid + Vector2(0, -32)]), Color("#3BA8C9"))
+			for k in 3:
+				var n := mid + Vector2(10.0 + k * 9.0, -40.0 - fmod(t * 14.0 + k * 9.0, 30.0))
+				c.draw_circle(n, 2.0, Color("#FFD23F"))
+				c.draw_line(n + Vector2(2, 0), n + Vector2(2, -6), Color("#FFD23F"), 1.0)
+	# Confetti falling.
+	var colours := [Color("#FFD23F"), Color("#E86BB0"), Color("#4DA6FF"), Color("#5BD16E"), Color.WHITE]
+	for i in 30:
+		var x := fmod(i * 41.0 + sin(t * 2.0 + i) * 5.0, SIZE.x)
+		var y := fmod(i * 17.0 + t * (18.0 + i % 4 * 5.0), SIZE.y)
+		c.draw_rect(Rect2(x, y, 2.0, 1.4), colours[i % colours.size()])
 
 
 # ── The films she can choose on a movie night ───────────────────

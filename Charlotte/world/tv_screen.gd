@@ -15,6 +15,8 @@ var auto_cycle := 0.0
 ## Where Charlotte stands to use it, and the room glow it drives (both set by the house).
 var stand_x := 0.0
 var glow: Sprite2D
+## Set by a scene for a click that means something else for a while (New Year's Eve): returns true when it handled it.
+var before_click: Callable
 
 var _t := 0.0
 var _cycle := 0.0
@@ -73,6 +75,8 @@ func release() -> void:
 
 
 func interact(_who: Character) -> void:
+	if before_click.is_valid() and before_click.call():
+		return
 	_cycle = 0.0
 	channel += 1
 	if channel >= channels.size():

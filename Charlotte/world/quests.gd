@@ -7,7 +7,7 @@ extends RefCounted
 
 ## Quests that come `after` "halloween" open the morning after it, in winter; the Halloween evening doesn't wait for them
 ## (`after_halloween`).
-const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole", "fete", "bonhomme", "glissade", "souffleuse", "sapin", "noel"]
+const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole", "fete", "bonhomme", "glissade", "souffleuse", "sapin", "noel", "jourdelan"]
 const ALL := {
 	"milk": {
 		"title": "Maman a besoin de lait : va au dépanneur",
@@ -129,6 +129,12 @@ const ALL := {
 		"find": "Maman compte les dodos avant Noël…",
 		"age": 7, "after": "sapin", "reward": 3.0,
 	},
+	"jourdelan": {
+		"title": "Le jour de l'an",
+		"hint": "Veille jusqu'à minuit avec tes parents devant le Bye Bye, pis dis ta bonne résolution le jour de l'an.",
+		"find": "L'année achève… Maman a une surprise pour le 31.",
+		"age": 7, "after": "noel", "reward": 2.0,
+	},
 }
 
 
@@ -152,6 +158,8 @@ static func hint(id: String) -> String:
 		return XmasTree.hint()
 	if id == Christmas.QUEST and active(id):
 		return Christmas.hint()
+	if id == NewYear.QUEST and active(id):
+		return NewYear.hint()
 	return str(ALL.get(id, {}).get("hint", ""))
 
 

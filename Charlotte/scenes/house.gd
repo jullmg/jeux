@@ -139,6 +139,7 @@ func _ready() -> void:
 	_build_chores()
 	_build_doors()
 	_build_xmas_spots()
+	_build_new_year()
 	_build_movie_night()
 	_enter_area(BEDROOM if _charlotte.position.x >= BEDROOM.x else HALL)
 	_finish([[700.0, "plant"], [1900.0, "plant"], [2900.0, "plant"], [5400.0, "plushie"], [6250.0, "plant"]])
@@ -209,11 +210,12 @@ func _build_family() -> void:
 			or Quests.active("milk") and Carry.has("milk") or Cinema.step() == 1 \
 			or Quests.available(School.QUEST) or Quests.available(Party.QUEST) and School.step() == 0 \
 			or Snowman.needs("boutons") and not Carry.busy() \
-			or Christmas.can_start() or Christmas.step() == 1 and Carry.has("lettre"))
+			or Christmas.can_start() or Christmas.step() == 1 and Carry.has("lettre") \
+			or NewYear.can_start() or NewYear.step() == 3)
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
 		return Quests.available("hamster") or Quests.available("plants") or Quests.available("chips") \
 			or Quests.active("chips") and Carry.has("chips") or Snowman.needs("tuque") and not Carry.busy() \
-			or Snowstorm.step() == 1 or XmasTree.can_start() or XmasTree.step() == 4)
+			or Snowstorm.step() == 1 or XmasTree.can_start() or XmasTree.step() == 4 or NewYear.step() == 3)
 	# The morning after the storm, Papa is out front shovelling.
 	if Snowstorm.dad_outside():
 		_dad.visible = false
@@ -256,6 +258,17 @@ func _talk_to_mom() -> void:
 		_say(_mom, "Amuse-toi bien, ma chouette !\nReviens quand ton sac sera plein.", 400.0, 3.5)
 	elif Halloween.step() == 1:
 		_say(_mom, "Ton déguisement est dans ta commode,\nma chouette ! Vas-y !", 400.0, 3.5)
+	elif NewYear.step() == 1:
+		_say(_mom, "Viens dans le corridor, ma chouette !\nLe Bye Bye commence à la télé.", 400.0, 3.2)
+	elif NewYear.step() == 2:
+		_say(_mom, "Il est minuit passé ! Au lit !", 380.0)
+	elif NewYear.step() == 3:
+		_ask_resolution()
+	elif NewYear.can_start() and Quests.start(NewYear.QUEST):
+		NewYear.set_step(1)
+		_mom.express("happy", 2.4)
+		_say(_mom, "C'est le 31 décembre ! À soir, tu peux veiller\njusqu'à minuit. On regarde le Bye Bye à la télé !", 410.0, 4.0)
+		Notebook.announce("step", "Va regarder le Bye Bye à la télé du corridor !", NewYear.HEADING)
 	elif Christmas.step() == 1 and Carry.has("lettre"):
 		_letter_to_mom()
 	elif Christmas.step() == 1:
@@ -332,6 +345,10 @@ func _talk_to_dad() -> void:
 			_dad_routine.process_mode = Node.PROCESS_MODE_DISABLED
 			_dad_routine.spot.queue_free()
 			_dad_routine.mark.queue_free())
+	elif NewYear.step() == 3:
+		_ask_resolution()
+	elif NewYear.step() == 1:
+		_say(_dad, "Le Bye Bye ! Viens, ma grande,\nça commence dans le corridor.", 390.0)
 	elif XmasTree.step() == 4:
 		_the_star()
 	elif XmasTree.step() == 3:
@@ -522,6 +539,172 @@ func _xmas_lights() -> void:
 		i += 1
 	_glow(origin + XmasTree.top_of(XmasTree.choice()) * XMAS_SCALE, 46.0, Color(1.0, 0.9, 0.5, 0.55))
 	_glow(origin + Vector2(XmasTree.W / 2.0, XmasTree.H * 0.55) * XMAS_SCALE, 190.0, Color(1.0, 0.8, 0.5, 0.18))
+
+
+# ── New Year's Eve and Day ──────────────────────────────────
+
+func _build_new_year() -> void:
+	_tv.before_click = func() -> bool:
+		if NewYear.step() != 1:
+			return false
+		_new_years_eve()
+		return true
+	add_child(QuestMark.make(_tv.get_global_rect().get_center() - Vector2(0, 90), func() -> bool:
+		return NewYear.step() == 1 and _control.enabled))
+	add_child(QuestMark.make(Vector2(BEDROOM.x + 584.0, 340.0), func() -> bool:
+		return NewYear.step() == 2 and _control.enabled))
+
+
+# The Bye Bye in the dimmed hall with her parents, the countdown, the wishes, then the fireworks through the salon window.
+func _new_years_eve() -> void:
+	_control.enabled = false
+	_mom_routine.pause(90.0, _tv.stand_x)
+	_dad_routine.pause(90.0, _tv.stand_x)
+	var mom_was := _mom.position.x
+	var dad_was := _dad.position.x
+	var layer := CanvasLayer.new()
+	layer.layer = 49
+	add_child(layer)
+	var black := ColorRect.new()
+	black.color = Color(0, 0, 0, 0)
+	black.size = VIEW
+	layer.add_child(black)
+	var big := Label.new()
+	var settings := LabelSettings.new()
+	settings.font_size = 120
+	settings.font_color = Color("#FFD23F")
+	settings.outline_size = 14
+	settings.outline_color = Color("#1D4F91")
+	big.label_settings = settings
+	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	big.size = Vector2(VIEW.x, 160)
+	big.position = Vector2(0, 90)
+	big.modulate.a = 0.0
+	var top := CanvasLayer.new()
+	top.layer = 53
+	top.add_child(big)
+	add_child(top)
+	# Lambdas copy locals: the veil goes in a dictionary so the one that takes it away sees it.
+	var veil := {}
+	var steps := create_tween()
+	steps.tween_property(black, "color:a", 1.0, 0.6)
+	steps.tween_callback(func() -> void:
+		veil.node = _movie_dark()
+		var show: Array[String] = ["byebye"]
+		_tv.channels = show
+		_tv.turn_on(0)
+		Sfx.play("tv", _tv.get_global_rect().get_center())
+		var spots := [[_charlotte, 2790.0], [_mom, 2880.0], [_dad, 2970.0]]
+		for spot: Array in spots:
+			var who: Character = spot[0]
+			who.position.x = spot[1]
+			who.facing = -1
+			who.is_walking = false
+			who.modulate = Color(0.8, 0.82, 0.96))
+	steps.tween_property(black, "color:a", 0.0, 0.8)
+	for line: Array in NewYear.SHOW:
+		steps.tween_callback(_new_year_says.bind(line[0], line[1]))
+		steps.tween_interval(3.2)
+	# The countdown.
+	steps.tween_property(big, "modulate:a", 1.0, 0.2)
+	for n in range(10, 0, -1):
+		steps.tween_callback(func() -> void:
+			big.text = str(n)
+			big.scale = Vector2.ONE
+			Sfx.play("click", Vector2.INF, 0.0, 1.0 + (10 - n) * 0.04))
+		steps.tween_interval(0.9)
+	steps.tween_callback(func() -> void:
+		big.text = "BONNE ANNÉE !"
+		settings.font_size = 90
+		Sfx.play("chime")
+		Sfx.play("goodnight")
+		for who: Character in [_charlotte, _mom, _dad]:
+			who.express("laugh", 3.0))
+	steps.tween_interval(2.4)
+	steps.tween_property(big, "modulate:a", 0.0, 0.5)
+	for line: Array in NewYear.AFTER:
+		steps.tween_callback(_new_year_says.bind(line[0], line[1]))
+		steps.tween_interval(3.0)
+	# To the salon window for the fireworks.
+	steps.tween_property(black, "color:a", 1.0, 0.6)
+	var fireworks := NewYear.Fireworks.new()
+	# Midnight in the salon: the whole room dimmed, the fireworks bright in the window.
+	var midnight := CanvasModulate.new()
+	midnight.color = Color(0.5, 0.52, 0.74)
+	steps.tween_callback(func() -> void:
+		veil.node.queue_free()
+		add_child(midnight)
+		fireworks.night = midnight.color
+		_tv.turn_off()
+		_tv.channels = TvShows.ALL.duplicate()
+		fireworks.glass = Rect2(_salon_window.position + Vector2(14, 14), Vector2(142, 272))
+		add_child(fireworks)
+		# Behind the tree, just over the window's picture.
+		move_child(fireworks, _salon_window.get_index() + 1)
+		_charlotte.position.x = 1610.0
+		_charlotte.facing = 1
+		_mom.position.x = 1510.0
+		_mom.facing = 1
+		_dad.position.x = 1790.0
+		_dad.facing = -1
+		for who: Character in [_charlotte, _mom, _dad]:
+			who.modulate = Color.WHITE)
+	steps.tween_property(black, "color:a", 0.0, 0.6)
+	steps.tween_callback(func() -> void:
+		_charlotte.express("wonder", 4.0)
+		_say(_charlotte, "Ooooh ! Des rouges pis des bleues !", 300.0, 3.0))
+	steps.tween_interval(3.4)
+	steps.tween_callback(_new_year_says.bind(0, "Wow ! Une belle année qui commence."))
+	steps.tween_interval(3.4)
+	steps.tween_callback(_new_year_says.bind(1, "Bon, il est ben tard. Au lit, ma chouette !"))
+	steps.tween_interval(3.0)
+	steps.tween_property(black, "color:a", 1.0, 0.5)
+	steps.tween_callback(func() -> void:
+		midnight.queue_free()
+		_mom.position.x = mom_was
+		_dad.position.x = dad_was)
+	steps.tween_property(black, "color:a", 0.0, 0.5)
+	steps.tween_callback(func() -> void:
+		layer.queue_free()
+		top.queue_free()
+		NewYear.set_step(2)
+		Notebook.announce("step", "Il est minuit passé : au lit !", NewYear.HEADING)
+		_control.enabled = true
+		_mom_routine.pause(0.1, mom_was)
+		_dad_routine.pause(0.1, dad_was))
+
+
+func _new_year_says(who: int, text: String) -> void:
+	if who < 0:
+		_say(_charlotte, text, 300.0, 3.0)
+	else:
+		_say(_dad if who == 0 else _mom, text, 390.0 if who == 0 else 380.0, 3.0)
+
+
+# New Year's Day: her resolution, and the wishes.
+func _ask_resolution() -> void:
+	_control.enabled = false
+	var choices: Array = []
+	for r: Array in NewYear.RESOLUTIONS:
+		choices.append({"text": r[0]})
+	var card := ChoiceCard.ask(self, "Ta bonne résolution pour la nouvelle année ?", choices)
+	card.chose.connect(func(i: int) -> void:
+		_control.enabled = true
+		if i < 0 or i >= NewYear.RESOLUTIONS.size():
+			return
+		var r: Array = NewYear.RESOLUTIONS[i]
+		GameState.flags[NewYear.RESOLUTION] = r[0]
+		_say(_charlotte, r[1], 300.0, 3.2)
+		var who := _mom if absf(_mom.position.x - _charlotte.position.x) < absf(_dad.position.x - _charlotte.position.x) else _dad
+		var more := create_tween()
+		more.tween_interval(3.4)
+		more.tween_callback(func() -> void:
+			who.express("happy", 2.4)
+			_say(who, r[2] + "\nBonne année, pis la santé, mon cœur !", 390.0 if who == _dad else 380.0, 3.6))
+		more.tween_interval(3.6)
+		more.tween_callback(func() -> void:
+			Sfx.play("chime")
+			Quests.complete(NewYear.QUEST)))
 
 
 # ── Christmas ───────────────────────────────────────────────
@@ -1544,7 +1727,8 @@ func _go_to_sleep() -> void:
 	night.add_child(dark)
 	var moon := _glow(Vector2(BEDROOM.x + 180.0, 280.0), 260.0, Color(0.6, 0.75, 1.0, 0.0))
 	var christmas_eve := Christmas.step() == 4
-	var words := _night_label("Bonne nuit, Chachoue…" if not christmas_eve else "Bonne nuit… le père Noël s'en vient !", 40)
+	var new_year := NewYear.step() == 2
+	var words := _night_label("Bonne nuit… le père Noël s'en vient !" if christmas_eve else ("Bonne nuit… pis bonne année !" if new_year else "Bonne nuit, Chachoue…"), 40)
 	words.position.y = -170.0
 	night.add_child(words)
 	# The z's rise from her pillow.
@@ -1602,6 +1786,10 @@ func _go_to_sleep() -> void:
 		words.text = "Le lendemain matin… il a neigé !" if halloween_over else ("Le lendemain matin… quelle tempête !" if storm else "Le lendemain matin…")
 		if christmas_eve:
 			words.text = "Le matin de Noël !"
+		if new_year:
+			NewYear.set_step(3)
+			words.text = "Le jour de l'an !"
+			Notebook.announce("step", "Bonne année ! Va dire ta bonne résolution à Maman ou à Papa.", NewYear.HEADING)
 		words.position.y = 0.0
 		moon.queue_free()
 		_charlotte.position.x = BEDROOM.x + 840.0
