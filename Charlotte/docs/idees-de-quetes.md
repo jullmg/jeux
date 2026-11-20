@@ -31,8 +31,8 @@ Rappels : une seule chose dans les bras à la fois (voir `world/carry.gd`) ; un 
 
 16. ~~**Le jour de l'an**~~ (fait : la quête `jourdelan`, `world/new_year.gd` ; le Bye Bye, le compte à rebours, les feux
     d'artifice par la fenêtre, la bonne résolution le matin)
-17. **Le fort de neige** (Julien, 2026-11-19) : bâtir un fort avec les jumelles dans la ruelle, puis une bataille de balles de
-    neige contre Billie et Auguste.
+17. ~~**Le fort de neige**~~ (fait : la quête `fort`, `world/snow_fort.gd` ; six blocs avec les jumelles, puis la bataille de
+    balles de neige contre Billie et Auguste)
 18. **La dent qui branle** (Julien, 2026-11-19) : sa dent tombe, sous l'oreiller, la fée des dents laisse des sous.
 19. **La fête de Charlotte, le 1er février** (Julien, 2026-11-19) : elle choisit les amis qu'elle invite, cinq au plus. Elle
     garde 7 ans pour l'instant (pas encore le droit de traverser seule).

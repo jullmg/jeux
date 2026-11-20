@@ -61,6 +61,7 @@ const CHECKED := "croque_checked"
 
 # Lots left to right (x from, x to; their kind), the openings (to an avenue or another lane), clothesline pulleys.
 var _lots: Array[Vector2] = []
+var _twins: Twins
 var _kinds: Array[String] = []
 var _front_sprites := {}
 var _openings: Array[Dictionary] = []
@@ -121,6 +122,8 @@ func _ready() -> void:
 		if Cinema.step() != 3:
 			_build_twins()
 		_build_little_neighbours()
+		if SnowFort.standing():
+			_build_snow_fort()
 	var squirrels := _build_lane_squirrels()
 	_charlotte = _spawn_charlotte(start_x)
 	for squirrel in squirrels:
@@ -612,6 +615,7 @@ func _opaque_top(sprite: Sprite2D, x: float) -> float:
 
 func _build_twins() -> void:
 	var twins := Twins.new()
+	_twins = twins
 	twins.position = Vector2((_lots[TWINS_LOT].x + _lots[TWINS_LOT].y) / 2.0, NEIGHBOUR_Y + 10.0)
 	twins.scale = Vector2.ONE * CHAR_SCALE
 	twins.control = _control
@@ -620,6 +624,22 @@ func _build_twins() -> void:
 	add_child(twins)
 	twins.spawn_hidden()
 	add_child(QuestMark.make(twins.position + Vector2(0, -190), twins.waiting))
+
+
+# The twins' snow fort (quest "fort"), in the next lot toward Dandurand: built block by block, then the snowball fight.
+func _build_snow_fort() -> void:
+	var fort := SnowFort.new()
+	fort.scene = self
+	fort.control = _control
+	fort.position = Vector2((_lots[TWINS_LOT + 1].x + _lots[TWINS_LOT + 1].y) / 2.0, NEIGHBOUR_Y + 18.0)
+	add_child(fort)
+	add_child(DoorSpot.make(Rect2(fort.position + Vector2(-110, -110), Vector2(220, 120)), func() -> void:
+		if SnowFort.step() == 1:
+			fort.add_block(_charlotte, func(text: String) -> void:
+				if _twins:
+					_twins.cheer(text))
+		, fort.position.x + SnowFort.THROW_DX))
+	add_child(QuestMark.make(fort.position + Vector2(0, -130), func() -> bool: return SnowFort.step() == 1 and _control.enabled))
 
 
 func _build_little_neighbours() -> void:

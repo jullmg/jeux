@@ -61,6 +61,13 @@ const FOUND_FLAG := "cachette_found"
 ## many she has asked for (`ROUND_FLAG`), which picks other fences to hide behind each time (`spots_for`).
 const AGAIN_FLAG := "cachette_again"
 const ROUND_FLAG := "cachette_round"
+const FORT := [
+	[0, "Chachoue ! Y a assez de neige pour faire un fort !"],
+	[1, "Un vrai fort, avec des créneaux !"],
+	[-1, "Oui ! Pis après, une bataille de balles de neige ?"],
+	[0, "Contre Billie pis Auguste ! Y vont voir !"],
+	[1, "Viens, on le bâtit à côté de chez nous."],
+]
 const AGAIN := [
 	[-1, "On joue à la cachette ?"],
 	[0, "Ouiii ! Mais cette fois-ci, on se cache\nben mieux, tu nous trouveras jamais !"],
@@ -125,7 +132,7 @@ static func met() -> bool:
 func waiting() -> bool:
 	if _talking:
 		return false
-	if not met() or Quests.available("cachette") or Quests.available("livre") or Quests.available(Cinema.QUEST):
+	if not met() or Quests.available("cachette") or Quests.available("livre") or Quests.available(Cinema.QUEST) or SnowFort.can_start():
 		return true
 	# She is bringing the book back.
 	return Quests.active("livre") and Carry.has("book")
@@ -190,6 +197,15 @@ func interact(who: Character) -> void:
 	if met() and Cinema.step() == 2:
 		_say(_clicked, "Des chips pis des bonbons,\nau dépanneur !" if _clicked == 0 else "Grouille, Chachoue, on a hâte !")
 		return
+	if met() and SnowFort.can_start():
+		_talk_through(FORT, func() -> void:
+			Quests.start(SnowFort.QUEST)
+			SnowFort.set_step(1)
+			Notebook.announce("step", "Bâtis le fort de neige à côté des jumelles !", SnowFort.HEADING))
+		return
+	if met() and SnowFort.step() == 1:
+		_say(_clicked, "Le fort, Chachoue ! Juste à côté !")
+		return
 	if met() and Quests.done("cachette"):
 		_ask_what_to_do()
 		return
@@ -197,6 +213,13 @@ func interact(who: Character) -> void:
 		_chat()
 		return
 	_meet()
+
+
+## A word from one of them, while Charlotte builds the fort.
+func cheer(text: String) -> void:
+	var i := randi() % 2
+	_sisters[i].express("grin", 1.6)
+	_say(i, text)
 
 
 func _chat() -> void:

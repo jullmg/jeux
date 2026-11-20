@@ -7,7 +7,7 @@ extends RefCounted
 
 ## Quests that come `after` "halloween" open the morning after it, in winter; the Halloween evening doesn't wait for them
 ## (`after_halloween`).
-const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole", "fete", "bonhomme", "glissade", "souffleuse", "sapin", "noel", "jourdelan"]
+const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole", "fete", "bonhomme", "glissade", "souffleuse", "sapin", "noel", "jourdelan", "fort"]
 const ALL := {
 	"milk": {
 		"title": "Maman a besoin de lait : va au dépanneur",
@@ -135,6 +135,12 @@ const ALL := {
 		"find": "L'année achève… Maman a une surprise pour le 31.",
 		"age": 7, "after": "noel", "reward": 2.0,
 	},
+	"fort": {
+		"title": "Le fort de neige",
+		"hint": "Bâtis un fort de neige avec les jumelles dans la ruelle, pis gagne la bataille de balles de neige contre Billie pis Auguste.",
+		"find": "Alphée pis Constance regardent la neige avec un drôle d'air…",
+		"age": 7, "after": "jourdelan", "reward": 2.0,
+	},
 }
 
 
@@ -160,6 +166,8 @@ static func hint(id: String) -> String:
 		return Christmas.hint()
 	if id == NewYear.QUEST and active(id):
 		return NewYear.hint()
+	if id == SnowFort.QUEST and active(id):
+		return SnowFort.hint()
 	return str(ALL.get(id, {}).get("hint", ""))
 
 
