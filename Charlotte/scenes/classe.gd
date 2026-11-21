@@ -336,6 +336,15 @@ func _start_lesson() -> void:
 	if Emilia.day():
 		_welcome_emilia(intro)
 		_lesson.append(Emilia.word_question())
+	var theme: Dictionary = School.current
+	if theme.id != "":
+		# What the day's lesson is about, on the board and in her words.
+		intro.tween_callback(func() -> void:
+			_board_text.text = theme.title
+			_board_text.add_theme_font_size_override("font_size", 38)
+			_board_text.position.y = BOARD.position.y + 140.0 - _board_text.size.y / 2.0
+			_teacher_says(theme.intro, 4.2))
+		intro.tween_interval(4.8)
 	intro.tween_callback(_teacher_says.bind("On commence ! Charlotte, tu veux répondre ?", 3.0))
 	intro.tween_interval(3.2)
 	intro.tween_callback(_ask)
@@ -422,6 +431,7 @@ func _end_lesson() -> void:
 	_board_shape.queue_redraw()
 	_teacher_says("Super travail ! Voici un autocollant\npour toi, Charlotte.", 3.0)
 	GameState.flags[School.STICKERS] = int(GameState.flags.get(School.STICKERS, 0)) + 1
+	School.lesson_done()
 	_treat(ClassArt.sticker(), "Un autocollant !", 1.0)
 	var bell := create_tween()
 	bell.tween_interval(4.6)

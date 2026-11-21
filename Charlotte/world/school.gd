@@ -21,6 +21,8 @@ const TODAY_DONE := "ecole_today_done"
 const SEEN := "ecole_seen"
 ## How many stickers Madame Nadia has given her.
 const STICKERS := "ecole_stickers"
+## How many lessons she has had: the first is the welcome mix, then one theme a day (`SchoolMath.CYCLE`).
+const LESSONS := "ecole_lessons"
 const YARD := "res://scenes/cour_ecole.tscn"
 const CLASS := "res://scenes/classe.tscn"
 const GARDE := "res://scenes/service_de_garde.tscn"
@@ -103,10 +105,35 @@ static func indoors(look: CharacterLook) -> CharacterLook:
 	return look
 
 
-## Today's questions: two on shapes she hasn't had yet (as long as there are), then an addition and a subtraction made up
+## The theme of the lesson being given: {id, title, intro}, id "" for the first one (the welcome mix).
+static var current := {}
+
+
+## A lesson is over (the sticker is given): tomorrow's will have the next theme.
+static func lesson_done() -> void:
+	GameState.flags[LESSONS] = int(GameState.flags.get(LESSONS, 0)) + 1
+
+
+## The theme of lesson number `n` (0 = the first, "" for the welcome mix, then round `SchoolMath.CYCLE`).
+static func theme_of(n: int) -> String:
+	return "" if n <= 0 else SchoolMath.CYCLE[(n - 1) % SchoolMath.CYCLE.size()]
+
+
+## Today's questions: the first lesson is a mix (below); after it each day has a theme of its own (`SchoolMath.lesson`).
+static func lesson(rng: RandomNumberGenerator) -> Array:
+	var n := int(GameState.flags.get(LESSONS, 0))
+	var id := theme_of(n)
+	if id == "":
+		current = {"id": "", "title": "", "intro": ""}
+		return _welcome_lesson(rng)
+	current = SchoolMath.info(id)
+	return SchoolMath.lesson(id, theme_of(n - 1), rng)
+
+
+## The first lesson: two on shapes she hasn't had yet (as long as there are), then an addition and a subtraction made up
 ## for the day, in either order; the order of the answers shuffled. Each is {ask (on the card), say (read out), board (in
 ## chalk), shape (to draw, or ""), answers, right}.
-static func lesson(rng: RandomNumberGenerator) -> Array:
+static func _welcome_lesson(rng: RandomNumberGenerator) -> Array:
 	var seen: Array = GameState.flags.get(SEEN, [])
 	var fresh: Array = []
 	for i in SHAPE_QUESTIONS.size():
@@ -190,6 +217,9 @@ static func _no_borrow(a: int, b: int) -> int:
 ## the little squares of the right angles on the square and the rectangle.
 static func draw_shape(canvas: CanvasItem, kind: String, at: Vector2, size: float, color := Color(1, 1, 1, 0.92)) -> void:
 	var k := size / 100.0
+	if kind.begins_with("pie:"):
+		_draw_pie(canvas, kind, at, size, color)
+		return
 	var pts: Array = []
 	match kind:
 		"carre":
@@ -223,6 +253,26 @@ static func draw_shape(canvas: CanvasItem, kind: String, at: Vector2, size: floa
 			var to_next: Vector2 = (line[i + 1] - c).normalized() * m
 			var to_prev: Vector2 = (line[(i + 3) % 4] - c).normalized() * m
 			canvas.draw_polyline(PackedVector2Array([c + to_next, c + to_next + to_prev, c + to_prev]), faint, maxf(1.5, 2.0 * k), true)
+
+
+## A pizza cut in equal slices, some of them coloured in: kind "pie:<slices>:<coloured>".
+static func _draw_pie(canvas: CanvasItem, kind: String, at: Vector2, size: float, color: Color) -> void:
+	var parts := kind.split(":")
+	var n := int(parts[1])
+	var lit := int(parts[2])
+	var r := size * 0.5
+	var faint := Color(color, color.a * 0.35)
+	for i in n:
+		var a0 := -PI / 2.0 + TAU * i / n
+		var a1 := -PI / 2.0 + TAU * (i + 1) / n
+		if i < lit:
+			var wedge := PackedVector2Array([at])
+			for j in 11:
+				wedge.append(at + Vector2.from_angle(lerpf(a0, a1, j / 10.0)) * r)
+			canvas.draw_colored_polygon(wedge, Color("#E8A33D", 0.85))
+		canvas.draw_line(at, at + Vector2.from_angle(a0) * r, color, 3.0, true)
+	canvas.draw_arc(at, r, 0.0, TAU, 48, color, 4.0, true)
+	canvas.draw_arc(at + Vector2(1.5, 1.2), r, 0.0, TAU, 48, faint, 2.0, true)
 
 
 ## What the notebook says to do next.
