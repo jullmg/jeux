@@ -227,6 +227,9 @@ func _here() -> Dictionary:
 		"jean_coutu":
 			# On Masson's south side, between 3e and 4e.
 			return {"at": Vector2(FOUR_X - AVE_STEP * 0.5, MASSON_Y + ST_W / 2.0 + 30.0), "say": "Je suis au Jean Coutu !"}
+		"parc_pelican":
+			# In the park, south of Masson between 1re and Molson.
+			return {"at": Vector2((MOLSON_X + FOUR_X - 3.0 * AVE_STEP) / 2.0, MASSON_Y + ST_W / 2.0 + 70.0), "say": "Je suis au parc du Pélican !"}
 		"dollarama":
 			# On Masson's south side, just west of 5e.
 			return {"at": Vector2(FIVE_X - AVE_W / 2.0 - 40.0, MASSON_Y + ST_W / 2.0 + 30.0), "say": "Je suis au Dollarama !"}

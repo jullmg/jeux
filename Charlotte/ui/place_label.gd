@@ -23,6 +23,7 @@ const NAMES := {
 	"jean_coutu": "Jean Coutu, rue Masson",
 	"fraichement_bon": "Fraîchement Bon, rue Masson",
 	"cour_ecole": "Cour de l'école Saint-Jean-de-Brébeuf",
+	"parc_pelican": "Parc du Pélican, rue Masson",
 }
 
 var _plate: PanelContainer

@@ -9497,11 +9497,21 @@ func _park_lot() -> void:
 		for lx: float in [bx + 10.0, bx + 112.0]:
 			_rect(lx, g - 86, 8, 86, "#2A2A2A")
 		_snow(bx, 130, g - 86)
+	# The park's gate (the way into the Parc du Pélican, `scenes/parc_pelican.gd`): the fence stops at the foot of the path, between
+	# two stone pillars, 680 to 900 px along the lot.
+	var gate0 := X0 + (X1 - X0) * 0.18 + 14.0
+	var gate1 := X0 + (X1 - X0) * 0.25 - 6.0
 	var fx := X0
 	while fx < X1:
-		_rect(fx, g - 46, 3, 46, "#2A2A2A")
+		if fx < gate0 - 6.0 or fx > gate1 + 6.0:
+			_rect(fx, g - 46, 3, 46, "#2A2A2A")
 		fx += 22.0
-	_rect(X0, g - 46, X1 - X0, 4, "#2A2A2A")
+	_rect(X0, g - 46, gate0 - X0, 4, "#2A2A2A")
+	_rect(gate1, g - 46, X1 - gate1, 4, "#2A2A2A")
+	for px: float in [gate0, gate1]:
+		_rect(px - 9.0, g - 78, 18, 78, "#9C978E", _stroke("#7E7A72", 1))
+		_rect(px - 12.0, g - 84, 24, 8, "#7E7A72")
+		_snow(px - 12.0, 24, g - 84)
 	var sx := X1 - 420.0
 	_rect(sx, g - 230.0, 260, 10, "#3A3A3C")
 	for lx: float in [sx, sx + 250.0]:

@@ -564,7 +564,7 @@ func _build_doors() -> void:
 ## Shops she can go into: [facade, its scene, the x of its door on the facade]. The Dollarama (2836, south side by 5e) and
 ## Fraîchement Bon (2903, north side at 6e). A new shop = one line here and its scene, whose door goes back to this side.
 const SHOP_DOORS := [["masson_2836", "res://scenes/dollarama.tscn", 1150.0], ["masson_2903", "res://scenes/fraichement_bon.tscn", 360.0],
-	["masson_2716", "res://scenes/jean_coutu.tscn", 640.0]]
+	["masson_2716", "res://scenes/jean_coutu.tscn", 640.0], ["masson_2560", "res://scenes/parc_pelican.tscn", 795.0, "park"]]
 
 
 func _build_shop_doors() -> void:
@@ -575,12 +575,19 @@ func _build_shop_doors() -> void:
 		var tex := _tex(d[0])
 		var origin := _house_origin(i)
 		var door_x: float = d[2]
-		var area := Rect2(origin + Vector2(door_x - 44.0, tex.get_height() - 240.0) * HOUSE_SCALE, Vector2(88.0, 236.0) * HOUSE_SCALE)
+		var half := 100.0 if d.size() > 3 and d[3] == "park" else 44.0
+		var area := Rect2(origin + Vector2(door_x - half, tex.get_height() - 240.0) * HOUSE_SCALE, Vector2(half * 2.0, 236.0) * HOUSE_SCALE)
 		var scene: String = d[1]
+		var is_park: bool = d.size() > 3 and d[3] == "park"
 		add_child(DoorSpot.make(area, func():
 			_control.enabled = false
 			Transition.street_x = area.get_center().x
-			Sfx.play("bell")
+			if is_park:
+				# The Parc du Pélican: no bell, and the park remembers where on Masson its gate is.
+				GameState.flags["park_from_x"] = area.get_center().x
+				Transition.street_x = NAN
+			else:
+				Sfx.play("bell")
 			Transition.change_scene(self, scene), area.get_center().x))
 
 
