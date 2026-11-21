@@ -390,6 +390,13 @@ func _talk_to_dad() -> void:
 		_say(_dad, "Décore-le, ma grande !\nJe t'aiderai pour l'étoile.", 390.0)
 	elif XmasTree.step() == 1:
 		_say(_dad, "Je t'attends à la porte d'en avant !\nOn va choisir notre sapin.", 390.0)
+	elif Luge.step() == 1:
+		_say(_dad, "J'ai le traîneau, Chachoue ! Mets ta tuque,\nje t'attends à la porte d'en avant.", 390.0)
+	elif Luge.can_start() and Quests.start(Luge.QUEST):
+		Luge.set_step(1)
+		_dad.express("happy", 2.4)
+		_say(_dad, "Chachoue ! Y a de la belle neige : on va glisser\nsur la petite montagne du parc du Pélican !\nJe t'attends à la porte d'en avant.", 410.0, 4.6)
+		Notebook.announce("step", "Papa t'attend à la porte d'en avant : on va glisser au parc du Pélican !", Luge.HEADING)
 	elif Snowman.needs("tuque"):
 		_give_for_snowman(_dad, "tuque", "Une tuque pour le bonhomme ? Prends ma vieille\ntuque du Canadien. Y va être champion !", 390.0)
 	elif XmasTree.can_start() and Quests.start(XmasTree.QUEST):
@@ -1932,6 +1939,13 @@ func _build_doors() -> void:
 			Transition.street_x = TreeSale.PAPA_X + 70.0
 			Transition.change_scene_saying(self, XmasTree.YARD, "Papa t'amène à la vente de sapins de l'école…")
 			return
+		if Luge.step() == 1:
+			# With Papa to the sliding hill of the Parc du Pélican, on Rue Masson: she may not cross alone at seven.
+			Luge.set_step(2)
+			Transition.street_x = Luge.PARK_START_X
+			Transition.arrive = ""
+			Transition.change_scene_saying(self, Luge.PARK, "Papa t'amène glisser au parc du Pélican, avec le traîneau…")
+			return
 		if Party.step() == 1:
 			# Off to Rue Masson with Maman for Alyzée's present: she can't go there alone at seven.
 			Party.set_step(2)
@@ -1943,7 +1957,7 @@ func _build_doors() -> void:
 			return
 		Transition.change_scene(self, "res://scenes/main.tscn")))
 	add_child(QuestMark.make(Vector2(455.0, 180.0), func() -> bool:
-		return (School.step() == 1 or Party.step() == 1 or XmasTree.step() == 1) and _control.enabled))
+		return (School.step() == 1 or Party.step() == 1 or XmasTree.step() == 1 or Luge.step() == 1) and _control.enabled))
 	add_child(DoorSpot.make(Rect2(CHACHA_DOOR_X, 170, 150, 430), func(): _go_through(BEDROOM_DOOR_X - 40.0, BEDROOM, -1)))
 	add_child(DoorSpot.make(Rect2(BEDROOM_DOOR_X, 170, 150, 430), func(): _go_through(CHACHA_DOOR_X + 75.0, HALL, 1)))
 	# The kitchen's back door: out to the yard and the lane behind the house. Shut on Halloween night like every

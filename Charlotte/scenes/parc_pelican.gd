@@ -44,8 +44,18 @@ const SPOTS := [
 	["butte", HILL_X + HILL_W * 0.4, 360.0, HILL_X + 240.0, ["La butte de glissade ! L'hiver, on glisse dessus.", "La butte de glissade ! Faut juste un traîneau !"]],
 ]
 
-var _from_x := NAN
 var _visitors: Array[_Visitor] = []
+var _swings: _Piece
+var _springs: Array[_Piece] = []
+var _pieces_by_kind := {}
+## A play in progress (a swing, the slide…): clicks wait until it is over.
+var _busy := false
+## Papa, at the foot of the hill during the sledding quest (`Luge`), and the sleds of the runs.
+var _papa: _Visitor
+var _sleds: Array[Sprite2D] = []
+const SLED_SCALE := 0.8
+const SLED_RIM := 10.0
+const PEAK := 0.32
 
 
 func _ready() -> void:
@@ -80,6 +90,8 @@ func _ready() -> void:
 	_control.walk_top = FOOT - 120.0
 	add_child(_control)
 	_build_park_doors()
+	if Luge.step() == 2:
+		_build_luge()
 	var saver := Saver.new()
 	saver.who = _charlotte
 	add_child(saver)
@@ -150,7 +162,8 @@ func _build_park_pieces() -> void:
 		back.append({"kind": "lamp", "x": lx, "y": BACK_Y + 8.0})
 	# The wading pool, with its fence and the water mushroom; a bench for the parents.
 	back.append({"kind": "wading_pool", "x": WADING_X, "y": 584.0, "r": 150.0, "animated": true})
-	back.append({"kind": "iron_fence", "x": WADING_X - 230.0, "x1": WADING_X + 230.0, "y": 620.0, "h": 42.0})
+	back.append({"kind": "iron_fence", "x": WADING_X - 230.0, "x1": WADING_X - 46.0, "y": 620.0, "h": 42.0})
+	back.append({"kind": "iron_fence", "x": WADING_X + 46.0, "x1": WADING_X + 230.0, "y": 620.0, "h": 42.0})
 	back.append({"kind": "water_mushroom", "x": WADING_X, "y": 588.0, "animated": true})
 	back.append({"kind": "bench", "x": WADING_X + 230.0, "y": BACK_Y + 4.0})
 	back.append({"kind": "fountain", "x": WADING_X - 250.0, "y": BACK_Y + 4.0})
@@ -196,11 +209,18 @@ func _build_park_pieces() -> void:
 	# The sliding hill, behind everything on its side.
 	back.append({"kind": "hill", "x": HILL_X, "y": 596.0, "w": HILL_W})
 	back.append({"kind": "bench", "x": HILL_X + HILL_W + 40.0, "y": BACK_Y + 6.0})
+	if GameState.flags.get("park_castle", false) and not winter:
+		back.append({"kind": "castle", "x": PLAY_X + 80.0, "y": 596.0})
 	for spec: Dictionary in back:
 		var piece := _Piece.new()
 		piece.spec = spec
 		piece.position = Vector2(spec.x, spec.y)
 		add_child(piece)
+		_pieces_by_kind[spec.kind] = piece
+		if spec.kind == "swings":
+			_swings = piece
+		elif spec.kind == "spring":
+			_springs.append(piece)
 
 
 func _build_park_labels() -> void:
@@ -232,11 +252,11 @@ func _build_park_people() -> void:
 		plan.append({"x": WADING_X - 70.0, "y": LANE_Y - 18.0, "lines": ["L'eau est ben bonne !", "Le champignon m'arrose tout le temps !"]})
 		plan.append({"x": WADING_X + 120.0, "y": LANE_Y - 18.0, "lines": ["Chu trempé de la tête aux pieds !", "On y va-tu à la grande piscine ?"]})
 		plan.append({"x": POOL_X + 90.0, "y": BACK_Y + 12.0, "age": "adult", "guard": true, "lines": ["Pas de course autour de la piscine !", "On nage à son aise, mais prudemment."]})
-	if winter:
+	if winter and Luge.step() != 2:
 		for k in 3:
 			plan.append({"x": HILL_X + 40.0 + k * 40.0, "y": 596.0, "mode": "slide", "phase": k * 3.1, "lines": ["Wouhou ! Ça glisse en malade !", "Mes pantalons de neige sont tout mouillés !"]})
 		plan.append({"x": POOL_X + 300.0, "y": BACK_Y + 14.0, "lines": ["Chu pas capable de tenir debout sur mes patins !", "La glace est belle aujourd'hui !"]})
-	else:
+	elif not winter:
 		plan.append({"x": HILL_X + 520.0, "y": 596.0 - ParkArt.hill_height(0.47) + 4.0, "lines": ["On voit tout le parc d'en haut !", "L'hiver, on glisse ici !"]})
 	for spot: Dictionary in plan:
 		var v := _Visitor.new()
@@ -271,12 +291,37 @@ func _build_park_people() -> void:
 
 func _build_park_doors() -> void:
 	add_child(DoorSpot.make(Rect2(GATE_X - 80.0, 380.0, 160.0, 270.0), _leave_by_gate, GATE_X + 20.0))
+	# Things to play with come first (the first interactable under the click wins), then the places' own lines.
+	var winter := Season.is_winter()
+	var swing_x := PLAY_X + 640.0
+	_play_spot(Rect2(swing_x + 20.0, 410.0, 230.0, 200.0), _swing, swing_x + 150.0)
+	_play_spot(Rect2(PLAY_X + 520.0, 540.0, 45.0, 76.0), _spring.bind(0), PLAY_X + 480.0)
+	_play_spot(Rect2(PLAY_X + 566.0, 540.0, 70.0, 76.0), _spring.bind(1), PLAY_X + 680.0)
+	_play_spot(Rect2(PLAY_X + 150.0, 420.0, 250.0, 190.0), _slide_down, PLAY_X + 479.0)
+	_play_spot(Rect2(PLAY_X - 20.0, 560.0, 200.0, 60.0), _castle, PLAY_X + 80.0)
+	if not winter:
+		_play_spot(Rect2(COURT_X, 300.0, COURT_W, 310.0), _shoot, COURT_X + COURT_W * 0.38)
+	else:
+		_play_spot(Rect2(COURT_X, 480.0, COURT_W, 130.0), _shoot, COURT_X + COURT_W * 0.38)
+	_play_spot(Rect2(COURT_X + COURT_W + 100.0, 510.0, 170.0, 100.0), _pingpong, COURT_X + COURT_W + 80.0)
+	if Season.current == "summer":
+		_play_spot(Rect2(WADING_X - 150.0, 480.0, 300.0, 130.0), _wade, WADING_X)
+	for fx: float in [WADING_X - 250.0, CHALET_X + CHALET_W + 80.0]:
+		_play_spot(Rect2(fx - 24.0, 540.0, 48.0, 70.0), _drink.bind(fx), fx)
 	for spot: Array in SPOTS:
-		var line: String = spot[4][1 if Season.is_winter() else 0]
+		var line: String = spot[4][1 if winter else 0]
 		var x: float = spot[1]
 		var half: float = spot[2]
 		var id: String = spot[0]
 		add_child(DoorSpot.make(Rect2(x - half, 400.0, half * 2.0, 230.0), func() -> void: _spot_clicked(id, line), spot[3]))
+
+
+func _play_spot(area: Rect2, action: Callable, stand: float) -> void:
+	if area.has_area():
+		add_child(DoorSpot.make(area, func() -> void:
+			if _busy or _charlotte.sitting:
+				return
+			action.call(), stand))
 
 
 ## A place of the park was clicked: what she says. (The activities will start from here: playground, pools, sliding.)
@@ -285,10 +330,464 @@ func _spot_clicked(_id: String, line: String) -> void:
 
 
 func _leave_by_gate() -> void:
+	if Luge.step() == 2:
+		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Papa m'attend pour glisser !\nOn s'en va pas tout de suite.", 3.0)
+		return
 	_control.enabled = false
 	# Out the way she came in: Masson's south side, at the lawn.
 	Transition.street_x = float(GameState.flags.get("park_from_x", NAN))
 	Transition.change_scene(self, "res://scenes/masson_pair.tscn")
+
+
+# ── Play ────────────────────────────────────────────────────────
+
+func _begin_play() -> void:
+	_busy = true
+	_control.hands_off = true
+	_charlotte.is_walking = false
+	_charlotte.running = false
+
+
+func _end_play() -> void:
+	_charlotte.sitting = false
+	_charlotte.sit_on_ground = false
+	_charlotte.seat_h = 0.0
+	_charlotte.position.y = CHARLOTTE_Y
+	_charlotte.is_walking = false
+	_control.hands_off = false
+	_busy = false
+
+
+func _say_c(text: String, seconds := 2.4) -> void:
+	_charlotte.express("grin", seconds)
+	Bubble.say(self, _charlotte.position + Vector2(0, -190), text, seconds)
+
+
+# A swing: she sits in the middle one and pumps, the swing getting higher then slower, the set's own swings still.
+func _swing() -> void:
+	if _swings == null:
+		return
+	_begin_play()
+	var top_y := 600.0 - 190.0
+	var hx := _swings.position.x + 120.0
+	_swings.ride_k = 1
+	_charlotte.facing = 1
+	_charlotte.sitting = true
+	_charlotte.sit_on_ground = false
+	var tw := create_tween()
+	tw.tween_method(func(u: float) -> void:
+		var amp := 0.5 * sin(PI * u) + 0.04
+		var a := amp * sin(u * 26.0)
+		_swings.ride_a = a
+		_swings.queue_redraw()
+		var seat_y := top_y + cos(a) * 132.0
+		_charlotte.position = Vector2(hx + sin(a) * 132.0, 612.0)
+		_charlotte.seat_h = 612.0 - seat_y - 4.0, 0.0, 1.0, 7.0)
+	tw.tween_callback(func() -> void:
+		_swings.ride_k = -1
+		_swings.queue_redraw()
+		_charlotte.position.x = hx - 50.0
+		_end_play()
+		_say_c("Wouiiii ! Plus haut !"))
+	Sfx.play("swoosh", _charlotte.position)
+	get_tree().create_timer(1.6).timeout.connect(func() -> void:
+		if _busy:
+			_say_c("Regarde comme je vole !", 1.8))
+
+
+func _spring(i: int) -> void:
+	if i >= _springs.size():
+		return
+	var rider := _springs[i]
+	_begin_play()
+	rider.ride = true
+	_charlotte.facing = 1
+	_charlotte.sitting = true
+	var tw := create_tween()
+	tw.tween_method(func(u: float) -> void:
+		var lean := 0.3 * sin(u * 4.2 * 5.0)
+		rider.t = u * 5.0
+		rider.queue_redraw()
+		_charlotte.position = Vector2(rider.position.x + lean * 40.0 + 12.0, rider.position.y + 6.0)
+		_charlotte.seat_h = 58.0 + 8.0 * absf(cos(u * 4.2 * 5.0)), 0.0, 1.0, 5.0)
+	tw.tween_callback(func() -> void:
+		rider.ride = false
+		rider.queue_redraw()
+		_charlotte.position.x = rider.position.x - 80.0
+		_end_play()
+		_say_c("Hue ! Mon cheval sautillant !"))
+
+
+# The slide: up the ladder of the little tower, across the bridge, down it on her bottom.
+func _slide_down() -> void:
+	_begin_play()
+	var base_x := PLAY_X + 270.0
+	var ladder_x := base_x + 209.0
+	var deck_y := 600.0 - 106.0
+	_charlotte.facing = 1
+	_charlotte.is_walking = true
+	var tw := create_tween()
+	tw.tween_property(_charlotte, "position:y", deck_y + 6.0, 1.5)
+	tw.tween_callback(func() -> void: _charlotte.facing = -1)
+	tw.tween_property(_charlotte, "position:x", base_x + 8.0, 1.6)
+	tw.tween_callback(func() -> void:
+		_charlotte.is_walking = false
+		_charlotte.facing = -1
+		_charlotte.sitting = true
+		_charlotte.sit_on_ground = true
+		_charlotte.seat_h = 0.0
+		_say_c("Youhou !", 1.4))
+	tw.tween_interval(0.5)
+	tw.tween_method(func(u: float) -> void:
+		var a := Vector2(base_x + 6.0, deck_y + 8.0)
+		var b := Vector2(base_x - 100.0, 596.0)
+		_charlotte.position = a.lerp(b, u), 0.0, 1.0, 1.1)
+	tw.tween_callback(func() -> void:
+		Sfx.play("swoosh", _charlotte.position)
+		_charlotte.sit_on_ground = false
+		_charlotte.sitting = false)
+	tw.tween_property(_charlotte, "position", Vector2(base_x - 150.0, CHARLOTTE_Y), 0.5)
+	tw.tween_callback(func() -> void:
+		_end_play()
+		_say_c("Encore ! Encore !"))
+
+
+func _castle() -> void:
+	if Season.is_winter():
+		_spot_clicked("sable", "Le bac à sable est plein de neige.\nOn y bâtit des châteaux l'été !")
+		return
+	_begin_play()
+	_charlotte.facing = 1
+	_charlotte.pet(2.6, 1.0)
+	_say_c("Je bâtis un château de sable !", 2.2)
+	var tw := create_tween()
+	tw.tween_interval(2.8)
+	tw.tween_callback(func() -> void:
+		if not GameState.flags.get("park_castle", false):
+			GameState.flags["park_castle"] = true
+			var piece := _Piece.new()
+			piece.spec = {"kind": "castle", "x": PLAY_X + 80.0, "y": 596.0}
+			piece.position = Vector2(PLAY_X + 80.0, 596.0)
+			piece.scale = Vector2.ZERO
+			add_child(piece)
+			var grow := create_tween()
+			grow.tween_property(piece, "scale", Vector2.ONE, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		Sfx.play("pop", _charlotte.position)
+		_end_play()
+		_say_c("Ta-da ! Un château avec des tours !"))
+
+
+# The water mushroom: she wades into the wading pool, splashing.
+func _wade() -> void:
+	_begin_play()
+	_charlotte.facing = 1
+	_charlotte.is_walking = true
+	var tw := create_tween()
+	tw.tween_property(_charlotte, "position:y", 598.0, 0.8)
+	tw.tween_callback(func() -> void:
+		_charlotte.is_walking = false
+		_say_c("Brr ! Elle est froide, mais c'est bon !", 2.2)
+		for k in 3:
+			_spray(_charlotte.position + Vector2((k - 1) * 40.0, -30.0), 1.4))
+	tw.tween_interval(2.6)
+	tw.tween_callback(func() -> void:
+		_charlotte.is_walking = true
+		_spray(_charlotte.position + Vector2(0, -20.0), 1.2))
+	tw.tween_property(_charlotte, "position:y", CHARLOTTE_Y, 0.8)
+	tw.tween_callback(func() -> void:
+		_end_play()
+		_say_c("Chu trempée jusqu'aux genoux !"))
+
+
+func _drink(fx: float) -> void:
+	_begin_play()
+	_charlotte.facing = 1
+	_charlotte.pet(1.8, 1.0)
+	Sfx.play("swoosh", _charlotte.position)
+	_spray(Vector2(fx, 540.0), 1.2)
+	var tw := create_tween()
+	tw.tween_interval(2.0)
+	tw.tween_callback(func() -> void:
+		_end_play()
+		_say_c("Glou glou ! De l'eau fraîche !"))
+
+
+# A shot: a basketball at the hoop in summer (it goes in, or not), a puck into the net on the hockey rink in winter.
+func _shoot() -> void:
+	_begin_play()
+	_charlotte.facing = 1
+	var winter := Season.is_winter()
+	var scores := randf() < 0.6
+	var ball := _Ball.new()
+	ball.kind = "puck" if winter else "basket"
+	add_child(ball)
+	var from := _charlotte.position + Vector2(36.0, -90.0)
+	_charlotte.pet(0.7, 0.0)
+	var tw := create_tween()
+	tw.tween_interval(0.5)
+	if winter:
+		var net := Vector2(COURT_X + COURT_W - 24.0, 584.0)
+		var start := Vector2(_charlotte.position.x + 50.0, 590.0)
+		tw.tween_method(func(u: float) -> void: ball.position = start.lerp(net if scores else net + Vector2(-60.0 if false else 0.0, -50.0), u), 0.0, 1.0, 1.1)
+	else:
+		var rim := Vector2(COURT_X + COURT_W - 6.0 - 30.0 - 13.0, 602.0 - 258.0)
+		tw.tween_method(func(u: float) -> void:
+			var p := from.lerp(rim, u)
+			p.y -= sin(PI * u) * 130.0
+			if not scores and u > 0.85:
+				p.x -= (u - 0.85) * 160.0
+			ball.position = p, 0.0, 1.0, 1.2)
+		if scores:
+			tw.tween_property(ball, "position:y", rim.y + 90.0, 0.35)
+		else:
+			tw.tween_property(ball, "position", rim + Vector2(-90.0, 150.0), 0.6)
+	tw.tween_callback(func() -> void:
+		ball.queue_free()
+		Sfx.play("pop", _charlotte.position)
+		_end_play()
+		if scores:
+			_charlotte.express("grin", 2.0)
+			_say_c("Panier !" if not winter else "But ! Papa va être fier !", 2.0)
+		else:
+			_charlotte.express("worry", 1.6)
+			_say_c("Raté… j'essaie encore !" if not winter else "Dans le poteau ! Encore !", 2.0))
+
+
+# Ping-pong against the table's far end: the ball hops along it, a rally of a few; it takes two to play.
+func _pingpong() -> void:
+	_begin_play()
+	_charlotte.facing = 1
+	var tx := COURT_X + COURT_W + 130.0
+	var y := 606.0 - 62.0
+	var ball := _Ball.new()
+	ball.kind = "pingpong"
+	add_child(ball)
+	var tw := create_tween()
+	for k in 6:
+		var a := tx + (14.0 if k % 2 == 0 else 106.0)
+		var b := tx + (106.0 if k % 2 == 0 else 14.0)
+		tw.tween_method(func(u: float) -> void:
+			ball.position = Vector2(lerpf(a, b, u), y - 10.0 - sin(PI * u) * 40.0), 0.0, 1.0, 0.32)
+		tw.tween_callback(func() -> void:
+			Sfx.play("click", ball.position)
+			_charlotte.pet(0.25, 0.0))
+	tw.tween_callback(func() -> void:
+		ball.queue_free()
+		_end_play()
+		_say_c("Faut être deux pour jouer vraiment !\nPapa va venir avec moi."))
+
+
+func _spray(at: Vector2, seconds: float) -> void:
+	var fx := _Spray.new()
+	fx.position = at
+	fx.life = seconds
+	add_child(fx)
+
+
+# ── Sledding with Papa (quest "luge") ───────────────────────────
+
+func _hill(u: float) -> Vector2:
+	return ParkArt.hill_point(HILL_X, 596.0, HILL_W, u) + Vector2(0.0, 5.0)
+
+
+func _slope(u: float) -> float:
+	var a := _hill(maxf(u - 0.02, 0.0))
+	var b := _hill(minf(u + 0.02, 1.0))
+	return clampf((b - a).angle(), -0.7, 0.7)
+
+
+func _build_luge() -> void:
+	# Papa at the foot of the hill, in his winter things, his own sled by his boots.
+	var look := CharacterLook.dad()
+	Season.dress_for_weather(look)
+	_papa = _Visitor.new()
+	_papa.look = look
+	_papa.lines = ["Prête à glisser, ma grande ?", "Cliquez sur la butte pour glisser !"]
+	_papa.position = Vector2(HILL_X + 150.0, 616.0)
+	_papa.scale = Vector2.ONE * CHAR_SCALE * 1.18
+	_papa.head = -420.0
+	_papa.facing = 1
+	add_child(_papa)
+	_play_spot_first(Rect2(HILL_X + 40.0, 330.0, 760.0, 280.0), _luge_run, HILL_X + 170.0)
+	add_child(QuestMark.make(Vector2(HILL_X + 330.0, 330.0), func() -> bool: return Luge.step() == 2 and not _busy and _control.enabled, 0.8))
+	var hello := create_tween()
+	hello.tween_interval(1.4)
+	hello.tween_callback(func() -> void:
+		_papa.say("Voilà la petite montagne du parc du Pélican !\nTiens, prends le traîneau, Chachoue.", 3.6)
+		_papa.body.express("happy", 3.0))
+	hello.tween_interval(4.0)
+	hello.tween_callback(func() -> void:
+		if not Carry.busy():
+			Carry.take(_charlotte, "traineau")
+		_say_c("Youpi ! Allons-y !", 2.0))
+
+
+## The first interactable under a click wins, and the play spots were added before: this one goes to the front of the group.
+func _play_spot_first(area: Rect2, action: Callable, stand: float) -> void:
+	var door := DoorSpot.make(area, func() -> void:
+		if _busy:
+			return
+		action.call(), stand)
+	add_child(door)
+	move_child(door, 0)
+
+
+func _make_sled(big: bool, tint: Color) -> Sprite2D:
+	var sled := Sprite2D.new()
+	sled.texture = Sledding.sled()
+	sled.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	sled.scale = Vector2.ONE * (SLED_SCALE * (1.5 if big else 1.0))
+	sled.offset = Vector2(24, 0)
+	sled.modulate = tint
+	add_child(sled)
+	_sleds.append(sled)
+	return sled
+
+
+func _sit(who: Character) -> void:
+	who.is_walking = false
+	who.sitting = true
+	who.sit_on_ground = true
+	who.seat_h = 0.0
+	who.facing = 1
+
+
+func _luge_run() -> void:
+	if _busy or Luge.step() != 2 or _papa == null:
+		return
+	var n := Luge.runs()
+	_begin_play()
+	var c := _charlotte
+	var pb := _papa.body
+	var together := n == 1
+	var race := n == 2
+	var with_papa := together or race
+	# The sled(s): hers is already in her arms.
+	Carry.put_down(c)
+	var sled_c := _make_sled(together, Color.WHITE)
+	var sled_p: Sprite2D = null
+	if race:
+		sled_p = _make_sled(false, Color("#6FA8FF"))
+	sled_c.visible = false
+	if sled_p:
+		sled_p.visible = false
+	var lines_before := ["Vas-y, Chachoue ! Je te regarde d'en bas !", "On y va ensemble ! Je m'assois derrière toi,\naccroche-toi bien !", "Une course ! Le premier en bas gagne !\nUn, deux, trois, go !"]
+	_papa.say(lines_before[n], 3.2)
+	c.facing = 1
+	c.is_walking = true
+	if with_papa:
+		pb.facing = 1
+		pb.is_walking = true
+	var tw := create_tween()
+	tw.tween_interval(1.0)
+	# Up the hill on foot, the sled under her arm.
+	tw.tween_method(func(u: float) -> void:
+		c.position = _hill(u)
+		if with_papa:
+			_papa.position = _hill(maxf(u - 0.035, 0.01)), 0.03, PEAK, 3.4)
+	tw.tween_callback(func() -> void:
+		_sit(c)
+		sled_c.visible = true
+		if with_papa:
+			_sit(pb)
+			if together:
+				_papa.position = _hill(PEAK - 0.03)
+			else:
+				_papa.position = _hill(PEAK - 0.05)
+				sled_p.visible = true
+		_place_sleds(PEAK, sled_c, sled_p, together)
+		_say_c("Wiiiii !" if n != 2 else "Je vais gagner !", 1.6))
+	tw.tween_interval(0.7)
+	tw.tween_callback(func() -> void: Sfx.play("swoosh", c.position))
+	# Down the long slope: Charlotte first; Papa, heavier, a little slower.
+	tw.tween_method(func(s: float) -> void:
+		var uc := lerpf(PEAK, 0.97, ease(s, 1.7))
+		c.position = _hill(uc)
+		if together:
+			_papa.position = _hill(maxf(uc - 0.03, 0.0))
+		elif race:
+			_papa.position = _hill(lerpf(PEAK - 0.05, 0.93, ease(s * 0.94, 1.7)))
+		_place_sleds(uc, sled_c, sled_p, together), 0.0, 1.0, 2.6)
+	tw.tween_callback(func() -> void:
+		for who: Character in [c, pb]:
+			who.sitting = false
+			who.sit_on_ground = false
+			who.seat_h = 0.0
+		for sl in _sleds:
+			sl.queue_free()
+		_sleds.clear()
+		Luge.add_run()
+		c.express("laugh", 2.0))
+	tw.tween_interval(0.6)
+	var afters := ["Wouhou ! C'est le fun ! Encore !", "Haha ! Ça va vite à deux !", "Ah ben ! Tu m'as battu, Chachoue ! T'es ben vite !"]
+	tw.tween_callback(func() -> void:
+		if n == 2:
+			_papa.say("Tu m'as battu ! T'es ben plus vite que ton père !", 3.0)
+		else:
+			_say_c(afters[n], 2.4))
+	tw.tween_interval(2.6)
+	# Back to the foot: on foot, along the flat.
+	tw.tween_callback(func() -> void:
+		c.is_walking = true
+		c.facing = -1
+		if with_papa:
+			pb.is_walking = true
+			pb.facing = -1)
+	tw.tween_method(func(u: float) -> void:
+		c.position = Vector2(lerpf(HILL_X + HILL_W * 0.97, HILL_X + 240.0, u), 616.0)
+		if with_papa:
+			_papa.position = Vector2(lerpf(HILL_X + HILL_W * 0.94, HILL_X + 150.0, u), 616.0), 0.0, 1.0, 2.8)
+	tw.tween_callback(func() -> void:
+		c.is_walking = false
+		pb.is_walking = false
+		pb.facing = 1
+		c.facing = 1
+		if Luge.runs() < Luge.RUNS:
+			if not Carry.busy():
+				Carry.take(c, "traineau")
+			_end_play_keep()
+			_papa.say(["Prête pour la deuxième ? Cette fois, on glisse à deux !", "Dernière descente : une course !"][mini(Luge.runs() - 1, 1)], 3.2)
+		else:
+			_luge_finish())
+
+
+func _place_sleds(u: float, sled_c: Sprite2D, sled_p: Sprite2D, together: bool) -> void:
+	var ang := _slope(u)
+	sled_c.rotation = ang
+	sled_c.position = (_charlotte.position + (_papa.position if together else _charlotte.position)) * 0.5 + Vector2(0, -SLED_RIM).rotated(ang) if together else _charlotte.position + Vector2(0, -SLED_RIM).rotated(ang)
+	if sled_p:
+		var ap := _slope(clampf((_papa.position.x - HILL_X) / HILL_W, 0.0, 1.0))
+		sled_p.rotation = ap
+		sled_p.position = _papa.position + Vector2(0, -SLED_RIM).rotated(ap)
+
+
+# After a run Charlotte is free again (hands on, the sled in her arms), waiting at the foot for the next one.
+func _end_play_keep() -> void:
+	_charlotte.sitting = false
+	_charlotte.position.y = 616.0
+	_control.hands_off = false
+	_busy = false
+
+
+# The third time down: Papa is proud, and takes her home for a hot chocolate. The quest is done.
+func _luge_finish() -> void:
+	var steps := create_tween()
+	steps.tween_callback(func() -> void:
+		_papa.say("Quelle belle journée ! On rentre prendre\nun bon chocolat chaud, ma grande ?", 3.6)
+		_charlotte.express("happy", 3.0))
+	steps.tween_interval(4.0)
+	steps.tween_callback(func() -> void:
+		Carry.put_down(_charlotte)
+		_say_c("Oui ! Merci, Papa ! C'était trop l'fun !", 2.6)
+		Quests.complete(Luge.QUEST))
+	steps.tween_interval(3.0)
+	steps.tween_callback(func() -> void:
+		Luge.clear()
+		_control.enabled = false
+		_busy = false
+		Transition.inside_x = School.HOME_X
+		Transition.street_x = NAN
+		Transition.change_scene_saying(self, School.HOME, "Papa te ramène à la maison…", 1.4))
 
 
 # ── Parts ───────────────────────────────────────────────────────
@@ -334,6 +833,10 @@ class _Piece:
 
 	var spec := {}
 	var t := 0.0
+	## A swing or spring rider she is on (the scene drives it while she rides).
+	var ride_k := -1
+	var ride_a := 0.0
+	var ride := false
 
 	func _process(delta: float) -> void:
 		if not spec.get("animated", false):
@@ -395,9 +898,11 @@ class _Piece:
 			"structure":
 				ParkArt.play_structure(self, 0.0, 0.0)
 			"swings":
-				ParkArt.swing_set(self, 0.0, 0.0, t)
+				ParkArt.swing_set(self, 0.0, 0.0, t, ride_k, ride_a)
 			"spring":
-				ParkArt.spring_rider(self, 0.0, 0.0, s.color, t)
+				ParkArt.spring_rider(self, 0.0, 0.0, s.color, t, ride)
+			"castle":
+				ParkArt.sandcastle(self, 0.0, 0.0)
 			"court":
 				ParkArt.court(self, 0.0, 0.0, s.w, s.d)
 			"boards":
@@ -551,6 +1056,42 @@ class _Visitor:
 		_line += 1
 
 
+## A ball, a puck: drawn by `ParkArt.ball`, moved by the scene's tweens.
+class _Ball:
+	extends Node2D
+	var kind := "basket"
+
+	func _draw() -> void:
+		ParkArt.ball(self, kind)
+
+
+## Drops of water thrown up and falling back (the fountain, her splashing).
+class _Spray:
+	extends Node2D
+	var life := 1.2
+	var _t := 0.0
+	var _seed := 0
+
+	func _ready() -> void:
+		_seed = randi()
+
+	func _process(delta: float) -> void:
+		_t += delta
+		queue_redraw()
+		if _t > life:
+			queue_free()
+
+	func _draw() -> void:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = _seed
+		for k in 16:
+			var vx := rng.randf_range(-70.0, 70.0)
+			var vy := rng.randf_range(-190.0, -90.0)
+			var t := fmod(_t + rng.randf_range(0.0, 0.3), 0.9)
+			var p := Vector2(vx * t, vy * t + 260.0 * t * t)
+			draw_circle(p, 2.6, Color(0.7, 0.9, 1.0, clampf(1.0 - _t / life, 0.0, 1.0)))
+
+
 ## A dog of the dog park, running up and down inside the fence.
 class _DogRunner:
 	extends Node2D
@@ -562,6 +1103,32 @@ class _DogRunner:
 	var _dir := 1.0
 	var _t := 0.0
 	var _rest := 0.0
+
+	func _ready() -> void:
+		add_to_group("interactable")
+
+	func can_interact() -> bool:
+		return true
+
+	func hit_test(p: Vector2) -> bool:
+		return Rect2(global_position + Vector2(-50, -70), Vector2(110, 80)).has_point(p)
+
+	func approach_x(_from_x: float) -> float:
+		return global_position.x
+
+	func focus_x() -> float:
+		return global_position.x
+
+	func reserve() -> void:
+		pass
+
+	func release() -> void:
+		pass
+
+	func interact(_who: Character) -> void:
+		Sfx.play("bark", global_position)
+		_rest = 1.0
+		Bubble.say(get_parent(), global_position + Vector2(0, -90), ["Ouaf !", "Ouaf ouaf !", "Wouf !"][randi() % 3], 1.4)
 
 	func _process(delta: float) -> void:
 		if not OnScreen.near(self, 600.0):

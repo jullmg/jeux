@@ -132,6 +132,8 @@ static func sign_board(ci: CanvasItem, x: float, y: float, w: float, h: float) -
 	ci.draw_rect(Rect2(x, y - h - 40.0, w, h), Color("#2E6B4C"))
 	ci.draw_rect(Rect2(x + 4.0, y - h - 36.0, w - 8.0, h - 8.0), Color("#2E6B4C"), false, 2.0)
 	ci.draw_rect(Rect2(x + 5.0, y - h - 35.0, w - 10.0, 4.0), Color(1, 1, 1, 0.18))
+	if w > 200.0:
+		pelican(ci, Vector2(x + 44.0, y - h * 0.5 - 40.0), 24.0)
 	snow_cap(ci, x, y - h - 40.0, w, 6.0)
 
 
@@ -387,7 +389,7 @@ static func play_structure(ci: CanvasItem, x: float, y: float) -> void:
 
 
 ## A swing set: an A-frame and three swings, which sway (`t`).
-static func swing_set(ci: CanvasItem, x: float, y: float, t: float) -> void:
+static func swing_set(ci: CanvasItem, x: float, y: float, t: float, ride_k := -1, ride_a := 0.0) -> void:
 	var top := y - 190.0
 	for ex: float in [x, x + 230.0]:
 		ci.draw_line(Vector2(ex + 14.0, top), Vector2(ex - 24.0, y), Color("#3E6A9A"), 7.0)
@@ -397,6 +399,8 @@ static func swing_set(ci: CanvasItem, x: float, y: float, t: float) -> void:
 	for k in 3:
 		var hx := x + 50.0 + k * 70.0
 		var ang := 0.28 * sin(t * 1.3 + k * 1.4) * (0.5 if winter() else 1.0)
+		if k == ride_k:
+			ang = ride_a
 		var seat := Vector2(hx, top) + Vector2(sin(ang), cos(ang)) * 132.0
 		ci.draw_line(Vector2(hx - 11.0, top), seat + Vector2(-11.0, 0), Color("#6E6E6E"), 1.8)
 		ci.draw_line(Vector2(hx + 11.0, top), seat + Vector2(11.0, 0), Color("#6E6E6E"), 1.8)
@@ -414,8 +418,10 @@ static func sandbox(ci: CanvasItem, x: float, y: float, w: float) -> void:
 
 
 ## A spring rider (a seat on a big spring), in a colour.
-static func spring_rider(ci: CanvasItem, x: float, y: float, col: Color, t: float) -> void:
+static func spring_rider(ci: CanvasItem, x: float, y: float, col: Color, t: float, ride := false) -> void:
 	var lean := 0.12 * sin(t * 1.1 + x)
+	if ride:
+		lean = 0.3 * sin(t * 4.2)
 	for k in 5:
 		ci.draw_arc(Vector2(x + lean * 40.0 * (k / 5.0), y - 8.0 - k * 7.0), 12.0, 0.0, PI, 8, Color("#8C96A0"), 3.0, true)
 	ci.draw_set_transform(Vector2(x + lean * 40.0, y - 50.0), lean, Vector2.ONE)
@@ -582,3 +588,64 @@ static func gate(ci: CanvasItem, x: float, y: float) -> void:
 		ci.draw_line(Vector2(hx, y - 96.0), Vector2(hx + side * 30.0, y - 84.0), IRON, 4.0)
 		for k in 5:
 			ci.draw_line(Vector2(hx + side * k * 6.0, y - 6.0 + k * 2.8), Vector2(hx + side * k * 6.0, y - 96.0 + k * 2.4), IRON, 2.0)
+
+
+## Where the sliding hill's surface is at `u` (0 foot on the left, 1 foot on the right), for a hill whose foot line is y at x.
+static func hill_point(x: float, y: float, w: float, u: float) -> Vector2:
+	return Vector2(x + w * u, y - hill_height(u))
+
+
+## A sandcastle in the sandbox: a bucket-shaped keep, two towers with flags, a moat line.
+static func sandcastle(ci: CanvasItem, x: float, y: float) -> void:
+	var sand := Color("#E3C57A")
+	var dark := Color("#C9A95A")
+	ci.draw_rect(Rect2(x - 26.0, y - 26.0, 52.0, 26.0), sand)
+	ci.draw_rect(Rect2(x - 26.0, y - 26.0, 52.0, 5.0), Color(1, 1, 1, 0.25))
+	for tx: float in [x - 34.0, x + 22.0]:
+		ci.draw_rect(Rect2(tx, y - 40.0, 14.0, 40.0), sand)
+		ci.draw_rect(Rect2(tx - 2.0, y - 46.0, 18.0, 8.0), dark)
+		ci.draw_line(Vector2(tx + 7.0, y - 46.0), Vector2(tx + 7.0, y - 62.0), Color("#6E4E2E"), 1.5)
+		ci.draw_colored_polygon(PackedVector2Array([Vector2(tx + 7.0, y - 62.0), Vector2(tx + 20.0, y - 57.0), Vector2(tx + 7.0, y - 52.0)]), Color("#E04F5F"))
+	for k in 4:
+		ci.draw_rect(Rect2(x - 22.0 + k * 12.0, y - 32.0, 7.0, 7.0), dark)
+	ci.draw_rect(Rect2(x - 7.0, y - 14.0, 14.0, 14.0), dark)
+
+
+## A ball (a basketball, a ping-pong ball, a puck) for the shots she takes.
+static func ball(ci: CanvasItem, kind: String) -> void:
+	match kind:
+		"basket":
+			ci.draw_circle(Vector2.ZERO, 11.0, Color("#E8812E"))
+			ci.draw_arc(Vector2.ZERO, 11.0, 0.0, TAU, 16, Color("#7A3A10"), 1.4, true)
+			ci.draw_line(Vector2(-11.0, 0.0), Vector2(11.0, 0.0), Color("#7A3A10"), 1.2)
+			ci.draw_line(Vector2(0.0, -11.0), Vector2(0.0, 11.0), Color("#7A3A10"), 1.2)
+		"pingpong":
+			ci.draw_circle(Vector2.ZERO, 5.0, Color("#FFFFFF"))
+			ci.draw_arc(Vector2.ZERO, 5.0, 0.0, TAU, 10, Color("#C9C9C9"), 1.0, true)
+		"puck":
+			ci.draw_rect(Rect2(-9.0, -3.0, 18.0, 6.0), Color("#1E1E22"))
+			ci.draw_rect(Rect2(-9.0, -3.0, 18.0, 2.0), Color("#4A4A52"))
+		"snow":
+			ci.draw_circle(Vector2.ZERO, 8.0, Color("#F4F8FC"))
+			ci.draw_arc(Vector2.ZERO, 8.0, 0.0, TAU, 12, Color("#B9C6D6"), 1.2, true)
+
+
+## A little cartoon pelican (the park's namesake), white with a long orange bill and its pouch, facing right: for its sign.
+static func pelican(ci: CanvasItem, c: Vector2, r: float) -> void:
+	var w := maxf(1.0, r * 0.05)
+	# Body and wing.
+	ci.draw_set_transform(c, 0.0, Vector2.ONE)
+	ci.draw_circle(Vector2(-0.2, 0.15) * r, 0.62 * r, Color("#F6F4EE"))
+	ci.draw_circle(Vector2(-0.45, 0.2) * r, 0.42 * r, Color("#E4E0D6"))
+	ci.draw_colored_polygon(PackedVector2Array([Vector2(-0.95, 0.35) * r, Vector2(-1.3, 0.2) * r, Vector2(-0.9, 0.05) * r]), Color("#E4E0D6"))
+	# Neck, head, the long bill with its pouch.
+	ci.draw_line(Vector2(0.15, -0.2) * r, Vector2(0.4, -0.75) * r, Color("#F6F4EE"), r * 0.3, true)
+	ci.draw_circle(Vector2(0.42, -0.85) * r, 0.24 * r, Color("#F6F4EE"))
+	ci.draw_colored_polygon(PackedVector2Array([Vector2(0.55, -0.92) * r, Vector2(1.7, -0.7) * r, Vector2(1.55, -0.5) * r, Vector2(0.55, -0.72) * r]), Color("#F2A23A"))
+	ci.draw_colored_polygon(PackedVector2Array([Vector2(0.6, -0.72) * r, Vector2(1.55, -0.5) * r, Vector2(1.0, -0.18) * r]), Color("#F7C86A"))
+	ci.draw_circle(Vector2(0.45, -0.9) * r, maxf(1.2, r * 0.05), LINE)
+	# Legs.
+	for lx: float in [-0.25, 0.05]:
+		ci.draw_line(Vector2(lx, 0.7) * r, Vector2(lx, 1.1) * r, Color("#F2A23A"), w * 1.5, true)
+		ci.draw_line(Vector2(lx, 1.1) * r, Vector2(lx + 0.2, 1.1) * r, Color("#F2A23A"), w * 1.5, true)
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

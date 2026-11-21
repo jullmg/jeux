@@ -7,7 +7,7 @@ extends RefCounted
 
 ## Quests that come `after` "halloween" open the morning after it, in winter; the Halloween evening doesn't wait for them
 ## (`after_halloween`).
-const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole", "emilia", "fete", "bonhomme", "glissade", "souffleuse", "sapin", "noel", "jourdelan", "fort", "dent", "anniversaire"]
+const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole", "emilia", "fete", "bonhomme", "glissade", "souffleuse", "sapin", "noel", "jourdelan", "fort", "dent", "anniversaire", "luge"]
 const ALL := {
 	"milk": {
 		"title": "Maman a besoin de lait : va au dépanneur",
@@ -159,6 +159,12 @@ const ALL := {
 		"find": "Le 1er février approche… c'est un jour ben spécial !",
 		"age": 7, "after": "dent", "reward": 3.0,
 	},
+	"luge": {
+		"title": "La luge avec Papa",
+		"hint": "Va glisser avec Papa sur la petite montagne du parc du Pélican, avec le traîneau.",
+		"find": "Papa regarde la neige avec un grand sourire… il a une idée !",
+		"age": 7, "after": "anniversaire", "reward": 3.0,
+	},
 }
 
 
@@ -174,6 +180,8 @@ static func hint(id: String) -> String:
 		return Emilia.hint()
 	if id == Party.QUEST and active(id):
 		return Party.hint()
+	if id == Luge.QUEST and active(id):
+		return Luge.hint()
 	if id == Snowman.QUEST and active(id):
 		return Snowman.hint()
 	if id == Sledding.QUEST and active(id):
