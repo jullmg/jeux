@@ -94,6 +94,15 @@ static func make(which: Part, from: CrossStreet) -> CrossStreet:
 	return cs
 
 
+## The grids the walls are drawn with (`_wall_grid`), kept alive as long as the vista.
+var _wall_meshes: Array[Mesh] = []
+## The worst a picture's level line bends, in px, over every grid drawn so far, in any vista (`_wall_grid`): the check tool
+## (`tools/check_walls.gd`) fails above `MAX_BEND`. A saw along a wall's bricks and roof line is what this keeps out.
+static var worst_bend := 0.0
+static var grids_drawn := 0
+static var grid_cells := 0
+const MAX_BEND := 0.75
+
 func _vp() -> Vector2:
 	return Vector2((x0 + x1) / 2.0, HORIZON_Y)
 
@@ -648,17 +657,7 @@ func _tower_face(t: Dictionary) -> void:
 	var strips := clampi(int(span / 4.0) + 4, 4, 120)
 	# Its side, out of the sun: a little darker than its front.
 	var tint := Color.WHITE.darkened(0.2 if side < 0.0 else 0.3)
-	var colors := PackedColorArray([tint, tint, tint, tint])
-	for i in strips:
-		var ta := float(i) / strips
-		var tb := float(i + 1) / strips
-		var da := lerpf(d0, d1, ta)
-		var db := lerpf(d0, d1, tb)
-		var ua := lerpf(u1, u0, ta) if side < 0.0 else lerpf(u0, u1, ta)
-		var ub := lerpf(u1, u0, tb) if side < 0.0 else lerpf(u0, u1, tb)
-		draw_polygon(PackedVector2Array([_at(Vector2(x, top), da), _at(Vector2(x, top), db),
-			_at(Vector2(x, bottom), db), _at(Vector2(x, bottom), da)]),
-			colors, PackedVector2Array([Vector2(ua, v0), Vector2(ub, v0), Vector2(ub, v1), Vector2(ua, v1)]), tex)
+	_wall_grid(tex, x, top, bottom, d0, d1, u1 if side < 0.0 else u0, u0 if side < 0.0 else u1, v0, v1, tint, strips)
 
 
 # A tower's face square to the view (`d`: its depth), from the wall line out by `back` px: seen down a street that runs along
@@ -717,17 +716,74 @@ func _textured_wall(front_x: float, w: Dictionary, d0: float, d1: float, side :=
 	var span := absf(_at(Vector2(front_x, top), d0).x - _at(Vector2(front_x, top), d1).x)
 	var strips := clampi(int(span / 6.0) + 4, 4, 200)
 	var tint := Color.WHITE.lerp(HAZE, clampf(d0 / FAR * 1.4, 0.0, 0.65)).darkened(0.16 if side < 0.0 else 0.27)
-	var colors := PackedColorArray([tint, tint, tint, tint])
+	_wall_grid(tex, front_x, top, FACADE_Y, d0, d1, u0, u1, v_top, 1.0, tint, strips)
+
+
+# The worst bend (px) a grid of `strips` by `rows` makes of a level line: the middle of each cell where its two triangles
+# put it, against where it truly is.
+func _grid_bend(x: float, top: float, bottom: float, d0: float, d1: float, strips: int, rows: int) -> float:
+	var worst := 0.0
 	for i in strips:
-		var ta := float(i) / strips
-		var tb := float(i + 1) / strips
-		var da := lerpf(d0, d1, ta)
-		var db := lerpf(d0, d1, tb)
-		var ua := lerpf(u0, u1, ta)
-		var ub := lerpf(u0, u1, tb)
-		draw_polygon(PackedVector2Array([_at(Vector2(front_x, top), da), _at(Vector2(front_x, top), db),
-			_at(Vector2(front_x, FACADE_Y), db), _at(Vector2(front_x, FACADE_Y), da)]),
-			colors, PackedVector2Array([Vector2(ua, v_top), Vector2(ub, v_top), Vector2(ub, 1), Vector2(ua, 1)]), tex)
+		var da := lerpf(d0, d1, float(i) / strips)
+		var db := lerpf(d0, d1, float(i + 1) / strips)
+		for r in rows:
+			var ya := lerpf(top, bottom, float(r) / rows)
+			var yb := lerpf(top, bottom, float(r + 1) / rows)
+			var mid := (_at(Vector2(x, ya), da) + _at(Vector2(x, yb), db)) * 0.5
+			var truth := _at(Vector2(x, (ya + yb) * 0.5), (da + db) * 0.5)
+			worst = maxf(worst, mid.distance_to(truth))
+	return worst
+
+
+# A picture laid on a receding wall as a grid, `strips` columns down the depth and several rows: a level line of the picture
+# (the roof, a course of bricks, a balcony) is a straight line on a real wall, and so it is here. One quad of two triangles
+# bends it into a V at the diagonal, which read as a saw along every wall; with rows the quads are near enough to
+# parallelograms that the bend is a fraction of a pixel. u runs from `ua` at depth d0 to `ub` at d1, v from `va` at `top` to `vb`.
+func _wall_grid(tex: Texture2D, x: float, top: float, bottom: float, d0: float, d1: float, ua: float, ub: float, va: float, vb: float,
+		tint: Color, strips: int) -> void:
+	# Rows enough that no cell bends a level line by more than a fraction of a pixel (`MAX_BEND`): the nearer and the taller
+	# the wall, the more it takes.
+	var rows := clampi(int(absf(bottom - top) / 28.0) + 4, 6, 24)
+	while rows < 96 and _grid_bend(x, top, bottom, d0, d1, strips, rows) > MAX_BEND * 0.6:
+		rows *= 2
+	# (and, when rows alone can't, narrower strips: a wall right at the camera is much wider than its 6 px strips assume)
+	while strips < 1200 and _grid_bend(x, top, bottom, d0, d1, strips, rows) > MAX_BEND * 0.6:
+		strips *= 2
+	var verts := PackedVector2Array()
+	var uvs := PackedVector2Array()
+	var cols := PackedColorArray()
+	for i in strips + 1:
+		var t := float(i) / strips
+		var d := lerpf(d0, d1, t)
+		for r in rows + 1:
+			var f := float(r) / rows
+			verts.append(_at(Vector2(x, lerpf(top, bottom, f)), d))
+			uvs.append(Vector2(lerpf(ua, ub, t), lerpf(va, vb, f)))
+			cols.append(tint)
+	var idx := PackedInt32Array()
+	for i in strips:
+		for r in rows:
+			var a := i * (rows + 1) + r
+			var b := a + rows + 1
+			idx.append_array([a, b, b + 1, a, b + 1, a + 1])
+			# Where the middle of this cell lands on the diagonal the two triangles share, against where it really is: the
+			# difference is how much a level line of the picture bends here.
+			var mid := (verts[a] + verts[b + 1]) * 0.5
+			var truth := _at(Vector2(x, lerpf(top, bottom, (r + 0.5) / rows)), lerpf(d0, d1, (i + 0.5) / strips))
+			worst_bend = maxf(worst_bend, mid.distance_to(truth))
+	grids_drawn += 1
+	grid_cells += strips * rows
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_TEX_UV] = uvs
+	arrays[Mesh.ARRAY_COLOR] = cols
+	arrays[Mesh.ARRAY_INDEX] = idx
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	# The canvas item keeps only the mesh's RID: the node holds the mesh itself, or it is freed when this returns.
+	_wall_meshes.append(mesh)
+	draw_mesh(mesh, tex)
 
 
 # Exposed brickwork on a drawn wall: the courses, and near enough to see, the staggered joints between the bricks.
