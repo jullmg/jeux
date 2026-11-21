@@ -336,6 +336,7 @@ func _draw_for_parents() -> void:
 	_charlotte.facing = 1
 	var pad := DrawingPad.new()
 	pad.done_text = "Pour Papa et Maman !"
+	pad.fridge_ok = false
 	pad.closed.connect(func(drawing: Image) -> void:
 		_control.enabled = true
 		if drawing == null:

@@ -2243,7 +2243,8 @@ func _open_drawing_pad() -> void:
 	pad.closed.connect(func(drawing: Image):
 		if drawing:
 			DrawingPad.keep(drawing)
-			_show_fridge_drawings()
+		# The drawer may have put one on the fridge without finishing this one.
+		_show_fridge_drawings()
 		_control.enabled = true)
 	add_child(pad)
 
