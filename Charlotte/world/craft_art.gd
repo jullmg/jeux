@@ -1,0 +1,814 @@
+class_name CraftArt
+extends RefCounted
+## What the craft studio (`ui/craft_studio.gd`) draws: the things she can make (`BASES`), the paper shapes she cuts out and
+## the papers they are cut from, the decorations she glues on (googly eyes, pompoms, buttons, gems, felt, feathers…; the cute
+## stickers are `StampArt`'s), her writing, and the necklace beads. Everything is drawn on any CanvasItem, in the studio's
+## own units: the workbench is `WORK` px, light from the upper left like the rest of the game.
+## **A new decoration = its id in a `DECO_GROUPS` list + a case in `deco`; a new shape = its id in `SHAPES` + a case in
+## `shape_points`; a new thing to make = its entry in `BASES` + its cases in `base_rect`, `inside`, `draw_base`.**
+
+const WORK := Vector2(560, 420)
+const LINE := Color("#3A3A48")
+
+## What she can make, in the order of the first card: id, name, what it is.
+const BASE_ORDER := ["carte", "assiette", "pot", "cadre", "collier"]
+const BASES := {
+	"carte": ["Une carte", "Une carte à décorer, avec un mot à l'intérieur."],
+	"assiette": ["Une assiette-visage", "Une assiette en carton : yeux, nez, cheveux de laine…"],
+	"pot": ["Un pot à crayons", "Une vieille boîte de conserve toute belle."],
+	"cadre": ["Un cadre", "Un cadre pour un de tes dessins."],
+	"collier": ["Un collier", "Des pâtes et des perles sur une ficelle."],
+}
+
+const PALETTE := ["#E04F5F", "#FF8A3D", "#FFD23F", "#9BD84B", "#3E8E5A", "#2FB7B0", "#4FA3E0", "#1D4F91", "#7E57C2", "#FF7BA3",
+	"#B5442E", "#8D6E63", "#F2C29A", "#FFFFFF", "#E8E8E8", "#2B2B2B", "#F7C7D2", "#BFE3F7", "#C9EDB3", "#FFE9A8"]
+
+const SHAPES := ["cercle", "ovale", "carre", "rectangle", "triangle", "losange", "coeur", "etoile", "fleur", "nuage", "lune", "feuille",
+	"goutte", "papillon", "bande", "vague", "maison"]
+const PAPERS := [["uni", "Uni"], ["pois", "Pois"], ["rayures", "Rayures"], ["carreaux", "Carreaux"], ["zigzag", "Zigzag"],
+	["paillettes", "Brillant"]]
+
+## Decorations, in boxes: id, name. The stickers (`StampArt`) are a box of their own in the studio.
+const DECO_GROUPS := [
+	["visage", "Visages", [["yeux", "Yeux"], ["oeil", "Œil"], ["nez_rond", "Nez rond"], ["nez_pointe", "Nez pointu"], ["bouche", "Sourire"],
+		["bouche_ouverte", "Bouche"], ["moustache", "Moustache"], ["joues", "Joues"], ["sourcils", "Sourcils"], ["lunettes", "Lunettes"]]],
+	["pompons", "Pompons", [["pompon", "Pompon"], ["bouton", "Bouton"], ["bouton4", "Bouton"], ["perle", "Perle"], ["grelot", "Grelot"],
+		["noeud", "Nœud"], ["spirale", "Ruban"]]],
+	["brillants", "Brillants", [["gemme", "Diamant"], ["gemme_ronde", "Gemme"], ["scintille", "Scintille"], ["paillettes", "Paillettes"],
+		["confettis", "Confettis"]]],
+	["nature", "Nature", [["plume", "Plume"], ["marguerite", "Marguerite"], ["tournesol", "Tournesol"], ["fleur_feutre", "Feutre"],
+		["coeur_feutre", "Cœur"], ["etoile_feutre", "Étoile"], ["coquillage", "Coquillage"], ["feuillage", "Feuillage"]]],
+]
+## Beads for the necklace: id, name.
+const BEADS := [["macaroni", "Macaroni"], ["penne", "Penne"], ["rigatoni", "Rigatoni"], ["roue", "Roue"], ["farfalle", "Papillon"],
+	["ronde", "Perle"], ["cube", "Cube"], ["etoile", "Étoile"], ["coeur", "Cœur"], ["fleur", "Fleur"], ["bois", "Bois"]]
+
+static var _half_cache := {}
+
+
+# ── What she makes ──────────────────────────────────────────────
+
+## Where the piece lies on the workbench (also what the picture of it is cut to).
+static func base_rect(base: String) -> Rect2:
+	match base:
+		"carte":
+			return Rect2(135, 15, 290, 390)
+		"assiette":
+			return Rect2(95, 25, 370, 370)
+		"pot":
+			return Rect2(150, 40, 260, 385)
+		"cadre":
+			return Rect2(60, 30, 440, 360)
+	return Rect2(40, 20, 480, 380)
+
+
+## The window of the frame, where the picture shows.
+const WINDOW := Rect2(130, 100, 300, 220)
+
+
+## Can paint, glue or wool go here ? (`grow` widens the piece, to be generous at the edge.)
+static func inside(base: String, p: Vector2, grow := 0.0) -> bool:
+	match base:
+		"carte":
+			return Rect2(135, 15, 290, 390).grow(grow).has_point(p)
+		"assiette":
+			return p.distance_to(Vector2(280, 210)) <= 185.0 + grow
+		"pot":
+			var x := (p.x - 280.0) / 110.0
+			if absf(x) > 1.0 + grow / 110.0:
+				return false
+			var top := 110.0 + 22.0 * sqrt(maxf(0.0, 1.0 - x * x))
+			if p.y < top - grow:
+				return false
+			if p.y <= 395.0:
+				return true
+			return absf(p.y - 395.0) <= 22.0 * sqrt(maxf(0.0, 1.0 - x * x)) + grow
+		"cadre":
+			return Rect2(60, 30, 440, 360).grow(grow).has_point(p) and not WINDOW.grow(-grow).has_point(p)
+	return true
+
+
+## The piece before anything is on it. `picture` is the frame's drawing (null = a little scene of her own).
+static func draw_base(ci: CanvasItem, base: String, face: int, picture: Texture2D) -> void:
+	match base:
+		"carte":
+			var r := Rect2(135, 15, 290, 390)
+			ci.draw_rect(Rect2(r.position + Vector2(5, 7), r.size), Color(0.3, 0.2, 0.1, 0.18))
+			ci.draw_rect(r, Color("#FFFDF7"))
+			for k in 18:
+				ci.draw_line(Vector2(r.position.x + 8, r.position.y + 14 + k * 21), Vector2(r.end.x - 8, r.position.y + 14 + k * 21), Color(0.8, 0.75, 0.65, 0.12), 1.0)
+			ci.draw_rect(r, Color("#C9BFA8"), false, 2.0)
+			if face == 1:
+				# Inside: the fold down the left and the faint lines to write on.
+				ci.draw_line(r.position + Vector2(10, 0), r.position + Vector2(10, r.size.y), Color(0.7, 0.65, 0.55, 0.5), 2.0)
+		"assiette":
+			var c := Vector2(280, 210)
+			var rim := PackedVector2Array()
+			for k in 120:
+				var a := TAU * k / 120.0
+				rim.append(c + Vector2.from_angle(a) * (185.0 + 3.0 * sin(a * 40.0)))
+			var shade := PackedVector2Array()
+			for p: Vector2 in rim:
+				shade.append(p + Vector2(5, 7))
+			ci.draw_colored_polygon(shade, Color(0.3, 0.2, 0.1, 0.18))
+			ci.draw_colored_polygon(rim, Color("#F6EEDF"))
+			ci.draw_arc(c, 142.0, 0.0, TAU, 64, Color(0.7, 0.6, 0.45, 0.25), 3.0, true)
+			ci.draw_arc(c, 170.0, 0.0, TAU, 64, Color(1, 1, 1, 0.5), 2.0, true)
+		"pot":
+			# The pencils inside, then the tin.
+			var top := Vector2(280, 110)
+			_ellipse(ci, top, Vector2(110, 22), Color("#6B6F78"))
+			var pencils := [[-60.0, -62.0, "#E04F5F"], [-25.0, -90.0, "#4FA3E0"], [12.0, -70.0, "#FFD23F"], [48.0, -96.0, "#7CCB5A"], [75.0, -58.0, "#FF8A3D"]]
+			for pc: Array in pencils:
+				var x: float = pc[0]
+				var tipy: float = pc[1]
+				var col := Color(pc[2])
+				var base_pt := top + Vector2(x * 0.7, 6)
+				var tip_pt := top + Vector2(x * 1.0 + 6.0 * sign(x), tipy - 20.0)
+				var dir := (tip_pt - base_pt).normalized()
+				var side := dir.orthogonal() * 7.0
+				ci.draw_colored_polygon(PackedVector2Array([base_pt + side, base_pt - side, tip_pt - side, tip_pt + side]), col)
+				ci.draw_polyline(PackedVector2Array([base_pt + side, tip_pt + side, tip_pt - side, base_pt - side]), LINE, 1.5, true)
+				ci.draw_colored_polygon(PackedVector2Array([tip_pt + side, tip_pt - side, tip_pt + dir * 20.0]), Color("#F2D2A0"))
+				ci.draw_colored_polygon(PackedVector2Array([tip_pt + dir * 11.0 + side * 0.4, tip_pt + dir * 11.0 - side * 0.4, tip_pt + dir * 20.0]), LINE)
+			var body := PackedVector2Array([Vector2(170, 110), Vector2(390, 110), Vector2(390, 395)])
+			for k in 25:
+				body.append(Vector2(280, 395) + Vector2(cos(TAU * k / 48.0), sin(TAU * k / 48.0)) * Vector2(110, 22))
+			body.append(Vector2(170, 395))
+			ci.draw_colored_polygon(body, Color("#B9BEC7"))
+			for k in 10:
+				ci.draw_rect(Rect2(170 + k * 22, 110, 11, 300), Color(1, 1, 1, 0.07 + 0.05 * (k % 3)))
+		"cadre":
+			var f := Rect2(60, 30, 440, 360)
+			ci.draw_rect(Rect2(f.position + Vector2(6, 8), f.size), Color(0.3, 0.2, 0.1, 0.2))
+			ci.draw_rect(f, Color("#C9A073"))
+			ci.draw_rect(f, Color("#8A6A42"), false, 3.0)
+			if picture != null:
+				ci.draw_texture_rect(picture, WINDOW, false)
+			else:
+				_default_picture(ci, WINDOW)
+			ci.draw_rect(WINDOW, Color("#6F5232"), false, 4.0)
+
+
+## What goes over the paint and the pieces: the front rim of the tin, the glass of the frame.
+static func draw_over(ci: CanvasItem, base: String) -> void:
+	match base:
+		"pot":
+			ci.draw_arc(Vector2(280, 110), 110.0, 0.0, PI, 32, Color("#8F949D"), 4.0, true)
+			ci.draw_arc(Vector2(280, 110), 110.0, 0.0, PI, 32, Color(1, 1, 1, 0.35), 1.5, true)
+		"cadre":
+			ci.draw_rect(WINDOW, Color(0.3, 0.2, 0.1, 0.28), false, 6.0)
+			ci.draw_colored_polygon(PackedVector2Array([WINDOW.position + Vector2(20, 8), WINDOW.position + Vector2(110, 8),
+				WINDOW.position + Vector2(40, 100), WINDOW.position + Vector2(8, 100)]), Color(1, 1, 1, 0.12))
+
+
+static func _default_picture(ci: CanvasItem, r: Rect2) -> void:
+	ci.draw_rect(r, Color("#BFE3F7"))
+	ci.draw_rect(Rect2(r.position.x, r.position.y + r.size.y * 0.7, r.size.x, r.size.y * 0.3), Color("#9BD84B"))
+	CuteArt.sun(ci, r.position + Vector2(r.size.x * 0.82, r.size.y * 0.2), 22.0)
+	CuteArt.house(ci, r.position + Vector2(r.size.x * 0.4, r.size.y * 0.6), 52.0)
+	CuteArt.flower(ci, r.position + Vector2(r.size.x * 0.12, r.size.y * 0.82), 20.0, Color("#FF7BA3"))
+
+
+static func _ellipse(ci: CanvasItem, c: Vector2, rad: Vector2, col: Color) -> void:
+	var pts := PackedVector2Array()
+	for k in 36:
+		pts.append(c + Vector2(cos(TAU * k / 36.0) * rad.x, sin(TAU * k / 36.0) * rad.y))
+	ci.draw_colored_polygon(pts, col)
+
+
+# ── Paper shapes and papers ─────────────────────────────────────
+
+## The outline of a shape about `s` px across, centred on the origin.
+static func shape_points(id: String, s: float) -> PackedVector2Array:
+	var h := s * 0.5
+	var pts := PackedVector2Array()
+	match id:
+		"cercle":
+			for k in 48:
+				pts.append(Vector2.from_angle(TAU * k / 48.0) * h)
+		"ovale":
+			for k in 48:
+				pts.append(Vector2(cos(TAU * k / 48.0) * h, sin(TAU * k / 48.0) * h * 0.68))
+		"carre":
+			pts = PackedVector2Array([Vector2(-h, -h) * 0.9, Vector2(h, -h) * 0.9, Vector2(h, h) * 0.9, Vector2(-h, h) * 0.9])
+		"rectangle":
+			pts = PackedVector2Array([Vector2(-h, -h * 0.62), Vector2(h, -h * 0.62), Vector2(h, h * 0.62), Vector2(-h, h * 0.62)])
+		"triangle":
+			pts = PackedVector2Array([Vector2(0, -h * 0.95), Vector2(h, h * 0.8), Vector2(-h, h * 0.8)])
+		"losange":
+			pts = PackedVector2Array([Vector2(0, -h), Vector2(h * 0.72, 0), Vector2(0, h), Vector2(-h * 0.72, 0)])
+		"coeur":
+			for k in 48:
+				var t := TAU * k / 48.0
+				var p := Vector2(16.0 * pow(sin(t), 3), -(13.0 * cos(t) - 5.0 * cos(2.0 * t) - 2.0 * cos(3.0 * t) - cos(4.0 * t)))
+				pts.append(Vector2(p.x / 17.0 * h, (p.y + 2.0) / 16.0 * h))
+		"etoile":
+			for k in 10:
+				pts.append(Vector2.from_angle(-PI / 2.0 + TAU * k / 10.0) * h * (1.0 if k % 2 == 0 else 0.42))
+		"fleur":
+			for k in 80:
+				var a := TAU * k / 80.0
+				pts.append(Vector2.from_angle(a) * h * (0.78 + 0.22 * cos(a * 5.0)))
+		"nuage":
+			var parts := [[Vector2(-0.45, 0.2), 0.36], [Vector2(0.45, 0.2), 0.36], [Vector2(-0.18, -0.1), 0.46], [Vector2(0.25, -0.02), 0.4]]
+			var merged := PackedVector2Array()
+			for pr: Array in parts:
+				var circle := PackedVector2Array()
+				for k in 24:
+					circle.append((pr[0] + Vector2.from_angle(TAU * k / 24.0) * pr[1]) * h)
+				if merged.is_empty():
+					merged = circle
+				else:
+					var res := Geometry2D.merge_polygons(merged, circle)
+					if not res.is_empty():
+						merged = res[0]
+			pts = merged
+		"lune":
+			for k in 25:
+				var a := PI * 0.5 + PI * k / 24.0
+				pts.append(Vector2(cos(a), sin(a)) * h)
+			for k in range(1, 24):
+				var a := PI * 1.5 - PI * k / 24.0
+				pts.append(Vector2(cos(a) * h * 0.5, sin(a) * h))
+		"feuille":
+			for k in 21:
+				var t := float(k) / 20.0
+				pts.append(Vector2(sin(t * PI) * h * 0.62, (t - 0.5) * 2.0 * h))
+			for k in range(19, 0, -1):
+				var t := float(k) / 20.0
+				pts.append(Vector2(-sin(t * PI) * h * 0.62, (t - 0.5) * 2.0 * h))
+		"goutte":
+			pts.append(Vector2(0, -h))
+			for k in 25:
+				var a := -PI * 0.35 + PI * 1.7 * k / 24.0
+				pts.append(Vector2(cos(a) * h * 0.62, h * 0.35 + sin(a) * h * 0.62))
+		"papillon":
+			var wings := [[Vector2(-0.45, -0.25), Vector2(0.5, 0.45)], [Vector2(0.45, -0.25), Vector2(0.5, 0.45)],
+				[Vector2(-0.35, 0.35), Vector2(0.36, 0.3)], [Vector2(0.35, 0.35), Vector2(0.36, 0.3)]]
+			var merged := PackedVector2Array()
+			for wg: Array in wings:
+				var oval := PackedVector2Array()
+				for k in 24:
+					oval.append(Vector2(wg[0].x + cos(TAU * k / 24.0) * wg[1].x, wg[0].y + sin(TAU * k / 24.0) * wg[1].y) * h)
+				if merged.is_empty():
+					merged = oval
+				else:
+					var res := Geometry2D.merge_polygons(merged, oval)
+					if not res.is_empty():
+						merged = res[0]
+			pts = merged
+		"bande":
+			pts = PackedVector2Array([Vector2(-h, -h * 0.16), Vector2(h, -h * 0.16), Vector2(h, h * 0.16), Vector2(-h, h * 0.16)])
+		"vague":
+			for k in 41:
+				var x := lerpf(-h, h, k / 40.0)
+				pts.append(Vector2(x, -h * 0.2 + sin(x / h * TAU * 1.5) * h * 0.1))
+			for k in range(40, -1, -1):
+				var x := lerpf(-h, h, k / 40.0)
+				pts.append(Vector2(x, h * 0.12 + sin(x / h * TAU * 1.5) * h * 0.1))
+		"maison":
+			pts = PackedVector2Array([Vector2(-h * 0.8, -h * 0.1), Vector2(0, -h * 0.9), Vector2(h * 0.8, -h * 0.1), Vector2(h * 0.8, h * 0.85),
+				Vector2(-h * 0.8, h * 0.85)])
+	return pts
+
+
+## Half the width and height of a shape drawn at size `s`.
+static func shape_half(id: String, s: float) -> Vector2:
+	if not _half_cache.has(id):
+		var pts := shape_points(id, 100.0)
+		var box := Rect2(pts[0], Vector2.ZERO)
+		for p: Vector2 in pts:
+			box = box.expand(p)
+		_half_cache[id] = Vector2(maxf(absf(box.position.x), absf(box.end.x)), maxf(absf(box.position.y), absf(box.end.y))) / 100.0
+	return _half_cache[id] * s
+
+
+## The outline gone a little wobbly, as if cut by hand with scissors.
+static func hand_cut(pts: PackedVector2Array, seed_: int, wobble: float) -> PackedVector2Array:
+	if pts.size() < 3 or wobble <= 0.0:
+		return pts
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_
+	var out := PackedVector2Array()
+	var n := pts.size()
+	for i in n:
+		var prev := pts[(i + n - 1) % n]
+		var next := pts[(i + 1) % n]
+		var normal := (next - prev).orthogonal().normalized()
+		out.append(pts[i] + normal * rng.randf_range(-wobble, wobble))
+	return out
+
+
+## A piece of paper: its shadow, the paper (colour and pattern), a lit edge.
+static func draw_paper(ci: CanvasItem, item: Dictionary) -> void:
+	var s: float = item.s
+	var clean := shape_points(item.sub, s)
+	var pts := hand_cut(clean, int(item.get("seed", 1)), 1.4 if item.get("cut", true) else 0.0)
+	# A wobble that folds the outline over itself (the heart's point) can't be filled: keep the clean one.
+	if pts.size() < 3 or Geometry2D.triangulate_polygon(pts).size() == 0:
+		pts = clean
+	if pts.size() < 3:
+		return
+	var col: Color = item.color
+	var shadow := PackedVector2Array()
+	for p: Vector2 in pts:
+		shadow.append(p + Vector2(2.5, 3.5))
+	if Geometry2D.triangulate_polygon(shadow).size() > 0:
+		ci.draw_colored_polygon(shadow, Color(0.2, 0.12, 0.05, 0.28))
+	if Geometry2D.triangulate_polygon(pts).size() == 0:
+		return
+	ci.draw_colored_polygon(pts, col)
+	var pattern: String = item.get("pattern", "uni")
+	var mark := Color.WHITE if col.get_luminance() < 0.8 else col.darkened(0.3)
+	var half := shape_half(item.sub, s)
+	match pattern:
+		"pois":
+			var step := maxf(14.0, s * 0.16)
+			var y := -half.y + step * 0.5
+			var row := 0
+			while y < half.y:
+				var x := -half.x + step * (0.5 if row % 2 == 0 else 1.0)
+				while x < half.x:
+					if _in_poly(Vector2(x, y), pts) and _in_poly(Vector2(x + step * 0.3, y), pts) and _in_poly(Vector2(x - step * 0.3, y), pts) \
+							and _in_poly(Vector2(x, y + step * 0.3), pts) and _in_poly(Vector2(x, y - step * 0.3), pts):
+						ci.draw_circle(Vector2(x, y), step * 0.22, Color(mark, 0.9))
+					x += step
+				y += step * 0.9
+				row += 1
+		"rayures", "carreaux", "zigzag":
+			var step := maxf(14.0, s * 0.15)
+			var bands: Array = []
+			if pattern == "rayures":
+				var x := -half.x
+				while x < half.x:
+					bands.append(PackedVector2Array([Vector2(x, -half.y), Vector2(x + step * 0.45, -half.y), Vector2(x + step * 0.45, half.y), Vector2(x, half.y)]))
+					x += step
+			elif pattern == "carreaux":
+				var y := -half.y
+				var row := 0
+				while y < half.y:
+					var x := -half.x + (step if row % 2 == 0 else 0.0)
+					while x < half.x:
+						bands.append(PackedVector2Array([Vector2(x, y), Vector2(x + step, y), Vector2(x + step, y + step), Vector2(x, y + step)]))
+						x += step * 2.0
+					y += step
+					row += 1
+			else:
+				var y := -half.y
+				while y < half.y:
+					var zig := PackedVector2Array()
+					var x := -half.x
+					var up := true
+					while x <= half.x + step:
+						zig.append(Vector2(x, y + (0.0 if up else step * 0.45)))
+						x += step * 0.5
+						up = not up
+					var back := PackedVector2Array()
+					for p: Vector2 in zig:
+						back.append(p + Vector2(0, step * 0.2))
+					back.reverse()
+					zig.append_array(back)
+					bands.append(zig)
+					y += step * 0.8
+			for band: PackedVector2Array in bands:
+				for piece in Geometry2D.intersect_polygons(pts, band):
+					if Geometry2D.triangulate_polygon(piece).size() > 0:
+						ci.draw_colored_polygon(piece, Color(mark, 0.85))
+		"paillettes":
+			var rng := RandomNumberGenerator.new()
+			rng.seed = int(item.get("seed", 1)) + 7
+			for k in int(s * 0.5):
+				var p := Vector2(rng.randf_range(-half.x, half.x), rng.randf_range(-half.y, half.y))
+				if _in_poly(p, pts):
+					var warm := rng.randf() < 0.5
+					ci.draw_circle(p, rng.randf_range(0.8, 1.8), Color(1, 0.97, 0.8, 0.95) if warm else Color(1, 1, 1, 0.8))
+	var ring := pts.duplicate()
+	ring.append(pts[0])
+	ci.draw_polyline(ring, Color(1, 1, 1, 0.35), 1.6, true)
+	ci.draw_polyline(ring, Color(0, 0, 0, 0.18), 1.0, true)
+
+
+static func _in_poly(p: Vector2, pts: PackedVector2Array) -> bool:
+	return Geometry2D.is_point_in_polygon(p, pts)
+
+
+# ── Decorations ─────────────────────────────────────────────────
+
+static func deco(ci: CanvasItem, id: String, c: Vector2, r: float, color: Color, seed_ := 1) -> void:
+	var w := maxf(1.0, r * 0.05)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_
+	match id:
+		"yeux":
+			for s in [-1.0, 1.0]:
+				_eye(ci, c + Vector2(s * 0.5, 0) * r, r * 0.46, s)
+		"oeil":
+			_eye(ci, c, r * 0.8, 1.0)
+		"nez_rond":
+			var nose := color if color.s > 0.3 else Color("#E04F5F")
+			ci.draw_circle(c + Vector2(1.5, 2.5), r * 0.45, Color(0, 0, 0, 0.2))
+			ci.draw_circle(c, r * 0.45, nose)
+			ci.draw_circle(c + Vector2(-0.15, -0.15) * r, r * 0.12, Color(1, 1, 1, 0.65))
+		"nez_pointe":
+			StampArt._p(ci, c, r, [Vector2(-0.5, -0.5), Vector2(0.5, -0.5), Vector2(0, 0.7)], color if color.s > 0.3 else Color("#FF8A3D"), w)
+			ci.draw_line(c + Vector2(-0.25, -0.3) * r, c + Vector2(0.1, 0.3) * r, Color(0, 0, 0, 0.18), w, true)
+		"bouche":
+			ci.draw_arc(c + Vector2(0, -0.3) * r, r * 0.7, 0.35, PI - 0.35, 20, color if color.s > 0.3 else Color("#E04F5F"), r * 0.18, true)
+		"bouche_ouverte":
+			var mouth := PackedVector2Array()
+			for k in 21:
+				var a := PI * k / 20.0
+				mouth.append(c + Vector2(cos(a) * 0.6, -0.15 + sin(a) * 0.55) * r)
+			ci.draw_colored_polygon(mouth, Color("#7A1F2B"))
+			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(-0.3, 0.3) * r, c + Vector2(0.3, 0.3) * r, c + Vector2(0.15, 0.38) * r, c + Vector2(-0.15, 0.38) * r]), Color("#F2A7B4"))
+			mouth.append(mouth[0])
+			ci.draw_polyline(mouth, LINE, w * 1.4, true)
+			ci.draw_line(c + Vector2(-0.6, -0.15) * r, c + Vector2(0.6, -0.15) * r, Color.WHITE, r * 0.12, true)
+		"moustache":
+			var col := color if color.v < 0.6 else Color("#3B2A20")
+			for s in [-1.0, 1.0]:
+				var pts := PackedVector2Array()
+				for k in 17:
+					var t := k / 16.0
+					pts.append(c + Vector2(s * (0.08 + t * 0.9), 0.05 - sin(t * PI) * 0.18 + t * t * 0.28) * r)
+				ci.draw_polyline(pts, col, r * 0.2, true)
+				ci.draw_circle(pts[16], r * 0.1, col)
+		"joues":
+			for s in [-1.0, 1.0]:
+				ci.draw_circle(c + Vector2(s * 0.55, 0) * r, r * 0.34, Color("#FF7BA3", 0.6))
+		"sourcils":
+			for s in [-1.0, 1.0]:
+				ci.draw_arc(c + Vector2(s * 0.5, 0.35) * r, r * 0.42, PI * 1.15, PI * 1.85, 10, color if color.v < 0.7 else Color("#3B2A20"), r * 0.13, true)
+		"lunettes":
+			var frame := color if color.v < 0.7 else Color("#2B2B2B")
+			for s in [-1.0, 1.0]:
+				ci.draw_circle(c + Vector2(s * 0.52, 0) * r, r * 0.42, Color(0.75, 0.9, 1.0, 0.3))
+				ci.draw_arc(c + Vector2(s * 0.52, 0) * r, r * 0.42, 0.0, TAU, 24, frame, r * 0.09, true)
+			ci.draw_line(c + Vector2(-0.1, -0.02) * r, c + Vector2(0.1, -0.02) * r, frame, r * 0.08, true)
+		"pompon":
+			var fluff := color
+			ci.draw_circle(c + Vector2(1.5, 3.0), r * 0.55, Color(0, 0, 0, 0.18))
+			ci.draw_circle(c, r * 0.52, fluff.darkened(0.12))
+			for k in int(r * 5.0):
+				var a := rng.randf() * TAU
+				var d := r * (0.2 + 0.4 * sqrt(rng.randf()))
+				var p := c + Vector2.from_angle(a) * d
+				var tilt := Vector2.from_angle(a + rng.randf_range(-0.6, 0.6)) * r * 0.16
+				var lit := fluff.lightened(0.25) if (p - c).dot(Vector2(-1, -1)) > 0.0 else fluff
+				ci.draw_line(p - tilt, p + tilt, lit, maxf(1.5, r * 0.07), true)
+		"bouton", "bouton4":
+			ci.draw_circle(c + Vector2(1.5, 2.5), r * 0.5, Color(0, 0, 0, 0.2))
+			ci.draw_circle(c, r * 0.5, color)
+			ci.draw_arc(c, r * 0.38, 0.0, TAU, 20, color.darkened(0.25), w * 1.5, true)
+			ci.draw_arc(c, r * 0.5, 0.0, TAU, 20, color.lightened(0.3), w, true)
+			var holes := [Vector2(-0.12, 0), Vector2(0.12, 0)] if id == "bouton" else [Vector2(-0.12, -0.12), Vector2(0.12, -0.12), Vector2(-0.12, 0.12), Vector2(0.12, 0.12)]
+			for hpt: Vector2 in holes:
+				ci.draw_circle(c + hpt * r, r * 0.06, Color(0.15, 0.1, 0.08))
+			if id == "bouton":
+				ci.draw_line(c + Vector2(-0.12, 0) * r, c + Vector2(0.12, 0) * r, Color("#F4EEE6"), w, true)
+			else:
+				ci.draw_line(c + Vector2(-0.12, -0.12) * r, c + Vector2(0.12, 0.12) * r, Color("#F4EEE6"), w, true)
+				ci.draw_line(c + Vector2(0.12, -0.12) * r, c + Vector2(-0.12, 0.12) * r, Color("#F4EEE6"), w, true)
+		"perle":
+			ci.draw_circle(c + Vector2(1.5, 2.5), r * 0.4, Color(0, 0, 0, 0.2))
+			ci.draw_circle(c, r * 0.4, color)
+			ci.draw_circle(c + Vector2(0.1, 0.1) * r, r * 0.3, color.darkened(0.12))
+			ci.draw_circle(c + Vector2(-0.12, -0.12) * r, r * 0.12, Color(1, 1, 1, 0.8))
+		"grelot":
+			ci.draw_circle(c + Vector2(1.5, 2.5), r * 0.45, Color(0, 0, 0, 0.2))
+			ci.draw_circle(c, r * 0.45, Color("#F2C230"))
+			ci.draw_arc(c, r * 0.45, 0.0, TAU, 24, Color("#B8860B"), w * 1.5, true)
+			ci.draw_line(c + Vector2(-0.4, 0.05) * r, c + Vector2(0.4, 0.05) * r, Color("#8A6A00"), w * 1.5, true)
+			ci.draw_circle(c + Vector2(0, 0.14) * r, r * 0.06, Color("#8A6A00"))
+			ci.draw_circle(c + Vector2(-0.16, -0.18) * r, r * 0.1, Color(1, 1, 1, 0.7))
+		"noeud":
+			for s in [-1.0, 1.0]:
+				StampArt._p(ci, c, r, [Vector2(0, 0), Vector2(s * 0.85, -0.45), Vector2(s * 0.95, 0.0), Vector2(s * 0.85, 0.45)], color, w)
+				StampArt._p(ci, c, r, [Vector2(0.0, 0.1), Vector2(s * 0.3, 0.9), Vector2(s * 0.5, 0.78), Vector2(s * 0.12, 0.05)], color.darkened(0.12), w)
+			ci.draw_circle(c, r * 0.2, color.lightened(0.1))
+			ci.draw_arc(c, r * 0.2, 0.0, TAU, 14, LINE, w, true)
+		"spirale":
+			var pts := PackedVector2Array()
+			for k in 61:
+				var t := k / 60.0
+				var a := t * TAU * 2.5
+				pts.append(c + Vector2(cos(a), sin(a)) * r * (0.1 + 0.8 * t))
+			ci.draw_polyline(pts, Color(0, 0, 0, 0.18), r * 0.2 + 2.0, true)
+			ci.draw_polyline(pts, color, r * 0.18, true)
+			ci.draw_polyline(pts, color.lightened(0.35), r * 0.06, true)
+		"gemme":
+			var tint := color
+			StampArt._p(ci, c, r, [Vector2(-0.8, -0.2), Vector2(-0.45, -0.7), Vector2(0.45, -0.7), Vector2(0.8, -0.2), Vector2(0, 0.85)], tint, w)
+			StampArt._p(ci, c, r, [Vector2(-0.8, -0.2), Vector2(-0.45, -0.7), Vector2(-0.15, -0.2)], tint.lightened(0.4), 0.0)
+			StampArt._p(ci, c, r, [Vector2(0.8, -0.2), Vector2(0.45, -0.7), Vector2(0.15, -0.2)], tint.lightened(0.25), 0.0)
+			StampArt._p(ci, c, r, [Vector2(-0.15, -0.2), Vector2(0.15, -0.2), Vector2(0, 0.85)], tint.darkened(0.15), 0.0)
+			ci.draw_line(c + Vector2(-0.8, -0.2) * r, c + Vector2(0.8, -0.2) * r, Color(1, 1, 1, 0.5), w, true)
+			ci.draw_circle(c + Vector2(-0.3, -0.5) * r, r * 0.07, Color(1, 1, 1, 0.9))
+		"gemme_ronde":
+			ci.draw_circle(c, r * 0.6, color)
+			for k in 8:
+				var a := TAU * k / 8.0
+				ci.draw_line(c, c + Vector2.from_angle(a) * r * 0.6, color.lightened(0.3 if k % 2 == 0 else 0.0), w, true)
+			ci.draw_circle(c, r * 0.28, color.lightened(0.35))
+			ci.draw_arc(c, r * 0.6, 0.0, TAU, 24, color.darkened(0.4), w * 1.4, true)
+			ci.draw_circle(c + Vector2(-0.25, -0.28) * r, r * 0.09, Color(1, 1, 1, 0.9))
+		"scintille":
+			var gold := Color("#FFE27A") if color.v > 0.5 else color
+			var pts := PackedVector2Array()
+			for k in 8:
+				var a := TAU * k / 8.0 - PI / 2.0
+				pts.append(c + Vector2.from_angle(a) * r * (0.95 if k % 2 == 0 else 0.16))
+			ci.draw_colored_polygon(pts, Color(1, 0.98, 0.85))
+			ci.draw_polyline(pts + PackedVector2Array([pts[0]]), gold, w * 1.6, true)
+			ci.draw_circle(c, r * 0.12, Color.WHITE)
+		"paillettes":
+			for k in 16:
+				var p := c + Vector2.from_angle(rng.randf() * TAU) * r * 0.9 * sqrt(rng.randf())
+				var sc := color if k % 3 != 0 else color.lightened(0.45)
+				ci.draw_circle(p, r * 0.11, sc)
+				ci.draw_circle(p + Vector2(-0.03, -0.03) * r, r * 0.035, Color(1, 1, 1, 0.9))
+		"confettis":
+			var cols := ["#E04F5F", "#FFD23F", "#4FA3E0", "#7CCB5A", "#FF7BA3", "#7E57C2"]
+			for k in 18:
+				var p := c + Vector2.from_angle(rng.randf() * TAU) * r * 0.9 * sqrt(rng.randf())
+				var a := rng.randf() * PI
+				var d := Vector2.from_angle(a) * r * 0.1
+				var n := d.orthogonal() * 0.5
+				ci.draw_colored_polygon(PackedVector2Array([p - d - n, p + d - n, p + d + n, p - d + n]), Color(cols[k % cols.size()]))
+		"plume":
+			var tip := c + Vector2(0.5, -0.95) * r
+			var root := c + Vector2(-0.45, 0.95) * r
+			var mid := (tip + root) * 0.5
+			var side := (tip - root).orthogonal().normalized() * r * 0.32
+			var vane := PackedVector2Array([root, mid + side + (tip - root) * 0.05, tip, mid - side - (tip - root) * 0.05])
+			ci.draw_colored_polygon(vane, color)
+			for k in 7:
+				var t := 0.15 + k * 0.11
+				var q := root.lerp(tip, t)
+				ci.draw_line(q, q + side * (1.0 - absf(t - 0.5)) * 1.1 + (tip - root) * 0.05, color.darkened(0.18), w, true)
+				ci.draw_line(q, q - side * (1.0 - absf(t - 0.5)) * 1.1 + (tip - root) * 0.05, color.lightened(0.15), w, true)
+			ci.draw_line(root - (tip - root) * 0.08, tip, color.darkened(0.45), w * 1.6, true)
+		"marguerite":
+			for k in 12:
+				var a := TAU * k / 12.0
+				StampArt._e(ci, c, r, Vector2.from_angle(a) * 0.58, Vector2(0.34, 0.14), Color.WHITE, w * 0.7)
+			ci.draw_circle(c, r * 0.28, Color("#FFD23F"))
+			ci.draw_arc(c, r * 0.28, 0.0, TAU, 16, Color("#B8860B"), w, true)
+		"tournesol":
+			for k in 14:
+				var a := TAU * k / 14.0
+				StampArt._e(ci, c, r, Vector2.from_angle(a) * 0.65, Vector2(0.3, 0.13), Color("#FFC21A"), w * 0.7)
+			ci.draw_circle(c, r * 0.36, Color("#6B3E1E"))
+			for k in 22:
+				var p := c + Vector2.from_angle(rng.randf() * TAU) * r * 0.3 * sqrt(rng.randf())
+				ci.draw_circle(p, r * 0.025, Color("#3A2010"))
+		"fleur_feutre":
+			for k in 5:
+				var a := TAU * k / 5.0 - PI / 2.0
+				ci.draw_circle(c + Vector2.from_angle(a) * r * 0.5, r * 0.36, color)
+				_stitch_arc(ci, c + Vector2.from_angle(a) * r * 0.5, r * 0.28, color)
+			ci.draw_circle(c, r * 0.28, color.lightened(0.3))
+			_stitch_arc(ci, c, r * 0.2, color.lightened(0.3))
+		"coeur_feutre":
+			var heart := shape_points("coeur", r * 2.0)
+			var moved := PackedVector2Array()
+			for p: Vector2 in heart:
+				moved.append(c + p)
+			ci.draw_colored_polygon(moved, color)
+			var inner := PackedVector2Array()
+			for p: Vector2 in moved:
+				inner.append(c + (p - c) * 0.8)
+			_dashed(ci, inner, color.lightened(0.5))
+		"etoile_feutre":
+			var star := PackedVector2Array()
+			for k in 10:
+				star.append(c + Vector2.from_angle(-PI / 2.0 + TAU * k / 10.0) * r * (1.0 if k % 2 == 0 else 0.45))
+			ci.draw_colored_polygon(star, color)
+			var inner := PackedVector2Array()
+			for p: Vector2 in star:
+				inner.append(c + (p - c) * 0.78)
+			_dashed(ci, inner, color.lightened(0.5))
+		"coquillage":
+			var shell := PackedVector2Array([c + Vector2(0, 0.85) * r])
+			for k in 21:
+				var a := PI * 1.08 + PI * 0.84 * k / 20.0
+				shell.append(c + Vector2(cos(a) * 0.9, sin(a) * 0.95 + 0.1) * r)
+			ci.draw_colored_polygon(shell, color)
+			for k in 7:
+				var a := PI * 1.08 + PI * 0.84 * k / 6.0
+				ci.draw_line(c + Vector2(0, 0.85) * r, c + Vector2(cos(a) * 0.9, sin(a) * 0.95 + 0.1) * r, color.darkened(0.25), w, true)
+			shell.append(shell[0])
+			ci.draw_polyline(shell, color.darkened(0.4), w * 1.3, true)
+			ci.draw_rect(Rect2(c + Vector2(-0.25, 0.8) * r, Vector2(0.5, 0.15) * r), color.darkened(0.3))
+		"feuillage":
+			ci.draw_line(c + Vector2(0, 0.95) * r, c + Vector2(0, -0.8) * r, Color("#3E8E5A"), w * 1.6, true)
+			for k in 4:
+				var y := 0.7 - k * 0.38
+				for s in [-1.0, 1.0]:
+					var lf := PackedVector2Array()
+					for j in 11:
+						var t := j / 10.0
+						lf.append(c + Vector2(s * (0.05 + t * 0.55), y - t * 0.3 - sin(t * PI) * 0.16) * r)
+					for j in range(9, 0, -1):
+						var t := j / 10.0
+						lf.append(c + Vector2(s * (0.05 + t * 0.55), y - t * 0.3 + sin(t * PI) * 0.1) * r)
+					if Geometry2D.triangulate_polygon(lf).size() > 0:
+						ci.draw_colored_polygon(lf, color if color.s > 0.2 else Color("#5FAE4F"))
+			StampArt._e(ci, c, r, Vector2(0, -0.88), Vector2(0.14, 0.2), color if color.s > 0.2 else Color("#5FAE4F"), 0.0)
+
+
+static func _eye(ci: CanvasItem, c: Vector2, rad: float, side: float) -> void:
+	ci.draw_circle(c + Vector2(1.0, 1.8), rad, Color(0, 0, 0, 0.22))
+	ci.draw_circle(c, rad, Color.WHITE)
+	ci.draw_arc(c, rad, 0.0, TAU, 24, LINE, maxf(1.0, rad * 0.12), true)
+	ci.draw_circle(c + Vector2(0.18 * side, 0.22) * rad, rad * 0.46, Color("#2B2B2B"))
+	ci.draw_circle(c + Vector2(0.05 * side, 0.1) * rad, rad * 0.14, Color.WHITE)
+
+
+static func _stitch_arc(ci: CanvasItem, c: Vector2, rad: float, col: Color) -> void:
+	for k in 8:
+		var a := TAU * k / 8.0
+		ci.draw_arc(c, rad, a, a + 0.4, 4, col.lightened(0.5), 1.4, true)
+
+
+static func _dashed(ci: CanvasItem, pts: PackedVector2Array, col: Color) -> void:
+	for i in pts.size():
+		var a := pts[i]
+		var b := pts[(i + 1) % pts.size()]
+		if i % 2 == 0:
+			ci.draw_line(a, b, col, 1.4, true)
+
+
+## Half the size a decoration or sticker takes up, for its frame and its hit.
+static func deco_half(id: String, r: float) -> Vector2:
+	match id:
+		"yeux":
+			return Vector2(0.98, 0.5) * r
+		"bouche", "bouche_ouverte", "moustache", "sourcils", "lunettes", "joues":
+			return Vector2(1.0, 0.65) * r
+		"pompon", "bouton", "bouton4", "perle", "grelot":
+			return Vector2(0.55, 0.55) * r
+		"noeud":
+			return Vector2(1.0, 0.85) * r
+	return Vector2(1.0, 1.0) * r
+
+
+# ── Writing ─────────────────────────────────────────────────────
+
+const TEXT_STYLES := [["simple", "Simple"], ["etiquette", "Étiquette"], ["bulle", "Bulle"], ["banderole", "Banderole"]]
+
+
+static func text_size(item: Dictionary) -> Vector2:
+	var size := int(item.s)
+	var w := ThemeDB.fallback_font.get_string_size(item.text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+	var pad := 0.0
+	match item.get("style", "simple"):
+		"etiquette":
+			pad = size * 0.9
+		"bulle":
+			pad = size * 0.7
+		"banderole":
+			pad = size * 1.4
+	return Vector2(w + pad, size * (1.5 if item.get("style", "simple") != "simple" else 1.1))
+
+
+static func draw_text(ci: CanvasItem, item: Dictionary) -> void:
+	var font := ThemeDB.fallback_font
+	var size := int(item.s)
+	var box := text_size(item)
+	var col: Color = item.color
+	var dark := col.get_luminance() < 0.55
+	match item.get("style", "simple"):
+		"etiquette":
+			var r := Rect2(-box * 0.5, box)
+			StampArt._p(ci, Vector2.ZERO, 1.0, [Vector2(r.position.x + size * 0.5, r.position.y), Vector2(r.end.x, r.position.y), r.end,
+				Vector2(r.position.x + size * 0.5, r.end.y), Vector2(r.position.x, r.position.y + box.y * 0.5)], Color("#FFFDF7"), 1.5)
+			ci.draw_circle(Vector2(r.position.x + size * 0.45, 0), size * 0.14, Color("#8A6A42"))
+			ci.draw_line(Vector2(r.position.x + size * 0.45, 0), Vector2(r.position.x - size * 0.8, -size * 0.5), Color("#8D6E63"), 1.6, true)
+			ci.draw_string(font, Vector2(-box.x * 0.5 + size * 0.95, size * 0.35), item.text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, col if dark else LINE)
+		"bulle":
+			var r2 := Rect2(-box * 0.5, box)
+			var sb := StyleBoxFlat.new()
+			sb.bg_color = col
+			sb.set_corner_radius_all(int(box.y * 0.5))
+			sb.border_color = col.darkened(0.3)
+			sb.set_border_width_all(2)
+			ci.draw_style_box(sb, r2)
+			ci.draw_string(font, Vector2(-box.x * 0.5 + size * 0.35, size * 0.35), item.text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color.WHITE if dark else LINE)
+		"banderole":
+			var r3 := Rect2(-box * 0.5, box)
+			var tail := size * 0.7
+			ci.draw_colored_polygon(PackedVector2Array([r3.position + Vector2(-tail, size * 0.3), r3.position + Vector2(tail * 0.3, size * 0.3),
+				r3.position + Vector2(tail * 0.3, r3.size.y), r3.position + Vector2(-tail, r3.size.y), r3.position + Vector2(-tail * 0.5, r3.size.y * 0.65)]), col.darkened(0.2))
+			ci.draw_colored_polygon(PackedVector2Array([r3.end + Vector2(tail, -r3.size.y + size * 0.3), r3.end + Vector2(-tail * 0.3, -r3.size.y + size * 0.3),
+				r3.end + Vector2(-tail * 0.3, 0), r3.end + Vector2(tail, 0), r3.end + Vector2(tail * 0.5, -r3.size.y * 0.35)]), col.darkened(0.2))
+			ci.draw_rect(r3, col)
+			ci.draw_line(r3.position + Vector2(0, 3), r3.position + Vector2(r3.size.x, 3), Color(1, 1, 1, 0.3), 2.0)
+			ci.draw_string(font, Vector2(-box.x * 0.5 + size * 0.7, size * 0.35), item.text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color.WHITE if dark else LINE)
+		_:
+			var at := Vector2(-box.x * 0.5, size * 0.35)
+			ci.draw_string_outline(font, at, item.text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, maxi(3, size / 7), Color(1, 1, 1, 0.85) if dark else Color(0, 0, 0, 0.3))
+			ci.draw_string(font, at, item.text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, col)
+
+
+# ── Anything that goes on a piece ───────────────────────────────
+
+## Draws an item (paper, decoration, sticker or writing) at its place, turned and flipped.
+static func draw_item(ci: CanvasItem, item: Dictionary) -> void:
+	var pop: float = item.get("pop", 1.0)
+	ci.draw_set_transform(item.at, item.get("rot", 0.0), Vector2(-pop if item.get("flip", false) and item.kind != "text" else pop, pop))
+	match item.kind:
+		"paper":
+			draw_paper(ci, item)
+		"deco":
+			deco(ci, item.sub, Vector2.ZERO, item.s, item.color, int(item.get("seed", 1)))
+		"sticker":
+			StampArt.draw(ci, item.sub, Vector2.ZERO, item.s, item.color)
+		"text":
+			draw_text(ci, item)
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+static func item_half(item: Dictionary) -> Vector2:
+	match item.kind:
+		"paper":
+			return shape_half(item.sub, item.s) + Vector2(3, 3)
+		"deco":
+			return deco_half(item.sub, item.s) + Vector2(3, 3)
+		"text":
+			return text_size(item) * 0.5 + Vector2(6, 2)
+	return Vector2(item.s, item.s) * 1.05
+
+
+# ── Beads (the necklace) ────────────────────────────────────────
+
+## A bead centred on `c`, `r` px across, lying along `dir` (the string's direction at that spot).
+static func bead(ci: CanvasItem, id: String, c: Vector2, r: float, color: Color, dir: float, seed_ := 1) -> void:
+	ci.draw_set_transform(c, dir - (PI / 2.0 if id == "macaroni" else 0.0), Vector2.ONE)
+	var w := maxf(1.0, r * 0.06)
+	var pasta := Color("#EBC879") if color.s < 0.1 else color
+	match id:
+		"macaroni":
+			var arc_pts := PackedVector2Array()
+			for k in 13:
+				var a := -PI * 0.55 + PI * 1.1 * k / 12.0
+				arc_pts.append(Vector2(cos(a) * r * 0.6, sin(a) * r * 0.42 + r * 0.1))
+			ci.draw_polyline(arc_pts, pasta.darkened(0.25), r * 0.5, true)
+			ci.draw_polyline(arc_pts, pasta, r * 0.4, true)
+			ci.draw_polyline(arc_pts, pasta.lightened(0.3), r * 0.1, true)
+		"penne":
+			var body := PackedVector2Array([Vector2(-r * 0.6, -r * 0.2), Vector2(r * 0.5, -r * 0.34), Vector2(r * 0.5, r * 0.34), Vector2(-r * 0.6, r * 0.2)])
+			ci.draw_colored_polygon(body, pasta)
+			for k in 5:
+				var x := -r * 0.45 + k * r * 0.22
+				ci.draw_line(Vector2(x, -r * 0.3 + k * 0.01), Vector2(x, r * 0.3), pasta.darkened(0.2), w, true)
+			ci.draw_polyline(body + PackedVector2Array([body[0]]), pasta.darkened(0.35), w * 1.3, true)
+		"rigatoni":
+			ci.draw_rect(Rect2(-r * 0.55, -r * 0.3, r * 1.1, r * 0.6), pasta)
+			for k in 6:
+				ci.draw_line(Vector2(-r * 0.55, -r * 0.25 + k * r * 0.1), Vector2(r * 0.55, -r * 0.25 + k * r * 0.1), pasta.darkened(0.18), w, true)
+			ci.draw_rect(Rect2(-r * 0.55, -r * 0.3, r * 1.1, r * 0.6), pasta.darkened(0.35), false, w * 1.3)
+			ci.draw_rect(Rect2(-r * 0.58, -r * 0.14, r * 0.1, r * 0.28), Color(0.2, 0.12, 0.05))
+		"roue":
+			ci.draw_circle(Vector2.ZERO, r * 0.5, pasta)
+			ci.draw_arc(Vector2.ZERO, r * 0.5, 0.0, TAU, 20, pasta.darkened(0.35), w * 1.3, true)
+			ci.draw_circle(Vector2.ZERO, r * 0.1, Color(0.2, 0.12, 0.05))
+			for k in 6:
+				ci.draw_line(Vector2.from_angle(TAU * k / 6.0) * r * 0.14, Vector2.from_angle(TAU * k / 6.0) * r * 0.46, pasta.darkened(0.3), w * 1.3, true)
+		"farfalle":
+			for s in [-1.0, 1.0]:
+				ci.draw_colored_polygon(PackedVector2Array([Vector2(0, 0), Vector2(s * r * 0.55, -r * 0.4), Vector2(s * r * 0.55, r * 0.4)]), pasta)
+				ci.draw_polyline(PackedVector2Array([Vector2(0, 0), Vector2(s * r * 0.55, -r * 0.4), Vector2(s * r * 0.55, r * 0.4), Vector2(0, 0)]), pasta.darkened(0.35), w, true)
+			ci.draw_rect(Rect2(-r * 0.09, -r * 0.2, r * 0.18, r * 0.4), pasta.darkened(0.12))
+		"ronde":
+			ci.draw_circle(Vector2(1.0, 1.6), r * 0.4, Color(0, 0, 0, 0.2))
+			ci.draw_circle(Vector2.ZERO, r * 0.4, color if color.s > 0.05 else Color("#E04F5F"))
+			ci.draw_circle(Vector2(-0.1, -0.1) * r, r * 0.12, Color(1, 1, 1, 0.7))
+		"cube":
+			var cube := color if color.s > 0.05 else Color("#FFD23F")
+			ci.draw_rect(Rect2(-r * 0.34, -r * 0.34, r * 0.68, r * 0.68), cube)
+			ci.draw_rect(Rect2(-r * 0.34, -r * 0.34, r * 0.68, r * 0.68), cube.darkened(0.4), false, w * 1.3)
+			ci.draw_rect(Rect2(-r * 0.34, -r * 0.34, r * 0.68, r * 0.2), Color(1, 1, 1, 0.25))
+		"etoile":
+			var star := PackedVector2Array()
+			for k in 10:
+				star.append(Vector2.from_angle(-PI / 2.0 + TAU * k / 10.0) * r * (0.5 if k % 2 == 0 else 0.22))
+			ci.draw_colored_polygon(star, color if color.s > 0.05 else Color("#FFD23F"))
+			ci.draw_polyline(star + PackedVector2Array([star[0]]), (color if color.s > 0.05 else Color("#FFD23F")).darkened(0.4), w * 1.2, true)
+		"coeur":
+			var hs := shape_points("coeur", r * 0.9)
+			ci.draw_colored_polygon(hs, color if color.s > 0.05 else Color("#FF7BA3"))
+			ci.draw_polyline(hs + PackedVector2Array([hs[0]]), (color if color.s > 0.05 else Color("#FF7BA3")).darkened(0.4), w * 1.2, true)
+		"fleur":
+			for k in 5:
+				ci.draw_circle(Vector2.from_angle(TAU * k / 5.0) * r * 0.24, r * 0.17, color if color.s > 0.05 else Color("#FF7BA3"))
+			ci.draw_circle(Vector2.ZERO, r * 0.14, Color("#FFD23F"))
+		"bois":
+			ci.draw_circle(Vector2.ZERO, r * 0.4, Color("#D9A05B"))
+			ci.draw_arc(Vector2.ZERO, r * 0.4, 0.0, TAU, 20, Color("#8A5A2B"), w * 1.3, true)
+			ci.draw_arc(Vector2.ZERO, r * 0.22, 0.4, 5.0, 12, Color("#B87D3C"), w, true)
+		"lettre":
+			ci.draw_rect(Rect2(-r * 0.4, -r * 0.4, r * 0.8, r * 0.8), Color("#FFFDF7"))
+			ci.draw_rect(Rect2(-r * 0.4, -r * 0.4, r * 0.8, r * 0.8), color.darkened(0.2), false, w * 1.5)
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

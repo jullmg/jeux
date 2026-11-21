@@ -96,6 +96,7 @@ var _party_busy := false
 
 # Charlotte's drawings stuck on the fridge door with magnets.
 var _fridge_art: Node2D
+var _crafts_art: Node2D
 var _fridge_busy := false
 var _mom_routine: FamilyRoutine
 var _dad_routine: FamilyRoutine
@@ -252,6 +253,8 @@ func _routine(who: Character, tasks: Array, on_click: Callable, mark_at: Vector2
 # Mom asks for milk, sends her to the dépanneur, and thanks her when she brings it home.
 func _talk_to_mom() -> void:
 	_mom_routine.pause(4.0, _charlotte.position.x)
+	if _hand_craft("maman"):
+		return
 	if Quests.active("milk") and Carry.has("milk"):
 		Carry.put_down(_charlotte)
 		_say(_mom, "Du lait ! Merci, Chachoue !", 350.0)
@@ -361,6 +364,8 @@ func _talk_to_mom() -> void:
 
 func _talk_to_dad() -> void:
 	_dad_routine.pause(4.0, _charlotte.position.x)
+	if _hand_craft("papa"):
+		return
 	if Quests.active("chips") and Carry.has("chips"):
 		_hockey_night()
 	elif Snowstorm.step() == 1:
@@ -409,6 +414,71 @@ func _talk_to_dad() -> void:
 	else:
 		_say(_dad, DAD_LINES[_dad_line % DAD_LINES.size()], 360.0)
 		_dad_line += 1
+
+
+## What a parent says when she hands over her craft, by what it is.
+const CRAFT_LINES := {
+	"carte": {"maman": "Oh, une carte ! Elle est magnifique, ma chouette.\nJe vais la garder toute ma vie.", "papa": "Une carte, pour moi ? Wow, Chachoue !\nElle est super belle."},
+	"assiette": {"maman": "Hi hi ! Quel beau bonhomme !\nIl a l'air de bonne humeur.", "papa": "Ha ha ! Il est trop drôle, ton bonhomme !\nJe l'accroche tout de suite."},
+	"pot": {"maman": "Un pot à crayons ! Juste ce qu'il me fallait\npour mon atelier. Merci, mon cœur !", "papa": "Un pot à crayons ! Il va être\nsur mon bureau, c'est sûr !"},
+	"cadre": {"maman": "Un cadre avec ton dessin ! Je vais\nle mettre bien en vue.", "papa": "Ton dessin dans un beau cadre ?\nÇa, c'est du grand art !"},
+	"collier": {"maman": "Un collier de pâtes ! Je le mets tout de suite.\nRegarde comme il me va bien !", "papa": "Un collier de pâtes ! Je vais le porter\nau travail demain, promis !"},
+}
+
+
+# She gives Maman or Papa what she made at the service de garde (`CraftStudio`): they look at it, and it stays on the dining table.
+# True when the click was about it (even for the wrong parent).
+func _hand_craft(who: String) -> bool:
+	if not CraftStudio.has_pending():
+		return false
+	var parent: Character = _mom if who == "maman" else _dad
+	var height := 350.0 if who == "maman" else 360.0
+	if CraftStudio.pending_for() != who:
+		_say(parent, "Oh, ça, c'est pour %s, je pense !\nVa le lui donner." % ("Papa" if who == "maman" else "Maman"), height, 3.2)
+		return true
+	var entry := CraftStudio.pending()
+	if Carry.has("bricolage"):
+		Carry.put_down(_charlotte)
+	_control.enabled = false
+	_charlotte.express("happy", 2.4)
+	parent.express("happy", 4.0)
+	var look := CraftStudio.reveal(self, entry)
+	look.done.connect(func() -> void:
+		CraftStudio.keep_pending()
+		_show_crafts()
+		Sfx.play("chime")
+		var lines: Dictionary = CRAFT_LINES.get(entry.kind, CRAFT_LINES.carte)
+		_say(parent, lines[who], height, 4.6)
+		var later := create_tween()
+		later.tween_interval(1.4)
+		later.tween_callback(func() -> void:
+			_charlotte.express("happy", 2.4)
+			_say(_charlotte, "Je t'aime, %s !" % ("Maman" if who == "maman" else "Papa"), 300.0, 2.6))
+		later.tween_interval(2.8)
+		later.tween_callback(func() -> void: _control.enabled = true))
+	return true
+
+
+# The crafts she has given stand on the dining table (the newest four).
+func _show_crafts() -> void:
+	if _crafts_art == null:
+		return
+	for child in _crafts_art.get_children():
+		child.queue_free()
+	var all := CraftStudio.kept()
+	var slots := [1790.0, 1880.0, 1970.0, 2050.0]
+	var start := maxi(0, all.size() - slots.size())
+	for i in range(start, all.size()):
+		var img: Image = all[i].image
+		var sprite := Sprite2D.new()
+		sprite.texture = ImageTexture.create_from_image(img)
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		sprite.centered = false
+		var k := 74.0 / float(maxi(img.get_width(), img.get_height()))
+		sprite.scale = Vector2.ONE * k
+		sprite.position = Vector2(slots[i - start] - img.get_width() * k * 0.5, 484.0 - img.get_height() * k)
+		sprite.rotation = deg_to_rad([-3.0, 2.0, -2.0, 3.0][(i - start) % 4])
+		_crafts_art.add_child(sprite)
 
 
 # Maman or Papa gives her something for Billie and Auguste's snowman (`Snowman`): the button tin, the old tuque.
@@ -1892,7 +1962,7 @@ func _build_doors() -> void:
 	add_child(DoorSpot.make(Rect2(KITCHEN_START + 4.0, 240, 104, 356), _open_fridge, KITCHEN_START + 140.0))
 	# The drawing from the service de garde, waiting to go up on it.
 	add_child(QuestMark.make(Vector2(KITCHEN_START + 56.0, 210.0), func() -> bool:
-		return (Carry.has("drawing") or Snowman.needs("carotte") and not Carry.busy() or Tooth.step() == 1) and _control.enabled))
+		return (Carry.has("drawing") or DrawingPad.has_pending() or Snowman.needs("carotte") and not Carry.busy() or Tooth.step() == 1) and _control.enabled))
 	# Her bed: sleep until the next morning.
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 360.0, 380, 448, 228), _bed_clicked, BEDROOM.x + 600.0))
 	# Under it, her hiding place: the shoebox of junk food.
@@ -1959,7 +2029,7 @@ func _costume_chosen() -> void:
 func _open_fridge() -> void:
 	if _fridge_busy:
 		return
-	if Carry.has("drawing"):
+	if Carry.has("drawing") or DrawingPad.has_pending():
 		_drawing_on_fridge()
 		return
 	_fridge_busy = true
@@ -1995,7 +2065,8 @@ func _open_fridge() -> void:
 func _drawing_on_fridge() -> void:
 	_charlotte.facing = -1
 	_charlotte.pet(0.8, 0.0)
-	Carry.put_down(_charlotte)
+	if Carry.has("drawing"):
+		Carry.put_down(_charlotte)
 	DrawingPad.put_pending_on_fridge()
 	_show_fridge_drawings()
 	Sfx.play("pop", Vector2(KITCHEN_START + 60.0, 380.0))
@@ -2347,6 +2418,9 @@ func _build_salon() -> void:
 	_put(InteriorArt.dining_table(), 1780.0, 606.0, 0.85, "floor")
 	_salon_pendant = _pendant(1984.0, 310.0)
 	_put(InteriorArt.black_shelf(), 2110.0, WALL_BASE, 0.7, "floor")
+	_crafts_art = Node2D.new()
+	add_child(_crafts_art)
+	_show_crafts()
 	if XmasTree.in_salon():
 		_build_xmas_tree()
 

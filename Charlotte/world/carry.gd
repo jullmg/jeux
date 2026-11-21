@@ -2,7 +2,7 @@ class_name Carry
 extends RefCounted
 ## Everything Charlotte holds in her arms, behind ONE saved indicator: `GameState.flags.carried` = "" (hands free), or
 ## "<kind>" / "<kind>:<id>": "milk" (Mom's pint), "can" (the watering can), "cat:<quest id>" (a lost cat), "toy:<item>" (a thing
-## from her bedroom floor while she tidies), "book" (Constance's), "chips" (Papa's Ruffles), "snacks" (the movie night's bag), "drawing" (the one she made at the service de garde for the fridge), "gift" (Alyzée's birthday present), "bonhomme:<part>" (the carrot, the tin of buttons or the tuque for the snowman), "traineau" (the sled the service de garde lends her), "pelle" (her little snow shovel, the morning after the storm), "deco:<id>" (a decoration for the Christmas tree), "lettre" (her letter to Santa), "biscuits" (the cookies and milk for Santa). One thing at a
+## from her bedroom floor while she tidies), "book" (Constance's), "chips" (Papa's Ruffles), "snacks" (the movie night's bag), "drawing" (the one she made at the service de garde for the fridge), "bricolage" (the craft she made there for Maman or Papa, `CraftStudio.pending`), "gift" (Alyzée's birthday present), "bonhomme:<part>" (the carrot, the tin of buttons or the tuque for the snowman), "traineau" (the sled the service de garde lends her), "pelle" (her little snow shovel, the morning after the storm), "deco:<id>" (a decoration for the Christmas tree), "lettre" (her letter to Santa), "biscuits" (the cookies and milk for Santa). One thing at a
 ## time, enforced here for every quest:
 ##   - `Carry.take(who, kind, id)` is the only way to put something in her arms; it refuses (returns false) when her hands
 ##     are not free, so the caller just says `Carry.FULL_HANDS`;
@@ -166,6 +166,21 @@ static func _build(kind: String, id: String) -> Node2D:
 			sheet.name = "drawing"
 			sheet.set_meta("keep_upright", true)
 			return sheet
+		"bricolage":
+			# The craft from the service de garde for Maman or Papa, held up in front of her, the right way round.
+			var piece := Sprite2D.new()
+			var entry := CraftStudio.pending()
+			var img: Image = entry.image if not entry.is_empty() else null
+			if img == null:
+				img = Image.create(200, 200, false, Image.FORMAT_RGBA8)
+			piece.texture = ImageTexture.create_from_image(img)
+			piece.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			var fit := 96.0 / float(maxi(img.get_width(), img.get_height()))
+			piece.scale = Vector2.ONE * fit
+			piece.offset = Vector2(0, -16.0 / fit)
+			piece.name = "bricolage"
+			piece.set_meta("keep_upright", true)
+			return piece
 		"gift":
 			# Alyzée's present, wrapped at the Jean Coutu's till, held against her.
 			var box := Sprite2D.new()

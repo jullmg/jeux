@@ -29,6 +29,7 @@ const JADE_REMINDS := ["N'oublie pas ton dessin pour ton papa\npis ta maman, Cha
 const JADE_SLED := "Il a neigé en masse ! Avant le bricolage,\non sort glisser dans la cour. Viens me voir !"
 const JADE_LENDS := "Tiens, un traîneau ! Mets ta tuque\npis sors par la porte, là-bas."
 const JADE_BACK := "Ouf ! On a les joues ben rouges !\nAstheure, un dessin pour vos parents."
+const JADE_CRAFT := ["Wow, quel beau bricolage, Chachoue !\n%s va l'adorer !", "Tu as de l'or dans les doigts !\n%s va être ben content(e)."]
 const JADE_LIKES := ["Wow ! C'est magnifique, Chachoue !\nTes parents vont capoter !", "Quel beau dessin !\nIl va être ben beau sur le frigo."]
 const JADE_LINES := ["Bienvenue au service de garde, Chachoue !", "On se lave les mains avant la collation !",
 	"On range les blocs quand on a fini, OK ?", "Ton papa va arriver bientôt."]
@@ -322,6 +323,33 @@ func _make_craft() -> void:
 	if not _drew:
 		_draw_for_parents()
 		return
+	if not CraftStudio.has_pending():
+		_ask_craft()
+		return
+	_quick_craft()
+
+
+# The table of the daycare: a craft for Maman, one for Papa, or the little craft of the season.
+func _ask_craft() -> void:
+	_control.enabled = false
+	var card := ChoiceCard.ask(self, "Qu'est-ce que tu veux bricoler ?", [
+		{"text": "Un bricolage pour Maman", "color": Color("#FFB6C8")},
+		{"text": "Un bricolage pour Papa", "color": Color("#9ED0F5")},
+		{"text": "Un petit bricolage de saison", "color": Color("#FFE27A")}])
+	card.chose.connect(_craft_chosen)
+
+
+func _craft_chosen(i: int) -> void:
+	_control.enabled = true
+	if i == 0:
+		_craft_for("maman")
+	elif i == 1:
+		_craft_for("papa")
+	elif i == 2:
+		_quick_craft()
+
+
+func _quick_craft() -> void:
 	_did = true
 	_charlotte.facing = 1
 	_charlotte.pet(1.2, 0.0)
@@ -350,8 +378,48 @@ func _draw_for_parents() -> void:
 			Carry.take(_charlotte, "drawing")
 		_charlotte.express("happy", 2.0)
 		Sfx.play("chime")
-		_jade_says(JADE_LIKES[randi() % JADE_LIKES.size()], 3.0))
+		_jade_says(JADE_LIKES[randi() % JADE_LIKES.size()], 3.0)
+		if not CraftStudio.has_pending():
+			var more := create_tween()
+			more.tween_interval(3.6)
+			more.tween_callback(_jade_says.bind("Si tu veux, tu peux aussi faire un bricolage\npour Maman ou Papa, à la table !", 3.8)))
 	add_child(pad)
+
+
+# The craft studio (`CraftStudio`): what she makes is carried home for Maman or Papa.
+func _craft_for(who: String) -> void:
+	_control.enabled = false
+	_charlotte.facing = 1
+	var studio := CraftStudio.new()
+	studio.who = who
+	studio.picture = _frame_picture()
+	studio.closed.connect(func(result: Dictionary) -> void:
+		_control.enabled = true
+		if result.is_empty():
+			_say(_charlotte, "Je vais le faire tantôt…", 200.0)
+			return
+		CraftStudio.hold_pending(result)
+		_did = true
+		var name := "Maman" if who == "maman" else "Papa"
+		if not Carry.busy():
+			Carry.take(_charlotte, "bricolage")
+		else:
+			_say(_charlotte, "Je le range dans mon sac à dos !", 200.0)
+		_charlotte.express("happy", 2.0)
+		Sfx.play("chime")
+		_jade_says(JADE_CRAFT[randi() % JADE_CRAFT.size()] % name, 3.4)
+		Notebook.announce("step", "Ton bricolage est prêt ! Donne-le à %s à la maison." % name, "🎨  Bricolage"))
+	add_child(studio)
+
+
+# A drawing of hers for the frame: the one she just made for her parents, or the newest in her drawer.
+func _frame_picture() -> Texture2D:
+	var img := DrawingPad.pending()
+	if img == null:
+		var names := DrawingPad.gallery_names()
+		if not names.is_empty():
+			img = Image.load_from_file(DrawingPad.gallery_folder() + "/" + names[0])
+	return ImageTexture.create_from_image(img) if img else null
 
 
 # The tower grows a block at each click; past six it tumbles down and she starts again.
@@ -442,6 +510,10 @@ func _go_home_with_papa() -> void:
 	if Carry.has("drawing"):
 		lines = [[_charlotte, "Regarde, Papa ! J'ai fait un dessin\npour toi pis Maman !"],
 			[_papa, "Il est magnifique ! On va le mettre\nsur le frigo en arrivant."]]
+	if CraftStudio.has_pending():
+		var name := "Maman" if CraftStudio.pending_for() == "maman" else "Papa"
+		lines += [[_charlotte, "J'ai fabriqué un bricolage pour %s !" % name],
+			[_papa, "Un bricolage ? On va le lui montrer\nen arrivant à la maison !" if name == "Maman" else "Un bricolage pour moi ? J'ai hâte de voir ça\nà la maison !"]]
 	if School.first_day():
 		lines += [[_charlotte, "Papa ! J'ai une nouvelle amie !\nElle s'appelle Alyzée !"],
 			[_papa, "Une nouvelle amie ? Wow !\nBravo, ma grande !"]]

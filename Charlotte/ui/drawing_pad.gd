@@ -924,6 +924,10 @@ static func hold_pending(img: Image) -> void:
 	img.save_png(pending_path())
 
 
+static func has_pending() -> bool:
+	return FileAccess.file_exists(pending_path())
+
+
 static func pending() -> Image:
 	return Image.load_from_file(pending_path()) if FileAccess.file_exists(pending_path()) else null
 
