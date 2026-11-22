@@ -552,6 +552,7 @@ class _Pinata:
 	var _halves := [Vector2.ZERO, Vector2.ZERO]
 	var _fall := 0.0
 	var _candy: Array = []
+	var _scraps: Array = []
 
 	func hit(damage: float) -> void:
 		_damage = damage
@@ -565,7 +566,12 @@ class _Pinata:
 		var c := _body()
 		for i in 40:
 			_candy.append({"p": c, "v": Vector2(rng.randf_range(-260, 260), rng.randf_range(-320, -60)), "c": colors[i % colors.size()],
-				"r": rng.randf_range(0, TAU), "spin": rng.randf_range(-8, 8), "rest": false})
+				"r": rng.randf_range(0, TAU), "spin": rng.randf_range(-8, 8), "rest": false, "kind": i % 4})
+		# Scraps of crêpe paper tumbling down with it.
+		for i in 46:
+			_scraps.append({"p": c + Vector2(rng.randf_range(-40, 40), rng.randf_range(-40, 40)), "v": Vector2(rng.randf_range(-150, 150), rng.randf_range(-200, 40)),
+				"c": colors[rng.randi_range(0, colors.size() - 1)], "r": rng.randf_range(0, TAU), "spin": rng.randf_range(-6, 6),
+				"len": rng.randf_range(9.0, 18.0)})
 
 	func _body() -> Vector2:
 		return Vector2(sin(_swing), cos(_swing)) * ROPE + Vector2(0, R)
@@ -588,8 +594,18 @@ class _Pinata:
 				if k.p.y > floor_y:
 					k.p.y = floor_y
 					k.v *= Vector2(0.5, -0.3)
+					k.spin *= 0.4
 					if absf(k.v.y) < 40.0:
 						k.rest = true
+			# Paper floats down slower, and stays where it lands.
+			for sc in _scraps:
+				if sc.p.y >= floor_y:
+					continue
+				sc.v.y = minf(sc.v.y + 380.0 * delta, 150.0)
+				sc.v.x *= exp(-1.5 * delta)
+				sc.p += sc.v * delta + Vector2(sin(_t * 4.0 + sc.r) * 18.0 * delta, 0)
+				sc.r += sc.spin * delta
+				sc.p.y = minf(sc.p.y, floor_y)
 		if OnScreen.near(self, 300.0):
 			queue_redraw()
 
@@ -599,34 +615,99 @@ class _Pinata:
 		draw_line(Vector2(0, -20), rope_end, Color("#C9B79A"), 3.0, true)
 		if not burst:
 			_draw_star(body, 0.0, Vector2.ZERO)
-		elif _fall < 1.6:
-			# The two halves falling apart and fading.
-			var drop := Vector2(0, 0.5 * 900.0 * _fall * _fall)
-			var a := 1.0 - _fall / 1.6
-			_draw_half(body + Vector2(-30.0 * _fall * 3.0, 0) + drop, -_fall * 2.0, a, -1.0)
-			_draw_half(body + Vector2(30.0 * _fall * 3.0, 0) + drop, _fall * 2.0, a, 1.0)
+		var floor_y := 668.0 - position.y - 4.0
+		for sc in _scraps:
+			draw_set_transform(sc.p, sc.r)
+			draw_rect(Rect2(-sc.len / 2.0, -1.5, sc.len, 3.0), sc.c)
+			draw_set_transform(Vector2.ZERO)
+		# A soft shadow under every candy that has landed, then the candy.
 		for k in _candy:
-			draw_set_transform(k.p, k.r)
-			draw_rect(Rect2(-6, -4, 12, 8), k.c)
-			draw_colored_polygon(PackedVector2Array([Vector2(-6, 0), Vector2(-11, -4), Vector2(-11, 4)]), k.c.lightened(0.3))
-			draw_colored_polygon(PackedVector2Array([Vector2(6, 0), Vector2(11, -4), Vector2(11, 4)]), k.c.lightened(0.3))
+			if k.rest:
+				draw_set_transform(Vector2(k.p.x, floor_y + 5.0), 0.0, Vector2(1.0, 0.3))
+				draw_circle(Vector2.ZERO, 9.0, Color(0, 0, 0, 0.22))
+				draw_set_transform(Vector2.ZERO)
+		for k in _candy:
+			draw_set_transform(k.p, k.r, Vector2(1.4, 1.4))
+			_draw_candy(k.kind, k.c)
 			draw_set_transform(Vector2.ZERO)
 
+	# A sweet, about 20 px: wrapped in a twist, a lollipop, a hard candy, a foil chocolate.
+	func _draw_candy(kind: int, c: Color) -> void:
+		var dark := c.darkened(0.25)
+		var light := c.lightened(0.45)
+		match kind:
+			0:
+				# Wrapped sweet: a plump body between two twisted ends, a stripe and a shine.
+				draw_colored_polygon(PackedVector2Array([Vector2(-5, 0), Vector2(-12, -6), Vector2(-10, 0), Vector2(-12, 6)]), light)
+				draw_colored_polygon(PackedVector2Array([Vector2(5, 0), Vector2(12, -6), Vector2(10, 0), Vector2(12, 6)]), light)
+				_ellipse(Vector2.ZERO, Vector2(7.5, 5.5), dark)
+				_ellipse(Vector2(0, -0.6), Vector2(6.8, 4.8), c)
+				draw_rect(Rect2(-1.5, -5.0, 3.0, 10.0), Color(1, 1, 1, 0.55))
+				_ellipse(Vector2(-3.0, -2.6), Vector2(2.2, 1.1), Color(1, 1, 1, 0.6))
+			1:
+				# Lollipop: a swirled disc on a white stick.
+				draw_rect(Rect2(-1.0, 2.0, 2.0, 13.0), Color("#F4EEE4"))
+				draw_circle(Vector2.ZERO, 7.5, dark)
+				draw_circle(Vector2.ZERO, 6.6, c)
+				draw_arc(Vector2.ZERO, 3.2, 0.0, TAU * 0.8, 12, light, 1.6, true)
+				draw_arc(Vector2.ZERO, 5.6, 1.0, TAU * 0.7, 12, Color(1, 1, 1, 0.8), 1.4, true)
+				_ellipse(Vector2(-2.6, -3.0), Vector2(2.0, 1.1), Color(1, 1, 1, 0.55))
+			2:
+				# Hard candy: a glossy round bead.
+				draw_circle(Vector2.ZERO, 5.8, dark)
+				draw_circle(Vector2(0.3, 0.3), 5.0, c)
+				draw_circle(Vector2(-1.6, -1.8), 1.9, Color(1, 1, 1, 0.7))
+			_:
+				# Foil chocolate: a square with creases and a bright edge.
+				draw_rect(Rect2(-6.5, -5.5, 13, 11), dark)
+				draw_rect(Rect2(-5.7, -4.7, 11.4, 9.4), c)
+				draw_line(Vector2(-5.7, -4.7), Vector2(5.7, 4.7), Color(1, 1, 1, 0.35), 1.2)
+				draw_line(Vector2(-5.7, 0.5), Vector2(5.7, -1.0), Color(1, 1, 1, 0.25), 1.0)
+				draw_rect(Rect2(-5.7, -4.7, 11.4, 2.0), Color(1, 1, 1, 0.3))
+
+	func _ellipse(at: Vector2, r: Vector2, color: Color) -> void:
+		var pts := PackedVector2Array()
+		for i in 16:
+			var a := TAU * i / 16.0
+			pts.append(at + Vector2(cos(a) * r.x, sin(a) * r.y))
+		draw_colored_polygon(pts, color)
+
 	func _draw_star(c: Vector2, _rot: float, _off: Vector2) -> void:
-		var colors := [Color("#E04F5F"), Color("#FFD23F"), Color("#4FA3E0"), Color("#7CCB5A"), Color("#FF7BA3")]
+		var colors := [Color("#E04F5F"), Color("#FFC21F"), Color("#3E93E0"), Color("#5CBF4A"), Color("#FF6FA0")]
+		var outer := R + 38.0
+		var inner := R * 1.0
+		# The star's body: five kites in five colours, the left of each lit and the right in the shade.
 		for i in 5:
 			var a := -PI / 2.0 + i * TAU / 5.0 + sin(_t * 2.0) * 0.03
 			var dir := Vector2(cos(a), sin(a))
-			var side := Vector2(-dir.y, dir.x)
-			var tip := c + dir * (R + 46.0)
-			draw_colored_polygon(PackedVector2Array([c + dir * (R - 8.0) + side * 20.0, tip, c + dir * (R - 8.0) - side * 20.0]), colors[i])
-			# The tassels at the tip, fluttering.
+			var left := Vector2(cos(a - TAU / 10.0), sin(a - TAU / 10.0)) * inner
+			var right := Vector2(cos(a + TAU / 10.0), sin(a + TAU / 10.0)) * inner
+			var col: Color = colors[i]
+			draw_colored_polygon(PackedVector2Array([c, c + left, c + dir * outer, c + right]), col.darkened(0.12))
+			draw_colored_polygon(PackedVector2Array([c, c + left, c + dir * outer]), col.lightened(0.1))
+			# Rows of fringe along the two edges: strips of crêpe, longer toward the middle, fluttering.
+			for edge in 2:
+				var from := c + (left if edge == 0 else right)
+				var to := c + dir * outer
+				var out_n := (left - dir * inner).normalized() if edge == 0 else (right - dir * inner).normalized()
+				for k in 7:
+					var u := (k + 0.5) / 7.0
+					var p := from.lerp(to, u)
+					var wob := sin(_t * 4.0 + k * 1.7 + i) * 2.0
+					var tail := p + out_n * (6.0 - u * 3.0) + Vector2(wob, 7.0 + (1.0 - u) * 4.0)
+					var fc: Color = colors[(i + k + edge) % 5]
+					draw_line(p, tail, fc.darkened(0.08), 3.4 - u * 1.4, true)
+			# The tip's tassels.
+			var tip := c + dir * outer
 			for k in 3:
-				var tail := tip + dir * 4.0 + side * (k - 1) * 5.0
-				draw_line(tail, tail + Vector2(sin(_t * 5.0 + k + i) * 4.0, 22.0), colors[(i + k + 1) % 5], 3.0, true)
-		for ring in 4:
-			draw_circle(c, R - ring * 11.0, colors[(ring + 2) % 5])
-		draw_circle(c + Vector2(-16, -18), 12.0, Color(1, 1, 1, 0.25))
+				var tail := tip + Vector2((k - 1) * 4.0 + sin(_t * 5.0 + k + i) * 3.0, 15.0)
+				draw_line(tip, tail, colors[(i + k + 1) % 5], 3.0, true)
+		# The middle: a ring of stripes and a shiny paper disc.
+		draw_circle(c, R * 0.82, Color("#9C4A7A"))
+		for ring in 3:
+			draw_circle(c, R * 0.74 - ring * 11.0, colors[(ring + 1) % 5])
+		draw_circle(c, R * 0.26, Color("#FFF3C4"))
+		draw_circle(c + Vector2(-14, -16), 10.0, Color(1, 1, 1, 0.3))
 		# The cracks, more with each hit.
 		var cracks := int(_damage * 6.0)
 		for k in cracks:
@@ -635,17 +716,6 @@ class _Pinata:
 			var p1 := c + Vector2(cos(a + 0.3), sin(a + 0.3)) * (R * 0.6)
 			var p2 := c + Vector2(cos(a - 0.1), sin(a - 0.1)) * R
 			draw_polyline(PackedVector2Array([p0, p1, p2]), Color("#3A2A2A"), 2.5, true)
-
-	func _draw_half(c: Vector2, rot: float, alpha: float, side: float) -> void:
-		draw_set_transform(c, rot)
-		var color := Color("#FFD23F") if side < 0.0 else Color("#4FA3E0")
-		var pts := PackedVector2Array()
-		for k in 13:
-			var a := PI / 2.0 + side * (-PI / 2.0) + k * PI / 12.0 * side
-			pts.append(Vector2(cos(a), sin(a)) * R)
-		pts.append(Vector2.ZERO)
-		draw_colored_polygon(pts, Color(color, alpha))
-		draw_set_transform(Vector2.ZERO)
 
 
 # ── 4. The cake, and the table's goodies ────────────────────────
