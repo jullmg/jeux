@@ -162,6 +162,9 @@ static func load_game(n: int) -> String:
 	money = float(data.get("money", START_MONEY))
 	quests = data.get("quests", {})
 	flags = data.get("flags", {})
+	# A birthday already celebrated (before she was made older by it) makes her eight.
+	if str(quests.get("anniversaire", "")) == "done":
+		age = maxi(age, Birthday.AGE_AFTER)
 	Carry.migrate()
 	var scene := str(data.get("scene", ""))
 	var x := float(data.get("x", NAN))

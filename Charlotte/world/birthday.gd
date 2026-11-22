@@ -1,13 +1,15 @@
 class_name Birthday
 extends RefCounted
 ## Charlotte's birthday, the 1st of February (quest "anniversaire", winter, after the wobbly tooth; Julien: she invites the
-## friends SHE chooses, five at most; she stays 7 for now), at home (`house.gd`), step by step (`flags.anniv_step`):
+## friends SHE chooses, five at most; she turns 8 when it is done: `AGE_AFTER`), at home (`house.gd`), step by step (`flags.anniv_step`):
 ##   1. Maman says it is her birthday soon: the invitation card (`InviteCard`) lists the friends she has met (`GUESTS`) and she
 ##      ticks the ones she invites (`flags.anniv_invites`, `MAX` at most);
 ##   2. she decorates the salon: the banner over the sofa, the balloons, the party table (`DECOR`, `flags.anniv_decor`);
 ##   3. the party: the doorbell, her guests come in, each hands her a present she opens (`flags.anniv_opened`); then Maman
 ##      brings the cake, everyone sings, she blows out the candles, a slice; the guests go home and the quest is done.
 
+## Her age once the birthday is over (Julien, 2026-11-22: it still said 7).
+const AGE_AFTER := 8
 const QUEST := "anniversaire"
 const STEP := "anniv_step"
 const INVITES := "anniv_invites"

@@ -260,6 +260,8 @@ static func complete(id: String) -> bool:
 		return false
 	GameState.quests[id] = "done"
 	GameState.money += float(ALL[id].reward)
+	if id == Birthday.QUEST:
+		GameState.age = maxi(GameState.age, Birthday.AGE_AFTER)
 	_announce("done", id)
 	return true
 

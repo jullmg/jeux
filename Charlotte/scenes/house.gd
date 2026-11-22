@@ -858,6 +858,8 @@ func _birthday_cake() -> void:
 		_guests.clear()
 		Sfx.play("goodnight")
 		Quests.complete(Birthday.QUEST)
+		# She is eight now (Julien): the notebook, the menu and her height marks say so, and she may cross the streets alone.
+		Notebook.announce("step", "Joyeux anniversaire ! Tu as %d ans astheure !" % GameState.age, "🎂  Ma fête")
 		_mom_routine.pause(0.1, _mom.position.x)
 		_party_busy = false
 		_control.enabled = true)
