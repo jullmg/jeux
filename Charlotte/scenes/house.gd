@@ -1118,12 +1118,18 @@ func _noel_under_tree() -> void:
 	elif _noel_plate and step >= 5:
 		_noel_plate.texture = Christmas.cookies(true)
 	if step == 5 and _noel_presents.is_empty():
-		for i in Christmas.PRESENTS.size():
+		# Six presents piled under the tree, a back row behind a front row: [x from the tree, floor, scale].
+		var spots := [[-110.0, 664.0, 0.78], [-40.0, 692.0, 0.9], [30.0, 664.0, 0.8], [100.0, 694.0, 0.9], [-10.0, 640.0, 0.7], [180.0, 690.0, 0.85]]
+		var order := [0, 2, 4, 1, 3, 5]
+		for k in order:
+			var i: int = k
 			var id: String = Christmas.PRESENTS[i][0]
-			var box := _put(Christmas.present(i, id in Christmas.opened()), XMAS_X - 40.0 + i * 92.0, 684.0, 0.85)
+			var spot: Array = spots[order.find(i)]
+			var box := _put(Christmas.present(i, id in Christmas.opened()), XMAS_X + float(spot[0]), float(spot[1]), float(spot[2]))
 			_noel_presents.append(box)
-			add_child(DoorSpot.make(Rect2(box.position, Vector2(85, 80)), _open_present.bind(i), box.position.x - 30.0))
-			add_child(QuestMark.make(box.position + Vector2(42, -30), func() -> bool:
+			box.set_meta("kind", i)
+			add_child(DoorSpot.make(Rect2(box.position + Vector2(10, 10), Vector2(90, 80) * float(spot[2])), _open_present.bind(i), box.position.x - 30.0))
+			add_child(QuestMark.make(box.position + Vector2(48, -24), func() -> bool:
 				return Christmas.step() == 5 and id not in Christmas.opened() and _control.enabled and not _noel_busy, 0.7))
 
 
@@ -1289,9 +1295,11 @@ func _open_present(i: int) -> void:
 	_charlotte.facing = 1
 	_charlotte.pet(0.9, 0.5)
 	Christmas.open_present(id)
-	_noel_presents[i].texture = Christmas.present(i, true)
-	Sfx.play("swoosh", _noel_presents[i].position)
-	_treat(Christmas.capybara_plush() if id == "capybara" else Christmas.crayons(), Christmas.PRESENTS[i][1], 0.2)
+	for box: Sprite2D in _noel_presents:
+		if int(box.get_meta("kind")) == i:
+			box.texture = Christmas.present(i, true)
+			Sfx.play("swoosh", box.position)
+	_treat(Christmas.gift_picture(id), Christmas.PRESENTS[i][1], 0.2)
 	if Christmas.opened().size() < Christmas.PRESENTS.size():
 		return
 	_noel_busy = true

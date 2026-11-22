@@ -871,7 +871,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     (`_xmas_glow_from`), candles, the tourtière, the family round the table, `Christmas.REVEILLON`, a slice of bûche;
     4. bed: "Bonne nuit… le père Noël s'en vient !", sleigh bells and Santa's golden sleigh crossing the night (`_Sleigh`);
     5. "Le matin de Noël !": crumbs, the empty glass and Santa's note on the plate, two presents under the tree
-    (`Christmas.PRESENTS`: the capybara plush with its orange, a box of crayons); opening both finishes it, and the plush sits on
+    (`Christmas.PRESENTS`: six, each with its wrapping `Christmas.present(kind, open)` and its contents `Christmas.gift_picture(id)`: the capybara plush with its orange, a box of crayons, a picture book, a board game, mittens and a tuque, ice skates; **a new present = a line in `PRESENTS`, a wrapping case in `present` and a picture in `gift_picture`**); opening them all finishes it, and the plush sits on
     her bed from then on (`flags.noel_capybara`).
   - jourdelan, New Year's Eve and Day (after "noel"; `world/new_year.gd`, `NewYear`, step in `flags.jourdelan_step`): Maman
     lets her stay up till midnight; the hallway TV (its click taken over through `TvScreen.before_click`) plays the year-end
