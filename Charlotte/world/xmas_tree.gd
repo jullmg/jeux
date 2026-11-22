@@ -268,15 +268,27 @@ static func _star(c: Vector2, r: float) -> String:
 
 ## Canvas 120 × 90: the box of decorations, open, the next things peeking out. `left`: how many decorations are still in it.
 static func box(left: int) -> ImageTexture:
-	var s := '<path d="M10 40 H110 V86 H10 Z" fill="#B5302B" stroke="#6E1A16" stroke-width="2.5"/>'
-	s += '<path d="M10 40 L0 24 H100 L110 40 Z" fill="#D9473F" stroke="#6E1A16" stroke-width="2"/>'
-	s += '<rect x="52" y="40" width="16" height="46" fill="#E9B824"/>'
+	# An open cardboard box in three-quarter view: the back flap standing up, the dark inside with the decorations showing
+	# over its rim, the front and the right side (both faces drawn, shaded differently), a flap folded down at the front.
+	var s := '<path d="M30 34 L110 34 L104 14 L36 14 Z" fill="#C9372F" stroke="#6E1A16" stroke-width="2" stroke-linejoin="round"/>'
+	s += '<path d="M36 14 L104 14 L106 20 L34 20 Z" fill="#E0605A" opacity="0.5"/>'
+	s += '<path d="M10 44 L90 44 L110 34 L30 34 Z" fill="#3A1512" stroke="#6E1A16" stroke-width="2" stroke-linejoin="round"/>'
 	if left > 0:
-		var colours := ["#D42A3A", "#E9B824", "#2E6FD8", "#9B3BD1"]
+		var colours := ["#D42A3A", "#E9B824", "#2E6FD8", "#9B3BD1", "#2FA34F"]
+		var spots := [[34.0, 36.0], [52.0, 33.0], [70.0, 36.0], [88.0, 34.0], [44.0, 40.0]]
+		s += '<path d="M24 40 Q46 28 64 38 Q82 28 100 36" stroke="#E9B824" stroke-width="4" fill="none" stroke-dasharray="2 3" stroke-linecap="round"/>'
 		for i in mini(left + 1, 5):
-			s += '<circle cx="%d" cy="34" r="8" fill="%s" stroke="#00000044"/>' % [24 + i * 18, colours[i % colours.size()]]
-		s += '<path d="M14 36 Q40 20 66 34 Q90 24 106 36" stroke="#E9B824" stroke-width="5" fill="none" stroke-dasharray="2 3"/>'
-	s += _star(Vector2(96, 22), 9.0) if left >= 0 else ""
+			var p: Array = spots[i]
+			s += '<circle cx="%s" cy="%s" r="8" fill="%s" stroke="#00000055" stroke-width="1.2"/><circle cx="%s" cy="%s" r="2.4" fill="#FFFFFF" opacity="0.7"/>' % [p[0], p[1], colours[i % colours.size()], p[0] - 3.0, p[1] - 3.0]
+	s += '<path d="M10 44 H90 V86 H10 Z" fill="#B5302B" stroke="#6E1A16" stroke-width="2.5" stroke-linejoin="round"/>'
+	s += '<path d="M90 44 L110 34 V76 L90 86 Z" fill="#8E221E" stroke="#6E1A16" stroke-width="2.5" stroke-linejoin="round"/>'
+	s += '<path d="M12 46 H88" stroke="#FFFFFF" stroke-width="2" opacity="0.18"/>'
+	# The front flap folded down over its face, a gold ribbon of tape and a star label.
+	s += '<path d="M10 44 L90 44 L88 56 L12 56 Z" fill="#D9473F" stroke="#6E1A16" stroke-width="2" stroke-linejoin="round"/>'
+	s += '<rect x="42" y="44" width="16" height="42" fill="#E9B824" stroke="#8E6C0C" stroke-width="1.5"/>'
+	s += '<path d="M44 46 V84" stroke="#FFFFFF" stroke-width="1.6" opacity="0.4"/>'
+	s += '<path d="M96 52 L106 46 M96 60 L106 54" stroke="#6E1A16" stroke-width="1.4" opacity="0.4"/>'
+	s += _star(Vector2(26, 72), 9.0) if left >= 0 else ""
 	return InteriorArt.tex(120, 90, s)
 
 
