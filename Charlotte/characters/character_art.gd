@@ -671,6 +671,8 @@ func _torso_svg(sx: float, sy: float) -> String:
 			s += _top() + _cardigan()
 		"raincoat":
 			s += _coat() + _raincoat()
+		"parka":
+			s += _parka()
 		_:
 			s += _top()
 	if look.backpack != "":
@@ -930,6 +932,34 @@ func _coat() -> String:
 	for y in [52, 66]:
 		s += _f('<circle cx="58" cy="%d" r="3" fill="{accent}" stroke="{cloth_line}" stroke-width="1.3"/>' % y)
 	s += _f('<path d="M20 138 Q65 144 111 138" stroke="{cloth_line}" stroke-width="1.5" fill="none" stroke-dasharray="3 3" opacity="0.5"/>')
+	return s
+
+
+# A sporty ski jacket (the style of a North Face, no logo): a short puffy body in quilted rows, a bright yoke over the
+# shoulders and bright side panels, a tall collar, a zip with its pull, a zipped chest pocket and an elastic hem.
+const PARKA_BODY := "M40 14 Q65 22 90 14 Q103 15 107 27 Q111 40 108 54 Q103 72 104 96 Q106 118 112 128 Q108 138 98 136 Q65 142 32 136 Q22 138 18 128 Q24 118 26 96 Q27 72 22 54 Q19 40 23 27 Q27 15 40 14 Z"
+
+
+func _parka() -> String:
+	var s := _f('<path d="%s" fill="{cloth}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>' % PARKA_BODY)
+	s += _sheen(PARKA_BODY)
+	s += _f('<path d="M23 36 Q23 26 30 21 Q25 80 22 132 H17 Z" fill="{cloth_shade}"/>')
+	# Bright colour blocks: the yoke across the chest and shoulders, a panel down each side.
+	s += _f('<path d="M25 24 Q40 18 65 22 Q90 18 105 24 Q109 36 107 48 Q86 40 65 44 Q44 40 23 48 Q21 36 25 24 Z" fill="{accent}" stroke="{accent_line}" stroke-width="2" stroke-linejoin="round"/>')
+	s += _f('<path d="M22 58 Q26 80 25 104 Q24 120 29 132 L38 133 Q34 112 36 88 Q36 70 32 56 Z" fill="{accent}" opacity="0.9"/>')
+	s += _f('<path d="M108 58 Q104 80 105 104 Q106 120 101 132 L92 133 Q96 112 94 88 Q94 70 98 56 Z" fill="{accent}" opacity="0.9"/>')
+	# Quilted rows: puffy baffles, each a slight bulge with a seam under it.
+	for y in [58, 72, 86, 100, 114]:
+		s += _f('<path d="M36 %d Q65 %d 94 %d" stroke="{cloth_line}" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.55"/>' % [y, y + 4, y])
+		s += '<path d="M38 %d Q65 %d 92 %d" stroke="#FFFFFF" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.14"/>' % [y - 5, y - 1, y - 5]
+	# The tall collar and the zip.
+	s += _f('<path d="M40 12 Q40 2 52 4 L58 14 L65 8 L72 14 L78 4 Q90 2 90 12 Q90 26 65 28 Q40 26 40 12 Z" fill="{cloth_shade}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>')
+	s += _f('<path d="M65 10 V136" stroke="{cloth_line}" stroke-width="3"/>')
+	s += '<path d="M65 12 V134" stroke="#D8D8DC" stroke-width="1.2" stroke-dasharray="2 2"/>'
+	s += _f('<rect x="62" y="22" width="6" height="11" rx="2" fill="{accent}" stroke="{accent_line}" stroke-width="1.4"/>')
+	# A zipped chest pocket, the elastic hem.
+	s += _f('<path d="M76 54 L98 56" stroke="{accent_line}" stroke-width="2.4" stroke-linecap="round"/><path d="M76 56 L98 58 L97 70 L77 68 Z" fill="none" stroke="{cloth_line}" stroke-width="1.4" opacity="0.6"/>')
+	s += _f('<path d="M20 126 Q65 133 112 126 L112 136 Q65 143 20 136 Z" fill="{cloth_line}" opacity="0.5"/>')
 	return s
 
 

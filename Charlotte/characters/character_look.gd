@@ -27,6 +27,7 @@ const ADULT_HAIR: Array[String] = ["short", "bob", "bun", "curly", "long_straigh
 ## "round" (big storybook eyes) or "almond" (narrow, lids with the outer corner lifted).
 @export var eyes := "round"
 @export var mouth := "open_smile"
+@export var winter_coat := "coat"  # what `Season.dress_for_weather` puts on in winter: "coat" or "parka" (a sporty ski jacket)
 @export var freckles := false
 @export var glasses := ""
 @export var facial_hair := ""
@@ -137,6 +138,8 @@ static func dad() -> CharacterLook:  # navy bike T-shirt, dark jeans, white snea
 	look.legwear_color = Color("#3E5A86")
 	look.shoes = "sneaker"
 	look.shoe_color = Color("#F4F1EA")
+	# In winter Papa wears a sporty ski jacket, not a long coat.
+	look.winter_coat = "parka"
 	return look
 
 

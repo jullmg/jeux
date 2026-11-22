@@ -187,7 +187,11 @@ const TUQUES: Array[String] = ["#E04F5F", "#4A6FA5", "#FFD23F", "#3E8E5A", "#FF8
 static func dress_for_weather(look: CharacterLook) -> void:
 	match current:
 		"winter":
-			look.outfit = "coat"
+			look.outfit = look.winter_coat
+			if look.winter_coat == "parka":
+				# The ski jacket's colour blocks: a bright yoke and side panels over the main colour.
+				look.accent_color = Color("#E8553A")
+				look.outfit_color = Color("#2F6FB8")
 			look.sleeve = "long"
 			look.pattern = "none"
 			if look.legwear == "socks":
