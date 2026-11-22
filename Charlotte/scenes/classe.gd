@@ -3,8 +3,8 @@ extends Interior
 # from the yard and the cubbies where the coats hang, the cork board of drawings, the windows, the pupils' desks in a row
 # facing the board (Charlotte's beside Alyzée's), the board with today's date in chalk, Madame Nadia's desk, the Québec
 # flag, the aquarium and the reading corner. The alphabet runs along the top of the wall.
-# Charlotte sits at her desk and the lesson starts: Madame Nadia asks three questions at the board (`School.lesson`, read
-# out by `Voice`, answered on a `ChoiceCard`), gives her a sticker, and at the bell the class goes down to the service de garde.
+# Charlotte sits at her desk and the lesson starts: Madame Nadia asks questions at the board (`School.lesson`: two on a shape drawn in chalk, two small number ones,
+# no voice; answered on a `ChoiceCard`), gives her a sticker, and at the bell the class goes down to the service de garde.
 # Madame Nadia is invented (no photo): a woman in her forties, dark hair in a bun, round glasses, a mustard cardigan.
 
 const ROOM := Vector2(0.0, 2900.0)
@@ -382,7 +382,6 @@ func _ask() -> void:
 	_board_shape.queue_redraw()
 	_teacher.facing = -1
 	_teacher_says(q.ask, 3.0)
-	Voice.say(q.say)
 	_card_for(q).chose.connect(_answered)
 
 

@@ -57,7 +57,7 @@ const SHAPE_QUESTIONS := [
 	["Un carré, c'est aussi\nune sorte de…", "", "rectangle", "triangle", "trapèze"],
 	["Combien d'angles droits\na un rectangle ?", "rectangle", "4", "2", "0"],
 ]
-const SHAPES := ["carre", "rectangle", "triangle", "losange", "trapeze", "parallelogramme"]
+const SHAPES := ["carre", "rectangle", "triangle", "losange", "trapeze", "parallelogramme", "cercle"]
 
 ## The sums (Julien: additions and subtractions, the level of a 3e année): numbers to 999, carrying and borrowing.
 ## `SUM_MAX` is the largest answer an addition gives; raise it (and the ranges in `_sum`) for older pupils.
@@ -131,15 +131,120 @@ static func theme_of(n: int) -> String:
 	return "" if n <= 0 else SchoolMath.CYCLE[(n - 1) % SchoolMath.CYCLE.size()]
 
 
-## Today's questions: the first lesson is a mix (below); after it each day has a theme of its own (`SchoolMath.lesson`).
+## Today's questions. Julien (2026-11-22): the questions were too hard, and he missed the shapes drawn in chalk that she can
+## click on; so, while `EASY` is on, every lesson is two questions on a shape drawn on the board (`_easy_lesson`) and two very
+## small sums or number games. Turn `EASY` off to get back the lessons of a 3e année (the first lesson's mix, then one theme a
+## day round `SchoolMath.CYCLE`).
+const EASY := true
+
+
 static func lesson(rng: RandomNumberGenerator) -> Array:
 	var n := int(GameState.flags.get(LESSONS, 0))
+	if EASY:
+		current = {"id": "", "title": "", "intro": ""} if n <= 0 else {"id": "facile", "title": "Les formes et les nombres",
+			"intro": "Aujourd'hui, on regarde des formes\npis on fait des petits calculs !"}
+		return _easy_lesson(rng)
 	var id := theme_of(n)
 	if id == "":
 		current = {"id": "", "title": "", "intro": ""}
 		return _welcome_lesson(rng)
 	current = SchoolMath.info(id)
 	return SchoolMath.lesson(id, theme_of(n - 1), rng)
+
+
+## What she is asked about a shape: its name or how many sides it has.
+const EASY_NAMES := {"carre": "un carré", "rectangle": "un rectangle", "triangle": "un triangle", "losange": "un losange", "cercle": "un cercle"}
+const EASY_SIDES := {"carre": 4, "rectangle": 4, "triangle": 3, "losange": 4}
+const SEEN_EASY := "ecole_seen_easy"
+
+
+## Two questions on a shape she hasn't had yet (as long as there are), then two small number questions, each made up for the day.
+static func _easy_lesson(rng: RandomNumberGenerator) -> Array:
+	var pool: Array = []
+	for shape: String in EASY_NAMES:
+		pool.append(["nom", shape])
+	for shape: String in EASY_SIDES:
+		pool.append(["cotes", shape])
+	var seen: Array = GameState.flags.get(SEEN_EASY, [])
+	var fresh: Array = []
+	for i in pool.size():
+		if not seen.has(i):
+			fresh.append(i)
+	if fresh.size() < SHAPES_PER_LESSON:
+		seen = []
+		fresh = range(pool.size())
+	var out: Array = []
+	var last_shape := ""
+	for k in SHAPES_PER_LESSON:
+		var pick := rng.randi_range(0, fresh.size() - 1)
+		# Not two questions on the same shape in a row.
+		if fresh.size() > 1 and pool[fresh[pick]][1] == last_shape:
+			pick = (pick + 1) % fresh.size()
+		var i: int = fresh.pop_at(pick)
+		seen.append(i)
+		var shape: String = pool[i][1]
+		last_shape = shape
+		if pool[i][0] == "nom":
+			var others: Array = EASY_NAMES.keys()
+			others.erase(shape)
+			others.shuffle()
+			out.append(_question("Quelle est cette forme ?", "Quelle est cette forme ?", "Quelle est cette forme ?", shape,
+				[EASY_NAMES[shape], EASY_NAMES[others[0]], EASY_NAMES[others[1]]]))
+		else:
+			var sides: int = EASY_SIDES[shape]
+			var wrong: Array = [sides + 1, sides - 1 if sides > 3 else sides + 2]
+			out.append(_question("Combien de côtés a cette forme ?", "Combien de côtés a cette forme ?", "Combien de côtés\na cette forme ?", shape,
+				[str(sides), str(wrong[0]), str(wrong[1])]))
+	GameState.flags[SEEN_EASY] = seen
+	var kinds := ["plus", "moins", "grand", "petit", "suite", "double"]
+	kinds.shuffle()
+	for k in PER_LESSON - SHAPES_PER_LESSON:
+		out.append(_easy_number(kinds[k], rng))
+	return out
+
+
+## One very small number question: {ask, say, board, shape "", answers, right}.
+static func _easy_number(kind: String, rng: RandomNumberGenerator) -> Dictionary:
+	match kind:
+		"plus":
+			var a := rng.randi_range(1, 9)
+			var b := rng.randi_range(1, 9)
+			return _question("Combien font %d + %d ?" % [a, b], "Combien font %d plus %d ?" % [a, b], "%d + %d = ?" % [a, b], "",
+				_around(a + b))
+		"moins":
+			var a := rng.randi_range(5, 15)
+			var b := rng.randi_range(1, mini(9, a - 1))
+			return _question("Combien font %d − %d ?" % [a, b], "Combien font %d moins %d ?" % [a, b], "%d − %d = ?" % [a, b], "",
+				_around(a - b))
+		"grand", "petit":
+			var nums: Array = []
+			while nums.size() < 3:
+				var v := rng.randi_range(10, 60)
+				if not nums.has(v):
+					nums.append(v)
+			var right: int = nums.max() if kind == "grand" else nums.min()
+			var rest: Array = nums.filter(func(v: int) -> bool: return v != right)
+			var ask := "Quel est le plus grand nombre ?" if kind == "grand" else "Quel est le plus petit nombre ?"
+			return _question(ask, ask, ask, "", [str(right), str(rest[0]), str(rest[1])])
+		"suite":
+			var step: int = [1, 2, 5, 10][rng.randi_range(0, 3)]
+			var start := step * rng.randi_range(0, 3) + (0 if step > 2 else rng.randi_range(0, 3))
+			var shown := "%d, %d, %d, ?" % [start, start + step, start + 2 * step]
+			return _question("Quel est le prochain nombre ?\n%s" % shown, "Quel est le prochain nombre ? %s" % shown, shown, "",
+				_around(start + 3 * step))
+		_:
+			var x := rng.randi_range(2, 9)
+			return _question("Quel est le double de %d ?" % x, "Quel est le double de %d ?" % x, "Le double de %d ?" % x, "", _around(2 * x))
+	return {}
+
+
+## The right number and two wrong ones close to it (never negative, never twice): as strings, the right one first.
+static func _around(right: int) -> Array:
+	var out: Array = [str(right)]
+	for d: int in [1, -1, 2, -2, 3]:
+		if right + d >= 0 and out.size() < 3 and not out.has(str(right + d)):
+			out.append(str(right + d))
+	return out
 
 
 ## The first lesson: two on shapes she hasn't had yet (as long as there are), then an addition and a subtraction made up
@@ -231,6 +336,10 @@ static func draw_shape(canvas: CanvasItem, kind: String, at: Vector2, size: floa
 	var k := size / 100.0
 	if kind.begins_with("pie:"):
 		_draw_pie(canvas, kind, at, size, color)
+		return
+	if kind == "cercle":
+		canvas.draw_arc(at, 52.0 * k, 0.0, TAU, 56, color, maxf(3.0, 4.0 * k), true)
+		canvas.draw_arc(at + Vector2(1.5, 1.2) * k, 52.0 * k, 0.0, TAU, 56, Color(color, color.a * 0.35), maxf(1.5, 2.0 * k), true)
 		return
 	var pts: Array = []
 	match kind:
