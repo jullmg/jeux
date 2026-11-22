@@ -5,7 +5,9 @@ extends Node2D
 ## The first click is the meeting (`flags.met_billie_auguste`); after that the one clicked says a line. Quests go in `interact`.
 ## Their first one is the snowman (`Snowman`, winter): they roll its balls beside them and Charlotte brings the rest.
 
-const SPREAD := 74.0
+## Where each stands (Billie, Auguste), in their units: well apart, not shoulder to shoulder. Auguste plays with his ball.
+const XS := [-170.0, 190.0]
+const SPREAD := 190.0
 ## The top of each one's head, in their own units (Billie, Auguste).
 const HEADS := [-322.0, -278.0]
 const FLAG := "met_billie_auguste"
@@ -20,7 +22,7 @@ const MEETING := [
 ]
 const LINE_SECONDS := 2.3
 ## Where their snowman stands, in their units (right of Auguste).
-const SNOWMAN_X := 330.0
+const SNOWMAN_X := 500.0
 const SNOWMAN_ASK := [
 	[0, "Chachoue ! As-tu vu toute la neige ?"],
 	[1, "On fait un bonhomme de neige ! Un GROS !"],
@@ -62,6 +64,8 @@ var _clicked := 0
 var _line := [0, 0]
 var _talking := false
 var _snowman: Snowman
+var _ball: _Ball
+var _t := 0.0
 
 
 func _ready() -> void:
@@ -70,14 +74,33 @@ func _ready() -> void:
 		Season.dress_for_weather(looks[i])
 		var kid := Character.new()
 		kid.look = looks[i]
-		kid.fidgets = true
-		kid.position.x = SPREAD * (-1.0 if i == 0 else 1.0)
+		# Auguste bounces his ball instead of fidgeting.
+		kid.fidgets = i == 0
+		kid.position.x = XS[i]
 		kid.facing = 1 if i == 0 else -1
 		add_child(kid)
 		_kids.append(kid)
+	_ball = _Ball.new()
+	_ball.owner_kid = self
+	add_child(_ball)
 	if Snowman.standing():
 		_build_snowman()
 	add_to_group("interactable")
+
+
+func _process(delta: float) -> void:
+	_t += delta
+	# Auguste bounces the ball: his hand goes down to it each time it comes back up.
+	if absf(sin(_t * 3.4)) > 0.88 and not _kids[1].is_petting():
+		_kids[1].pet(0.1, 0.0)
+	if OnScreen.near(self, 400.0):
+		_ball.queue_redraw()
+
+
+## Where the ball is, in their units: beside Auguste, on the side he faces, bouncing up from the ground.
+func ball_position() -> Vector2:
+	var side := float(_kids[1].facing)
+	return Vector2(_kids[1].position.x + side * 62.0, -24.0 - absf(sin(_t * 3.4)) * 105.0)
 
 
 static func met() -> bool:
@@ -244,3 +267,23 @@ func _say(speaker: int, text: String) -> void:
 	var kid := _kids[speaker]
 	kid.express("talk", LINE_SECONDS * 0.8)
 	Bubble.say(get_parent(), to_global(kid.position) + Vector2(0, HEADS[speaker]) * scale - Vector2(0, 12), text, LINE_SECONDS)
+
+
+# Auguste's rubber ball, orange with its seams, and the small shadow on the ground that shrinks as it rises.
+class _Ball:
+	extends Node2D
+	var owner_kid: BillieAuguste
+	var color := Color("#E8662A")
+
+	func _draw() -> void:
+		var p := owner_kid.ball_position()
+		var h := -p.y - 24.0
+		draw_set_transform(Vector2(p.x, 2), 0.0, Vector2(1.0, 0.25))
+		draw_circle(Vector2.ZERO, 20.0 - h * 0.05, Color(0, 0, 0, 0.18))
+		draw_set_transform(Vector2.ZERO)
+		draw_circle(p, 20.0, color)
+		draw_arc(p, 20.0, 0, TAU, 24, color.darkened(0.35), 2.6, true)
+		draw_line(p + Vector2(-20, 0), p + Vector2(20, 0), color.darkened(0.4), 1.8, true)
+		draw_arc(p + Vector2(-26, 0), 20.0, -0.9, 0.9, 10, color.darkened(0.4), 1.8, true)
+		draw_arc(p + Vector2(26, 0), 20.0, PI - 0.9, PI + 0.9, 10, color.darkened(0.4), 1.8, true)
+		draw_circle(p + Vector2(-7, -8), 4.5, Color(1, 1, 1, 0.35))
