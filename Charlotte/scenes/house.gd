@@ -1153,34 +1153,39 @@ func _letter_to_mom() -> void:
 		Notebook.announce("step", "Fais des biscuits avec Maman, au comptoir de la cuisine !", Christmas.HEADING))
 
 
-# One step of the cookies at the counter, Maman beside her; the last one puts the plate and the milk in her arms.
+# The cookies at the counter: the whole cookie studio (mix, roll, cut, bake, decorate, plate); when it is done the plate and the
+# glass are in her arms.
 func _bake() -> void:
 	if Christmas.step() != 2 or _noel_busy or Carry.has("biscuits"):
 		return
-	var done := Christmas.baked()
-	if done >= Christmas.BAKE.size():
+	if Christmas.baked() >= Christmas.BAKE.size():
+		# Already made (an older save, or the plate was put down on the way): take them again.
 		if Carry.take(_charlotte, "biscuits"):
 			_say(_charlotte, "L'assiette et le verre de lait,\nsous le sapin !", 300.0)
 		else:
 			_say(_charlotte, Carry.FULL_HANDS, 300.0)
 		return
+	if Carry.busy():
+		_say(_charlotte, Carry.FULL_HANDS, 300.0)
+		return
 	_noel_busy = true
+	_control.enabled = false
 	_mom_routine.pause(6.0, _charlotte.position.x)
 	_charlotte.facing = 1
-	_charlotte.pet(1.2, 0.0)
-	Sfx.play("swoosh" if done < 2 else "pop", Vector2(KITCHEN_START + 215.0, 450.0))
-	var line: Array = Christmas.BAKE[done]
-	_say(_charlotte, line[0], 300.0)
-	GameState.flags[Christmas.BAKED] = done + 1
-	var more := create_tween()
-	more.tween_interval(2.0)
-	more.tween_callback(func() -> void:
-		_say(_mom, line[1], 380.0)
+	var studio := CookieStudio.new()
+	studio.closed.connect(func(result: Dictionary) -> void:
+		_control.enabled = true
 		_noel_busy = false
-		if Christmas.baked() >= Christmas.BAKE.size():
-			Sfx.play("chime")
-			_treat(Christmas.cookies(), "Des biscuits pour le père Noël !", 0.4)
-			Carry.take(_charlotte, "biscuits"))
+		if result.is_empty():
+			_say(_charlotte, "On les fera tantôt, Maman !", 300.0)
+			return
+		_mom_routine.pause(4.0, _charlotte.position.x)
+		Sfx.play("chime")
+		_charlotte.express("happy", 2.4)
+		_say(_mom, "Ils sont magnifiques ! Le père Noël\nva se régaler.", 380.0, 3.4)
+		_treat(Christmas.cookies(), "Des biscuits pour le père Noël !", 0.4)
+		Carry.take(_charlotte, "biscuits"))
+	add_child(studio)
 
 
 func _cookies_under_tree() -> void:

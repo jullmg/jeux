@@ -856,8 +856,17 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     (`XmasTree.in_salon`).
   - noel, Christmas (after "sapin", winter; `world/christmas.gd`, `Christmas`, step in `flags.noel_step`), the winter's long
     quest, all at home: 1. Maman asks for the letter to Santa: her desk opens the drawing pad on it ("Pour le père Noël !"), the
-    envelope in her arms (`Carry` "lettre") to Maman, who posts it to H0H 0H0; 2. cookies with Maman at the kitchen counter
-    (`Christmas.BAKE`, three clicks, `flags.noel_baked`), the plate and the glass of milk (`Carry` "biscuits") under the tree;
+    envelope in her arms (`Carry` "lettre") to Maman, who posts it to H0H 0H0; 2. the cookies with Maman at the kitchen counter,
+    a whole studio of seven steps (`ui/cookie_studio.gd` `CookieStudio`, art in `world/cookie_art.gd` `CookieArt`; Julien: "extraordinary,
+    many steps"): the seven ingredients go into the bowl, she stirs by turning the mouse, rolls the dough with the pin, cuts it with eight
+    cutters (`CookieArt.SHAPES`, wheel to turn, 3 to 10 cookies), bakes it (the oven's gauge: pale / golden / dark / burnt, a burnt tray can
+    be redone), decorates each cookie big on a board (icing pen in eight colours and three widths, pouring icing, eleven candies
+    `CookieArt.CANDIES`, seven sprinkles `CookieArt.SPRINKLES`, Oups / Refaire, Au hasard) and chooses the plate and what Santa drinks. The
+    plate drawn with HER cookies is baked to two PNGs in the slot (`Christmas.save_plate`: `biscuits_pere_noel.png`, `biscuits_manges.png`,
+    flag `noel_plate`), which `Christmas.cookies(eaten)` returns (the old SVG plate is the fallback); then the plate and the glass (`Carry`
+    "biscuits") go under the tree. **A new cutter = its id in `SHAPES` + `RADIUS` + a case in `_make_shape`; a new candy = `CANDIES` + a
+    case in `candy`.** Test with a temporary scene calling the studio's `stage_input` / `_click_ingredient` / `_next` (`speed` runs the
+    oven faster), `--no-save`, and `Christmas.clear()` after (it deletes the PNGs);
     3. the réveillon at the dining table (`NOEL_TABLE`): the salon under a night-blue veil slipped just under the tree's glows
     (`_xmas_glow_from`), candles, the tourtière, the family round the table, `Christmas.REVEILLON`, a slice of bûche;
     4. bed: "Bonne nuit… le père Noël s'en vient !", sleigh bells and Santa's golden sleigh crossing the night (`_Sleigh`);

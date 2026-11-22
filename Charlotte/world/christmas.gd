@@ -17,6 +17,7 @@ const STEP := "noel_step"
 const BAKED := "noel_baked"
 const OPENED := "noel_opened"
 const PLUSH := "noel_capybara"
+const PLATE := "noel_plate"
 const HEADING := "🎅  Noël"
 ## Baking with Maman, one click each: what Charlotte says, what Maman says.
 const BAKE := [
@@ -51,6 +52,29 @@ static func can_start() -> bool:
 	return Season.is_winter() and Quests.available(QUEST)
 
 
+## Her plate for Santa, drawn by `CookieStudio` with her own cookies: where the two pictures (the full plate and, for the morning,
+## the crumbs) are kept in her game's folder.
+static var _plate_cache := {}
+
+
+static func plate_path(eaten: bool) -> String:
+	return GameState.slot_dir() + ("/biscuits_manges.png" if eaten else "/biscuits_pere_noel.png")
+
+
+static func save_plate(full: Image, eaten: Image, plate: String, drink: String) -> void:
+	DirAccess.make_dir_recursive_absolute(GameState.slot_dir())
+	full.save_png(plate_path(false))
+	eaten.save_png(plate_path(true))
+	GameState.flags[BAKED] = BAKE.size()
+	GameState.flags[PLATE] = {"plate": plate, "drink": drink}
+	_plate_cache.clear()
+
+
+## What she chose to drink with them ("lait", "chocolat", "chaud"), "" before the cookies are made.
+static func drink() -> String:
+	return str(GameState.flags.get(PLATE, {}).get("drink", ""))
+
+
 static func baked() -> int:
 	return int(GameState.flags.get(BAKED, 0))
 
@@ -71,8 +95,12 @@ static func has_plush() -> bool:
 
 
 static func clear() -> void:
-	for key in [STEP, BAKED, OPENED, PLUSH]:
+	for key in [STEP, BAKED, OPENED, PLUSH, PLATE]:
 		GameState.flags.erase(key)
+	for eaten in [false, true]:
+		if FileAccess.file_exists(plate_path(eaten)):
+			DirAccess.remove_absolute(plate_path(eaten))
+	_plate_cache.clear()
 
 
 static func hint() -> String:
@@ -84,7 +112,7 @@ static func hint() -> String:
 		2:
 			if Carry.has("biscuits"):
 				return "Mets l'assiette de biscuits pis le verre de lait sous le sapin, dans le salon."
-			return "Fais des biscuits pour le père Noël avec Maman, au comptoir de la cuisine (%d étapes sur %d)." % [baked(), BAKE.size()]
+			return "Fais des biscuits pour le père Noël avec Maman, au comptoir de la cuisine : mélange, étends, découpe, cuis et décore !"
 		3:
 			return "C'est le réveillon ! Va à la table de la salle à manger, dans le salon."
 		4:
@@ -110,6 +138,14 @@ static func letter() -> ImageTexture:
 ## Canvas 110 × 80: a plate of iced cookies (gingerbread men, stars) and a glass of milk; `eaten`: only crumbs and an empty
 ## glass are left, and Santa's folded note.
 static func cookies(eaten := false) -> ImageTexture:
+	if GameState.flags.has(PLATE) and FileAccess.file_exists(plate_path(eaten)):
+		if not _plate_cache.has(eaten):
+			var img := Image.load_from_file(plate_path(eaten))
+			img.convert(Image.FORMAT_RGBA8)
+			img.resize(110, 80, Image.INTERPOLATE_LANCZOS)
+			img.generate_mipmaps()
+			_plate_cache[eaten] = ImageTexture.create_from_image(img)
+		return _plate_cache[eaten]
 	var s := '<ellipse cx="46" cy="64" rx="42" ry="11" fill="#FFFFFF" stroke="#B8C4D0" stroke-width="2"/>'
 	s += '<ellipse cx="46" cy="62" rx="32" ry="7" fill="#EEF3F8"/>'
 	if eaten:
