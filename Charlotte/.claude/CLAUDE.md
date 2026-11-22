@@ -495,6 +495,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   box stacks, pallet of cases, hand truck, mop and bucket, broom, step ladder, A-frame sign, open sign, bin, newspapers, vending
   machine, egg tray, water cooler, toy rack, salt bag, tin pyramid, CCTV monitor, `floor_junk`): pick from these
   when a new shop or street scene needs props.
+- Papa wears a sporty ski jacket in winter, no logo (`CharacterLook.winter_coat` "parka", `CharacterArt._parka`; `Season.dress_for_weather` puts on `look.winter_coat`). The mug the parents drink from is smaller (`HELD_SCALE` × 0.78) and the drink cycle is two sips (`Character` "drink"). A "yum" mouth keeps the tongue inside. **Leaving a building must put her at its own door**: an outing that sets `Transition.street_x` but never reads it (the party's Jean Coutu leg) must clear it, as `house.gd`'s front door and `fete_alyzee.gd`'s end do.
 - The parents go about chores and their own passions (Julien: Papa cycles, plays the piano and jogs; Maman throws pots, cooks and
   drinks coffee): `world/family_routine.gd` (`FamilyRoutine`) walks one character between tasks
   (`MOM_TASKS` / `DAD_TASKS` in house.gd: dicts {x, facing, task, prop, secs, say} plus `work` ([front hand, back hand] points,
@@ -711,7 +712,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   may go farther in the neighbourhood and gets more advanced quests. A year is slow: all four seasons must pass and dozens
   of quests be done (the ageing rule isn't implemented yet). Gate new quests and places by age.
 - `world/quests.gd` (`Quests`): the catalogue (`ORDER`, `ALL`: `title`, `hint` = where to go, `find` = clue shown before it
-  starts, `age`, optional `after` = quest it waits for, `reward` in $). Several quests can be on at once. State in
+  starts, `age`, optional `after` = quest it waits for, `reward` in $). Several quests can be on at once, except the **heavy** ones (`"exclusive": true` in `Quests.ALL`: ecole, fete, sapin, luge, cinema, noel, jourdelan), which wait until no other heavy quest is active (`Quests.available`, `Quests.heavy_active`); the small ones stay free. State in
   `GameState.quests` (absent / "active" / "done"); `available`, `start`, `complete` (adds the reward), `stars`, `money_text`.
 - `ui/notebook.gd` is the `Notebook` autoload (CanvasLayer 75): button left of the mute button (N key), "Mon carnet" with
   three pages behind coloured tabs on its edge (`Notebook.TABS`, click or ←/→): Missions (En cours + hint, Réussies with yellow stars, À découvrir with clues), Mes devoirs (the week's homework, part by part) and Mes amis (`Notebook.FRIENDS`: name, note, story flag; **a new friend = one line there, and a call to `Notebook.new_friend(flag)` at the moment she meets them**: a pink note "Nouvel ami !" / "Nouveaux amis !" slides down, the notebook button and the tab wear a pink heart and the name is tagged "♥ Nouveau !" until she has opened the page; `flags.friends_new`); age and pocket money; crayon doodles, ribbon bookmark, elastic,
