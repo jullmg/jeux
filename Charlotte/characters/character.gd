@@ -806,8 +806,12 @@ func _task_pose() -> void:
 		"drink":
 			# The mug comes up to the lips, not in front of the eyes: the hand goes where the mouth is (just under the head,
 			# a little in front), the head tips back a touch, and `_sip` lets the mug tip with it.
-			var cycle := fmod(t, 5.0)
-			_sip = smoothstep(0.0, 0.55, cycle) * (1.0 - smoothstep(1.7, 2.3, cycle))
+			# One long cycle: the mug rises slowly, two small sips (the cup tips a little more each time), a pause with
+			# the mug held up under the nose, then it comes back down.
+			var cycle := fmod(t, 6.5)
+			var lift := smoothstep(0.0, 1.0, cycle) * (1.0 - smoothstep(3.4, 4.3, cycle))
+			var sips := smoothstep(1.2, 1.5, cycle) * (1.0 - smoothstep(1.7, 2.0, cycle)) + smoothstep(2.4, 2.7, cycle) * (1.0 - smoothstep(3.0, 3.3, cycle))
+			_sip = clampf(lift * (0.72 + 0.28 * sips), 0.0, 1.0)
 			var rest := _arms[1].position + Vector2(-9.0, (_rig.arm_len as float) * 0.66)
 			var lips := _head.position + Vector2(-25.0, 38.0)
 			var reach := _ik(_arms[1], rest.lerp(lips, _sip))
@@ -816,7 +820,8 @@ func _task_pose() -> void:
 			_snap[1] = true
 			_aim(0, -14.0, 0.97)
 			_hand_goal = ["relaxed", "grip"]
-			_head.rotation += 0.07 * f * _sip
+			_head.rotation += (0.05 + 0.04 * sips) * f * _sip
+			_body.rotation -= 0.015 * f * _sip
 		"fridge":
 			_aim(1, -76.0, 0.9, Vector2(0, sin(t * 1.5) * 2.0))
 			_aim(0, -24.0, 0.96)
