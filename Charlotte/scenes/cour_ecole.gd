@@ -506,7 +506,7 @@ func _ring_the_bell() -> void:
 	if first:
 		steps.tween_callback(func() -> void:
 			_charlotte.facing = 1 if _alyzee.position.x > _charlotte.position.x else -1
-			_charlotte_says("Oui ! T'es mon amie, astheure !"))
+			_charlotte_says("Oui ! T'es mon amie, maintenant !"))
 		steps.tween_interval(2.6)
 	steps.tween_callback(func() -> void:
 		_control.hands_off = false

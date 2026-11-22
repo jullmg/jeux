@@ -1023,7 +1023,7 @@ func _new_years_eve() -> void:
 	steps.tween_property(black, "color:a", 0.0, 0.6)
 	steps.tween_callback(func() -> void:
 		_charlotte.express("wonder", 4.0)
-		_say(_charlotte, "Ooooh ! Des rouges pis des bleues !", 300.0, 3.0))
+		_say(_charlotte, "Ooooh ! Des rouges et des bleues !", 300.0, 3.0))
 	steps.tween_interval(3.4)
 	steps.tween_callback(_new_year_says.bind(0, "Wow ! Une belle année qui commence."))
 	steps.tween_interval(3.4)
@@ -1157,7 +1157,7 @@ func _bake() -> void:
 	var done := Christmas.baked()
 	if done >= Christmas.BAKE.size():
 		if Carry.take(_charlotte, "biscuits"):
-			_say(_charlotte, "L'assiette pis le verre de lait,\nsous le sapin !", 300.0)
+			_say(_charlotte, "L'assiette et le verre de lait,\nsous le sapin !", 300.0)
 		else:
 			_say(_charlotte, Carry.FULL_HANDS, 300.0)
 		return
@@ -1381,7 +1381,7 @@ const MOVIE_LINES := {
 		[1.0, 1, "J'adore ce film-là !"],
 		[5.5, 0, "Y sont partis sans lui !"],
 		[10.5, -1, "Ha ha ! Le pot de peinture !"],
-		[15.0, 1, "Les voleurs sont ben poches !"],
+		[15.0, 1, "Les voleurs sont nuls !"],
 		[19.0, -1, "Miam, des bonbons !"],
 	],
 	"ratatouille": [
@@ -1491,7 +1491,7 @@ func _build_movie_night() -> void:
 	if _charlotte.position.x < BEDROOM.x:
 		var hello := create_tween()
 		hello.tween_interval(1.0)
-		hello.tween_callback(func() -> void: _say(_charlotte, "Alphée pis Constance m'attendent\ndevant la télé !", 300.0, 3.0))
+		hello.tween_callback(func() -> void: _say(_charlotte, "Alphée et Constance m'attendent\ndevant la télé !", 300.0, 3.0))
 
 
 func _start_movie() -> void:
@@ -1519,7 +1519,7 @@ func _roll_film(id: String) -> void:
 	_film = id
 	for routine in [_mom_routine, _dad_routine]:
 		routine.pause(TvShows.FILM_LENGTH + 14.0, 2650.0)
-	_say(_charlotte, "J'ai tout ! Des chips pis des bonbons !", 300.0)
+	_say(_charlotte, "J'ai tout ! Des chips et des bonbons !", 300.0)
 	var go := create_tween()
 	go.tween_interval(2.3)
 	go.tween_callback(func() -> void:
@@ -2261,7 +2261,7 @@ func _count_the_candy() -> void:
 			_charlotte.hand_mode = ""
 			# The whole haul goes into the shoebox under her bed, where everything sweet ends up.
 			Stash.from_halloween()
-			_say(_charlotte, "Je cache tout ça sous mon lit,\npis je vais me coucher !", 300.0, 3.6)
+			_say(_charlotte, "Je cache tout ça sous mon lit,\net je vais me coucher !", 300.0, 3.6)
 			GameState.flags["halloween_counted"] = true)
 		add_child(sheet))
 
@@ -2269,9 +2269,9 @@ func _count_the_candy() -> void:
 ## What she whispers as she helps herself from the box: never out loud, it is a secret.
 const STASH_MIAM := {
 	"wrapped": "Miam ! Un bon p'tit bonbon…",
-	"lollipop": "Un suçon ! C'est ben bon, ça.",
+	"lollipop": "Un suçon ! C'est très bon, ça.",
 	"chocolate": "Du chocolat ! Chut, chut, chut…",
-	"gum": "Une gomme, pis personne le sait !",
+	"gum": "Une gomme, et personne ne le sait !",
 	"chips": "Des chips ! Faut pas que j'fasse de bruit…",
 }
 

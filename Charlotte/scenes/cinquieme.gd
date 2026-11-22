@@ -128,7 +128,7 @@ func _build_school_door() -> void:
 	add_child(edge)
 	_label("SERVICE\nDE GARDE", plate.position + plate.size / 2.0, plate.size, 8, Color("#1D4F91"), Color(1, 1, 1, 0))
 	add_child(DoorSpot.make(Rect2(dx - 30.0, HOUSE_BASE_Y - 190.0, 60.0, 180.0), func() -> void:
-		_say_at_door("C'est la porte du service de garde !\nJ'y vais avant pis après l'école."), dx))
+		_say_at_door("C'est la porte du service de garde !\nJ'y vais avant et après l'école."), dx))
 
 
 func _say_at_door(text: String) -> void:

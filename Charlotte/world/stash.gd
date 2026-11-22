@@ -7,7 +7,7 @@ extends RefCounted
 
 const FLAG := "stash"
 ## What she says when she pulls the box out and there is nothing left in it.
-const EMPTY := "Ma cachette est vide !\nFaudrait ben que je passe au dépanneur."
+const EMPTY := "Ma cachette est vide !\nIl faudrait que je passe au dépanneur."
 
 
 ## Everything hidden in the box: {kind: how many}. Kinds with none left are not in it.

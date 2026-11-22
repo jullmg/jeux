@@ -508,7 +508,7 @@ func _go_home_with_papa() -> void:
 	_papa.facing = 1 if _charlotte.position.x > _papa.position.x else -1
 	var lines: Array = []
 	if Carry.has("drawing"):
-		lines = [[_charlotte, "Regarde, Papa ! J'ai fait un dessin\npour toi pis Maman !"],
+		lines = [[_charlotte, "Regarde, Papa ! J'ai fait un dessin\npour toi et Maman !"],
 			[_papa, "Il est magnifique ! On va le mettre\nsur le frigo en arrivant."]]
 	if CraftStudio.has_pending():
 		var name := "Maman" if CraftStudio.pending_for() == "maman" else "Papa"
@@ -524,7 +524,7 @@ func _go_home_with_papa() -> void:
 			[_papa, "Une concha ? Ça a l'air délicieux !\nBravo, ma grande !"]]
 	else:
 		var stickers := int(GameState.flags.get(School.STICKERS, 0))
-		lines += [[_charlotte, "Madame Nadia m'a donné un autocollant !\nJ'en ai %d, astheure !" % stickers],
+		lines += [[_charlotte, "Madame Nadia m'a donné un autocollant !\nJ'en ai %d, maintenant !" % stickers],
 			[_papa, "T'es ben bonne, ma Chachoue !"]]
 	var talk := create_tween()
 	for line: Array in lines:

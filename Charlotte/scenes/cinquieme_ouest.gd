@@ -108,7 +108,7 @@ func _build_doors() -> void:
 
 
 ## What she says at a lane on this side of 5e Avenue: it isn't hers.
-const NOT_OUR_LANE := ["C'est pas ma ruelle, ça.\nJe la connais pas pantoute !",
+const NOT_OUR_LANE := ["C'est pas ma ruelle, ça.\nJe ne la connais pas du tout !",
 	"Maman veut pas que j'aille\ndans les ruelles que je connais pas.",
 	"Ma ruelle à moi, c'est de l'autre côté\nde la rue !"]
 

@@ -36,8 +36,8 @@ const HILL_W := 1100.0
 ## The activities (playground, pools, sliding) hook onto these ids.
 const SPOTS := [
 	["pataugeoire", WADING_X, 190.0, WADING_X, ["La pataugeoire, c'est pour les moins de 10 ans !\nChu assez petite, moi !", "La pataugeoire est couverte de neige.\nElle ouvre en été !"]],
-	["chiens", DOG_X + DOG_W * 0.5, 230.0, DOG_X + DOG_W * 0.5, ["Les chiens courent en liberté, là-dedans !\nIls ont ben du fun.", "Les chiens jouent dans la neige !"]],
-	["chalet", CHALET_X + CHALET_W * 0.5, 280.0, CHALET_X + CHALET_W * 0.5, ["Le chalet : les toilettes, pis un coin pour se reposer.", "Le chalet est chaud : on peut se réchauffer !"]],
+	["chiens", DOG_X + DOG_W * 0.5, 230.0, DOG_X + DOG_W * 0.5, ["Les chiens courent en liberté, là-dedans !\nIls s'amusent beaucoup.", "Les chiens jouent dans la neige !"]],
+	["chalet", CHALET_X + CHALET_W * 0.5, 280.0, CHALET_X + CHALET_W * 0.5, ["Le chalet : les toilettes et un coin pour se reposer.", "Le chalet est chaud : on peut se réchauffer !"]],
 	["piscine", POOL_X + POOL_W * 0.5, 480.0, POOL_X + POOL_W * 0.5, ["La grande piscine ! On va nager quand il fait chaud.", "C'est la patinoire, astheure ! Faut des patins."]],
 	["jeux", PLAY_X + 330.0, 480.0, PLAY_X + 330.0, ["Les modules de jeux ! Ma glissoire préférée !", "Les balançoires sont gelées, mais les modules sont beaux."]],
 	["court", COURT_X + COURT_W * 0.5, 330.0, COURT_X + COURT_W * 0.5, ["Le terrain de basketball.\nOn peut aussi jouer au ping-pong !", "La patinoire avec bandes : on joue au hockey !"]],
@@ -719,7 +719,7 @@ func _luge_run() -> void:
 		Luge.add_run()
 		c.express("laugh", 2.0))
 	tw.tween_interval(0.6)
-	var afters := ["Wouhou ! C'est le fun ! Encore !", "Haha ! Ça va vite à deux !", "Ah ben ! Tu m'as battu, Chachoue ! T'es ben vite !"]
+	var afters := ["Wouhou ! C'est amusant ! Encore !", "Haha ! Ça va vite à deux !", "Ah ben ! Tu m'as battu, Chachoue ! Tu es très vite !"]
 	tw.tween_callback(func() -> void:
 		if n == 2:
 			_papa.say("Tu m'as battu ! T'es ben plus vite que ton père !", 3.0)

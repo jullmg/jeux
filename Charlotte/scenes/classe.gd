@@ -282,7 +282,7 @@ func _build_spots() -> void:
 		_teacher_says(TEACHER_LINES[_teacher_line % TEACHER_LINES.size()])
 		_teacher_line += 1, TEACHER_X - 120.0))
 	add_child(DoorSpot.make(Rect2(2440.0, 380.0, 180.0, 230.0), func() -> void:
-		_say(_charlotte, "Coucou, les poissons !\nVous êtes ben beaux !", 200.0), 2420.0))
+		_say(_charlotte, "Coucou, les poissons !\nVous êtes très beaux !", 200.0), 2420.0))
 	add_child(DoorSpot.make(Rect2(SEATS[HERS] - 50.0, FEET_Y - 150.0, 100.0, 150.0), func() -> void:
 		if not _started:
 			_alyzee_says("Viens t'asseoir à côté de moi, Chachoue !"), SEATS[HERS] - 110.0))

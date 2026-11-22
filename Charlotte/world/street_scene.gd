@@ -1088,14 +1088,14 @@ func _winter_hello() -> void:
 # ── Halloween night ─────────────────────────────────────────────
 
 ## What she says when she thinks of going down a lane on Halloween night: far too dark for her.
-const DARK_LANE := ["Ayoye, c'est ben trop noir là-dedans !\nJe reste sur la rue.",
+const DARK_LANE := ["Ayoye, c'est beaucoup trop noir là-dedans !\nJe reste sur la rue.",
 	"Pas de ruelle à soir…\nJ'vois même pas le bout !",
-	"Chu pas game d'aller dans la ruelle\nquand il fait noir de même !",
+	"Je n'ose pas aller dans la ruelle\nquand il fait noir de même !",
 	"Non non non, la ruelle le soir,\nc'est pas une bonne idée !"]
 
 ## What she says at a dépanneur's door on Halloween night: they shut early that evening (Julien).
 const SHOP_SHUT := ["C'est fermé ! Le dépanneur ferme de bonne heure\nle soir de l'Halloween.",
-	"Y'a personne pantoute, pis les lumières sont éteintes.\nC'est fermé à soir !",
+	"Il n'y a personne et les lumières sont éteintes.\nC'est fermé à soir !",
 	"Fermé ! Ben tant pis,\nj'ai déjà plein de bonbons."]
 
 
