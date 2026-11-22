@@ -21,3 +21,12 @@
 10. ~~FAIT~~ **Genoux** aux jambes des personnages (articulation), puis **réviser tout** (cyclistes, objets portés, laisse, etc.) pour ne rien briser.
 11. ~~FAIT~~ **Améliorer l'apparence des vêtements** des personnages (`CharacterArt`).
 12. ~~FAIT~~ **Expressions faciales** des personnages selon leurs actions (yeux, bouche, sourcils : content, concentré, surpris, goûte, dort…).
+
+## À réviser par Julien (en jouant)
+
+- **Ruelles, 2026-11-22** (deux passes de bugs visuels, commit 8cb1e51) : regarder les trois ruelles dans les quatre saisons.
+  Corrigés : cordes à linge qui montaient dans le ciel, lierre en rectangle sur les murs de côté, plaques rectangulaires sur ces murs,
+  lianes nues d'hiver trop serpentines. **Pas touchés, à juger** : un arbre de cour qui semble pousser sur le toit du garage
+  (ruelle de Holt, x≈2400), une traînée brune sur le hangar de tôle (ruelle du milieu, x≈2400), les clôtures floues du bas de l'écran
+  qui s'arrêtent net là où une ruelle s'ouvre (voulu). Seules la ruelle du milieu (hiver), celle de Holt (été) et celle de Dandurand
+  (automne) ont été revues après les derniers réglages.
