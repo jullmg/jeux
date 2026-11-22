@@ -84,6 +84,8 @@ const NOEL_TABLE := Rect2(1780.0, 440.0, 290.0, 170.0)
 var _noel_plate: Sprite2D
 var _noel_presents: Array[Sprite2D] = []
 var _xmas_glow_from := -1
+# The glows of the tree's bulbs [sprite, their own alpha]: they fade where someone stands in front of them.
+var _xmas_bulb_glows: Array = []
 var _noel_busy := false
 # Her birthday (quest "anniversaire"): the decorations up, the guests, the cake.
 const PARTY_TABLE_X := 1760.0
@@ -645,9 +647,10 @@ func _xmas_lights() -> void:
 	var colours := [Color(1.0, 0.35, 0.3), Color(1.0, 0.85, 0.3), Color(0.35, 0.65, 1.0), Color(0.4, 0.9, 0.5), Color(1.0, 0.55, 0.9)]
 	var i := 0
 	for p: Vector2 in XmasTree.bulbs(XmasTree.choice()):
-		_glow(origin + p * XMAS_SCALE, 16.0, Color(colours[i % colours.size()], 0.6))
+		var bulb := _glow(origin + p * XMAS_SCALE, 16.0, Color(colours[i % colours.size()], 0.6))
+		_xmas_bulb_glows.append(bulb)
 		i += 1
-	_glow(origin + XmasTree.top_of(XmasTree.choice()) * XMAS_SCALE, 46.0, Color(1.0, 0.9, 0.5, 0.55))
+	_xmas_bulb_glows.append(_glow(origin + XmasTree.top_of(XmasTree.choice()) * XMAS_SCALE, 46.0, Color(1.0, 0.9, 0.5, 0.55)))
 	_glow(origin + Vector2(XmasTree.W / 2.0, XmasTree.H * 0.55) * XMAS_SCALE, 190.0, Color(1.0, 0.8, 0.5, 0.18))
 
 
@@ -2402,12 +2405,35 @@ func _build_vestibule() -> void:
 
 func _process(delta: float) -> void:
 	super(delta)
+	_hide_glows_behind_people(delta)
 	if _sofa_front:
 		var taken := false
 		for who: Character in [_charlotte, _mom, _dad]:
 			if who and who.seated_amount() > 0.985 and who.sitting and who.seat_floor == _sofa_seat.floor_y and who.position.x >= _sofa_seat.span.x - 60.0 and who.position.x <= _sofa_seat.span.y + 60.0:
 				taken = true
 		_sofa_front.visible = taken
+
+
+# The tree's bulb glows are drawn over the room, so they used to shine through Papa and Charlotte standing in front of
+# the tree. A glow fades out while someone's body covers it, and comes back when they step away.
+func _hide_glows_behind_people(delta: float) -> void:
+	if _xmas_bulb_glows.is_empty():
+		return
+	var people: Array[Character] = []
+	for child in get_children():
+		if child is Character and child.visible:
+			people.append(child)
+	for glow: Sprite2D in _xmas_bulb_glows:
+		if not is_instance_valid(glow):
+			continue
+		var covered := false
+		for who in people:
+			var half := 46.0 * who.scale.x / 0.5
+			var height := 340.0 * who.scale.x / 0.5 * 0.5
+			if absf(glow.position.x - who.position.x) < half and glow.position.y < who.position.y + 10.0 and glow.position.y > who.position.y - height:
+				covered = true
+				break
+		glow.modulate.a = move_toward(glow.modulate.a, 0.0 if covered else 1.0, delta * 8.0)
 
 
 func _build_salon() -> void:
