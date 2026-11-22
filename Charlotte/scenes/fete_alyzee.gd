@@ -804,4 +804,8 @@ func _goodbye() -> void:
 	bye.tween_interval(2.0)
 	bye.tween_callback(func() -> void:
 		Transition.inside_x = School.HOME_X
+		# The way in left the Jean Coutu's door on Masson in street_x and nobody read it: left there, the front door
+		# would put her on the Masson end of 6e.
+		Transition.street_x = NAN
+		Transition.arrive = ""
 		Transition.change_scene_saying(self, Party.HOME, "Maman te ramène à la maison…", 1.6))

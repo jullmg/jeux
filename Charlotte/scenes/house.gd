@@ -1936,6 +1936,8 @@ func _build_doors() -> void:
 		# An outing with Maman or Papa is waiting at this door, but her arms are full of another errand (the snowman's
 		# buttons, a cat…): she doesn't go off with it. She goes out to finish her errand; the outing waits for her.
 		if Carry.busy() and (School.step() == 1 or XmasTree.step() == 1 or Luge.step() == 1 or Party.step() == 1):
+			Transition.street_x = NAN
+			Transition.arrive = ""
 			Transition.change_scene_saying(self, "res://scenes/main.tscn", "J'ai les mains pleines : je finis ça d'abord !")
 			return
 		if School.step() == 1:
@@ -1963,6 +1965,9 @@ func _build_doors() -> void:
 		if School.available_today():
 			_school_or_play()
 			return
+		# Out of her own front door she is at her own front door, whatever an outing left behind.
+		Transition.street_x = NAN
+		Transition.arrive = ""
 		Transition.change_scene(self, "res://scenes/main.tscn")))
 	add_child(QuestMark.make(Vector2(455.0, 180.0), func() -> bool:
 		return (School.step() == 1 or Party.step() == 1 or XmasTree.step() == 1 or Luge.step() == 1) and _control.enabled))
@@ -2014,6 +2019,8 @@ func _school_or_play() -> void:
 			School.set_step(1)
 			_off_to_school()
 		elif i == 1:
+			Transition.street_x = NAN
+			Transition.arrive = ""
 			Transition.change_scene(self, "res://scenes/main.tscn")
 		else:
 			_control.enabled = true)
