@@ -364,9 +364,24 @@ static func recycling_bin() -> ImageTexture:
 		var inset: float = 8.0 + (y - 44) * 0.1
 		s += '<path d="M%.1f %d H%.1f" stroke="#1C3C78" stroke-width="2" opacity="0.5"/><path d="M%.1f %d H%.1f" stroke="#7FB0F2" stroke-width="1.4" opacity="0.4"/>' % [inset, y, 90 - inset, inset, y + 2, 90 - inset]
 	s += '<path d="M11 52 L17 108" stroke="#FFFFFF" stroke-width="3" opacity="0.2" stroke-linecap="round"/>'
-	# The chasing arrows.
-	s += '<path d="M45 58 L56 78 M60 84 H36 M34 78 L42 64" stroke="#FFFFFF" stroke-width="3.4" fill="none" stroke-linecap="round"/>'
-	s += '<path d="M56 78 l-1 -7 l-5 5 z M36 84 l7 2 l-3 -7 z M42 64 l-6 3 l7 3 z" fill="#FFFFFF"/>'
+	# The recycling mark: three arrows chasing each other round a triangle, as stamped on the real bins (a shade under them
+	# so they look moulded in).
+	var mark := Vector2(45.0, 82.0)
+	for layer in 2:
+		var off := Vector2(0.0, 1.2) if layer == 0 else Vector2.ZERO
+		var ink := "#1C3C78" if layer == 0 else "#FFFFFF"
+		for k in 3:
+			var a0 := deg_to_rad(-90.0 + 120.0 * k + 14.0)
+			var a1 := deg_to_rad(-90.0 + 120.0 * k + 96.0)
+			var r := 14.0
+			var p0 := mark + off + Vector2(cos(a0), sin(a0)) * r
+			var p1 := mark + off + Vector2(cos(a1), sin(a1)) * r
+			var tangent := Vector2(-sin(a1), cos(a1))
+			var normal := Vector2(cos(a1), sin(a1))
+			var head := p1 + tangent * 7.0
+			s += '<path d="M%.1f %.1f A%.1f %.1f 0 0 1 %.1f %.1f" stroke="%s" stroke-width="4.2" fill="none" stroke-linecap="round"%s/>' % [p0.x, p0.y, r, r, p1.x, p1.y, ink, ' opacity="0.5"' if layer == 0 else ""]
+			s += '<path d="M%.1f %.1f L%.1f %.1f L%.1f %.1f Z" fill="%s" stroke="%s" stroke-width="1" stroke-linejoin="round"%s/>' % [
+				head.x, head.y, (p1 + normal * 5.6).x, (p1 + normal * 5.6).y, (p1 - normal * 5.6).x, (p1 - normal * 5.6).y, ink, ink, ' opacity="0.5"' if layer == 0 else ""]
 	# A handle at the back, a wheel and its hub.
 	s += '<path d="M78 46 Q92 46 92 58 V70" stroke="#1C3C78" stroke-width="4" fill="none" stroke-linecap="round"/>'
 	s += '<circle cx="70" cy="114" r="6.5" fill="#23262B"/><circle cx="70" cy="114" r="2.6" fill="#8E949B"/>'
