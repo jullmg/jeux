@@ -807,23 +807,33 @@ static func _distant_tree(rng: RandomNumberGenerator, foot: Vector2, crown: Vect
 	return s
 
 
-## Bare branches rising from `foot`: stems forking twice, a few red berries (from their own random numbers).
+## Bare branches rising from `foot`: curved stems that lean a little and keep growing upward, each with small twigs leaving
+## it at a slant (never straight sticks fanned out), a few red berries (from their own random numbers).
 static func _twigs(seed_value: int, foot: Vector2, r: Vector2) -> String:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
-	var d := ""
+	var main := ""
+	var fine := ""
 	var berries := ""
 	for i in rng.randi_range(5, 8):
-		var a := foot + Vector2(rng.randf_range(-0.3, 0.3) * r.x, 0)
-		var b := a + Vector2(rng.randf_range(-0.7, 0.7) * r.x, -rng.randf_range(0.8, 1.5) * r.y)
-		d += "M%.1f %.1f L%.1f %.1f " % [a.x, a.y, b.x, b.y]
-		for k in 3:
-			var from := a.lerp(b, rng.randf_range(0.4, 0.9))
-			var to := from + Vector2(rng.randf_range(-0.5, 0.5) * r.x, -rng.randf_range(0.2, 0.6) * r.y)
-			d += "M%.1f %.1f L%.1f %.1f " % [from.x, from.y, to.x, to.y]
-			if seed_value % 2 == 0:
-				berries += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#B5302A"/>' % [to.x, to.y, maxf(r.x * 0.03, 0.8)]
-	return '<path d="%s" stroke="#5E4A3C" stroke-width="%.1f" fill="none" stroke-linecap="round"/>%s' % [d, maxf(r.x * 0.03, 0.8), berries]
+		var a := foot + Vector2(rng.randf_range(-0.35, 0.35) * r.x, 0)
+		var lean := rng.randf_range(-0.45, 0.45) * r.x
+		var h := rng.randf_range(0.9, 1.5) * r.y
+		var tip := a + Vector2(lean, -h)
+		var mid := a + Vector2(lean * 0.15 + rng.randf_range(-0.12, 0.12) * r.x, -h * 0.55)
+		main += "M%.1f %.1f Q%.1f %.1f %.1f %.1f " % [a.x, a.y, mid.x, mid.y, tip.x, tip.y]
+		var dir := 1.0 if lean >= 0.0 else -1.0
+		for k in rng.randi_range(3, 5):
+			var u := rng.randf_range(0.3, 0.9)
+			var from := a.lerp(mid, u).lerp(tip, u * u)
+			var side := dir if k % 2 == 0 else -dir
+			var to := from + Vector2(side * rng.randf_range(0.12, 0.3) * r.x, -rng.randf_range(0.18, 0.4) * r.y)
+			var ctl := from + Vector2(side * 0.02 * r.x, -(to.y - from.y) * -0.6)
+			fine += "M%.1f %.1f Q%.1f %.1f %.1f %.1f " % [from.x, from.y, ctl.x, ctl.y, to.x, to.y]
+			if seed_value % 2 == 0 and k == 0:
+				berries += '<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#B5302A"/>' % [to.x, to.y, maxf(r.x * 0.025, 0.8)]
+	var w := maxf(r.x * 0.026, 0.9)
+	return '<path d="%s" stroke="#5E4A3C" stroke-width="%.1f" fill="none" stroke-linecap="round"/><path d="%s" stroke="#6A5444" stroke-width="%.1f" fill="none" stroke-linecap="round"/>%s' % [main, w, fine, maxf(w * 0.6, 0.7), berries]
 
 
 ## Virginia creeper over the top of a fence and down its face: a mass of leaves along the top, strands trailing from it with
@@ -866,6 +876,8 @@ static func _vine(rng: RandomNumberGenerator, x: float, w: float, top: float, co
 static func _climber(rng: RandomNumberGenerator, x: float, w: float, top: float, bottom: float, colors: Array) -> String:
 	var bare := colors.is_empty()
 	var h := bottom - top
+	var wr := RandomNumberGenerator.new()  # the winter stems' own numbers: the shared rng draws the same in every season
+	wr.seed = rng.randi()
 	var outline := []
 	# The shade behind the leaves stops well short of their edge, so only leaves show at the top and sides.
 	# A rounded dome narrowing toward the top (never a rectangle with straight sides and a flat top).
@@ -880,11 +892,27 @@ static func _climber(rng: RandomNumberGenerator, x: float, w: float, top: float,
 			lerpf(bottom, shade_top, pow(rise, 0.7)) + rng.randf_range(-3.0, 3.0)))
 	var s := ""
 	if bare:
+		# A few woody vines clinging to the wall: wavy main stems that fork, each with short side shoots.
 		var stems := ""
-		for k in 7:
-			var sx := x + w * k / 6.0
-			stems += "M%.1f %.1f Q%.1f %.1f %.1f %.1f " % [sx, bottom, sx + 14.0 * sin(k * 2.1), top + h * 0.5, sx + 18.0 * cos(k * 1.7), top + h * (0.05 + 0.08 * (k % 3))]
-		s += '<path d="%s" stroke="#6A5444" stroke-width="1.4" fill="none"/>' % stems
+		var shoots := ""
+		for k in 4:
+			var sx := x + w * (0.15 + 0.7 * k / 3.0) + wr.randf_range(-6.0, 6.0)
+			var y := bottom
+			var px := sx
+			var d := "M%.1f %.1f" % [px, y]
+			var reach := h * wr.randf_range(0.45, 0.9)
+			var drift := wr.randf_range(-0.25, 0.25)
+			while y > bottom - reach:
+				var step := wr.randf_range(12.0, 22.0)
+				y -= step
+				px += drift * step + wr.randf_range(-5.0, 5.0)
+				d += " L%.1f %.1f" % [px, y]
+				if wr.randf() < 0.45:
+					var sd := 1.0 if wr.randf() < 0.5 else -1.0
+					shoots += "M%.1f %.1f l%.1f %.1f l%.1f %.1f " % [px, y, sd * wr.randf_range(6.0, 12.0), -wr.randf_range(4.0, 9.0), sd * wr.randf_range(3.0, 8.0), -wr.randf_range(2.0, 6.0)]
+			stems += d + " "
+		s += '<path d="%s" stroke="#5A4638" stroke-width="1.6" fill="none" stroke-linejoin="round" opacity="0.75"/>' % stems
+		s += '<path d="%s" stroke="#5A4638" stroke-width="1.0" fill="none" stroke-linejoin="round" opacity="0.7"/>' % shoots
 	else:
 		s += _poly(outline, _dark(colors[0], 0.42))
 	for i in mini(int(w * h / 30.0), 560):
