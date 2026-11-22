@@ -1172,6 +1172,10 @@ static func tee(rng: RandomNumberGenerator, w: float, vx: float, s: float, half:
 	var tops: Array[float] = [268.0, 300.0, 250.0, 284.0, 262.0, 296.0]
 	var bricks: Array[String] = ["#8E3A2F", "#B4513F", "#9C6B4E", "#A8473A", "#7E4436", "#B5603F"]
 	for n in 6:
+		# Past the opening, on the long lane's side, a plex across the avenue would be painted over the back of this lane's
+		# own first lot (a small red building "inside" the beige one): the lot hides everything there, so none is drawn.
+		if n % 2 == 0 and n > 0:
+			continue
 		var u0: float = half + (n / 2) * 300.0 if n % 2 == 0 else -half - (n / 2 + 1) * 300.0
 		var u1 := u0 + 300.0
 		var top: float = tops[n % tops.size()]
