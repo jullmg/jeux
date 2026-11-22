@@ -243,6 +243,43 @@ func _switch_area(x: float, y: float) -> Rect2:
 ## A speech bubble over someone's head (`height` px above their feet) for a moment.
 func _say(who: Node2D, text: String, height := 280.0, seconds := 2.4) -> void:
 	Bubble.say(self, who.position + Vector2(0, -height), text, seconds)
+	_face_talk(who)
+
+
+## How far a conversation reaches: people this close to someone who speaks turn toward them.
+const TALK_RANGE := 520.0
+
+
+## People who talk face each other (Julien: "make sure characters always face each other when they interact"): whoever speaks
+## turns to Charlotte (or, if she speaks, to the nearest person), and everyone standing near turns to the speaker. Seated people
+## (the cushions in front of the TV, the school desks), cyclists and anyone walking keep their way.
+func _face_talk(who: Node2D) -> void:
+	if not (who is Character):
+		return
+	var speaker: Character = who
+	if speaker.sitting or speaker.riding or speaker.is_walking:
+		return
+	var near: Array[Character] = []
+	for node in get_children():
+		if node is Character and node != speaker:
+			var c: Character = node
+			if c.visible and not c.sitting and not c.riding and not c.is_walking \
+					and absf(c.position.x - speaker.position.x) < TALK_RANGE and absf(c.position.y - speaker.position.y) < 160.0:
+				near.append(c)
+	if near.is_empty():
+		return
+	var target: Character = near[0]
+	for c in near:
+		if c == _charlotte:
+			target = c
+			break
+		if absf(c.position.x - speaker.position.x) < absf(target.position.x - speaker.position.x):
+			target = c
+	if absf(target.position.x - speaker.position.x) > 4.0:
+		speaker.facing = 1 if target.position.x > speaker.position.x else -1
+	for c in near:
+		if absf(c.position.x - speaker.position.x) > 4.0:
+			c.facing = 1 if speaker.position.x > c.position.x else -1
 
 
 ## Something Charlotte gets (a snack, a treat): its picture floats up above her with `text`, and a happy sound.

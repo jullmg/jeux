@@ -980,7 +980,12 @@ func _new_years_eve() -> void:
 	steps.tween_property(black, "color:a", 0.0, 0.8)
 	for line: Array in NewYear.SHOW:
 		steps.tween_callback(_new_year_says.bind(line[0], line[1]))
-		steps.tween_interval(3.2)
+		steps.tween_interval(2.7)
+		# They turned to each other to talk (`_say`); now back to the show.
+		steps.tween_callback(func() -> void:
+			for who: Character in [_charlotte, _mom, _dad]:
+				who.facing = -1)
+		steps.tween_interval(0.5)
 	# The countdown.
 	steps.tween_property(big, "modulate:a", 1.0, 0.2)
 	for n in range(10, 0, -1):
@@ -1223,7 +1228,9 @@ func _reveillon() -> void:
 	steps.tween_property(black, "color:a", 1.0, 0.6)
 	steps.tween_callback(func() -> void:
 		# Evening: everything but the tree's lights and the candles under a night-blue veil.
-		veil.polygon = PackedVector2Array([Vector2(VESTIBULE_END, 0), Vector2(SALON_END, 0), Vector2(SALON_END, VIEW.y), Vector2(VESTIBULE_END, VIEW.y)])
+		# The whole flat, not just the salon: the view reaches past the salon's end and a veil that stopped there left a straight line
+		# down the room (Julien: dark, then a vertical line, then not dark).
+		veil.polygon = PackedVector2Array([Vector2(HALL.x - 400.0, -200.0), Vector2(HALL.y + 400.0, -200.0), Vector2(HALL.y + 400.0, VIEW.y + 200.0), Vector2(HALL.x - 400.0, VIEW.y + 200.0)])
 		veil.color = Color(0.04, 0.05, 0.16, 0.45)
 		add_child(veil)
 		if _xmas_glow_from >= 0:
@@ -1236,11 +1243,12 @@ func _reveillon() -> void:
 		for cx in [NOEL_TABLE.position.x + 70.0, NOEL_TABLE.end.x - 70.0]:
 			_candle(Vector2(cx, NOEL_TABLE.position.y + 14.0), 70.0)
 		# Round the table, clear of the tree.
-		_mom.position.x = NOEL_TABLE.position.x + 40.0
+		# Maman and Papa at the two ends, Charlotte between them, the pie in the middle: they face each other.
+		_mom.position.x = NOEL_TABLE.position.x - 30.0
 		_mom.facing = 1
-		_charlotte.position.x = NOEL_TABLE.position.x + 130.0
+		_charlotte.position.x = NOEL_TABLE.position.x + 85.0
 		_charlotte.facing = 1
-		_dad.position.x = NOEL_TABLE.end.x + 40.0
+		_dad.position.x = NOEL_TABLE.end.x + 30.0
 		_dad.facing = -1
 		for who: Character in [_mom, _charlotte, _dad]:
 			who.is_walking = false

@@ -33,6 +33,8 @@ var running := false
 var step_sound := ""
 var walk_phase := 0.0
 var facing := 1
+## How far (in the head's units) the eyes, brows and mouth slide toward the side she faces.
+const GAZE := 5.0
 var animate := true
 
 var _rig: Dictionary
@@ -525,6 +527,13 @@ func _apply_pose() -> void:
 	_head.rotation = deg_to_rad(2.0) * tilt + deg_to_rad(10.0) * _pet - deg_to_rad(4.0) * _run
 	_torso.skew = 0.035 * swing
 	_body.scale.x = facing
+	# The face is turned a little the way she looks (eyes, brows and mouth slide toward `facing`): the puppets are drawn front-on, so
+	# this is what lets two people who talk be seen looking at each other (Julien).
+	for spr: Sprite2D in [_eyes_spr, _brows_spr, _mouth_spr]:
+		if spr:
+			if not spr.has_meta("base_x"):
+				spr.set_meta("base_x", spr.position.x)
+			spr.position.x = float(spr.get_meta("base_x")) + GAZE
 	# Something with writing on it (the milk carton) is not mirrored with her body when she turns to the left.
 	if is_holding() and _held.has_meta("keep_upright"):
 		_held.scale.x = absf(_held.scale.x) * facing

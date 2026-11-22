@@ -1117,6 +1117,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 ## Conventions
 
 - Art is made procedurally in code: SVG strings or `_draw()`. There are no hand-drawn sprites except the logo.
+- **People who talk face each other** (Julien, 2026-11-22): `Interior._say` calls `_face_talk` (whoever speaks turns to Charlotte or the nearest person, everyone standing within `TALK_RANGE` turns to the speaker; seated, walking and riding people are left alone), and `Character.GAZE` slides the eyes, brows and mouth toward the side she faces (the puppets are drawn front-on). A scene that stages people at a table or in a row sets `facing` toward the centre, never all toward the camera.
 - **Real brands and their logos are allowed** (Julien's decision, 2026-11-01; it replaces the old "original artwork, never real
   logos" rule). Put the logo file in `art/brands/` (a transparent PNG or SVG, cropped from the brand's site, Wikimedia Commons
   or a product photo such as Open Food Facts), write where it comes from in `art/brands/SOURCES.md`, and lay it over the drawn
