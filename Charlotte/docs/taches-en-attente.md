@@ -36,3 +36,4 @@
 15. ~~FAIT~~ **Bug de la ruelle** (capture `reference/bugs/Screenshot 2026-11-22 at 8.36.04 AM.png`, flèche rouge) : dans la ruelle du milieu, vers la ruelle verte, un petit bâtiment rouge apparaît « à l'intérieur » du grand bâtiment beige (les dos de plex de la vue `LaneArt.junction` / `tee` passent par-dessus le mur d'un bâtiment).
 16. ~~FAIT (dos de plex : linteaux, appuis, meneaux, suie, corbeaux de briques, pièce rejointoyée)~~ **Bâtiments des ruelles** : améliorer leur apparence (dos de plex, murs de côté, garages).
 17. ~~FAIT (bottes sur leur plateau, bac de recyclage bleu avec son couvercle ouvert)~~ **Maison de Charlotte** : améliorer l'apparence des bottes à l'entrée et du bac de recyclage (`InteriorArt`).
+18. **À FAIRE SEULEMENT QUAND JULIEN LE DIRA** (« pas tout de suite ») : **Bac de recyclage** de la maison de Charlotte (`InteriorArt.recycling_bin`) : améliorer le signe de recyclage dessiné dessus.
