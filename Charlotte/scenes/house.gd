@@ -357,6 +357,9 @@ func _talk_to_mom() -> void:
 		_ask_mom()
 	elif School.available_today():
 		_mom_about_school()
+	elif School.hands_full_today():
+		_mom.express("happy", 2.0)
+		_say(_mom, "Finis d'abord ce que tu as à faire, ma chouette :\nl'école va t'attendre !", 400.0, 3.4)
 	else:
 		_say(_mom, MOM_LINES[_mom_line % MOM_LINES.size()], 350.0)
 		_mom_line += 1
@@ -1930,6 +1933,11 @@ func _build_doors() -> void:
 	add_child(DoorSpot.make(Rect2(370, 204, 170, 396), func():
 		_control.enabled = false
 		Sfx.play("door")
+		# An outing with Maman or Papa is waiting at this door, but her arms are full of another errand (the snowman's
+		# buttons, a cat…): she doesn't go off with it. She goes out to finish her errand; the outing waits for her.
+		if Carry.busy() and (School.step() == 1 or XmasTree.step() == 1 or Luge.step() == 1 or Party.step() == 1):
+			Transition.change_scene_saying(self, "res://scenes/main.tscn", "J'ai les mains pleines : je finis ça d'abord !")
+			return
 		if School.step() == 1:
 			_off_to_school()
 			return

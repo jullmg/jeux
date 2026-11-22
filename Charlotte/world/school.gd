@@ -82,8 +82,20 @@ static func first_day() -> bool:
 
 ## After the first day, school is there once a day, in the morning: the front door offers it until she has been (or goes
 ## to sleep: a new day).
+## Never offered while her arms are full: she is in the middle of an errand (the snowman's buttons, a lost cat…) and
+## Maman would be sending her off to school with it. The errand comes first; school waits (`hands_full_today`).
 static func available_today() -> bool:
+	return school_day() and not Carry.busy()
+
+
+## A school day she hasn't had yet, whatever she is carrying.
+static func school_day() -> bool:
 	return Quests.done(QUEST) and step() == 0 and not GameState.flags.get(TODAY_DONE, false)
+
+
+## A school day is waiting but her hands are full of another errand.
+static func hands_full_today() -> bool:
+	return school_day() and Carry.busy()
 
 
 ## The day is over (Papa takes her home): no more school until she has slept.
