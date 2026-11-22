@@ -834,7 +834,9 @@ class _Clotheslines:
 		# The same random numbers in every season: in winter the washing is simply taken in.
 		var hanging := not Season.is_winter()
 		for p in pulleys:
-			var end := p + Vector2(rng.randf_range(450.0, 750.0) * (1.0 if rng.randf() < 0.5 else -1.0), -p.y - 40.0)
+			# Nearly level, like a real line from gallery to pole: it climbs only a little and runs on long enough
+			# to leave the view, instead of shooting up into the sky and stopping there.
+			var end := p + Vector2(rng.randf_range(700.0, 1100.0) * (1.0 if rng.randf() < 0.5 else -1.0), -rng.randf_range(30.0, 90.0))
 			# Hung within reach of the gallery, near the pulley, not out in the sky over the lane.
 			var line := []
 			# Spread along the first third of the line, one after the other, so nothing overlaps.

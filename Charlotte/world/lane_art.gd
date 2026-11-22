@@ -783,7 +783,7 @@ static func _vine(rng: RandomNumberGenerator, x: float, w: float, top: float, co
 		var stem := "M%.1f %.1f" % [tx, y]
 		while y < top + length:
 			var f := (y - top) / length
-			var sway := tx + sin(y * 0.08) * 6.0
+			var sway := tx + sin(y * 0.08) * (2.0 if bare else 6.0)
 			stem += " L%.1f %.1f" % [sway, y]
 			var side := 1.0 if int(y) % 2 == 0 else -1.0
 			var size := lerpf(7.5, 3.5, f) * rng.randf_range(0.85, 1.15)
@@ -792,7 +792,7 @@ static func _vine(rng: RandomNumberGenerator, x: float, w: float, top: float, co
 			if not bare:
 				leaves += _leaf(Vector2(sway + side * 2.0, y), size, turn, tone)
 			y += rng.randf_range(5.0, 9.0)
-		s += '<path d="%s" stroke="%s" stroke-width="1.2" fill="none"/>' % [stem, "#6A5444" if bare else _dark(colors[0], 0.5)]
+		s += '<path d="%s" stroke="%s" stroke-width="1.2" fill="none"%s/>' % [stem, "#6A5444" if bare else _dark(colors[0], 0.5), ' opacity="0.45"' if bare else ""]
 	return s + leaves
 
 
@@ -803,12 +803,16 @@ static func _climber(rng: RandomNumberGenerator, x: float, w: float, top: float,
 	var h := bottom - top
 	var outline := []
 	# The shade behind the leaves stops well short of their edge, so only leaves show at the top and sides.
-	for k in 9:
-		outline.append(Vector2(x + 8.0 + rng.randf_range(-4.0, 4.0), lerpf(bottom, top + h * 0.26, k / 8.0)))
-	for k in 7:
-		outline.append(Vector2(lerpf(x + 8.0, x + w - 8.0, k / 6.0), top + h * 0.2 + rng.randf_range(-4.0, 4.0)))
-	for k in 9:
-		outline.append(Vector2(x + w - 8.0 + rng.randf_range(-4.0, 4.0), lerpf(top + h * 0.26, bottom, k / 8.0)))
+	# A rounded dome narrowing toward the top (never a rectangle with straight sides and a flat top).
+	var cx := x + w * 0.5
+	var half := w * 0.5 - 8.0
+	var shade_top := top + h * 0.2
+	for k in 13:
+		var a := PI * k / 12.0  # 0 = right foot, PI = left foot, over the top
+		var rise := sin(a)
+		var wob := rng.randf_range(-4.0, 4.0)
+		outline.append(Vector2(cx + cos(a) * (half * (0.78 + 0.22 * pow(1.0 - rise, 0.5)) + wob),
+			lerpf(bottom, shade_top, pow(rise, 0.7)) + rng.randf_range(-3.0, 3.0)))
 	var s := ""
 	if bare:
 		var stems := ""
@@ -818,8 +822,11 @@ static func _climber(rng: RandomNumberGenerator, x: float, w: float, top: float,
 		s += '<path d="%s" stroke="#6A5444" stroke-width="1.4" fill="none"/>' % stems
 	else:
 		s += _poly(outline, _dark(colors[0], 0.42))
-	for i in mini(int(w * h / 38.0), 460):
-		var p := Vector2(x + rng.randf_range(-6.0, w + 6.0), bottom - pow(rng.randf(), 0.95) * h)
+	for i in mini(int(w * h / 30.0), 560):
+		var up := pow(rng.randf(), 0.95)
+		# The mass narrows toward its top, so its edge is a rounded dome like the shade under it.
+		var span := (w * 0.5 + 6.0) * sqrt(maxf(1.0 - pow(up, 3.0) * 0.85, 0.1))
+		var p := Vector2(x + w * 0.5 + rng.randf_range(-span, span), bottom - up * h)
 		var size := rng.randf_range(5.5, 8.5)
 		var turn := PI + rng.randf_range(-0.9, 0.9)
 		var tone := _tone(rng, colors)
@@ -945,7 +952,10 @@ static func side_wall(rng: RandomNumberGenerator, w: float, top: float, color: C
 	for i in 5:
 		var pw := rng.randf_range(40.0, 110.0)
 		var ph := rng.randf_range(28.0, 70.0)
-		s += _rect(rng.randf_range(10.0, w - pw - 10.0), rng.randf_range(top + 20.0, H - ph - 60.0), pw, ph, _dark(brick, 0.16) if i % 2 == 0 else _light(brick, 0.12), 'opacity="0.3"')
+		# Soft uneven stains, not hard-edged rectangles.
+		var px := rng.randf_range(10.0, w - pw - 10.0)
+		var py := rng.randf_range(top + 20.0, H - ph - 60.0)
+		s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="%s" opacity="0.16"/>' % [px + pw * 0.5, py + ph * 0.5, pw * 0.5, ph * 0.5, _dark(brick, 0.16) if i % 2 == 0 else _light(brick, 0.12)]
 	# Small windows on each floor, stone sill and lintel, away from the corner.
 	var floors := int(round((H - top - 40.0) / 118.0))
 	var columns: Array[float] = [w * 0.36, w * 0.66]
