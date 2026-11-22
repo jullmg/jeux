@@ -1321,50 +1321,6 @@ func _open_present(i: int) -> void:
 		_noel_busy = false)
 
 
-## Santa's sleigh going by in the night sky, behind its reindeer, gold against the dark, a trail of sparkles behind.
-class _Sleigh:
-	extends Node2D
-	var _t := 0.0
-
-	func _process(delta: float) -> void:
-		_t += delta
-		if _t > 4.0:
-			queue_free()
-			return
-		queue_redraw()
-
-	func _draw() -> void:
-		var u := _t / 4.0
-		var at := Vector2(lerpf(1380.0, -260.0, u), 150.0 + sin(u * PI * 2.0) * 26.0 - u * 40.0)
-		var gold := Color(1.0, 0.86, 0.45, 0.95)
-		# The trail.
-		for k in 18:
-			var back := at + Vector2(130.0 + k * 22.0, -sin((u - k * 0.012) * PI * 2.0) * 10.0 + k * 1.5)
-			draw_circle(back, 3.0 - k * 0.14, Color(1.0, 0.95, 0.7, 0.8 - k * 0.04))
-		# The sleigh: its curled runner, its body, Santa's round shape and his sack.
-		draw_arc(at + Vector2(54, 18), 12.0, PI * 0.5, PI * 1.4, 10, gold, 3.0, true)
-		draw_line(at + Vector2(54, 30), at + Vector2(120, 30), gold, 3.0, true)
-		draw_colored_polygon(PackedVector2Array([at + Vector2(60, 26), at + Vector2(118, 26), at + Vector2(122, 4), at + Vector2(96, 8), at + Vector2(66, 10)]), gold)
-		draw_circle(at + Vector2(90, -4), 11.0, gold)
-		draw_circle(at + Vector2(90, -18), 7.0, gold)
-		draw_circle(at + Vector2(110, -6), 10.0, gold)
-		# The reins and four reindeer ahead, legs mid-leap.
-		draw_line(at + Vector2(62, 8), at + Vector2(-140, 0), Color(gold, 0.6), 1.5, true)
-		for r in 4:
-			var d := at + Vector2(30.0 - r * 46.0, sin(_t * 8.0 + r) * 3.0)
-			draw_set_transform(d, 0.0, Vector2(1.0, 0.55))
-			draw_circle(Vector2.ZERO, 12.0, gold)
-			draw_set_transform(Vector2.ZERO)
-			draw_circle(d + Vector2(-13, -8), 5.0, gold)
-			draw_line(d + Vector2(-14, -12), d + Vector2(-20, -22), gold, 2.0, true)
-			draw_line(d + Vector2(-12, -12), d + Vector2(-8, -22), gold, 2.0, true)
-			var kick := sin(_t * 10.0 + r) * 6.0
-			draw_line(d + Vector2(-8, 4), d + Vector2(-14 - kick, 16), gold, 2.0, true)
-			draw_line(d + Vector2(8, 4), d + Vector2(14 + kick, 16), gold, 2.0, true)
-			if r == 3:
-				draw_circle(d + Vector2(-18, -7), 2.6, Color(1.0, 0.3, 0.3, 1.0))
-
-
 # ── Papa's hockey night ─────────────────────────────────────
 
 # She hands Papa his chips: the quest is done, and the hockey goes on the hallway TV.
@@ -2178,13 +2134,10 @@ func _go_to_sleep() -> void:
 	tween.parallel().tween_property(zs, "modulate:a", 1.0, 0.6)
 	tween.parallel().tween_property(zs, "position:y", pillow.y - 110.0, 2.6)
 	if christmas_eve:
-		# Sleigh bells, and Santa's sleigh going by in the night sky.
-		tween.tween_callback(func() -> void:
-			var sleigh := _Sleigh.new()
-			night.add_child(sleigh)
-			for k in 3:
-				get_tree().create_timer(k * 0.7).timeout.connect(func() -> void: Sfx.play("bell", Vector2.INF, -4.0, 1.0 + k * 0.08)))
-		tween.tween_interval(4.2)
+		# Santa's sleigh crossing the night sky, its reindeer, its bells (`SantaFlight`).
+		tween.tween_interval(1.4)
+		tween.tween_callback(func() -> void: night.add_child(SantaFlight.new()))
+		tween.tween_interval(SantaFlight.DURATION)
 	elif tooth_night:
 		# The tooth fairy, a tinkle of bells.
 		tween.tween_callback(func() -> void:
