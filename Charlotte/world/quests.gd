@@ -82,12 +82,14 @@ const ALL := {
 		"age": 7, "after": "halloween", "reward": 2.0,
 	},
 	"cinema": {
+		"exclusive": true,
 		"title": "Une soirée cinéma avec les jumelles",
 		"hint": "Alphée et Constance veulent faire une soirée cinéma chez toi.",
 		"find": "Alphée et Constance ont une idée pour les soirées d'hiver…",
 		"age": 7, "after": "halloween", "reward": 3.0,
 	},
 	"ecole": {
+		"exclusive": true,
 		"title": "Une journée à l'école",
 		"hint": "Maman t'amène à l'école. À la récré, fais-toi une nouvelle amie dans la cour.",
 		"find": "Maman a quelque chose à te dire pour demain matin…",
@@ -100,6 +102,7 @@ const ALL := {
 		"age": 7, "after": "ecole", "reward": 2.0,
 	},
 	"fete": {
+		"exclusive": true,
 		"title": "La fête d'Alyzée",
 		"hint": "Alyzée t'invite à sa fête ! Achète-lui un cadeau au Jean Coutu avec Maman, pis va fêter chez elle.",
 		"find": "Il y a une enveloppe rose dans ton sac d'école…",
@@ -124,18 +127,21 @@ const ALL := {
 		"age": 7, "after": "halloween", "reward": 2.0,
 	},
 	"sapin": {
+		"exclusive": true,
 		"title": "Le sapin de Noël",
 		"hint": "Choisis un sapin à la vente de l'école avec Papa, pis décore-le dans le salon.",
 		"find": "Papa a l'air de penser à Noël…",
 		"age": 7, "after": "halloween", "reward": 2.0,
 	},
 	"noel": {
+		"exclusive": true,
 		"title": "Noël !",
 		"hint": "Écris au père Noël, fais-lui des biscuits, fête le réveillon, pis ouvre tes cadeaux le matin de Noël.",
 		"find": "Maman compte les dodos avant Noël…",
 		"age": 7, "after": "sapin", "reward": 3.0,
 	},
 	"jourdelan": {
+		"exclusive": true,
 		"title": "Le jour de l'an",
 		"hint": "Veille jusqu'à minuit avec tes parents devant le Bye Bye, pis dis ta bonne résolution le jour de l'an.",
 		"find": "L'année achève… Maman a une surprise pour le 31.",
@@ -160,6 +166,7 @@ const ALL := {
 		"age": 7, "after": "dent", "reward": 3.0,
 	},
 	"luge": {
+		"exclusive": true,
 		"title": "La luge avec Papa",
 		"hint": "Va glisser avec Papa sur la petite montagne du parc du Pélican, avec le traîneau.",
 		"find": "Papa regarde la neige avec un grand sourire… il a une idée !",
@@ -223,8 +230,19 @@ static func available(id: String) -> bool:
 		return false
 	if quest.has("after") and not done(quest.after):
 		return false
+	# A heavy quest (an outing with a parent, a whole evening) waits until the other heavy quest is over, so two never mix.
+	if quest.get("exclusive", false) and not heavy_active(id).is_empty():
+		return false
 	# A quest that waits for the whole notebook (the Halloween evening).
 	return not quest.get("after_all", false) or Halloween.ready()
+
+
+## The "exclusive" quest (other than `except`) that is under way, or "" if none.
+static func heavy_active(except := "") -> String:
+	for id: String in ALL:
+		if id != except and ALL[id].get("exclusive", false) and active(id):
+			return id
+	return ""
 
 
 ## Puts the quest in her notebook. Returns false if it can't start (already started, or not available).
