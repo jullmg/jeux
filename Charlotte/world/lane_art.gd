@@ -542,7 +542,9 @@ static func _tole(rng: RandomNumberGenerator, x: float, w: float) -> String:
 		dark = not dark
 	for i in rng.randi_range(2, 4):
 		var rx := rng.randf_range(x + 10.0, x + w - 20.0)
-		s += _poly([Vector2(rx, top + rng.randf_range(10, 80)), Vector2(rx + 10, top + 20), Vector2(rx + 6, H), Vector2(rx - 4, H)], "#8E5A3A", 'opacity="0.35"')
+		# A thin streak of rust running down from a seam, not a wide dark slash.
+		var ry := top + rng.randf_range(10, 80)
+		s += _poly([Vector2(rx, ry), Vector2(rx + 3, top + 20), Vector2(rx + 3, H), Vector2(rx - 1, H)], "#8E5A3A", 'opacity="0.2"')
 	# The flat roof's edge, a little window high up, the double doors.
 	s += _rect(x - 8, top - 10, w + 16, 14, _dark(c, 0.4))
 	if Season.is_winter():

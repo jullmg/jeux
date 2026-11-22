@@ -434,6 +434,11 @@ func _build_yard_trees() -> void:
 			tree.position.x = maxf(tree.position.x, lot.x)
 		elif lane == "middle" and i == _lots.size() - 1:
 			tree.position.x = minf(tree.position.x, lot.y - 760.0 * k)
+		# Behind a garage, tôle garage or shed the trunk would seem to grow out of its flat roof: the yard's
+		# tree is left out there (after its random draws, so every other tree stays where it was).
+		if _kinds[i] in ["garage", "tole", "shed"]:
+			tree.free()
+			continue
 		tree.material = _sway(6.0, phase)
 		phase += 1.3
 		add_child(tree)
