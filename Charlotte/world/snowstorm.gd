@@ -165,6 +165,27 @@ static func sign() -> ImageTexture:
 
 ## Canvas 70 × 110 (`big`: Papa's, 90 × 170): a snow shovel, its scoop at the bottom. Hers is a red plastic one with a yellow
 ## handle; his a wide black scoop on a wooden shaft.
+## A shovel to put in someone's hands: the picture, plus what `Character` reads to hold it properly: `grips` (where the back hand and
+## the front hand go, in the shovel's own space: the top of the shaft and a little lower), `rest_rot` (how it is carried, the scoop
+## forward and down) and `swing` (how much further the scoop dips on each stroke, with `Character.pet`).
+static func shovel_node(big := false) -> Sprite2D:
+	var s := Sprite2D.new()
+	s.texture = shovel(big)
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	var h := 170.0 if big else 110.0
+	var oy := 30.0 if big else 26.0
+	s.scale = Vector2.ONE * (1.5 if big else 1.4)
+	s.offset = Vector2(0, oy)
+	s.rotation = SHOVEL_REST
+	s.set_meta("rest_rot", SHOVEL_REST)
+	s.set_meta("swing", -0.9)
+	s.set_meta("grips", [Vector2(0, 11.0 - h / 2.0 + oy), Vector2(0, (66.0 if big else 46.0) - h / 2.0 + oy)])
+	return s
+
+
+const SHOVEL_REST := -0.38
+
+
 static func shovel(big := false) -> ImageTexture:
 	var w := 90.0 if big else 70.0
 	var h := 170.0 if big else 110.0

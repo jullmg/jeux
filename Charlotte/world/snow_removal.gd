@@ -64,12 +64,7 @@ func _ready() -> void:
 	_papa.position = Vector2(door_x + PAPA_DX, StreetScene.CHARLOTTE_Y - 4.0)
 	_papa.facing = 1
 	_behind.add_child(_papa)
-	var big := Sprite2D.new()
-	big.texture = Snowstorm.shovel(true)
-	big.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	big.scale = Vector2.ONE * 1.5
-	big.rotation = deg_to_rad(18.0)
-	big.offset = Vector2(0, 30)
+	var big := Snowstorm.shovel_node(true)
 	_papa.carry(big)
 	scene.add_child(DoorSpot.make(Rect2(_papa.position + Vector2(-50, -220), Vector2(100, 220)), _talk_to_papa, _papa.position.x + 90.0))
 	scene.add_child(QuestMark.make(_papa.position + Vector2(0, -250), func() -> bool:

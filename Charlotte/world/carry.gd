@@ -212,13 +212,8 @@ static func _build(kind: String, id: String) -> Node2D:
 			sled.name = "traineau"
 			return sled
 		"pelle":
-			# Her little red snow shovel, held up across her.
-			var shovel := Sprite2D.new()
-			shovel.texture = Snowstorm.shovel()
-			shovel.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-			shovel.scale = Vector2.ONE * 1.4
-			shovel.rotation = deg_to_rad(20.0)
-			shovel.offset = Vector2(0, 26)
+			# Her little red snow shovel, both hands on its shaft.
+			var shovel := Snowstorm.shovel_node(false)
 			shovel.name = "pelle"
 			return shovel
 		"deco":

@@ -502,7 +502,18 @@ func _apply_pose() -> void:
 	if _pet > 0.3:
 		_hand_goal[1] = "flat"
 	# Carrying something in her arms: both hands reach round it.
-	if _hold > 0.0 and is_holding():
+	if _hold > 0.0 and is_holding() and _held.has_meta("grips"):
+		# A tool (the snow shovel): both hands stay on its shaft, and on a stroke (`pet`) the whole thing dips forward with them.
+		var arm_len: float = _rig.arm_len
+		var grips: Array = _held.get_meta("grips")
+		_held.rotation = float(_held.get_meta("rest_rot", 0.0)) + float(_held.get_meta("swing", 0.0)) * _pet
+		_held.position = _held_base + Vector2(arm_len * 0.2, arm_len * 0.12) * _pet
+		for i in 2:
+			_reach_blend(i, _held.transform * (grips[i] as Vector2), _hold, false)
+		if _hold > 0.5:
+			_hand_goal[0] = "grip"
+			_hand_goal[1] = "grip"
+	elif _hold > 0.0 and is_holding():
 		var hands: String = _held.get_meta("hands", "grip")
 		_reach_blend(0, _arm_back.position + Vector2.from_angle(deg_to_rad(18.0)) * (_rig.arm_len as float) * 0.86, _hold, false)
 		_reach_blend(1, _arm_front.position + Vector2.from_angle(deg_to_rad(32.0)) * (_rig.arm_len as float) * 0.86, _hold, false)
