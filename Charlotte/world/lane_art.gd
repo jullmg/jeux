@@ -123,6 +123,7 @@ static func back(rng: RandomNumberGenerator, w: float, own := false, brick := ""
 	s += _rect(w - 14, top, 14, H - top, "#000000", 'opacity="0.12"')
 	s += _rect(-2, top - 8, w + 4, 12, "#55585C")
 	s += _rect(-2, top + 4, w + 4, 3, "#000000", 'opacity="0.2"')
+	s += _back_wear(w, top, wall, siding, floors)
 	if rng.randf() < 0.35:
 		s += _rect(w * rng.randf_range(0.2, 0.6), top - 30, 46, 22, "#C9CDD2", 'stroke="#8E9399" stroke-width="2"')
 	# The gallery side: the back doors are on it.
@@ -145,6 +146,7 @@ static func back(rng: RandomNumberGenerator, w: float, own := false, brick := ""
 			if rng.randf() < 0.5:
 				s += _rect(x + 2, fy - 93, 14, 66, PropArt._pick(rng, ["#F4E3B0", "#E8B4B8", "#FFFFFF", "#B8D4E8"]), 'opacity="0.85"')
 			s += _line(Vector2(x + 23, fy - 95), Vector2(x + 23, fy - 25), "#F2F0EA", 3.0)
+			s += _back_window_trim(x, fy, wall, siding)
 	# Galleries on every floor (the ground one is a deck), with railings of balusters.
 	var pulley := Vector2(g1 - 4.0 if left else g0 + 4.0, 0)
 	for f in floors:
@@ -186,6 +188,67 @@ static func back(rng: RandomNumberGenerator, w: float, own := false, brick := ""
 			s += _rect(p.x - 7, p.y - 2, 14, 3, _light(wood, 0.1))
 		s += _line(Vector2(sx, hi - 34), Vector2(ex, lo - 34), wood, 3.0)
 	return [_tex(w, s), pulley, top]
+
+
+## A window's trim on a plex back, with no random numbers (so nothing else in the lane moves): a course of bricks on end over
+## it (a painted board on siding), a mullion across the glass, the shade of its reveal, a stone sill with its shadow and the
+## dirt the rain has run down under it.
+static func _back_window_trim(x: float, fy: float, wall: String, siding: bool) -> String:
+	var s := ""
+	# The glass sits in a reveal: a shaded top and left edge.
+	s += _rect(x, fy - 95, 46, 7, "#000000", 'opacity="0.2"')
+	s += _rect(x, fy - 95, 4, 70, "#000000", 'opacity="0.1"')
+	# The meeting rail of a double-hung window.
+	s += _rect(x - 1, fy - 62, 48, 3.5, "#F2F0EA")
+	s += _line(Vector2(x, fy - 58.5), Vector2(x + 46, fy - 58.5), "#000000", 1.0, 'opacity="0.18"')
+	# The lintel.
+	if siding:
+		s += _rect(x - 7, fy - 106, 60, 8, "#F2F0EA") + _rect(x - 7, fy - 99, 60, 2.5, "#000000", 'opacity="0.2"')
+	else:
+		s += _rect(x - 6, fy - 107, 58, 9, _dark(wall, 0.3))
+		var bx := x - 6.0
+		while bx < x + 52.0:
+			s += _line(Vector2(bx, fy - 107), Vector2(bx, fy - 98), _dark(wall, 0.55), 1.0, 'opacity="0.7"')
+			bx += 6.0
+		s += _rect(x - 6, fy - 99, 58, 2.5, "#000000", 'opacity="0.2"')
+	# The sill, its shadow, the rain's dirt.
+	s += _rect(x - 6, fy - 26, 58, 6, "#DCD7CB") + _rect(x - 6, fy - 26, 58, 1.8, "#FFFFFF", 'opacity="0.5"')
+	s += _rect(x - 6, fy - 20, 58, 4, "#000000", 'opacity="0.2"')
+	s += _rect(x + 3, fy - 16, 14, 36, "#000000", 'opacity="0.05"')
+	s += _rect(x + 28, fy - 16, 10, 28, "#000000", 'opacity="0.04"')
+	return s
+
+
+## What time has done to the back of a plex, again with no random numbers of the lane's: soot run down from under the coping,
+## a corbelled brick course under it, a repointed patch and a pale stain of salt. Drawn over the wall, under the galleries.
+static func _back_wear(w: float, top: float, wall: String, siding: bool, floors: int) -> String:
+	var wr := RandomNumberGenerator.new()
+	wr.seed = int(w) * 31 + floors * 7 + 5
+	var s := ""
+	# Soot under the coping, thicker in streaks where the water runs.
+	s += _rect(0, top + 4, w, 26, "#000000", 'opacity="0.07"')
+	var sx := wr.randf_range(8.0, 40.0)
+	while sx < w - 20.0:
+		var len := wr.randf_range(30.0, 110.0)
+		s += _rect(sx, top + 4, wr.randf_range(5.0, 14.0), len, "#000000", 'opacity="0.05"')
+		sx += wr.randf_range(34.0, 90.0)
+	if not siding:
+		# The corbelled course under the coping: little steps of brick.
+		var cx := 0.0
+		while cx < w:
+			s += _rect(cx + 1, top + 5, 9, 6, _dark(wall, 0.22))
+			s += _rect(cx + 1, top + 5, 9, 1.5, "#FFFFFF", 'opacity="0.18"')
+			cx += 12.0
+		s += _rect(-2, top + 11, w + 4, 2.5, "#000000", 'opacity="0.18"')
+		# A repointed patch: fresher mortar, paler bricks.
+		var px := wr.randf_range(w * 0.1, w * 0.7)
+		var py := wr.randf_range(top + 50.0, H - 140.0)
+		s += _rect(px, py, wr.randf_range(34.0, 70.0), wr.randf_range(24.0, 44.0), _light(wall, 0.1), 'opacity="0.28"')
+	# The coping stone's lit edge.
+	s += _rect(-2, top - 8, w + 4, 2.2, "#FFFFFF", 'opacity="0.3"')
+	# A pale salt stain low on the wall.
+	s += '<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="14" fill="#FFFFFF" opacity="0.07"/>' % [wr.randf_range(w * 0.2, w * 0.8), H - 56.0, wr.randf_range(30.0, 60.0)]
+	return s
 
 
 ## Charlotte's own house seen from the lane (reference/ruelle/Maison_charlotte_ruelle.jpg): red-brown brick, the white
