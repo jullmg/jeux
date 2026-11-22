@@ -742,73 +742,172 @@ static func item_half(item: Dictionary) -> Vector2:
 
 
 # ── Beads (the necklace) ────────────────────────────────────────
+# Every bead is lit from the upper left like the rest of the game: a darker body, a lighter one shifted toward the light, a soft
+# glow and a small shine, an outline of its own darker tone. Pasta is painted pasta (glossy tempera), tubes show their ridges and
+# the dark hole the string goes through.
+
+static func _oval(c: Vector2, rx: float, ry: float, rot := 0.0, n := 20) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	for k in n:
+		var a := TAU * k / n
+		pts.append(c + Vector2(cos(a) * rx, sin(a) * ry).rotated(rot))
+	return pts
+
+
+## A ball with light from the upper left, its shadow on the table, a shine.
+static func _ball(ci: CanvasItem, c: Vector2, rad: float, col: Color, shine := true) -> void:
+	ci.draw_circle(c, rad, col.darkened(0.34))
+	ci.draw_circle(c + Vector2(-0.08, -0.1) * rad, rad * 0.9, col.darkened(0.1))
+	ci.draw_circle(c + Vector2(-0.16, -0.2) * rad, rad * 0.62, col.lightened(0.14))
+	ci.draw_circle(c + Vector2(-0.26, -0.34) * rad, rad * 0.3, col.lightened(0.4))
+	if shine:
+		ci.draw_circle(c + Vector2(-0.34, -0.4) * rad, rad * 0.13, Color(1, 1, 1, 0.9))
+	ci.draw_arc(c, rad, 0.0, TAU, 28, col.darkened(0.5), maxf(1.0, rad * 0.06), true)
+
+
+## A convex piece (a star, a heart, a wing) with a lit body shifted toward the upper left and a glow, round the middle `m`.
+static func _bevel(ci: CanvasItem, pts: PackedVector2Array, col: Color, m := Vector2.ZERO, line := 1.6) -> void:
+	ci.draw_colored_polygon(pts, col.darkened(0.3))
+	var inner := PackedVector2Array()
+	var glow := PackedVector2Array()
+	for p in pts:
+		inner.append(m + (p - m) * 0.86 + Vector2(-0.05, -0.07) * line * 4.0)
+		glow.append(m + (p - m) * 0.42 + Vector2(-0.1, -0.16) * line * 5.0)
+	ci.draw_colored_polygon(inner, col.lightened(0.06))
+	ci.draw_colored_polygon(glow, Color(col.lightened(0.55), 0.55))
+	ci.draw_polyline(pts + PackedVector2Array([pts[0]]), col.darkened(0.55), line, true)
+
+
+## A tube lying along x (half length `hw`, half height `hh`): shaded across, ridged along, the string's hole in each end.
+static func _tube(ci: CanvasItem, hw: float, hh: float, col: Color, ridges: int, slant := 0.0) -> void:
+	var back := _oval(Vector2(hw, 0), hh * 0.42, hh, slant)
+	ci.draw_colored_polygon(back, col.darkened(0.4))
+	# The body in strips from the lit top to the shaded bottom.
+	var strips := 9
+	for i in strips:
+		var u0 := float(i) / strips
+		var u1 := float(i + 1) / strips
+		var tone := col.lightened(0.28 * (1.0 - u0 * 1.6)) if u0 < 0.5 else col.darkened(0.34 * (u0 - 0.4))
+		ci.draw_rect(Rect2(-hw, lerpf(-hh, hh, u0), hw * 2.0, (u1 - u0) * hh * 2.0 + 0.6), tone)
+	for k in ridges:
+		var y := lerpf(-hh * 0.85, hh * 0.85, (k + 0.5) / ridges)
+		ci.draw_line(Vector2(-hw, y), Vector2(hw, y), col.darkened(0.3), maxf(1.0, hh * 0.07), true)
+		ci.draw_line(Vector2(-hw, y - hh * 0.07), Vector2(hw, y - hh * 0.07), Color(col.lightened(0.5), 0.45), maxf(1.0, hh * 0.05), true)
+	ci.draw_line(Vector2(-hw, -hh), Vector2(hw, -hh), col.darkened(0.5), maxf(1.0, hh * 0.06), true)
+	ci.draw_line(Vector2(-hw, hh), Vector2(hw, hh), col.darkened(0.55), maxf(1.0, hh * 0.06), true)
+	# The open end, with the hole.
+	var rim := _oval(Vector2(-hw, 0), hh * 0.42, hh, slant)
+	ci.draw_colored_polygon(rim, col.lightened(0.2))
+	ci.draw_polyline(rim + PackedVector2Array([rim[0]]), col.darkened(0.5), maxf(1.0, hh * 0.07), true)
+	ci.draw_colored_polygon(_oval(Vector2(-hw, 0), hh * 0.2, hh * 0.46, slant), Color(0.16, 0.1, 0.06))
+
+
+## The thin cube of a letter bead: ivory front, a lit top and a shaded side.
+static func _tile(ci: CanvasItem, h: float, col: Color) -> void:
+	var d := h * 0.28
+	ci.draw_colored_polygon(PackedVector2Array([Vector2(h, -h), Vector2(h + d, -h - d), Vector2(h + d, h - d), Vector2(h, h)]), col.darkened(0.35))
+	ci.draw_colored_polygon(PackedVector2Array([Vector2(-h, -h), Vector2(-h + d, -h - d), Vector2(h + d, -h - d), Vector2(h, -h)]), Color("#FFFFFF").lerp(col, 0.15))
+	ci.draw_rect(Rect2(-h, -h, h * 2.0, h * 2.0), Color("#FFFDF7"))
+	ci.draw_rect(Rect2(-h, -h, h * 2.0, h * 2.0), col.darkened(0.15), false, maxf(1.6, h * 0.1))
+	ci.draw_rect(Rect2(-h + h * 0.16, -h + h * 0.16, h * 1.68, h * 1.68), Color(col, 0.28), false, 1.0)
+
 
 ## A bead centred on `c`, `r` px across, lying along `dir` (the string's direction at that spot).
 static func bead(ci: CanvasItem, id: String, c: Vector2, r: float, color: Color, dir: float, seed_ := 1) -> void:
 	ci.draw_set_transform(c, dir - (PI / 2.0 if id == "macaroni" else 0.0), Vector2.ONE)
 	var w := maxf(1.0, r * 0.06)
 	var pasta := Color("#EBC879") if color.s < 0.1 else color
+	var paint := color if color.s > 0.05 else Color("#E04F5F")
 	match id:
 		"macaroni":
+			# A curved tube: its dark outer edge, the body, a lit line along the top of the curve, two open ends.
 			var arc_pts := PackedVector2Array()
-			for k in 13:
-				var a := -PI * 0.55 + PI * 1.1 * k / 12.0
-				arc_pts.append(Vector2(cos(a) * r * 0.6, sin(a) * r * 0.42 + r * 0.1))
-			ci.draw_polyline(arc_pts, pasta.darkened(0.25), r * 0.5, true)
-			ci.draw_polyline(arc_pts, pasta, r * 0.4, true)
-			ci.draw_polyline(arc_pts, pasta.lightened(0.3), r * 0.1, true)
+			for k in 17:
+				var a := -PI * 0.58 + PI * 1.16 * k / 16.0
+				arc_pts.append(Vector2(cos(a) * r * 0.55, sin(a) * r * 0.42 + r * 0.14))
+			ci.draw_polyline(arc_pts, pasta.darkened(0.45), r * 0.36, true)
+			ci.draw_polyline(arc_pts, pasta.darkened(0.12), r * 0.31, true)
+			ci.draw_polyline(arc_pts, pasta.lightened(0.08), r * 0.22, true)
+			var lit := PackedVector2Array()
+			for p in arc_pts:
+				lit.append(p + Vector2(-0.02, -0.07) * r)
+			ci.draw_polyline(lit, Color(pasta.lightened(0.55), 0.7), r * 0.07, true)
+			for e in [arc_pts[0], arc_pts[arc_pts.size() - 1]]:
+				ci.draw_circle(e, r * 0.17, pasta.lightened(0.2))
+				ci.draw_arc(e, r * 0.17, 0.0, TAU, 14, pasta.darkened(0.5), w, true)
+				ci.draw_circle(e, r * 0.085, Color(0.16, 0.1, 0.06))
 		"penne":
-			var body := PackedVector2Array([Vector2(-r * 0.6, -r * 0.2), Vector2(r * 0.5, -r * 0.34), Vector2(r * 0.5, r * 0.34), Vector2(-r * 0.6, r * 0.2)])
-			ci.draw_colored_polygon(body, pasta)
-			for k in 5:
-				var x := -r * 0.45 + k * r * 0.22
-				ci.draw_line(Vector2(x, -r * 0.3 + k * 0.01), Vector2(x, r * 0.3), pasta.darkened(0.2), w, true)
-			ci.draw_polyline(body + PackedVector2Array([body[0]]), pasta.darkened(0.35), w * 1.3, true)
+			_tube(ci, r * 0.52, r * 0.28, pasta, 5, 0.5)
 		"rigatoni":
-			ci.draw_rect(Rect2(-r * 0.55, -r * 0.3, r * 1.1, r * 0.6), pasta)
-			for k in 6:
-				ci.draw_line(Vector2(-r * 0.55, -r * 0.25 + k * r * 0.1), Vector2(r * 0.55, -r * 0.25 + k * r * 0.1), pasta.darkened(0.18), w, true)
-			ci.draw_rect(Rect2(-r * 0.55, -r * 0.3, r * 1.1, r * 0.6), pasta.darkened(0.35), false, w * 1.3)
-			ci.draw_rect(Rect2(-r * 0.58, -r * 0.14, r * 0.1, r * 0.28), Color(0.2, 0.12, 0.05))
+			_tube(ci, r * 0.5, r * 0.31, pasta, 7)
 		"roue":
-			ci.draw_circle(Vector2.ZERO, r * 0.5, pasta)
-			ci.draw_arc(Vector2.ZERO, r * 0.5, 0.0, TAU, 20, pasta.darkened(0.35), w * 1.3, true)
-			ci.draw_circle(Vector2.ZERO, r * 0.1, Color(0.2, 0.12, 0.05))
+			# A wheel of pasta: a thick rim, six spokes with the gaps between them showing the table, a hub with its hole.
+			ci.draw_circle(Vector2(1.0, 1.6), r * 0.5, Color(0, 0, 0, 0.18))
+			ci.draw_circle(Vector2.ZERO, r * 0.5, pasta.darkened(0.4))
+			ci.draw_circle(Vector2(-0.015, -0.02) * r, r * 0.47, pasta.lightened(0.06))
 			for k in 6:
-				ci.draw_line(Vector2.from_angle(TAU * k / 6.0) * r * 0.14, Vector2.from_angle(TAU * k / 6.0) * r * 0.46, pasta.darkened(0.3), w * 1.3, true)
+				var a0 := TAU * k / 6.0 + 0.22
+				var a1 := TAU * (k + 1) / 6.0 - 0.22
+				var gap := PackedVector2Array()
+				for j in 7:
+					gap.append(Vector2.from_angle(lerpf(a0, a1, j / 6.0)) * r * 0.37)
+				for j in 7:
+					gap.append(Vector2.from_angle(lerpf(a1, a0, j / 6.0)) * r * 0.16)
+				ci.draw_colored_polygon(gap, Color(0.2, 0.14, 0.09, 0.85))
+			ci.draw_circle(Vector2.ZERO, r * 0.15, pasta.lightened(0.18))
+			ci.draw_arc(Vector2.ZERO, r * 0.5, 0.0, TAU, 28, pasta.darkened(0.5), w * 1.2, true)
+			ci.draw_arc(Vector2.ZERO, r * 0.4, PI * 1.1, PI * 1.7, 10, Color(pasta.lightened(0.55), 0.7), w * 1.4, true)
+			ci.draw_circle(Vector2.ZERO, r * 0.06, Color(0.16, 0.1, 0.06))
 		"farfalle":
+			# A bow tie: two crimped wings pinched in the middle.
 			for s in [-1.0, 1.0]:
-				ci.draw_colored_polygon(PackedVector2Array([Vector2(0, 0), Vector2(s * r * 0.55, -r * 0.4), Vector2(s * r * 0.55, r * 0.4)]), pasta)
-				ci.draw_polyline(PackedVector2Array([Vector2(0, 0), Vector2(s * r * 0.55, -r * 0.4), Vector2(s * r * 0.55, r * 0.4), Vector2(0, 0)]), pasta.darkened(0.35), w, true)
-			ci.draw_rect(Rect2(-r * 0.09, -r * 0.2, r * 0.18, r * 0.4), pasta.darkened(0.12))
+				var wing := PackedVector2Array([Vector2(s * r * 0.05, -r * 0.08)])
+				for k in 9:
+					var u := float(k) / 8.0
+					var crimp := (r * 0.035) if k % 2 == 0 else 0.0
+					wing.append(Vector2(s * (r * 0.54 - crimp), lerpf(-r * 0.4, r * 0.4, u)))
+				wing.append(Vector2(s * r * 0.05, r * 0.08))
+				_bevel(ci, wing, pasta, Vector2(s * r * 0.3, 0), w * 1.2)
+				for k in 3:
+					ci.draw_line(Vector2(s * r * 0.1, (k - 1) * r * 0.05), Vector2(s * r * 0.46, (k - 1) * r * 0.22), pasta.darkened(0.28), w, true)
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(-r * 0.09, -r * 0.14), Vector2(r * 0.09, -r * 0.14), Vector2(r * 0.07, r * 0.14), Vector2(-r * 0.07, r * 0.14)]), pasta.darkened(0.22))
+			ci.draw_line(Vector2(-r * 0.04, -r * 0.12), Vector2(-r * 0.04, r * 0.12), Color(pasta.lightened(0.5), 0.6), w, true)
 		"ronde":
-			ci.draw_circle(Vector2(1.0, 1.6), r * 0.4, Color(0, 0, 0, 0.2))
-			ci.draw_circle(Vector2.ZERO, r * 0.4, color if color.s > 0.05 else Color("#E04F5F"))
-			ci.draw_circle(Vector2(-0.1, -0.1) * r, r * 0.12, Color(1, 1, 1, 0.7))
+			ci.draw_circle(Vector2(r * 0.05, r * 0.1), r * 0.4, Color(0, 0, 0, 0.2))
+			_ball(ci, Vector2.ZERO, r * 0.4, paint)
 		"cube":
+			# A small cube with three faces: the lit top, the front, the shaded side.
+			var h := r * 0.28
+			var d := r * 0.14
 			var cube := color if color.s > 0.05 else Color("#FFD23F")
-			ci.draw_rect(Rect2(-r * 0.34, -r * 0.34, r * 0.68, r * 0.68), cube)
-			ci.draw_rect(Rect2(-r * 0.34, -r * 0.34, r * 0.68, r * 0.68), cube.darkened(0.4), false, w * 1.3)
-			ci.draw_rect(Rect2(-r * 0.34, -r * 0.34, r * 0.68, r * 0.2), Color(1, 1, 1, 0.25))
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(h, -h), Vector2(h + d, -h - d), Vector2(h + d, h - d), Vector2(h, h)]), cube.darkened(0.38))
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(-h, -h), Vector2(-h + d, -h - d), Vector2(h + d, -h - d), Vector2(h, -h)]), cube.lightened(0.28))
+			ci.draw_rect(Rect2(-h, -h, h * 2.0, h * 2.0), cube)
+			ci.draw_rect(Rect2(-h * 0.8, -h * 0.8, h * 0.9, h * 0.5), Color(1, 1, 1, 0.28))
+			ci.draw_rect(Rect2(-h, -h, h * 2.0, h * 2.0), cube.darkened(0.5), false, w * 1.2)
+			ci.draw_polyline(PackedVector2Array([Vector2(h, -h), Vector2(h + d, -h - d), Vector2(-h + d, -h - d)]), cube.darkened(0.5), w, true)
 		"etoile":
 			var star := PackedVector2Array()
 			for k in 10:
-				star.append(Vector2.from_angle(-PI / 2.0 + TAU * k / 10.0) * r * (0.5 if k % 2 == 0 else 0.22))
-			ci.draw_colored_polygon(star, color if color.s > 0.05 else Color("#FFD23F"))
-			ci.draw_polyline(star + PackedVector2Array([star[0]]), (color if color.s > 0.05 else Color("#FFD23F")).darkened(0.4), w * 1.2, true)
+				star.append(Vector2.from_angle(-PI / 2.0 + TAU * k / 10.0) * r * (0.5 if k % 2 == 0 else 0.25))
+			_bevel(ci, star, color if color.s > 0.05 else Color("#FFD23F"))
 		"coeur":
-			var hs := shape_points("coeur", r * 0.9)
-			ci.draw_colored_polygon(hs, color if color.s > 0.05 else Color("#FF7BA3"))
-			ci.draw_polyline(hs + PackedVector2Array([hs[0]]), (color if color.s > 0.05 else Color("#FF7BA3")).darkened(0.4), w * 1.2, true)
+			_bevel(ci, shape_points("coeur", r * 0.9), color if color.s > 0.05 else Color("#FF7BA3"), Vector2(0, -r * 0.04))
 		"fleur":
+			var petal := color if color.s > 0.05 else Color("#FF7BA3")
 			for k in 5:
-				ci.draw_circle(Vector2.from_angle(TAU * k / 5.0) * r * 0.24, r * 0.17, color if color.s > 0.05 else Color("#FF7BA3"))
-			ci.draw_circle(Vector2.ZERO, r * 0.14, Color("#FFD23F"))
+				var pc := Vector2.from_angle(-PI / 2.0 + TAU * k / 5.0) * r * 0.25
+				_ball(ci, pc, r * 0.19, petal, false)
+			_ball(ci, Vector2.ZERO, r * 0.14, Color("#FFD23F"))
+			ci.draw_circle(Vector2(r * 0.03, r * 0.02), r * 0.025, Color("#B8860B"))
 		"bois":
-			ci.draw_circle(Vector2.ZERO, r * 0.4, Color("#D9A05B"))
-			ci.draw_arc(Vector2.ZERO, r * 0.4, 0.0, TAU, 20, Color("#8A5A2B"), w * 1.3, true)
-			ci.draw_arc(Vector2.ZERO, r * 0.22, 0.4, 5.0, 12, Color("#B87D3C"), w, true)
+			# A wooden bead: a ball of pale wood with the rings of its grain.
+			var wood := Color("#D9A05B")
+			ci.draw_circle(Vector2(r * 0.05, r * 0.1), r * 0.4, Color(0, 0, 0, 0.2))
+			_ball(ci, Vector2.ZERO, r * 0.4, wood, false)
+			for k in 3:
+				ci.draw_arc(Vector2(-r * 0.06, -r * 0.05), r * (0.1 + k * 0.08), 0.5 + k * 0.3, 4.6 + k * 0.3, 12, Color("#8A5A2B", 0.55), w, true)
+			ci.draw_circle(Vector2(-r * 0.14, -r * 0.16), r * 0.06, Color(1, 1, 1, 0.55))
 		"lettre":
-			ci.draw_rect(Rect2(-r * 0.4, -r * 0.4, r * 0.8, r * 0.8), Color("#FFFDF7"))
-			ci.draw_rect(Rect2(-r * 0.4, -r * 0.4, r * 0.8, r * 0.8), color.darkened(0.2), false, w * 1.5)
+			_tile(ci, r * 0.38, color)
 	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

@@ -29,3 +29,10 @@
   lianes nues d'hiver trop serpentines, arbre de cour qui poussait sur le toit d'un garage / d'une tôle / d'un hangar (il est
   maintenant omis derrière ces façades), traînée brune trop large sur la tôle. Seule chose laissée : les clôtures floues du bas de
   l'écran qui s'arrêtent net là où une ruelle s'ouvre (voulu).
+
+## Demandées le 2026-11-22 (dans l'ordre)
+
+14. ~~FAIT (perles du collier, tapis de découpe, cartes du choix, ficelle, perles centrées)~~ **Bricolage** (`ui/craft_studio.gd`, `world/craft_art.gd`) : refonte visuelle complète, d'abord les perles du collier (plus belles), puis le reste de l'atelier (cartes du choix, établi, étiquettes), et améliorer aussi le fonctionnement.
+15. **Bug de la ruelle** (capture `reference/bugs/Screenshot 2026-11-22 at 8.36.04 AM.png`, flèche rouge) : dans la ruelle du milieu, vers la ruelle verte, un petit bâtiment rouge apparaît « à l'intérieur » du grand bâtiment beige (les dos de plex de la vue `LaneArt.junction` / `tee` passent par-dessus le mur d'un bâtiment).
+16. **Bâtiments des ruelles** : améliorer leur apparence (dos de plex, murs de côté, garages).
+17. **Maison de Charlotte** : améliorer l'apparence des bottes à l'entrée et du bac de recyclage (`InteriorArt`).

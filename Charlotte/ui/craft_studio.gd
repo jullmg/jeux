@@ -26,6 +26,7 @@ const KEEP_MAX := 8
 const TABS := [["peinture", "Peinture"], ["papier", "Papier"], ["decos", "Décos"], ["laine", "Laine"], ["ecrire", "Écrire"]]
 const PAINT_TOOLS := [["pinceau", "Pinceau"], ["eponge", "Éponge"], ["rouleau", "Rouleau"], ["pot", "Remplir"], ["gomme", "Gomme"]]
 const INK_TOOLS := [["laine", "Laine"], ["feutre", "Feutre"], ["colle", "Colle brillante"], ["crayon", "Cire"], ["gomme", "Gomme"]]
+const CARD_TONES := {"carte": "#FFE9EE", "assiette": "#E6F3E0", "pot": "#E3EEFA", "cadre": "#FFF1D6", "collier": "#EEE6F8"}
 const SIZES := [["Petit", 0], ["Moyen", 1], ["Grand", 2]]
 const BRUSH_R := [4.0, 9.0, 18.0]
 const PAPER_S := [70.0, 120.0, 180.0]
@@ -157,11 +158,27 @@ func _choose() -> void:
 		card.position = Vector2(x, 130)
 		card.custom_minimum_size = Vector2(222, 440)
 		card.size = Vector2(222, 440)
-		card.add_theme_stylebox_override("normal", _box(Color.WHITE, Color("#C8A27A"), 3, 18))
-		card.add_theme_stylebox_override("hover", _box(Color("#FFF4C2"), BLUE, 4, 18))
+		var normal := _box(Color.WHITE, Color("#C8A27A"), 3, 18)
+		normal.shadow_color = Color(0.3, 0.18, 0.05, 0.18)
+		normal.shadow_size = 8
+		normal.shadow_offset = Vector2(0, 4)
+		card.add_theme_stylebox_override("normal", normal)
+		var hover := _box(Color("#FFF4C2"), BLUE, 4, 18)
+		hover.shadow_color = Color(0.1, 0.2, 0.5, 0.25)
+		hover.shadow_size = 12
+		hover.shadow_offset = Vector2(0, 6)
+		card.add_theme_stylebox_override("hover", hover)
 		card.add_theme_stylebox_override("pressed", _box(Color("#FFE9A8"), YELLOW, 4, 18))
+		card.clip_contents = true
 		card.pressed.connect(func() -> void: _begin(id))
 		_panel.add_child(card)
+		# A pastel backdrop under the picture, a different tone for each thing to make.
+		var back := Panel.new()
+		back.position = Vector2(10, 10)
+		back.size = Vector2(202, 238)
+		back.add_theme_stylebox_override("panel", _box(Color(CARD_TONES.get(id, "#FFF7E0")), Color(CARD_TONES.get(id, "#FFF7E0")).darkened(0.12), 2, 14))
+		back.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card.add_child(back)
 		var pic := _CardPicture.new()
 		pic.base = id
 		pic.picture = picture
@@ -170,16 +187,19 @@ func _choose() -> void:
 		pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		pic.clip_contents = true
 		card.add_child(pic)
-		var nm := _label(CraftArt.BASES[id][0], 26, BLUE)
+		var long_name: bool = str(CraftArt.BASES[id][0]).length() > 14
+		var nm := _label(CraftArt.BASES[id][0], 22 if long_name else 26, BLUE)
 		nm.position = Vector2(8, 262)
 		nm.size = Vector2(206, 40)
 		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		nm.clip_text = true
 		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		card.add_child(nm)
-		var blurb := _label(CraftArt.BASES[id][1], 18, Color(BLUE, 0.8))
-		blurb.position = Vector2(14, 310)
-		blurb.size = Vector2(194, 110)
+		var blurb := _label(CraftArt.BASES[id][1], 17, Color(BLUE, 0.8))
 		blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		blurb.custom_minimum_size = Vector2(192, 0)
+		blurb.position = Vector2(15, 312)
+		blurb.size = Vector2(192, 110)
 		blurb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		blurb.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		card.add_child(blurb)
@@ -1085,6 +1105,37 @@ func _do_again() -> void:
 
 # ── Drawing the piece (on the bench and when it is printed) ─────
 
+## The bench itself: a green self-healing cutting mat, with its grid, its heavier lines and the ticks along two edges.
+func paint_mat(ci: CanvasItem, area: Vector2) -> void:
+	ci.draw_rect(Rect2(Vector2.ZERO, area), Color("#C9DEC2"))
+	var fine := Color(0.28, 0.5, 0.32, 0.16)
+	var bold := Color(0.28, 0.5, 0.32, 0.3)
+	var x := 0.0
+	var k := 0
+	while x <= area.x:
+		ci.draw_line(Vector2(x, 0), Vector2(x, area.y), bold if k % 5 == 0 else fine, 1.6 if k % 5 == 0 else 1.0)
+		x += 28.0
+		k += 1
+	var y := 0.0
+	k = 0
+	while y <= area.y:
+		ci.draw_line(Vector2(0, y), Vector2(area.x, y), bold if k % 5 == 0 else fine, 1.6 if k % 5 == 0 else 1.0)
+		y += 28.0
+		k += 1
+	x = 0.0
+	k = 0
+	while x <= area.x:
+		ci.draw_line(Vector2(x, 0), Vector2(x, 9.0 if k % 5 == 0 else 5.0), Color(0.18, 0.4, 0.24, 0.6), 1.4)
+		x += 28.0
+		k += 1
+	y = 0.0
+	k = 0
+	while y <= area.y:
+		ci.draw_line(Vector2(0, y), Vector2(9.0 if k % 5 == 0 else 5.0, y), Color(0.18, 0.4, 0.24, 0.6), 1.4)
+		y += 28.0
+		k += 1
+
+
 func paint_face(ci: CanvasItem, fi: int, overlay: bool) -> void:
 	var f: Dictionary = _faces[fi]
 	CraftArt.draw_base(ci, _base, fi, picture)
@@ -1396,7 +1447,12 @@ func _bead_spots() -> Array:
 		prev = p
 	var total: float = lens[samples]
 	var spots: Array = []
-	var at := 30.0
+	# The beads are centred on the string, like a necklace held up, not piled at one end.
+	var used := 30.0
+	for b: Dictionary in _beads:
+		used += float(b.r) * 1.12
+	var at := 30.0 + maxf(0.0, ((total - 30.0) - used) * 0.5)
+	var start_used := used
 	for b: Dictionary in _beads:
 		var span: float = b.r * 1.12
 		var mid := at + span * 0.5
@@ -1410,7 +1466,7 @@ func _bead_spots() -> Array:
 		var q0 := _string_point(maxf(0.0, t - 0.01))
 		spots.append({"p": p, "dir": (q - q0).angle()})
 		at += span
-	return [spots, at, total - 30.0]
+	return [spots, start_used, total - 30.0]
 
 
 func _build_beads() -> void:
@@ -1421,9 +1477,10 @@ func _build_beads() -> void:
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_panel.add_child(_title)
 	_colors_grid()
-	_sidebar_colors.position = Vector2(20, 110)
+	_sidebar_colors.position = Vector2(20, 142)
 	var cl := _label("Couleur des pâtes\net des perles", 18, Color(BLUE, 0.8))
-	cl.position = Vector2(20, 66)
+	cl.position = Vector2(20, 76)
+	cl.size = Vector2(200, 56)
 	_panel.add_child(cl)
 	var frame := Panel.new()
 	frame.position = STAGE_POS - Vector2(8, 8)
@@ -1598,11 +1655,28 @@ func _paint_necklace(ci: CanvasItem) -> void:
 	var pts := PackedVector2Array()
 	for k in 61:
 		pts.append(_string_point(k / 60.0))
-	ci.draw_polyline(pts, Color(0, 0, 0, 0.15), 5.0, true)
-	ci.draw_polyline(pts, Color("#8D6E63"), 3.0, true)
+	var shadow := PackedVector2Array()
+	for p in pts:
+		shadow.append(p + Vector2(4, 9))
+	ci.draw_polyline(shadow, Color(0.35, 0.2, 0.08, 0.16), 6.0, true)
+	# Twine: a dark core, the lit strand, and the short slanting marks of its twist.
+	ci.draw_polyline(pts, Color("#6E4E3A"), 4.4, true)
+	ci.draw_polyline(pts, Color("#B58C68"), 3.0, true)
+	for k in range(1, 120):
+		var t := k / 120.0
+		var a := _string_point(t)
+		var b := _string_point(minf(1.0, t + 0.004))
+		var n := (b - a).normalized().orthogonal()
+		var mid := (a + b) * 0.5
+		ci.draw_line(mid - n * 1.8 - (b - a).normalized() * 1.2, mid + n * 1.8 + (b - a).normalized() * 1.2, Color("#6E4E3A", 0.7), 1.0, true)
 	for s in [STRING_FROM, STRING_TO]:
-		ci.draw_circle(s, 7.0, Color("#B8860B"))
-		ci.draw_circle(s + Vector2(-1.5, -1.5), 2.5, Color(1, 1, 1, 0.8))
+		# A little brass ring with the string tied through it.
+		ci.draw_circle(s + Vector2(2, 3), 9.0, Color(0, 0, 0, 0.14))
+		ci.draw_circle(s, 9.0, Color("#8A6410"))
+		ci.draw_circle(s + Vector2(-0.6, -0.8), 7.4, Color("#D9A82B"))
+		ci.draw_circle(s, 3.6, Color("#EBD9BD"))
+		ci.draw_arc(s, 3.6, 0.0, TAU, 12, Color("#8A6410"), 1.2, true)
+		ci.draw_circle(s + Vector2(-3.4, -3.8), 1.8, Color(1, 1, 1, 0.8))
 	for i in _beads.size():
 		var b: Dictionary = _beads[i]
 		var p: Vector2 = spots[i].p
@@ -1774,6 +1848,7 @@ class _Stage:
 	var studio: CraftStudio
 
 	func _draw() -> void:
+		studio.paint_mat(self, size)
 		studio.paint_face(self, studio._face, true)
 
 	func _gui_input(event: InputEvent) -> void:
@@ -1792,9 +1867,26 @@ class _BeadStage:
 	var studio: CraftStudio
 
 	func _draw() -> void:
-		draw_rect(Rect2(Vector2.ZERO, size), Color("#F3E7D3"))
-		for k in 14:
-			draw_line(Vector2(0, 30 + k * 30), Vector2(size.x, 30 + k * 30), Color(0.7, 0.55, 0.35, 0.08), 2.0)
+		# A felt mat on the craft table: warm, with a faint weave, a stitched border and a soft shadow under the string's loop.
+		draw_rect(Rect2(Vector2.ZERO, size), Color("#EBD9BD"))
+		var weave := Color(0.62, 0.45, 0.25, 0.07)
+		for k in int(size.y / 14.0):
+			draw_line(Vector2(0, k * 14.0), Vector2(size.x, k * 14.0), weave, 1.0)
+		for k in int(size.x / 14.0):
+			draw_line(Vector2(k * 14.0, 0), Vector2(k * 14.0, size.y), weave, 1.0)
+		var inset := Rect2(Vector2(14, 14), size - Vector2(28, 28))
+		var x := inset.position.x
+		while x < inset.end.x:
+			var dash := minf(9.0, inset.end.x - x)
+			draw_line(Vector2(x, inset.position.y), Vector2(x + dash, inset.position.y), Color("#C98F6B"), 2.0)
+			draw_line(Vector2(x, inset.end.y), Vector2(x + dash, inset.end.y), Color("#C98F6B"), 2.0)
+			x += 15.0
+		var y := inset.position.y
+		while y < inset.end.y:
+			var dash2 := minf(9.0, inset.end.y - y)
+			draw_line(Vector2(inset.position.x, y), Vector2(inset.position.x, y + dash2), Color("#C98F6B"), 2.0)
+			draw_line(Vector2(inset.end.x, y), Vector2(inset.end.x, y + dash2), Color("#C98F6B"), 2.0)
+			y += 15.0
 		studio._paint_necklace(self)
 
 
