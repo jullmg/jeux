@@ -1499,10 +1499,7 @@ func _start_movie() -> void:
 		_say(_movie_twins[0], "As-tu les grignotines, Chachoue ?", 320.0)
 		return
 	_control.enabled = false
-	if not Cinema.again():
-		_roll_film("film")
-		return
-	# A movie night she asked for: she picks the film.
+	# She picks the film, the very first night as well as the ones she asks Maman for.
 	var choices: Array = []
 	for id: String in Cinema.FILMS:
 		choices.append({"text": TvShows.INFO[id].name})

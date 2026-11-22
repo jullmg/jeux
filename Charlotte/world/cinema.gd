@@ -20,7 +20,7 @@ const HEADING := "🍿  Soirée cinéma"
 ## Maman's pocket money for it.
 const MONEY := 5.0
 const AGAIN := "cinema_again"
-## The films she can choose from on a movie night she asked for (TvShows ids); the first night is always "film".
+## The films she can choose from on any movie night (TvShows ids), the first one included.
 const FILMS: Array[String] = ["grinch", "maison", "ratatouille", "reine", "film"]
 
 
