@@ -111,6 +111,7 @@ func _meet() -> void:
 		steps.tween_interval(Bubble.reading_time(text, 2.0) + 0.2)
 	steps.tween_callback(func() -> void:
 		GameState.flags[FLAG] = true
+		Notebook.new_friend(FLAG)
 		kid.express("happy", 2.0)
 		_charlotte.express("happy", 2.0))
 	_play_tag(steps)

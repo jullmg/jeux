@@ -88,6 +88,8 @@ func toggle() -> void:
 	if _open:
 		_fill()
 	_page.visible = _open
+	if _open and _unseen_friends():
+		_tabs[2].text = TABS[2][0] + "  ♥"
 	get_tree().paused = _open
 	Sfx.play("page")
 
@@ -99,6 +101,27 @@ func announce(what: String, id: String, heading := "") -> void:
 	_wiggle = 1.2
 	if not _toasting:
 		_next_toast()
+
+
+## Called by whoever she has just met (`flag` = the friend's story flag in FRIENDS): a pink note slides down saying who
+## the new friend is, and until she opens "Mes amis" the notebook button wears a pink heart and the new name is tagged.
+func new_friend(flag: String) -> void:
+	var names: Array = []
+	for friend: Dictionary in FRIENDS:
+		if friend.flag == flag:
+			names.append(str(friend.name).split(" ")[0])
+	if names.is_empty():
+		return
+	var fresh: Array = GameState.flags.get("friends_new", [])
+	if not flag in fresh:
+		fresh.append(flag)
+	GameState.flags["friends_new"] = fresh
+	announce("friend", " et ".join(names), "💖  Nouvel ami !" if names.size() == 1 else "💖  Nouveaux amis !")
+	_button.queue_redraw()
+
+
+func _unseen_friends() -> bool:
+	return not (GameState.flags.get("friends_new", []) as Array).is_empty()
 
 
 # ── The open notebook ───────────────────────────────────────
@@ -227,11 +250,20 @@ func _devoirs() -> void:
 
 
 func _friends() -> void:
+	# (The tab's heart is put back right after this page is built: see the end of the function.)
 	var met := FRIENDS.filter(func(friend: Dictionary) -> bool: return GameState.flags.get(friend.flag, false))
 	if met.is_empty():
 		_list.add_child(_label("Pas encore d'amis ici. Va jouer dehors, tu vas en rencontrer !", 17, Color(INK, 0.6)))
+	var fresh: Array = GameState.flags.get("friends_new", [])
 	for friend in met:
-		_list.add_child(_row("friend", friend.name, friend.note, INK))
+		var is_new: bool = friend.flag in fresh
+		_list.add_child(_row("friend", friend.name + ("   ♥ Nouveau !" if is_new else ""), friend.note,
+			Color("#D6336C") if is_new else INK))
+	# Seen now: the heart on the button goes.
+	if not fresh.is_empty():
+		GameState.flags["friends_new"] = []
+		_button.queue_redraw()
+		_tabs[2].text = TABS[2][0]
 
 
 func _section(heading: String, ids: Array, kind: String, line: String, hint: String) -> void:
@@ -283,12 +315,12 @@ func _next_toast() -> void:
 	var item: Array = _toasts.pop_front()
 	var done: bool = item[0] == "done"
 	# A step of a long quest announces its own words instead of naming a quest.
-	var a_step: bool = item[0] == "step" or item[0] == "devoirs"
+	var a_step: bool = item[0] == "step" or item[0] == "devoirs" or item[0] == "friend"
 	var quest: Dictionary = {"title": item[1], "reward": 0.0} if a_step else Quests.ALL[item[1]]
 	var box := PanelContainer.new()
 	var style := StyleBoxFlat.new()
 	style.bg_color = CREAM
-	style.border_color = YELLOW if done else BLUE
+	style.border_color = Color("#E85FA0") if item[0] == "friend" else (YELLOW if done else BLUE)
 	style.set_border_width_all(4)
 	style.set_corner_radius_all(14)
 	style.set_content_margin_all(12)
@@ -300,6 +332,8 @@ func _next_toast() -> void:
 	var heading := "Nouvelle quête dans ton carnet"
 	if item[0] == "devoirs":
 		heading = "★  Devoirs de la semaine finis !"
+	elif item[0] == "friend":
+		heading = str(item[2])
 	elif item[0] == "step":
 		heading = str(item[2]) if str(item[2]) != "" else "🎃  Halloween"
 	elif done:
@@ -319,7 +353,7 @@ func _next_toast() -> void:
 	add_child(box)
 	box.reset_size()
 	box.position = Vector2((1280 - box.size.x) / 2.0, -box.size.y - 10)
-	Sfx.play("chime" if done else "page")
+	Sfx.play("chime" if done or item[0] == "friend" else "page")
 	var tween := box.create_tween()
 	tween.tween_property(box, "position:y", 18.0, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.tween_interval(3.2)
@@ -337,6 +371,12 @@ func _draw_icon() -> void:
 	for i in 4:
 		_button.draw_circle(c + Vector2(-11, -9 + i * 6), 2.2, Color("#C9CED6"))
 	_button.draw_colored_polygon(_Star.points(c + Vector2(1, 0), 7.5), YELLOW)
+	if _unseen_friends():
+		# A pink heart over the corner: someone new is in "Mes amis".
+		var h := Vector2(44, 8)
+		_button.draw_circle(h, 10, Color("#E85FA0"))
+		_button.draw_arc(h, 10, 0, TAU, 20, Color.WHITE, 1.5, true)
+		_button.draw_string(ThemeDB.fallback_font, h + Vector2(-10, 5), "♥", HORIZONTAL_ALIGNMENT_CENTER, 20, 13, Color.WHITE)
 	var stars := Quests.stars()
 	if stars > 0:
 		var at := Vector2(44, 44)

@@ -253,6 +253,7 @@ func _meet() -> void:
 		steps.tween_interval(LINE_SECONDS)
 	steps.tween_callback(func() -> void:
 		GameState.flags["met_twins"] = true
+		Notebook.new_friend("met_twins")
 		Quests.complete("amies")
 		_talking = false
 		if control:

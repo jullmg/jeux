@@ -582,7 +582,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `FamilyRoutine`'s "daydream" task) floating in front of her for about five seconds); `set_look()` rebuilds it), `PlayerControl` (keys and
   click/tap-to-walk, walks to interactables and calls them; used by the street and the house), `CharacterArt` (generates the
   body-part SVGs from a look), `CharacterLook` (Resource; `CharacterLook.charlotte()` and `CharacterLook.random(rng, age)`).
-- `world/`: one `class_name` per element (`SkyBackdrop`, `Skyline`, `Cloud`, `Birds`, `Street`, `Squirrel`, `Passerby`, `PropArt`),
+- `world/`: one `class_name` per element (`SkyBackdrop`, `Skyline`, `Cloud`, `Birds` (a flock in a V: each bird seen from the side with a beak, a tail and wings that beat, drawn as triangles so nothing fails to triangulate), `Street`, `Squirrel`, `Passerby`, `PropArt`),
   plus `StrayCat` (procedural sidewalk cats: 8 coats, walk/sit/loaf/pet), `Dog` (9 breeds on a leash, attached to a passerby's
   `Character.hand_position()`), `WindowCats` (cats that pop up behind window panes near the camera), `Wind` (periodic gusts:
   drives the `gust` uniform of every sway material + a leaf flurry), `LeafKick` (leaves kicked by Charlotte's feet),
@@ -714,7 +714,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   starts, `age`, optional `after` = quest it waits for, `reward` in $). Several quests can be on at once. State in
   `GameState.quests` (absent / "active" / "done"); `available`, `start`, `complete` (adds the reward), `stars`, `money_text`.
 - `ui/notebook.gd` is the `Notebook` autoload (CanvasLayer 75): button left of the mute button (N key), "Mon carnet" with
-  three pages behind coloured tabs on its edge (`Notebook.TABS`, click or ←/→): Missions (En cours + hint, Réussies with yellow stars, À découvrir with clues), Mes devoirs (the week's homework, part by part) and Mes amis (`Notebook.FRIENDS`: name, note, story flag; **a new friend = one line there**); age and pocket money; crayon doodles, ribbon bookmark, elastic,
+  three pages behind coloured tabs on its edge (`Notebook.TABS`, click or ←/→): Missions (En cours + hint, Réussies with yellow stars, À découvrir with clues), Mes devoirs (the week's homework, part by part) and Mes amis (`Notebook.FRIENDS`: name, note, story flag; **a new friend = one line there, and a call to `Notebook.new_friend(flag)` at the moment she meets them**: a pink note "Nouvel ami !" / "Nouveaux amis !" slides down, the notebook button and the tab wear a pink heart and the name is tagged "♥ Nouveau !" until she has opened the page; `flags.friends_new`); age and pocket money; crayon doodles, ribbon bookmark, elastic,
   washi tape on the page; pauses the game while open. Hidden
   on the title and `tools/` scenes. `Notebook.announce()` (called by `Quests`) pops "Nouvelle quête" / "Quête réussie !".
 - `QuestMark.make(at, condition, scale)` (`world/quest_mark.gd`): a bobbing yellow "!" over a quest giver, or over where

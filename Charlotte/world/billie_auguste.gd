@@ -152,6 +152,7 @@ func _meet() -> void:
 		steps.tween_interval(LINE_SECONDS)
 	steps.tween_callback(func() -> void:
 		GameState.flags[FLAG] = true
+		Notebook.new_friend(FLAG)
 		_talking = false
 		if control:
 			control.hands_off = false
