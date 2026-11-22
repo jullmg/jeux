@@ -33,6 +33,6 @@
 ## Demandées le 2026-11-22 (dans l'ordre)
 
 14. ~~FAIT (perles du collier, tapis de découpe, cartes du choix, ficelle, perles centrées)~~ **Bricolage** (`ui/craft_studio.gd`, `world/craft_art.gd`) : refonte visuelle complète, d'abord les perles du collier (plus belles), puis le reste de l'atelier (cartes du choix, établi, étiquettes), et améliorer aussi le fonctionnement.
-15. **Bug de la ruelle** (capture `reference/bugs/Screenshot 2026-11-22 at 8.36.04 AM.png`, flèche rouge) : dans la ruelle du milieu, vers la ruelle verte, un petit bâtiment rouge apparaît « à l'intérieur » du grand bâtiment beige (les dos de plex de la vue `LaneArt.junction` / `tee` passent par-dessus le mur d'un bâtiment).
-16. **Bâtiments des ruelles** : améliorer leur apparence (dos de plex, murs de côté, garages).
-17. **Maison de Charlotte** : améliorer l'apparence des bottes à l'entrée et du bac de recyclage (`InteriorArt`).
+15. ~~FAIT~~ **Bug de la ruelle** (capture `reference/bugs/Screenshot 2026-11-22 at 8.36.04 AM.png`, flèche rouge) : dans la ruelle du milieu, vers la ruelle verte, un petit bâtiment rouge apparaît « à l'intérieur » du grand bâtiment beige (les dos de plex de la vue `LaneArt.junction` / `tee` passent par-dessus le mur d'un bâtiment).
+16. ~~FAIT (dos de plex : linteaux, appuis, meneaux, suie, corbeaux de briques, pièce rejointoyée)~~ **Bâtiments des ruelles** : améliorer leur apparence (dos de plex, murs de côté, garages).
+17. ~~FAIT (bottes sur leur plateau, bac de recyclage bleu avec son couvercle ouvert)~~ **Maison de Charlotte** : améliorer l'apparence des bottes à l'entrée et du bac de recyclage (`InteriorArt`).

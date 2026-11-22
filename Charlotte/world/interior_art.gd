@@ -334,13 +334,43 @@ static func tv() -> ImageTexture:
 	return tex(220, 140, s)
 
 
-## Canvas 90x120: blue recycling bin with flattened cardboard.
+## Canvas 90x120: the blue recycling bin (Montréal's bac), its lid standing open at the back, with what she sorted poking out of it:
+## a flattened cardboard box, a bundle of newspapers tied with string and a bottle. Light from the upper left, a wheel and a handle.
 static func recycling_bin() -> ImageTexture:
-	var s := '<path d="M30 6 L64 2 L70 60 L36 64 Z" fill="#C9A26E" stroke="#8A6A40" stroke-width="2"/>'
-	s += '<path d="M8 40 H82 L74 118 H16 Z" fill="#2E5FB0" stroke="#1C3C78" stroke-width="3"/>'
-	s += '<path d="M8 40 H82 V50 H8 Z" fill="#3A6EC4" stroke="#1C3C78" stroke-width="2"/>'
-	s += '<path d="M38 74 l7 -10 l7 10 m-14 4 l-6 10 h12 m10 -14 l6 10 h-12" stroke="#FFFFFF" stroke-width="2.5" fill="none"/>'
-	return tex(90, 120, s)
+	var s := '<defs><linearGradient id="bin" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4B8CE8"/><stop offset="0.45" stop-color="#2F67BC"/><stop offset="1" stop-color="#1F4590"/></linearGradient>'
+	s += '<linearGradient id="binlid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3B78D2"/><stop offset="1" stop-color="#2A5CAD"/></linearGradient>'
+	s += '<linearGradient id="card" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#D9B27C"/><stop offset="1" stop-color="#B98F58"/></linearGradient></defs>'
+	# The shadow on the floor.
+	s += '<ellipse cx="46" cy="117" rx="40" ry="4" fill="#000000" opacity="0.22"/>'
+	# The lid, open: its underside seen from the front, standing at the back.
+	s += '<path d="M12 40 L78 40 L74 6 L16 8 Z" fill="url(#binlid)" stroke="#1C3C78" stroke-width="2.5" stroke-linejoin="round"/>'
+	s += '<path d="M20 14 L70 13 M19 24 L71 23" stroke="#1C3C78" stroke-width="1.6" opacity="0.5"/>'
+	s += '<path d="M14 40 L26 9" stroke="#FFFFFF" stroke-width="2" opacity="0.3"/>'
+	# What is in it: a bottle, a bundle of newspapers, flattened cardboard.
+	s += '<path d="M14 46 L14 24 Q14 20 17 18 L17 10 L22 10 L22 18 Q25 20 25 24 L25 46 Z" fill="#BFE0F2" stroke="#6F9DB8" stroke-width="1.6" opacity="0.95"/>'
+	s += '<rect x="15.5" y="28" width="8" height="10" fill="#E8F4FB" opacity="0.9"/><path d="M17 20 L17 40" stroke="#FFFFFF" stroke-width="1.5" opacity="0.7"/>'
+	s += '<rect x="56" y="16" width="22" height="30" fill="#EFEAD9" stroke="#A59E88" stroke-width="1.8"/>'
+	for i in 5:
+		s += '<path d="M59 %d H75" stroke="#6E6A5E" stroke-width="1.6" opacity="0.55"/>' % (21 + i * 5)
+	s += '<path d="M56 30 H78 M67 16 V46" stroke="#B39A66" stroke-width="1.6"/>'
+	s += '<path d="M26 46 L28 8 L56 4 L58 46 Z" fill="url(#card)" stroke="#8A6A40" stroke-width="2" stroke-linejoin="round"/>'
+	s += '<path d="M42 5 L43 46" stroke="#8A6A40" stroke-width="1.6" opacity="0.6"/><path d="M30 12 H54 M30 20 H54" stroke="#8A6A40" stroke-width="1" opacity="0.35"/>'
+	s += '<rect x="36" y="6" width="14" height="8" fill="#E6D3A8" opacity="0.7"/>'
+	# The body of the bin, tapering, with its ribs, the rim and the recycling mark.
+	s += '<path d="M8 44 H82 L75 110 Q75 116 69 116 H21 Q15 116 15 110 Z" fill="url(#bin)" stroke="#1C3C78" stroke-width="3" stroke-linejoin="round"/>'
+	s += '<path d="M6 40 H84 Q86 40 86 43 V50 H4 V43 Q4 40 6 40 Z" fill="#4A8BE6" stroke="#1C3C78" stroke-width="2.5"/>'
+	s += '<rect x="8" y="42" width="40" height="3" fill="#FFFFFF" opacity="0.28"/>'
+	for y in [66, 84, 102]:
+		var inset: float = 8.0 + (y - 44) * 0.1
+		s += '<path d="M%.1f %d H%.1f" stroke="#1C3C78" stroke-width="2" opacity="0.5"/><path d="M%.1f %d H%.1f" stroke="#7FB0F2" stroke-width="1.4" opacity="0.4"/>' % [inset, y, 90 - inset, inset, y + 2, 90 - inset]
+	s += '<path d="M11 52 L17 108" stroke="#FFFFFF" stroke-width="3" opacity="0.2" stroke-linecap="round"/>'
+	# The chasing arrows.
+	s += '<path d="M45 58 L56 78 M60 84 H36 M34 78 L42 64" stroke="#FFFFFF" stroke-width="3.4" fill="none" stroke-linecap="round"/>'
+	s += '<path d="M56 78 l-1 -7 l-5 5 z M36 84 l7 2 l-3 -7 z M42 64 l-6 3 l7 3 z" fill="#FFFFFF"/>'
+	# A handle at the back, a wheel and its hub.
+	s += '<path d="M78 46 Q92 46 92 58 V70" stroke="#1C3C78" stroke-width="4" fill="none" stroke-linecap="round"/>'
+	s += '<circle cx="70" cy="114" r="6.5" fill="#23262B"/><circle cx="70" cy="114" r="2.6" fill="#8E949B"/>'
+	return tex(94, 120, s)
 
 
 ## Canvas 150x430: Charlotte's bedroom door, oak panels with strong grain. The "chacha" sign is added as labels.
@@ -1233,13 +1263,40 @@ static func doormat() -> ImageTexture:
 	return tex(220, 30, s)
 
 
-## Canvas 130x80: rain boots (yellow and green) standing by the door. Floor at y 80.
+## Canvas 130x80: her rain boots on a rubber boot tray by the door: one yellow with white dots, one green with a yellow stripe, each
+## glossy, with its cuff, pull tabs, a thick sole with a tread and a high shine, a little water and some grit on the tray. Floor at y 80.
 static func boots() -> ImageTexture:
-	var s := ""
-	for b in [[8.0, "#F2C12E", "#A8800E"], [66.0, "#3E8E5A", "#245E36"]]:
+	var s := '<defs>'
+	for g in [["bootY", "#FFD84A", "#F2C12E", "#C99A12"], ["bootG", "#5AB07A", "#3E8E5A", "#27663E"]]:
+		s += '<linearGradient id="%s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="%s"/><stop offset="0.4" stop-color="%s"/><stop offset="1" stop-color="%s"/></linearGradient>' % g
+	s += '<linearGradient id="tray" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7C828C"/><stop offset="1" stop-color="#555A63"/></linearGradient></defs>'
+	# The tray: a raised rim round a darker floor, with grit and a puddle.
+	s += '<path d="M2 66 Q2 62 8 62 H122 Q128 62 128 66 L124 78 Q123 80 120 80 H10 Q7 80 6 78 Z" fill="url(#tray)" stroke="#23262B" stroke-width="2"/>'
+	s += '<path d="M10 66 H120 L117 75 H13 Z" fill="#454952"/><path d="M8 63.5 H122" stroke="#8E949B" stroke-width="1.6" opacity="0.7"/>'
+	s += '<ellipse cx="62" cy="71" rx="16" ry="2.6" fill="#7FA9C4" opacity="0.55"/><ellipse cx="58" cy="70.4" rx="6" ry="1" fill="#FFFFFF" opacity="0.5"/>'
+	for g in [[20, 70], [34, 73], [92, 72], [108, 70], [100, 74], [26, 74]]:
+		s += '<circle cx="%d" cy="%d" r="1.4" fill="#8A7A60"/>' % g
+	for b in [[4.0, "bootY", "#B88A0E", true], [66.0, "bootG", "#1F5434", false]]:
 		var x: float = b[0]
-		s += '<path d="M%s 6 H%s V56 Q%s 60 %s 64 H%s Q%s 80 %s 78 H%s Z" fill="%s" stroke="%s" stroke-width="2.5"/>' % [x + 6, x + 32, x + 34, x + 50, x + 54, x + 58, x + 50, x + 4, b[1], b[2]]
-		s += '<rect x="%s" y="6" width="26" height="8" fill="%s" opacity="0.4"/>' % [x + 6, b[2]]
+		var body := 'M%s 6 L%s 6 L%s 46 C%s 54 %s 54 %s 60 C%s 64 %s 70 %s 73 L%s 73 L%s 50 C%s 30 %s 16 %s 6 Z' % [x + 4, x + 34, x + 36, x + 36, x + 48, x + 54, x + 60, x + 62, x + 60, x + 1, x + 2, x + 3, x + 4, x + 4]
+		s += '<ellipse cx="%s" cy="74" rx="32" ry="3.4" fill="#000000" opacity="0.28"/>' % (x + 31)
+		# The pull tabs on the cuff, then the boot itself and its cuff band.
+		s += '<path d="M%s 8 Q%s 0 %s 8 M%s 8 Q%s 0 %s 8" stroke="%s" stroke-width="2.4" fill="none"/>' % [x + 4, x + 6, x + 10, x + 28, x + 31, x + 34, b[2]]
+		s += '<path d="%s" fill="url(#%s)" stroke="%s" stroke-width="2.4" stroke-linejoin="round"/>' % [body, b[1], b[2]]
+		s += '<path d="M%s 6 L%s 6 L%s 14 L%s 14 Z" fill="%s" opacity="0.38"/>' % [x + 4, x + 34, x + 35, x + 4, b[2]]
+		s += '<ellipse cx="%s" cy="6" rx="15" ry="3" fill="#2A1E10" stroke="%s" stroke-width="1.6"/>' % [x + 19, b[2]]
+		# A glossy strip down the shaft and a round shine on the toe.
+		s += '<path d="M%s 17 Q%s 34 %s 50" stroke="#FFFFFF" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.5"/>' % [x + 11, x + 10, x + 14]
+		s += '<ellipse cx="%s" cy="63" rx="5" ry="2.2" fill="#FFFFFF" opacity="0.4"/>' % (x + 50)
+		# The thick sole with its tread.
+		s += '<path d="M%s 68 L%s 66 Q%s 68 %s 72 L%s 77 L%s 77 Z" fill="#EFE8D4" stroke="#9A917A" stroke-width="1.6"/>' % [x + 1, x + 54, x + 62, x + 64, x + 62, x + 1]
+		for k in 8:
+			s += '<path d="M%s 72 V77" stroke="#B3AA92" stroke-width="1.6"/>' % (x + 6 + k * 7)
+		if b[3]:
+			for d in [[x + 12, 24], [x + 24, 20], [x + 18, 34], [x + 28, 36], [x + 12, 44], [x + 24, 48], [x + 40, 58], [x + 48, 66]]:
+				s += '<circle cx="%s" cy="%s" r="2.3" fill="#FFFFFF" opacity="0.85"/>' % d
+		else:
+			s += '<path d="M%s 26 Q%s 30 %s 26 M%s 36 Q%s 40 %s 36" stroke="#FFD84A" stroke-width="3.4" fill="none" stroke-linecap="round" transform="translate(0 0)"/>' % [x + 6, x + 20, x + 35, x + 6, x + 20, x + 35]
 	return tex(130, 80, s)
 
 
