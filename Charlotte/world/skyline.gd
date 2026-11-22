@@ -117,8 +117,8 @@ static func _tree_pictures() -> Array:
 		var colors := []
 		if not palettes.is_empty():
 			for c: String in palettes[i % palettes.size()]:
-				colors.append("#" + Color(c).lerp(HAZE, 0.5).to_html(false))
-		var bark := "#" + Color("#5E4A3C").lerp(HAZE, 0.5).to_html(false)
+				colors.append("#" + Color(c).lerp(HAZE, 0.2).to_html(false))
+		var bark := "#" + Color("#4A382C").lerp(HAZE, 0.12).to_html(false)
 		var body := LaneArt._distant_tree(rng, Vector2(TREE_W / 2.0, TREE_FOOT), Vector2(TREE_W / 2.0, TREE_CROWN), rng.randf_range(105.0, 135.0), colors, bark)
 		var svg := '<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">%s</svg>' % [TREE_W, TREE_FOOT, TREE_W, TREE_FOOT, body]
 		pictures.append(PropArt.tex(svg, TREE_RASTER))
