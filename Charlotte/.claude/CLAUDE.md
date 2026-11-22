@@ -869,7 +869,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     oven faster), `--no-save`, and `Christmas.clear()` after (it deletes the PNGs);
     3. the réveillon at the dining table (`NOEL_TABLE`): the salon under a night-blue veil slipped just under the tree's glows
     (`_xmas_glow_from`), candles, the tourtière, the family round the table, `Christmas.REVEILLON`, a slice of bûche;
-    4. bed: "Bonne nuit… le père Noël s'en vient !", sleigh bells and Santa's golden sleigh crossing the night (`_Sleigh`);
+    4. bed: "Bonne nuit… le père Noël s'en vient !", then a little film of Santa's flight (`world/santa_flight.gd` `SantaFlight`, `DURATION` 9.6 s, drawn by hand: moon, stars, soft clouds, her neighbourhood's roofs with lit windows, nine galloping reindeer with Rudolph's glowing nose, the sleigh with Santa waving, a sack of presents, a glitter trail, bells in step with the gallop, a « Ho ! Ho ! Ho ! »);
     5. "Le matin de Noël !": crumbs, the empty glass and Santa's note on the plate, two presents under the tree
     (`Christmas.PRESENTS`: six, each with its wrapping `Christmas.present(kind, open)` and its contents `Christmas.gift_picture(id)`: the capybara plush with its orange, a box of crayons, a picture book, a board game, mittens and a tuque, ice skates; **a new present = a line in `PRESENTS`, a wrapping case in `present` and a picture in `gift_picture`**); opening them all finishes it, and the plush sits on
     her bed from then on (`flags.noel_capybara`).
