@@ -1697,6 +1697,8 @@ func _build_chores() -> void:
 		# She stands beside the pot, on the side she comes from, the spout over the soil.
 		var soil_x := _soil(id).x
 		spot.approach = func(from_x: float) -> float: return soil_x - POUR_REACH if from_x < soil_x else soil_x + POUR_REACH
+		# Once the quest is done the plants are only decoration: no click, no "elle a assez bu".
+		spot.condition = func() -> bool: return not Quests.done("plants")
 		add_child(spot)
 	var before := get_child_count()
 	_can = _put(InteriorArt.watering_can(), CAN_X, 606.0, 0.55, "floor")
