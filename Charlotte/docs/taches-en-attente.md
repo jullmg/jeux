@@ -38,3 +38,4 @@
 17. ~~FAIT (bottes sur leur plateau, bac de recyclage bleu avec son couvercle ouvert)~~ **Maison de Charlotte** : améliorer l'apparence des bottes à l'entrée et du bac de recyclage (`InteriorArt`).
 18. **À FAIRE SEULEMENT QUAND JULIEN LE DIRA** (« pas tout de suite ») : **Bac de recyclage** de la maison de Charlotte (`InteriorArt.recycling_bin`) : améliorer le signe de recyclage dessiné dessus.
 19. **Bug, fête d'Alyzée** (`scenes/fete_alyzee.gd`, étape de la licorne : épingler la corne les yeux bandés, `_Blindfold`) : pendant ce jeu, Alyzée n'est pas dans l'écran (la vue est cadrée ailleurs, ou le noir la cache) et sa bulle de texte apparaît à côté de l'écran. À corriger : qu'elle reste visible, ou que sa bulle soit placée dans le cadre.
+20. **À FAIRE SEULEMENT QUAND JULIEN LE DIRA** : **Fête d'Alyzée**, la piñata (`_Pinata`, étoile en papier crépon) et les bonbons qui tombent : améliorer leur apparence (`scenes/fete_alyzee.gd`, `world/party_art.gd`).
