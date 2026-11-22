@@ -390,9 +390,10 @@ func _mouth_svg(kind: String) -> String:
 		"laugh":
 			s += _open_smile("laugh", 18.0, 162.0, 31.0)
 		"yum":
-			s += _f('<path d="M106 164 Q123 190 140 164 Q123 169 106 164 Z" fill="{mouth}" stroke="{mouth_line}" stroke-width="2" stroke-linejoin="round"/>')
-			s += _f('<path d="M126 176 Q137 177 138 186 Q130 190 124 182 Z" fill="{tongue}" stroke="{mouth_line}" stroke-width="1.4" stroke-linejoin="round"/>')
-			s += _f('<path d="M134 167 Q139 166 141 161" stroke="{mouth_line}" stroke-width="2" fill="none" stroke-linecap="round"/>')
+			# Mmm: a happy open mouth with the tongue kept inside it (it used to be a red tongue hanging out of the
+			# corner, which looked odd), and a little dimple at the cheek.
+			s += _open_smile("yum", 13.0, 165.0, 17.0)
+			s += _f('<path d="M139 167 Q143 166 145 161" stroke="{mouth_line}" stroke-width="2" fill="none" stroke-linecap="round"/>')
 		"open":
 			s += _f('<ellipse cx="123" cy="174" rx="7.5" ry="10" fill="{mouth}" stroke="{mouth_line}" stroke-width="2.4"/>')
 			s += _f('<ellipse cx="123" cy="180" rx="4.5" ry="3.4" fill="{tongue}"/>')
