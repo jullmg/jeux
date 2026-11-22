@@ -215,7 +215,11 @@ func _build_spots() -> void:
 	pinata_spot.condition = func() -> bool: return not _pinata.burst
 	add_child(pinata_spot)
 	add_child(DoorSpot.make(Rect2(TABLE_X - 220.0, 470.0, 440.0, 200.0), _at_table, TABLE_X - 120.0))
-	add_child(DoorSpot.make(Rect2(TV_X - 160.0, 250.0, 320.0, 420.0), _start_film, TV_X - 200.0))
+	# The TV is hers to start: a click only says so (no channels to flip through).
+	_tv.before_click = func() -> bool:
+		if not _busy:
+			_says(_charlotte, "Je vais demander à Alyzée\nde lancer le film !" if _stage == Stage.FILM else "On va écouter un film tantôt !")
+		return true
 	add_child(DoorSpot.make(Rect2(_her_mom.position.x - 60.0, 330.0, 120.0, 340.0), func() -> void:
 		if _busy:
 			return
@@ -234,7 +238,7 @@ func _build_spots() -> void:
 	add_child(QuestMark.make(Vector2(POSTER_X, 220.0), func() -> bool: return _stage == Stage.UNICORN and not _busy))
 	add_child(QuestMark.make(Vector2(PINATA_X, 160.0), func() -> bool: return _stage == Stage.PINATA and not _busy))
 	add_child(QuestMark.make(Vector2(TABLE_X, 420.0), func() -> bool: return _stage == Stage.CAKE and not _busy))
-	add_child(QuestMark.make(Vector2(TV_X, 220.0), func() -> bool: return _stage == Stage.FILM and not _busy))
+	add_child(QuestMark.make(Vector2(CUSHIONS[1] + 30.0, 470.0), func() -> bool: return _stage == Stage.FILM and not _busy))
 
 
 func _says(who: Character, text: String, seconds := 2.6) -> void:
@@ -300,6 +304,9 @@ func _talk_to_alyzee() -> void:
 	_alyzee.facing = -1 if _charlotte.position.x < _alyzee.position.x else 1
 	if _stage == Stage.GIFT:
 		_give_present()
+		return
+	if _stage == Stage.FILM:
+		_start_film()
 		return
 	_says(_alyzee, ALYZEE_LINES[_line % ALYZEE_LINES.size()], 2.8)
 	_line += 1
@@ -368,9 +375,12 @@ func _unicorn_game() -> void:
 	_busy = true
 	_control.enabled = false
 	_charlotte.facing = 1
-	_says(_alyzee, "On te bande les yeux…\nPis tu colles la corne !", 2.6)
+	# Alyzée comes to the poster first: she used to talk from the far end of the room, out of the picture.
+	_move_alyzee(POSTER_X + 200.0, -1)
 	var go := create_tween()
-	go.tween_interval(2.0)
+	go.tween_interval(maxf(absf(POSTER_X + 200.0 - _alyzee.position.x) / 170.0 + 0.5, 0.8))
+	go.tween_callback(func() -> void: _says(_alyzee, "On te bande les yeux…\net tu colles la corne !", 2.6))
+	go.tween_interval(2.4)
 	go.tween_callback(func() -> void:
 		var blind := _Blindfold.new()
 		blind.area = Rect2(_poster.position, Vector2(260, 220))
@@ -752,6 +762,8 @@ func _sit_for_film() -> void:
 		person.sitting = true
 		person.is_walking = false
 		person.fidgets = false
+	# Her mother goes off to the kitchen: she used to stand over the children on the cushions.
+	_her_mom.visible = false
 	_dim(0.6)
 	var film: Array[String] = [FILM]
 	_tv.channels = film
@@ -774,6 +786,7 @@ func _lights_up() -> void:
 	_maman.facing = 1
 	_her_mom.position.x = TV_X - 300.0
 	_her_mom.facing = -1
+	_her_mom.visible = true
 
 
 func _goodbye() -> void:
