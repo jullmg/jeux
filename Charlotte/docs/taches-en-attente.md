@@ -21,6 +21,8 @@
 10. ~~FAIT~~ **Genoux** aux jambes des personnages (articulation), puis **réviser tout** (cyclistes, objets portés, laisse, etc.) pour ne rien briser.
 11. ~~FAIT~~ **Améliorer l'apparence des vêtements** des personnages (`CharacterArt`).
 12. ~~FAIT~~ **Expressions faciales** des personnages selon leurs actions (yeux, bouche, sourcils : content, concentré, surpris, goûte, dort…).
+32. **À FAIRE SEULEMENT QUAND JULIEN LE DIRA** : **Bug visuel, le soir du réveillon** (`house.gd` `_reveillon`, le salon sous un voile bleu nuit, `black` / `veil` / `_xmas_glow_from`) : la pièce est sombre, puis il y a une ligne verticale et, après cette ligne, la pièce n'est plus sombre. Le voile ne couvre pas toute la largeur du salon (ou s'arrête à une limite d'aire). À trouver et corriger : le voile doit couvrir toute la pièce où elle se trouve, sans coupure.
+33. **À FAIRE SEULEMENT QUAND JULIEN LE DIRA** : **Traîneau du père Noël, quand Charlotte dort le soir de Noël** (`world/christmas.gd` / `house.gd`, `_Sleigh`, les grelots) : l'animation du traîneau doit être « vraiment, vraiment mieux » : un vrai traîneau, des rennes qui galopent, Rudolph au nez rouge, le père Noël, le sac de cadeaux, une traînée d'étoiles, la lune, des nuages, le toit du quartier, un mouvement fluide, la musique et les grelots synchronisés.
 
 ## À réviser par Julien (en jouant)
 
