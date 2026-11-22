@@ -218,8 +218,8 @@ func _build_classmates() -> void:
 	var winter := Season.is_winter()
 	var plan := [
 		{"x": 520.0, "mode": "tag", "lines": ["Tague ! T'es gelée !", "Chu trop vite pour toi !"]},
-		{"x": 700.0, "mode": "tag", "lines": ["Attends, chu essoufflé !", "On joue à la tague gelée ?"]},
-		{"x": 1010.0, "y": 612.0 - 112.0, "mode": "idle", "lines": ["Chu le roi de la montagne !", "Regarde, je vais glisser !"]},
+		{"x": 700.0, "mode": "tag", "lines": ["Attends, je suis essoufflé !", "On joue à la tague gelée ?"]},
+		{"x": 1010.0, "y": 612.0 - 112.0, "mode": "idle", "lines": ["Je suis le roi de la montagne !", "Regarde, je vais glisser !"]},
 		{"x": 1830.0, "mode": "rope", "lines": ["Un, deux, trois, quatre… j'en suis à cinquante !", "Veux-tu tourner la corde ?"]},
 	]
 	if winter and _garde:

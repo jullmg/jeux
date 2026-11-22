@@ -24,13 +24,13 @@ const FILM := "reine"
 enum Stage { GIFT, UNICORN, PINATA, CAKE, FILM, BYE }
 
 const KID_LINES := [
-	["Y a-tu des bonbons dans la piñata ?\nJ'ai ben hâte !", "Moi, j'ai donné un toutou à Alyzée !"],
+	["Y a-tu des bonbons dans la piñata ?\nJ'ai tellement hâte !", "Moi, j'ai donné un toutou à Alyzée !"],
 	["C'est la plus belle fête de l'année !", "Le gâteau, y est-tu au chocolat ?"],
-	["Chu bon à la piñata, tu vas voir !", "J'ai mangé trop de chips… Hi hi !"],
+	["Je suis bon à la piñata, tu vas voir !", "J'ai mangé trop de chips… Hi hi !"],
 ]
 const HER_MOM_LINES := ["Servez-vous, les amis ! Y en a en masse !", "Faites attention au bâton de la piñata, hein !",
 	"Ça me fait tellement plaisir que tu sois venue, Charlotte."]
-const ALYZEE_LINES := ["Chu contente que tu sois là, Chachoue !", "Huit ans ! Chu rendue grande, han ?",
+const ALYZEE_LINES := ["Je suis contente que tu sois là, Chachoue !", "Huit ans ! Chu rendue grande, han ?",
 	"Après, on écoute un film ! C'est moi qui l'ai choisi."]
 const SONG := [
 	"♪ Bonne fête à toi… ♪",

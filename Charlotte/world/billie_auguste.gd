@@ -18,7 +18,7 @@ const MEETING := [
 	[1, "Moi, j'ai CINQ ans ! Pis chu grand, hein ?"],
 	[-1, "Mes amis m'appellent Chachoue."],
 	[1, "Cha-choue ! Cha-choue !"],
-	[0, "On est amis, astheure ! Reviens nous voir !"],
+	[0, "On est amis, maintenant ! Reviens nous voir !"],
 ]
 const LINE_SECONDS := 2.3
 ## Where their snowman stands, in their units (right of Auguste).
@@ -37,7 +37,7 @@ const SNOWMAN_LACKS := [
 ]
 ## What each says as the part goes on: [who puts it on, their line, Charlotte's answer].
 const SNOWMAN_PUT := {
-	"carotte": [1, "C'est moi qui mets le nez ! Pouic !", "Y'a l'air d'un vrai, astheure !"],
+	"carotte": [1, "C'est moi qui mets le nez ! Pouic !", "Il a l'air d'un vrai, maintenant !"],
 	"boutons": [0, "Un, deux, trois boutons ! Y est ben chic !", "Rouge, bleu, jaune !"],
 	"tuque": [1, "La tuque du Canadien ! Go Habs go !", "Y aura pas frette aux oreilles !"],
 }
@@ -45,15 +45,15 @@ const SNOWMAN_DONE := [
 	[0, "Y est fini ! C'est le plus beau bonhomme de la ruelle !"],
 	[1, "On l'appelle Monsieur Carotte !"],
 	[-1, "Bonjour, Monsieur Carotte !"],
-	[0, "Merci, Chachoue ! T'es ben fine."],
+	[0, "Merci, Chachoue ! T'es très gentille."],
 ]
 const SNOWMAN_LINES := [
 	["Monsieur Carotte a pas fondu ! Y fait trop frette !", "Demain, on y fait une blonde !"],
 	["Y me regarde, Monsieur Carotte !", "Chu plus grand que lui ? Non ? Pas encore !"],
 ]
 const LINES := [
-	["Salut, Chachoue !", "J'ai mangé une crème glacée, c'tait ben bon !", "Mon p'tit frère court plus vite que moi, mais pas longtemps !"],
-	["Regarde mon chandail ! C'est un vrai !", "Chu capable de compter jusqu'à vingt, tsé !", "Ma sœur est ben fine, mais a me gosse des fois !"],
+	["Salut, Chachoue !", "J'ai mangé une crème glacée, c'était très bon !", "Mon p'tit frère court plus vite que moi, mais pas longtemps !"],
+	["Regarde mon chandail ! C'est un vrai !", "Je suis capable de compter jusqu'à vingt !", "Ma sœur est ben fine, mais a me gosse des fois !"],
 ]
 
 ## The scene's PlayerControl: Charlotte stays put during the meeting.

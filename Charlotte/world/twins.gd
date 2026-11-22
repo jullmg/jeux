@@ -34,13 +34,13 @@ const ASKING := [
 	[0, "Pis a' se rappelle pus lequel ! A' l'oublie toute, ma sœur."],
 	[1, "Ben là ! C'était dans une ruelle,\nmais laquelle, mettons…"],
 	[-1, "Je vais le retrouver ! Je connais toutes les ruelles du bloc."],
-	[1, "T'es donc ben fine ! Si tu le trouves, on le lira ensemble."],
+	[1, "Tu es vraiment gentille ! Si tu le trouves, on le lira ensemble."],
 ]
 const GIVING := [
 	[-1, "Constance ! Regarde ce que j'ai trouvé !"],
 	[1, "« Minou et la lune » ! C'est lui ! Y'était où ?"],
 	[-1, "Dans le croque-livre de la ruelle verte."],
-	[0, "Je te l'avais dit, tsé, que c'tait là !"],
+	[0, "Je te l'avais dit que c'était là !"],
 	[1, "Merci, Chachoue ! Astheure, on le lit ensemble ?"],
 ]
 ## In winter, after Halloween: Alphée has an idea, a movie night at Charlotte's (Cinema).
@@ -48,7 +48,7 @@ const MOVIE := [
 	[0, "Chachoue ! Il fait ben trop frette pour jouer dehors…"],
 	[1, "On pourrait faire une soirée cinéma ! Chez vous, mettons ?"],
 	[-1, "Oh oui ! Devant la télé, avec des coussins !"],
-	[0, "Pis des grignotines ! Des chips pis des bonbons, tsé."],
+	[0, "Et des grignotines ! Des chips et des bonbons."],
 	[1, "Demande des sous à ta mère pour aller au dépanneur !"],
 	[-1, "J'y vais ! On se rejoint chez moi ?"],
 	[0, "Deal ! On arrive dès que t'as les grignotines !"],
@@ -65,13 +65,13 @@ const FORT := [
 	[0, "Chachoue ! Y a assez de neige pour faire un fort !"],
 	[1, "Un vrai fort, avec des créneaux !"],
 	[-1, "Oui ! Pis après, une bataille de balles de neige ?"],
-	[0, "Contre Billie pis Auguste ! Y vont voir !"],
+	[0, "Contre Billie et Auguste ! Ils vont voir !"],
 	[1, "Viens, on le bâtit à côté de chez nous."],
 ]
 const AGAIN := [
 	[-1, "On joue à la cachette ?"],
 	[0, "Ouiii ! Mais cette fois-ci, on se cache\nben mieux, tu nous trouveras jamais !"],
-	[1, "Ferme les yeux pis compte jusqu'à dix !"],
+	[1, "Ferme les yeux et compte jusqu'à dix !"],
 	[-1, "Un, deux, trois, quatre…"],
 ]
 ## How much of a hiding sister shows over her fence.
@@ -195,7 +195,7 @@ func interact(who: Character) -> void:
 		_say(_clicked, "Demande des sous à ta mère\npour les grignotines !")
 		return
 	if met() and Cinema.step() == 2:
-		_say(_clicked, "Des chips pis des bonbons,\nau dépanneur !" if _clicked == 0 else "Grouille, Chachoue, on a hâte !")
+		_say(_clicked, "Des chips et des bonbons,\nau dépanneur !" if _clicked == 0 else "Grouille, Chachoue, on a hâte !")
 		return
 	if met() and SnowFort.can_start():
 		_talk_through(FORT, func() -> void:

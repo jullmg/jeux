@@ -33,7 +33,7 @@ const BUILD_LINES := [
 	["Les créneaux !", "Comme un vrai château !"],
 	["Pis le dernier !", "Y est fini ! Le plus beau fort de la ruelle !"],
 ]
-const HIT_LINES := ["Ayoye ! Dans ma tuque !", "Hi hi ! Tu m'as eu !", "Pas dans le cou, c'est frette !", "Encore ?! T'es ben bonne !", "Bon, bon, bon…"]
+const HIT_LINES := ["Ayoye ! Dans ma tuque !", "Hi hi ! Tu m'as eu !", "Pas dans le cou, c'est frette !", "Encore ?! T'es très bonne !", "Bon, bon, bon…"]
 
 var scene: Node2D
 var control: PlayerControl

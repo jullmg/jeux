@@ -19,7 +19,7 @@ const MAX := 5
 ## (a `PartyArt.gift` kind, or "balle"), and what she says opening it.
 const GUESTS := [
 	["alphee", "Alphée", "met_twins", "Bonne fête, Chachoue ! Ouvre le mien en premier !", "casse_tete", "Un casse-tête de minous ! Merci, Alphée !"],
-	["constance", "Constance", "met_twins", "C'est moi qui l'ai choisi, tsé !", "vernis", "Du vernis brillant ! Merci, Constance !"],
+	["constance", "Constance", "met_twins", "C'est moi qui l'ai choisi !", "vernis", "Du vernis brillant ! Merci, Constance !"],
 	["billie", "Billie", "met_billie_auguste", "Bonne fête ! C'est pour bricoler ensemble !", "bricolage", "Des brillants pis des pompons ! Merci, Billie !"],
 	["auguste", "Auguste", "met_billie_auguste", "C'est moi qui l'ai emballé tout seul !", "balle", "Une balle qui rebondit ! Merci, Auguste !"],
 	["alyzee", "Alyzée", "met_alyzee", "Bonne fête, ma meilleure amie !", "licorne", "Une licorne ! Comme celle que je t'ai donnée !"],

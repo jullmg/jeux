@@ -17,12 +17,12 @@ const MEETING := [
 	[-1, "Allô ! Pourquoi t'es toute seule ?"],
 	[0, "Chu nouvelle… Je connais personne encore."],
 	[-1, "Moi, c'est Charlotte.\nMais tout le monde m'appelle Chachoue !"],
-	[0, "Moi, c'est Alyzée. Avec un y pis un z !"],
+	[0, "Moi, c'est Alyzée. Avec un y et un z !"],
 	[-1, "Veux-tu jouer avec moi ?"],
 	[0, "Oui ! Ben oui !"],
 ]
-const LINES := ["Salut, Chachoue !", "On vient d'arriver dans le quartier, tsé.", "T'es ma première amie dans le quartier, tsé !", "Demain, on joue encore à la tague ?",
-	"J'ai un chat qui s'appelle Biscotte !", "Ma maîtresse est ben fine !"]
+const LINES := ["Salut, Chachoue !", "On vient d'arriver dans le quartier.", "T'es ma première amie dans le quartier, tsé !", "Demain, on joue encore à la tague ?",
+	"J'ai un chat qui s'appelle Biscotte !", "Ma maîtresse est très gentille !"]
 
 ## The scene's PlayerControl: Charlotte is left to the script while they talk and play.
 var control: PlayerControl

@@ -42,7 +42,7 @@ const AFTER_DRAWING := [
 	[0, "¡Amigas ! Hi hi !"],
 ]
 const LINES := ["¡Hola, Chachoue !", "Mariposa, ça veut dire papillon !", "Ma abuela m'envoie des cartes postales du Mexique.",
-	"Ma mamá fait des conchas, du pain sucré. Je t'en donne une un jour !", "Chez nous, on parle français pis espagnol.",
+	"Ma mamá fait des conchas, du pain sucré. Je t'en donne une un jour !", "Chez nous, on parle français et espagnol.",
 	"Gracias, ça veut dire merci !", "Demain, on dessine un soleil, OK ?"]
 
 ## The control the scene gives her: Charlotte is left to the script while they talk and draw.

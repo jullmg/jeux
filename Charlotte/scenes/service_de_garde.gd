@@ -51,7 +51,7 @@ const EMILIA_AFTER := [
 	[-1, "Oui ! C'est super bon ! Gracias, Emilia !"],
 	[0, "¡De nada ! Ça veut dire : y'a pas de quoi."],
 ]
-const KID_LINES := [["Regarde mon bricolage !", "J'ai mis ben trop de colle…"], ["On fait la plus grande tour du monde !"],
+const KID_LINES := [["Regarde mon bricolage !", "J'ai mis beaucoup trop de colle…"], ["On fait la plus grande tour du monde !"],
 	["Les pommes, c'est ma collation préférée !"]]
 
 var _jade: Character
