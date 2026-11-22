@@ -86,15 +86,79 @@ static func coat_shelf() -> ImageTexture:
 	return tex(300, 330, s)
 
 
-## Canvas w x h: white cast-iron radiator. Floor at the bottom.
+## A framed picture, with volume: a soft shadow on the wall, a mitred frame in `kind` ("wood", "black", "gold", "white") with its light
+## on the upper left, a cream mat with a bevelled opening, the picture (`inner`, drawn in the opening's own space, `pw` × `ph`, clipped)
+## and a streak of reflection on the glass. `id` keeps the clip path of each frame in a sheet apart.
+static func _framed(id: String, x: float, y: float, w: float, h: float, kind: String, inner: String, t := 7.0, mat := 6.0, hue := "#F4EFE4") -> String:
+	var tones: Array = {
+		"wood": ["#C99259", "#B27A44", "#8C5C30", "#744A24"],
+		"black": ["#46464C", "#2E2E33", "#1C1C20", "#101013"],
+		"gold": ["#EBC95A", "#D2A93F", "#A88120", "#8A6812"],
+		"white": ["#FFFFFF", "#F4F2EC", "#DEDACF", "#CBC6B8"],
+	}[kind]
+	var s := '<rect x="%s" y="%s" width="%s" height="%s" rx="1.5" fill="#000000" opacity="0.16"/>' % [x + 3.5, y + 4.5, w, h]
+	s += '<polygon points="%s,%s %s,%s %s,%s %s,%s" fill="%s"/>' % [x, y, x + w, y, x + w - t, y + t, x + t, y + t, tones[0]]
+	s += '<polygon points="%s,%s %s,%s %s,%s %s,%s" fill="%s"/>' % [x, y, x + t, y + t, x + t, y + h - t, x, y + h, tones[1]]
+	s += '<polygon points="%s,%s %s,%s %s,%s %s,%s" fill="%s"/>' % [x + w, y, x + w, y + h, x + w - t, y + h - t, x + w - t, y + t, tones[2]]
+	s += '<polygon points="%s,%s %s,%s %s,%s %s,%s" fill="%s"/>' % [x, y + h, x + t, y + h - t, x + w - t, y + h - t, x + w, y + h, tones[3]]
+	s += '<rect x="%s" y="%s" width="%s" height="%s" fill="none" stroke="#00000033" stroke-width="1"/>' % [x + 0.5, y + 0.5, w - 1.0, h - 1.0]
+	if kind == "wood":
+		for k in 3:
+			s += '<path d="M%s %s h%s" stroke="#FFFFFF" stroke-width="0.7" opacity="0.18"/>' % [x + 4.0, y + 2.0 + k * 1.6, w - 8.0]
+	if kind == "gold":
+		s += '<rect x="%s" y="%s" width="%s" height="%s" fill="none" stroke="#FFF3B0" stroke-width="1" opacity="0.6"/>' % [x + 2.0, y + 2.0, w - 4.0, h - 4.0]
+	# The mat and its bevelled opening.
+	var mx := x + t
+	var my := y + t
+	var mw := w - 2.0 * t
+	var mh := h - 2.0 * t
+	s += '<rect x="%s" y="%s" width="%s" height="%s" fill="%s"/>' % [mx, my, mw, mh, hue]
+	s += '<path d="M%s %s h%s v%s" stroke="#00000022" stroke-width="1.5" fill="none"/>' % [mx, my, mw, mh]
+	var px := mx + mat
+	var py := my + mat
+	var pw := mw - 2.0 * mat
+	var ph := mh - 2.0 * mat
+	s += '<defs><clipPath id="clip_%s"><rect x="%s" y="%s" width="%s" height="%s"/></clipPath></defs>' % [id, px, py, pw, ph]
+	s += '<g clip-path="url(#clip_%s)"><g transform="translate(%s %s)">%s</g>' % [id, px, py, inner]
+	# Shade inside the opening (the mat is thicker than the picture), then the glass.
+	s += '<rect x="%s" y="%s" width="%s" height="3" fill="#000000" opacity="0.22"/><rect x="%s" y="%s" width="3" height="%s" fill="#000000" opacity="0.16"/>' % [px, py, pw, px, py, ph]
+	s += '<polygon points="%s,%s %s,%s %s,%s %s,%s" fill="#FFFFFF" opacity="0.2"/>' % [px, py, px + pw * 0.5, py, px + pw * 0.12, py + ph, px, py + ph]
+	s += '<polygon points="%s,%s %s,%s %s,%s %s,%s" fill="#FFFFFF" opacity="0.1"/>' % [px + pw * 0.58, py, px + pw * 0.66, py, px + pw * 0.28, py + ph, px + pw * 0.2, py + ph]
+	s += '</g>'
+	s += '<rect x="%s" y="%s" width="%s" height="%s" fill="none" stroke="#00000044" stroke-width="1"/>' % [px, py, pw, ph]
+	return s
+
+
+## Canvas w x h: a white cast-iron column radiator, floor at the bottom: enamel columns that catch the light on their left, the dark
+## gaps between them, a top and a bottom header, the valve with its knob, the pipe into the floor, a few chips of paint.
 static func radiator(w: float, h: float) -> ImageTexture:
-	var s := '<rect x="2" y="%s" width="%s" height="8" fill="#DCD8D0"/>' % [h - 8, w - 4]
-	var x := 4.0
-	while x < w - 14:
-		s += '<rect x="%s" y="6" width="12" height="%s" rx="6" fill="#F4F2EC" stroke="#B9B4AA" stroke-width="2"/>' % [x, h - 16]
-		x += 13.0
-	s += '<rect x="2" y="%s" width="%s" height="6" fill="#B9B4AA"/>' % [h * 0.18, w - 4]
-	s += '<rect x="2" y="%s" width="%s" height="6" fill="#B9B4AA"/>' % [h * 0.82 - 6, w - 4]
+	var s := '<defs><linearGradient id="enamel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#E4E0D6"/><stop offset="0.28" stop-color="#FFFFFF"/><stop offset="0.7" stop-color="#EDEAE2"/><stop offset="1" stop-color="#C9C4B8"/></linearGradient>'
+	s += '<linearGradient id="enamel_h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D8D4C8"/></linearGradient></defs>'
+	var foot := h - 4.0
+	s += '<ellipse cx="%s" cy="%s" rx="%s" ry="4" fill="#000000" opacity="0.18"/>' % [w / 2.0, foot, w / 2.0 - 2.0]
+	var n := int((w - 18.0) / 15.0)
+	var x := 9.0 + (w - 18.0 - n * 15.0) / 2.0
+	for k in n:
+		var cx := x + k * 15.0
+		# One column: a deep slot behind, the enamel cylinder over it, its highlight and its chipped foot.
+		s += '<rect x="%s" y="10" width="13" height="%s" rx="6.5" fill="#6E6A60"/>' % [cx + 1.0, foot - 16.0]
+		s += '<rect x="%s" y="8" width="12" height="%s" rx="6" fill="url(#enamel)" stroke="#A8A398" stroke-width="1.4"/>' % [cx, foot - 18.0]
+		s += '<path d="M%s 14 v%s" stroke="#FFFFFF" stroke-width="1.6" opacity="0.8" stroke-linecap="round"/>' % [cx + 3.0, foot - 32.0]
+		s += '<path d="M%s 14 v%s" stroke="#9A958A" stroke-width="1" opacity="0.5" stroke-linecap="round"/>' % [cx + 9.5, foot - 32.0]
+	# Headers: the top and bottom manifolds the columns grow out of.
+	for hy in [4.0, foot - 14.0]:
+		s += '<rect x="3" y="%s" width="%s" height="10" rx="4" fill="url(#enamel_h)" stroke="#A8A398" stroke-width="1.6"/>' % [hy, w - 6.0]
+		s += '<path d="M8 %s H%s" stroke="#FFFFFF" stroke-width="1.4" opacity="0.8"/>' % [hy + 2.5, w - 8.0]
+		s += '<path d="M8 %s H%s" stroke="#B3AEA2" stroke-width="1" opacity="0.8"/>' % [hy + 8.0, w - 8.0]
+	# The valve and the pipe.
+	s += '<rect x="%s" y="%s" width="6" height="%s" fill="#B8B4AA" stroke="#8F8A7E" stroke-width="1.2"/>' % [w - 14.0, foot - 8.0, 8.0]
+	s += '<rect x="%s" y="%s" width="12" height="9" rx="2" fill="#C9A35A" stroke="#8A6A2A" stroke-width="1.4"/>' % [w - 17.0, foot - 24.0]
+	s += '<circle cx="%s" cy="%s" r="5" fill="#C9A35A" stroke="#8A6A2A" stroke-width="1.4"/><path d="M%s %s h8" stroke="#8A6A2A" stroke-width="2"/>' % [w - 11.0, foot - 34.0, w - 15.0, foot - 34.0]
+	# A little wear: chips down to the black iron, and a faint rust stain by the valve.
+	for chip in [[x + 20.0, foot - 28.0], [x + 61.0, 20.0], [x + 108.0, foot - 24.0]]:
+		if float(chip[0]) < w - 24.0:
+			s += '<circle cx="%s" cy="%s" r="1.4" fill="#4A463E"/>' % chip
+	s += '<ellipse cx="%s" cy="%s" rx="5" ry="3" fill="#B26A3A" opacity="0.25"/>' % [w - 14.0, foot - 4.0]
 	return tex(w, h, s)
 
 
@@ -235,24 +299,45 @@ static func rug() -> ImageTexture:
 
 ## Canvas 120x160: framed posters (style 0 line drawing, 1 dark with a glowing mushroom, 2 figure grid).
 static func poster(style: int) -> ImageTexture:
-	var s := '<rect x="2" y="2" width="116" height="156" fill="#3A3A3A"/>'
+	var inner := ""
+	var kind := "black"
+	var hue := "#F4EFE4"
 	match style:
 		0:
-			s += '<rect x="8" y="8" width="104" height="144" fill="#F1ECE2"/>'
-			s += '<path d="M24 40 h70 M24 60 h50 M24 80 h64 M30 110 q30 -30 60 0" stroke="#8A8478" stroke-width="2" fill="none"/>'
+			# Line art on cream: a face drawn in one stroke, a sun, a wavy line.
+			inner += '<rect width="104" height="136" fill="#F1ECE2"/>'
+			inner += '<circle cx="74" cy="34" r="14" fill="#E8B15A" opacity="0.85"/>'
+			inner += '<path d="M18 52 Q30 30 48 44 Q64 56 58 76 Q52 94 36 90 Q24 86 28 72 Q32 62 44 66" stroke="#4A453C" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
+			inner += '<path d="M30 54 q3 -3 6 0 M44 50 q3 -3 6 0" stroke="#4A453C" stroke-width="1.6" fill="none"/>'
+			inner += '<path d="M14 110 Q30 98 46 110 T78 110 T104 106" stroke="#7A8F7E" stroke-width="2" fill="none"/>'
+			inner += '<path d="M14 120 Q30 108 46 120 T78 120 T104 116" stroke="#B5C2B6" stroke-width="2" fill="none"/>'
 		1:
-			s += '<rect x="8" y="8" width="104" height="144" fill="#2E2A26"/>'
-			s += '<circle cx="60" cy="70" r="30" fill="#5A4A2E" opacity="0.6"/>'
-			s += '<path d="M40 82 Q60 52 80 82 Z" fill="#F2E6C8"/><rect x="56" y="82" width="8" height="26" fill="#E8DCC0"/>'
+			# A mushroom under a big moon, on a dark ground.
+			kind = "black"
+			hue = "#EDE6D6"
+			inner += '<rect width="104" height="136" fill="#2A2622"/>'
+			inner += '<circle cx="52" cy="56" r="34" fill="#6A5632" opacity="0.7"/><circle cx="52" cy="56" r="26" fill="#8A7242" opacity="0.5"/>'
+			inner += '<path d="M28 82 Q52 36 76 82 Z" fill="#F2E6C8"/><path d="M34 76 Q52 46 70 76" stroke="#D9C9A4" stroke-width="2" fill="none"/>'
+			inner += '<rect x="47" y="80" width="10" height="32" rx="3" fill="#E8DCC0"/>'
+			for d in [[40, 66, 4], [56, 58, 3], [64, 72, 3.5], [48, 70, 2.5]]:
+				inner += '<circle cx="%s" cy="%s" r="%s" fill="#C9A06A" opacity="0.7"/>' % d
+			for st in [[12, 14], [90, 20], [22, 40], [86, 100], [14, 110]]:
+				inner += '<circle cx="%s" cy="%s" r="1.4" fill="#F2E6C8"/>' % st
 		_:
-			s += '<rect x="8" y="8" width="104" height="144" fill="#EFE9DE"/>'
-			for r in 4:
-				for c in 3:
-					var x := 26.0 + c * 30.0
-					var y := 30.0 + r * 32.0
-					s += '<path d="M%s %s l6 -10 l6 10 m-6 -10 v-8" stroke="#5A5248" stroke-width="2" fill="none"/>' % [x, y + 10]
-	s += '<path d="M8 8 L50 8 L8 70 Z" fill="#FFFFFF" opacity="0.14"/>'
-	return tex(120, 160, s)
+			# A botanical print: three sprigs on a pale page.
+			kind = "white"
+			hue = "#F7F3E9"
+			inner += '<rect width="104" height="136" fill="#EFE9DE"/>'
+			for k in 3:
+				var cx := 22.0 + k * 30.0
+				inner += '<path d="M%s 124 Q%s 80 %s 30" stroke="#5E7A4E" stroke-width="2" fill="none"/>' % [cx, cx - 4.0 + k * 3.0, cx + 2.0]
+				for j in 6:
+					var y := 40.0 + j * 14.0
+					var side := 1.0 if j % 2 == 0 else -1.0
+					inner += '<ellipse cx="%s" cy="%s" rx="9" ry="3.6" fill="#7E9E68" stroke="#4E6A3E" stroke-width="1" transform="rotate(%s %s %s)"/>' % [cx + side * 8.0, y, -30.0 * side, cx + side * 8.0, y]
+				inner += '<circle cx="%s" cy="30" r="3.4" fill="#D8845A"/>' % (cx + 2.0)
+	var s := _framed("poster%d" % style, 2.0, 2.0, 116.0, 156.0, kind, inner, 7.0, 6.0, hue)
+	return tex(124, 164, s)
 
 
 ## Canvas 480x220: walnut dining table with chairs, things on top. Floor at y 220.
@@ -551,24 +636,28 @@ static func terrarium(front: bool) -> ImageTexture:
 
 ## Canvas 200x150: yellow checkerboard painting with pink flowers.
 static func flower_painting() -> ImageTexture:
-	var s := '<rect x="2" y="2" width="196" height="146" fill="#F7F2E0" stroke="#D9D2C4" stroke-width="2"/>'
+	var inner := '<rect width="170" height="118" fill="#F6EFD6"/>'
 	for r in 4:
 		for c in 5:
 			if (r + c) % 2 == 0:
-				s += '<rect x="%d" y="%d" width="38" height="36" fill="#F2C12E"/>' % [4 + c * 38, 4 + r * 36]
-	s += '<path d="M40 130 Q100 80 160 130 Z" fill="#3E8E5A"/>'
-	for x in [62.0, 88.0, 112.0, 138.0]:
-		s += '<circle cx="%s" cy="100" r="11" fill="#F2A7C9"/><circle cx="%s" cy="100" r="4" fill="#FFF4C4"/>' % [x, x]
-	return tex(200, 150, s)
+				inner += '<rect x="%d" y="%d" width="34" height="30" fill="#F2C12E" opacity="0.85"/>' % [c * 34, r * 30]
+	inner += '<path d="M30 112 Q85 56 140 112 Z" fill="#3E8E5A"/><path d="M44 108 Q85 72 126 108" stroke="#5FB07A" stroke-width="2" fill="none"/>'
+	for x in [54.0, 78.0, 100.0, 124.0]:
+		inner += '<path d="M%s 100 v-14" stroke="#2F6A40" stroke-width="2"/>' % x
+		for a in 5:
+			var ang := TAU * a / 5.0
+			inner += '<ellipse cx="%s" cy="%s" rx="6" ry="4" fill="#F2A7C9" stroke="#C0678F" stroke-width="0.8" transform="rotate(%s %s %s)"/>' % [x + cos(ang) * 6.0, 84.0 + sin(ang) * 6.0, rad_to_deg(ang), x + cos(ang) * 6.0, 84.0 + sin(ang) * 6.0]
+		inner += '<circle cx="%s" cy="84" r="3.6" fill="#FFF0B0" stroke="#D8A93A" stroke-width="0.8"/>' % x
+	return tex(190, 140, _framed("flower", 2.0, 2.0, 184.0, 134.0, "wood", inner, 8.0, 7.0, "#FBF7EA"))
 
 
 ## Canvas 120x160: strawberry poster on a pink checkerboard.
 static func strawberry_poster() -> ImageTexture:
-	var s := '<rect x="0" y="0" width="120" height="160" fill="#F7E0EA"/>'
+	var s := '<rect x="0" y="0" width="104" height="142" fill="#F7E0EA"/>'
 	for r in 8:
 		for c in 6:
 			if (r + c) % 2 == 0:
-				s += '<rect x="%d" y="%d" width="20" height="20" fill="#E9A3C3"/>' % [c * 20, r * 20]
+				s += '<rect x="%d" y="%d" width="18" height="18" fill="#E9A3C3"/>' % [c * 18, r * 18]
 	for p in [[44.0, 58.0, 24.0], [78.0, 84.0, 20.0]]:
 		var cx: float = p[0]
 		var top: float = p[1]
@@ -578,7 +667,7 @@ static func strawberry_poster() -> ImageTexture:
 		for k in 7:
 			s += '<ellipse cx="%s" cy="%s" rx="1.6" ry="2.4" fill="#F7D774"/>' % [cx + [-12, 0, 12, -6, 6, -10, 10][k] * r / 24.0, top + [8, 6, 8, 20, 20, 30, 30][k] * r / 24.0]
 		s += '<path d="M%s %s l-12 -4 l9 -3 l-2 -9 l7 7 l7 -7 l-2 9 l9 3 l-12 4 z" fill="#3E8E5A" stroke="#2A6A40" stroke-width="1.5"/>' % [cx, top + 2]
-	return tex(120, 160, s)
+	return tex(124, 164, _framed("straw", 2.0, 2.0, 116.0, 156.0, "white", s, 7.0, 5.0, "#FFF6F8"))
 
 
 ## Canvas 170x250: three white picture-book ledges. Not flat rectangles: every book has its own height, width
@@ -1317,19 +1406,43 @@ static func boots() -> ImageTexture:
 
 ## Canvas 440x170: a row of framed family photos for the hallway.
 static func photo_row() -> ImageTexture:
+	# Family photographs in frames of their own: [x, y, w, h, frame kind, sky, ground, mood], each a little scene with people.
+	var specs := [
+		[0.0, 30.0, 92.0, 112.0, "black", "#9DB9C9", "#7E9E68", 0],
+		[104.0, 0.0, 124.0, 92.0, "wood", "#F2D9A0", "#B8855A", 1],
+		[104.0, 102.0, 58.0, 66.0, "white", "#C9DDEA", "#E8EEF2", 2],
+		[172.0, 102.0, 56.0, 66.0, "black", "#F2B6CF", "#A8C28A", 0],
+		[246.0, 18.0, 84.0, 104.0, "gold", "#D9C6E6", "#8EA880", 2],
+		[344.0, 38.0, 94.0, 74.0, "wood", "#BFE0F0", "#6E9E6A", 1],
+	]
 	var s := ""
-	var frames := [[0, 30, 90, 110, "#2B2B2B"], [110, 0, 120, 90, "#B08A5A"], [110, 104, 56, 64, "#F4F2EC"], [180, 104, 50, 64, "#2B2B2B"], [250, 20, 80, 100, "#F4F2EC"], [350, 40, 90, 70, "#B08A5A"]]
-	var tints := ["#9DB9C9", "#E8C9A0", "#C9DDB5", "#F2B6CF", "#D9C6E6", "#F2D9A0"]
-	for i in frames.size():
-		var f: Array = frames[i]
-		s += '<rect x="%s" y="%s" width="%s" height="%s" fill="%s"/>' % [f[0], f[1], f[2], f[3], f[4]]
-		s += '<rect x="%s" y="%s" width="%s" height="%s" fill="%s"/>' % [f[0] + 7, f[1] + 7, f[2] - 14, f[3] - 14, tints[i]]
-		var cx: float = f[0] + f[2] / 2.0
-		var cy: float = f[1] + f[3] * 0.62
-		s += '<circle cx="%s" cy="%s" r="%s" fill="#6E4E3A" opacity="0.6"/>' % [cx - 8, cy - 8, minf(f[2], f[3]) * 0.12]
-		s += '<circle cx="%s" cy="%s" r="%s" fill="#B0623A" opacity="0.6"/>' % [cx + 10, cy - 4, minf(f[2], f[3]) * 0.1]
-		s += '<path d="M%s %s q18 -16 36 0 v%s h-36 z" fill="#5A6E8E" opacity="0.5"/>' % [cx - 18, cy + 8, f[3] * 0.18]
-	return tex(440, 170, s)
+	for i in specs.size():
+		var f: Array = specs[i]
+		var w: float = f[2]
+		var h: float = f[3]
+		var t := 6.0
+		var mat := 7.0
+		var pw := w - 2.0 * (t + mat)
+		var ph := h - 2.0 * (t + mat)
+		var inner := '<rect width="%s" height="%s" fill="%s"/>' % [pw, ph, f[5]]
+		inner += '<ellipse cx="%s" cy="%s" rx="%s" ry="%s" fill="%s"/>' % [pw * 0.5, ph, pw * 0.9, ph * 0.4, f[6]]
+		if int(f[7]) == 1:
+			# A sun and a hill.
+			inner += '<circle cx="%s" cy="%s" r="%s" fill="#FFF0B0" opacity="0.9"/>' % [pw * 0.8, ph * 0.28, pw * 0.1]
+		# Two people (a tall and a small one) and, in some, a tree.
+		var cx := pw * 0.5
+		var base := ph * 0.9
+		inner += '<ellipse cx="%s" cy="%s" rx="%s" ry="2.4" fill="#000000" opacity="0.2"/>' % [cx, base + 1.0, pw * 0.22]
+		inner += '<rect x="%s" y="%s" width="%s" height="%s" rx="2" fill="%s"/>' % [cx - pw * 0.2, base - ph * 0.36, pw * 0.14, ph * 0.36, ["#3E6AA8", "#B0623A", "#7E4E8E"][i % 3]]
+		inner += '<circle cx="%s" cy="%s" r="%s" fill="#E8B898"/>' % [cx - pw * 0.13, base - ph * 0.42, pw * 0.075]
+		inner += '<path d="M%s %s a%s %s 0 0 1 %s 0" fill="#5A3A24"/>' % [cx - pw * 0.205, base - ph * 0.44, pw * 0.075, pw * 0.06, pw * 0.15]
+		inner += '<rect x="%s" y="%s" width="%s" height="%s" rx="2" fill="%s"/>' % [cx + pw * 0.04, base - ph * 0.22, pw * 0.11, ph * 0.22, ["#D84A5A", "#F2C230", "#3BAA5C"][i % 3]]
+		inner += '<circle cx="%s" cy="%s" r="%s" fill="#EFC3A5"/>' % [cx + pw * 0.095, base - ph * 0.27, pw * 0.058]
+		inner += '<path d="M%s %s a%s %s 0 0 1 %s 0" fill="#C8884A"/>' % [cx + pw * 0.037, base - ph * 0.285, pw * 0.058, pw * 0.05, pw * 0.116]
+		if i % 2 == 1:
+			inner += '<rect x="%s" y="%s" width="3" height="%s" fill="#6E4E3A"/><circle cx="%s" cy="%s" r="%s" fill="#5E9A5A"/>' % [pw * 0.12, ph * 0.5, ph * 0.4, pw * 0.14, ph * 0.46, pw * 0.1]
+		s += _framed("ph%d" % i, float(f[0]) + 2.0, float(f[1]) + 2.0, w, h, str(f[4]), inner, t, mat, "#F6F1E6")
+	return tex(446, 176, s)
 
 
 ## Canvas w x 70: long striped runner rug for the hallway floor.
@@ -1632,20 +1745,32 @@ static func mobile() -> ImageTexture:
 
 ## Canvas 80x80: a round wall clock with a pastel rim and fat hands, ticking at the time it was painted (10 past 10).
 static func wall_clock() -> ImageTexture:
-	var s := '<circle cx="40" cy="40" r="36" fill="#F7C9DA" stroke="#C2406E" stroke-width="3"/><circle cx="40" cy="40" r="29" fill="#FFFDF6" stroke="#E8D2A8" stroke-width="1.5"/>'
-	for k in 12:
-		var d := Vector2.from_angle(TAU * k / 12.0)
-		s += '<path d="M%.1f %.1f L%.1f %.1f" stroke="#7A5A66" stroke-width="%s" stroke-linecap="round"/>' % [40 + d.x * 23, 40 + d.y * 23, 40 + d.x * 27, 40 + d.y * 27, "3" if k % 3 == 0 else "1.6"]
-	s += '<path d="M40 40 L28 30" stroke="#5A3A4A" stroke-width="4" stroke-linecap="round"/><path d="M40 40 L58 28" stroke="#5A3A4A" stroke-width="3" stroke-linecap="round"/><circle cx="40" cy="40" r="3" fill="#C2406E"/>'
-	return tex(80, 80, s)
+	var s := '<defs><radialGradient id="clockface" cx="0.4" cy="0.35"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F1E4CA"/></radialGradient>'
+	s += '<linearGradient id="clockrim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F59AB8"/><stop offset="0.55" stop-color="#D8527E"/><stop offset="1" stop-color="#A83460"/></linearGradient></defs>'
+	s += '<ellipse cx="43" cy="44" rx="36" ry="36" fill="#000000" opacity="0.18"/>'
+	s += '<circle cx="40" cy="40" r="37" fill="url(#clockrim)" stroke="#8A2A50" stroke-width="1.6"/>'
+	s += '<circle cx="40" cy="40" r="31" fill="#B8406A"/><circle cx="40" cy="40" r="30" fill="url(#clockface)" stroke="#E2CFA6" stroke-width="1.2"/>'
+	for k in 60:
+		var d := Vector2.from_angle(TAU * k / 60.0)
+		if k % 5 == 0:
+			s += '<circle cx="%.1f" cy="%.1f" r="1.9" fill="#6E4A5A"/>' % [40 + d.x * 25.0, 40 + d.y * 25.0]
+		else:
+			s += '<circle cx="%.1f" cy="%.1f" r="0.6" fill="#B9A0A8"/>' % [40 + d.x * 27.0, 40 + d.y * 27.0]
+	s += '<path d="M42 42 L30 32" stroke="#000000" stroke-width="4" stroke-linecap="round" opacity="0.2"/><path d="M42 42 L60 30" stroke="#000000" stroke-width="3" stroke-linecap="round" opacity="0.2"/>'
+	s += '<path d="M40 40 L28 30" stroke="#4A2E3C" stroke-width="4" stroke-linecap="round"/><path d="M40 40 L58 28" stroke="#4A2E3C" stroke-width="2.8" stroke-linecap="round"/>'
+	s += '<path d="M40 46 L44 22" stroke="#D8283A" stroke-width="1.2" stroke-linecap="round"/><circle cx="40" cy="40" r="3.4" fill="#D8527E" stroke="#8A2A50" stroke-width="1"/><circle cx="39" cy="39" r="1.1" fill="#FFFFFF" opacity="0.8"/>'
+	s += '<path d="M16 28 Q28 12 48 11" stroke="#FFFFFF" stroke-width="3" fill="none" opacity="0.5" stroke-linecap="round"/>'
+	s += '<ellipse cx="32" cy="26" rx="14" ry="8" fill="#FFFFFF" opacity="0.12" transform="rotate(-30 32 26)"/>'
+	return tex(86, 86, s)
 
 
 # ── Kitchen and entrance decor (any house) ───────────────────
 
 ## Canvas 76x96: a paper wall calendar (red header, spiral, grid of days, a few circled, a star sticker) with a pencil on a string.
 static func wall_calendar() -> ImageTexture:
-	var s := '<rect x="2" y="2" width="72" height="92" rx="3" fill="#FFFDF6" stroke="#B9B4AA" stroke-width="2"/>'
-	s += '<rect x="2" y="2" width="72" height="30" rx="3" fill="#E5604D"/><circle cx="38" cy="14" r="9" fill="#FFD7A8" opacity="0.9"/><path d="M26 22 Q38 8 50 22 Z" fill="#7BB661"/>'
+	var s := '<rect x="5" y="6" width="72" height="92" rx="3" fill="#000000" opacity="0.16"/><rect x="2" y="2" width="72" height="92" rx="3" fill="#FFFDF6" stroke="#B9B4AA" stroke-width="2"/>'
+	s += '<path d="M60 94 Q66 86 74 84 L74 94 Z" fill="#EDE7D8" stroke="#B9B4AA" stroke-width="1"/><path d="M62 94 Q67 89 73 88" stroke="#FFFFFF" stroke-width="1" fill="none"/>'
+	s += '<rect x="2" y="2" width="72" height="30" rx="3" fill="#E5604D"/><rect x="2" y="2" width="72" height="10" rx="3" fill="#F08A78" opacity="0.7"/><circle cx="38" cy="14" r="9" fill="#FFD7A8" opacity="0.9"/><path d="M26 22 Q38 8 50 22 Z" fill="#7BB661"/>'
 	for k in 8:
 		s += '<circle cx="%d" cy="4" r="2.2" fill="#6E6E6E"/>' % (10 + k * 8)
 	for row in 5:
