@@ -1543,7 +1543,17 @@ func _finish() -> void:
 		var eaten := await _render(func(n: CanvasItem) -> void: _scene(n, cookies, shape, plate, drink, true))
 		Christmas.save_plate(full, eaten, plate, drink)
 	Sfx.play("chime")
-	closed.emit({"count": cookies.size(), "plate": plate, "drink": drink, "recipe": recipe, "image": full})
+	# A mark out of three, for Maman to praise: baked just right, decorated, and a plate and a drink picked.
+	var stars := 1
+	if not _burnt and _doneness >= 0.45 and _doneness <= 0.92:
+		stars += 1
+	var decorated := 0
+	for ck: Dictionary in cookies:
+		if not (ck.get("ops", []) as Array).is_empty():
+			decorated += 1
+	if decorated > 0:
+		stars += 1
+	closed.emit({"count": cookies.size(), "plate": plate, "drink": drink, "recipe": recipe, "image": full, "stars": stars})
 	queue_free()
 
 

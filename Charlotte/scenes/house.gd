@@ -1625,7 +1625,9 @@ func _open_cooking(recipe: String) -> void:
 		var shot: Image = result.image
 		shot.resize(110, 80, Image.INTERPOLATE_LANCZOS)
 		shot.generate_mipmaps()
-		_say(_mom, str(CookieArt.recipe(str(result.recipe)).eat), 380.0, 3.4)
+		var stars := int(result.get("stars", 2))
+		var praise := ["Pas mal pour une première fois !", "Bravo, c'est vraiment réussi !", "Wow ! Une vraie cheffe !"][clampi(stars - 1, 0, 2)]
+		_say(_mom, "%s\n%s  %s" % [str(CookieArt.recipe(str(result.recipe)).eat), "★".repeat(stars) + "☆".repeat(3 - stars), praise], 380.0, 4.2)
 		_treat(ImageTexture.create_from_image(shot), "On a tout fait nous-mêmes !", 0.4))
 	add_child(studio)
 
