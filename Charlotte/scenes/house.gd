@@ -2883,23 +2883,26 @@ func _open_drawing_pad() -> void:
 func _show_fridge_drawings() -> void:
 	for child in _fridge_art.get_children():
 		child.queue_free()
-	var slots := [Vector2(KITCHEN_START + 14.0, 258.0), Vector2(KITCHEN_START + 56.0, 284.0),
-		Vector2(KITCHEN_START + 16.0, 396.0), Vector2(KITCHEN_START + 58.0, 430.0)]
-	var magnets := [Color("#E04F5F"), Color("#4FA3E0"), Color("#FFD23F"), Color("#7CCB5A")]
+	# Eight places, four on each door (a little smaller than before); when all are taken, the oldest comes down (first in,
+	# first out: `DrawingPad.KEEP`).
+	var slots := [Vector2(KITCHEN_START + 10.0, 252.0), Vector2(KITCHEN_START + 56.0, 262.0), Vector2(KITCHEN_START + 12.0, 304.0), Vector2(KITCHEN_START + 58.0, 316.0),
+		Vector2(KITCHEN_START + 12.0, 388.0), Vector2(KITCHEN_START + 58.0, 398.0), Vector2(KITCHEN_START + 10.0, 438.0), Vector2(KITCHEN_START + 56.0, 448.0)]
+	var magnets := [Color("#E04F5F"), Color("#4FA3E0"), Color("#FFD23F"), Color("#7CCB5A"), Color("#B85AD8"), Color("#FF8A3D"), Color("#2EC4B6"), Color("#FF7AB0")]
+	var tilts := [-5.0, 4.0, 3.0, -4.0, 4.0, -3.0, -5.0, 3.0]
 	var drawings := DrawingPad.saved()
-	for i in drawings.size():
+	for i in mini(drawings.size(), slots.size()):
 		var art := Sprite2D.new()
 		art.texture = ImageTexture.create_from_image(drawings[i])
 		art.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		art.centered = false
-		art.scale = Vector2.ONE * 40.0 / DrawingPad.PAPER.x
+		art.scale = Vector2.ONE * 36.0 / DrawingPad.PAPER.x
 		art.position = slots[i]
-		art.rotation = deg_to_rad([-5.0, 4.0, 3.0, -4.0][i])
+		art.rotation = deg_to_rad(tilts[i])
 		_fridge_art.add_child(art)
 		var magnet := Polygon2D.new()
-		magnet.polygon = CritterDraw.ellipse_points(Vector2.ZERO, Vector2(3.5, 3.5))
+		magnet.polygon = CritterDraw.ellipse_points(Vector2.ZERO, Vector2(3.2, 3.2))
 		magnet.color = magnets[i]
-		magnet.position = slots[i] + Vector2(20, 1).rotated(art.rotation)
+		magnet.position = slots[i] + Vector2(18, 1).rotated(art.rotation)
 		_fridge_art.add_child(magnet)
 
 

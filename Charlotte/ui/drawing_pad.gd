@@ -15,7 +15,7 @@ signal closed(drawing: Image)
 
 const PAPER := Vector2i(480, 320)
 ## Drawings kept on the fridge (newest), and in the drawer.
-const KEEP := 4
+const KEEP := 8
 const GALLERY_MAX := 48
 const BLUE := Color("#1D4F91")
 const YELLOW := Color("#FFD23F")
