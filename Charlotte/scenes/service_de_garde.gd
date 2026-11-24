@@ -159,6 +159,16 @@ func _build_room() -> void:
 	words.size = banner.size
 	words.position = banner.position
 	add_child(words)
+	var table_sign := Label.new()
+	table_sign.text = "BRICOLAGE"
+	table_sign.add_theme_font_size_override("font_size", 26)
+	table_sign.add_theme_color_override("font_color", Color("#1D4F91"))
+	table_sign.add_theme_color_override("font_outline_color", Color("#FFD23F"))
+	table_sign.add_theme_constant_override("outline_size", 8)
+	table_sign.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	table_sign.size = Vector2(300, 40)
+	table_sign.position = Vector2(CRAFT_X - 150.0, 420.0)
+	add_child(table_sign)
 	for lx in [500.0, 1300.0, 2100.0]:
 		_ceiling_light(lx)
 	_put(ClassArt.cork_board(art), 1960.0, 400.0, 0.85, "wall")
@@ -327,12 +337,27 @@ func _make_craft() -> void:
 		_say(_charlotte, "On va glisser avant !\nLe dessin, ce sera après.", 200.0)
 		return
 	if not _drew:
-		_draw_for_parents()
+		_ask_table()
 		return
 	if not CraftStudio.has_pending():
 		_ask_craft()
 		return
 	_quick_craft()
+
+
+# The first click on the table asks what to do: the drawing for her parents, or a craft (Julien couldn't find it).
+func _ask_table() -> void:
+	_control.enabled = false
+	var card := ChoiceCard.ask(self, "Qu'est-ce que tu veux faire à la table ?", [
+		{"text": "Un dessin pour Papa et Maman", "note": "Jade le demande", "color": Color("#FFE27A")},
+		{"text": "Un bricolage", "note": "pour Maman ou pour Papa", "color": Color("#FFB6C8")},
+		{"text": "Plus tard", "color": Color("#DDE6F0")}])
+	card.chose.connect(func(i: int) -> void:
+		_control.enabled = true
+		if i == 0:
+			_draw_for_parents()
+		elif i == 1:
+			_ask_craft())
 
 
 # The table of the daycare: a craft for Maman, one for Papa, or the little craft of the season.
