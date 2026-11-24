@@ -52,6 +52,7 @@ const FILM_LINES := [
 ]
 
 var _stage := Stage.GIFT
+var _film_sound: FilmSound
 var _busy := false
 var _alyzee: Character
 var _alyzee_spot: DoorSpot
@@ -843,10 +844,16 @@ func _sit_for_film() -> void:
 	var film: Array[String] = [FILM]
 	_tv.channels = film
 	_tv.turn_on(0)
+	_film_sound = FilmSound.new()
+	add_child(_film_sound)
+	_film_sound.start("reine")
 	Sfx.play("tv", _tv.get_global_rect().get_center())
 
 
 func _lights_up() -> void:
+	if _film_sound and is_instance_valid(_film_sound):
+		_film_sound.stop()
+	_film_sound = null
 	_tv.turn_off()
 	_dim(0.0)
 	for person: Character in [_charlotte, _alyzee] + _kids:

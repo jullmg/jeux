@@ -119,6 +119,7 @@ var _tv: TvScreen
 var _movie_twins: Array[Character] = []
 ## The film on tonight (a TvShows id).
 var _film := "film"
+var _film_sound: FilmSound
 var _movie_nest: _Nest
 
 
@@ -1797,11 +1798,17 @@ func _lights_down() -> void:
 	var film: Array[String] = [_film]
 	_tv.channels = film
 	_tv.turn_on(0)
+	_film_sound = FilmSound.new()
+	add_child(_film_sound)
+	_film_sound.start(_film)
 	Sfx.play("tv", _tv.get_global_rect().get_center())
 
 
 # The film is over: the twins go home, the blanket is folded away, the lights come back on.
 func _lights_up() -> void:
+	if _film_sound and is_instance_valid(_film_sound):
+		_film_sound.stop()
+	_film_sound = null
 	Carry.put_down(_charlotte)
 	Cinema.clear()
 	_charlotte.sitting = false
