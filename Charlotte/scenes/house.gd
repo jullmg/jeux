@@ -436,7 +436,7 @@ const CRAFT_LINES := {
 }
 
 
-# She gives Maman or Papa what she made at the service de garde (`CraftStudio`): they look at it, and it stays on the dining table.
+# She gives Maman or Papa what she made at the service de garde (`CraftStudio`): they look at it, and it doesn't stay anywhere afterwards.
 # True when the click was about it (even for the wrong parent).
 func _hand_craft(who: String) -> bool:
 	if not CraftStudio.has_pending():
@@ -454,8 +454,8 @@ func _hand_craft(who: String) -> bool:
 	parent.express("happy", 4.0)
 	var look := CraftStudio.reveal(self, entry)
 	look.done.connect(func() -> void:
-		CraftStudio.keep_pending()
-		_show_crafts()
+		# It is theirs now: it doesn't stay on the table (Julien).
+		CraftStudio.clear_pending()
 		Sfx.play("chime")
 		var lines: Dictionary = CRAFT_LINES.get(entry.kind, CRAFT_LINES.carte)
 		_say(parent, lines[who], height, 4.6)
@@ -469,12 +469,13 @@ func _hand_craft(who: String) -> bool:
 	return true
 
 
-# The crafts she has given stand on the dining table (the newest four).
+# Crafts given no longer stay on the table: this only sweeps away the ones an older save had kept.
 func _show_crafts() -> void:
 	if _crafts_art == null:
 		return
 	for child in _crafts_art.get_children():
 		child.queue_free()
+	CraftStudio.clear_kept()
 	var all := CraftStudio.kept()
 	var slots := [1790.0, 1880.0, 1970.0, 2050.0]
 	var start := maxi(0, all.size() - slots.size())

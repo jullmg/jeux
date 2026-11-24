@@ -1765,6 +1765,16 @@ static func keep_pending() -> void:
 			DirAccess.remove_absolute(folder() + "/" + inside_name)
 
 
+## Julien: what she gave to her parents doesn't stay on the table or the desk, it goes away: removes any craft kept by an
+## older version of the game.
+static func clear_kept() -> void:
+	for n: String in _kept_names():
+		DirAccess.remove_absolute(folder() + "/" + n)
+		var inside_name := n.replace(".png", "_dedans.png")
+		if FileAccess.file_exists(folder() + "/" + inside_name):
+			DirAccess.remove_absolute(folder() + "/" + inside_name)
+
+
 static func _kept_names() -> Array:
 	var dir := DirAccess.open(folder())
 	if dir == null:
