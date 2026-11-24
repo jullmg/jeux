@@ -1724,15 +1724,12 @@ func _start_movie() -> void:
 		return
 	_control.enabled = false
 	# She picks the film, the very first night as well as the ones she asks Maman for.
-	var choices: Array = []
-	for id: String in Cinema.FILMS:
-		choices.append({"text": TvShows.INFO[id].name})
-	var card := ChoiceCard.ask(self, "Quel film on regarde ?", choices)
-	card.chose.connect(func(i: int) -> void:
-		if i < 0:
+	var menu := FilmMenu.ask(self, Cinema.FILMS)
+	menu.chose.connect(func(id: String) -> void:
+		if id == "":
 			_control.enabled = true
 			return
-		_roll_film(Cinema.FILMS[i]))
+		_roll_film(id))
 
 
 # The evening itself with the film `id` (a TvShows id): everyone sits, the lights go down, the film plays with its lines.
