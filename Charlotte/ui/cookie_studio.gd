@@ -295,7 +295,20 @@ func _next() -> void:
 		_goto(_order[pos + 1])
 
 
+var _cheered := 0
+
+## Maman's word of encouragement at a third and at two thirds of a step.
+func _cheer(k: float, lines: Array) -> void:
+	var due := 1 if k >= 0.34 else 0
+	if k >= 0.67:
+		due = 2
+	if due > _cheered and due <= lines.size():
+		_cheered = due
+		_say(str(lines[due - 1]))
+
+
 func _step_done(text: String) -> void:
+	_cheered = 0
 	Sfx.play("chime")
 	_say(text)
 	_refresh_buttons()
@@ -634,6 +647,10 @@ func _click_ingredient(p: Vector2) -> void:
 			Sfx.play("swoosh")
 			var tw := create_tween()
 			tw.tween_property(self, "_pour_t", 1.0, 1.9)
+			if _ingredients[i][0] == "oeuf":
+				# The shell cracks on the bowl's rim: a tap, then the plop.
+				get_tree().create_timer(0.86).timeout.connect(func() -> void: Sfx.play("click", Vector2.INF, -4.0, 1.5))
+				get_tree().create_timer(1.35).timeout.connect(func() -> void: Sfx.play("pop", Vector2.INF, -6.0, 0.8))
 			tw.tween_callback(func() -> void:
 				_added.append(i)
 				_pour_i = -1
@@ -662,6 +679,7 @@ func _stir_move(p: Vector2) -> void:
 				if _stir_total < STIR_NEED:
 					_stir_total = minf(STIR_NEED, _stir_total + absf(da))
 					_stir_sound += absf(da)
+					_cheer(_stir_total / STIR_NEED, ["Oui, comme ça ! Tourne encore, tu y es presque.", "La pâte devient toute lisse, continue !"])
 					if _stir_sound > 1.6:
 						_stir_sound = 0.0
 						Sfx.play("swoosh", Vector2.INF, -12.0, randf_range(0.8, 1.1))
@@ -683,6 +701,7 @@ func _roll_move(p: Vector2) -> void:
 	if _roll < 1.0 and absf(_pin_y - DOUGH_C.y) < lerpf(66.0, 168.0, _roll) + 24.0:
 		_roll = minf(1.0, _roll + dy / 1250.0)
 		_roll_sound += dy
+		_cheer(_roll, ["Bien égal ! Un peu plus mince encore.", "Presque ! Il reste les bords."])
 		if _roll_sound > 150.0:
 			_roll_sound = 0.0
 			Sfx.play("swoosh", Vector2.INF, -10.0, 0.7)
