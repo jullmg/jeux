@@ -22,7 +22,7 @@ const SIT_THIGH := -88.0
 const SIT_THICK := 7.0
 ## What the face does while a chore goes on.
 const TASK_FACES := {"piano": "happy", "pottery": "focus", "bike": "focus", "jog": "effort", "stir": "happy", "read": "focus", "phone": "talk", "type": "focus", "wash": "focus", "drink": "normal", "fridge": "wonder",
-	"exercise": "effort", "skip": "happy", "watch": "happy", "daydream": "blank"}
+	"exercise": "effort", "skip": "happy", "skate": "grin", "watch": "happy", "daydream": "blank"}
 
 var look: CharacterLook
 var walk_speed := 200.0
@@ -867,6 +867,19 @@ func _task_pose() -> void:
 			_body.position.y -= absf(s) * 7.0
 			_shin_front.rotation += absf(s) * 0.5
 			_shin_back.rotation += absf(s) * 0.5
+		"skate":
+			# Skating: leaning into the glide, the arms out for balance, one leg pushing behind then the other (the legs are the
+			# stance; the scene moves her along the ice).
+			var push := sin(t * 2.4)
+			_body.rotation += 0.14 * f
+			_head.rotation -= 0.06 * f
+			_aim(1, -72.0 + push * 10.0, 0.96)
+			_aim(0, 72.0 - push * 10.0, 0.96)
+			_hand_goal = ["open", "open"]
+			_leg_front.rotation += (0.32 + 0.22 * push) * f
+			_leg_back.rotation -= (0.42 - 0.22 * push) * f
+			_shin_back.rotation += 0.35 * maxf(0.0, -push) + 0.15
+			_shin_front.rotation += 0.12
 		"jog":
 			# Jogging on the spot: the arms pumping at the elbows, fists closed (the legs are the run cycle).
 			_elbow_goal[1] = deg_to_rad(76.0)

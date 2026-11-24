@@ -361,6 +361,8 @@ func _leave_by_gate() -> void:
 
 var _outing_papa: _Visitor
 var _cheer_cool := 0.0
+## How many free slides she has had with Papa (not the quest's): alone, together, a race, round again.
+var _free_runs := 0
 
 
 func _build_outing_papa() -> void:
@@ -375,16 +377,22 @@ func _build_outing_papa() -> void:
 	papa.facing = 1
 	add_child(papa)
 	_outing_papa = papa
+	_papa = papa
+	if Season.is_winter():
+		# Papa brought the sled and the skates: the hill and the rink are for playing, as long as she likes.
+		_play_spot_first(Rect2(HILL_X + 40.0, 330.0, 760.0, 280.0), _luge_run, HILL_X + 170.0)
+		_play_spot_first(Rect2(POOL_X + 20.0, 470.0, POOL_W - 40.0, 150.0), _skate, POOL_X + 140.0)
+	_play_spot_first(Rect2(560.0, 540.0, 1300.0, 80.0), _play_with_papa, 900.0)
 	var hello := create_tween()
 	hello.tween_interval(1.3)
 	hello.tween_callback(func() -> void:
-		papa.say("Voilà le parc du Pélican, ma grande !\nAmuse-toi, je te regarde.", 3.4)
+		papa.say("Voilà le parc du Pélican, ma grande !\nOn a le traîneau pis les patins : glisse, patine, joue !" if Season.is_winter() else "Voilà le parc du Pélican, ma grande !\nAmuse-toi : balançoire, glissoire, ballon… ou une course avec moi !", 4.2)
 		papa.body.express("happy", 3.0))
 
 
 # He walks a few steps behind her, and stops beside her, looking her way.
 func _follow_papa(delta: float) -> void:
-	if _outing_papa == null or not is_instance_valid(_outing_papa):
+	if _outing_papa == null or not is_instance_valid(_outing_papa) or _busy:
 		return
 	var body: Character = _outing_papa.body
 	var target := _charlotte.position.x + (-140.0 if _charlotte.facing > 0 else 140.0)
@@ -451,21 +459,40 @@ func _swing() -> void:
 	_charlotte.facing = 1
 	_charlotte.sitting = true
 	_charlotte.sit_on_ground = false
+	var pushed := _outing_papa != null and is_instance_valid(_outing_papa)
+	if pushed:
+		# Papa behind her, pushing: each push sends her higher.
+		_outing_papa.position = Vector2(hx - 118.0, 616.0)
+		_outing_papa.body.is_walking = false
+		_outing_papa.body.facing = 1
+		for k in 6:
+			get_tree().create_timer(0.5 + k * 1.15).timeout.connect(func() -> void:
+				if _busy and is_instance_valid(_outing_papa):
+					_outing_papa.body.pet(0.7, 0.2)
+					Sfx.play("swoosh", _charlotte.position, -6.0, 0.8 + k * 0.05))
+		get_tree().create_timer(2.0).timeout.connect(func() -> void:
+			if _busy and is_instance_valid(_outing_papa):
+				_outing_papa.say("Accroche-toi bien ! Je pousse !", 2.2))
+		get_tree().create_timer(4.4).timeout.connect(func() -> void:
+			if _busy:
+				_say_c("Plus haut, Papa ! Plus haut !", 2.0))
 	var tw := create_tween()
 	tw.tween_method(func(u: float) -> void:
-		var amp := 0.5 * sin(PI * u) + 0.04
+		var amp := (0.75 if pushed else 0.5) * sin(PI * u) + 0.04
 		var a := amp * sin(u * 26.0)
 		_swings.ride_a = a
 		_swings.queue_redraw()
 		var seat_y := top_y + cos(a) * 132.0
 		_charlotte.position = Vector2(hx + sin(a) * 132.0, 612.0)
-		_charlotte.seat_h = 612.0 - seat_y - 4.0, 0.0, 1.0, 7.0)
+		_charlotte.seat_h = 612.0 - seat_y - 4.0, 0.0, 1.0, 8.0 if pushed else 7.0)
 	tw.tween_callback(func() -> void:
 		_swings.ride_k = -1
 		_swings.queue_redraw()
 		_charlotte.position.x = hx - 50.0
 		_end_play()
-		_say_c("Wouiiii ! Plus haut !"))
+		_say_c("Wouiiii ! Plus haut !")
+		if pushed and is_instance_valid(_outing_papa):
+			_outing_papa.say("Ha ha ! Tu voles, ma grande !", 2.4))
 	Sfx.play("swoosh", _charlotte.position)
 	get_tree().create_timer(1.6).timeout.connect(func() -> void:
 		if _busy:
@@ -526,7 +553,24 @@ func _slide_down() -> void:
 	tw.tween_property(_charlotte, "position", Vector2(base_x - 150.0, CHARLOTTE_Y), 0.5)
 	tw.tween_callback(func() -> void:
 		_end_play()
-		_say_c("Encore ! Encore !"))
+		_say_c("Encore ! Encore !")
+		if _outing_papa != null and is_instance_valid(_outing_papa):
+			# Papa catches her at the bottom of the slide and whirls her round.
+			_outing_papa.position.x = _charlotte.position.x - 70.0
+			_outing_papa.body.facing = 1
+			_outing_papa.body.pet(1.0, 0.6)
+			_outing_papa.say("Hop ! Je t'ai attrapée !", 2.4)
+			_whirl(_charlotte, 6))
+
+
+## Round and round: she turns on the spot (the puppet flips side to side), up on her toes, laughing.
+func _whirl(who: Character, turns: int) -> void:
+	var tw := create_tween()
+	for k in turns:
+		tw.tween_callback(func() -> void: who.facing = -who.facing)
+		tw.tween_property(who, "position:y", who.position.y - 22.0, 0.11)
+		tw.tween_property(who, "position:y", who.position.y, 0.11)
+	tw.tween_callback(func() -> void: who.express("laugh", 1.6))
 
 
 func _castle() -> void:
@@ -661,6 +705,150 @@ func _spray(at: Vector2, seconds: float) -> void:
 	add_child(fx)
 
 
+# ── Skating, and games with Papa (`ParkOuting`) ─────────────────
+
+# On the rink (the big pool in winter) with her skates on: a lap to the right, one back with a wave, then a pirouette; Papa glides
+# behind her. As long as she likes.
+func _skate() -> void:
+	if not Season.is_winter():
+		return
+	_begin_play()
+	var c := _charlotte
+	var papa: Character = _outing_papa.body if _outing_papa != null and is_instance_valid(_outing_papa) else null
+	var left := POOL_X + 140.0
+	var right := POOL_X + POOL_W - 140.0
+	var y := 616.0
+	c.task = "skate"
+	if papa:
+		papa.task = "skate"
+	c.position.y = y
+	_say_c("Mes patins ! Ça glisse, ça glisse !", 2.2)
+	if papa:
+		_outing_papa.say("Tiens bon sur tes patins, Chachoue !\nJe te suis !", 2.6)
+	Sfx.play("swoosh", c.position, -4.0, 1.3)
+	var glide := func(u: float, from: float, to: float, dir: float, wob: float) -> void:
+		var x := lerpf(from, to, u)
+		c.facing = int(dir)
+		c.position = Vector2(x, y + sin(u * PI * 2.0) * wob)
+		if papa:
+			papa.get_parent().position = Vector2(x - dir * 120.0, y + sin(u * PI * 2.0 + 0.6) * wob * 0.6)
+			papa.facing = int(dir)
+		if randf() < 0.05:
+			_spray(c.position + Vector2(0, -4), 0.5)
+	var tw := create_tween()
+	tw.tween_method(func(u: float) -> void: glide.call(u, c.position.x, right, 1.0, 14.0), 0.0, 1.0, 3.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_callback(func() -> void:
+		_say_c("Regarde-moi aller, Papa !", 1.8)
+		c.facing = -1)
+	tw.tween_method(func(u: float) -> void: glide.call(u, right, left + 300.0, -1.0, 18.0), 0.0, 1.0, 3.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_callback(func() -> void:
+		_say_c("Une pirouette !", 1.4)
+		Sfx.play("pop", c.position, -4.0, 1.4)
+		if papa:
+			_outing_papa.say("Wow ! Bravo !", 1.8)
+		_whirl(c, 8))
+	tw.tween_interval(2.4)
+	tw.tween_callback(func() -> void:
+		c.task = ""
+		if papa:
+			papa.task = ""
+		c.facing = 1
+		_end_play()
+		c.express("laugh", 2.0)
+		_say_c("C'est trop l'fun, patiner !", 2.4))
+
+
+# Snowballs in winter, catch with a ball the rest of the year: Charlotte and Papa throw to each other, dodge, laugh.
+func _play_with_papa() -> void:
+	if _outing_papa == null or not is_instance_valid(_outing_papa):
+		return
+	_begin_play()
+	var c := _charlotte
+	var papa: Character = _outing_papa.body
+	var winter := Season.is_winter()
+	var mid := clampf(c.position.x, 700.0, 1700.0)
+	c.position.x = mid - 230.0
+	c.facing = 1
+	_outing_papa.position = Vector2(mid + 230.0, 616.0)
+	papa.facing = -1
+	papa.is_walking = false
+	c.is_walking = false
+	_outing_papa.say("Prépare-toi ! Une bataille de balles de neige !" if winter else "Attrape ! On joue au ballon !", 2.4)
+	var lines_c := ["Raté, Papa !", "Ha ha ! Tu m'as pas eue !", "Je t'ai eu !", "Encore, encore !"]
+	var tw := create_tween()
+	tw.tween_interval(1.8)
+	for round_i in 4:
+		var from_c := round_i % 2 == 0
+		tw.tween_callback(func() -> void:
+			var thrower: Character = c if from_c else papa
+			thrower.pet(0.5, 0.2)
+			Sfx.play("swoosh", c.position, -6.0, 1.2))
+		tw.tween_method(func(u: float) -> void:
+			var a: Vector2 = c.position + Vector2(20, -120)
+			var b: Vector2 = _outing_papa.position + Vector2(-20, -120)
+			if not from_c:
+				var s := a
+				a = b
+				b = s
+			_ball_at(a.lerp(b, u) + Vector2(0, -sin(u * PI) * 70.0), winter), 0.0, 1.0, 0.8)
+		tw.tween_callback(func() -> void:
+			_ball_at(Vector2.INF, winter)
+			if from_c:
+				papa.express("surprised", 1.2)
+				_outing_papa.say(["Oh ! Ma tuque !", "Touché !", "Ouf ! Bien visé !"][round_i % 3] if winter else "Bien lancé !", 1.6)
+				_spray(_outing_papa.position + Vector2(0, -150), 0.6)
+			else:
+				c.facing = 1
+				_say_c(lines_c[round_i % lines_c.size()], 1.6)
+				var hop := create_tween()
+				hop.tween_property(c, "position:y", c.position.y - 28.0, 0.15)
+				hop.tween_property(c, "position:y", 616.0, 0.15))
+		tw.tween_interval(1.0)
+	tw.tween_callback(func() -> void:
+		c.express("laugh", 2.2)
+		_outing_papa.say("Ha ha ha ! Match nul, ma grande !\nT'es championne !", 2.8)
+		_whirl(c, 4))
+	tw.tween_interval(2.6)
+	tw.tween_callback(func() -> void:
+		_end_play())
+
+
+var _toss: Node2D
+
+
+# One ball (a snowball, or a beach ball) in the air at `at`; `Vector2.INF` takes it away.
+func _ball_at(at: Vector2, snow: bool) -> void:
+	if at == Vector2.INF:
+		if _toss:
+			_toss.queue_free()
+			_toss = null
+		return
+	if _toss == null:
+		var b := _Toss.new()
+		b.snow = snow
+		add_child(b)
+		_toss = b
+	_toss.position = at
+
+
+## What is thrown: a white snowball, or a striped ball.
+class _Toss:
+	extends Node2D
+	var snow := true
+
+	func _draw() -> void:
+		if snow:
+			draw_circle(Vector2(1.5, 2.0), 11.0, Color(0.5, 0.6, 0.75, 0.35))
+			draw_circle(Vector2.ZERO, 11.0, Color("#F4F8FC"))
+			draw_arc(Vector2.ZERO, 11.0, 0.0, TAU, 20, Color("#B8C8DC"), 1.6, true)
+			draw_circle(Vector2(-3.5, -3.5), 3.0, Color.WHITE)
+		else:
+			draw_circle(Vector2.ZERO, 13.0, Color("#E5383B"))
+			draw_arc(Vector2.ZERO, 13.0, -0.6, 2.4, 14, Color("#FFD23F"), 6.0, true)
+			draw_arc(Vector2.ZERO, 13.0, 2.6, 5.2, 14, Color("#3B8BE0"), 6.0, true)
+			draw_circle(Vector2(-4, -4), 3.0, Color(1, 1, 1, 0.6))
+
+
 # ── Sledding with Papa (quest "luge") ───────────────────────────
 
 func _hill(u: float) -> Vector2:
@@ -730,9 +918,10 @@ func _sit(who: Character) -> void:
 
 
 func _luge_run() -> void:
-	if _busy or Luge.step() != 2 or _papa == null:
+	if _busy or _papa == null or not (Luge.step() == 2 or (ParkOuting.active() and Season.is_winter())):
 		return
-	var n := Luge.runs()
+	var quest := Luge.step() == 2
+	var n := Luge.runs() if quest else _free_runs % 3
 	_begin_play()
 	var c := _charlotte
 	var pb := _papa.body
@@ -793,7 +982,10 @@ func _luge_run() -> void:
 		for sl in _sleds:
 			sl.queue_free()
 		_sleds.clear()
-		Luge.add_run()
+		if quest:
+			Luge.add_run()
+		else:
+			_free_runs += 1
 		c.express("laugh", 2.0))
 	tw.tween_interval(0.6)
 	var afters := ["Wouhou ! C'est amusant ! Encore !", "Haha ! Ça va vite à deux !", "Ah ben ! Tu m'as battu, Chachoue ! Tu es très vite !"]
@@ -819,11 +1011,14 @@ func _luge_run() -> void:
 		pb.is_walking = false
 		pb.facing = 1
 		c.facing = 1
-		if Luge.runs() < Luge.RUNS:
+		if not quest or Luge.runs() < Luge.RUNS:
 			if not Carry.busy():
 				Carry.take(c, "traineau")
 			_end_play_keep()
-			_papa.say(["Prête pour la deuxième ? Cette fois, on glisse à deux !", "Dernière descente : une course !"][mini(Luge.runs() - 1, 1)], 3.2)
+			if quest:
+				_papa.say(["Prête pour la deuxième ? Cette fois, on glisse à deux !", "Dernière descente : une course !"][mini(Luge.runs() - 1, 1)], 3.2)
+			else:
+				_papa.say(["Encore ? Cette fois, on glisse à deux !", "Une course, cette fois ! Le premier en bas gagne !", "On recommence ? Toute seule, ma grande !"][_free_runs % 3], 3.2)
 		else:
 			_luge_finish())
 
