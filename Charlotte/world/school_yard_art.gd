@@ -434,3 +434,39 @@ static func snow_hill() -> ImageTexture:
 	s += '<path d="M200 18 C260 30 300 70 330 104 C356 132 380 150 404 %.1f" stroke="#B4C6DA" stroke-width="16" fill="none" stroke-linecap="round" stroke-opacity="0.8"/>' % [h - 6.0]
 	s += '<path d="M70 %.1f C90 120 120 70 150 40" stroke="#D5E1EE" stroke-width="5" fill="none" stroke-dasharray="6 8"/>' % [h - 20.0]
 	return PropArt.tex(_svg(w, h, s))
+
+
+## Canvas 250 × 200 (foot on the bottom edge): the yard's games shed (le cabanon): green boards, white trim, a low gabled
+## roof (snow on it in winter), its double doors open on a dark inside where a red sled, a ball, a coil of rope and hoops wait.
+static func shed() -> ImageTexture:
+	var w := 250.0
+	var h := 200.0
+	var s := '<defs><linearGradient id="bd" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4C7E5C"/><stop offset="1" stop-color="#2F5A42"/></linearGradient>'
+	s += '<linearGradient id="rf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A5E68"/><stop offset="1" stop-color="#3A3E48"/></linearGradient></defs>'
+	s += '<ellipse cx="125" cy="%.1f" rx="122" ry="8" fill="#000" fill-opacity="0.2"/>' % [h - 3.0]
+	s += '<rect x="14" y="62" width="222" height="%.1f" fill="url(#bd)"/>' % [h - 66.0]
+	for i in 21:
+		s += '<line x1="%.1f" y1="64" x2="%.1f" y2="%.1f" stroke="#244A36" stroke-width="1.4" stroke-opacity="0.7"/>' % [14.0 + i * 10.6, 14.0 + i * 10.6, h - 6.0]
+	s += '<rect x="14" y="%.1f" width="222" height="8" fill="#E8EDEA"/>' % [h - 14.0]
+	# The doors: both leaves swung open against the walls, the dark inside between them.
+	s += '<rect x="64" y="86" width="122" height="%.1f" fill="#1A1814"/>' % [h - 100.0]
+	s += '<rect x="64" y="86" width="122" height="8" fill="#000" fill-opacity="0.35"/>'
+	s += '<polygon points="64,86 38,92 38,%.1f 64,%.1f" fill="#E8EDEA" stroke="#B8C4BE" stroke-width="2"/>' % [h - 14.0, h - 14.0]
+	s += '<polygon points="186,86 212,92 212,%.1f 186,%.1f" fill="#E8EDEA" stroke="#B8C4BE" stroke-width="2"/>' % [h - 14.0, h - 14.0]
+	s += '<rect x="44" y="104" width="14" height="40" fill="#CFD8D3"/><rect x="192" y="104" width="14" height="40" fill="#CFD8D3"/>'
+	# Inside: shelves with a ball and hoops, a rope coil on a hook, the red sled leaning on the back wall.
+	s += '<rect x="68" y="130" width="114" height="4" fill="#8A6A46"/>'
+	s += '<circle cx="84" cy="122" r="9" fill="#E8662A"/><circle cx="84" cy="122" r="9" fill="none" stroke="#9A3E12" stroke-width="1.5"/>'
+	s += '<circle cx="106" cy="123" r="8" fill="#3A8AD8"/><circle cx="106" cy="123" r="8" fill="none" stroke="#1E5A98" stroke-width="1.5"/>'
+	s += '<ellipse cx="150" cy="116" rx="14" ry="5" fill="none" stroke="#E8408A" stroke-width="3.2"/><ellipse cx="150" cy="123" rx="14" ry="5" fill="none" stroke="#F0C030" stroke-width="3.2"/>'
+	s += '<circle cx="168" cy="108" r="9" fill="none" stroke="#E85FA0" stroke-width="3.4"/><circle cx="168" cy="108" r="4.5" fill="none" stroke="#E85FA0" stroke-width="3"/>'
+	s += '<path d="M126 134 L146 %.1f L170 %.1f L152 %.1f Z" fill="#D8352E" stroke="#7E1418" stroke-width="2"/>' % [h - 16.0, h - 20.0, h - 30.0]
+	s += '<path d="M118 %.1f Q112 %.1f 122 %.1f L170 %.1f" stroke="#5A3A22" stroke-width="3" fill="none"/>' % [h - 18.0, h - 12.0, h - 10.0, h - 14.0]
+	# The roof: a low gable with an overhang and its thick fascia.
+	s += '<polygon points="4,66 125,12 246,66" fill="url(#rf)"/>'
+	s += '<polygon points="4,66 125,12 125,22 22,66" fill="#fff" fill-opacity="0.12"/>'
+	s += '<rect x="4" y="64" width="242" height="6" fill="#E8EDEA"/>'
+	if Season.is_winter():
+		s += '<path d="M2 66 L125 8 L248 66 L240 66 Q220 54 190 48 L125 16 L60 48 Q30 54 10 66 Z" fill="#F6FAFF"/>'
+		s += '<ellipse cx="125" cy="%.1f" rx="118" ry="6" fill="#EAF1F8"/>' % [h - 2.0]
+	return PropArt.tex(_svg(w, h, s))

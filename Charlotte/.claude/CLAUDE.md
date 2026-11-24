@@ -911,7 +911,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   snow in winter, with one long snowbank along the wall shovelled clear at the door), the climbing frame and slide, the hoop
   (or in winter the plough's snow hill with a child sliding down it), the bench. Classmates (`_Kid`: "tag" pair, "rope",
   "ball", "slide", "idle", each with two lines) and a supervisor by the door. Reached only through the quest (and the debug
-  menu, "Cour d'école"); the map puts her on the "cour d'école". Its gate only lets her out when it isn't a school day.
+  menu, "Cour d'école"); the map puts her on the "cour d'école". Its gate only lets her out when it isn't a school day. **The games shed (le cabanon, `SHED_X`, `SchoolYardArt.shed`, "JEUX" label)**: a click opens a `ChoiceCard` (`_shed`, `_shed_pick`): in winter a sled (`Carry` "traineau": the hill's click then slides her any number of times, `_slide` without the quest), skipping rope (`_MyRope`), a bouncing ball (`_MyBall`), chalk drawings (`_MyChalk`); not while the glissade quest is on.
 - Alyzée (`CharacterLook.alyzee()`, no photo: Julien asked for black hair, Charlotte's height, very pale skin and long hair,
   rig "child"; long straight black hair, plum star dress, purple tights, red sneakers), new at school; on the notebook's friends page once met. **Her later quests go
   in `Alyzee.interact`.**

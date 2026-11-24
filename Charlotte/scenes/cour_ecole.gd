@@ -23,6 +23,8 @@ const BENCH_X := 1250.0
 const FRAME_X := 850.0
 const HILL_X := 1990.0
 const HOOP_X := 2190.0
+## The games shed.
+const SHED_X := 470.0
 ## Where the classmates stand, a little behind Charlotte (so she passes in front of them), and the yard's own people.
 const KID_Y := 624.0
 const START_X := 340.0
@@ -56,6 +58,9 @@ var _garde := false
 var _sale: TreeSale
 var _sled: Sprite2D
 var _sliding := false
+## Busy with a game from the shed (rope, ball, chalk).
+var _playing := false
+var _toys: Array[Node2D] = []
 
 
 func _ready() -> void:
@@ -206,6 +211,20 @@ func _build_furniture() -> void:
 		var hoop := _sprite(SchoolYardArt.hoop(), 1.0)
 		hoop.position = Vector2(HOOP_X - 40.0, 606.0 - 330.0)
 		add_child(hoop)
+	if _sale == null and XmasTree.step() != 2:
+		var shed := _sprite(SchoolYardArt.shed(), 1.0)
+		shed.position = Vector2(SHED_X - 125.0, 596.0 - 200.0)
+		add_child(shed)
+		var sign_label := Label.new()
+		sign_label.text = "JEUX"
+		sign_label.add_theme_font_size_override("font_size", 22)
+		sign_label.add_theme_color_override("font_color", Color("#FFFFFF"))
+		sign_label.add_theme_color_override("font_outline_color", Color("#2F5A42"))
+		sign_label.add_theme_constant_override("outline_size", 6)
+		sign_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		sign_label.size = Vector2(110, 30)
+		sign_label.position = Vector2(SHED_X - 55.0, 596.0 - 200.0 + 48.0)
+		add_child(sign_label)
 	var bench := _sprite(SchoolYardArt.bench(), 1.0)
 	bench.position = Vector2(BENCH_X, KID_Y - 64.0)
 	add_child(bench)
@@ -314,12 +333,149 @@ func _build_doors() -> void:
 			return
 		_go_to_class(), DOOR_X))
 	add_child(QuestMark.make(Vector2(DOOR_X, WALL_FOOT - 170.0), func() -> bool: return _bell_rung and _control.enabled))
+	if not _sale:
+		add_child(DoorSpot.make(Rect2(SHED_X - 120.0, 596.0 - 150.0, 240.0, 160.0), _shed, SHED_X))
+		if Season.is_winter():
+			add_child(DoorSpot.make(Rect2(HILL_X + 40.0, 616.0 - 170.0, 380.0, 190.0), _slide, SLIDE_PATH[5].x))
+
+
+# ── The games shed (le cabanon) ─────────────────────────────────
+
+func _shed() -> void:
+	if _sliding or _playing or not _control.enabled:
+		return
+	if Sledding.step() == 2:
+		_charlotte_says("Une glissade d'abord !\nJade m'a prêté un traîneau.")
+		return
+	var choices: Array = []
+	var ids: Array[String] = []
+	if Season.is_winter():
+		if Carry.has("traineau"):
+			choices.append({"text": "Ranger le traîneau", "note": "le remettre dans le cabanon", "color": Color("#FFB6B0")})
+			ids.append("ranger")
+		else:
+			choices.append({"text": "Prendre un traîneau", "note": "pour glisser sur la grosse butte", "color": Color("#FFB6B0")})
+			ids.append("traineau")
+	choices.append({"text": "La corde à danser", "note": "sauter à la corde", "color": Color("#FFD0E8")})
+	ids.append("corde")
+	choices.append({"text": "Le ballon", "note": "le faire rebondir", "color": Color("#FFD9A0")})
+	ids.append("ballon")
+	choices.append({"text": "Les craies", "note": "dessiner sur l'asphalte", "color": Color("#C8E8FF")})
+	ids.append("craies")
+	choices.append({"text": "Plus tard", "color": Color("#DDE6F0")})
+	_control.enabled = false
+	var card := ChoiceCard.ask(self, "Qu'est-ce que tu veux prendre dans le cabanon ?", choices)
+	card.chose.connect(func(i: int) -> void:
+		_control.enabled = true
+		if i < 0 or i >= ids.size():
+			return
+		_shed_pick(ids[i]))
+
+
+func _shed_pick(what: String) -> void:
+	match what:
+		"traineau":
+			if Carry.take(_charlotte, "traineau"):
+				_charlotte.express("grin", 2.0)
+				Sfx.play("swoosh", _charlotte.position)
+				_charlotte_says("Un traîneau ! Direction la butte !")
+			else:
+				_charlotte_says(Carry.FULL_HANDS)
+		"ranger":
+			Carry.put_down(_charlotte)
+			_charlotte_says("Je le range pour les autres !")
+		"corde":
+			_play_rope()
+		"ballon":
+			_play_ball()
+		"craies":
+			_play_chalk()
+
+
+func _end_play() -> void:
+	for toy in _toys:
+		if is_instance_valid(toy) and not toy.is_in_group("keep"):
+			toy.queue_free()
+	_toys.clear()
+	_charlotte.task = ""
+	_charlotte.work = []
+	_charlotte.position.y = CHARLOTTE_Y
+	_playing = false
+	_control.hands_off = false
+	_charlotte.express("laugh", 1.6)
+
+
+# Skipping rope: the loop turns round her, she hops each time it passes under, and counts.
+func _play_rope() -> void:
+	_playing = true
+	_control.hands_off = true
+	_charlotte.facing = 1
+	_charlotte.task = "skip"
+	for front in [false, true]:
+		var rope := _MyRope.new()
+		rope.who = _charlotte
+		rope.front = front
+		rope.base_y = CHARLOTTE_Y
+		add_child(rope)
+		if not front:
+			# The half behind her is drawn just before her, over the ground.
+			move_child(rope, _charlotte.get_index())
+		_toys.append(rope)
+	_charlotte_says("Un… deux… trois…")
+	var count := create_tween()
+	for n in range(4, 11):
+		count.tween_interval(0.8)
+		count.tween_callback(_charlotte_says.bind("%d !" % n if n < 10 else "Dix ! Mon record !"))
+	count.tween_interval(1.4)
+	count.tween_callback(_end_play)
+
+
+# The ball bounces by her side, she pats it down each time.
+func _play_ball() -> void:
+	_playing = true
+	_control.hands_off = true
+	_charlotte.facing = 1
+	var ball := _MyBall.new()
+	ball.who = _charlotte
+	ball.z_index = 2
+	add_child(ball)
+	_toys.append(ball)
+	var count := create_tween()
+	for n in range(1, 11):
+		count.tween_callback(func() -> void:
+			_charlotte.pet(0.5, 0.9)
+			Sfx.play("pop", _charlotte.position)
+			if n == 1 or n == 5 or n == 10:
+				_charlotte_says("%d !" % n if n < 10 else "Dix sans le rater !"))
+		count.tween_interval(0.95)
+	count.tween_callback(_end_play)
+
+
+# Chalk on the asphalt: a flower and a sun come out under her hand, and they stay.
+func _play_chalk() -> void:
+	_playing = true
+	_control.hands_off = true
+	_charlotte.facing = 1
+	var art := _MyChalk.new()
+	art.at = Vector2(_charlotte.position.x + 90.0, CHARLOTTE_Y + 6.0)
+	art.z_index = 0
+	art.add_to_group("keep")
+	add_child(art)
+	_toys.append(art)
+	_charlotte_says("Je dessine une grosse fleur !")
+	var draw := create_tween()
+	draw.tween_callback(func() -> void: _charlotte.pet(5.0, 1.0))
+	draw.tween_method(func(k: float) -> void:
+		art.k = k
+		art.queue_redraw(), 0.0, 1.0, 5.0)
+	draw.tween_callback(func() -> void: _charlotte_says("Ta-da ! Une fleur avec un soleil !"))
+	draw.tween_interval(1.0)
+	draw.tween_callback(_end_play)
 
 
 # ── Sliding with the service de garde ───────────────────────────
 
 func _build_sledding() -> void:
-	add_child(DoorSpot.make(Rect2(HILL_X + 40.0, 616.0 - 170.0, 380.0, 190.0), _slide, SLIDE_PATH[5].x))
 	add_child(QuestMark.make(Vector2(HILL_X + 200.0, 616.0 - 220.0), func() -> bool:
 		return Sledding.step() == 2 and not _sliding and _control.enabled))
 	var hello := create_tween()
@@ -329,7 +485,10 @@ func _build_sledding() -> void:
 
 # Up the hill on foot (the sled in her arms), sit on it at the top, down the track on her own speed and out onto the flat.
 func _slide() -> void:
-	if _sliding or Sledding.step() != 2:
+	if _sliding or _playing:
+		return
+	if Sledding.step() != 2 and not Carry.has("traineau"):
+		_charlotte_says("Il me faudrait un traîneau !\nIl y en a au cabanon.")
 		return
 	_sliding = true
 	_control.hands_off = true
@@ -390,6 +549,14 @@ func _landed() -> void:
 		_sled.queue_free()
 		_sled = null
 	Carry.restore(_charlotte)
+	if Sledding.step() != 2:
+		# A free slide with the shed's sled: as many as she likes.
+		_sliding = false
+		_control.hands_off = false
+		_charlotte.express("laugh", 2.0)
+		var more := ["Encore ! Encore !", "C'est trop l'fun !", "J'ai de la neige dans le cou !", "Plus vite ! Wiiii !"]
+		_charlotte_says(more[randi() % more.size()])
+		return
 	Sledding.add_run()
 	_sliding = false
 	_charlotte.express("laugh", 2.0)
@@ -812,6 +979,107 @@ class _Ball:
 		draw_arc(p + Vector2(-34, 0), 26.0, -0.9, 0.9, 10, color.darkened(0.4), 2.0, true)
 		draw_arc(p + Vector2(34, 0), 26.0, PI - 0.9, PI + 0.9, 10, color.darkened(0.4), 2.0, true)
 		draw_circle(p + Vector2(-9, -10), 6.0, Color(1, 1, 1, 0.35))
+
+
+# A skipping rope of her own: the two halves of the loop (behind her, in front of her), round her hands.
+class _MyRope:
+	extends Node2D
+	var who: Character
+	var front := false
+	var base_y := 638.0
+	var _t := 0.0
+
+	func _process(delta: float) -> void:
+		_t += delta
+		queue_redraw()
+		var c := -cos(_phase())
+		if not front:
+			return
+		who.position.y = base_y - 16.0 * pow(maxf(c, 0.0), 3.0)
+		var hand_y := who.position.y - 56.0
+		who.work = [Vector2(who.position.x - 34.0, hand_y), Vector2(who.position.x + 34.0, hand_y)]
+
+	func _phase() -> float:
+		return _t * 5.2
+
+	func _draw() -> void:
+		if who == null or who.work.size() < 2:
+			return
+		var phase := _phase()
+		if (sin(phase) > 0.0) != front:
+			return
+		var a: Vector2 = who.hand_at(1)
+		var b: Vector2 = who.hand_at(0)
+		var hands_y := (a.y + b.y) / 2.0
+		var down := base_y - hands_y - 2.0
+		var up := hands_y - (base_y - 190.0)
+		var c := -cos(phase)
+		var swing := c * (down if c > 0.0 else up)
+		var line := PackedVector2Array()
+		for k in 25:
+			var u := k / 24.0
+			line.append(a.lerp(b, u) + Vector2(0.0, swing * pow(sin(PI * u), 0.75)))
+		var col := Color("#E85FA0") if front else Color("#C9468A")
+		draw_polyline(line, col, 4.0, true)
+		if front:
+			for end: Vector2 in [a, b]:
+				draw_circle(end, 4.0, Color("#F2C230"))
+
+
+# A ball she bounces by her side.
+class _MyBall:
+	extends Node2D
+	var who: Character
+	var _t := 0.0
+
+	func _process(delta: float) -> void:
+		_t += delta
+		queue_redraw()
+
+	func _draw() -> void:
+		if who == null:
+			return
+		var ground := Vector2(who.position.x + 56.0, 646.0)
+		var h := absf(cos(_t * PI / 0.95)) * 90.0
+		draw_set_transform(ground, 0.0, Vector2(1.0, 0.3))
+		draw_circle(Vector2.ZERO, 15.0 - h * 0.05, Color(0, 0, 0, 0.2))
+		draw_set_transform(Vector2.ZERO)
+		var p := ground + Vector2(0.0, -14.0 - h)
+		var color := Color("#E8662A")
+		draw_circle(p, 14.0, color)
+		draw_arc(p, 14.0, 0, TAU, 20, color.darkened(0.35), 2.0, true)
+		draw_line(p + Vector2(-14, 0), p + Vector2(14, 0), color.darkened(0.4), 1.4, true)
+		draw_arc(p + Vector2(-18, 0), 14.0, -0.9, 0.9, 8, color.darkened(0.4), 1.4, true)
+		draw_arc(p + Vector2(18, 0), 14.0, PI - 0.9, PI + 0.9, 8, color.darkened(0.4), 1.4, true)
+		draw_circle(p + Vector2(-5, -6), 3.4, Color(1, 1, 1, 0.35))
+
+
+# A flower and a sun in chalk, drawn bit by bit (`k` 0..1) on the asphalt.
+class _MyChalk:
+	extends Node2D
+	var at := Vector2.ZERO
+	var k := 0.0
+
+	func _draw() -> void:
+		draw_set_transform(at, 0.0, Vector2(1.0, 0.45))
+		# The sun first (0 to 0.4), then the stem and leaves, then the petals.
+		var s := clampf(k / 0.4, 0.0, 1.0)
+		if s > 0.0:
+			draw_arc(Vector2(-90, 0), 30.0, 0.0, TAU * s, 28, Color("#FFD23F"), 5.0, true)
+			for i in int(s * 10.0):
+				var a := TAU * i / 10.0
+				draw_line(Vector2(-90, 0) + Vector2(cos(a), sin(a)) * 38.0, Vector2(-90, 0) + Vector2(cos(a), sin(a)) * 54.0, Color("#FFD23F"), 4.0, true)
+		var st := clampf((k - 0.4) / 0.2, 0.0, 1.0)
+		if st > 0.0:
+			draw_line(Vector2(20, 60), Vector2(20, 60 - 120.0 * st), Color("#5FD06A"), 5.0, true)
+			if st > 0.5:
+				draw_colored_polygon(PackedVector2Array([Vector2(20, 20), Vector2(70, -10), Vector2(30, 40)]), Color("#5FD06A", 0.8))
+		var pt := clampf((k - 0.6) / 0.4, 0.0, 1.0)
+		for i in int(pt * 8.0):
+			var a := TAU * i / 8.0
+			draw_circle(Vector2(20, -64) + Vector2(cos(a), sin(a)) * 26.0, 14.0, Color("#FF7AB0"))
+		if pt > 0.0:
+			draw_circle(Vector2(20, -64), 14.0, Color("#FFE27A"))
 
 
 # ── The yard's ground ───────────────────────────────────────────
