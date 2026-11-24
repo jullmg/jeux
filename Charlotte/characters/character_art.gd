@@ -497,7 +497,6 @@ func _strands(d: String) -> String:
 			s += _f('<path d="%s" stroke="{hair_light}" stroke-width="1.4" opacity="0.55" transform="translate(4 2)"/>' % path)
 	# A soft gloss across the crown, light from the upper left, and the shade gathering toward the ends.
 	s += _f('<ellipse cx="96" cy="46" rx="48" ry="12" fill="{hair_light}" opacity="0.28" transform="rotate(-14 96 46)"/>')
-	s += '<rect x="0" y="190" width="240" height="100" fill="#000000" opacity="0.08"/>'
 	return s + '</g>'
 
 
@@ -1178,14 +1177,10 @@ func _hand_svg(mode: String, scale: float) -> String:
 			s += _f('<rect x="-3.4" y="-1" width="6.8" height="9.5" rx="3.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
 	# One clean silhouette: every part drawn once with a thick outline, then once more filled so the lines where the fingers
 	# overlap vanish; then a little light on the palm (no lines on the back of the hand).
-	var outlined := s.replace('stroke-width="1.5"', 'stroke-width="3.2"').replace('stroke-width="1.7"', 'stroke-width="3.4"')
-	var filled := s.replace('stroke="{skin_line}"', 'stroke="{skin}"')
+	var outlined := s.replace('stroke-width="1.5"', 'stroke-width="4.0"').replace('stroke-width="1.7"', 'stroke-width="4.2"').replace('stroke-width="1.4"', 'stroke-width="4.0"')
+	# The fill pass is fatter than the fingers' own outline, so the crevices between them close up: a smooth silhouette.
+	var filled := s.replace('stroke="{skin_line}"', 'stroke="{skin}"').replace('stroke-width="1.5"', 'stroke-width="2.6"').replace('stroke-width="1.7"', 'stroke-width="2.8"').replace('stroke-width="1.4"', 'stroke-width="2.6"')
 	s = _f(outlined) + _f(filled)
-	s += _f('<ellipse cx="19.5" cy="11.5" rx="3.2" ry="4.5" fill="#FFFFFF" opacity="0.2"/>')
-	# Soft shade on the side away from the light and under the fingers, a highlight on the knuckles: a plump, rounded hand.
-	s += _f('<ellipse cx="25.5" cy="17.5" rx="4.6" ry="4" fill="{skin_line}" opacity="0.16"/>')
-	if mode != "grip":
-		s += _f('<path d="M17.4 17.6 Q22 20.4 28.4 17.6" stroke="#FFFFFF" stroke-width="1.6" fill="none" opacity="0.3" stroke-linecap="round"/>')
 	s += _f(palm_top)
 	var w := ceili(44.0 * scale)
 	var h := ceili(50.0 * scale)
