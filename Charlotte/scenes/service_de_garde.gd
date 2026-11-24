@@ -23,7 +23,7 @@ const PAPA_AFTER := 5.0
 ## Jade reminds her of the drawing every so often until it is done.
 const REMIND_EVERY := 25.0
 const JADE_ASKS := "Aujourd'hui, on fait un dessin\npour nos parents ! Va à la table de dessin."
-const JADE_REMINDS := ["N'oublie pas ton dessin pour ton papa\npis ta maman, Chachoue !", "La table de dessin t'attend !\nTon dessin pour tes parents ?"]
+const JADE_REMINDS := ["N'oublie pas ton dessin pour ton papa\npis ta maman, Chachoue !", "La table de dessin t'attend !\nTon dessin pour tes parents ?", "Si tu veux rentrer, clique sur la porte :\nj'appelle ton papa !"]
 ## The sliding (`Sledding`, quest "glissade"): what Jade says when there is snow to slide on, as she lends the sled, and
 ## when they come back in.
 const JADE_SLED := "Il a neigé en masse ! Avant le bricolage,\non sort glisser dans la cour. Viens me voir !"
@@ -32,7 +32,7 @@ const JADE_BACK := "Ouf ! On a les joues ben rouges !\nAstheure, un dessin pour 
 const JADE_CRAFT := ["Wow, quel beau bricolage, Chachoue !\n%s va l'adorer !", "Tu as de l'or dans les doigts !\n%s va être ben content(e)."]
 const JADE_LIKES := ["Wow ! C'est magnifique, Chachoue !\nTes parents vont capoter !", "Quel beau dessin !\nIl va être ben beau sur le frigo."]
 const JADE_LINES := ["Bienvenue au service de garde, Chachoue !", "On se lave les mains avant la collation !",
-	"On range les blocs quand on a fini, OK ?", "Ton papa va arriver bientôt."]
+	"On range les blocs quand on a fini, OK ?", "Ton papa va arriver bientôt.", "Si tu veux rentrer, clique sur la porte :\nj'appelle ton papa !"]
 const ALYZEE_CHAT := ["Tu viens bricoler avec moi, tantôt ?", "J'aime ben ça, le service de garde !", "Ma maman m'a dit qu'elle arrive bientôt.", "Regarde, j'ai fait un dessin de licorne !"]
 ## Emilia shares her mamá's concha (quest "emilia"): [who (0 Emilia, -1 Charlotte), what].
 const EMILIA_SHARE := [
@@ -66,6 +66,8 @@ var _drew := false
 var _drew_at := 0.0
 var _reminded := 0.0
 var _chat := 0
+## She asked to go home without making a drawing (the door): Papa comes anyway.
+var _called := false
 
 
 func _ready() -> void:
@@ -113,7 +115,7 @@ func _process(delta: float) -> void:
 	if _papa_here:
 		return
 	_wait += delta
-	if _drew:
+	if _drew or _called:
 		# On Emilia's day Papa waits until the concha has been shared (and a talk in progress is over).
 		var ready := not Emilia.day() or (Emilia.shared() and not _busy)
 		if _wait - _drew_at > PAPA_AFTER and ready:
@@ -235,7 +237,7 @@ func _build_spots() -> void:
 		if Sledding.step() == 1:
 			_out_to_slide()
 		elif not _papa_here:
-			_say(_charlotte, "J'attends Papa.\nIl va venir me chercher !", 200.0)
+			_ask_home()
 		, DOOR_X + 80.0))
 	add_child(QuestMark.make(Vector2(CRAFT_X, 470.0), func() -> bool:
 		return not _drew and _control.enabled and Sledding.step() == 0 and not Sledding.can_start()))
@@ -252,7 +254,7 @@ func _talk_to_jade() -> void:
 	elif Sledding.step() == 1:
 		_jade_says("La porte est là-bas, Chachoue !\nLes amis t'attendent dehors.")
 	elif _drew and not CraftStudio.has_pending() and not _papa_here:
-		_jade_says("Pour le bricolage, va à l'autre table, là-bas,\napres la collation : j'ai le « ! » pour toi !".replace("apres", "après"), 3.6)
+		_jade_says("Pour le bricolage, va à l'autre table, là-bas,\naprès la collation : j'ai le « ! » pour toi !", 3.6)
 	else:
 		_jade_line += 1
 		_jade_says(JADE_LINES[_jade_line % JADE_LINES.size()])
@@ -325,6 +327,24 @@ func _alyzee_says(text: String) -> void:
 
 
 # ── What she does ───────────────────────────────────────────────
+
+# The door: she may ask to go home whenever she likes, drawing or not (Julien): Papa is called and comes.
+func _ask_home() -> void:
+	if _called or _drew:
+		_say(_charlotte, "J'attends Papa.\nIl va venir me chercher !", 200.0)
+		return
+	_control.enabled = false
+	var card := ChoiceCard.ask(self, "Tu veux rentrer à la maison ?", [
+		{"text": "Oui, appeler Papa", "note": "il vient me chercher", "color": Color("#FFE27A")},
+		{"text": "Non, je reste", "color": Color("#DDE6F0")}])
+	card.chose.connect(func(i: int) -> void:
+		_control.enabled = true
+		if i != 0:
+			return
+		_called = true
+		_drew_at = _wait
+		_jade_says("D'accord, Chachoue ! J'appelle ton papa.\nIl arrive tout de suite.", 3.2))
+
 
 # The drawing table: the drawing for her parents (Jade asks for it every day).
 func _draw_table() -> void:
