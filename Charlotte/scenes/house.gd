@@ -1506,6 +1506,8 @@ func _ask_mom() -> void:
 	var card := ChoiceCard.ask(self, "Qu'est-ce que tu dis à Maman ?", choices)
 	card.chose.connect(func(i: int) -> void:
 		_control.enabled = true
+		if i < 0:
+			return
 		_mom_routine.pause(4.0, _charlotte.position.x)
 		var what: String = kinds[i]
 		if what == "cook":
@@ -1515,9 +1517,59 @@ func _ask_mom() -> void:
 		elif what == "school":
 			_mom_about_school()
 		else:
-			_mom.express("happy", 2.0)
-			_say(_mom, MOM_LINES[_mom_line % MOM_LINES.size()], 350.0)
+			_hug_with(_mom, _mom_routine, MOM_LINES[_mom_line % MOM_LINES.size()], 350.0)
 			_mom_line += 1)
+
+
+# A real hug (Julien: nothing happened, only a line): she walks up to the parent, they face each other, arms round, little
+# hearts rise, then the parent says a word.
+func _hug_with(who: Character, routine: FamilyRoutine, words: String, bubble_width: float) -> void:
+	_control.enabled = false
+	routine.pause(10.0, _charlotte.position.x)
+	var side := -1 if _charlotte.position.x < who.position.x else 1
+	var spot := who.position.x + side * 58.0
+	var go := create_tween()
+	go.tween_callback(func() -> void:
+		_charlotte.facing = -side
+		_charlotte.is_walking = true)
+	go.tween_property(_charlotte, "position:x", spot, maxf(absf(spot - _charlotte.position.x) / 190.0, 0.05))
+	go.tween_callback(func() -> void:
+		_charlotte.is_walking = false
+		_charlotte.facing = -side
+		who.facing = side
+		_charlotte.task = "hug"
+		who.task = "hug"
+		_charlotte.express("happy", 3.0)
+		who.express("happy", 3.0)
+		Sfx.play("purr", _charlotte.position)
+		for k in 4:
+			_heart_up(Vector2((_charlotte.position.x + who.position.x) / 2.0 + (k - 1.5) * 14.0, _charlotte.position.y - 170.0), k * 0.35))
+	go.tween_interval(2.8)
+	go.tween_callback(func() -> void:
+		_charlotte.task = ""
+		who.task = ""
+		_control.enabled = true
+		_say(who, words, bubble_width))
+
+
+# A little pink heart that floats up and fades.
+func _heart_up(at: Vector2, delay: float) -> void:
+	var heart := Label.new()
+	heart.text = "♥"
+	heart.add_theme_font_size_override("font_size", 26)
+	heart.add_theme_color_override("font_color", Color("#FF5E8A"))
+	heart.add_theme_color_override("font_outline_color", Color.WHITE)
+	heart.add_theme_constant_override("outline_size", 5)
+	heart.position = at
+	heart.z_index = 20
+	heart.modulate.a = 0.0
+	add_child(heart)
+	var tw := create_tween()
+	tw.tween_interval(delay)
+	tw.tween_property(heart, "modulate:a", 1.0, 0.2)
+	tw.parallel().tween_property(heart, "position:y", at.y - 60.0, 1.6)
+	tw.tween_property(heart, "modulate:a", 0.0, 0.5)
+	tw.tween_callback(heart.queue_free)
 
 
 # Cooking with Maman, on demand (Julien): she picks a recipe, then the whole studio (`CookieStudio`) at the counter.
@@ -1578,12 +1630,13 @@ func _ask_dad() -> void:
 	var card := ChoiceCard.ask(self, "Qu'est-ce que tu dis à Papa ?", [{"text": "On va jouer au parc ?", "note": "le parc du Pélican"}, {"text": "Juste un câlin !"}])
 	card.chose.connect(func(i: int) -> void:
 		_control.enabled = true
+		if i < 0:
+			return
 		_dad_routine.pause(4.0, _charlotte.position.x)
 		if i == 0:
 			_park_with_dad()
 		else:
-			_dad.express("happy", 2.0)
-			_say(_dad, DAD_LINES[_dad_line % DAD_LINES.size()], 360.0)
+			_hug_with(_dad, _dad_routine, DAD_LINES[_dad_line % DAD_LINES.size()], 360.0)
 			_dad_line += 1)
 
 

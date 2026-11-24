@@ -22,7 +22,7 @@ const SIT_THIGH := -88.0
 const SIT_THICK := 7.0
 ## What the face does while a chore goes on.
 const TASK_FACES := {"piano": "happy", "pottery": "focus", "bike": "focus", "jog": "effort", "stir": "happy", "read": "focus", "phone": "talk", "type": "focus", "wash": "focus", "drink": "normal", "fridge": "wonder",
-	"exercise": "effort", "skip": "happy", "skate": "grin", "watch": "happy", "daydream": "blank"}
+	"exercise": "effort", "hug": "happy", "skip": "happy", "skate": "grin", "watch": "happy", "daydream": "blank"}
 
 var look: CharacterLook
 var walk_speed := 200.0
@@ -806,6 +806,14 @@ func _task_pose() -> void:
 			_aim(0, -70.0, 0.88)
 			_hand_goal = ["flat", "grip"]
 			_head.rotation += 0.14 * f + sin(t * 0.6) * 0.02
+		"hug":
+			# Both arms forward and round the other's back, heads together, a little squeeze.
+			var squeeze := sin(t * 3.0) * 1.5
+			_aim(1, -52.0 - squeeze * 2.0, 0.9)
+			_aim(0, -44.0 + squeeze * 2.0, 0.9)
+			_hand_goal = ["open", "open"]
+			_body.rotation += 0.07 * f
+			_head.rotation += 0.12 * f
 		"phone":
 			_aim(1, -74.0, 0.78, Vector2(0, sin(t * 1.4) * 1.5))
 			_aim(0, -12.0, 0.97)
