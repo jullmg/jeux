@@ -92,6 +92,8 @@ func _ready() -> void:
 	_build_park_doors()
 	if Luge.step() == 2:
 		_build_luge()
+	elif ParkOuting.active():
+		_build_outing_papa()
 	var saver := Saver.new()
 	saver.who = _charlotte
 	add_child(saver)
@@ -118,8 +120,10 @@ func _ready() -> void:
 		_save_screenshot(shot)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_follow_charlotte()
+	_cheer_cool = maxf(0.0, _cheer_cool - delta)
+	_follow_papa(delta)
 
 
 func room_name() -> String:
@@ -321,7 +325,8 @@ func _play_spot(area: Rect2, action: Callable, stand: float) -> void:
 		add_child(DoorSpot.make(area, func() -> void:
 			if _busy or _charlotte.sitting:
 				return
-			action.call(), stand))
+			action.call()
+			_cheer(), stand))
 
 
 ## A place of the park was clicked: what she says. (The activities will start from here: playground, pools, sliding.)
@@ -333,10 +338,82 @@ func _leave_by_gate() -> void:
 	if Luge.step() == 2:
 		Bubble.say(self, _charlotte.position + Vector2(0, -190), "Papa m'attend pour glisser !\nOn s'en va pas tout de suite.", 3.0)
 		return
+	if ParkOuting.active():
+		_control.enabled = false
+		var ask := ChoiceCard.ask(self, "On rentre à la maison avec Papa ?", [{"text": "Oui, on rentre !"}, {"text": "Encore un peu !"}])
+		ask.chose.connect(func(i: int) -> void:
+			if i == 1:
+				_control.enabled = true
+				return
+			ParkOuting.end()
+			Transition.inside_x = School.HOME_X
+			Transition.street_x = NAN
+			Transition.arrive = ""
+			Transition.change_scene_saying(self, School.HOME, "Papa te ramène à la maison…", 1.4))
+		return
 	_control.enabled = false
 	# Out the way she came in: Masson's south side, at the lawn.
 	Transition.street_x = float(GameState.flags.get("park_from_x", NAN))
 	Transition.change_scene(self, "res://scenes/masson_pair.tscn")
+
+
+# ── Papa at the park (`ParkOuting`) ─────────────────────────────
+
+var _outing_papa: _Visitor
+var _cheer_cool := 0.0
+
+
+func _build_outing_papa() -> void:
+	var look := CharacterLook.dad()
+	Season.dress_for_weather(look)
+	var papa := _Visitor.new()
+	papa.look = look
+	papa.lines = ParkOuting.LINES
+	papa.position = Vector2(_charlotte.position.x - 130.0, 616.0)
+	papa.scale = Vector2.ONE * CHAR_SCALE * 1.18
+	papa.head = -420.0
+	papa.facing = 1
+	add_child(papa)
+	_outing_papa = papa
+	var hello := create_tween()
+	hello.tween_interval(1.3)
+	hello.tween_callback(func() -> void:
+		papa.say("Voilà le parc du Pélican, ma grande !\nAmuse-toi, je te regarde.", 3.4)
+		papa.body.express("happy", 3.0))
+
+
+# He walks a few steps behind her, and stops beside her, looking her way.
+func _follow_papa(delta: float) -> void:
+	if _outing_papa == null or not is_instance_valid(_outing_papa):
+		return
+	var body: Character = _outing_papa.body
+	var target := _charlotte.position.x + (-140.0 if _charlotte.facing > 0 else 140.0)
+	var dx := target - _outing_papa.position.x
+	if absf(dx) > 760.0:
+		# Far behind (she ran across the park): he is beside her again, out of sight.
+		_outing_papa.position.x = target
+		return
+	if absf(dx) > 50.0:
+		_outing_papa.position.x += signf(dx) * minf(absf(dx), 200.0 * delta)
+		body.is_walking = true
+		body.facing = 1 if dx > 0.0 else -1
+	else:
+		body.is_walking = false
+		body.facing = 1 if _charlotte.position.x >= _outing_papa.position.x else -1
+
+
+# After a game, Papa says a kind word (not after every one).
+func _cheer() -> void:
+	if _outing_papa == null or _cheer_cool > 0.0:
+		return
+	_cheer_cool = 8.0
+	var papa := _outing_papa
+	var t := create_tween()
+	t.tween_interval(2.4)
+	t.tween_callback(func() -> void:
+		if is_instance_valid(papa):
+			papa.say(ParkOuting.CHEERS[randi() % ParkOuting.CHEERS.size()], 2.8)
+			papa.body.express("happy", 2.4))
 
 
 # ── Play ────────────────────────────────────────────────────────

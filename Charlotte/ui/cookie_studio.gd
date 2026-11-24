@@ -10,7 +10,7 @@ extends CanvasLayer
 ##   5. Cuire: tray in the oven, and she takes it out when the cookies are golden (too early: pale; too late: dark, then burnt and
 ##      she can bake another tray);
 ##   6. Décorer: every cookie, big on the board: icing pen (eight colours, three widths), pouring icing over all of it, candies
-##      (`CookieArt.CANDIES`), sprinkles (`CookieArt.SPRINKLES`), "Oups !" / "Refaire", "Au hasard", "Effacer";
+##      (`_candies`), sprinkles (`_sprinkles`), "Oups !" / "Refaire", "Au hasard", "Effacer";
 ##   7. Assiette: she chooses the plate and what Santa drinks; the plate is drawn with her own cookies on it and kept
 ##      (`Christmas.save_plate`), so it is what she carries and what lies under the tree.
 ## `closed({count, plate, drink})`, or `closed({})` if she gives up.
@@ -25,9 +25,9 @@ const STAGE_POS := Vector2(44, 120)
 const STAGE_SIZE := Vector2(880, 520)
 const SIDE_POS := Vector2(944, 120)
 const SIDE_SIZE := Vector2(272, 520)
-const STEPS := ["Ingrédients", "Mélanger", "Étendre", "Découper", "Cuire", "Décorer", "Assiette"]
 const RECIPE := ["3 tasses de farine", "1 tasse de cassonade", "½ tasse de beurre", "1 œuf", "½ tasse de mélasse", "2 c. à thé de gingembre", "1 c. à thé de cannelle"]
-const POUR_COLORS := {"farine": "#FFFFFF", "cassonade": "#C98A4B", "melasse": "#3A1E0C", "gingembre": "#D09A3A", "cannelle": "#8A4A2A"}
+const POUR_COLORS := {"farine": "#FFFFFF", "cassonade": "#C98A4B", "melasse": "#3A1E0C", "gingembre": "#D09A3A", "cannelle": "#8A4A2A",
+	"sucre": "#FFFFFF", "sel": "#FFFFFF", "levure": "#D9B26A", "eau": "#BFE3F7", "huile": "#E8C46A", "lait": "#FFFFFF", "bleuets": "#3E4EB0"}
 const CUT_MAX := 10
 const CUT_MIN := 3
 const STIR_NEED := 3.0 * TAU
@@ -38,7 +38,6 @@ const BAKE_END := 13.0
 const BOWL_C := Vector2(440, 328)
 const BOWL_RX := 190.0
 const DOUGH_C := Vector2(440, 255)
-const DOUGH_COLOR := Color("#C99A5F")
 const CUTTER_SCALE := 0.9
 const VIEW_C := Vector2(440, 192)
 const VIEW_S := 3.0
@@ -46,6 +45,17 @@ const ICING_WIDTHS := [["Fin", 2.0], ["Moyen", 3.8], ["Gros", 6.5]]
 
 ## How fast the oven's clock runs (tests only).
 var speed := 1.0
+## What is cooked (`CookieArt.RECIPES`: "biscuits", "pizza", "muffins"); `for_santa`: the Christmas cookies, whose plate is kept for the tree.
+var recipe := "biscuits"
+var for_santa := false
+var _r: Dictionary
+var _ingredients: Array
+var _icings: Array
+var _candies: Array
+var _sprinkles: Array
+var _plates: Array
+var _drinks: Array
+var _order: Array[int] = []
 
 var _root: Control
 var _panel: Panel
@@ -122,6 +132,7 @@ func _init() -> void:
 
 func _ready() -> void:
 	add_to_group("modal")
+	_apply_recipe()
 	_rng.seed = 2026
 	for i in 90:
 		_grain.append([_rng.randf_range(0, STAGE_SIZE.x), _rng.randf_range(0, STAGE_SIZE.y), _rng.randf_range(14, 60), _rng.randf_range(0.04, 0.14)])
@@ -189,6 +200,29 @@ func _unhandled_input(event: InputEvent) -> void:
 
 # ── Steps ───────────────────────────────────────────────────
 
+func _apply_recipe() -> void:
+	_r = CookieArt.recipe(recipe)
+	_ingredients = _r.ingredients
+	_icings = _r.icings
+	_candies = _r.candies
+	_sprinkles = _r.sprinkles
+	_plates = _r.plates
+	_drinks = _r.drinks
+	_order.assign(_r.order)
+
+
+## Maman's words on screen `p` (the recipe's own, else the default ones).
+func _line_for(p: int) -> String:
+	var own: Array = _r.says
+	if p < own.size() and str(own[p]) != "":
+		return str(own[p])
+	return SAYS[p]
+
+
+func _dough_color() -> Color:
+	return Color(str(_r.mix))
+
+
 const SAYS := [
 	"Salut Chachoue ! On fait des biscuits pour le père Noël. Mets tous les ingrédients dans le bol : clique dessus !",
 	"Astheure, on mélange ! Tourne la cuillère en rond dans le bol, longtemps, jusqu'à ce que la pâte soit lisse.",
@@ -205,12 +239,12 @@ func _goto(p: int) -> void:
 	_busy = false
 	_down = false
 	_stroking = false
-	_say(SAYS[p])
+	_say(_line_for(p))
 	_ribbon.queue_redraw()
 	if p == 3:
 		_cut_fx.clear()
-	if p == 4:
-		_make_tray()
+	if p == 4 or p == 5:
+		_ensure_food()
 	_build_side()
 	_refresh_buttons()
 	_dirty = true
@@ -225,7 +259,7 @@ func _say(text: String) -> void:
 func _can_next() -> bool:
 	match _phase:
 		0:
-			return _added.size() >= CookieArt.INGREDIENTS.size() and _pour_i < 0
+			return _added.size() >= _ingredients.size() and _pour_i < 0
 		1:
 			return _stir_total >= STIR_NEED
 		2:
@@ -240,8 +274,9 @@ func _can_next() -> bool:
 
 
 func _refresh_buttons() -> void:
-	var labels := ["Mélanger →", "Étendre la pâte →", "Découper →", "Mettre au four →", "Décorer →", "Sur l'assiette →", "Voilà, c'est prêt ! ♥"]
-	_btn_next.text = labels[_phase]
+	var labels := {1: "Mélanger →", 2: "Étendre la pâte →", 3: "Découper →", 4: "Mettre au four →", 5: "Décorer →", 6: "Sur l'assiette →"}
+	var pos := _order.find(_phase)
+	_btn_next.text = "Voilà, c'est prêt ! ♥" if pos >= _order.size() - 1 else str(labels[_order[pos + 1]])
 	_btn_next.disabled = not _can_next() or _busy
 	_btn_undo.visible = _phase == 3 or _phase == 5
 	_btn_redo.visible = _phase == 5
@@ -253,13 +288,11 @@ func _next() -> void:
 	if _busy:
 		return
 	Sfx.play("click")
-	match _phase:
-		3:
-			_goto(4)
-		6:
-			_finish()
-		_:
-			_goto(_phase + 1)
+	var pos := _order.find(_phase)
+	if pos >= _order.size() - 1:
+		_finish()
+	else:
+		_goto(_order[pos + 1])
 
 
 func _step_done(text: String) -> void:
@@ -304,23 +337,30 @@ func _side_recipe() -> void:
 	t.size = Vector2(SIDE_SIZE.x, 40)
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	card.add_child(t)
-	var sub := _label("Biscuits au gingembre", 18, Color(INK, 0.8))
+	var sub := _label(str(_r.title), 18, Color(INK, 0.8))
 	sub.position = Vector2(0, 50)
 	sub.size = Vector2(SIDE_SIZE.x, 26)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	card.add_child(sub)
-	for i in CookieArt.INGREDIENTS.size():
+	var lines: Array = _r.lines
+	for i in lines.size():
 		var done: bool = _phase > 0 or i in _added
-		var row := _label(("✔  " if done else "○  ") + RECIPE[i], 19, Color("#2F7A45") if done else INK)
+		var row := _label(("✔  " if done else "○  ") + str(lines[i]), 19, Color("#2F7A45") if done else INK)
 		row.position = Vector2(18, 88 + i * 32)
 		card.add_child(row)
-	var steps := ["Mélanger", "Étendre", "Découper"]
-	var y := 88 + 7 * 32 + 14
-	for k in 3:
-		var on := k + 1 == _phase
-		var row := _label(("► " if on else "   ") + steps[k], 18, BLUE if on else Color(INK, 0.5))
-		row.position = Vector2(18, y + k * 26)
+	# The steps still to come.
+	var y: float = 88.0 + lines.size() * 32.0 + 14.0
+	var pos := _order.find(_phase)
+	for k in range(1, mini(_order.size() - pos, 4)):
+		var id: int = _order[pos + k]
+		var row := _label("   " + str(_r.steps[id]), 18, Color(INK, 0.5))
+		row.position = Vector2(18, y + (k - 1) * 26)
 		card.add_child(row)
+	if pos < _order.size():
+		var now := _label("► " + str(_r.steps[_phase]), 18, BLUE)
+		now.position = Vector2(18, y - 26.0)
+		now.visible = false
+		card.add_child(now)
 	if _phase == 2:
 		var b := _button("Un peu de farine !", 20, _throw_flour, Vector2(236, 44))
 		b.position = Vector2(18, SIDE_SIZE.y - 40.0 - 62.0)
@@ -413,21 +453,22 @@ func _side_oven() -> void:
 				keep.position = Vector2(18, 264)
 				card.add_child(keep)
 			else:
-				var tip := _label("Ils sont sortis !\nOn les laisse refroidir\nun peu, pis on les décore.", 18, INK)
+				var tip := _label("C'est sorti du four !\nOn laisse refroidir\nun peu, pis on continue.", 18, INK)
 				tip.position = Vector2(18, 210)
 				card.add_child(tip)
 
 
 func _side_decorate() -> void:
 	var card := _card(SIDE_SIZE.y - 40.0)
-	var tabs := [["glacage", "Glaçage"], ["bonbons", "Bonbons"], ["pepites", "Pépites"]]
+	var names: Array = _r.tabs
+	var tabs := [["glacage", names[0]], ["bonbons", names[1]], ["pepites", names[2]]]
 	for i in 3:
 		var b := Button.new()
 		b.text = tabs[i][1]
 		b.position = Vector2(8 + i * 86, 8)
 		b.custom_minimum_size = Vector2(82, 40)
 		b.size = Vector2(82, 40)
-		b.add_theme_font_size_override("font_size", 16)
+		b.add_theme_font_size_override("font_size", 14)
 		b.add_theme_color_override("font_color", BLUE)
 		b.add_theme_stylebox_override("normal", _box(YELLOW if _tab == tabs[i][0] else Color.WHITE, BLUE, 3, 12))
 		b.add_theme_stylebox_override("hover", _box(Color("#FFF4C2"), BLUE, 3, 12))
@@ -448,12 +489,12 @@ func _side_decorate() -> void:
 				b.position = Vector2(10 + i * 126, 58)
 				b.add_theme_stylebox_override("normal", _box(YELLOW if _tool == modes[i][0] else Color.WHITE, BLUE, 3, 12))
 				card.add_child(b)
-			for i in CookieArt.ICINGS.size():
+			for i in _icings.size():
 				var sw := Button.new()
 				sw.position = Vector2(14 + (i % 4) * 62, 114 + (i / 4) * 62)
 				sw.custom_minimum_size = Vector2(54, 54)
 				sw.size = Vector2(54, 54)
-				var col := Color(CookieArt.ICINGS[i][1])
+				var col := Color(_icings[i][1])
 				sw.add_theme_stylebox_override("normal", _box(col, BLUE if i == _icing else col.darkened(0.35), 5 if i == _icing else 2, 27))
 				sw.add_theme_stylebox_override("hover", _box(col.lightened(0.1), BLUE, 4, 27))
 				sw.pressed.connect(func() -> void:
@@ -470,23 +511,23 @@ func _side_decorate() -> void:
 					wb.add_theme_stylebox_override("normal", _box(YELLOW if i == _width else Color.WHITE, BLUE, 3, 12))
 					wb.add_theme_stylebox_override("hover", _box(Color("#FFF4C2"), BLUE, 3, 12))
 					wb.paint = func(ci: CanvasItem, mid: Vector2) -> void:
-						ci.draw_line(Vector2(14, mid.y - 6), Vector2(mid.x * 2.0 - 14, mid.y - 6), Color(CookieArt.ICINGS[_icing][1]), float(ICING_WIDTHS[i][1]) * 1.4)
+						ci.draw_line(Vector2(14, mid.y - 6), Vector2(mid.x * 2.0 - 14, mid.y - 6), Color(_icings[_icing][1]), float(ICING_WIDTHS[i][1]) * 1.4)
 						ci.draw_string(ThemeDB.fallback_font, Vector2(0, mid.y * 2.0 - 8.0), ICING_WIDTHS[i][0], HORIZONTAL_ALIGNMENT_CENTER, mid.x * 2.0, 14, BLUE)
 					wb.pressed.connect(func() -> void:
 						_width = i
 						Sfx.play("click")
 						_build_side())
 					card.add_child(wb)
-				var tip := _label("Appuie et glisse sur le biscuit\npour écrire avec le glaçage.", 16, INK)
+				var tip := _label("Appuie et glisse dessus\npour écrire avec le glaçage.", 16, INK)
 				tip.position = Vector2(14, 318)
 				card.add_child(tip)
 			else:
-				var tip := _label("Un clic et tout le biscuit\nest couvert de glaçage.\nAjoute des lignes dessus\nensuite !", 16, INK)
+				var tip := _label("Un clic et tout est\ncouvert d'un coup.\nAjoute des lignes dessus\nensuite !", 16, INK)
 				tip.position = Vector2(14, 250)
 				card.add_child(tip)
 		"bonbons":
-			for i in CookieArt.CANDIES.size():
-				var id: String = CookieArt.CANDIES[i][0]
+			for i in _candies.size():
+				var id: String = _candies[i][0]
 				var b := _IconButton.new()
 				b.position = Vector2(8 + (i % 3) * 88, 58 + (i / 3) * 78)
 				b.custom_minimum_size = Vector2(84, 74)
@@ -495,7 +536,7 @@ func _side_decorate() -> void:
 				b.add_theme_stylebox_override("hover", _box(Color("#FFF4C2"), BLUE, 3, 12))
 				b.paint = func(ci: CanvasItem, mid: Vector2) -> void:
 					CookieArt.candy_icon(ci, id, mid + Vector2(0, -8), 36.0, Color(CookieArt.CANDY_COLORS[i % CookieArt.CANDY_COLORS.size()]))
-					ci.draw_string(ThemeDB.fallback_font, Vector2(0, mid.y * 2.0 - 5.0), CookieArt.CANDIES[i][1], HORIZONTAL_ALIGNMENT_CENTER, mid.x * 2.0, 11, BLUE)
+					ci.draw_string(ThemeDB.fallback_font, Vector2(0, mid.y * 2.0 - 5.0), _candies[i][1], HORIZONTAL_ALIGNMENT_CENTER, mid.x * 2.0, 11, BLUE)
 				b.pressed.connect(func() -> void:
 					_candy = i
 					Sfx.play("click")
@@ -505,8 +546,8 @@ func _side_decorate() -> void:
 			tip.position = Vector2(14, 58 + 4 * 78 + 6)
 			card.add_child(tip)
 		"pepites":
-			for i in CookieArt.SPRINKLES.size():
-				var id: String = CookieArt.SPRINKLES[i][0]
+			for i in _sprinkles.size():
+				var id: String = _sprinkles[i][0]
 				var b := _IconButton.new()
 				b.position = Vector2(8 + (i % 2) * 130, 58 + (i / 2) * 78)
 				b.custom_minimum_size = Vector2(124, 72)
@@ -521,13 +562,13 @@ func _side_decorate() -> void:
 						var bit := {"p": Vector2(r.randf_range(-12, 12), r.randf_range(-5, 5)) , "rot": r.randf() * TAU, "c": CookieArt.bit_color(id, r)}
 						CookieArt.draw_bit(ci, id, bit)
 					ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-					ci.draw_string(ThemeDB.fallback_font, Vector2(0, mid.y * 2.0 - 5.0), CookieArt.SPRINKLES[i][1], HORIZONTAL_ALIGNMENT_CENTER, mid.x * 2.0, 13, BLUE if id != "glace" else Color.WHITE)
+					ci.draw_string(ThemeDB.fallback_font, Vector2(0, mid.y * 2.0 - 5.0), _sprinkles[i][1], HORIZONTAL_ALIGNMENT_CENTER, mid.x * 2.0, 13, BLUE if id != "glace" else Color.WHITE)
 				b.pressed.connect(func() -> void:
 					_sprinkle = i
 					Sfx.play("click")
 					_build_side())
 				card.add_child(b)
-			var tip := _label("Appuie et bouge sur le\nbiscuit pour saupoudrer.", 16, INK)
+			var tip := _label("Appuie et bouge sur le\nplat pour saupoudrer.", 16, INK)
 			tip.position = Vector2(14, 58 + 4 * 78 + 6)
 			card.add_child(tip)
 	var rnd := _button("✨ Au hasard", 17, _decorate_randomly, Vector2(122, 40))
@@ -545,8 +586,8 @@ func _side_plate() -> void:
 	t.size = Vector2(SIDE_SIZE.x, 36)
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	card.add_child(t)
-	for i in CookieArt.PLATES.size():
-		var b := _button(CookieArt.PLATES[i][1], 18, func() -> void:
+	for i in _plates.size():
+		var b := _button(_plates[i][1], 18, func() -> void:
 			_plate = i
 			Sfx.play("click")
 			_build_side()
@@ -559,8 +600,8 @@ func _side_plate() -> void:
 	t2.size = Vector2(SIDE_SIZE.x, 36)
 	t2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	card.add_child(t2)
-	for i in CookieArt.DRINKS.size():
-		var b := _button(CookieArt.DRINKS[i][1], 18, func() -> void:
+	for i in _drinks.size():
+		var b := _button(_drinks[i][1], 18, func() -> void:
 			_drink = i
 			Sfx.play("click")
 			_build_side()
@@ -568,7 +609,7 @@ func _side_plate() -> void:
 		b.position = Vector2(14, 252 + i * 48)
 		b.add_theme_stylebox_override("normal", _box(YELLOW if i == _drink else Color.WHITE, BLUE, 3, 12))
 		card.add_child(b)
-	var tip := _label("Le père Noël en a pour\ntoute la nuit !", 17, INK)
+	var tip := _label("Le père Noël en a pour\ntoute la nuit !" if for_santa else "Bon appétit,\nà vous deux !", 17, INK)
 	tip.position = Vector2(14, 410)
 	card.add_child(tip)
 
@@ -576,20 +617,20 @@ func _side_plate() -> void:
 # ── Step 1: the ingredients ─────────────────────────────────
 
 func _item_pos(i: int) -> Vector2:
-	return Vector2(74.0 + i * 122.0, 178.0)
+	return Vector2(440.0 + (i - (_ingredients.size() - 1) / 2.0) * 122.0, 178.0)
 
 
 func _click_ingredient(p: Vector2) -> void:
 	if _pour_i >= 0:
 		return
-	for i in CookieArt.INGREDIENTS.size():
+	for i in _ingredients.size():
 		if i in _added:
 			continue
 		var at := _item_pos(i)
 		if Rect2(at.x - 50.0, at.y - 130.0, 100.0, 150.0).has_point(p):
 			_pour_i = i
 			_pour_t = 0.0
-			_say(str(CookieArt.INGREDIENTS[i][2]))
+			_say(str(_ingredients[i][2]))
 			Sfx.play("swoosh")
 			var tw := create_tween()
 			tw.tween_property(self, "_pour_t", 1.0, 1.9)
@@ -598,7 +639,7 @@ func _click_ingredient(p: Vector2) -> void:
 				_pour_i = -1
 				Sfx.play("pop")
 				_build_side()
-				if _added.size() >= CookieArt.INGREDIENTS.size():
+				if _added.size() >= _ingredients.size():
 					_step_done("Tout est dans le bol ! Parfait. Astheure, on mélange.")
 				_refresh_buttons())
 			return
@@ -664,9 +705,10 @@ func _throw_flour() -> void:
 
 func _dough_poly(k: float) -> PackedVector2Array:
 	var pts := PackedVector2Array()
-	var a := lerpf(66.0, 280.0, k)
-	var b := lerpf(66.0, 168.0, k)
-	var n := lerpf(2.0, 3.3, k)
+	var fin: Array = _r.dough
+	var a := lerpf(66.0, float(fin[0]), k)
+	var b := lerpf(66.0, float(fin[1]), k)
+	var n := lerpf(2.0, float(fin[2]), k)
 	for i in 72:
 		var t := TAU * i / 72.0
 		var cs := cos(t)
@@ -733,12 +775,17 @@ func _toast(text: String) -> void:
 
 # ── Step 5: the oven ────────────────────────────────────────
 
-## The cut-outs go onto the tray, in two rows.
-func _make_tray() -> void:
+## What is on the tray: the cut-outs (cookies), or the one pizza, or six muffins.
+func _ensure_food() -> void:
 	if not _cookies.is_empty():
 		return
-	for c: Dictionary in _cuts:
-		_cookies.append({"shape": c.shape, "rot": 0.0, "seed": c.seed, "doneness": 0.0, "ops": []})
+	var shape := str(_r.shape)
+	if shape == "":
+		for c: Dictionary in _cuts:
+			_cookies.append({"shape": c.shape, "rot": 0.0, "seed": c.seed, "doneness": 0.0, "ops": []})
+	else:
+		for i in (1 if shape == "pizza" else 6):
+			_cookies.append({"shape": shape, "rot": 0.0, "seed": _rng.randi(), "doneness": 0.0, "ops": []})
 	_oven = "ready"
 	_slide = 0.0
 	_bake_t = 0.0
@@ -746,6 +793,8 @@ func _make_tray() -> void:
 
 
 func _tray_slot(i: int, n: int) -> Vector3:
+	if n == 1:
+		return Vector3(440.0, 440.0, 1.35)
 	var rows := 1 if n <= 5 else 2
 	var per := int(ceil(float(n) / rows))
 	var row := i / per
@@ -791,25 +840,35 @@ func _take_out(too_late: bool) -> void:
 	tw.tween_property(self, "_slide", 0.0, 0.8).set_trans(Tween.TRANS_SINE)
 	Sfx.play("bell" if not too_late else "squeak")
 	if _burnt:
-		_say("Oh non, ils sont brûlés ! Ça arrive à tout le monde… On en refait une fournée ?")
+		_say("Oh non, c'est brûlé ! Ça arrive à tout le monde… On en refait un ?")
 	elif t < BAKE_PALE:
-		_say("Un peu pâles, mais ils vont être bien tendres ! On les décore ?")
+		_say("Un peu pâle, mais ça va être bien tendre !")
 	elif t < BAKE_OVER:
-		_say("Parfaits, bien dorés ! Tu es une vraie pâtissière.")
+		_say("Parfait, bien doré ! Tu es une vraie cuisinière.")
 	else:
-		_say("Un peu foncés, comme j'aime ça ! Le glaçage va les rendre beaux.")
+		_say("Un peu foncé, comme j'aime ça ! Ça va être bon pareil.")
 	_build_side()
 	_refresh_buttons()
 
 
 func _bake_again() -> void:
-	_cookies.clear()
-	_cuts.clear()
-	_cut_fx.clear()
-	_oven = "ready"
 	_burnt = false
-	_goto(3)
-	_say("Une autre fournée ! On a assez de pâte, découpe-en encore.")
+	if str(_r.shape) == "":
+		_cookies.clear()
+		_cuts.clear()
+		_cut_fx.clear()
+		_oven = "ready"
+		_goto(3)
+		_say("Une autre fournée ! On a assez de pâte, découpe-en encore.")
+		return
+	# Pizza and muffins: the same food, raw again, back in the oven.
+	for ck: Dictionary in _cookies:
+		ck.doneness = 0.0
+	_oven = "ready"
+	_slide = 0.0
+	_bake_t = 0.0
+	_goto(4)
+	_say("On recommence ! Cette fois, surveille-le bien.")
 
 
 func _bake_color(t: float) -> float:
@@ -860,16 +919,16 @@ func _deco_press(p: Vector2) -> void:
 	match _tab:
 		"glacage":
 			if _tool == "napper":
-				_add_op({"t": "flood", "c": Color(CookieArt.ICINGS[_icing][1])})
+				_add_op({"t": "flood", "c": Color(_icings[_icing][1])})
 				Sfx.play("swoosh", Vector2.INF, -6.0, 1.4)
 			else:
-				_add_op({"t": "line", "c": Color(CookieArt.ICINGS[_icing][1]), "w": float(ICING_WIDTHS[_width][1]), "pts": PackedVector2Array([q])})
+				_add_op({"t": "line", "c": Color(_icings[_icing][1]), "w": float(ICING_WIDTHS[_width][1]), "pts": PackedVector2Array([q])})
 				_stroking = true
 				Sfx.play("pop", Vector2.INF, -10.0, 1.3)
 		"bonbons":
 			_put_candy(q)
 		"pepites":
-			var kind: String = CookieArt.SPRINKLES[_sprinkle][0]
+			var kind: String = _sprinkles[_sprinkle][0]
 			_add_op({"t": "bits", "kind": kind, "bits": []})
 			_stroking = true
 			_shake(q)
@@ -888,7 +947,7 @@ func _deco_drag(p: Vector2) -> void:
 				_stroking = false
 				return
 			if not _stroking or op.get("t", "") != "line":
-				_add_op({"t": "line", "c": Color(CookieArt.ICINGS[_icing][1]), "w": float(ICING_WIDTHS[_width][1]), "pts": PackedVector2Array([q])})
+				_add_op({"t": "line", "c": Color(_icings[_icing][1]), "w": float(ICING_WIDTHS[_width][1]), "pts": PackedVector2Array([q])})
 				_stroking = true
 				return
 			var pts: PackedVector2Array = op.pts
@@ -904,7 +963,7 @@ func _deco_drag(p: Vector2) -> void:
 
 
 func _put_candy(q: Vector2) -> void:
-	var id: String = CookieArt.CANDIES[_candy][0]
+	var id: String = _candies[_candy][0]
 	var c := Color(CookieArt.CANDY_COLORS[_rng.randi() % CookieArt.CANDY_COLORS.size()])
 	_add_op({"t": "candy", "id": id, "p": q, "rot": _rng.randf() * TAU, "c": c})
 	_last_put = q
@@ -934,8 +993,8 @@ func _decorate_randomly() -> void:
 	Sfx.play("chime")
 	var base := _rng.randi() % 3
 	if base != 0:
-		_add_op({"t": "flood", "c": Color(CookieArt.ICINGS[[0, 1, 2, 3, 4, 5, 6][_rng.randi() % 7]][1])})
-	var col := Color(CookieArt.ICINGS[_rng.randi() % 8][1])
+		_add_op({"t": "flood", "c": Color(_icings[_rng.randi() % _icings.size()][1])})
+	var col := Color(_icings[_rng.randi() % _icings.size()][1])
 	var poly := CookieArt.inset(id, 9.0)
 	var pts := PackedVector2Array()
 	var n := 36
@@ -949,12 +1008,14 @@ func _decorate_randomly() -> void:
 	if ring.size() > 2:
 		ring.append(ring[0])
 		_add_op({"t": "line", "c": col, "w": 2.6, "pts": ring})
-	var kinds := ["smarties", "gomme", "bouton", "coeur", "etoile", "dragee", "cannelle"]
+	var kinds: Array = []
+	for cd: Array in _candies:
+		kinds.append(cd[0])
 	for i in 6 + _rng.randi() % 5:
 		var q := Vector2(_rng.randf_range(-30, 30), _rng.randf_range(-36, 36))
 		if Geometry2D.is_point_in_polygon(q, CookieArt.inset(id, 8.0)):
 			_add_op({"t": "candy", "id": kinds[_rng.randi() % kinds.size()], "p": q, "rot": _rng.randf() * TAU, "c": Color(CookieArt.CANDY_COLORS[_rng.randi() % 7])})
-	var kind: String = CookieArt.SPRINKLES[_rng.randi() % 4][0]
+	var kind: String = _sprinkles[_rng.randi() % mini(4, _sprinkles.size())][0]
 	var bits: Array = []
 	for i in 30:
 		var b := Vector2(_rng.randf_range(-36, 36), _rng.randf_range(-40, 40))
@@ -1116,7 +1177,7 @@ func _bar(ci: CanvasItem, at: Vector2, w: float, k: float) -> void:
 func _paint_ingredients(ci: CanvasItem) -> void:
 	CookieArt.bowl(ci, BOWL_C, BOWL_RX)
 	_paint_bowl_contents(ci)
-	for i in CookieArt.INGREDIENTS.size():
+	for i in _ingredients.size():
 		var at := _item_pos(i)
 		var added := i in _added
 		var hot := not added and _pour_i < 0 and Rect2(at.x - 50.0, at.y - 130.0, 100.0, 150.0).has_point(_mouse)
@@ -1127,8 +1188,8 @@ func _paint_ingredients(ci: CanvasItem) -> void:
 			_text(ci, "✔", at + Vector2(-14, -36), 40, Color("#2F7A45"))
 			continue
 		ci.draw_colored_polygon(CookieArt._ellipse(at + Vector2(0, 6), 42.0, 9.0), Color(0, 0, 0, 0.16))
-		CookieArt.ingredient(ci, CookieArt.INGREDIENTS[i][0], at + Vector2(0, -4.0 if hot else 0.0), 1.2 if hot else 1.12)
-		_text(ci, CookieArt.INGREDIENTS[i][1], at + Vector2(-60, 40), 18, INK if not hot else BLUE, 120.0, HORIZONTAL_ALIGNMENT_CENTER)
+		CookieArt.ingredient(ci, _ingredients[i][0], at + Vector2(0, -4.0 if hot else 0.0), 1.2 if hot else 1.12)
+		_text(ci, _ingredients[i][1], at + Vector2(-60, 40), 18, INK if not hot else BLUE, 120.0, HORIZONTAL_ALIGNMENT_CENTER)
 	if _pour_i >= 0:
 		_paint_pour(ci)
 	if _added.is_empty() and _pour_i < 0:
@@ -1137,7 +1198,7 @@ func _paint_ingredients(ci: CanvasItem) -> void:
 
 
 func _paint_pour(ci: CanvasItem) -> void:
-	var id: String = CookieArt.INGREDIENTS[_pour_i][0]
+	var id: String = _ingredients[_pour_i][0]
 	var home := _item_pos(_pour_i)
 	var t := _pour_t
 	var over := Vector2(BOWL_C.x + 70.0, 175.0)
@@ -1181,7 +1242,7 @@ func _paint_pour(ci: CanvasItem) -> void:
 				for k in 14:
 					var ph := fposmod(_time * 2.6 + k / 14.0, 1.0)
 					var q := mouth + Vector2(sin(k * 3.1) * 5.0 + ph * 4.0, ph * (BOWL_C.y - mouth.y))
-					ci.draw_circle(q, 2.8 if id in ["farine", "cassonade", "melasse"] else 1.8, col)
+					ci.draw_circle(q, 2.8 if id in ["farine", "cassonade", "melasse", "sucre", "eau", "lait", "huile", "bleuets"] else 1.8, col)
 	if t > 0.7 and id == "farine":
 		ci.draw_circle(BOWL_C + Vector2(0, -8), 60.0 * (1.0 - t) * 3.0, Color(1, 1, 1, 0.18 * (1.0 - t) * 3.0))
 
@@ -1192,7 +1253,7 @@ func _paint_bowl_contents(ci: CanvasItem) -> void:
 	var r := BOWL_RX * 0.9
 	var blob_rng := RandomNumberGenerator.new()
 	for j in _added.size():
-		var id: String = CookieArt.INGREDIENTS[_added[j]][0]
+		var id: String = _ingredients[_added[j]][0]
 		blob_rng.seed = 100 + _added[j]
 		var a := j * 2.4
 		var p := Vector2(cos(a), sin(a)) * r * blob_rng.randf_range(0.18, 0.5)
@@ -1217,6 +1278,11 @@ func _paint_bowl_contents(ci: CanvasItem) -> void:
 				var col := Color("#C98A2E") if id == "gingembre" else Color("#8A4A2A")
 				for k in 36:
 					ci.draw_circle(Vector2(blob_rng.randfn(0, r * 0.4), blob_rng.randfn(0, r * 0.4)), blob_rng.randf_range(1.5, 3.5), col)
+			"bleuets":
+				for k in 14:
+					ci.draw_circle(Vector2(blob_rng.randfn(0, r * 0.3), blob_rng.randfn(0, r * 0.3)), 6.0, Color("#3A4A9A"))
+			_:
+				ci.draw_circle(p, r * 0.3, Color(str(POUR_COLORS.get(id, "#E8E0C8")), 0.9))
 	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
@@ -1226,7 +1292,7 @@ func _paint_stirring(ci: CanvasItem) -> void:
 	var prog := clampf(_stir_total / STIR_NEED, 0.0, 1.0)
 	var c := BOWL_C + Vector2(0, 3)
 	var r := BOWL_RX * 0.9
-	var dough := DOUGH_COLOR.darkened(0.08)
+	var dough := _dough_color().darkened(0.08)
 	ci.draw_set_transform(c, 0.0, Vector2(1.0, 0.55))
 	ci.draw_circle(Vector2.ZERO, r, Color("#EFE6D2").lerp(dough, smoothstep(0.0, 0.85, prog)))
 	var streaks := [Color("#FFFFFF"), Color("#C99A5F"), Color("#FFE680"), Color("#3A1E0C"), Color("#F5A623"), Color("#FFFFFF"), Color("#6A3A1A")]
@@ -1272,11 +1338,11 @@ func _paint_board(ci: CanvasItem) -> void:
 	var poly := _dough_poly(k)
 	var th := lerpf(34.0, 8.0, k)
 	ci.draw_colored_polygon(CookieArt._shifted(poly, Vector2(5, th + 6.0)), Color(0, 0, 0, 0.18))
-	ci.draw_colored_polygon(CookieArt._shifted(poly, Vector2(0, th)), DOUGH_COLOR.darkened(0.3))
-	ci.draw_colored_polygon(poly, DOUGH_COLOR)
+	ci.draw_colored_polygon(CookieArt._shifted(poly, Vector2(0, th)), _dough_color().darkened(0.3))
+	ci.draw_colored_polygon(poly, _dough_color())
 	var hl := CookieArt._shifted(CookieArt._scaled(poly, 0.9), Vector2(-4, -4))
-	ci.draw_colored_polygon(hl, DOUGH_COLOR.lightened(0.1))
-	ci.draw_polyline(CookieArt._closed(poly), DOUGH_COLOR.darkened(0.45), 1.5, true)
+	ci.draw_colored_polygon(hl, _dough_color().lightened(0.1))
+	ci.draw_polyline(CookieArt._closed(poly), _dough_color().darkened(0.45), 1.5, true)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 321
 	for i in 70:
@@ -1301,7 +1367,7 @@ func _paint_board(ci: CanvasItem) -> void:
 				out.append(c.p + (v * (1.0 + grow)).rotated(c.rot) * CUTTER_SCALE)
 			return out
 		ci.draw_colored_polygon(xf.call(p, 0.05), Color("#6B4524", 0.75))
-		ci.draw_colored_polygon(xf.call(p, 0.0), DOUGH_COLOR.lightened(0.08))
+		ci.draw_colored_polygon(xf.call(p, 0.0), _dough_color().lightened(0.08))
 		ci.draw_polyline(CookieArt._closed(xf.call(p, -0.02)), Color("#FFFFFF", 0.25), 1.5, true)
 	for fx: Dictionary in _cut_fx:
 		var lift: float = float(fx.t) * 160.0
@@ -1367,10 +1433,10 @@ func _paint_oven(ci: CanvasItem) -> void:
 			var sl := _tray_slot(i, n)
 			var two := n > 5
 			var row := 0 if (not two or i < int(ceil(n / 2.0))) else 1
-			var p := Vector2(440.0 + (sl.x - 440.0) * 0.52, (206.0 if not two else 168.0 + row * 42.0) + inside.y)
+			var p := Vector2(440.0 + (sl.x - 440.0) * 0.52, (190.0 if n == 1 else (206.0 if not two else 168.0 + row * 42.0)) + inside.y)
 			var ck: Dictionary = _cookies[i].duplicate()
 			ck.doneness = _bake_color(_bake_t) if _oven == "baking" else 0.0
-			CookieArt.draw_cookie(ci, ck, p, 0.3 * puff, 0.0, false)
+			CookieArt.draw_cookie(ci, ck, p, (0.55 if n == 1 else 0.3) * puff, 0.0, false)
 		ci.draw_rect(win, Color(1, 1, 1, 0.06))
 		ci.draw_polyline(PackedVector2Array([Vector2(win.position.x + 14, win.end.y - 8), Vector2(win.position.x + 90, win.position.y + 8)]), Color(1, 1, 1, 0.22), 6.0, true)
 		ci.draw_rect(Rect2(280, 78, 320, 7), Color("#B8C0CA"))
@@ -1429,17 +1495,17 @@ func _paint_decorating(ci: CanvasItem) -> void:
 		var q := _to_local(_mouse)
 		var on := _inside(q)
 		if _tab == "glacage" and _tool == "stylo":
-			ci.draw_arc(_mouse, float(ICING_WIDTHS[_width][1]) * VIEW_S * 0.5, 0.0, TAU, 20, Color(CookieArt.ICINGS[_icing][1]), 3.0, true)
+			ci.draw_arc(_mouse, float(ICING_WIDTHS[_width][1]) * VIEW_S * 0.5, 0.0, TAU, 20, Color(_icings[_icing][1]), 3.0, true)
 		elif _tab == "bonbons" and on:
 			CookieArt._frame = Transform2D(0.0, _mouse).scaled_local(Vector2.ONE * VIEW_S)
 			ci.draw_set_transform(_mouse, 0.0, Vector2.ONE * VIEW_S)
-			CookieArt._candy_local(ci, CookieArt.CANDIES[_candy][0], Color(CookieArt.CANDY_COLORS[_candy % 7]))
+			CookieArt._candy_local(ci, _candies[_candy][0], Color(CookieArt.CANDY_COLORS[_candy % 7]))
 			ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			CookieArt._frame = Transform2D.IDENTITY
 		elif _tab == "pepites":
-			ci.draw_arc(_mouse, (14.0 if CookieArt.SPRINKLES[_sprinkle][0] == "glace" else 9.0) * VIEW_S * 0.6, 0.0, TAU, 24, Color(BLUE, 0.5), 2.0, true)
+			ci.draw_arc(_mouse, (14.0 if _sprinkles[_sprinkle][0] == "glace" else 9.0) * VIEW_S * 0.6, 0.0, TAU, 24, Color(BLUE, 0.5), 2.0, true)
 		elif _tab == "glacage" and _tool == "napper" and on:
-			ci.draw_arc(_mouse, 20.0, 0.0, TAU, 20, Color(CookieArt.ICINGS[_icing][1]), 5.0, true)
+			ci.draw_arc(_mouse, 20.0, 0.0, TAU, 20, Color(_icings[_icing][1]), 5.0, true)
 	# The row of cookies.
 	for i in _cookies.size():
 		var r := _thumb_rect(i)
@@ -1453,7 +1519,10 @@ func _paint_decorating(ci: CanvasItem) -> void:
 
 # Step 7.
 func _paint_plate(ci: CanvasItem) -> void:
-	CookieArt.plate_scene(ci, Vector2(110, 10), 6.0, _cookies, CookieArt.PLATES[_plate][0], CookieArt.DRINKS[_drink][0], false)
+	if str(_r.shape) == "pizza" or str(_r.shape) == "muffin":
+		CookieArt.table_scene(ci, Vector2(110, 10), 6.0, _cookies, str(_r.shape), _plates[_plate][0], _drinks[_drink][0])
+	else:
+		CookieArt.plate_scene(ci, Vector2(110, 10), 6.0, _cookies, _plates[_plate][0], _drinks[_drink][0], false)
 
 
 # ── Finishing ───────────────────────────────────────────────
@@ -1463,16 +1532,25 @@ func _finish() -> void:
 		return
 	_busy = true
 	_btn_next.disabled = true
-	_say("Je les mets de côté pour le père Noël…")
-	var plate: String = CookieArt.PLATES[_plate][0]
-	var drink: String = CookieArt.DRINKS[_drink][0]
+	_say("Je mets tout ça de côté…" if for_santa else "Ça sent tellement bon ! On goûte ?")
+	var plate: String = _plates[_plate][0]
+	var drink: String = _drinks[_drink][0]
 	var cookies := _cookies
-	var full := await _render(func(n: CanvasItem) -> void: CookieArt.plate_scene(n, Vector2.ZERO, 4.0, cookies, plate, drink, false))
-	var eaten := await _render(func(n: CanvasItem) -> void: CookieArt.plate_scene(n, Vector2.ZERO, 4.0, cookies, plate, drink, true))
-	Christmas.save_plate(full, eaten, plate, drink)
+	var shape := str(_r.shape)
+	var full := await _render(func(n: CanvasItem) -> void: _scene(n, cookies, shape, plate, drink, false))
+	if for_santa:
+		var eaten := await _render(func(n: CanvasItem) -> void: _scene(n, cookies, shape, plate, drink, true))
+		Christmas.save_plate(full, eaten, plate, drink)
 	Sfx.play("chime")
-	closed.emit({"count": cookies.size(), "plate": plate, "drink": drink})
+	closed.emit({"count": cookies.size(), "plate": plate, "drink": drink, "recipe": recipe, "image": full})
 	queue_free()
+
+
+func _scene(n: CanvasItem, cookies: Array, shape: String, plate: String, drink: String, eaten: bool) -> void:
+	if shape == "pizza" or shape == "muffin":
+		CookieArt.table_scene(n, Vector2.ZERO, 4.0, cookies, shape, plate, drink)
+	else:
+		CookieArt.plate_scene(n, Vector2.ZERO, 4.0, cookies, plate, drink, eaten)
 
 
 ## What `painter` draws on a transparent sheet 440 × 320.
@@ -1582,16 +1660,19 @@ class _Ribbon:
 	var studio: CookieStudio
 
 	func _draw() -> void:
-		var w := size.x / CookieStudio.STEPS.size()
-		for i in CookieStudio.STEPS.size():
-			var on: bool = i == studio._phase
-			var done: bool = i < studio._phase
-			var c := Vector2(i * w + 22.0, 24.0)
+		var order: Array = studio._order
+		var w := size.x / order.size()
+		var at := order.find(studio._phase)
+		for pos in order.size():
+			var id: int = order[pos]
+			var on: bool = pos == at
+			var done: bool = pos < at
+			var c := Vector2(pos * w + 22.0, 24.0)
 			var col := YELLOW if on else (Color("#7BC96F") if done else Color("#E4D8C0"))
 			draw_circle(c, 16.0, col)
 			draw_arc(c, 16.0, 0.0, TAU, 24, BLUE if on else Color("#B8A888"), 2.5, true)
-			draw_string(ThemeDB.fallback_font, c + Vector2(-20, 7), "✔" if done else str(i + 1), HORIZONTAL_ALIGNMENT_CENTER, 40.0, 18, BLUE if (on or done) else Color("#8A7A5A"))
-			draw_string(ThemeDB.fallback_font, c + Vector2(22, 6), CookieStudio.STEPS[i], HORIZONTAL_ALIGNMENT_LEFT, w - 46.0, 15, BLUE if on else Color("#8A7A5A"))
+			draw_string(ThemeDB.fallback_font, c + Vector2(-20, 7), "✔" if done else str(pos + 1), HORIZONTAL_ALIGNMENT_CENTER, 40.0, 18, BLUE if (on or done) else Color("#8A7A5A"))
+			draw_string(ThemeDB.fallback_font, c + Vector2(22, 6), str(studio._r.steps[id]), HORIZONTAL_ALIGNMENT_LEFT, w - 46.0, 15, BLUE if on else Color("#8A7A5A"))
 
 
 class _Banner:

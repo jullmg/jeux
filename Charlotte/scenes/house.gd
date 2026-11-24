@@ -139,6 +139,8 @@ func room_name() -> String:
 
 
 func _ready() -> void:
+	# Back inside (from the park or anywhere): an outing with Papa is over.
+	ParkOuting.end()
 	_build_shell()
 	_build_vestibule()
 	_build_salon()
@@ -355,16 +357,13 @@ func _talk_to_mom() -> void:
 		_say(_mom, "Je t'attends à la porte d'en avant,\nma chouette ! On va au Jean Coutu.", 400.0, 3.4)
 	elif Quests.available(Party.QUEST) and School.step() == 0:
 		_invitation()
-	elif Cinema.can_ask():
+	elif Cinema.can_ask() or School.available_today():
 		_ask_mom()
-	elif School.available_today():
-		_mom_about_school()
 	elif School.hands_full_today():
 		_mom.express("happy", 2.0)
 		_say(_mom, "Finis d'abord ce que tu as à faire, ma chouette :\nl'école va t'attendre !", 400.0, 3.4)
 	else:
-		_say(_mom, MOM_LINES[_mom_line % MOM_LINES.size()], 350.0)
-		_mom_line += 1
+		_ask_mom()
 
 
 func _talk_to_dad() -> void:
@@ -424,8 +423,7 @@ func _talk_to_dad() -> void:
 	elif Quests.active("plants"):
 		_say(_dad, "Deux au salon, deux dans le corridor\net une dans ta chambre !", 390.0, 3.5)
 	else:
-		_say(_dad, DAD_LINES[_dad_line % DAD_LINES.size()], 360.0)
-		_dad_line += 1
+		_ask_dad()
 
 
 ## What a parent says when she hands over her craft, by what it is.
@@ -1186,6 +1184,7 @@ func _bake() -> void:
 	_mom_routine.pause(6.0, _charlotte.position.x)
 	_charlotte.facing = 1
 	var studio := CookieStudio.new()
+	studio.for_santa = true
 	studio.closed.connect(func(result: Dictionary) -> void:
 		_control.enabled = true
 		_noel_busy = false
@@ -1412,23 +1411,96 @@ func _mom_about_school() -> void:
 func _ask_mom() -> void:
 	_control.enabled = false
 	var school := School.available_today()
-	var choices: Array = [{"text": "On fait une soirée cinéma ?", "note": "avec Alphée pis Constance"}]
+	var movie := Cinema.can_ask()
+	var choices: Array = [{"text": "On cuisine ensemble ?", "note": "pizza, muffins, biscuits…"}]
+	var kinds: Array = ["cook"]
+	if movie:
+		choices.append({"text": "On fait une soirée cinéma ?", "note": "avec Alphée pis Constance"})
+		kinds.append("movie")
 	if school:
 		choices.append({"text": "Je vais à l'école ?"})
+		kinds.append("school")
 	choices.append({"text": "Juste un câlin !"})
+	kinds.append("hug")
 	var card := ChoiceCard.ask(self, "Qu'est-ce que tu dis à Maman ?", choices)
 	card.chose.connect(func(i: int) -> void:
 		_control.enabled = true
 		_mom_routine.pause(4.0, _charlotte.position.x)
-		if i == 0:
+		var what: String = kinds[i]
+		if what == "cook":
+			_cook_with_mom()
+		elif what == "movie":
 			Cinema.start_again()
 			_pocket_money_for_the_movie(true)
-		elif i == 1 and school:
+		elif what == "school":
 			_mom_about_school()
-		elif i >= 1:
+		else:
 			_mom.express("happy", 2.0)
 			_say(_mom, MOM_LINES[_mom_line % MOM_LINES.size()], 350.0)
 			_mom_line += 1)
+
+
+# Cooking with Maman, on demand (Julien): she picks a recipe, then the whole studio (`CookieStudio`) at the counter.
+func _cook_with_mom() -> void:
+	_control.enabled = false
+	var ids := ["pizza", "muffins", "biscuits"]
+	var card := ChoiceCard.ask(self, "Qu'est-ce qu'on cuisine ?", [
+		{"text": "Une pizza maison", "note": "la pâte, la sauce, les garnitures"},
+		{"text": "Des muffins aux bleuets", "note": "avec du glaçage et des fruits"},
+		{"text": "Des biscuits au gingembre", "note": "à découper pis à décorer"},
+		{"text": "Plus tard"}])
+	card.chose.connect(func(i: int) -> void:
+		if i >= ids.size():
+			_control.enabled = true
+			return
+		_mom.express("happy", 2.0)
+		_mom_routine.pause(8.0, _charlotte.position.x)
+		var studio := CookieStudio.new()
+		studio.recipe = ids[i]
+		studio.closed.connect(func(result: Dictionary) -> void:
+			_control.enabled = true
+			if result.is_empty():
+				_say(_charlotte, "On le fera tantôt, Maman !", 300.0)
+				return
+			_mom_routine.pause(4.0, _charlotte.position.x)
+			Sfx.play("chime")
+			var shot: Image = result.image
+			shot.resize(110, 80, Image.INTERPOLATE_LANCZOS)
+			shot.generate_mipmaps()
+			_say(_mom, str(CookieArt.recipe(str(result.recipe)).eat), 380.0, 3.4)
+			_treat(ImageTexture.create_from_image(shot), "On a tout fait nous-mêmes !", 0.4))
+		add_child(studio))
+
+
+# Papa, on demand: to the Parc du Pélican, with him (`ParkOuting`).
+func _ask_dad() -> void:
+	_control.enabled = false
+	var card := ChoiceCard.ask(self, "Qu'est-ce que tu dis à Papa ?", [{"text": "On va jouer au parc ?", "note": "le parc du Pélican"}, {"text": "Juste un câlin !"}])
+	card.chose.connect(func(i: int) -> void:
+		_control.enabled = true
+		_dad_routine.pause(4.0, _charlotte.position.x)
+		if i == 0:
+			_park_with_dad()
+		else:
+			_dad.express("happy", 2.0)
+			_say(_dad, DAD_LINES[_dad_line % DAD_LINES.size()], 360.0)
+			_dad_line += 1)
+
+
+func _park_with_dad() -> void:
+	if Carry.busy():
+		_say(_charlotte, Carry.FULL_HANDS, 300.0)
+		return
+	_control.enabled = false
+	_dad.express("happy", 3.0)
+	_say(_dad, "Le parc ? Bonne idée, Chachoue !\nMets tes souliers, on y va.", 390.0, 3.0)
+	var go := create_tween()
+	go.tween_interval(3.2)
+	go.tween_callback(func() -> void:
+		ParkOuting.start()
+		Transition.street_x = ParkOuting.START_X
+		Transition.arrive = ""
+		Transition.change_scene_saying(self, ParkOuting.PARK, "Papa t'amène jouer au parc du Pélican…"))
 
 
 # Maman gives her the pocket money for the evening's snacks (`again`: a movie night Charlotte asked for, after the quest).

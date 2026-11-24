@@ -231,6 +231,9 @@ func _build_spots() -> void:
 		, DOOR_X + 80.0))
 	add_child(QuestMark.make(Vector2(CRAFT_X, 470.0), func() -> bool:
 		return not _drew and _control.enabled and Sledding.step() == 0 and not Sledding.can_start()))
+	# Once the drawing is done the craft table still calls her (Julien couldn't find it): a smaller mark until a craft is made.
+	add_child(QuestMark.make(Vector2(CRAFT_X, 470.0), func() -> bool:
+		return _drew and not CraftStudio.has_pending() and not _papa_here and not _busy and _control.enabled and Sledding.step() == 0, 0.8))
 	add_child(QuestMark.make(Vector2(JADE_X, FEET_Y - 330.0), func() -> bool: return Sledding.can_start() and not _drew))
 	add_child(QuestMark.make(Vector2(DOOR_X, 300.0), func() -> bool: return Sledding.step() == 1 and _control.enabled))
 	add_child(QuestMark.make(Vector2(ALYZEE_X, FEET_Y - 190.0), func() -> bool: return _drew and not _played and not _papa_here))
@@ -241,6 +244,9 @@ func _talk_to_jade() -> void:
 		_lend_sled()
 	elif Sledding.step() == 1:
 		_jade_says("La porte est là-bas, Chachoue !\nLes amis t'attendent dehors.")
+	elif _drew and not CraftStudio.has_pending() and not _papa_here:
+		_jade_says("Pour le bricolage, va à la grande table
+au milieu de la salle : j'ai le « ! » pour toi !", 3.6)
 	else:
 		_jade_line += 1
 		_jade_says(JADE_LINES[_jade_line % JADE_LINES.size()])
