@@ -57,6 +57,7 @@ const RECIPES := {
 		"says": [], "eat": "Mmm ! Des biscuits au gingembre, y a rien de meilleur !", "steps": ["Ingrédients", "Mélanger", "Étendre", "Découper", "Cuire", "Décorer", "Assiette"],
 	},
 	"pizza": {
+		"raw": "la pizza crue",
 		"title": "Pizza maison",
 		"ingredients": [["farine", "Farine", "De la farine : trois tasses, pour une belle croûte !"], ["levure", "Levure", "La levure, c'est ce qui fait gonfler la pâte."],
 			["eau", "Eau tiède", "De l'eau tiède, pas trop chaude : la levure aime ça."], ["huile", "Huile d'olive", "Un filet d'huile d'olive, pour que ce soit moelleux."],
@@ -77,6 +78,7 @@ const RECIPES := {
 		"eat": "Mmm ! Une pizza maison, c'est la meilleure du monde !", "steps": ["Ingrédients", "Pétrir", "Étendre", "Découper", "Cuire", "Garnir", "Servir"],
 	},
 	"muffins": {
+		"raw": "les muffins crus",
 		"title": "Muffins aux bleuets",
 		"ingredients": [["farine", "Farine", "De la farine : deux tasses, pour la base."], ["sucre", "Sucre", "Du sucre, pour que ce soit bon !"],
 			["oeuf", "Des œufs", "Crac ! Deux œufs, attention aux coquilles."], ["lait", "Lait", "Une tasse de lait, tout doucement."],
@@ -95,6 +97,7 @@ const RECIPES := {
 		"eat": "Mmm ! Des muffins aux bleuets tout chauds, quel régal !", "steps": ["Ingrédients", "Mélanger", "Étendre", "Découper", "Cuire", "Décorer", "Servir"],
 	},
 	"cupcakes": {
+		"raw": "les cupcakes crus",
 		"title": "Petits gâteaux (cupcakes)",
 		"ingredients": [["farine", "Farine", "De la farine : une tasse et demie."], ["sucre", "Sucre", "Du sucre : ils vont être bien sucrés."],
 			["beurre", "Beurre mou", "Du beurre mou, pour que ce soit moelleux."], ["oeuf", "Des œufs", "Crac ! Deux œufs."],
@@ -113,6 +116,7 @@ const RECIPES := {
 		"eat": "Mmm ! Des cupcakes faits maison, c'est une vraie fête !", "steps": ["Ingrédients", "Mélanger", "Étendre", "Découper", "Cuire", "Décorer", "Servir"],
 	},
 	"gateau": {
+		"raw": "le gâteau cru",
 		"title": "Gâteau au chocolat",
 		"ingredients": [["farine", "Farine", "De la farine : deux tasses."], ["sucre", "Sucre", "Du sucre : ¾ de tasse."], ["cacao", "Cacao", "Du cacao, pour que ce soit bien chocolaté !"],
 			["oeuf", "Des œufs", "Crac ! Trois œufs pour un grand gâteau."], ["lait", "Lait", "Une tasse de lait."], ["beurre", "Beurre fondu", "Du beurre fondu, pour que le gâteau soit tendre."]],
@@ -130,6 +134,7 @@ const RECIPES := {
 		"eat": "Mmm ! Un gâteau au chocolat fait maison, y a rien de meilleur !", "steps": ["Ingrédients", "Mélanger", "Étendre", "Découper", "Cuire", "Décorer", "Servir"],
 	},
 	"pepites": {
+		"raw": "les biscuits crus",
 		"title": "Biscuits aux pépites de chocolat",
 		"ingredients": [["farine", "Farine", "De la farine : deux tasses."], ["cassonade", "Cassonade", "De la cassonade, pour le goût de caramel."],
 			["beurre", "Beurre mou", "Du beurre mou, bien crémeux."], ["oeuf", "Un œuf", "Crac ! Un œuf."], ["vanille", "Vanille", "Un peu de vanille."], ["pepites", "Pépites", "Pis les pépites de chocolat : plein, plein !"]],
@@ -338,6 +343,18 @@ static func draw_cookie(ci: CanvasItem, ck: Dictionary, at: Vector2, s: float, r
 		var p := Vector2(rng.randf_range(-48, 48), rng.randf_range(-48, 48))
 		if specks.size() > 2 and Geometry2D.is_point_in_polygon(p, specks):
 			ci.draw_circle(p, rng.randf_range(0.5, 1.2), Color(base.darkened(0.4), 0.45))
+	# What the dough is made of shows through: chocolate chips in the chip cookies, a golden dome on cakes.
+	if id == "cookie":
+		for i in 9:
+			var cp := Vector2(rng.randf_range(-30, 30), rng.randf_range(-30, 30))
+			if specks.size() > 2 and Geometry2D.is_point_in_polygon(cp, specks):
+				var ch := base.darkened(0.62)
+				ci.draw_colored_polygon(PackedVector2Array([cp + Vector2(-3.4, 2.4), cp + Vector2(3.6, 2.0), cp + Vector2(0.4, -3.6)]), ch)
+				ci.draw_line(cp + Vector2(-1.4, 0.2), cp + Vector2(0.2, -1.8), Color(1, 1, 1, 0.25), 0.8)
+	elif id == "cupcake" or id == "muffin" or id == "gateau":
+		var r := 41.0 if id != "gateau" else 45.0
+		ci.draw_arc(Vector2(-3, -4), r * 0.62, PI * 1.05, PI * 1.62, 14, Color(1, 1, 1, 0.2 + 0.1 * float(ck.get("doneness", 0.5))), 3.0, true)
+		ci.draw_arc(Vector2(2, 3), r * 0.8, PI * 0.1, PI * 0.6, 12, Color(0, 0, 0, 0.12), 3.0, true)
 	for op: Dictionary in ck.get("ops", []):
 		_draw_op(ci, op, id)
 	ci.draw_polyline(_closed(full), base.darkened(0.45), 1.0, true)

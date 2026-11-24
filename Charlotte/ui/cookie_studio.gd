@@ -429,7 +429,7 @@ func _side_oven() -> void:
 			b.position = Vector2(18, 200)
 			b.add_theme_stylebox_override("normal", _box(YELLOW, BLUE, 3, 16))
 			card.add_child(b)
-			var tip := _label("La plaque est prête, avec les\nbiscuits crus. Clique pour\nla glisser dans le four !", 18, INK)
+			var tip := _label("La plaque est prête, avec\n%s. Clique pour\nla glisser dans le four !" % str(_r.get("raw", "les biscuits crus")), 18, INK)
 			tip.position = Vector2(18, 280)
 			card.add_child(tip)
 		"baking":
