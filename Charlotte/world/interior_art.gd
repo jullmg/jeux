@@ -616,6 +616,14 @@ static func bed() -> ImageTexture:
 	s += '<path d="M434 146 H548" stroke="#C9C2B4" stroke-width="10"/><path d="M434 146 H548" stroke="url(#iron)" stroke-width="7"/>'
 	for fx in [440.0, 544.0]:
 		s += '<circle cx="%s" cy="138" r="7" fill="#F4F0E6" stroke="#B8B2A2" stroke-width="1.8"/><circle cx="%s" cy="135" r="2.4" fill="#FFFFFF"/>' % [fx, fx - 2.0]
+	# A soft knitted blanket folded across the foot, with its stripes and fringe, and light from the left over the whole bed.
+	s += '<path d="M330 182 Q420 170 536 178 L540 214 Q430 230 326 214 Z" fill="#F7E2A8" stroke="#C9A24A" stroke-width="2.2"/>'
+	for y in [190.0, 200.0, 208.0]:
+		s += '<path d="M332 %s Q430 %s 538 %s" stroke="#F29BB2" stroke-width="3" fill="none" opacity="0.8"/>' % [y, y - 8.0, y - 2.0]
+	for x in range(334, 538, 8):
+		s += '<path d="M%d 212 l-1 8" stroke="#C9A24A" stroke-width="1.6" stroke-linecap="round"/>' % x
+	s += '<path d="M60 160 Q200 150 340 156" stroke="#FFFFFF" stroke-width="5" fill="none" opacity="0.28" stroke-linecap="round"/>'
+	s += '<path d="M470 190 Q500 200 540 196 V226 Q500 240 468 228 Z" fill="#000000" opacity="0.1"/>'
 	# A plush bunny leaning on the pillows.
 	s += '<ellipse cx="254" cy="150" rx="22" ry="15" fill="#FBD2DE" stroke="#C26A84" stroke-width="2.2"/><circle cx="276" cy="136" r="12" fill="#FBD2DE" stroke="#C26A84" stroke-width="2.2"/>'
 	s += '<path d="M270 126 q-5 -22 2 -24 q7 2 5 24 M281 126 q3 -22 9 -22 q5 4 -2 24" fill="#FBD2DE" stroke="#C26A84" stroke-width="2.2"/>'
@@ -816,21 +824,52 @@ static func fluffy_chair() -> ImageTexture:
 
 ## Canvas 360x260: white desk under a pile of bags and clothes, with the red office chair. Floor at y 260.
 static func desk() -> ImageTexture:
-	var s := '<rect x="60" y="100" width="290" height="16" fill="#F7F6F2" stroke="#C9C2B4" stroke-width="2.5"/>'
-	s += '<rect x="250" y="116" width="96" height="144" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="2.5"/>'
-	s += '<rect x="66" y="116" width="10" height="144" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="2"/>'
-	for y in [130.0, 176.0, 222.0]:
-		s += '<rect x="258" y="%s" width="80" height="38" fill="none" stroke="#D9D2C4" stroke-width="2"/>' % y
-	s += '<path d="M130 100 q10 -40 60 -36 q40 4 40 36 z" fill="#8FB5A0" stroke="#5E8A72" stroke-width="2"/>'
-	s += '<path d="M160 100 q20 -30 60 -20 q30 10 30 20 z" fill="#F2B6CF" stroke="#B5647F" stroke-width="2"/>'
-	s += '<path d="M120 100 q10 -30 40 -26 l20 26 z" fill="#F2D9A0" stroke="#B5A270" stroke-width="2"/>'
-	# Red office chair with a white sweater over the back.
-	s += '<path d="M40 40 Q40 20 70 20 H120 Q140 20 140 40 V130 H40 Z" fill="#D9343F" stroke="#8E1A24" stroke-width="3"/>'
-	s += '<path d="M60 26 Q90 14 130 30 L126 120 Q100 136 70 120 Z" fill="#F1ECE2" stroke="#B9B4AA" stroke-width="2.5"/>'
-	s += '<rect x="30" y="136" width="130" height="22" rx="8" fill="#D9343F" stroke="#8E1A24" stroke-width="3"/>'
-	s += '<path d="M95 158 V220 M50 240 L95 220 L140 240 M95 220 V244" stroke="#8E9399" stroke-width="7" stroke-linecap="round"/>'
+	var s := '<defs>'
+	s += '<linearGradient id="dk_top" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.6" stop-color="#F3EFE6"/><stop offset="1" stop-color="#DAD3C4"/></linearGradient>'
+	s += '<linearGradient id="dk_body" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FBF9F4"/><stop offset="1" stop-color="#E2DCCD"/></linearGradient>'
+	s += '<linearGradient id="dk_chair" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EE5B63"/><stop offset="1" stop-color="#B8222E"/></linearGradient>'
+	s += '<linearGradient id="dk_lamp" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE69A"/><stop offset="1" stop-color="#F2B94A"/></linearGradient>'
+	s += '</defs>'
+	# Its shade on the floor.
+	s += '<ellipse cx="200" cy="256" rx="170" ry="6" fill="#000000" opacity="0.14"/>'
+	# The top: a slab with a bevelled front edge, a lighter lip and a shade under it.
+	s += '<rect x="56" y="94" width="298" height="9" rx="2" fill="url(#dk_top)" stroke="#C9C2B4" stroke-width="2"/>'
+	s += '<rect x="56" y="103" width="298" height="13" fill="url(#dk_body)" stroke="#C9C2B4" stroke-width="2.4"/>'
+	s += '<path d="M60 97 H350" stroke="#FFFFFF" stroke-width="1.8" opacity="0.9"/>'
+	s += '<rect x="68" y="116" width="274" height="6" fill="#000000" opacity="0.1"/>'
+	# Left leg (a panel) and the stack of drawers, with their knobs and a keyhole.
+	s += '<rect x="64" y="116" width="11" height="140" fill="url(#dk_body)" stroke="#C9C2B4" stroke-width="2"/>'
+	s += '<rect x="248" y="116" width="100" height="140" fill="url(#dk_body)" stroke="#C9C2B4" stroke-width="2.4"/>'
+	for k in 3:
+		var y := 122.0 + k * 44.0
+		s += '<rect x="256" y="%s" width="84" height="38" rx="3" fill="#FFFFFF" stroke="#D2CABA" stroke-width="2"/>' % y
+		s += '<rect x="258" y="%s" width="80" height="6" fill="#FFFFFF" opacity="0.8"/>' % (y + 2)
+		s += '<circle cx="298" cy="%s" r="5" fill="#F2B94A" stroke="#A47A12" stroke-width="1.6"/><circle cx="296.6" cy="%s" r="1.6" fill="#FFF3C4"/>' % [y + 20.0, y + 18.6]
+	s += '<rect x="250" y="116" width="6" height="140" fill="#000000" opacity="0.06"/>'
+	# Her things on the desk: a pencil cup, a little lamp with its warm shade, a stack of books and a plush frog.
+	s += '<rect x="166" y="64" width="26" height="30" rx="4" fill="#7FB5D9" stroke="#3E6F99" stroke-width="2"/><rect x="169" y="66" width="5" height="26" fill="#FFFFFF" opacity="0.4"/>'
+	s += '<path d="M174 66 L170 40 M180 66 L182 34 M186 66 L192 44" stroke="#E8546A" stroke-width="3.2" stroke-linecap="round"/><path d="M178 66 L176 46" stroke="#F2C14E" stroke-width="3.2" stroke-linecap="round"/>'
+	s += '<path d="M180 36 L182 34 M170 42 L169 40" stroke="#3A3A3A" stroke-width="2"/>'
+	s += '<ellipse cx="108" cy="92" rx="16" ry="4" fill="#B8B2A2" stroke="#8E8878" stroke-width="1.5"/>'
+	s += '<path d="M108 90 V62 L122 44" stroke="#8E9399" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+	s += '<path d="M106 40 L134 36 L140 54 L112 58 Z" fill="url(#dk_lamp)" stroke="#A47A12" stroke-width="2"/>'
+	s += '<path d="M112 56 L140 52" stroke="#FFF3C4" stroke-width="2.4" opacity="0.8"/>'
+	s += '<rect x="212" y="82" width="38" height="12" rx="2" fill="#E8546A" stroke="#8E2A3A" stroke-width="1.8"/><rect x="216" y="70" width="34" height="12" rx="2" fill="#6FAE8A" stroke="#3E7E5A" stroke-width="1.8"/><rect x="214" y="60" width="32" height="10" rx="2" fill="#F2C14E" stroke="#B58A24" stroke-width="1.8"/>'
+	s += '<path d="M218 85 H246 M220 73 H246" stroke="#FFFFFF" stroke-width="1.4" opacity="0.6"/>'
+	s += '<ellipse cx="318" cy="88" rx="18" ry="9" fill="#7BC47F" stroke="#3E8E5A" stroke-width="2"/><circle cx="308" cy="78" r="6" fill="#FFFFFF" stroke="#3E8E5A" stroke-width="1.6"/><circle cx="326" cy="78" r="6" fill="#FFFFFF" stroke="#3E8E5A" stroke-width="1.6"/>'
+	s += '<circle cx="309" cy="78" r="2.4" fill="#2B2B2B"/><circle cx="325" cy="78" r="2.4" fill="#2B2B2B"/><path d="M312 90 Q318 94 324 90" stroke="#3E8E5A" stroke-width="1.8" fill="none"/>'
+	# Red office chair with a cushion, a white sweater over the back, shine from the upper left.
+	s += '<path d="M38 40 Q38 18 70 18 H122 Q144 18 144 40 V132 H38 Z" fill="url(#dk_chair)" stroke="#8E1A24" stroke-width="3"/>'
+	s += '<path d="M46 30 Q50 22 70 22 H100" stroke="#FFFFFF" stroke-width="3" fill="none" opacity="0.5" stroke-linecap="round"/>'
+	s += '<path d="M60 26 Q90 14 132 30 L128 122 Q100 138 70 122 Z" fill="#F7F2E8" stroke="#B9B4AA" stroke-width="2.5"/>'
+	s += '<path d="M72 40 Q96 34 120 42 M74 64 Q98 58 122 66 M74 90 Q98 86 122 92" stroke="#D8D1C4" stroke-width="2" fill="none"/>'
+	s += '<path d="M62 30 Q80 20 108 24" stroke="#FFFFFF" stroke-width="3.5" fill="none" opacity="0.8" stroke-linecap="round"/>'
+	s += '<rect x="28" y="136" width="134" height="24" rx="9" fill="url(#dk_chair)" stroke="#8E1A24" stroke-width="3"/>'
+	s += '<path d="M38 142 H110" stroke="#FFFFFF" stroke-width="3" opacity="0.45" stroke-linecap="round"/>'
+	s += '<path d="M95 160 V222 M50 242 L95 222 L140 242 M95 222 V246" stroke="#6E747A" stroke-width="7" stroke-linecap="round"/>'
+	s += '<path d="M93 160 V222" stroke="#C4C9CE" stroke-width="2" opacity="0.8"/>'
 	for x in [50.0, 95.0, 140.0]:
-		s += '<circle cx="%s" cy="250" r="8" fill="#3A3A3A"/>' % x
+		s += '<circle cx="%s" cy="250" r="8" fill="#3A3A3A"/><circle cx="%s" cy="248" r="2.4" fill="#8E9399"/>' % [x, x - 2.0]
 	return tex(360, 260, s)
 
 
