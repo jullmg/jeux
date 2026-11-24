@@ -1080,9 +1080,9 @@ func _sleeve_palette(build: Callable) -> String:
 func _upper_arm_svg(length: float) -> String:
 	var ey := 8.0 + length
 	# The arm tapers: a fuller shoulder, slimmer at the elbow.
-	var s := _f('<path d="M8.2 16 Q15 11 21.8 16 L20.4 %s Q15 %s 9.6 %s Z" fill="{skin}" stroke="{skin_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [ey - 4.0, ey - 1.0, ey - 4.0])
-	s += _f('<circle cx="15" cy="%s" r="6.5" fill="{skin}" stroke="{skin_line}" stroke-width="2.5"/>' % ey)
-	s += _f('<rect x="10.4" y="%s" width="9.2" height="13" fill="{skin}"/>' % (ey - 9.0))
+	var s := _f('<path d="M7.2 16 Q15 10 22.8 16 L21.4 %s Q15 %s 8.6 %s Z" fill="{skin}" stroke="{skin_line}" stroke-width="2.5" stroke-linejoin="round"/>' % [ey - 4.0, ey - 1.0, ey - 4.0])
+	s += _f('<circle cx="15" cy="%s" r="7.2" fill="{skin}" stroke="{skin_line}" stroke-width="2.5"/>' % ey)
+	s += _f('<rect x="9.4" y="%s" width="11.2" height="13" fill="{skin}"/>' % (ey - 9.0))
 	s += _sleeve_palette(func() -> String:
 		var t := ""
 		match look.sleeve:
@@ -1107,9 +1107,9 @@ func _upper_arm_svg(length: float) -> String:
 func _forearm_svg(length: float) -> String:
 	var wy := 8.0 + length
 	# Fuller at the elbow, narrowing to the wrist.
-	var s := _f('<path d="M9.6 8 H20.4 L19.2 %s Q15 %s 10.8 %s Z" fill="{skin}" stroke="{skin_line}" stroke-width="2.2" stroke-linejoin="round"/>' % [wy - 1.0, wy + 2.0, wy - 1.0])
-	s += _f('<circle cx="15" cy="8" r="5.8" fill="{skin}" stroke="{skin_line}" stroke-width="2.2"/>')
-	s += _f('<rect x="11" y="3" width="8" height="12" fill="{skin}"/>')
+	var s := _f('<path d="M8.6 8 H21.4 L19.8 %s Q15 %s 10.2 %s Z" fill="{skin}" stroke="{skin_line}" stroke-width="2.2" stroke-linejoin="round"/>' % [wy - 1.0, wy + 2.0, wy - 1.0])
+	s += _f('<circle cx="15" cy="8" r="6.6" fill="{skin}" stroke="{skin_line}" stroke-width="2.2"/>')
+	s += _f('<rect x="10" y="3" width="10" height="12" fill="{skin}"/>')
 	s += _f('<path d="M11 14 V%s" stroke="{skin_shade}" stroke-width="2" opacity="0.5"/>' % (wy - 4.0))
 	s += _sleeve_palette(func() -> String:
 		var t := ""
