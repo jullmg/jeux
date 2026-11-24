@@ -255,13 +255,17 @@ func _bubly_display(x: float, bottom: float, s := 0.62) -> void:
 	add_child(DoorSpot.make(Rect2(x, bottom - 120.0 * s, 150.0 * s, 120.0 * s), _buy_bubly, x + 75.0 * s))
 
 
-var _last_bubly := -1
-
-
+# She picks the flavour of her bubly on a card (one colour per flavour).
 func _buy_bubly() -> void:
-	var i := randi() % ShopArt.BUBLY.size()
-	if i == _last_bubly:
-		i = (i + 1) % ShopArt.BUBLY.size()
-	_last_bubly = i
+	if _asking:
+		return
 	var says := ["au lime", "au citron", "à la fraise", "à la mûre", "au pamplemousse", "à la mangue"]
-	_buy(ShopArt.bubly_can(i), "Une eau pétillante bubly\n%s !" % says[i], PRICES.bubly)
+	var choices: Array = []
+	for f: Array in ShopArt.BUBLY:
+		choices.append({"text": "Bubly %s" % str(f[0]), "color": Color(str(f[2]))})
+	choices.append({"text": "Pas maintenant", "color": Color("#DDE6F0")})
+	var card := ChoiceCard.ask(self, "Quelle saveur de bubly ?", choices)
+	card.chose.connect(func(i: int) -> void:
+		if i < 0 or i >= ShopArt.BUBLY.size():
+			return
+		_buy(ShopArt.bubly_can(i), "Une eau pétillante bubly\n%s !" % says[i], PRICES.bubly))
