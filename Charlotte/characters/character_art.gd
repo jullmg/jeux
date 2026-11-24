@@ -24,7 +24,7 @@ const CLOTH_DEFS := ('<defs><linearGradient id="cs" x1="0" y1="0" x2="1" y2="0.5
 	+ '<stop offset="1" stop-color="#000000" stop-opacity="0.07"/></linearGradient></defs>')
 ## The shin's picture reaches this far above the knee (the round cap of the joint).
 const SHIN_PAD := 14.0
-const HAND_SCALE := {"child": 1.16, "kid7": 1.1, "kid5": 1.04, "tween": 1.22, "teen": 1.28, "adult": 1.42, "senior": 1.38}
+const HAND_SCALE := {"child": 1.34, "kid7": 1.26, "kid5": 1.2, "tween": 1.4, "teen": 1.46, "adult": 1.6, "senior": 1.56}
 
 var look: CharacterLook
 var p := {}
@@ -1140,47 +1140,47 @@ func _hand_svg(mode: String, scale: float) -> String:
 	match mode:
 		"relaxed":
 			# Pinky, ring, middle, index: each a little longer than the last and curled a little more.
-			for f in [[16.8, 3.8, 7.5, 5.0, -2.0, -20.0], [20.8, 4.2, 9.5, 6.0, -4.0, -22.0], [24.8, 4.2, 10.0, 6.5, -6.0, -24.0], [28.6, 4.0, 9.0, 6.0, -9.0, -26.0]]:
+			for f in [[16.6, 5.0, 6.5, 4.6, -2.0, -22.0], [20.6, 5.4, 8.0, 5.4, -4.0, -24.0], [24.8, 5.4, 8.6, 5.8, -6.0, -26.0], [28.8, 5.2, 7.6, 5.4, -9.0, -28.0]]:
 				s += _finger(f[0], 14.0, f[1], f[2], f[3], f[4], f[5])
 			s += _f('<path d="M16.6 3 H27.4 Q30.4 9 30.0 16 Q29.8 21.4 25.6 21.4 H18.4 Q14.2 21.4 14.0 16 Q13.6 9 16.6 3 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
 			s += _f('<ellipse cx="26.4" cy="12.4" rx="4.0" ry="5.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
 			s += '<g transform="translate(29.2 8.5) rotate(-36)">'
-			s += _f('<rect x="-2.7" y="0" width="5.4" height="8.2" rx="2.7" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
+			s += _f('<rect x="-3.4" y="0" width="6.8" height="8.2" rx="3.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
 			s += '<g transform="translate(0 7) rotate(-16)">'
-			s += _f('<rect x="-2.5" y="-1" width="5" height="6.4" rx="2.5" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g></g>')
+			s += _f('<rect x="-3.2" y="-1" width="6.4" height="6.4" rx="3.2" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g></g>')
 		"open":
-			for f in [[16.8, 3.8, 15.0, 0.0, 14.0, 0.0], [20.8, 4.2, 18.0, 0.0, 6.0, 0.0], [24.8, 4.2, 19.0, 0.0, -3.0, 0.0], [28.6, 4.0, 17.0, 0.0, -12.0, 0.0]]:
+			for f in [[16.6, 5.0, 13.0, 0.0, 14.0, 0.0], [20.6, 5.4, 15.5, 0.0, 6.0, 0.0], [24.8, 5.4, 16.5, 0.0, -3.0, 0.0], [28.8, 5.2, 14.5, 0.0, -12.0, 0.0]]:
 				s += _finger(f[0], 14.0, f[1], f[2], 0.01, f[4], 0.0)
 			s += _f('<path d="M16.6 3 H27.4 Q30.4 9 30.0 16 Q29.8 21.4 25.6 21.4 H18.4 Q14.2 21.4 14.0 16 Q13.6 9 16.6 3 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
 			s += _f('<ellipse cx="26.4" cy="12.4" rx="4.0" ry="5.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
 			s += '<g transform="translate(29.4 9.5) rotate(-58)">'
-			s += _f('<rect x="-2.8" y="0" width="5.6" height="13" rx="2.8" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
+			s += _f('<rect x="-3.5" y="0" width="7" height="12" rx="3.5" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
 		"flat":
-			for f in [[17.3, 4.4, 13.0, 0.01, -1.0, 0.0], [21.3, 4.6, 16.0, 0.01, -2.0, 0.0], [25.3, 4.6, 17.0, 0.01, -3.0, 0.0], [29.0, 4.4, 15.5, 0.01, -4.0, 0.0]]:
+			for f in [[17.0, 5.2, 11.5, 0.01, -1.0, 0.0], [21.2, 5.6, 14.0, 0.01, -2.0, 0.0], [25.4, 5.6, 15.0, 0.01, -3.0, 0.0], [29.2, 5.2, 13.5, 0.01, -4.0, 0.0]]:
 				s += _finger(f[0], 14.0, f[1], f[2], f[3], f[4], 0.0)
 			s += _f('<path d="M16.6 3 H27.4 Q30.4 9 30.0 16 Q29.8 21.4 25.6 21.4 H18.4 Q14.2 21.4 14.0 16 Q13.6 9 16.6 3 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
 			s += _f('<ellipse cx="26.4" cy="12.4" rx="4.0" ry="5.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
 			s += '<g transform="translate(29.6 9) rotate(-14)">'
-			s += _f('<rect x="-2.7" y="0" width="5.4" height="11" rx="2.7" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
+			s += _f('<rect x="-3.4" y="0" width="6.8" height="10" rx="3.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
 		_:
 			# The fist: a block of palm, four curled fingers stacked on the front of it, the thumb folded over them.
 			s += _f('<rect x="13.5" y="4" width="17" height="18" rx="7" fill="{skin}" stroke="{skin_line}" stroke-width="1.7"/>')
 			for i in 4:
 				var y := 8.5 + i * 4.3
 				var len := 13.0 - absf(i - 1.5) * 1.0
-				s += _f('<rect x="20" y="%s" width="%s" height="4.6" rx="2.3" fill="{skin}" stroke="{skin_line}" stroke-width="1.4"/>' % [y, len])
+				s += _f('<rect x="20" y="%s" width="%s" height="5.0" rx="2.5" fill="{skin}" stroke="{skin_line}" stroke-width="1.4"/>' % [y, len])
 			s += '<g transform="translate(26 6.5) rotate(-72)">'
-			s += _f('<rect x="-2.7" y="-1" width="5.4" height="10" rx="2.7" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
+			s += _f('<rect x="-3.4" y="-1" width="6.8" height="9.5" rx="3.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
 	# One clean silhouette: every part drawn once with a thick outline, then once more filled so the lines where the fingers
 	# overlap vanish; then a little light on the palm (no lines on the back of the hand).
 	var outlined := s.replace('stroke-width="1.5"', 'stroke-width="3.2"').replace('stroke-width="1.7"', 'stroke-width="3.4"')
 	var filled := s.replace('stroke="{skin_line}"', 'stroke="{skin}"')
 	s = _f(outlined) + _f(filled)
 	s += _f('<ellipse cx="19.5" cy="11.5" rx="3.2" ry="4.5" fill="#FFFFFF" opacity="0.2"/>')
+	# Soft shade on the side away from the light and under the fingers, a highlight on the knuckles: a plump, rounded hand.
+	s += _f('<ellipse cx="25.5" cy="17.5" rx="4.6" ry="4" fill="{skin_line}" opacity="0.16"/>')
 	if mode != "grip":
-		# The palm's creases, very faint, and the light on the knuckles.
-		s += _f('<path d="M17.2 11 Q21.5 15.5 26 11.6" stroke="{skin_line}" stroke-width="0.9" fill="none" opacity="0.28" stroke-linecap="round"/>')
-		s += _f('<path d="M16.4 18.4 Q22 20.2 28.2 18.4" stroke="#FFFFFF" stroke-width="1.2" fill="none" opacity="0.22" stroke-linecap="round"/>')
+		s += _f('<path d="M17.4 17.6 Q22 20.4 28.4 17.6" stroke="#FFFFFF" stroke-width="1.6" fill="none" opacity="0.3" stroke-linecap="round"/>')
 	s += _f(palm_top)
 	var w := ceili(44.0 * scale)
 	var h := ceili(50.0 * scale)
