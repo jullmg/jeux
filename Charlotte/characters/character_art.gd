@@ -1143,38 +1143,26 @@ func _hand_svg(mode: String, scale: float) -> String:
 	var palm_top := '<rect x="17" y="2" width="10" height="7" fill="{skin}"/>'
 	match mode:
 		"relaxed":
-			# Pinky, ring, middle, index: each a little longer than the last and curled a little more.
-			for f in [[16.6, 5.0, 6.5, 4.6, -2.0, -22.0], [20.6, 5.4, 8.0, 5.4, -4.0, -24.0], [24.8, 5.4, 8.6, 5.8, -6.0, -26.0], [28.8, 5.2, 7.6, 5.4, -9.0, -28.0]]:
-				s += _finger(f[0], 14.0, f[1], f[2], f[3], f[4], f[5])
+			# A mitten: one soft mass for the four fingers (no separate sections), the thumb beside it.
+			s += _f('<path d="M16 12 H31 Q34 14 33.6 22 Q33 33 27.5 36.5 Q21.5 39 16.8 34 Q14.4 27 16 12 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
 			s += _f('<path d="M16.6 3 H27.4 Q30.4 9 30.0 16 Q29.8 21.4 25.6 21.4 H18.4 Q14.2 21.4 14.0 16 Q13.6 9 16.6 3 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
-			s += _f('<ellipse cx="26.4" cy="12.4" rx="4.0" ry="5.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
 			s += '<g transform="translate(29.2 8.5) rotate(-36)">'
-			s += _f('<rect x="-3.4" y="0" width="6.8" height="8.2" rx="3.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
-			s += '<g transform="translate(0 7) rotate(-16)">'
-			s += _f('<rect x="-3.2" y="-1" width="6.4" height="6.4" rx="3.2" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g></g>')
+			s += _f('<rect x="-3.6" y="0" width="7.2" height="12" rx="3.6" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
 		"open":
-			for f in [[16.6, 5.0, 13.0, 0.0, 14.0, 0.0], [20.6, 5.4, 15.5, 0.0, 6.0, 0.0], [24.8, 5.4, 16.5, 0.0, -3.0, 0.0], [28.8, 5.2, 14.5, 0.0, -12.0, 0.0]]:
-				s += _finger(f[0], 14.0, f[1], f[2], 0.01, f[4], 0.0)
+			s += _f('<path d="M15.6 12 H31.4 Q34.4 14 34 22 Q33.4 36 27.5 40 Q21.5 42 16.4 36 Q14 28 15.6 12 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
 			s += _f('<path d="M16.6 3 H27.4 Q30.4 9 30.0 16 Q29.8 21.4 25.6 21.4 H18.4 Q14.2 21.4 14.0 16 Q13.6 9 16.6 3 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
-			s += _f('<ellipse cx="26.4" cy="12.4" rx="4.0" ry="5.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
 			s += '<g transform="translate(29.4 9.5) rotate(-58)">'
-			s += _f('<rect x="-3.5" y="0" width="7" height="12" rx="3.5" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
+			s += _f('<rect x="-3.7" y="0" width="7.4" height="13" rx="3.7" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
 		"flat":
-			for f in [[17.0, 5.2, 11.5, 0.01, -1.0, 0.0], [21.2, 5.6, 14.0, 0.01, -2.0, 0.0], [25.4, 5.6, 15.0, 0.01, -3.0, 0.0], [29.2, 5.2, 13.5, 0.01, -4.0, 0.0]]:
-				s += _finger(f[0], 14.0, f[1], f[2], f[3], f[4], 0.0)
+			s += _f('<path d="M16 12 H32 Q34 14 33.6 22 Q33.4 34 31 37 Q24 39 17.4 36.5 Q15 28 16 12 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
 			s += _f('<path d="M16.6 3 H27.4 Q30.4 9 30.0 16 Q29.8 21.4 25.6 21.4 H18.4 Q14.2 21.4 14.0 16 Q13.6 9 16.6 3 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
-			s += _f('<ellipse cx="26.4" cy="12.4" rx="4.0" ry="5.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
 			s += '<g transform="translate(29.6 9) rotate(-14)">'
-			s += _f('<rect x="-3.4" y="0" width="6.8" height="10" rx="3.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
+			s += _f('<rect x="-3.6" y="0" width="7.2" height="11" rx="3.6" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
 		_:
-			# The fist: a block of palm, four curled fingers stacked on the front of it, the thumb folded over them.
-			s += _f('<rect x="13.5" y="4" width="17" height="18" rx="7" fill="{skin}" stroke="{skin_line}" stroke-width="1.7"/>')
-			for i in 4:
-				var y := 8.5 + i * 4.3
-				var len := 13.0 - absf(i - 1.5) * 1.0
-				s += _f('<rect x="20" y="%s" width="%s" height="5.0" rx="2.5" fill="{skin}" stroke="{skin_line}" stroke-width="1.4"/>' % [y, len])
-			s += '<g transform="translate(26 6.5) rotate(-72)">'
-			s += _f('<rect x="-3.4" y="-1" width="6.8" height="9.5" rx="3.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
+			# The fist: one rounded block and the thumb folded over it.
+			s += _f('<rect x="13.5" y="4" width="19" height="21" rx="8.5" fill="{skin}" stroke="{skin_line}" stroke-width="1.7"/>')
+			s += '<g transform="translate(27 7) rotate(-72)">'
+			s += _f('<rect x="-3.6" y="-1" width="7.2" height="10" rx="3.6" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
 	# One clean silhouette: every part drawn once with a thick outline, then once more filled so the lines where the fingers
 	# overlap vanish; then a little light on the palm (no lines on the back of the hand).
 	var outlined := s.replace('stroke-width="1.5"', 'stroke-width="4.0"').replace('stroke-width="1.7"', 'stroke-width="4.2"').replace('stroke-width="1.4"', 'stroke-width="4.0"')
