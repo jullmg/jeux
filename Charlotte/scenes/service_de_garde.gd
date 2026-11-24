@@ -1,9 +1,9 @@
 extends Interior
 # The school's service de garde, after class (a school day's step 4, world/school.gd): a big bright room in the basement under
-# a paper garland, a rainbow painted on the wall. Left to right: the door Papa comes in by, the coat hooks, the craft table,
-# the block corner, the snack table with Jade the educator, and the games table where Alyzée waits. Each thing she does there is
-# a little moment (a craft of the season, a tower that grows and tumbles, a snack, a game with Alyzée). Every day she has a
-# drawing to make for her parents first (Julien): Jade asks for it, the craft table opens the drawing pad, and she carries
+# a paper garland, a rainbow painted on the wall. Left to right: the door Papa comes in by, the coat hooks, the drawing table,
+# the block corner, the snack table, Jade the educator, the craft table (its own table: the whole craft studio) and Alyzée. Each
+# other thing she does there is a little moment (a tower that grows and tumbles, a snack, a chat with Alyzée). Every day she has a
+# drawing to make for her parents first (Julien): Jade asks for it, the drawing table opens the drawing pad, and she carries
 # the drawing home (`Carry` "drawing", `DrawingPad.pending`), where it goes up on the fridge. Papa comes once it is done; she
 # shows it to him and tells him about her day (on the first day, her new friend: the quest is done), and "Papa te ramène à
 # la maison…".
@@ -22,8 +22,8 @@ const EMILIA_X := 1700.0
 const PAPA_AFTER := 5.0
 ## Jade reminds her of the drawing every so often until it is done.
 const REMIND_EVERY := 25.0
-const JADE_ASKS := "Aujourd'hui, on fait un dessin\npour nos parents ! Va à la table de bricolage."
-const JADE_REMINDS := ["N'oublie pas ton dessin pour ton papa\npis ta maman, Chachoue !", "La table de bricolage t'attend !\nTon dessin pour tes parents ?"]
+const JADE_ASKS := "Aujourd'hui, on fait un dessin\npour nos parents ! Va à la table de dessin."
+const JADE_REMINDS := ["N'oublie pas ton dessin pour ton papa\npis ta maman, Chachoue !", "La table de dessin t'attend !\nTon dessin pour tes parents ?"]
 ## The sliding (`Sledding`, quest "glissade"): what Jade says when there is snow to slide on, as she lends the sled, and
 ## when they come back in.
 const JADE_SLED := "Il a neigé en masse ! Avant le bricolage,\non sort glisser dans la cour. Viens me voir !"
@@ -33,13 +33,7 @@ const JADE_CRAFT := ["Wow, quel beau bricolage, Chachoue !\n%s va l'adorer !", "
 const JADE_LIKES := ["Wow ! C'est magnifique, Chachoue !\nTes parents vont capoter !", "Quel beau dessin !\nIl va être ben beau sur le frigo."]
 const JADE_LINES := ["Bienvenue au service de garde, Chachoue !", "On se lave les mains avant la collation !",
 	"On range les blocs quand on a fini, OK ?", "Ton papa va arriver bientôt."]
-const ALYZEE_GAME := [
-	[0, "On joue aux serpents et échelles ?"],
-	[-1, "Oui ! Moi, je prends le pion bleu."],
-	[0, "Six ! Je monte l'échelle !"],
-	[-1, "Ah non ! Moi, je glisse sur le serpent…"],
-	[0, "Hi hi ! On en refait une demain ?"],
-]
+const ALYZEE_CHAT := ["Tu viens bricoler avec moi, tantôt ?", "J'aime ben ça, le service de garde !", "Ma maman m'a dit qu'elle arrive bientôt.", "Regarde, j'ai fait un dessin de licorne !"]
 ## Emilia shares her mamá's concha (quest "emilia"): [who (0 Emilia, -1 Charlotte), what].
 const EMILIA_SHARE := [
 	[0, "Chachoue ! Ma mamá m'a donné des conchas\npour la collation. J'en ai une pour toi !"],
@@ -71,7 +65,7 @@ var _jade_line := 0
 var _drew := false
 var _drew_at := 0.0
 var _reminded := 0.0
-var _played := false
+var _chat := 0
 
 
 func _ready() -> void:
@@ -160,7 +154,7 @@ func _build_room() -> void:
 	words.position = banner.position
 	add_child(words)
 	var table_sign := Label.new()
-	table_sign.text = "BRICOLAGE"
+	table_sign.text = "DESSIN"
 	table_sign.add_theme_font_size_override("font_size", 26)
 	table_sign.add_theme_color_override("font_color", Color("#1D4F91"))
 	table_sign.add_theme_color_override("font_outline_color", Color("#FFD23F"))
@@ -169,6 +163,10 @@ func _build_room() -> void:
 	table_sign.size = Vector2(300, 40)
 	table_sign.position = Vector2(CRAFT_X - 150.0, 420.0)
 	add_child(table_sign)
+	var craft_sign := table_sign.duplicate() as Label
+	craft_sign.text = "BRICOLAGE"
+	craft_sign.position = Vector2(GAME_X - 150.0, 420.0)
+	add_child(craft_sign)
 	for lx in [500.0, 1300.0, 2100.0]:
 		_ceiling_light(lx)
 	_put(ClassArt.cork_board(art), 1960.0, 400.0, 0.85, "wall")
@@ -177,7 +175,7 @@ func _build_room() -> void:
 	_put(ClassArt.craft_table(), CRAFT_X - 150.0, 660.0, 1.0, "floor")
 	_blocks = _put(ClassArt.block_tower(_level), BLOCKS_X - 85.0, 668.0, 1.0)
 	_put(ClassArt.snack_table(), SNACK_X - 120.0, 660.0, 1.0, "floor")
-	_put(ClassArt.game_table(), GAME_X - 100.0, 664.0, 1.0, "floor")
+	_put(ClassArt.craft_table(), GAME_X - 150.0, 660.0, 1.0, "floor")
 
 
 func _build_people() -> void:
@@ -218,11 +216,11 @@ func _build_people() -> void:
 
 
 func _build_spots() -> void:
-	add_child(DoorSpot.make(Rect2(CRAFT_X - 150.0, 540.0, 300.0, 130.0), _make_craft, CRAFT_X - 60.0))
+	add_child(DoorSpot.make(Rect2(CRAFT_X - 150.0, 540.0, 300.0, 130.0), _draw_table, CRAFT_X - 60.0))
 	add_child(DoorSpot.make(Rect2(BLOCKS_X - 85.0, 420.0, 170.0, 250.0), _build_tower, BLOCKS_X - 120.0))
 	add_child(DoorSpot.make(Rect2(SNACK_X - 120.0, 520.0, 240.0, 150.0), _have_snack, SNACK_X - 40.0))
-	add_child(DoorSpot.make(Rect2(GAME_X - 100.0, 550.0, 200.0, 120.0), _play_game, GAME_X - 140.0))
-	add_child(DoorSpot.make(Rect2(ALYZEE_X - 55.0, 500.0, 110.0, 170.0), _play_game, ALYZEE_X - 120.0))
+	add_child(DoorSpot.make(Rect2(GAME_X - 150.0, 540.0, 300.0, 130.0), _craft_table, GAME_X - 60.0))
+	add_child(DoorSpot.make(Rect2(ALYZEE_X - 55.0, 500.0, 110.0, 170.0), _talk_to_alyzee, ALYZEE_X - 120.0))
 	add_child(DoorSpot.make(Rect2(JADE_X - 55.0, 380.0, 110.0, 290.0), _talk_to_jade, JADE_X - 110.0))
 	if _emilia:
 		add_child(DoorSpot.make(Rect2(EMILIA_X - 55.0, 500.0, 110.0, 170.0), _talk_to_emilia, EMILIA_X - 120.0))
@@ -241,12 +239,11 @@ func _build_spots() -> void:
 		, DOOR_X + 80.0))
 	add_child(QuestMark.make(Vector2(CRAFT_X, 470.0), func() -> bool:
 		return not _drew and _control.enabled and Sledding.step() == 0 and not Sledding.can_start()))
-	# Once the drawing is done the craft table still calls her (Julien couldn't find it): a smaller mark until a craft is made.
-	add_child(QuestMark.make(Vector2(CRAFT_X, 470.0), func() -> bool:
+	# Once the drawing is done the craft table (its own table, to the right) calls her until a craft is made.
+	add_child(QuestMark.make(Vector2(GAME_X, 470.0), func() -> bool:
 		return _drew and not CraftStudio.has_pending() and not _papa_here and not _busy and _control.enabled and Sledding.step() == 0, 0.8))
 	add_child(QuestMark.make(Vector2(JADE_X, FEET_Y - 330.0), func() -> bool: return Sledding.can_start() and not _drew))
 	add_child(QuestMark.make(Vector2(DOOR_X, 300.0), func() -> bool: return Sledding.step() == 1 and _control.enabled))
-	add_child(QuestMark.make(Vector2(ALYZEE_X, FEET_Y - 190.0), func() -> bool: return _drew and not _played and not _papa_here))
 
 
 func _talk_to_jade() -> void:
@@ -255,8 +252,7 @@ func _talk_to_jade() -> void:
 	elif Sledding.step() == 1:
 		_jade_says("La porte est là-bas, Chachoue !\nLes amis t'attendent dehors.")
 	elif _drew and not CraftStudio.has_pending() and not _papa_here:
-		_jade_says("Pour le bricolage, va à la grande table
-au milieu de la salle : j'ai le « ! » pour toi !", 3.6)
+		_jade_says("Pour le bricolage, va à l'autre table, là-bas,\napres la collation : j'ai le « ! » pour toi !".replace("apres", "après"), 3.6)
 	else:
 		_jade_line += 1
 		_jade_says(JADE_LINES[_jade_line % JADE_LINES.size()])
@@ -330,63 +326,49 @@ func _alyzee_says(text: String) -> void:
 
 # ── What she does ───────────────────────────────────────────────
 
-func _make_craft() -> void:
+# The drawing table: the drawing for her parents (Jade asks for it every day).
+func _draw_table() -> void:
 	if _busy:
 		return
 	if Sledding.step() == 1:
 		_say(_charlotte, "On va glisser avant !\nLe dessin, ce sera après.", 200.0)
+	elif _drew:
+		_say(_charlotte, "J'ai déjà fait mon dessin !\nIl est dans mes bras.", 200.0)
+	else:
+		_draw_for_parents()
+
+
+# The craft table, its own table: the whole craft studio (`CraftStudio`), for Maman or for Papa.
+func _craft_table() -> void:
+	if _busy or _papa_here:
 		return
-	if not _drew:
-		_ask_table()
-		return
-	if not CraftStudio.has_pending():
+	if Sledding.step() == 1:
+		_say(_charlotte, "On va glisser avant !\nLe bricolage, ce sera après.", 200.0)
+	elif CraftStudio.has_pending():
+		_say(_charlotte, "J'ai déjà un bricolage\nà rapporter à la maison !", 200.0)
+	else:
 		_ask_craft()
-		return
-	_quick_craft()
 
 
-# The first click on the table asks what to do: the drawing for her parents, or a craft (Julien couldn't find it).
-func _ask_table() -> void:
+func _ask_craft() -> void:
 	_control.enabled = false
-	var card := ChoiceCard.ask(self, "Qu'est-ce que tu veux faire à la table ?", [
-		{"text": "Un dessin pour Papa et Maman", "note": "Jade le demande", "color": Color("#FFE27A")},
-		{"text": "Un bricolage", "note": "pour Maman ou pour Papa", "color": Color("#FFB6C8")},
+	var card := ChoiceCard.ask(self, "Pour qui est ton bricolage ?", [
+		{"text": "Un bricolage pour Maman", "color": Color("#FFB6C8")},
+		{"text": "Un bricolage pour Papa", "color": Color("#9ED0F5")},
 		{"text": "Plus tard", "color": Color("#DDE6F0")}])
 	card.chose.connect(func(i: int) -> void:
 		_control.enabled = true
 		if i == 0:
-			_draw_for_parents()
+			_craft_for("maman")
 		elif i == 1:
-			_ask_craft())
+			_craft_for("papa"))
 
 
-# The table of the daycare: a craft for Maman, one for Papa, or the little craft of the season.
-func _ask_craft() -> void:
-	_control.enabled = false
-	var card := ChoiceCard.ask(self, "Qu'est-ce que tu veux bricoler ?", [
-		{"text": "Un bricolage pour Maman", "color": Color("#FFB6C8")},
-		{"text": "Un bricolage pour Papa", "color": Color("#9ED0F5")},
-		{"text": "Un petit bricolage de saison", "color": Color("#FFE27A")}])
-	card.chose.connect(_craft_chosen)
-
-
-func _craft_chosen(i: int) -> void:
-	_control.enabled = true
-	if i == 0:
-		_craft_for("maman")
-	elif i == 1:
-		_craft_for("papa")
-	elif i == 2:
-		_quick_craft()
-
-
-func _quick_craft() -> void:
+func _talk_to_alyzee() -> void:
+	_alyzee.facing = -1 if _charlotte.position.x < _alyzee.position.x else 1
 	_did = true
-	_charlotte.facing = 1
-	_charlotte.pet(1.2, 0.0)
-	var words := {"winter": "J'ai fait un flocon en papier !", "autumn": "J'ai fait une feuille d'automne !",
-		"spring": "J'ai fait une tulipe en papier !"}
-	_treat(ClassArt.craft(), str(words.get(Season.current, "J'ai fait un beau soleil !")), 1.0)
+	_alyzee_says(ALYZEE_CHAT[_chat % ALYZEE_CHAT.size()])
+	_chat += 1
 
 
 # The drawing pad, its button "Pour Papa et Maman !": the drawing is kept for home and she carries it in her arms.
@@ -413,7 +395,7 @@ func _draw_for_parents() -> void:
 		if not CraftStudio.has_pending():
 			var more := create_tween()
 			more.tween_interval(3.6)
-			more.tween_callback(_jade_says.bind("Si tu veux, tu peux aussi faire un bricolage\npour Maman ou Papa, à la table !", 3.8)))
+			more.tween_callback(_jade_says.bind("Si tu veux, tu peux aussi faire un bricolage\npour Maman ou Papa, à la table de bricolage !", 3.8)))
 	add_child(pad)
 
 
@@ -476,29 +458,6 @@ func _have_snack() -> void:
 	_did = true
 	_jade_says("C'est l'heure de la collation !")
 	_treat(ClassArt.snack(), "Miam ! Des pommes pis des craquelins.", 0.6)
-
-
-func _play_game() -> void:
-	if _busy:
-		return
-	_busy = true
-	_did = true
-	_played = true
-	_alyzee.facing = -1 if _charlotte.position.x < _alyzee.position.x else 1
-	var steps := create_tween()
-	for line: Array in ALYZEE_GAME:
-		steps.tween_callback(func() -> void:
-			if line[0] < 0:
-				_say(_charlotte, line[1], 200.0, 2.0)
-			else:
-				_alyzee_says(line[1]))
-		steps.tween_interval(Bubble.reading_time(line[1], 2.0) + 0.1)
-		if line[1].begins_with("Six"):
-			steps.tween_callback(Sfx.play.bind("click", Vector2(GAME_X, 600.0)))
-	steps.tween_callback(func() -> void:
-		_alyzee.express("laugh", 1.8)
-		_charlotte.express("laugh", 1.8)
-		_busy = false)
 
 
 # ── Papa ────────────────────────────────────────────────────────
