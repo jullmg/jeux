@@ -432,8 +432,46 @@ func _end_lesson() -> void:
 	GameState.flags[School.STICKERS] = int(GameState.flags.get(School.STICKERS, 0)) + 1
 	School.lesson_done()
 	_treat(ClassArt.sticker(), "Un autocollant !", 1.0)
+	# The fifth sticker earns a surprise from Madame Nadia's treasure box, then the bell as usual.
+	if int(GameState.flags.get(School.STICKERS, 0)) == SURPRISE_AT:
+		var wait := create_tween()
+		wait.tween_interval(3.6)
+		wait.tween_callback(_surprise)
+	else:
+		_ring_bell(4.6)
+
+
+const SURPRISE_AT := 5
+
+
+# Five stickers: « Cinq autocollants ! » and a pick from the treasure box (3 $, three sweets or a gold star medal).
+func _surprise() -> void:
+	_teacher_says("Cinq autocollants ! Bravo, Charlotte !\nTu as droit à une surprise du coffre aux trésors.", 3.4)
+	var wait := create_tween()
+	wait.tween_interval(3.6)
+	wait.tween_callback(func() -> void:
+		var card := ChoiceCard.ask(self, "Madame Nadia ouvre le coffre aux trésors. Que choisis-tu ?", [
+			{"text": "Une pièce brillante", "note": "3 $ pour ma tirelire", "color": Color("#FFD23F")},
+			{"text": "Des friandises", "note": "trois suçons pour ma cachette", "color": Color("#F2789F")},
+			{"text": "Une médaille dorée", "note": "pour la meilleure élève", "color": Color("#8FD3E8")}])
+		card.chose.connect(func(i: int) -> void:
+			match i:
+				0:
+					GameState.money += 3.0
+					_treat(ClassArt.sticker(), "+ 3 $ !", 0.0)
+				1:
+					Stash.add("lollipop", 3)
+					_treat(ClassArt.sticker(), "+ 3 suçons !", 0.0)
+				_:
+					GameState.flags["ecole_medal"] = true
+					_treat(ClassArt.sticker(), "Une médaille !", 0.0)
+			_teacher_says("Tu l'as bien mérité ! Continue comme ça.", 2.6)
+			_ring_bell(3.2)))
+
+
+func _ring_bell(first_wait: float) -> void:
 	var bell := create_tween()
-	bell.tween_interval(4.6)
+	bell.tween_interval(first_wait)
 	bell.tween_callback(func() -> void:
 		_over = true
 		Sfx.play("school_bell"))
