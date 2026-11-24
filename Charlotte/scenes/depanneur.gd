@@ -132,6 +132,7 @@ func _build_counter() -> void:
 	_clerk.fidget_moves = ["look", "look", "stretch"]
 	add_child(_clerk)
 	_put(ShopArt.counter(), COUNTER_X, 616.0, 1.0, "floor")
+	_bubly_display(COUNTER_X + 520.0, 458.0)
 	_lucky_cat = _LuckyCat.new()
 	_lucky_cat.position = Vector2(COUNTER_X + 52.0, 616.0 - 240.0 + 70.0)
 	add_child(_lucky_cat)

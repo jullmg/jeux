@@ -119,6 +119,7 @@ func _build_counter() -> void:
 	_clerk.fidget_moves = ["look", "look", "stretch"]
 	add_child(_clerk)
 	_put(ShopArt.modern_counter(), COUNTER_X, 616.0, 1.0, "floor")
+	_bubly_display(COUNTER_X + 250.0, 458.0)
 	_put(InteriorArt.doormat(), COUNTER_X + 190.0, 640.0)
 	# On the wall to the right of the counter, between it and the candy wall: the clock and the neon.
 	var clock := _Clock.new()

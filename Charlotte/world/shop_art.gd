@@ -1653,3 +1653,45 @@ static func floor_junk(seed_value := 1) -> ImageTexture:
 				s += '<path d="M%.1f 36 L%.1f 18 L%.1f 20 L%.1f 36 Z" fill="#C9A26E" stroke="#8A6A40" stroke-width="1"/>' % [x, x + 8, x + 36, x + 40]
 				x += 44.0
 	return tex(150, 40, s)
+
+
+# ── Bubly, the sparkling waters ─────────────────────────────────
+
+## The six flavours: [name, can colour, band colour].
+const BUBLY := [["lime", "#58B848", "#B8E8A0"], ["citron", "#F2D030", "#FFF0A0"], ["fraise", "#E8405A", "#FFB8C4"],
+	["mûre", "#7A4AA8", "#C8A8E8"], ["pamplemousse", "#F2708A", "#FFC4D0"], ["mangue", "#F29030", "#FFD098"]]
+
+
+## A slim can of sparkling water of flavour `i` of BUBLY, with its bubbles and a coloured fruit disc. Canvas 64 x 64.
+static func bubly_can(i: int) -> ImageTexture:
+	var f: Array = BUBLY[i % BUBLY.size()]
+	var s := _defs()
+	s += '<rect x="22" y="4" width="20" height="56" rx="5" fill="%s" stroke="#FFFFFF" stroke-width="1.2"/>' % f[1]
+	s += '<rect x="22" y="22" width="20" height="18" fill="%s" fill-opacity="0.85"/>' % f[2]
+	s += '<circle cx="32" cy="31" r="6" fill="%s" stroke="#FFFFFF" stroke-width="1.2"/>' % f[1]
+	for b in [[27, 14, 2.0], [37, 12, 1.4], [30, 50, 1.6], [36, 46, 2.2], [26, 54, 1.2]]:
+		s += '<circle cx="%s" cy="%s" r="%s" fill="#FFFFFF" fill-opacity="0.7"/>' % b
+	s += '<rect x="22" y="4" width="20" height="56" rx="5" fill="url(#cyl)"/>'
+	s += '<ellipse cx="32" cy="5.5" rx="9.4" ry="2" fill="#E4E8EC" stroke="#9AA0A6" stroke-width="0.6"/>'
+	return tex(64, 64, s)
+
+
+## Canvas 150 x 120 (foot on the bottom edge): the counter-top cardboard display, a teal header over two rows of cans in
+## the six colours, little bubbles on the cardboard. The word "bubly" is a label laid over the header by the shop.
+static func bubly_display() -> ImageTexture:
+	var s := _defs()
+	s += '<ellipse cx="75" cy="115" rx="68" ry="5" fill="#000" fill-opacity="0.16"/>'
+	s += '<rect x="6" y="38" width="138" height="76" rx="3" fill="#E8F6F8" stroke="#8ACAD8" stroke-width="2"/>'
+	s += '<rect x="6" y="6" width="138" height="34" rx="4" fill="#12A8C0" stroke="#0A7E92" stroke-width="2"/>'
+	s += '<rect x="6" y="6" width="138" height="12" rx="4" fill="#FFFFFF" fill-opacity="0.2"/>'
+	for k in 6:
+		var f: Array = BUBLY[k]
+		for row in 2:
+			var x := 12.0 + k * 21.0
+			var y := 44.0 + row * 34.0
+			s += '<rect x="%.1f" y="%.1f" width="16" height="30" rx="4" fill="%s" stroke="#FFFFFF" stroke-width="0.8"/>' % [x, y, f[1]]
+			s += '<rect x="%.1f" y="%.1f" width="16" height="9" fill="%s" fill-opacity="0.85"/>' % [x, y + 11.0, f[2]]
+			s += '<rect x="%.1f" y="%.1f" width="16" height="30" rx="4" fill="url(#cyl)"/>' % [x, y]
+	for b in [[18, 24, 3.0], [30, 14, 2.0], [124, 22, 3.4], [112, 12, 2.0], [100, 28, 1.6]]:
+		s += '<circle cx="%s" cy="%s" r="%s" fill="#FFFFFF" fill-opacity="0.6"/>' % b
+	return tex(150, 120, s)

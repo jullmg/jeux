@@ -75,7 +75,7 @@ func _ad(kind: int, x: float, bottom: float, s := 0.8) -> void:
 ## What things cost in a Montréal corner store (Québec dollars, 2026), the same in both shops.
 const PRICES := {
 	"candy": 1.25, "lollipop": 0.75, "chips": 2.99, "slush": 2.75, "chocolate": 2.25, "popsicle": 1.75, "juice": 2.25,
-	"milk": 3.29, "bread": 3.99, "coffee": 2.00,
+	"milk": 3.29, "bread": 3.99, "coffee": 2.00, "bubly": 1.75,
 }
 ## Papa's favourite (ShopArt.CHIPS): Ruffles crème sure et oignons.
 const PAPAS_CHIPS := 0
@@ -245,3 +245,23 @@ class _Flicker:
 			if is_instance_valid(t):
 				t.modulate.a = dim
 
+
+
+## The bubly display on the counter at `x` (its foot at `bottom`): click it for a can of sparkling water, a flavour picked at
+## random (always a different one from the last).
+func _bubly_display(x: float, bottom: float, s := 0.62) -> void:
+	_put(ShopArt.bubly_display(), x, bottom, s)
+	_wall_label("bubly", Vector2(x + 75.0 * s, bottom - 98.0 * s), 16, Color.WHITE, Color("#0A7E92"), 4)
+	add_child(DoorSpot.make(Rect2(x, bottom - 120.0 * s, 150.0 * s, 120.0 * s), _buy_bubly, x + 75.0 * s))
+
+
+var _last_bubly := -1
+
+
+func _buy_bubly() -> void:
+	var i := randi() % ShopArt.BUBLY.size()
+	if i == _last_bubly:
+		i = (i + 1) % ShopArt.BUBLY.size()
+	_last_bubly = i
+	var says := ["au lime", "au citron", "à la fraise", "à la mûre", "au pamplemousse", "à la mangue"]
+	_buy(ShopArt.bubly_can(i), "Une eau pétillante bubly\n%s !" % says[i], PRICES.bubly)

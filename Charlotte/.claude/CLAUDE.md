@@ -429,7 +429,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   security cameras (blinking light), baskets, wet-floor sign, floor wear, recessed ceiling panels (one flickers) with light
   cones and pools on the floor, cold glow before the fridges, daylight through the door, the neon OUVERT (`NeonSign`) and a
   lucky cat on the counter that waves only when clicked (`_LuckyCat.wave()`); the blurred foreground is a red shopping basket (`"basket"`).
-- `world/shop.gd` (`Shop`, extends `Interior`): what the corner stores share (the clerk, `_wall_label`, `_hang` aisle signs, `_buy`,
+- `world/shop.gd` (`Shop`, extends `Interior`): what the corner stores share (the **bubly** sparkling-water display on each counter, `_bubly_display`, `ShopArt.bubly_display` / `bubly_can`, six flavours, `PRICES.bubly`; the clerk, `_wall_label`, `_hang` aisle signs, `_buy`,
   `_buy_chips`, `_buy_milk`, `_thanks`, the clock, a blinking camera light, a stuttering panel). `scenes/depanneur.gd` (Xin-Xin) and
   `scenes/ohbon.gd` extend it.
 - `scenes/ohbon.gd` (dépanneur **Oh Bon!**, rue Holt: its black glass door on the 6e corner, `holt.gd` `_build_doors`): the opposite
