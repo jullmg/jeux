@@ -562,37 +562,66 @@ static func bunting(w: float) -> ImageTexture:
 
 ## Canvas 560x300: white metal bed with a pink duvet, lilac pillow and a plush bunny. Floor at y 300.
 static func bed() -> ImageTexture:
-	var s := '<path d="M20 300 V60 Q20 20 70 20 Q120 20 120 60 V300" fill="none" stroke="#F4F2EC" stroke-width="10"/>'
-	s += '<path d="M20 300 V60 Q20 20 70 20 Q120 20 120 60 V300" fill="none" stroke="#C9C2B4" stroke-width="2"/>'
+	var s := '<defs>'
+	s += '<linearGradient id="duvet" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#F8C0CF"/><stop offset="0.45" stop-color="#F4A4B9"/><stop offset="1" stop-color="#E4829F"/></linearGradient>'
+	s += '<linearGradient id="duvet_v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.35"/><stop offset="0.6" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="1" stop-color="#7A2A44" stop-opacity="0.28"/></linearGradient>'
+	s += '<linearGradient id="pillow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F0E6F8"/><stop offset="1" stop-color="#C7B0DE"/></linearGradient>'
+	s += '<linearGradient id="iron" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.5" stop-color="#F0EDE6"/><stop offset="1" stop-color="#CFC9BB"/></linearGradient>'
+	s += '<linearGradient id="ticking" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E4DED2"/></linearGradient>'
+	s += '</defs>'
+	# Shade on the floor under it (the box of sweets peeks out of it).
+	s += '<ellipse cx="300" cy="296" rx="250" ry="6" fill="#000000" opacity="0.14"/>'
+	# The headboard: a white iron arch, bars with their balls, two rails, and a finial on each post.
+	s += '<path d="M20 296 V60 Q20 20 70 20 Q120 20 120 60 V296" fill="none" stroke="#C9C2B4" stroke-width="12"/>'
+	s += '<path d="M20 296 V60 Q20 20 70 20 Q120 20 120 60 V296" fill="none" stroke="url(#iron)" stroke-width="9"/>'
+	s += '<path d="M17 296 V62 Q17 24 66 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" opacity="0.9"/>'
 	for x in [44.0, 70.0, 96.0]:
-		s += '<path d="M%s 50 V190" stroke="#F4F2EC" stroke-width="6"/><circle cx="%s" cy="90" r="5" fill="#2B2B2B"/>' % [x, x]
-	s += '<path d="M24 120 H116 M24 190 H116" stroke="#F4F2EC" stroke-width="7"/>'
-	s += '<path d="M30 184 H540 V224 H30 Z" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="2"/>'
-	s += '<path d="M52 130 Q50 104 80 104 H190 Q214 104 212 132 Q212 160 190 162 H80 Q52 162 52 130 Z" fill="#D9C6E6" stroke="#9E86B5" stroke-width="2.5"/>'
-	s += '<path d="M60 170 Q90 140 200 150 Q380 136 540 150 L546 214 Q300 236 60 214 Z" fill="#F2A7B9" stroke="#C26A84" stroke-width="3"/>'
-	s += '<path d="M220 158 Q300 176 360 160 M400 152 Q450 174 520 158 M140 190 Q240 206 330 192" stroke="#E08AA2" stroke-width="2.5" fill="none"/>'
-	s += '<path d="M60 206 Q300 228 546 206 L548 240 Q300 262 58 240 Z" fill="#EE97AD" stroke="#C26A84" stroke-width="2.5"/>'
-	s += '<path d="M80 168 Q200 146 330 152 Q430 146 530 154" stroke="#FBD3DE" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.8"/>'
-	s += '<path d="M62 238 Q300 258 546 238" stroke="#B85A76" stroke-width="5" fill="none" opacity="0.35"/>'
-	# A quilt, not a slab: the sheet turned down at the top, stitched diamonds over the duvet, and the shade it casts on the base.
-	s += '<path d="M60 170 Q200 150 340 156 Q440 150 538 158 L540 180 Q430 170 338 177 Q200 172 62 190 Z" fill="#FBF6EE" stroke="#D6CCC0" stroke-width="2"/>'
-	s += '<path d="M66 186 Q200 168 340 174 Q440 168 536 176" stroke="#E4D9CC" stroke-width="2" fill="none" opacity="0.8"/>'
-	# Quilting: two rows of stitches, dashed like a sewing machine's.
-	s += '<path d="M80 200 Q300 216 536 200" stroke="#D98AA2" stroke-width="1.8" fill="none" stroke-dasharray="5 6" opacity="0.5"/>'
-	s += '<path d="M80 224 Q300 242 536 224" stroke="#D98AA2" stroke-width="1.8" fill="none" stroke-dasharray="5 6" opacity="0.4"/>'
-	s += '<path d="M60 214 Q300 236 546 214 L546 222 Q300 244 60 222 Z" fill="#B85A76" opacity="0.18"/>'
-	# A second little cushion against the big pillow.
-	s += '<path d="M196 142 Q192 120 216 118 H286 Q308 120 306 144 Q306 166 286 168 H216 Q196 166 196 142 Z" fill="#F7D8E4" stroke="#C26A84" stroke-width="2.5"/>'
-	s += '<path d="M210 136 Q240 124 284 128" stroke="#FFFFFF" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.7"/>'
-	s += '<path d="M70 128 Q120 112 190 116" stroke="#F0E6F6" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.8"/>'
-	s += '<path d="M440 150 V300 M540 140 V300" stroke="#F4F2EC" stroke-width="8"/><path d="M440 150 V300 M540 140 V300" stroke="#C9C2B4" stroke-width="1.5"/>'
-	for x in [460.0, 480.0, 500.0, 520.0]:
-		s += '<path d="M%s 150 V200" stroke="#F4F2EC" stroke-width="5"/>' % x
-	s += '<path d="M436 146 H544" stroke="#F4F2EC" stroke-width="8"/>'
-	# Plush bunny.
-	s += '<ellipse cx="250" cy="148" rx="20" ry="14" fill="#F7C6D4" stroke="#C26A84" stroke-width="2"/><circle cx="270" cy="136" r="11" fill="#F7C6D4" stroke="#C26A84" stroke-width="2"/>'
-	s += '<path d="M264 126 q-4 -20 2 -22 q6 2 4 22 M274 126 q2 -20 8 -20 q4 4 -2 22" fill="#F7C6D4" stroke="#C26A84" stroke-width="2"/>'
-	s += '<circle cx="273" cy="135" r="1.8" fill="#2B2B2B"/>'
+		s += '<path d="M%s 50 V196" stroke="#C9C2B4" stroke-width="7"/><path d="M%s 50 V196" stroke="url(#iron)" stroke-width="5"/><circle cx="%s" cy="86" r="6" fill="#E9E5DA" stroke="#B8B2A2" stroke-width="1.5"/><circle cx="%s" cy="84" r="2" fill="#FFFFFF"/>' % [x, x, x, x]
+	for y in [122.0, 190.0]:
+		s += '<path d="M22 %s H118" stroke="#C9C2B4" stroke-width="9"/><path d="M22 %s H118" stroke="url(#iron)" stroke-width="6.5"/>' % [y, y]
+	for fx in [20.0, 120.0]:
+		s += '<circle cx="%s" cy="58" r="8" fill="#F4F0E6" stroke="#B8B2A2" stroke-width="1.8"/><circle cx="%s" cy="55" r="2.6" fill="#FFFFFF"/>' % [fx, fx - 2.0]
+	# The side of the mattress: quilted ticking with a piped edge, then the bed's base and its short feet.
+	s += '<path d="M44 222 Q300 240 548 222 V258 Q300 276 44 258 Z" fill="url(#ticking)" stroke="#BDB6A6" stroke-width="2.2"/>'
+	for x in range(80, 540, 46):
+		s += '<path d="M%d 226 Q%d 244 %d 262" stroke="#CFC8B8" stroke-width="1.2" fill="none" opacity="0.7"/>' % [x, x + 4, x + 2]
+	s += '<path d="M44 224 Q300 242 548 224" stroke="#F7B6C6" stroke-width="3.5" fill="none"/>'
+	s += '<path d="M44 256 Q300 274 548 256" stroke="#F7B6C6" stroke-width="3" fill="none" opacity="0.8"/>'
+	s += '<path d="M46 262 Q300 280 546 262 V272 Q300 290 46 272 Z" fill="#E9E5DA" stroke="#B8B2A2" stroke-width="1.8"/>'
+	for x in [70.0, 520.0]:
+		s += '<path d="M%s 270 V296" stroke="#C9C2B4" stroke-width="9" stroke-linecap="round"/><path d="M%s 270 V296" stroke="url(#iron)" stroke-width="6" stroke-linecap="round"/>' % [x, x]
+	# The big pillow (a pillowcase with a sewn border and creases) and the little cushion.
+	s += '<path d="M52 132 Q48 100 84 100 H196 Q222 100 220 134 Q220 166 194 168 H84 Q52 168 52 132 Z" fill="url(#pillow)" stroke="#9E86B5" stroke-width="2.6"/>'
+	s += '<path d="M62 134 Q62 112 86 112 H194 Q210 112 210 134" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.7" stroke-dasharray="4 5"/>'
+	s += '<path d="M76 118 Q140 106 206 116" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.7"/>'
+	s += '<path d="M96 150 Q140 140 188 150" stroke="#A58CC0" stroke-width="2" fill="none" opacity="0.6"/><path d="M120 128 Q140 138 168 132" stroke="#A58CC0" stroke-width="1.6" fill="none" opacity="0.5"/>'
+	s += '<path d="M196 146 Q192 122 218 120 H288 Q312 122 310 148 Q310 172 288 174 H218 Q196 172 196 146 Z" fill="#FBDCE8" stroke="#C26A84" stroke-width="2.4"/>'
+	s += '<path d="M208 138 Q240 126 292 130" stroke="#FFFFFF" stroke-width="4.5" fill="none" stroke-linecap="round" opacity="0.8"/>'
+	s += '<path d="M250 132 q-8 -10 -16 -2 q-6 8 16 24 q22 -16 16 -24 q-8 -8 -16 2 Z" fill="#F08AAE" opacity="0.65"/>'
+	# The duvet: scalloped hem at the front, the sheet turned over at the top, soft light from the left, quilted diamonds.
+	s += '<path d="M56 176 Q90 150 200 158 Q380 142 546 158 L550 226 Q300 250 50 226 Z" fill="url(#duvet)" stroke="#C26A84" stroke-width="3"/>'
+	s += '<path d="M56 176 Q90 150 200 158 Q380 142 546 158 L550 226 Q300 250 50 226 Z" fill="url(#duvet_v)"/>'
+	s += '<path d="M54 206 Q64 226 78 214 Q92 232 108 218 Q122 236 138 222 Q154 240 170 224 Q186 242 202 226 Q218 244 234 228 Q250 246 266 229 Q282 247 298 230 Q314 247 330 230 Q346 246 362 229 Q378 244 394 227 Q410 242 426 225 Q442 238 458 222 Q474 234 490 218 Q506 228 522 213 Q538 220 550 208" fill="#EE8FA9" stroke="#C26A84" stroke-width="2.4"/>'
+	for x in range(70, 540, 40):
+		s += '<path d="M%d 176 L%d 196 L%d 216 M%d 176 L%d 196 L%d 216" stroke="#E07C9A" stroke-width="1.6" fill="none" stroke-dasharray="4 5" opacity="0.55"/>' % [x, x + 20, x, x + 40, x + 20, x + 40]
+	s += '<path d="M64 168 Q200 146 340 154 Q440 148 548 156 L550 178 Q440 168 340 176 Q200 170 62 190 Z" fill="#FFFBF4" stroke="#D6CCC0" stroke-width="2"/>'
+	s += '<path d="M64 180 Q200 160 340 168 Q440 162 548 170" stroke="#F2A7B9" stroke-width="2.2" fill="none" stroke-dasharray="3 4"/>'
+	# Folds in the duvet over the sleeper's feet, and its shade on the sheet.
+	s += '<path d="M340 178 Q356 196 348 218 M420 176 Q436 194 428 214 M270 182 Q282 198 276 216" stroke="#D56F8E" stroke-width="2.4" fill="none" opacity="0.55" stroke-linecap="round"/>'
+	s += '<path d="M60 186 Q200 168 340 176 Q440 170 548 176" stroke="#B85A76" stroke-width="3" fill="none" opacity="0.18"/>'
+	# The footboard: a lower iron rail with posts and finials.
+	s += '<path d="M440 148 V296 M544 138 V296" stroke="#C9C2B4" stroke-width="10"/><path d="M440 148 V296 M544 138 V296" stroke="url(#iron)" stroke-width="7"/>'
+	for x in [462.0, 484.0, 506.0, 526.0]:
+		s += '<path d="M%s 152 V204" stroke="#C9C2B4" stroke-width="6"/><path d="M%s 152 V204" stroke="url(#iron)" stroke-width="4"/>' % [x, x]
+	s += '<path d="M434 146 H548" stroke="#C9C2B4" stroke-width="10"/><path d="M434 146 H548" stroke="url(#iron)" stroke-width="7"/>'
+	for fx in [440.0, 544.0]:
+		s += '<circle cx="%s" cy="138" r="7" fill="#F4F0E6" stroke="#B8B2A2" stroke-width="1.8"/><circle cx="%s" cy="135" r="2.4" fill="#FFFFFF"/>' % [fx, fx - 2.0]
+	# A plush bunny leaning on the pillows.
+	s += '<ellipse cx="254" cy="150" rx="22" ry="15" fill="#FBD2DE" stroke="#C26A84" stroke-width="2.2"/><circle cx="276" cy="136" r="12" fill="#FBD2DE" stroke="#C26A84" stroke-width="2.2"/>'
+	s += '<path d="M270 126 q-5 -22 2 -24 q7 2 5 24 M281 126 q3 -22 9 -22 q5 4 -2 24" fill="#FBD2DE" stroke="#C26A84" stroke-width="2.2"/>'
+	s += '<path d="M272 118 q-1 -12 1 -14 M286 118 q2 -12 4 -12" stroke="#F08AAE" stroke-width="2.4" fill="none" stroke-linecap="round"/>'
+	s += '<circle cx="279" cy="135" r="1.9" fill="#2B2B2B"/><circle cx="287" cy="139" r="2" fill="#F08AAE"/>'
+	s += '<circle cx="236" cy="152" r="6" fill="#FFFFFF" stroke="#E4B8C6" stroke-width="1.4"/>'
 	return tex(560, 300, s)
 
 
@@ -1511,24 +1540,36 @@ static func laundry_basket() -> ImageTexture:
 ## Canvas 150x86: the shoebox Charlotte keeps her junk food in, pushed under her bed with the lid askew, a strip
 ## of tape across it, "PRIVÉ !" written on the side in crayon, a heart sticker, and a wrapper poking out. Floor at y 86.
 static func stash_box() -> ImageTexture:
-	# The box itself, a little turned so we see its lid.
-	var s := '<path d="M10 34 H140 L134 82 H16 Z" fill="#C9A06A" stroke="#8A6A3E" stroke-width="3"/>'
-	s += '<path d="M10 34 H140 L134 82 H16 Z" fill="none" stroke="#B08A54" stroke-width="1" opacity="0.8"/>'
-	# Corrugated cardboard: the ridges down its front.
-	for x in range(22, 134, 11):
-		s += '<path d="M%d 38 L%d 78" stroke="#B88E58" stroke-width="1.6" opacity="0.5"/>' % [x, x - 2]
-	# The lid, off its box and leaning on top.
-	s += '<path d="M6 24 H132 L138 36 H12 Z" fill="#D9B482" stroke="#8A6A3E" stroke-width="3"/>'
-	s += '<path d="M8 27 H128" stroke="#EBD0A8" stroke-width="2" opacity="0.7"/>'
-	# A strip of tape across the lid, and the crayon label on the side.
-	s += '<path d="M60 22 h22 v16 h-22 z" fill="#F4F1E4" opacity="0.75" stroke="#D5CFBC" stroke-width="1.2"/>'
-	s += '<path d="M24 52 h58" stroke="#C8202A" stroke-width="3" stroke-linecap="round" opacity="0.9"/>'
-	s += '<path d="M24 52 q14 -5 28 2 q14 6 30 -2" fill="none" stroke="#C8202A" stroke-width="3" stroke-linecap="round"/>'
-	s += '<path d="M100 48 q6 -8 12 0 q6 -8 12 0 q0 10 -12 18 q-12 -8 -12 -18 z" fill="#E8597A" stroke="#B5415C" stroke-width="2"/>'
-	# A sweet she did not quite push back in, sticking out under the lid.
-	s += '<path d="M96 30 l14 -4 l-2 8 z" fill="#F2C230" stroke="#C9962E" stroke-width="1.5"/>'
-	s += '<ellipse cx="104" cy="33" rx="7" ry="5" fill="#E8542F" stroke="#B23A1C" stroke-width="1.5"/>'
-	return tex(150, 86, s)
+	# A shoebox half pulled out from under the bed: its front and side faces, corrugated edges, the lid ajar over a heap of sweets
+	# (wrapped candies, a lollipop, a chocolate bar), washi tape, a crayon heart, a star sticker and a sticky note.
+	var s := '<defs><linearGradient id="card" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DDB77F"/><stop offset="1" stop-color="#B98C55"/></linearGradient>'
+	s += '<linearGradient id="cardlid" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EBCB98"/><stop offset="1" stop-color="#C79C62"/></linearGradient></defs>'
+	s += '<ellipse cx="78" cy="82" rx="68" ry="5" fill="#000000" opacity="0.2"/>'
+	# The sweets in the box, heaped over its rim.
+	for c in [[30, 34, "#E5383B"], [46, 30, "#FFD23F"], [62, 33, "#3B8BE0"], [80, 30, "#FF7BB0"], [98, 33, "#2F9E55"], [116, 35, "#FF8A2E"], [38, 38, "#8E5BD0"], [72, 37, "#E5383B"], [104, 38, "#FFD23F"]]:
+		s += '<circle cx="%d" cy="%d" r="8" fill="%s" stroke="#00000033" stroke-width="1.2"/><circle cx="%d" cy="%d" r="2.4" fill="#FFFFFF" opacity="0.6"/>' % [c[0], c[1], c[2], c[0] - 3, c[1] - 3]
+	for w in [[24, 36, 0.5], [122, 38, -0.4], [88, 28, 0.2]]:
+		s += '<path d="M%d %d l-9 -4 l0 8 z M%d %d l9 -4 l0 8 z" fill="#FFFFFF" opacity="0.85" transform="rotate(%s %d %d)"/>' % [w[0] - 7, w[1], w[0] + 7, w[1], rad_to_deg(w[2]), w[0], w[1]]
+	s += '<path d="M126 22 l8 -14" stroke="#F4F1E4" stroke-width="3" stroke-linecap="round"/><circle cx="136" cy="8" r="8" fill="#E8597A" stroke="#B5415C" stroke-width="1.8"/><path d="M132 6 q4 -4 8 0 q-4 4 -8 0" stroke="#FFFFFF" stroke-width="1.6" fill="none"/>'
+	# The box: the front (lit), the right side (shaded), the rim, the corrugated edge.
+	s += '<path d="M8 40 H142 L136 82 H14 Z" fill="url(#card)" stroke="#7E5E3A" stroke-width="2.8" stroke-linejoin="round"/>'
+	s += '<path d="M142 40 L148 34 L142 76 L136 82 Z" fill="#9A7440" stroke="#7E5E3A" stroke-width="2" stroke-linejoin="round"/>'
+	s += '<path d="M8 40 H142" stroke="#F0D7AC" stroke-width="2.4"/>'
+	for x in range(20, 136, 10):
+		s += '<path d="M%d 44 L%d 78" stroke="#A67E4A" stroke-width="1.5" opacity="0.4"/>' % [x, x - 2]
+	s += '<path d="M12 78 H138" stroke="#7E5E3A" stroke-width="1.6" opacity="0.35"/>'
+	# The lid, off and tilted against the back, with its printed band.
+	s += '<path d="M4 22 L96 14 L102 26 L10 36 Z" fill="url(#cardlid)" stroke="#7E5E3A" stroke-width="2.6" stroke-linejoin="round"/>'
+	s += '<path d="M10 36 L102 26 L103 31 L11 41 Z" fill="#B98C55" stroke="#7E5E3A" stroke-width="1.8"/>'
+	s += '<path d="M10 27 L96 19" stroke="#F4DDB6" stroke-width="2.2" opacity="0.8"/>'
+	# Decorations on the front: a washi tape, a crayon heart, a star sticker, a sticky note.
+	s += '<path d="M28 38 h30 v12 h-30 z" fill="#F7B6C6" opacity="0.9" stroke="#E08AA2" stroke-width="1" transform="rotate(-4 43 44)"/>'
+	s += '<path d="M32 44 h22" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="3 3" opacity="0.8" transform="rotate(-4 43 44)"/>'
+	s += '<path d="M72 56 q-9 -12 -18 -2 q-8 10 18 28 q26 -18 18 -28 q-9 -10 -18 2 Z" transform="translate(6 -4) scale(0.8)" fill="#E8597A" stroke="#B5415C" stroke-width="2.4"/>'
+	s += '<path d="M100 50 l3 7 l8 1 l-6 5 l2 8 l-7 -4 l-7 4 l2 -8 l-6 -5 l8 -1 z" fill="#FFD23F" stroke="#C99410" stroke-width="1.4"/>'
+	s += '<path d="M112 58 h22 v18 h-22 z" fill="#FFF3A8" stroke="#D6C25A" stroke-width="1.2" transform="rotate(5 123 67)"/><path d="M116 64 h13 M116 70 h9" stroke="#C8202A" stroke-width="1.8" stroke-linecap="round" transform="rotate(5 123 67)"/>'
+	s += '<path d="M20 70 q14 -6 26 0 t24 0" stroke="#3B8BE0" stroke-width="2.6" fill="none" stroke-linecap="round"/>'
+	return tex(152, 86, s)
 
 
 ## Canvas 150x90: plushies sitting on the floor (a bear and a cat). Floor at y 90.
