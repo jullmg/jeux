@@ -148,7 +148,9 @@ static func back_wall(w: float, door_x: float, rng: RandomNumberGenerator) -> Im
 	s += _rect(10, 0, 2, h, "#FFFFFF", 'fill-opacity="0.15"')
 	if Season.is_winter():
 		s += _snow_line(0.0, w, 0.0, 6.0, rng)
-		s += _snow_line(0.0, w, table_y, 4.0, rng)
+		# The snow on the water table stops at the door's stone surround: it used to run across the red doors.
+		s += _snow_line(0.0, door_x - DOOR_W / 2.0 - 16.0, table_y, 4.0, rng)
+		s += _snow_line(door_x + DOOR_W / 2.0 + 16.0, w, table_y, 4.0, rng)
 	return PropArt.tex(_svg(w, h, s))
 
 
