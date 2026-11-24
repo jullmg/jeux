@@ -132,8 +132,8 @@ const RECIPES := {
 	"pepites": {
 		"title": "Biscuits aux pépites de chocolat",
 		"ingredients": [["farine", "Farine", "De la farine : deux tasses."], ["cassonade", "Cassonade", "De la cassonade, pour le goût de caramel."],
-			["beurre", "Beurre mou", "Du beurre mou, bien crémeux."], ["oeuf", "Un œuf", "Crac ! Un œuf."], ["vanille", "Vanille", "Un peu de vanille."], ["pepites", "Pépites de chocolat", "Pis les pépites de chocolat : plein, plein !"]],
-		"lines": ["2 tasses de farine", "¾ tasse de cassonade", "½ tasse de beurre mou", "1 œuf", "1 c. à thé de vanille", "1 tasse de pépites de chocolat"],
+			["beurre", "Beurre mou", "Du beurre mou, bien crémeux."], ["oeuf", "Un œuf", "Crac ! Un œuf."], ["vanille", "Vanille", "Un peu de vanille."], ["pepites", "Pépites", "Pis les pépites de chocolat : plein, plein !"]],
+		"lines": ["2 tasses de farine", "¾ tasse de cassonade", "½ tasse de beurre mou", "1 œuf", "1 c. à thé de vanille", "1 tasse de pépites"],
 		"order": [0, 1, 4, 5, 6], "shape": "cookie",
 		"icings": [["chocolat", "#5A301A"], ["blanc", "#FFFFFF"], ["caramel", "#C98A4B"], ["fraise", "#FF8AB8"]],
 		"candies": [["pepite", "Pépites"], ["smarties", "Bonbons"], ["guimauve", "Guimauves"], ["etoile", "Étoiles dorées"], ["dragee", "Dragées"], ["coeur", "Cœurs roses"]],
