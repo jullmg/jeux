@@ -499,7 +499,7 @@ func _strands(d: String) -> String:
 func _hair_back() -> String:
 	# Under a tuque the hair is tucked in: no bun or buns sticking out above it, and curls only round the sides.
 	var tucked := look.hat == "tuque"
-	if tucked and look.hair_style in ["bun", "space_buns"]:
+	if tucked and look.hair_style in ["bun", "space_buns", "high_ponytail", "afro_puffs", "half_up"]:
 		return _hair_shape(_CAP_BACK)
 	match look.hair_style:
 		"long_wavy":
@@ -547,6 +547,50 @@ func _hair_back() -> String:
 				+ _hair_shape("M62 42 m-28 0 a28 26 0 1 0 56 0 a28 26 0 1 0 -56 0") \
 				+ _hair_shape("M162 42 m-28 0 a28 26 0 1 0 56 0 a28 26 0 1 0 -56 0") \
 				+ _f('<path d="M46 56 Q62 66 80 56 M146 56 Q162 66 180 56" stroke="{accent}" stroke-width="5" fill="none" stroke-linecap="round"/>')
+		"high_ponytail":
+			# The tail rises from the crown, arcs over and falls behind her head, tied with a band.
+			return _hair_shape(_CAP_BACK) + _hair_shape("M108 30 C120 -34 214 -22 206 60 C204 100 176 118 178 80 C180 40 148 6 118 38 Z") \
+				+ _f('<path d="M112 28 Q124 36 134 26" stroke="{accent}" stroke-width="7" fill="none" stroke-linecap="round"/>')
+		"side_ponytail":
+			return _hair_shape(_CAP_BACK) + _hair_shape("M168 78 C212 84 226 150 214 214 C208 238 186 236 188 210 C192 166 186 128 160 104 Z") \
+				+ _f('<path d="M160 76 Q176 78 180 92" stroke="{accent}" stroke-width="7" fill="none" stroke-linecap="round"/><circle cx="176" cy="84" r="8" fill="{accent}" stroke="{accent_line}" stroke-width="2"/>')
+		"half_up":
+			# Long straight hair with the top gathered in a little knot and a bow.
+			return _hair_shape("M110 24 C166 22 200 60 196 120 L198 246 Q164 256 132 246 L112 190 L84 200 L80 248 Q50 258 24 248 L26 120 C22 60 56 26 110 24 Z") \
+				+ _hair_shape("M112 20 m-24 0 a24 22 0 1 0 48 0 a24 22 0 1 0 -48 0") \
+				+ _f('<path d="M84 36 Q112 46 140 36" stroke="{accent}" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M126 8 L146 -4 L146 20 Z M126 8 L106 -4 L106 20 Z" fill="{accent}" stroke="{accent_line}" stroke-width="2" stroke-linejoin="round"/><circle cx="126" cy="8" r="5" fill="{accent_light}" stroke="{accent_line}" stroke-width="1.5"/>')
+		"long_curly":
+			var c := _hair_shape("M110 22 C170 20 205 60 200 120 C198 160 210 200 196 236 L56 240 C34 224 26 196 28 160 C12 150 16 100 34 70 C52 38 80 24 110 22 Z")
+			for i in 9:
+				var ya := 140.0 + i * 12.0
+				c += _f('<circle cx="%.1f" cy="%.1f" r="17" fill="{hair}" stroke="{hair_line}" stroke-width="2.5"/>' % [32.0 + (i % 2) * 6.0, ya])
+				c += _f('<circle cx="%.1f" cy="%.1f" r="17" fill="{hair}" stroke="{hair_line}" stroke-width="2.5"/>' % [194.0 - (i % 2) * 6.0, ya + 4.0])
+			for k in 6:
+				c += _f('<circle cx="%.1f" cy="244" r="17" fill="{hair}" stroke="{hair_line}" stroke-width="2.5"/>' % (46.0 + k * 22.0))
+			return c
+		"pixie":
+			return _hair_shape("M36 120 C28 66 68 30 112 30 C160 30 196 64 190 118 C188 134 184 144 178 150 L48 150 C40 144 36 134 36 120 Z")
+		"afro_puffs":
+			var a := _hair_shape(_CAP_BACK)
+			for side: float in [-1.0, 1.0]:
+				var cx := 112.0 + side * 66.0
+				for k in 8:
+					var ang := TAU * k / 8.0
+					a += _f('<circle cx="%.1f" cy="%.1f" r="20" fill="{hair}" stroke="{hair_line}" stroke-width="2.5"/>' % [cx + cos(ang) * 22.0, 44.0 + sin(ang) * 22.0])
+				a += _f('<circle cx="%.1f" cy="44" r="24" fill="{hair}"/>' % cx)
+				a += _f('<path d="M%.1f 84 Q%.1f 92 %.1f 84" stroke="{accent}" stroke-width="6" fill="none" stroke-linecap="round"/>' % [cx - 14.0, cx, cx + 14.0])
+			return a
+		"side_braid":
+			var br := _hair_shape(_CAP_BACK)
+			for i in 9:
+				var y := 110.0 + i * 17.0
+				var x := 170.0 + sin(i * 0.7) * 6.0 + i * 2.0
+				var r := 14.0 - i * 0.8
+				br += _f('<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="11" fill="{hair}" stroke="{hair_line}" stroke-width="2.5" transform="rotate(%d %.1f %.1f)"/>' % [x, y, r, 24 if i % 2 == 0 else -24, x, y])
+			br += _f('<path d="M184 254 l-9 22 h18 Z" fill="{hair}" stroke="{hair_line}" stroke-width="2.5" stroke-linejoin="round"/><rect x="176" y="248" width="18" height="8" rx="3" fill="{accent}" stroke="{accent_line}" stroke-width="2"/>')
+			return br
+		"bob_bangs":
+			return _hair_shape("M32 122 C26 60 70 26 112 26 C160 26 198 58 196 118 C198 162 192 196 178 210 L46 210 C32 196 28 160 32 122 Z")
 		"short", "buzz":
 			return _hair_shape(_CAP_BACK)
 		"bald":
@@ -562,8 +606,18 @@ func _hair_front() -> String:
 				+ _f('<path d="M76 72 C80 60 92 50 108 44" stroke="{hair_line}" stroke-width="2.5" fill="none" stroke-linecap="round"/>') \
 				+ shine + _f('<path d="M176 64 C180 70 182 76 183 82" stroke="{hair_light}" stroke-width="5" fill="none" stroke-linecap="round"/>') \
 				+ _f('<path d="M48 96 C46 110 46 124 48 136" stroke="{hair_mid}" stroke-width="4" fill="none" stroke-linecap="round"/>')
-		"ponytail", "bun", "braids", "space_buns":
+		"ponytail", "bun", "braids", "space_buns", "high_ponytail", "side_ponytail", "half_up", "afro_puffs", "side_braid":
 			return _hair_shape(_SWEPT_FRONT) + _f('<path d="M70 60 C92 44 132 42 160 54" stroke="{hair_light}" stroke-width="7" fill="none" stroke-linecap="round"/>')
+		"long_curly":
+			var cs := ""
+			for i in 8:
+				cs += _f('<circle cx="%d" cy="%d" r="15" fill="{hair}" stroke="{hair_line}" stroke-width="2.5"/>' % [50 + i * 18, 66 + absi(4 - i) * 2])
+			return cs
+		"pixie":
+			return _hair_shape("M36 122 C30 64 70 28 112 28 C160 28 196 62 190 118 C178 90 150 74 124 80 C100 86 70 96 54 124 Z") + shine
+		"bob_bangs":
+			return _hair_shape("M36 114 C34 58 72 28 112 28 C158 28 192 58 190 114 L190 94 Q112 70 36 94 Z") \
+				+ _f('<path d="M60 70 Q90 56 120 62" stroke="{hair_light}" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.6"/><path d="M60 80 V92 M82 76 V90 M104 74 V88 M126 74 V88 M148 76 V90 M170 80 V92" stroke="{hair_line}" stroke-width="2" opacity="0.35" stroke-linecap="round"/>')
 		"curly":
 			var s := ""
 			for i in 7:
@@ -667,6 +721,8 @@ func _torso_svg(sx: float, sy: float) -> String:
 			s += _overalls()
 		"hoodie":
 			s += _top() + _hoodie()
+		"pyjama":
+			s += _top() + _pyjama()
 		"cardigan":
 			s += _top() + _cardigan()
 		"raincoat":
@@ -899,6 +955,19 @@ func _overalls() -> String:
 
 
 # Coton ouaté: a hood bunched behind the neck, drawstrings and a kangaroo pocket, over a sweater-like top.
+## A pyjama top: a collar with its piping, a button placket, a little chest pocket, piping at the cuffs and hem.
+func _pyjama() -> String:
+	var s := _f('<path d="M48 10 L65 38 L82 10 L76 8 L65 24 L54 8 Z" fill="{cloth_shade}" stroke="{cloth_line}" stroke-width="2.2" stroke-linejoin="round"/>')
+	s += _f('<path d="M48 10 L65 38 L82 10" stroke="{accent}" stroke-width="2" fill="none" stroke-linejoin="round" opacity="0.9"/>')
+	s += _f('<path d="M65 38 V100" stroke="{cloth_line}" stroke-width="1.6"/><path d="M62 38 V100" stroke="{accent}" stroke-width="1.4" opacity="0.8"/>')
+	for y in [48, 64, 80]:
+		s += _f('<circle cx="66.5" cy="%d" r="3" fill="{accent_light}" stroke="{cloth_line}" stroke-width="1.4"/><circle cx="65.6" cy="%d" r="0.9" fill="{cloth_line}"/>' % [y, y])
+	s += _f('<path d="M82 56 H98 V72 Q98 76 94 76 H86 Q82 76 82 72 Z" fill="{cloth}" stroke="{cloth_line}" stroke-width="1.8" stroke-linejoin="round"/>')
+	s += _f('<path d="M82 56 H98" stroke="{accent}" stroke-width="2.2"/>')
+	s += _f('<path d="M30 98 Q65 108 100 98" stroke="{accent}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.9"/>')
+	return s
+
+
 func _hoodie() -> String:
 	var s := _f('<path d="M34 20 Q30 4 46 2 Q65 14 84 2 Q100 4 96 20 Q80 30 65 30 Q50 30 34 20 Z" fill="{cloth_shade}" stroke="{cloth_line}" stroke-width="2.5" stroke-linejoin="round"/>')
 	s += _f('<path d="M58 22 L56 46 M72 22 L74 46" stroke="{accent_light}" stroke-width="2.5" stroke-linecap="round"/>')
@@ -1191,6 +1260,22 @@ func _leg_body(length: float) -> String:
 			s += '<path d="M13 78 V90" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" opacity="0.5"/>'
 			s += '<path d="M40 100 Q44 102 45 106" stroke="#FFFFFF" stroke-width="2.4" fill="none" stroke-linecap="round" opacity="0.5"/>'
 			s += _f('<circle cx="40" cy="101" r="3" fill="{shoe_light}"/>')
+		"slipper", "bunny_slipper", "bear_slipper":
+			# Big fluffy slippers, much bigger than her feet: a puffy mound with a fuzzy collar, and for the animals their ears, face and nose.
+			s += _f('<path d="M-1 110 Q-6 86 14 80 H34 Q58 82 55 104 Q55 114 48 114 H4 Z" fill="{shoe}" stroke="{shoe_line}" stroke-width="2.5" stroke-linejoin="round"/>')
+			for k in 7:
+				s += _f('<circle cx="%d" cy="%d" r="5.5" fill="{shoe_light}" stroke="{shoe_line}" stroke-width="1.2"/>' % [6 + k * 7, 82 + (k % 2) * 2])
+			s += _f('<ellipse cx="20" cy="84" rx="13" ry="4.5" fill="{shoe_line}" opacity="0.6"/>')
+			s += _f('<circle cx="46" cy="100" r="9" fill="{shoe_light}" opacity="0.7"/>')
+			if look.shoes == "bunny_slipper":
+				s += _f('<path d="M36 90 Q32 56 42 52 Q50 54 46 92 Z" fill="{shoe}" stroke="{shoe_line}" stroke-width="2.2" stroke-linejoin="round"/><path d="M44 92 Q42 58 52 56 Q58 60 52 94 Z" fill="{shoe}" stroke="{shoe_line}" stroke-width="2.2" stroke-linejoin="round"/>')
+				s += '<path d="M40 86 Q38 64 42 60 Q46 64 44 88 Z M49 88 Q48 66 52 62 Q55 66 51 90 Z" fill="#FFB6C8" opacity="0.9"/>'
+				s += '<circle cx="42" cy="99" r="2" fill="#2B2B2B"/><circle cx="50" cy="97" r="2" fill="#2B2B2B"/><circle cx="55" cy="102" r="3" fill="#FF8AA8"/>'
+			elif look.shoes == "bear_slipper":
+				s += _f('<circle cx="34" cy="84" r="7" fill="{shoe}" stroke="{shoe_line}" stroke-width="2.2"/><circle cx="50" cy="88" r="7" fill="{shoe}" stroke="{shoe_line}" stroke-width="2.2"/>')
+				s += '<circle cx="34" cy="84" r="3.4" fill="#FFB6C8"/><circle cx="50" cy="88" r="3.4" fill="#FFB6C8"/>'
+				s += _f('<ellipse cx="47" cy="102" rx="8" ry="6" fill="{shoe_light}" stroke="{shoe_line}" stroke-width="1.4"/>')
+				s += '<circle cx="42" cy="95" r="2" fill="#2B2B2B"/><circle cx="51" cy="95" r="2" fill="#2B2B2B"/><ellipse cx="50" cy="101" rx="3" ry="2.2" fill="#3A2A2A"/>'
 	s += _f('<rect x="3" y="106" width="46" height="9" rx="4.5" fill="{sole}" stroke="{sock_line}" stroke-width="1.5"/>')
 	# The tread on the sole.
 	for x in range(10, 46, 6):

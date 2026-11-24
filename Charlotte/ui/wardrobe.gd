@@ -11,7 +11,7 @@ const YELLOW := Color("#FFD23F")
 const CREAM := Color("#F6EFE4")
 
 const OUTFITS := [["dress", "Robe"], ["tshirt", "T-shirt"], ["sweater", "Chandail"], ["hoodie", "Coton ouaté"], ["cardigan", "Cardigan"], ["raincoat", "Imperméable"],
-	["overalls", "Salopette"], ["coat", "Manteau"]]
+	["overalls", "Salopette"], ["coat", "Manteau"], ["pyjama", "Pyjama"]]
 const DRESS_PATTERNS := [["none", "Uni"], ["dots", "Pois"], ["flowers", "Fleurs"], ["hearts", "Cœurs"], ["stars", "Étoiles"], ["stripes", "Rayures"],
 	["cats", "Petits chats"], ["cherries", "Cerises"]]
 const TOP_PATTERNS := [["none", "Uni"], ["stripes", "Rayures"], ["heart", "Gros cœur"], ["star", "Grande étoile"], ["zigzag", "Zigzag"],
@@ -19,7 +19,7 @@ const TOP_PATTERNS := [["none", "Uni"], ["stripes", "Rayures"], ["heart", "Gros 
 	["bike", "Vélo"], ["birds", "Oiseaux"], ["dots", "Pois"], ["flowers", "Fleurs"]]
 const SLEEVES := [["puff", "Bouffantes"], ["short", "Courtes"], ["long", "Longues"]]
 const LEGWEAR := [["socks", "Chaussettes"], ["tights", "Collants"], ["pants", "Pantalon"], ["shorts", "Bermuda"]]
-const SHOES := [["mary_jane", "Souliers"], ["sneaker", "Espadrilles"], ["boot", "Bottes"], ["rain_boot", "Bottes de pluie"], ["sandal", "Sandales"]]
+const SHOES := [["mary_jane", "Souliers"], ["sneaker", "Espadrilles"], ["boot", "Bottes"], ["rain_boot", "Bottes de pluie"], ["sandal", "Sandales"], ["slipper", "Grosses pantoufles"], ["bunny_slipper", "Pantoufles lapin"], ["bear_slipper", "Pantoufles ours"]]
 const HATS := [["", "Rien"], ["bow", "Boucle"], ["headband", "Serre-tête"], ["tuque", "Tuque"], ["cap", "Casquette"],
 	["beret", "Béret"], ["crown", "Couronne"], ["flower_crown", "Couronne de fleurs"], ["sun_hat", "Chapeau de soleil"],
 	["earmuffs", "Cache-oreilles"], ["helmet", "Casque de vélo"], ["witch", "Sorcière"], ["cat_ears", "Oreilles de chat"]]
@@ -28,7 +28,9 @@ const COLORS := ["#FFD23F", "#FF8A3D", "#E04F5F", "#FF5D8F", "#FFB3C7", "#C2185B
 const LEG_COLORS := ["#FFFFFF", "#FFB3C7", "#FF5D8F", "#E04F5F", "#FFD23F", "#7E57C2", "#4A6FA5", "#2F3E5C",
 	"#3A3A3A", "#8D6E63", "#5E6B3A", "#2B2B2B"]
 const HAIR_STYLES := [["long_wavy", "Longs ondulés"], ["long_straight", "Longs raides"], ["bob", "Carré"], ["ponytail", "Queue de cheval"],
-	["pigtails", "Couettes"], ["braids", "Tresses"], ["bun", "Chignon"], ["space_buns", "Deux chignons"], ["curly", "Bouclés"], ["short", "Courts"]]
+	["pigtails", "Couettes"], ["braids", "Tresses"], ["bun", "Chignon"], ["space_buns", "Deux chignons"], ["curly", "Bouclés"], ["short", "Courts"],
+	["high_ponytail", "Queue haute"], ["side_ponytail", "Queue de côté"], ["half_up", "Mi-attachés"], ["long_curly", "Longs bouclés"], ["pixie", "Coupe garçonne"],
+	["afro_puffs", "Deux boules"], ["side_braid", "Longue tresse"], ["bob_bangs", "Carré à frange"]]
 # Natural shades first (hers is the first), then a few fun ones.
 const HAIR_COLORS := ["#B0623A", "#8A3B1E", "#5A3A22", "#3A2618", "#1E1612", "#C9A060", "#E3C78A",
 	"#FF7BA3", "#B388FF", "#4FA3E0", "#3FBFA0"]
@@ -205,11 +207,18 @@ func _clothes_page(page: VBoxContainer) -> void:
 			_look.legwear = "pants"
 			_look.legwear_color = _look.outfit_color
 			_look.sleeve = "short"
+		elif v == "pyjama":
+			# Pyjamas come in two pieces: the long trousers in the same colour, long sleeves, little stars to start.
+			_look.legwear = "pants"
+			_look.legwear_color = _look.outfit_color
+			_look.sleeve = "long"
+			if _look.pattern == "none":
+				_look.pattern = "stars"
 		elif v == "dress" and _look.sleeve == "long":
 			_look.sleeve = "puff")
 	_swatches(page, "Couleur", COLORS, _look.outfit_color, func(c):
 		_look.outfit_color = c
-		if _look.outfit == "overalls":
+		if _look.outfit == "overalls" or _look.outfit == "pyjama":
 			_look.legwear_color = c)
 	if _look.outfit == "dress":
 		_choices(page, "Motif", DRESS_PATTERNS, _look.pattern, func(v): _look.pattern = v)
