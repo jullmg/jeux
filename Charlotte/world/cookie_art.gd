@@ -23,7 +23,7 @@ const INGREDIENTS := [
 const SHAPES := [["bonhomme", "Bonhomme"], ["etoile", "Étoile"], ["sapin", "Sapin"], ["coeur", "Cœur"], ["cloche", "Cloche"],
 	["botte", "Bas de Noël"], ["flocon", "Flocon"], ["boule", "Boule"]]
 ## A circle (in cookie units) that holds each shape, for keeping the cuts apart.
-const RADIUS := {"bonhomme": 52.0, "etoile": 50.0, "sapin": 51.0, "coeur": 47.0, "cloche": 46.0, "botte": 48.0, "flocon": 50.0, "boule": 46.0, "pizza": 47.0, "muffin": 43.0}
+const RADIUS := {"bonhomme": 52.0, "etoile": 50.0, "sapin": 51.0, "coeur": 47.0, "cloche": 46.0, "botte": 48.0, "flocon": 50.0, "boule": 46.0, "pizza": 47.0, "muffin": 43.0, "cupcake": 43.0, "gateau": 47.0, "cookie": 44.0}
 
 ## The things that are laid one at a time: id, name.
 const CANDIES := [["smarties", "Bonbons"], ["cannelle", "Cannelle"], ["gomme", "Gommes"], ["pepite", "Pépites"],
@@ -93,6 +93,58 @@ const RECIPES := {
 			"", "", "Les six muffins sont dans la plaque : au four ! Sors-les quand ils sont bien dorés.",
 			"Décore-les comme tu veux : du glaçage, des fruits, des pépites… Clique sur un muffin, en bas, pour changer.", "Qu'ils sont beaux ! Choisis l'assiette pis ce qu'on boit avec nos muffins."],
 		"eat": "Mmm ! Des muffins aux bleuets tout chauds, quel régal !", "steps": ["Ingrédients", "Mélanger", "Étendre", "Découper", "Cuire", "Décorer", "Servir"],
+	},
+	"cupcakes": {
+		"title": "Petits gâteaux (cupcakes)",
+		"ingredients": [["farine", "Farine", "De la farine : une tasse et demie."], ["sucre", "Sucre", "Du sucre : ils vont être bien sucrés."],
+			["beurre", "Beurre mou", "Du beurre mou, pour que ce soit moelleux."], ["oeuf", "Des œufs", "Crac ! Deux œufs."],
+			["lait", "Lait", "Un peu de lait, tout doucement."], ["vanille", "Vanille", "Une cuillérée de vanille : ça sent tellement bon !"]],
+		"lines": ["1½ tasse de farine", "¾ tasse de sucre", "½ tasse de beurre mou", "2 œufs", "½ tasse de lait", "1 c. à thé de vanille"],
+		"order": [0, 1, 4, 5, 6], "shape": "cupcake",
+		"icings": [["vanille", "#FFF6E8"], ["fraise", "#FF8AB8"], ["chocolat", "#6A3A22"], ["bleu", "#7FC8F0"]],
+		"candies": [["smarties", "Bonbons"], ["etoile", "Étoiles dorées"], ["coeur", "Cœurs roses"], ["cerise", "Cerises"], ["fraise", "Fraises"], ["bleuet", "Bleuets"]],
+		"sprinkles": [["arcenciel", "Arc-en-ciel"], ["argent", "Billes d'argent"], ["or", "Billes d'or"], ["sucre", "Sucre cristal"]],
+		"tabs": ["Glaçage", "Dessus", "Pépites"],
+		"plates": [["blanche", "Assiette blanche"], ["noel", "Assiette à fleurs"], ["bleue", "Assiette bleue"]], "drinks": DRINKS,
+		"mix": "#F6E6B4", "dough": [280.0, 168.0, 3.3],
+		"says": ["On fait des petits gâteaux ! Mets les ingrédients dans le bol : clique dessus !", "Mélange la pâte jusqu'à ce qu'elle soit lisse et crémeuse.",
+			"", "", "Les six cupcakes sont dans leur moule : au four ! On les sort quand ils sont dorés.",
+			"Le meilleur moment ! Mets du glaçage, des bonbons, des pépites : à toi de décorer tes cupcakes !", "Qu'ils sont beaux ! Choisis l'assiette pis ce qu'on boit avec."],
+		"eat": "Mmm ! Des cupcakes faits maison, c'est une vraie fête !", "steps": ["Ingrédients", "Mélanger", "Étendre", "Découper", "Cuire", "Décorer", "Servir"],
+	},
+	"gateau": {
+		"title": "Gâteau au chocolat",
+		"ingredients": [["farine", "Farine", "De la farine : deux tasses."], ["sucre", "Sucre", "Du sucre : ¾ de tasse."], ["cacao", "Cacao", "Du cacao, pour que ce soit bien chocolaté !"],
+			["oeuf", "Des œufs", "Crac ! Trois œufs pour un grand gâteau."], ["lait", "Lait", "Une tasse de lait."], ["beurre", "Beurre fondu", "Du beurre fondu, pour que le gâteau soit tendre."]],
+		"lines": ["2 tasses de farine", "¾ tasse de sucre", "½ tasse de cacao", "3 œufs", "1 tasse de lait", "½ tasse de beurre fondu"],
+		"order": [0, 1, 4, 5, 6], "shape": "gateau",
+		"icings": [["chocolat", "#6A3A22"], ["vanille", "#FFF6E8"], ["fraise", "#FF8AB8"], ["citron", "#FFE680"]],
+		"candies": [["bougie", "Bougies"], ["fraise", "Fraises"], ["cerise", "Cerises"], ["framboise", "Framboises"], ["smarties", "Bonbons"], ["etoile", "Étoiles dorées"], ["coeur", "Cœurs roses"], ["pepite", "Pépites"]],
+		"sprinkles": [["arcenciel", "Arc-en-ciel"], ["argent", "Billes d'argent"], ["or", "Billes d'or"], ["glace", "Sucre glace"]],
+		"tabs": ["Glaçage", "Dessus", "Pépites"],
+		"plates": [["blanche", "Assiette blanche"], ["noel", "Plat à gâteau"], ["bleue", "Assiette bleue"]], "drinks": DRINKS,
+		"mix": "#7A4A2E", "dough": [280.0, 168.0, 3.3],
+		"says": ["On fait un gâteau au chocolat ! Mets tous les ingrédients dans le bol : clique dessus !", "Mélange la pâte : tourne la cuillère en rond, jusqu'à ce qu'elle soit bien lisse.",
+			"", "", "Le gâteau au four ! Surveille-le : il doit être bien gonflé et pas brûlé.",
+			"Ton gâteau est cuit ! Glace-le, mets des fruits, des bonbons, des bougies : décore-le comme un gâteau de fête !", "Quel gâteau magnifique ! Choisis où on le sert, pis ce qu'on boit avec."],
+		"eat": "Mmm ! Un gâteau au chocolat fait maison, y a rien de meilleur !", "steps": ["Ingrédients", "Mélanger", "Étendre", "Découper", "Cuire", "Décorer", "Servir"],
+	},
+	"pepites": {
+		"title": "Biscuits aux pépites de chocolat",
+		"ingredients": [["farine", "Farine", "De la farine : deux tasses."], ["cassonade", "Cassonade", "De la cassonade, pour le goût de caramel."],
+			["beurre", "Beurre mou", "Du beurre mou, bien crémeux."], ["oeuf", "Un œuf", "Crac ! Un œuf."], ["vanille", "Vanille", "Un peu de vanille."], ["pepites", "Pépites de chocolat", "Pis les pépites de chocolat : plein, plein !"]],
+		"lines": ["2 tasses de farine", "¾ tasse de cassonade", "½ tasse de beurre mou", "1 œuf", "1 c. à thé de vanille", "1 tasse de pépites de chocolat"],
+		"order": [0, 1, 4, 5, 6], "shape": "cookie",
+		"icings": [["chocolat", "#5A301A"], ["blanc", "#FFFFFF"], ["caramel", "#C98A4B"], ["fraise", "#FF8AB8"]],
+		"candies": [["pepite", "Pépites"], ["smarties", "Bonbons"], ["guimauve", "Guimauves"], ["etoile", "Étoiles dorées"], ["dragee", "Dragées"], ["coeur", "Cœurs roses"]],
+		"sprinkles": [["sucre", "Sucre cristal"], ["arcenciel", "Arc-en-ciel"], ["or", "Billes d'or"], ["glace", "Sucre glace"]],
+		"tabs": ["Glaçage", "Pépites", "Pluie"],
+		"plates": [["blanche", "Assiette blanche"], ["noel", "Assiette à fleurs"], ["bleue", "Assiette bleue"]], "drinks": DRINKS,
+		"mix": "#D9B27A", "dough": [280.0, 168.0, 3.3],
+		"says": ["On fait des biscuits aux pépites ! Mets les ingrédients dans le bol : clique dessus !", "Mélange bien la pâte : elle doit être épaisse, avec plein de pépites.",
+			"", "", "Huit boules de pâte sur la plaque : au four ! On les sort quand ils sont dorés.",
+			"À toi de les décorer : plus de pépites, du glaçage, des bonbons…", "Que de beaux biscuits ! Choisis l'assiette pis ce qu'on boit avec."],
+		"eat": "Mmm ! Des biscuits aux pépites tout chauds, y en a plus pour longtemps !", "steps": ["Ingrédients", "Mélanger", "Étendre", "Découper", "Cuire", "Décorer", "Servir"],
 	},
 }
 
@@ -169,8 +221,17 @@ static func _make_shape(id: String) -> PackedVector2Array:
 	match id:
 		"pizza":
 			return _circle(Vector2.ZERO, 47.0, 48)
-		"muffin":
+		"muffin", "cupcake":
 			return _circle(Vector2.ZERO, 42.0, 40)
+		"gateau":
+			return _circle(Vector2.ZERO, 47.0, 48)
+		"cookie":
+			# A dropped dough ball baked flat: a round, a little uneven.
+			var pts := PackedVector2Array()
+			for i in 36:
+				var a := TAU * i / 36.0
+				pts.append(Vector2.from_angle(a) * (42.0 + sin(a * 3.0 + 1.0) * 2.4 + sin(a * 5.0) * 1.4))
+			return pts
 	return _circle(Vector2.ZERO, 40.0)
 
 
@@ -242,7 +303,9 @@ static func dough_color(doneness: float, id := "") -> Color:
 	var stops := [Color("#E7C38D"), Color("#D49A55"), Color("#B9773A"), Color("#8E5224"), Color("#4B2A14"), Color("#22130A")]
 	if id == "pizza":
 		stops = [Color("#EEDCB0"), Color("#E6C47E"), Color("#D49A4A"), Color("#A8662A"), Color("#4B2A14"), Color("#22130A")]
-	elif id == "muffin":
+	elif id == "gateau":
+		stops = [Color("#C9946A"), Color("#8A5A38"), Color("#5E3A22"), Color("#40261A"), Color("#25150C"), Color("#120A06")]
+	elif id == "muffin" or id == "cupcake":
 		stops = [Color("#F4E2B0"), Color("#EBC878"), Color("#D49A48"), Color("#A8662A"), Color("#4B2A14"), Color("#22130A")]
 	var f := clampf(doneness, 0.0, 1.0) * (stops.size() - 1)
 	var i := mini(int(f), stops.size() - 2)
@@ -255,8 +318,8 @@ static func draw_cookie(ci: CanvasItem, ck: Dictionary, at: Vector2, s: float, r
 	var base := dough_color(float(ck.get("doneness", 0.5)), id)
 	ci.draw_set_transform(at, rot, Vector2(s, s * squash))
 	_frame = Transform2D(rot, at).scaled_local(Vector2(s, s * squash))
-	if id == "muffin":
-		_muffin_cup(ci)
+	if id == "muffin" or id == "cupcake":
+		_muffin_cup(ci, id == "cupcake")
 	var full := shape(id)
 	if shadow:
 		ci.draw_colored_polygon(_shifted(full, Vector2(2.2, 4.0)), Color(0.15, 0.08, 0.02, 0.28))
@@ -278,6 +341,9 @@ static func draw_cookie(ci: CanvasItem, ck: Dictionary, at: Vector2, s: float, r
 	for op: Dictionary in ck.get("ops", []):
 		_draw_op(ci, op, id)
 	ci.draw_polyline(_closed(full), base.darkened(0.45), 1.0, true)
+	if id == "gateau":
+		# The cake's rim: a darker ring where the sponge meets the plate.
+		ci.draw_polyline(_closed(inset(id, 1.2)), base.lightened(0.15), 1.2, true)
 	if int(ck.get("slices", 0)) > 0:
 		# A pizza cut in slices: the knife lines from the middle to the crust.
 		var n := int(ck.slices)
@@ -289,9 +355,9 @@ static func draw_cookie(ci: CanvasItem, ck: Dictionary, at: Vector2, s: float, r
 
 
 ## The paper cup under a muffin: a pleated ring a little wider than the top.
-static func _muffin_cup(ci: CanvasItem) -> void:
+static func _muffin_cup(ci: CanvasItem, pink := false) -> void:
 	ci.draw_colored_polygon(_circle(Vector2(1.5, 3.0), 50.0, 40), Color(0.25, 0.12, 0.04, 0.25))
-	ci.draw_colored_polygon(_circle(Vector2.ZERO, 50.0, 40), Color("#E8DCC4"))
+	ci.draw_colored_polygon(_circle(Vector2.ZERO, 50.0, 40), Color("#F7B6C6") if pink else Color("#E8DCC4"))
 	for k in 28:
 		var a := TAU * k / 28.0
 		ci.draw_line(Vector2.from_angle(a) * 43.0, Vector2.from_angle(a) * 50.0, Color("#B9A27A", 0.8), 1.2, true)
@@ -316,7 +382,7 @@ static func _draw_op(ci: CanvasItem, op: Dictionary, id: String) -> void:
 	match op.t:
 		"flood":
 			var c: Color = op.c
-			var pad := 8.0 if id == "pizza" else (3.0 if id == "muffin" else 0.0)
+			var pad := 8.0 if id == "pizza" else (3.0 if id == "muffin" or id == "cupcake" else (4.0 if id == "gateau" else 0.0))
 			var edge := inset(id, 2.4 + pad)
 			if edge.size() > 2:
 				ci.draw_colored_polygon(edge, c.darkened(0.2))
@@ -440,6 +506,21 @@ static func _candy_local(ci: CanvasItem, id: String, c: Color) -> void:
 				ci.draw_line(Vector2(-6.0 + k * 2.4, 0), Vector2(-3.6 + k * 2.4, 0), col, 2.6)
 			ci.draw_rect(Rect2(-6.0, -1.3, 12.0, 2.6), Color("#B02A30"), false, 0.7)
 			ci.draw_line(Vector2(-5.5, -0.7), Vector2(5.5, -0.7), Color(1, 1, 1, 0.45), 0.6)
+		"bougie":
+			# A birthday candle standing up (seen from the side): a striped stick, its wick and a flame with a glow.
+			ci.draw_circle(Vector2(0, -9.0), 7.0, Color(1.0, 0.85, 0.3, 0.25))
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(-1.8, 4), Vector2(1.8, 4), Vector2(1.8, -4), Vector2(-1.8, -4)]), Color("#FF7BB0"))
+			ci.draw_line(Vector2(-1.8, 0), Vector2(1.8, -1.6), Color.WHITE, 1.2)
+			ci.draw_line(Vector2(-1.8, -3), Vector2(1.8, -4.6), Color.WHITE, 1.2)
+			ci.draw_line(Vector2(0, -4), Vector2(0, -6), Color("#3A2A1A"), 0.8)
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(0, -12.6), Vector2(2.4, -8.6), Vector2(0, -6.4), Vector2(-2.4, -8.6)]), Color("#FF9A1F"))
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(0, -10.6), Vector2(1.1, -8.6), Vector2(0, -7.2), Vector2(-1.1, -8.6)]), Color("#FFE680"))
+		"cerise":
+			ci.draw_circle(Vector2(0.4, 1.4), 4.6, Color(0, 0, 0, 0.2))
+			ci.draw_circle(Vector2(0, 1.0), 4.4, Color("#B8101E"))
+			ci.draw_circle(Vector2(0, 1.0), 3.6, Color("#E42438"))
+			ci.draw_circle(Vector2(-1.4, -0.4), 1.1, Color(1, 1, 1, 0.65))
+			ci.draw_arc(Vector2(2.4, -5.0), 5.4, PI * 1.05, PI * 1.55, 8, Color("#3E7A2E"), 1.1, true)
 		"pepperoni":
 			ci.draw_circle(Vector2(0.4, 0.8), 5.6, Color(0, 0, 0, 0.2))
 			ci.draw_circle(Vector2.ZERO, 5.6, Color("#9E2A22"))
@@ -716,6 +797,40 @@ static func ingredient(ci: CanvasItem, id: String, at: Vector2, s := 1.0, tilt :
 				ci.draw_circle(Vector2(b[0] - 2, b[1] - 2), 2.2, Color(1, 1, 1, 0.45))
 				ci.draw_circle(Vector2(b[0] + 1, b[1] + 1), 1.4, Color("#1E2660"))
 			ci.draw_polyline(PackedVector2Array([Vector2(-30, 2), Vector2(30, 2), Vector2(24, 50), Vector2(-24, 50), Vector2(-30, 2)]), Color("#7E5E3A"), 1.6, true)
+		"vanille":
+			# A small brown bottle with a black cap.
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(-9, -26), Vector2(9, -26), Vector2(9, -14), Vector2(18, -6), Vector2(18, 50), Vector2(-18, 50), Vector2(-18, -6), Vector2(-9, -14)]), Color("#6E3E1E"))
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(-16, 6), Vector2(16, 6), Vector2(16, 48), Vector2(-16, 48)]), Color("#4A2810", 0.55))
+			ci.draw_rect(Rect2(-9, -36, 18, 11), Color("#2A2A30"))
+			ci.draw_rect(Rect2(-12, 10, 24, 22), Color("#F4EAC8"))
+			ci.draw_rect(Rect2(-12, 10, 24, 22), Color("#6E5A18"), false, 1.2)
+			ci.draw_circle(Vector2(0, 21), 5.0, Color("#C8A04A"))
+			ci.draw_line(Vector2(-13, -2), Vector2(-13, 44), Color(1, 1, 1, 0.35), 2.4)
+			ci.draw_polyline(PackedVector2Array([Vector2(-9, -26), Vector2(9, -26), Vector2(9, -14), Vector2(18, -6), Vector2(18, 50), Vector2(-18, 50), Vector2(-18, -6), Vector2(-9, -14), Vector2(-9, -26)]), Color("#2E1608"), 1.4, true)
+		"cacao":
+			# A round tin of cocoa, brown with a gold lid and a label.
+			ci.draw_colored_polygon(_rr(Vector2(-22, -26), Vector2(22, 50), 5), Color("#6A3A22"))
+			ci.draw_colored_polygon(_rr(Vector2(-22, -26), Vector2(-10, 50), 4), Color(1, 1, 1, 0.12))
+			ci.draw_rect(Rect2(-24, -36, 48, 12), Color("#E0B84A"))
+			ci.draw_rect(Rect2(-24, -36, 48, 12), Color("#8A6A12"), false, 1.2)
+			ci.draw_rect(Rect2(-16, -8, 32, 36), Color("#F4E6C8"))
+			ci.draw_rect(Rect2(-16, -8, 32, 36), Color("#6A3A22"), false, 1.2)
+			ci.draw_circle(Vector2(0, 10), 8.0, Color("#6A3A22"))
+			ci.draw_circle(Vector2(-2, 8), 2.0, Color(1, 1, 1, 0.4))
+			ci.draw_polyline(_closed(_rr(Vector2(-22, -26), Vector2(22, 50), 5)), Color("#3A1E10"), 1.4, true)
+		"pepites":
+			# A bag of chocolate chips with a few spilled in front.
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(-26, -34), Vector2(26, -34), Vector2(30, 46), Vector2(-30, 46)]), Color("#C8283A"))
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(-26, -34), Vector2(-12, -34), Vector2(-14, 46), Vector2(-30, 46)]), Color(1, 1, 1, 0.14))
+			for k in 6:
+				ci.draw_line(Vector2(-24 + k * 9.5, -40), Vector2(-24 + k * 9.5, -34), Color("#8E1A24"), 3.0)
+			ci.draw_rect(Rect2(-20, -40, 40, 6), Color("#A81E2C"))
+			ci.draw_rect(Rect2(-18, -12, 36, 30), Color("#FFF4DA"))
+			ci.draw_rect(Rect2(-18, -12, 36, 30), Color("#6A1A22"), false, 1.2)
+			for c in [Vector2(-8, 0), Vector2(0, 8), Vector2(8, 0), Vector2(-4, -4), Vector2(6, 10)]:
+				ci.draw_colored_polygon(PackedVector2Array([c + Vector2(-4, 3), c + Vector2(4, 3), c + Vector2(0, -4)]), Color("#4A2A16"))
+			for c in [Vector2(-34, 50), Vector2(-24, 52), Vector2(32, 52), Vector2(40, 50)]:
+				ci.draw_colored_polygon(PackedVector2Array([c + Vector2(-4, 3), c + Vector2(4, 3), c + Vector2(0, -4)]), Color("#4A2A16"))
 		"gingembre", "cannelle":
 			var lid := Color("#E0842A") if id == "gingembre" else Color("#B5442E")
 			var dust := Color("#C98A2E") if id == "gingembre" else Color("#8A4A2A")
@@ -977,18 +1092,20 @@ static func table_scene(ci: CanvasItem, origin: Vector2, k: float, foods: Array,
 			ci.draw_colored_polygon(_ellipse(c + Vector2(0, 2), rx, rx * squash), Color("#C9D2DA"))
 			ci.draw_colored_polygon(_ellipse(c, rx, rx * squash), Color("#FFFFFF"))
 			ci.draw_polyline(_closed(_ellipse(c, rx - 5.0, rx * squash - 3.0)), Color("#DDE4EC"), 0.8, true)
-	if kind == "pizza":
+	if kind == "pizza" or kind == "gateau":
 		if not foods.is_empty():
 			var pz: Dictionary = foods[0].duplicate()
 			pz.slices = 8
 			draw_cookie(ci, pz, origin + (c + Vector2(0, -1)) * k, 0.44 * k, 0.0, false, squash)
 	else:
 		var n := foods.size()
+		var cols := 3 if n <= 6 else 4
+		var rows := int(ceil(float(n) / cols))
 		for i in n:
-			var col := i % 3
-			var row := i / 3
-			var at := c + Vector2((col - 1) * 20.0, (row - 0.5) * 12.0 + 2.0)
-			draw_cookie(ci, foods[i], origin + at * k, 0.19 * k, 0.0, false, 0.78)
+			var col := i % cols
+			var row := i / cols
+			var at := c + Vector2((col - (cols - 1) / 2.0) * (20.0 if cols == 3 else 17.0), (row - (rows - 1) / 2.0) * 12.0 + 2.0)
+			draw_cookie(ci, foods[i], origin + at * k, (0.19 if cols == 3 else 0.16) * k, 0.0, false, 0.78)
 	ci.draw_set_transform(origin, 0.0, Vector2.ONE * k)
 	glass(ci, Vector2(96, 70), 1.0, drink, false)
 	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

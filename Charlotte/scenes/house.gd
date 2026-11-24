@@ -1442,33 +1442,53 @@ func _ask_mom() -> void:
 # Cooking with Maman, on demand (Julien): she picks a recipe, then the whole studio (`CookieStudio`) at the counter.
 func _cook_with_mom() -> void:
 	_control.enabled = false
-	var ids := ["pizza", "muffins", "biscuits"]
 	var card := ChoiceCard.ask(self, "Qu'est-ce qu'on cuisine ?", [
 		{"text": "Une pizza maison", "note": "la pâte, la sauce, les garnitures"},
-		{"text": "Des muffins aux bleuets", "note": "avec du glaçage et des fruits"},
+		{"text": "Un dessert", "note": "gâteau, cupcakes, muffins, biscuits"},
+		{"text": "Plus tard"}])
+	card.chose.connect(func(i: int) -> void:
+		if i == 0:
+			_open_cooking("pizza")
+		elif i == 1:
+			_cook_dessert()
+		else:
+			_control.enabled = true)
+
+
+func _cook_dessert() -> void:
+	var ids := ["gateau", "cupcakes", "muffins", "pepites", "biscuits"]
+	var card := ChoiceCard.ask(self, "Quel dessert ?", [
+		{"text": "Un gâteau au chocolat", "note": "avec du glaçage, des fruits, des bougies"},
+		{"text": "Des petits gâteaux", "note": "des cupcakes bien glacés"},
+		{"text": "Des muffins aux bleuets"},
+		{"text": "Des biscuits aux pépites", "note": "de chocolat"},
 		{"text": "Des biscuits au gingembre", "note": "à découper pis à décorer"},
 		{"text": "Plus tard"}])
 	card.chose.connect(func(i: int) -> void:
 		if i >= ids.size():
 			_control.enabled = true
 			return
-		_mom.express("happy", 2.0)
-		_mom_routine.pause(8.0, _charlotte.position.x)
-		var studio := CookieStudio.new()
-		studio.recipe = ids[i]
-		studio.closed.connect(func(result: Dictionary) -> void:
-			_control.enabled = true
-			if result.is_empty():
-				_say(_charlotte, "On le fera tantôt, Maman !", 300.0)
-				return
-			_mom_routine.pause(4.0, _charlotte.position.x)
-			Sfx.play("chime")
-			var shot: Image = result.image
-			shot.resize(110, 80, Image.INTERPOLATE_LANCZOS)
-			shot.generate_mipmaps()
-			_say(_mom, str(CookieArt.recipe(str(result.recipe)).eat), 380.0, 3.4)
-			_treat(ImageTexture.create_from_image(shot), "On a tout fait nous-mêmes !", 0.4))
-		add_child(studio))
+		_open_cooking(ids[i]))
+
+
+func _open_cooking(recipe: String) -> void:
+	_mom.express("happy", 2.0)
+	_mom_routine.pause(8.0, _charlotte.position.x)
+	var studio := CookieStudio.new()
+	studio.recipe = recipe
+	studio.closed.connect(func(result: Dictionary) -> void:
+		_control.enabled = true
+		if result.is_empty():
+			_say(_charlotte, "On le fera tantôt, Maman !", 300.0)
+			return
+		_mom_routine.pause(4.0, _charlotte.position.x)
+		Sfx.play("chime")
+		var shot: Image = result.image
+		shot.resize(110, 80, Image.INTERPOLATE_LANCZOS)
+		shot.generate_mipmaps()
+		_say(_mom, str(CookieArt.recipe(str(result.recipe)).eat), 380.0, 3.4)
+		_treat(ImageTexture.create_from_image(shot), "On a tout fait nous-mêmes !", 0.4))
+	add_child(studio)
 
 
 # Papa, on demand: to the Parc du Pélican, with him (`ParkOuting`).

@@ -784,7 +784,8 @@ func _ensure_food() -> void:
 		for c: Dictionary in _cuts:
 			_cookies.append({"shape": c.shape, "rot": 0.0, "seed": c.seed, "doneness": 0.0, "ops": []})
 	else:
-		for i in (1 if shape == "pizza" else 6):
+		var count := 1 if (shape == "pizza" or shape == "gateau") else (8 if shape == "cookie" else 6)
+		for i in count:
 			_cookies.append({"shape": shape, "rot": 0.0, "seed": _rng.randi(), "doneness": 0.0, "ops": []})
 	_oven = "ready"
 	_slide = 0.0
@@ -1519,7 +1520,7 @@ func _paint_decorating(ci: CanvasItem) -> void:
 
 # Step 7.
 func _paint_plate(ci: CanvasItem) -> void:
-	if str(_r.shape) == "pizza" or str(_r.shape) == "muffin":
+	if str(_r.shape) != "":
 		CookieArt.table_scene(ci, Vector2(110, 10), 6.0, _cookies, str(_r.shape), _plates[_plate][0], _drinks[_drink][0])
 	else:
 		CookieArt.plate_scene(ci, Vector2(110, 10), 6.0, _cookies, _plates[_plate][0], _drinks[_drink][0], false)
@@ -1547,7 +1548,7 @@ func _finish() -> void:
 
 
 func _scene(n: CanvasItem, cookies: Array, shape: String, plate: String, drink: String, eaten: bool) -> void:
-	if shape == "pizza" or shape == "muffin":
+	if shape != "":
 		CookieArt.table_scene(n, Vector2.ZERO, 4.0, cookies, shape, plate, drink)
 	else:
 		CookieArt.plate_scene(n, Vector2.ZERO, 4.0, cookies, plate, drink, eaten)
