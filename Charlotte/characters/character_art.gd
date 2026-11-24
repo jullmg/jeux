@@ -495,6 +495,9 @@ func _strands(d: String) -> String:
 		s += _f('<path d="%s" stroke="{hair_line}" stroke-width="1.8" opacity="0.4"/>' % path)
 		if i % 3 == 1:
 			s += _f('<path d="%s" stroke="{hair_light}" stroke-width="1.4" opacity="0.55" transform="translate(4 2)"/>' % path)
+	# A soft gloss across the crown, light from the upper left, and the shade gathering toward the ends.
+	s += _f('<ellipse cx="96" cy="46" rx="48" ry="12" fill="{hair_light}" opacity="0.28" transform="rotate(-14 96 46)"/>')
+	s += '<rect x="0" y="190" width="240" height="100" fill="#000000" opacity="0.08"/>'
 	return s + '</g>'
 
 
