@@ -1178,30 +1178,65 @@ static func house_plant(kind: String, thirsty: bool) -> ImageTexture:
 				s += _curved_leaf(stem_end, a + droop * 0.5, 82.0 * float(l[2]), 34.0 * float(l[2]), droop * 0.6, leaf, line, t, "split")
 			s += _pot(cx, h, 92.0, 80.0, "#C2693F", "#7E3E22", t)
 		"pothos":
-			# A little wooden stool under the woven basket, the vines spilling over and trailing down.
+			# A little wooden stool under a woven basket; a mound of big heart-shaped leaves (some marbled with cream) at its
+			# rim, and long vines spilling over the edge and trailing down, a leaf every so often.
 			var rim := h - 130.0
+			s += '<ellipse cx="%s" cy="%s" rx="62" ry="5" fill="#000000" opacity="0.14"/>' % [cx, h - 3.0]
 			s += '<rect x="%s" y="%s" width="116" height="10" rx="3" fill="#A8743E" stroke="#6E4520" stroke-width="2"/>' % [cx - 58, h - 66]
+			s += '<rect x="%s" y="%s" width="116" height="3" rx="1.5" fill="#D0A06A" opacity="0.7"/>' % [cx - 58, h - 66]
 			for lx in [cx - 48, cx + 40]:
 				s += '<path d="M%s %s L%s %s" stroke="#8E5E2E" stroke-width="7" stroke-linecap="round"/>' % [lx + 4, h - 56, lx + (-4 if lx < cx else 12), h - 4]
 			s += '<path d="M%s %s H%s" stroke="#8E5E2E" stroke-width="4"/>' % [cx - 46, h - 24, cx + 50]
-			s += '<path d="M%s %s H%s L%s %s H%s Z" fill="#D9C9A8" stroke="#9A8660" stroke-width="3"/>' % [cx - 52, rim, cx + 52, cx + 40, rim + 66, cx - 40]
-			for k in 4:
-				s += '<path d="M%s %s H%s" stroke="#B9A580" stroke-width="2"/>' % [cx - 48 + k * 3, rim + 14 + k * 14, cx + 48 - k * 3]
-			s += _soil(cx, rim, 50.0, t)
-			for v in [[-46.0, 1.0, 80.0], [-26.0, 1.0, 112.0], [-6.0, -1.0, 64.0], [14.0, 1.0, 96.0], [34.0, -1.0, 118.0], [50.0, -1.0, 74.0]]:
-				var x0: float = cx + float(v[0])
-				var length: float = float(v[2]) * (1.0 + t * 0.1)
-				var pts: Array[Vector2] = []
-				for k in 9:
-					var q := k / 8.0
-					pts.append(Vector2(x0 + sin(q * 3.0 + x0) * 6.0 + float(v[1]) * q * 16.0, rim - 30.0 + q * length * 0.6 + (q * q * length * 0.4 if t > 0.0 else -sin(q * PI) * 30.0 * (1.0 - q))))
-				var path := "M%s %s" % [pts[0].x, pts[0].y]
-				for p in pts.slice(1):
-					path += " L%s %s" % [p.x, p.y]
-				s += '<path d="%s" stroke="%s" stroke-width="2.5" fill="none"/>' % [path, _hex(line)]
-				for k in range(1, pts.size()):
-					var side := 1.0 if k % 2 == 0 else -1.0
-					s += _curved_leaf(pts[k], side * (1.2 + t * 1.0), 26.0, 16.0, side * t * 0.8, leaf if (k + int(v[0])) % 4 != 0 else leaf.lerp(Color("#E8E2A0"), 0.5), line, t, "heart")
+			# The vines behind the basket's front (those that hang down the back), then the basket, then the mound and the front vines.
+			var vines := [[-50.0, -1.0, 96.0], [-30.0, 1.0, 150.0], [-8.0, -1.0, 110.0], [16.0, 1.0, 82.0], [34.0, -1.0, 168.0], [52.0, 1.0, 120.0]]
+			for pass_i in 2:
+				if pass_i == 1:
+					# The basket: a flared weave with a rolled rim, criss-crossed straw and a darker shade at its foot.
+					s += '<path d="M%s %s H%s L%s %s H%s Z" fill="#D9C9A8" stroke="#9A8660" stroke-width="3" stroke-linejoin="round"/>' % [cx - 52, rim, cx + 52, cx + 40, rim + 66, cx - 40]
+					for k in 6:
+						var y := rim + 8.0 + k * 10.0
+						var inset := k * 2.0
+						s += '<path d="M%s %s H%s" stroke="#B9A580" stroke-width="1.6"/>' % [cx - 50 + inset, y, cx + 50 - inset]
+					for k in 9:
+						var x := cx - 46.0 + k * 11.5
+						s += '<path d="M%s %s l6 10 M%s %s l-6 10" stroke="#C4B08A" stroke-width="1.3" opacity="0.8"/>' % [x, rim + 4.0, x + 6.0, rim + 4.0]
+					s += '<path d="M%s %s H%s L%s %s H%s Z" fill="#7A6238" opacity="0.18"/>' % [cx - 44, rim + 50, cx + 44, cx + 40, rim + 66, cx - 40]
+					s += '<rect x="%s" y="%s" width="108" height="8" rx="4" fill="#E8DABA" stroke="#9A8660" stroke-width="2"/>' % [cx - 54, rim - 4.0]
+					s += '<path d="M%s %s H%s" stroke="#FFFFFF" stroke-width="1.6" opacity="0.6"/>' % [cx - 46, rim - 1.0, cx + 20]
+					s += _soil(cx, rim, 48.0, t)
+					# The mound: leaves of different sizes round the soil, the low outer ones leaning out, the inner ones standing up.
+					for ring in 2:
+						var count := 11 if ring == 0 else 7
+						for k in count:
+							var spread := 1.45 if ring == 0 else 0.7
+							var a: float = lerpf(-spread, spread, k / float(count - 1)) + rng.randf_range(-0.07, 0.07)
+							var length := (34.0 if ring == 0 else 38.0) + rng.randf_range(-4.0, 6.0)
+							var base := Vector2(cx + sin(a) * (30.0 if ring == 0 else 14.0), rim - 2.0 - ring * 6.0)
+							var mark := (k * 3 + ring) % 4 == 0
+							s += _curved_leaf(base, a * (1.0 + t * 0.4) + signf(a) * t * 0.45, length + 14.0 * ring, length * 0.95, signf(a) * (0.1 + t * 0.7), leaf.lerp(Color("#CFE0A0"), 0.45) if mark else leaf.lerp(Color("#2F7A3E"), 0.28 * float(ring)), line, t, "heart")
+				for v in vines:
+					var is_back: bool = float(v[1]) < 0.0
+					if is_back != (pass_i == 0):
+						continue
+					var x0: float = cx + float(v[0])
+					var side: float = signf(float(v[0]) + 0.01)
+					var length: float = float(v[2]) * (1.0 - t * 0.2)
+					var pts: Array[Vector2] = []
+					for k in 11:
+						var q := k / 10.0
+						pts.append(Vector2(x0 + side * (sin(q * 2.6) * 12.0 + q * 14.0), rim + 6.0 + q * length))
+					var path := "M%s %s" % [pts[0].x, pts[0].y]
+					for pt in pts.slice(1):
+						path += " L%s %s" % [pt.x, pt.y]
+					s += '<path d="%s" stroke="%s" stroke-width="2.4" fill="none" stroke-linecap="round"/>' % [path, _hex(line)]
+					for k in range(2, pts.size()):
+						if k % 2 == 1 and k < pts.size() - 1:
+							continue
+						var qq := k / 10.0
+						var turn := 1.0 if (k / 2) % 2 == 0 else -1.0
+						var size := lerpf(32.0, 20.0, qq)
+						var ang := PI + turn * (0.85 + t * 0.4) + sin(k * 2.1) * 0.2
+						s += _curved_leaf(pts[k], ang, size, size * 0.7, -turn * t * 0.6, leaf.lerp(Color("#CFE0A0"), 0.4) if (k + int(float(v[0]))) % 5 == 0 else leaf, line, t, "heart")
 		"fern":
 			# Wooden plant stand, then fronds arching out of the pot (hanging limp when thirsty).
 			s += '<rect x="%s" y="%s" width="120" height="12" rx="3" fill="#A8743E" stroke="#6E4520" stroke-width="2"/>' % [cx - 60, h - 50]
