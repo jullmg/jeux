@@ -110,8 +110,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		# Timed by hand rather than event.double_click, so emulated taps on a tablet count too.
 		charlotte.running = now - _last_click_at < DOUBLE_TIME and event.position.distance_to(_last_click) < DOUBLE_DIST
+		var was_double := charlotte.running
 		_last_click = event.position
 		_last_click_at = now
+		# The second click of a double click only makes her run: she keeps the goal of the first one. (The view scrolls under
+		# the cursor as she goes, so that second click often lands on something nearer and sent her there, stopping her.)
+		if was_double and not is_nan(_goal_x):
+			return
 		var at := _to_world(event.position)
 		var target := _interactable_at(at)
 		# Clicking anywhere but the seat she is on gets her up first.
