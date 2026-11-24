@@ -320,19 +320,19 @@ func _start_lesson() -> void:
 	_lesson = School.lesson(_rng)
 	_asked = 0
 	var intro := create_tween()
-	intro.tween_interval(0.8)
+	intro.tween_interval(0.4)
 	if School.first_day():
 		intro.tween_callback(_teacher_says.bind("Bonjour, la classe ! Aujourd'hui, on accueille\nune nouvelle amie : Alyzée !", 3.6))
-		intro.tween_interval(4.2)
+		intro.tween_interval(2.3)
 		intro.tween_callback(func() -> void:
 			for kid in _kids:
 				kid.express("happy", 2.0)
 			_say(_kids[1], "Bonjour, Alyzée !", 175.0, 2.0))
-		intro.tween_interval(2.4)
+		intro.tween_interval(1.3)
 		intro.tween_callback(func() -> void:
 			_alyzee.express("happy", 2.0)
 			_alyzee_says("Merci !"))
-		intro.tween_interval(2.0)
+		intro.tween_interval(1.1)
 	if Emilia.day():
 		_welcome_emilia(intro)
 		_lesson.append(Emilia.word_question())
@@ -343,33 +343,33 @@ func _start_lesson() -> void:
 			_board_text.text = theme.title
 			_board_text.add_theme_font_size_override("font_size", 38)
 			_board_text.position.y = BOARD.position.y + 140.0 - _board_text.size.y / 2.0
-			_teacher_says(theme.intro, 4.2))
-		intro.tween_interval(4.8)
-	intro.tween_callback(_teacher_says.bind("On commence ! Charlotte, tu veux répondre ?", 3.0))
-	intro.tween_interval(3.2)
+			_teacher_says(theme.intro, 3.0))
+		intro.tween_interval(2.6)
+	intro.tween_callback(_teacher_says.bind("On commence ! Charlotte, tu veux répondre ?", 2.0))
+	intro.tween_interval(1.8)
 	intro.tween_callback(_ask)
 
 
 # Madame Nadia welcomes Emilia; she greets the class in Spanish, which the last question will come back to (quest "emilia").
 func _welcome_emilia(intro: Tween) -> void:
 	intro.tween_callback(_teacher_says.bind("Aujourd'hui, on accueille aussi une nouvelle\nélève : Emilia ! Dis-nous un petit mot.", 3.6))
-	intro.tween_interval(4.2)
+	intro.tween_interval(2.3)
 	intro.tween_callback(func() -> void:
 		_emilia.express("happy", 2.2)
 		_say(_emilia, "¡Buenos días, la clase !", 175.0, 2.2))
-	intro.tween_interval(2.6)
+	intro.tween_interval(1.4)
 	intro.tween_callback(func() -> void:
 		for kid in _kids:
 			kid.express("happy", 2.0)
 		_teacher_says("« Buenos días », ça veut dire « bonjour »\nen espagnol. Emilia parle deux langues !", 3.8))
-	intro.tween_interval(4.4)
+	intro.tween_interval(2.4)
 	intro.tween_callback(func() -> void:
 		_say(_emilia, "Chez nous, on parle espagnol pis français.\nMa mamá vient du Mexique !", 175.0, 3.4))
-	intro.tween_interval(3.8)
+	intro.tween_interval(2.1)
 	intro.tween_callback(func() -> void:
 		_charlotte.express("happy", 2.0)
 		_say(_charlotte, "Moi, j'ai hâte d'apprendre\ndes mots en espagnol !", 200.0, 2.8))
-	intro.tween_interval(3.0)
+	intro.tween_interval(1.7)
 
 
 func _ask() -> void:
@@ -381,7 +381,7 @@ func _ask() -> void:
 	_board_shape.kind = q.shape
 	_board_shape.queue_redraw()
 	_teacher.facing = -1
-	_teacher_says(q.ask, 3.0)
+	_teacher_says(q.ask, 2.6)
 	_card_for(q).chose.connect(_answered)
 
 
