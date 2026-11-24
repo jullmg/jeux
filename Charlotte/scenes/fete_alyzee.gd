@@ -39,11 +39,16 @@ const SONG := [
 	"♪ Bonne fête à toi ! ♪",
 ]
 const FILM_LINES := [
-	[1.0, 1, "Chut ! C'est mon film préféré !"],
-	[6.5, 2, "Wow ! Toute la neige tourne !"],
-	[11.0, -1, "Passe-moi le pop-corn, Alyzée !"],
-	[15.5, 3, "Le château de glace !"],
-	[19.5, 1, "Je connais toute la chanson !"],
+	[1.5, 1, "Chut ! C'est mon film préféré !"],
+	[10.0, 2, "Les aurores boréales, wow !"],
+	[19.0, 3, "Toute la neige qui tourne !"],
+	[28.0, -1, "Passe-moi le pop-corn, Alyzée !"],
+	[37.0, 2, "Un escalier de glace qui se construit !"],
+	[47.0, 1, "Je connais toute la chanson !"],
+	[57.0, 3, "Le château de glace !"],
+	[68.0, -1, "Je veux un château comme ça !"],
+	[78.0, 2, "Le bonhomme de neige est content."],
+	[88.0, 1, "J'adore la fin !"],
 ]
 
 var _stage := Stage.GIFT

@@ -26,15 +26,22 @@ const INFO := {
 	"maison": {"name": "Maman, j'ai raté l'avion", "glow": Color(1.0, 0.75, 0.5)},
 	"ratatouille": {"name": "Ratatouille", "glow": Color(1.0, 0.85, 0.6)},
 	"reine": {"name": "La Reine des neiges", "glow": Color(0.6, 0.85, 1.0)},
+	"lion": {"name": "Le Roi Lion", "glow": Color(1.0, 0.75, 0.35)},
+	"nemo": {"name": "Le monde de Nemo", "glow": Color(0.4, 0.8, 1.0)},
+	"up": {"name": "Là-haut", "glow": Color(0.6, 0.85, 1.0)},
+	"totoro": {"name": "Mon voisin Totoro", "glow": Color(0.6, 0.9, 0.6)},
 	# Not a channel of ALL: the New Year's Eve show (NewYear), the real title over a stage of our own.
 	"byebye": {"name": "Bye Bye", "glow": Color(1.0, 0.75, 0.95)},
 }
 ## How long the film lasts (title card, story, "FIN"), in seconds.
-const FILM_LENGTH := 24.0
+const FILM_LENGTH := FilmArt.LENGTH
 const TICKER := "Il fera beau à Montréal aujourd'hui  •  Les écureuils de la 6e Avenue font leurs provisions pour l'hiver  •  Des bonbons d'Halloween au dépanneur Xin-Xin  •  La ruelle verte est pleine de feuilles  •  "
 
 
 static func draw(id: String, c: CanvasItem, t: float, on_for: float) -> void:
+	if FilmArt.has(id):
+		FilmArt.draw(id, c, t, on_for)
+		return
 	match id:
 		"news": _news(c, t, on_for)
 		"animals": _animals(c, t, on_for)
@@ -46,11 +53,6 @@ static func draw(id: String, c: CanvasItem, t: float, on_for: float) -> void:
 		"space": _space(c, t, on_for)
 		"music": _music(c, t, on_for)
 		"game": _game(c, t, on_for)
-		"film": _film(c, t, on_for)
-		"grinch": _grinch(c, t, on_for)
-		"maison": _maison(c, t, on_for)
-		"ratatouille": _ratatouille(c, t, on_for)
-		"reine": _reine(c, t, on_for)
 		"byebye": _byebye(c, t, on_for)
 
 
@@ -393,80 +395,6 @@ static func _game(c: CanvasItem, t: float, _on_for: float) -> void:
 	_text(c, "JEU TÉLÉVISÉ", Vector2(6, 96), 10, Color("#FFD23F"))
 
 
-# The movie night's film, an original little cartoon: a fox in a blue scarf sledding down snowy hills at night under the
-# moon, past the pines and a snowman who waves. A title card first, "FIN" at the end.
-static func _film(c: CanvasItem, t: float, on_for: float) -> void:
-	var night := Color("#16224A")
-	c.draw_rect(Rect2(Vector2.ZERO, SIZE), night)
-	c.draw_rect(Rect2(0, 36, SIZE.x, 40), Color("#24386E"))
-	for i in 18:
-		var star := Vector2(fmod(i * 47.0, SIZE.x), fmod(i * 23.0, 44.0) + 4.0)
-		var tw := 0.5 + 0.5 * sin(t * 3.0 + i)
-		c.draw_circle(star, 0.8 + tw * 0.6, Color(1, 1, 0.85, 0.5 + tw * 0.5))
-	if on_for < 3.0 or on_for > FILM_LENGTH - 3.0:
-		var title := on_for < 3.0
-		var fade := clampf(minf(on_for, 3.0 - on_for) * 2.0, 0.0, 1.0) if title else clampf((on_for - FILM_LENGTH + 3.0) * 2.0, 0.0, 1.0)
-		var ink := Color("#FFD23F", fade)
-		if title:
-			_text(c, "LE PETIT RENARD", Vector2(0, 46), 17, ink, SIZE.x, HORIZONTAL_ALIGNMENT_CENTER)
-			_text(c, "des neiges", Vector2(0, 66), 13, Color(1, 1, 1, fade), SIZE.x, HORIZONTAL_ALIGNMENT_CENTER)
-			_fox(c, Vector2(98, 90), 0.9, t, Color(1, 1, 1, fade))
-		else:
-			_text(c, "FIN", Vector2(0, 62), 30, ink, SIZE.x, HORIZONTAL_ALIGNMENT_CENTER)
-		return
-	# The moon and the hills.
-	c.draw_circle(Vector2(160, 22), 11, Color("#FFF6D0"))
-	c.draw_circle(Vector2(156, 19), 2.5, Color("#EDE2B4"))
-	c.draw_circle(Vector2(30, 150), 85, Color("#DDE8F6"))
-	c.draw_circle(Vector2(180, 168), 95, Color("#EEF4FC"))
-	for p in [Vector2(24, 64), Vector2(40, 70), Vector2(170, 72), Vector2(186, 76)]:
-		c.draw_colored_polygon(PackedVector2Array([p + Vector2(-7, 14), p + Vector2(7, 14), p + Vector2(0, -8)]), Color("#2E5A44"))
-		c.draw_colored_polygon(PackedVector2Array([p + Vector2(-3, -2), p + Vector2(3, -2), p + Vector2(0, -8)]), Color.WHITE)
-	# The snowman, waving his stick arm as the fox goes by.
-	var sm := Vector2(140, 80)
-	c.draw_circle(sm, 8, Color.WHITE)
-	c.draw_circle(sm + Vector2(0, -11), 5.5, Color.WHITE)
-	c.draw_circle(sm + Vector2(-2, -12), 0.9, Color.BLACK)
-	c.draw_circle(sm + Vector2(2, -12), 0.9, Color.BLACK)
-	c.draw_colored_polygon(PackedVector2Array([sm + Vector2(0, -10.5), sm + Vector2(0, -9), sm + Vector2(5, -9.5)]), Color("#FF8A3D"))
-	c.draw_line(sm + Vector2(6, -3), sm + Vector2(13, -9 + sin(t * 6.0) * 3.0), Color("#6E4424"), 1.2)
-	# The fox on its red sled, down the slope from the left, again and again.
-	var run := fmod((on_for - 3.0) * 26.0, SIZE.x + 70.0) - 35.0
-	var at := Vector2(run, 52.0 + run * 0.22 + sin(run * 0.08) * 3.0)
-	_fox(c, at, 1.0, t, Color.WHITE)
-	# A puff of snow behind the sled.
-	for i in 4:
-		c.draw_circle(at + Vector2(-16 - i * 5, 6 - i), 2.2 - i * 0.4, Color(1, 1, 1, 0.7 - i * 0.15))
-	# Snow falling.
-	for i in 28:
-		var x := fmod(i * 37.0 + sin(t + i) * 6.0, SIZE.x)
-		var y := fmod(i * 19.0 + t * (10.0 + i % 5 * 3.0), SIZE.y)
-		c.draw_circle(Vector2(x, y), 0.9 + (i % 3) * 0.4, Color(1, 1, 1, 0.85))
-
-
-# The little fox on his sled at `at` (the sled's middle), `k` its size, his blue scarf flapping. `tint` fades him in.
-static func _fox(c: CanvasItem, at: Vector2, k: float, t: float, tint: Color) -> void:
-	var orange := Color("#E8762C") * tint
-	c.draw_rect(Rect2(at + Vector2(-14, 2) * k, Vector2(28, 4) * k), Color("#D8352E") * tint)
-	c.draw_line(at + Vector2(-16, 8) * k, at + Vector2(14, 8) * k, Color("#5A3A22") * tint, 1.2)
-	c.draw_arc(at + Vector2(14, 5) * k, 3.0 * k, -PI / 2.0, PI / 2.0, 6, Color("#5A3A22") * tint, 1.2)
-	# Tail curling up behind, white tip.
-	c.draw_circle(at + Vector2(-12, -3) * k, 4.5 * k, orange)
-	c.draw_circle(at + Vector2(-15, -6) * k, 2.6 * k, Color.WHITE * tint)
-	c.draw_circle(at + Vector2(-1, -3) * k, 7.0 * k, orange)
-	c.draw_circle(at + Vector2(1, 0) * k, 4.0 * k, Color("#FFF1E0") * tint)
-	var head := at + Vector2(7, -11) * k
-	c.draw_circle(head, 5.5 * k, orange)
-	for e in [Vector2(-3, -4), Vector2(2.5, -5)]:
-		c.draw_colored_polygon(PackedVector2Array([head + (e + Vector2(-2, 1)) * k, head + (e + Vector2(2, 1)) * k, head + (e + Vector2(0, -5)) * k]), orange)
-	c.draw_colored_polygon(PackedVector2Array([head + Vector2(2, 0) * k, head + Vector2(9, 2) * k, head + Vector2(2, 4) * k]), Color("#FFF1E0") * tint)
-	c.draw_circle(head + Vector2(9, 2) * k, 1.0 * k, Color.BLACK * tint)
-	c.draw_circle(head + Vector2(1.5, -1) * k, 0.9 * k, Color.BLACK * tint)
-	# The scarf, its end flying out behind him.
-	c.draw_line(head + Vector2(-4, 5) * k, head + Vector2(3, 5) * k, Color("#4FA3E0") * tint, 2.2 * k)
-	c.draw_line(head + Vector2(-4, 5) * k, head + Vector2(-12, 3 + sin(t * 14.0) * 2.0) * k, Color("#4FA3E0") * tint, 1.8 * k)
-
-
 # ── New Year's Eve: the year-end variety show ─────────────────
 
 ## A stage under sweeping spotlights, the year's sketches one after the other (a host at the mic, a skater, a dancing
@@ -539,261 +467,3 @@ static func _byebye(c: CanvasItem, t: float, on_for: float) -> void:
 		var x := fmod(i * 41.0 + sin(t * 2.0 + i) * 5.0, SIZE.x)
 		var y := fmod(i * 17.0 + t * (18.0 + i % 4 * 5.0), SIZE.y)
 		c.draw_rect(Rect2(x, y, 2.0, 1.4), colours[i % colours.size()])
-
-
-# ── The films she can choose on a movie night ───────────────────
-
-## The title card for the first 3 s and "FIN" for the last 3, over `bg`; true while one of them is up (nothing else to draw).
-static func _film_cards(c: CanvasItem, on_for: float, title: String, sub: String, bg: Color, ink: Color) -> bool:
-	if on_for >= 3.0 and on_for <= FILM_LENGTH - 3.0:
-		return false
-	c.draw_rect(Rect2(Vector2.ZERO, SIZE), bg)
-	var first := on_for < 3.0
-	var fade := clampf(minf(on_for, 3.0 - on_for) * 2.0, 0.0, 1.0) if first else clampf((on_for - FILM_LENGTH + 3.0) * 2.0, 0.0, 1.0)
-	if first:
-		_text(c, title, Vector2(0, 52 if sub == "" else 46), 17, Color(ink, fade), SIZE.x, HORIZONTAL_ALIGNMENT_CENTER)
-		if sub != "":
-			_text(c, sub, Vector2(0, 68), 12, Color(1, 1, 1, fade), SIZE.x, HORIZONTAL_ALIGNMENT_CENTER)
-	else:
-		_text(c, "FIN", Vector2(0, 62), 30, Color(ink, fade), SIZE.x, HORIZONTAL_ALIGNMENT_CENTER)
-	return true
-
-
-static func _snowfall(c: CanvasItem, t: float, n: int) -> void:
-	for i in n:
-		var x := fmod(i * 37.0 + sin(t + i) * 6.0, SIZE.x)
-		var y := fmod(i * 19.0 + t * (10.0 + i % 5 * 3.0), SIZE.y)
-		c.draw_circle(Vector2(x, y), 0.9 + (i % 3) * 0.4, Color(1, 1, 1, 0.85))
-
-
-static func _stars(c: CanvasItem, t: float, n: int, top: float) -> void:
-	for i in n:
-		var star := Vector2(fmod(i * 47.0, SIZE.x), fmod(i * 23.0, top) + 3.0)
-		var tw := 0.5 + 0.5 * sin(t * 3.0 + i)
-		c.draw_circle(star, 0.7 + tw * 0.5, Color(1, 1, 0.85, 0.4 + tw * 0.5))
-
-
-## A little house with a roof at `at` (its foot's middle), `w` wide; `lit` its windows' light, `bulbs` Christmas lights.
-static func _cottage(c: CanvasItem, at: Vector2, w: float, wall: Color, lit: float, t: float, bulbs := true) -> void:
-	var h := w * 0.7
-	c.draw_rect(Rect2(at.x - w / 2.0, at.y - h, w, h), wall)
-	c.draw_colored_polygon(PackedVector2Array([at + Vector2(-w * 0.6, -h), at + Vector2(w * 0.6, -h), at + Vector2(0, -h - w * 0.45)]), Color("#3A2A3E"))
-	c.draw_colored_polygon(PackedVector2Array([at + Vector2(-w * 0.6, -h), at + Vector2(w * 0.6, -h), at + Vector2(w * 0.45, -h - w * 0.1), at + Vector2(-w * 0.45, -h - w * 0.1)]), Color.WHITE)
-	var glow := Color("#FFD27A").lerp(Color("#2A2F4A"), 1.0 - lit)
-	c.draw_rect(Rect2(at.x - w * 0.32, at.y - h * 0.72, w * 0.22, w * 0.2), glow)
-	c.draw_rect(Rect2(at.x + w * 0.1, at.y - h * 0.72, w * 0.22, w * 0.2), glow)
-	if bulbs:
-		var colors := [Color("#FF4D4D"), Color("#FFD23F"), Color("#4DD26B"), Color("#4FA3E0")]
-		for i in 6:
-			var on := lit > 0.5 and int(t * 3.0 + i) % 3 != 0
-			c.draw_circle(at + Vector2(-w * 0.5 + i * w * 0.2, -h + 1.0), 1.1, colors[i % 4] if on else Color("#444455"))
-
-
-# « Le Grinch »: a snowy village at night under the mountain; a sleigh with a big sack slips down from the cave and the
-# houses go dark one by one; then the bells ring, the lights come back and a red heart grows big over the village.
-static func _grinch(c: CanvasItem, t: float, on_for: float) -> void:
-	if _film_cards(c, on_for, "LE GRINCH", "", Color("#0F2A1E"), Color("#7BE07B")):
-		return
-	var story := on_for - 3.0
-	c.draw_rect(Rect2(Vector2.ZERO, SIZE), Color("#132046"))
-	_stars(c, t, 16, 40.0)
-	# The mountain and its cave, on the left.
-	c.draw_colored_polygon(PackedVector2Array([Vector2(-10, 90), Vector2(40, 14), Vector2(95, 90)]), Color("#C9D6EA"))
-	c.draw_colored_polygon(PackedVector2Array([Vector2(28, 32), Vector2(40, 14), Vector2(52, 32)]), Color.WHITE)
-	c.draw_circle(Vector2(44, 40), 4.0, Color("#1A1A2E"))
-	c.draw_rect(Rect2(0, 88, SIZE.x, 20), Color("#EEF4FC"))
-	# The village: dark while the sleigh goes round (4–10 s), lit again after.
-	var dark := clampf((story - 4.0) * 0.6, 0.0, 1.0) * (1.0 - clampf((story - 10.0) * 0.8, 0.0, 1.0))
-	for i in 4:
-		var walls := [Color("#E8A0B4"), Color("#A0C8E8"), Color("#F0D080"), Color("#B8E0A0")]
-		_cottage(c, Vector2(108 + i * 24, 94), 18.0, walls[i], 1.0 - dark * (1.0 if i * 1.5 < story - 4.0 else 0.0), t)
-	# The sleigh with its sack, down the mountain and along the village (2–10 s).
-	if story > 1.5 and story < 10.0:
-		var u := (story - 1.5) / 8.5
-		var at := Vector2(lerpf(46, 190, u), lerpf(44, 86, minf(u * 2.0, 1.0)))
-		c.draw_rect(Rect2(at + Vector2(-9, -4), Vector2(16, 5)), Color("#B5302E"))
-		c.draw_line(at + Vector2(-10, 2), at + Vector2(9, 2), Color("#5A3A22"), 1.2)
-		c.draw_circle(at + Vector2(-2, -9), 6.0, Color("#D9C9A8"))
-		c.draw_line(at + Vector2(-2, -15), at + Vector2(-1, -18), Color("#8A6A3A"), 1.4)
-	# The heart: it grows three sizes over the village while the bells ring (12 s on).
-	if story > 11.0:
-		var grow := clampf((story - 11.0) / 5.0, 0.0, 1.0)
-		var beat := 1.0 + 0.06 * sin(t * 8.0)
-		var r := lerpf(3.0, 15.0, ease(grow, 0.5)) * beat
-		var hc := Vector2(98, 38)
-		c.draw_circle(hc + Vector2(-r * 0.5, 0), r * 0.55, Color("#E0303A"))
-		c.draw_circle(hc + Vector2(r * 0.5, 0), r * 0.55, Color("#E0303A"))
-		c.draw_colored_polygon(PackedVector2Array([hc + Vector2(-r * 1.02, r * 0.15), hc + Vector2(r * 1.02, r * 0.15), hc + Vector2(0, r * 1.2)]), Color("#E0303A"))
-		for i in 6:
-			var a := TAU * i / 6.0 + t
-			c.draw_circle(hc + Vector2(cos(a), sin(a)) * (r * 1.6 + 4.0), 1.0, Color("#FFD23F"))
-	_snowfall(c, t, 18)
-
-
-# « Maman, j'ai raté l'avion »: a big brick house all decorated for Christmas; a plane flies off over it without one of
-# them; then, at the side door, a paint can swings down on its rope and a burglar's hat goes flying.
-static func _maison(c: CanvasItem, t: float, on_for: float) -> void:
-	if _film_cards(c, on_for, "MAMAN, J'AI RATÉ", "l'avion", Color("#3A1414"), Color("#FFD23F")):
-		return
-	var story := on_for - 3.0
-	c.draw_rect(Rect2(Vector2.ZERO, SIZE), Color("#1A2650"))
-	_stars(c, t, 14, 30.0)
-	c.draw_rect(Rect2(0, 94, SIZE.x, 14), Color("#EEF4FC"))
-	# The house: two floors of red brick, a white door with a wreath, every window lit, lights along the eaves.
-	var house := Rect2(52, 40, 92, 54)
-	c.draw_rect(house, Color("#9A3A2E"))
-	for row in 6:
-		c.draw_line(Vector2(house.position.x, house.position.y + 6 + row * 8), Vector2(house.end.x, house.position.y + 6 + row * 8), Color("#7E2E24"), 0.6)
-	c.draw_colored_polygon(PackedVector2Array([Vector2(46, 40), Vector2(150, 40), Vector2(98, 18)]), Color("#2E2A3A"))
-	for wx in [60.0, 82.0, 108.0, 130.0]:
-		for wy in [48.0, 68.0]:
-			if wy == 68.0 and (wx == 82.0 or wx == 108.0):
-				continue
-			c.draw_rect(Rect2(wx - 5, wy, 10, 12), Color("#FFD27A"))
-			c.draw_line(Vector2(wx, wy), Vector2(wx, wy + 12), Color("#6E2A20"), 0.8)
-	c.draw_rect(Rect2(90, 72, 16, 22), Color("#F4F1EA"))
-	c.draw_arc(Vector2(98, 80), 4.0, 0, TAU, 12, Color("#2E8A44"), 2.0)
-	var colors := [Color("#FF4D4D"), Color("#FFD23F"), Color("#4DD26B"), Color("#4FA3E0")]
-	for i in 14:
-		var p := Vector2(46, 40).lerp(Vector2(98, 18), i / 7.0) if i < 7 else Vector2(98, 18).lerp(Vector2(150, 40), (i - 7) / 7.0)
-		c.draw_circle(p, 1.2, colors[(i + int(t * 3.0)) % 4])
-	# The plane, high over the house (first seconds), its lights blinking.
-	if story < 7.0:
-		var px := lerpf(-20.0, 220.0, story / 7.0)
-		var pa := Vector2(px, 16 - story * 0.8)
-		c.draw_colored_polygon(PackedVector2Array([pa + Vector2(-12, 0), pa + Vector2(12, -1), pa + Vector2(14, 1), pa + Vector2(-12, 2)]), Color("#D8DCE6"))
-		c.draw_colored_polygon(PackedVector2Array([pa + Vector2(-2, 0), pa + Vector2(4, 0), pa + Vector2(-4, 7)]), Color("#B8BEC9"))
-		c.draw_colored_polygon(PackedVector2Array([pa + Vector2(-12, 0), pa + Vector2(-9, 0), pa + Vector2(-13, -5)]), Color("#B8BEC9"))
-		if int(t * 4.0) % 2 == 0:
-			c.draw_circle(pa + Vector2(13, 0), 1.0, Color("#FF4D4D"))
-	# At the side door: the paint can swings down on its rope (8–15 s), a hat flies off, then again.
-	if story > 7.5:
-		var k := fmod(story - 7.5, 6.0)
-		var pivot := Vector2(166, 40)
-		var swing := lerpf(-1.4, 0.5, clampf(k / 1.2, 0.0, 1.0)) if k < 1.2 else 0.5 * cos((k - 1.2) * 3.0) * exp(-(k - 1.2) * 0.6)
-		var can := pivot + Vector2(sin(swing), cos(swing)) * 30.0
-		c.draw_line(pivot, can, Color("#D8D8D8"), 0.7)
-		c.draw_rect(Rect2(can + Vector2(-3, 0), Vector2(6, 7)), Color("#C9CED6"))
-		c.draw_rect(Rect2(can + Vector2(-3, 2), Vector2(6, 2)), Color("#4FA3E0"))
-		# The burglar's hat flying off where it hits.
-		if k > 1.2 and k < 3.5:
-			var f := (k - 1.2) / 2.3
-			var hat := Vector2(170, 72) + Vector2(f * 26.0, -sin(f * PI) * 26.0)
-			c.draw_rect(Rect2(hat + Vector2(-4, -2), Vector2(8, 3)), Color("#2A2A2A"))
-			c.draw_rect(Rect2(hat + Vector2(-2.5, -5), Vector2(5, 3)), Color("#2A2A2A"))
-			_text(c, "BONG !", Vector2(150, 60), 10, Color("#FFD23F", 1.0 - f))
-	_snowfall(c, t, 14)
-
-
-# « Ratatouille »: Paris at night, the tower and the rooftops; then in a restaurant's kitchen a little grey rat in a white
-# chef's hat stirs a big pot; last, the plate of ratatouille in its spiral of slices, under little stars.
-static func _ratatouille(c: CanvasItem, t: float, on_for: float) -> void:
-	if _film_cards(c, on_for, "RATATOUILLE", "", Color("#2A1A3A"), Color("#FFD23F")):
-		return
-	var story := on_for - 3.0
-	if story < 7.0:
-		# Paris: the sky, the tower and the roofs with their little windows.
-		c.draw_rect(Rect2(Vector2.ZERO, SIZE), Color("#24305E"))
-		_stars(c, t, 14, 40.0)
-		c.draw_circle(Vector2(30, 20), 8.0, Color("#FFF6D0"))
-		var base := Vector2(130, 92)
-		c.draw_colored_polygon(PackedVector2Array([base + Vector2(-22, 0), base + Vector2(-4, -60), base + Vector2(4, -60), base + Vector2(22, 0), base + Vector2(14, 0), base + Vector2(0, -30), base + Vector2(-14, 0)]), Color("#3A3550"))
-		c.draw_line(base + Vector2(0, -60), base + Vector2(0, -74), Color("#3A3550"), 1.5)
-		c.draw_line(base + Vector2(-12, -30), base + Vector2(12, -30), Color("#3A3550"), 2.0)
-		for i in 8:
-			c.draw_circle(base + Vector2(0, -12 - i * 7), 0.9, Color("#FFD27A", 0.5 + 0.5 * sin(t * 5.0 + i)))
-		for i in 6:
-			var x := i * 34.0
-			c.draw_rect(Rect2(x, 78, 32, 30), Color("#4A4060"))
-			c.draw_colored_polygon(PackedVector2Array([Vector2(x - 2, 78), Vector2(x + 34, 78), Vector2(x + 28, 70), Vector2(x + 4, 70)]), Color("#5E6680"))
-			c.draw_rect(Rect2(x + 6, 84, 6, 7), Color("#FFD27A"))
-			c.draw_rect(Rect2(x + 20, 84, 6, 7), Color("#FFD27A") if i % 2 == 0 else Color("#2A2F4A"))
-		return
-	# The kitchen: tiles, the stove, the pot steaming, the little chef on the counter stirring it.
-	c.draw_rect(Rect2(Vector2.ZERO, SIZE), Color("#F2E6D0"))
-	for i in 12:
-		c.draw_line(Vector2(i * 18.0, 0), Vector2(i * 18.0, 64), Color("#E0D2B8"), 0.6)
-	c.draw_rect(Rect2(0, 64, SIZE.x, 44), Color("#8A9AA8"))
-	c.draw_rect(Rect2(0, 64, SIZE.x, 4), Color("#B8C4CE"))
-	if story < 15.0:
-		var pot := Vector2(80, 64)
-		c.draw_rect(Rect2(pot + Vector2(-22, -22), Vector2(44, 22)), Color("#5A5E66"))
-		c.draw_rect(Rect2(pot + Vector2(-24, -24), Vector2(48, 4)), Color("#787C84"))
-		for i in 3:
-			var s := fmod(t * 0.8 + i * 0.33, 1.0)
-			c.draw_circle(pot + Vector2(-10 + i * 10 + sin(t * 2.0 + i) * 3.0, -28 - s * 22.0), 3.0 + s * 3.0, Color(1, 1, 1, 0.5 * (1.0 - s)))
-		# The rat: grey, round, a pink ear and nose, the tall white hat; the spoon going round in the pot.
-		var rat := Vector2(126, 62)
-		c.draw_circle(rat, 8.0, Color("#8A8E96"))
-		c.draw_circle(rat + Vector2(-6, -9), 5.5, Color("#9A9EA6"))
-		c.draw_circle(rat + Vector2(-3, -14), 2.6, Color("#9A9EA6"))
-		c.draw_circle(rat + Vector2(-3, -14), 1.4, Color("#F2A0B0"))
-		c.draw_circle(rat + Vector2(-11.5, -8), 1.1, Color("#F2A0B0"))
-		c.draw_circle(rat + Vector2(-7.5, -10), 0.9, Color.BLACK)
-		c.draw_rect(Rect2(rat + Vector2(-10, -24), Vector2(8, 9)), Color.WHITE)
-		c.draw_circle(rat + Vector2(-6, -25), 5.0, Color.WHITE)
-		c.draw_arc(rat + Vector2(9, 2), 7.0, -0.5, 1.6, 8, Color("#8A8E96"), 1.4)
-		var hand := pot + Vector2(10 + cos(t * 4.0) * 8.0, -26 + sin(t * 4.0) * 2.0)
-		c.draw_line(rat + Vector2(-8, -2), hand, Color("#B88A5A"), 1.6)
-		return
-	# The dish: the spiral of slices on a white plate, little stars round it.
-	c.draw_circle(Vector2(98, 58), 30.0, Color.WHITE)
-	c.draw_circle(Vector2(98, 58), 25.0, Color("#F4F1EA"))
-	var slices := [Color("#C8303A"), Color("#E8B020"), Color("#5A2A60"), Color("#3E8E3A")]
-	for i in 22:
-		var a := i * 0.6
-		var r := 4.0 + i * 0.85
-		c.draw_circle(Vector2(98, 58) + Vector2(cos(a), sin(a) * 0.8) * r, 3.2, slices[i % 4])
-	for i in 5:
-		var a := TAU * i / 5.0 + t * 0.5
-		c.draw_circle(Vector2(98, 58) + Vector2(cos(a), sin(a)) * 40.0, 1.3, Color("#FFD23F"))
-
-
-# « La Reine des neiges »: mountains under the northern lights; the snow begins to swirl, and an ice palace grows out of
-# it, spire after spire, sparkling; a snowman watches from the snow.
-static func _reine(c: CanvasItem, t: float, on_for: float) -> void:
-	if _film_cards(c, on_for, "LA REINE", "des neiges", Color("#14284E"), Color("#9FD8FF")):
-		return
-	var story := on_for - 3.0
-	c.draw_rect(Rect2(Vector2.ZERO, SIZE), Color("#16224A"))
-	# Northern lights, waving.
-	for i in 3:
-		var band := PackedVector2Array()
-		for k in 21:
-			var x := k * SIZE.x / 20.0
-			band.append(Vector2(x, 18 + i * 7 + sin(x * 0.05 + t * 0.8 + i) * 5.0))
-		c.draw_polyline(band, Color(0.4, 1.0, 0.75, 0.25), 5.0)
-	_stars(c, t, 14, 30.0)
-	c.draw_colored_polygon(PackedVector2Array([Vector2(-10, 100), Vector2(40, 40), Vector2(90, 100)]), Color("#B8CDE6"))
-	c.draw_colored_polygon(PackedVector2Array([Vector2(110, 100), Vector2(165, 36), Vector2(215, 100)]), Color("#A8C0DE"))
-	c.draw_rect(Rect2(0, 94, SIZE.x, 14), Color("#EEF4FC"))
-	# The palace grows from the snow (4–12 s): a tall spire and its shorter ones, pale blue with sparkles.
-	var grow := clampf((story - 4.0) / 8.0, 0.0, 1.0)
-	if grow > 0.0:
-		var foot := Vector2(100, 96)
-		var ice := Color(0.72, 0.9, 1.0, 0.9)
-		for spire: Vector3 in [Vector3(0, 52, 9), Vector3(-15, 36, 7), Vector3(15, 36, 7), Vector3(-27, 24, 5), Vector3(27, 24, 5)]:
-			var h := spire.y * ease(grow, 0.6)
-			var x := foot.x + spire.x
-			c.draw_rect(Rect2(x - spire.z / 2.0, foot.y - h * 0.7, spire.z, h * 0.7), ice)
-			c.draw_colored_polygon(PackedVector2Array([Vector2(x - spire.z / 2.0 - 1, foot.y - h * 0.7), Vector2(x + spire.z / 2.0 + 1, foot.y - h * 0.7), Vector2(x, foot.y - h)]), Color(0.85, 0.96, 1.0))
-		for i in 8:
-			var sp := foot + Vector2(sin(i * 2.3) * 26.0, -fmod(i * 13.0, 50.0) * grow)
-			var tw := 0.5 + 0.5 * sin(t * 6.0 + i)
-			c.draw_line(sp - Vector2(2, 0) * tw, sp + Vector2(2, 0) * tw, Color.WHITE, 0.8)
-			c.draw_line(sp - Vector2(0, 2) * tw, sp + Vector2(0, 2) * tw, Color.WHITE, 0.8)
-	# The swirl of snow round where the palace rises (2–12 s).
-	if story > 2.0 and story < 13.0:
-		var strength := clampf(minf(story - 2.0, 13.0 - story), 0.0, 1.0)
-		for i in 24:
-			var a := t * 2.0 + i * 0.5
-			var r := 6.0 + fmod(i * 7.0, 40.0)
-			c.draw_circle(Vector2(100, 70) + Vector2(cos(a), sin(a) * 0.5) * r, 1.1, Color(1, 1, 1, 0.8 * strength))
-	# A snowman in the snow on the left, hopping a little.
-	var sm := Vector2(34, 92 - absf(sin(t * 3.0)) * 2.0)
-	c.draw_circle(sm, 7, Color.WHITE)
-	c.draw_circle(sm + Vector2(0, -10), 5, Color.WHITE)
-	c.draw_circle(sm + Vector2(-1.8, -11), 0.8, Color.BLACK)
-	c.draw_circle(sm + Vector2(1.8, -11), 0.8, Color.BLACK)
-	c.draw_colored_polygon(PackedVector2Array([sm + Vector2(0, -9.5), sm + Vector2(0, -8), sm + Vector2(4.5, -8.6)]), Color("#FF8A3D"))
-	_snowfall(c, t, 16)

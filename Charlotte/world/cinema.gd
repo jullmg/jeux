@@ -75,7 +75,7 @@ static func look(id: String) -> CharacterLook:
 	return CharacterLook.alyzee()
 
 
-const FILMS: Array[String] = ["grinch", "maison", "ratatouille", "reine", "film"]
+const FILMS: Array[String] = ["film", "grinch", "maison", "ratatouille", "reine", "lion", "nemo", "up", "totoro"]
 
 
 ## 0 = not started (or done), else the step she is on (1 for a quest switched on by the debug menu).

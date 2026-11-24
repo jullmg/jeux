@@ -73,4 +73,5 @@
 
 Points 18 à 30 faits sans que Julien ait regardé : le signe de recyclage du bac, la piñata et les bonbons, la langue de Charlotte qui mange, la sortie de la maison après la fête (cause : une position de rue laissée par le trajet au Jean Coutu), les quêtes lourdes exclusives (seulement la disponibilité : pas encore de réplique des parents « après ta soirée cinéma »), le choix du film dès la première soirée, le manteau de ski de Papa (bleu avec l'empiècement orange, un peu long), les plantes non cliquables après la quête, la tasse et son animation, les lumières du sapin cachées par les personnages, la boîte des décorations, Alyzée près de la licorne, la télé de la fête, la maman d'Alyzée qui sort pendant le film. À regarder en jouant.
 
-50. **Soirée cinéma : de plus beaux films** — images plus belles, plus de choix de films, des films plus longs ; deuxième passe (en cours).
+50. **Soirée cinéma : de plus beaux films** — images plus belles, plus de choix de films, des films plus longs ; deuxième passe (fait : 9 films de 96 s, `world/film_art.gd`).
+51. **Cour d'école : une traînée de neige devant la porte de l'école** — message de Julien noté tel quel (« envoie une traînée de neige devant la porte »), à préciser : en hiver, une traînée de neige (ou son déneigement) devant la porte des élèves de `cour_ecole.gd` ? À demander à Julien.
