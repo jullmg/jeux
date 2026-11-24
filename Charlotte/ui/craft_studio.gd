@@ -283,8 +283,9 @@ func _build_work() -> void:
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(14, 1)
 	bar.add_child(gap)
+	bar.add_child(_button("Au hasard !", 17, _surprise_me, Vector2(110, 46)))
 	for spec: Array in [["Copier", _copy_item], ["Retourner", _flip_item], ["Devant", _to_front], ["Derrière", _to_back], ["Jeter", _delete_item]]:
-		var b := _button(spec[0], 18, spec[1], Vector2(100, 46))
+		var b := _button(spec[0], 17, spec[1], Vector2(88, 46))
 		bar.add_child(b)
 		_sel_buttons.append(b)
 	var spacer := Control.new()
@@ -661,6 +662,26 @@ func _add_deco(id: String, sticker: bool) -> void:
 	if _busy:
 		return
 	_new_item({"kind": "sticker" if sticker else "deco", "sub": id, "color": _color, "s": DECO_R[_size_i]})
+
+
+## Three decorations picked and scattered for her: a quick start, or a bit of fun (each can still be moved, turned, resized or thrown away).
+func _surprise_me() -> void:
+	if _busy:
+		return
+	var groups: Array = CraftArt.DECO_GROUPS
+	var r := CraftArt.base_rect(_base)
+	for k in 3:
+		var g: Array = groups[_rng.randi() % groups.size()]
+		var list: Array = g[2]
+		if list.is_empty():
+			continue
+		_color = Color(CraftArt.PALETTE[_rng.randi() % CraftArt.PALETTE.size()])
+		_add_deco(str((list[_rng.randi() % list.size()] as Array)[0]), false)
+		var it: Dictionary = _items()[_items().size() - 1]
+		it.at = r.position + Vector2(_rng.randf_range(0.18, 0.82) * r.size.x, _rng.randf_range(0.18, 0.82) * r.size.y)
+		it.rot = _rng.randf_range(-0.5, 0.5)
+	_toast("Voilà quelques surprises ! Déplace-les où tu veux.")
+	_stage.queue_redraw()
 
 
 func _add_text(text: String) -> void:
