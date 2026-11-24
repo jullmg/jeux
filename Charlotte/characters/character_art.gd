@@ -1053,10 +1053,12 @@ func _forearm_svg(length: float) -> String:
 func _finger(x: float, y: float, w: float, l1: float, l2: float, a1: float, a2: float) -> String:
 	var rx := w / 2.0
 	var s := '<g transform="translate(%s %s) rotate(%s)">' % [x, y, a1]
-	s += _f('<rect x="%s" y="0" width="%s" height="%s" rx="%s" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>' % [-rx, w, l1, rx])
+	# The first segment, a touch wider at the knuckle than at the joint; the tip tapers, with a nail and a crease between.
+	s += _f('<path d="M%s 0 H%s L%s %s Q%s %s %s %s Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.5" stroke-linejoin="round"/>' % [-rx, rx, rx * 0.94, l1, 0.0, l1 + 1.4, -rx * 0.94, l1])
 	s += '<g transform="translate(0 %s) rotate(%s)">' % [l1 - 1.0, a2]
-	s += _f('<rect x="%s" y="0" width="%s" height="%s" rx="%s" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>' % [-rx * 0.96, w * 0.96, l2, rx * 0.96])
-	s += '</g></g>'
+	s += _f('<path d="M%s 0 H%s L%s %s Q%s %s %s %s Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.5" stroke-linejoin="round"/>' % [-rx * 0.94, rx * 0.94, rx * 0.8, l2, 0.0, l2 + rx * 1.1, -rx * 0.8, l2])
+	s += '</g>'
+	s += '</g>'
 	return s
 
 
@@ -1071,7 +1073,8 @@ func _hand_svg(mode: String, scale: float) -> String:
 			# Pinky, ring, middle, index: each a little longer than the last and curled a little more.
 			for f in [[16.8, 3.8, 7.5, 5.0, -2.0, -20.0], [20.8, 4.2, 9.5, 6.0, -4.0, -22.0], [24.8, 4.2, 10.0, 6.5, -6.0, -24.0], [28.6, 4.0, 9.0, 6.0, -9.0, -26.0]]:
 				s += _finger(f[0], 14.0, f[1], f[2], f[3], f[4], f[5])
-			s += _f('<rect x="14.2" y="4" width="15.6" height="16.5" rx="6.2" fill="{skin}" stroke="{skin_line}" stroke-width="1.7"/>')
+			s += _f('<path d="M16.6 3 H27.4 Q30.4 9 30.0 16 Q29.8 21.4 25.6 21.4 H18.4 Q14.2 21.4 14.0 16 Q13.6 9 16.6 3 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
+			s += _f('<ellipse cx="26.4" cy="12.4" rx="4.0" ry="5.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
 			s += '<g transform="translate(29.2 8.5) rotate(-36)">'
 			s += _f('<rect x="-2.7" y="0" width="5.4" height="8.2" rx="2.7" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
 			s += '<g transform="translate(0 7) rotate(-16)">'
@@ -1079,13 +1082,15 @@ func _hand_svg(mode: String, scale: float) -> String:
 		"open":
 			for f in [[16.8, 3.8, 15.0, 0.0, 14.0, 0.0], [20.8, 4.2, 18.0, 0.0, 6.0, 0.0], [24.8, 4.2, 19.0, 0.0, -3.0, 0.0], [28.6, 4.0, 17.0, 0.0, -12.0, 0.0]]:
 				s += _finger(f[0], 14.0, f[1], f[2], 0.01, f[4], 0.0)
-			s += _f('<rect x="14.2" y="4" width="15.6" height="16.5" rx="6.2" fill="{skin}" stroke="{skin_line}" stroke-width="1.7"/>')
+			s += _f('<path d="M16.6 3 H27.4 Q30.4 9 30.0 16 Q29.8 21.4 25.6 21.4 H18.4 Q14.2 21.4 14.0 16 Q13.6 9 16.6 3 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
+			s += _f('<ellipse cx="26.4" cy="12.4" rx="4.0" ry="5.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
 			s += '<g transform="translate(29.4 9.5) rotate(-58)">'
 			s += _f('<rect x="-2.8" y="0" width="5.6" height="13" rx="2.8" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
 		"flat":
 			for f in [[17.3, 4.4, 13.0, 0.01, -1.0, 0.0], [21.3, 4.6, 16.0, 0.01, -2.0, 0.0], [25.3, 4.6, 17.0, 0.01, -3.0, 0.0], [29.0, 4.4, 15.5, 0.01, -4.0, 0.0]]:
 				s += _finger(f[0], 14.0, f[1], f[2], f[3], f[4], 0.0)
-			s += _f('<rect x="14.2" y="4" width="15.8" height="16.5" rx="6.2" fill="{skin}" stroke="{skin_line}" stroke-width="1.7"/>')
+			s += _f('<path d="M16.6 3 H27.4 Q30.4 9 30.0 16 Q29.8 21.4 25.6 21.4 H18.4 Q14.2 21.4 14.0 16 Q13.6 9 16.6 3 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
+			s += _f('<ellipse cx="26.4" cy="12.4" rx="4.0" ry="5.4" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/>')
 			s += '<g transform="translate(29.6 9) rotate(-14)">'
 			s += _f('<rect x="-2.7" y="0" width="5.4" height="11" rx="2.7" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
 		_:
@@ -1103,6 +1108,10 @@ func _hand_svg(mode: String, scale: float) -> String:
 	var filled := s.replace('stroke="{skin_line}"', 'stroke="{skin}"')
 	s = _f(outlined) + _f(filled)
 	s += _f('<ellipse cx="19.5" cy="11.5" rx="3.2" ry="4.5" fill="#FFFFFF" opacity="0.2"/>')
+	if mode != "grip":
+		# The palm's creases, very faint, and the light on the knuckles.
+		s += _f('<path d="M17.2 11 Q21.5 15.5 26 11.6" stroke="{skin_line}" stroke-width="0.9" fill="none" opacity="0.28" stroke-linecap="round"/>')
+		s += _f('<path d="M16.4 18.4 Q22 20.2 28.2 18.4" stroke="#FFFFFF" stroke-width="1.2" fill="none" opacity="0.22" stroke-linecap="round"/>')
 	s += _f(palm_top)
 	var w := ceili(44.0 * scale)
 	var h := ceili(50.0 * scale)
