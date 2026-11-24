@@ -268,7 +268,7 @@ func _talk_to_mom() -> void:
 	elif Cinema.step() == 2:
 		_say(_mom, "Des chips pis des bonbons,\npas plus, là !", 380.0)
 	elif Cinema.step() == 3:
-		_say(_mom, "Tes amies t'attendent\ndevant la télé, ma chouette !", 380.0)
+		_say(_mom, "Tes amis t'attendent\ndevant la télé, ma chouette !", 380.0)
 	elif Halloween.step() == 3:
 		_count_the_candy()
 	elif Halloween.step() == 2:
@@ -1415,7 +1415,7 @@ func _ask_mom() -> void:
 	var choices: Array = [{"text": "On cuisine ensemble ?", "note": "pizza, muffins, biscuits…"}]
 	var kinds: Array = ["cook"]
 	if movie:
-		choices.append({"text": "On fait une soirée cinéma ?", "note": "avec Alphée pis Constance"})
+		choices.append({"text": "On fait une soirée cinéma ?", "note": "avec un ou une amie"})
 		kinds.append("movie")
 	if school:
 		choices.append({"text": "Je vais à l'école ?"})
@@ -1430,8 +1430,7 @@ func _ask_mom() -> void:
 		if what == "cook":
 			_cook_with_mom()
 		elif what == "movie":
-			Cinema.start_again()
-			_pocket_money_for_the_movie(true)
+			_choose_movie_friends()
 		elif what == "school":
 			_mom_about_school()
 		else:
@@ -1503,13 +1502,35 @@ func _park_with_dad() -> void:
 		Transition.change_scene_saying(self, ParkOuting.PARK, "Papa t'amène jouer au parc du Pélican…"))
 
 
+# Who comes to the movie night? Any friend she has met (`Cinema.FRIENDS`); with only the twins to ask, no question.
+func _choose_movie_friends() -> void:
+	var friends := Cinema.friends()
+	if friends.size() <= 1:
+		Cinema.choose(str(friends[0][0]))
+		Cinema.start_again()
+		_pocket_money_for_the_movie(true)
+		return
+	_control.enabled = false
+	var choices: Array = []
+	for f: Array in friends:
+		choices.append({"text": str(f[1]), "note": str(f[2])})
+	var card := ChoiceCard.ask(self, "Avec qui on fait la soirée ?", choices)
+	card.chose.connect(func(i: int) -> void:
+		_control.enabled = true
+		if i < 0 or i >= friends.size():
+			return
+		Cinema.choose(str(friends[i][0]))
+		Cinema.start_again()
+		_pocket_money_for_the_movie(true))
+
+
 # Maman gives her the pocket money for the evening's snacks (`again`: a movie night Charlotte asked for, after the quest).
 func _pocket_money_for_the_movie(again := false) -> void:
 	GameState.money += Cinema.MONEY
 	Cinema.set_step(2)
 	_mom.express("happy", 2.4)
 	if again:
-		_say(_mom, "Encore une soirée cinéma ? Bonne idée !\nJ'appelle les jumelles. Tiens, 5 $.", 400.0, 3.6)
+		_say(_mom, "Encore une soirée cinéma ? Bonne idée !\nJ'appelle %s. Tiens, 5 $." % Cinema.names(), 400.0, 3.6)
 	else:
 		_say(_mom, "Une soirée cinéma avec les jumelles ?\nQuelle bonne idée ! Tiens, 5 $.", 400.0, 3.6)
 	Notebook.announce("step", "Maman t'a donné %s pour les grignotines !" % Quests.money_text(Cinema.MONEY), Cinema.HEADING)
@@ -1527,10 +1548,10 @@ func _build_movie_night() -> void:
 	# Up a little from the floor they sit on, so the cushions are under their hips.
 	_movie_nest.position = Vector2(2648.0, MOVIE_FLOOR - 18.0)
 	add_child(_movie_nest)
-	var looks := [CharacterLook.alphee(), CharacterLook.constance()]
-	for i in 2:
+	var who_comes: Array = Cinema.chosen()[3]
+	for i in who_comes.size():
 		var sister := Character.new()
-		sister.look = looks[i]
+		sister.look = Cinema.look(str(who_comes[i]))
 		sister.fidgets = true
 		sister.scale = Vector2.ONE * CHAR_SCALE
 		sister.position = Vector2(MOVIE_WAIT[i], FEET_Y)
@@ -1545,7 +1566,7 @@ func _build_movie_night() -> void:
 	if _charlotte.position.x < BEDROOM.x:
 		var hello := create_tween()
 		hello.tween_interval(1.0)
-		hello.tween_callback(func() -> void: _say(_charlotte, "Alphée et Constance m'attendent\ndevant la télé !", 300.0, 3.0))
+		hello.tween_callback(func() -> void: _say(_charlotte, "%s %s\ndevant la télé !" % [Cinema.names(), "m'attendent" if Cinema.plural() else "m'attend"], 300.0, 3.0))
 
 
 func _start_movie() -> void:
@@ -1604,11 +1625,14 @@ func _lights_down() -> void:
 	var held := _charlotte.held()
 	if held:
 		held.visible = false
-	var who: Array[Character] = [_charlotte, _movie_twins[0], _movie_twins[1]]
-	for i in 3:
+	var who: Array[Character] = [_charlotte]
+	who.append_array(_movie_twins)
+	# With one friend, she sits on the other side of the bowl.
+	var seat_of := [0, 1, 2] if who.size() == 3 else [0, 2]
+	for i in who.size():
 		var person := who[i]
-		person.position.x = MOVIE_SEATS[i][0]
-		person.facing = MOVIE_SEATS[i][1]
+		person.position.x = MOVIE_SEATS[seat_of[i]][0]
+		person.facing = MOVIE_SEATS[seat_of[i]][1]
 		person.seat_h = CUSHION_H
 		person.seat_floor = MOVIE_FLOOR
 		person.sitting = true
@@ -1672,7 +1696,7 @@ func _movie_say(who: int, text: String) -> void:
 			_charlotte.express("yum", 2.4)
 			Sfx.play("miam", _charlotte.position)
 		return
-	var sister := _movie_twins[who]
+	var sister := _movie_twins[mini(who, _movie_twins.size() - 1)]
 	sister.express("talk", 1.8)
 	_say(sister, text, 250.0, Twins.LINE_SECONDS)
 	if text.contains("chips"):

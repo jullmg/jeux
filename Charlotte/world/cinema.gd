@@ -21,6 +21,60 @@ const HEADING := "🍿  Soirée cinéma"
 const MONEY := 5.0
 const AGAIN := "cinema_again"
 ## The films she can choose from on any movie night (TvShows ids), the first one included.
+## Who she can invite (Julien, 2026-11-23: any of her friends): [id, names on the card, a few words about them, the looks that sit down,
+## the flag of having met them]. The first night is always with the twins who suggested it; later she picks (`choose`).
+const FRIENDS := [
+	["jumelles", "Alphée et Constance", "les jumelles Turcotte", ["alphee", "constance"], "met_twins"],
+	["billie", "Billie et Auguste", "ceux du bout de la ruelle", ["billie", "auguste"], "met_billie_auguste"],
+	["alyzee", "Alyzée", "ton amie de l'école", ["alyzee"], "met_alyzee"],
+	["emilia", "Emilia", "ton amie de l'école", ["emilia"], "met_emilia"],
+]
+const GUEST := "cinema_friend"
+
+
+## The friends she has met, among those who can come.
+static func friends() -> Array:
+	var out: Array = FRIENDS.filter(func(f: Array) -> bool: return bool(GameState.flags.get(f[4], false)))
+	return out if not out.is_empty() else [FRIENDS[0]]
+
+
+## Who is coming tonight: the entry of `FRIENDS` she chose (the twins by default).
+static func chosen() -> Array:
+	var id := str(GameState.flags.get(GUEST, "jumelles"))
+	for f: Array in FRIENDS:
+		if f[0] == id:
+			return f
+	return FRIENDS[0]
+
+
+static func choose(id: String) -> void:
+	GameState.flags[GUEST] = id
+
+
+## "Alphée et Constance", "Alyzée"…
+static func names() -> String:
+	return str(chosen()[1])
+
+
+static func plural() -> bool:
+	return (chosen()[3] as Array).size() > 1
+
+
+static func look(id: String) -> CharacterLook:
+	match id:
+		"alphee":
+			return CharacterLook.alphee()
+		"constance":
+			return CharacterLook.constance()
+		"billie":
+			return CharacterLook.billie()
+		"auguste":
+			return CharacterLook.auguste()
+		"emilia":
+			return CharacterLook.emilia()
+	return CharacterLook.alyzee()
+
+
 const FILMS: Array[String] = ["grinch", "maison", "ratatouille", "reine", "film"]
 
 
@@ -39,7 +93,7 @@ static func can_ask() -> bool:
 	return Quests.done(QUEST) and step() == 0
 
 
-## Another movie night: Maman gives the pocket money, the twins are invited (step 2).
+## Another movie night: Maman gives the pocket money, the friends she chose are invited (step 2).
 static func start_again() -> void:
 	GameState.flags[AGAIN] = true
 	GameState.flags.erase(SNACKS)
@@ -85,5 +139,5 @@ static func hint() -> String:
 			var words := {"chips": "un sac de chips", "candy": "des bonbons"}
 			return "Achète %s au dépanneur (Xin-Xin, sur Dandurand, ou Oh Bon!, sur Holt)." % " et ".join(left.map(func(k: String) -> String: return words[k]))
 		3:
-			return "Tu as les grignotines ! Rentre à la maison : Alphée et Constance t'attendent devant la télé du corridor."
+			return "Tu as les grignotines ! Rentre à la maison : %s %s devant la télé du corridor." % [names(), "t'attendent" if plural() else "t'attend"]
 	return str(Quests.ALL[QUEST].hint)

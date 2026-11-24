@@ -153,8 +153,9 @@ static func lesson(rng: RandomNumberGenerator) -> Array:
 
 
 ## What she is asked about a shape: its name or how many sides it has.
-const EASY_NAMES := {"carre": "un carré", "rectangle": "un rectangle", "triangle": "un triangle", "losange": "un losange", "cercle": "un cercle"}
-const EASY_SIDES := {"carre": 4, "rectangle": 4, "triangle": 3, "losange": 4}
+const EASY_NAMES := {"carre": "un carré", "rectangle": "un rectangle", "triangle": "un triangle", "losange": "un losange", "cercle": "un cercle",
+	"trapeze": "un trapèze", "parallelogramme": "un parallélogramme"}
+const EASY_SIDES := {"carre": 4, "rectangle": 4, "triangle": 3, "losange": 4, "trapeze": 4, "parallelogramme": 4}
 const SEEN_EASY := "ecole_seen_easy"
 
 
@@ -196,52 +197,63 @@ static func _easy_lesson(rng: RandomNumberGenerator) -> Array:
 			out.append(_question("Combien de côtés a cette forme ?", "Combien de côtés a cette forme ?", "Combien de côtés\na cette forme ?", shape,
 				[str(sides), str(wrong[0]), str(wrong[1])]))
 	GameState.flags[SEEN_EASY] = seen
-	var kinds := ["plus", "moins", "grand", "petit", "suite", "double"]
+	var kinds := ["plus", "moins", "grand", "petit", "suite", "double", "fois", "moitie"]
 	kinds.shuffle()
 	for k in PER_LESSON - SHAPES_PER_LESSON:
 		out.append(_easy_number(kinds[k], rng))
 	return out
 
 
-## One very small number question: {ask, say, board, shape "", answers, right}.
+## One number question, a little harder than the very first ones (Julien, 2026-11-23: "a bit more difficult"): two-digit sums and
+## differences, the 2, 3, 4, 5 and 10 times tables, halves, doubles, sequences, three-digit numbers to compare. {ask, say, board,
+## shape "", answers, right}.
 static func _easy_number(kind: String, rng: RandomNumberGenerator) -> Dictionary:
 	match kind:
 		"plus":
-			var a := rng.randi_range(1, 9)
-			var b := rng.randi_range(1, 9)
+			var a := rng.randi_range(12, 58)
+			var b := rng.randi_range(6, 38)
 			return _question("Combien font %d + %d ?" % [a, b], "Combien font %d plus %d ?" % [a, b], "%d + %d = ?" % [a, b], "",
-				_around(a + b))
+				_around(a + b, true))
 		"moins":
-			var a := rng.randi_range(5, 15)
-			var b := rng.randi_range(1, mini(9, a - 1))
+			var a := rng.randi_range(24, 96)
+			var b := rng.randi_range(6, mini(a - 5, 48))
 			return _question("Combien font %d − %d ?" % [a, b], "Combien font %d moins %d ?" % [a, b], "%d − %d = ?" % [a, b], "",
-				_around(a - b))
+				_around(a - b, true))
 		"grand", "petit":
 			var nums: Array = []
 			while nums.size() < 3:
-				var v := rng.randi_range(10, 60)
-				if not nums.has(v):
+				var v := rng.randi_range(100, 999)
+				if not nums.has(v) and nums.all(func(o: int) -> bool: return absi(o - v) > 9):
 					nums.append(v)
 			var right: int = nums.max() if kind == "grand" else nums.min()
 			var rest: Array = nums.filter(func(v: int) -> bool: return v != right)
 			var ask := "Quel est le plus grand nombre ?" if kind == "grand" else "Quel est le plus petit nombre ?"
 			return _question(ask, ask, ask, "", [str(right), str(rest[0]), str(rest[1])])
 		"suite":
-			var step: int = [1, 2, 5, 10][rng.randi_range(0, 3)]
-			var start := step * rng.randi_range(0, 3) + (0 if step > 2 else rng.randi_range(0, 3))
-			var shown := "%d, %d, %d, ?" % [start, start + step, start + 2 * step]
+			var step: int = [2, 3, 4, 5, 10, 20][rng.randi_range(0, 5)]
+			var start := step * rng.randi_range(1, 6)
+			var shown := "%d, %d, %d, %d, ?" % [start, start + step, start + 2 * step, start + 3 * step]
 			return _question("Quel est le prochain nombre ?\n%s" % shown, "Quel est le prochain nombre ? %s" % shown, shown, "",
-				_around(start + 3 * step))
+				_around(start + 4 * step, true))
+		"fois":
+			var tab: int = [2, 3, 4, 5, 10][rng.randi_range(0, 4)]
+			var m := rng.randi_range(2, 10)
+			return _question("Combien font %d × %d ?" % [tab, m], "Combien font %d fois %d ?" % [tab, m], "%d × %d = ?" % [tab, m], "",
+				_around(tab * m, true))
+		"moitie":
+			var h := rng.randi_range(3, 24)
+			return _question("Quelle est la moitié de %d ?" % (h * 2), "Quelle est la moitié de %d ?" % (h * 2), "La moitié de %d ?" % (h * 2), "", _around(h, true))
 		_:
-			var x := rng.randi_range(2, 9)
-			return _question("Quel est le double de %d ?" % x, "Quel est le double de %d ?" % x, "Le double de %d ?" % x, "", _around(2 * x))
+			var x := rng.randi_range(6, 35)
+			return _question("Quel est le double de %d ?" % x, "Quel est le double de %d ?" % x, "Le double de %d ?" % x, "", _around(2 * x, true))
 	return {}
 
 
 ## The right number and two wrong ones close to it (never negative, never twice): as strings, the right one first.
-static func _around(right: int) -> Array:
+static func _around(right: int, hard := false) -> Array:
 	var out: Array = [str(right)]
-	for d: int in [1, -1, 2, -2, 3]:
+	# Harder questions get the slips a pupil really makes: ten off (a forgotten carry) or one off.
+	for d: int in ([10, -1, 1, -10, 2] if hard else [1, -1, 2, -2, 3]):
 		if right + d >= 0 and out.size() < 3 and not out.has(str(right + d)):
 			out.append(str(right + d))
 	return out
