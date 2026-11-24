@@ -1104,6 +1104,38 @@ static func table_scene(ci: CanvasItem, origin: Vector2, k: float, foods: Array,
 			ci.draw_colored_polygon(_ellipse(c + Vector2(0, 2), rx, rx * squash), Color("#6E7680"))
 			ci.draw_colored_polygon(_ellipse(c, rx, rx * squash), Color("#B8C0CA"))
 			ci.draw_colored_polygon(_ellipse(c, rx - 3.0, rx * squash - 2.0), Color("#9AA3AE"))
+		"bleue":
+			# A blue plate: a deep blue rim with white dots round it, a pale well.
+			ci.draw_colored_polygon(_ellipse(c + Vector2(2, 4), rx + 2.0, rx * squash + 2.0), Color(0, 0, 0, 0.2))
+			ci.draw_colored_polygon(_ellipse(c + Vector2(0, 2), rx, rx * squash), Color("#2E5FA8"))
+			ci.draw_colored_polygon(_ellipse(c, rx, rx * squash), Color("#5B8FD8"))
+			ci.draw_colored_polygon(_ellipse(c, rx - 7.0, rx * squash - 4.0), Color("#E6F0FA"))
+			for j in 16:
+				var a := TAU * j / 16.0
+				ci.draw_circle(c + Vector2(cos(a) * (rx - 3.4), sin(a) * (rx * squash - 2.0)), 1.1, Color.WHITE)
+		"noel":
+			if kind == "gateau":
+				# A cake stand: a pale glass dish on a short stem and foot, a gold rim.
+				ci.draw_colored_polygon(_ellipse(c + Vector2(2, 14), rx - 6.0, rx * squash - 6.0), Color(0, 0, 0, 0.18))
+				ci.draw_colored_polygon(_ellipse(c + Vector2(0, 11), 14.0, 4.5), Color("#D8E4EC"))
+				ci.draw_rect(Rect2(c.x - 3.0, c.y + 2.0, 6.0, 10.0), Color("#C4D4DE"))
+				ci.draw_colored_polygon(_ellipse(c + Vector2(0, 4), rx, rx * squash), Color("#C9D8E2"))
+				ci.draw_colored_polygon(_ellipse(c, rx, rx * squash), Color("#F2F8FC"))
+				ci.draw_polyline(_closed(_ellipse(c, rx - 1.0, rx * squash - 0.6)), Color("#E0B84A"), 1.2, true)
+			else:
+				# A flowered plate: a cream rim painted with pink flowers and green leaves.
+				ci.draw_colored_polygon(_ellipse(c + Vector2(2, 4), rx + 2.0, rx * squash + 2.0), Color(0, 0, 0, 0.2))
+				ci.draw_colored_polygon(_ellipse(c + Vector2(0, 2), rx, rx * squash), Color("#D8C9A8"))
+				ci.draw_colored_polygon(_ellipse(c, rx, rx * squash), Color("#FFF8E8"))
+				ci.draw_polyline(_closed(_ellipse(c, rx - 5.0, rx * squash - 3.0)), Color("#E8D8B8"), 0.8, true)
+				for j in 8:
+					var a := TAU * j / 8.0
+					var q := c + Vector2(cos(a) * (rx - 3.0), sin(a) * (rx * squash - 1.8))
+					ci.draw_circle(q + Vector2(1.6, 0.6), 1.3, Color("#6AB85A"))
+					for petal in 5:
+						var pa := TAU * petal / 5.0
+						ci.draw_circle(q + Vector2(cos(pa), sin(pa)) * 1.2, 0.9, Color("#FF7AB0") if j % 2 == 0 else Color("#FFB347"))
+					ci.draw_circle(q, 0.7, Color("#FFE27A"))
 		_:
 			ci.draw_colored_polygon(_ellipse(c + Vector2(2, 4), rx + 2.0, rx * squash + 2.0), Color(0, 0, 0, 0.2))
 			ci.draw_colored_polygon(_ellipse(c + Vector2(0, 2), rx, rx * squash), Color("#C9D2DA"))
@@ -1113,7 +1145,7 @@ static func table_scene(ci: CanvasItem, origin: Vector2, k: float, foods: Array,
 		if not foods.is_empty():
 			var pz: Dictionary = foods[0].duplicate()
 			pz.slices = 8
-			draw_cookie(ci, pz, origin + (c + Vector2(0, -1)) * k, 0.44 * k, 0.0, false, squash)
+			draw_cookie(ci, pz, origin + (c + Vector2(0, -1)) * k, (0.58 if kind == "gateau" else 0.44) * k, 0.0, false, squash)
 	else:
 		var n := foods.size()
 		var cols := 3 if n <= 6 else 4
