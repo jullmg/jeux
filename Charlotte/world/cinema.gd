@@ -21,43 +21,62 @@ const HEADING := "🍿  Soirée cinéma"
 const MONEY := 5.0
 const AGAIN := "cinema_again"
 ## The films she can choose from on any movie night (TvShows ids), the first one included.
-## Who she can invite (Julien, 2026-11-23: any of her friends): [id, names on the card, a few words about them, the looks that sit down,
-## the flag of having met them]. The first night is always with the twins who suggested it; later she picks (`choose`).
+## Who she can invite (Julien, 2026-11-23: any of her friends, ticked one by one): [look id, name, the flag of having met them].
+## The first night is always with the twins who suggested it; later she ticks up to `MAX_GUESTS` (`choose_guests`).
 const FRIENDS := [
-	["jumelles", "Alphée et Constance", "les jumelles Turcotte", ["alphee", "constance"], "met_twins"],
-	["billie", "Billie et Auguste", "ceux du bout de la ruelle", ["billie", "auguste"], "met_billie_auguste"],
-	["alyzee", "Alyzée", "ton amie de l'école", ["alyzee"], "met_alyzee"],
-	["emilia", "Emilia", "ton amie de l'école", ["emilia"], "met_emilia"],
+	["alphee", "Alphée", "met_twins"],
+	["constance", "Constance", "met_twins"],
+	["billie", "Billie", "met_billie_auguste"],
+	["auguste", "Auguste", "met_billie_auguste"],
+	["alyzee", "Alyzée", "met_alyzee"],
+	["emilia", "Emilia", "met_emilia"],
 ]
-const GUEST := "cinema_friend"
+## How many friends fit on the blanket (with her, five on the cushions).
+const MAX_GUESTS := 4
+const GUESTS := "cinema_guests"
+const TWINS: Array = ["alphee", "constance"]
 
 
-## The friends she has met, among those who can come.
+## The friends she has met, among those who can come: [id, name].
 static func friends() -> Array:
-	var out: Array = FRIENDS.filter(func(f: Array) -> bool: return bool(GameState.flags.get(f[4], false)))
-	return out if not out.is_empty() else [FRIENDS[0]]
+	var out: Array = []
+	for f: Array in FRIENDS:
+		if bool(GameState.flags.get(f[2], false)):
+			out.append([f[0], f[1]])
+	if out.is_empty():
+		out = [[FRIENDS[0][0], FRIENDS[0][1]], [FRIENDS[1][0], FRIENDS[1][1]]]
+	return out
 
 
-## Who is coming tonight: the entry of `FRIENDS` she chose (the twins by default).
-static func chosen() -> Array:
-	var id := str(GameState.flags.get(GUEST, "jumelles"))
+## Who is coming tonight: the look ids she ticked (the twins by default).
+static func guests() -> Array:
+	var ids: Array = GameState.flags.get(GUESTS, [])
+	return ids if not ids.is_empty() else TWINS
+
+
+static func choose_guests(ids: Array) -> void:
+	GameState.flags[GUESTS] = ids.slice(0, MAX_GUESTS)
+
+
+static func _name_of(id: String) -> String:
 	for f: Array in FRIENDS:
 		if f[0] == id:
-			return f
-	return FRIENDS[0]
+			return str(f[1])
+	return id
 
 
-static func choose(id: String) -> void:
-	GameState.flags[GUEST] = id
-
-
-## "Alphée et Constance", "Alyzée"…
+## "Alphée et Constance", "Billie, Constance et Alyzée"…
 static func names() -> String:
-	return str(chosen()[1])
+	var list: Array = []
+	for id in guests():
+		list.append(_name_of(str(id)))
+	if list.size() == 1:
+		return str(list[0])
+	return ", ".join(list.slice(0, list.size() - 1)) + " et " + str(list[list.size() - 1])
 
 
 static func plural() -> bool:
-	return (chosen()[3] as Array).size() > 1
+	return guests().size() > 1
 
 
 static func look(id: String) -> CharacterLook:
@@ -127,6 +146,7 @@ static func clear() -> void:
 	GameState.flags.erase(STEP)
 	GameState.flags.erase(SNACKS)
 	GameState.flags.erase(AGAIN)
+	GameState.flags.erase(GUESTS)
 
 
 ## What the notebook says to do next.

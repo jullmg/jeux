@@ -1338,12 +1338,12 @@ func _hockey_night() -> void:
 
 # Where everyone sits on the cushions (x, facing), and the floor under them: in front of the hallway TV, nearer than where
 # she walks. Charlotte first, then Alphée and Constance.
-const MOVIE_SEATS := [[2545.0, 1], [2445.0, 1], [2770.0, -1]]
+const MOVIE_SEATS := [[2545.0, 1], [2445.0, 1], [2770.0, -1], [2345.0, 1], [2870.0, -1]]
 const MOVIE_FLOOR := 690.0
 const CUSHION_H := 10.0
 # Where the twins wait for her before the film, and what is said during it ([seconds into the film, who: -1 Charlotte,
 # 0 Alphée, 1 Constance, words]).
-const MOVIE_WAIT := [2700.0, 2830.0]
+const MOVIE_WAIT := [2700.0, 2830.0, 2960.0, 3090.0]
 const MOVIE_LINES := {
 	"film": [
 		[1.5, 1, "Chut ! Ça commence !"],
@@ -1660,21 +1660,13 @@ func _park_with_dad() -> void:
 # Who comes to the movie night? Any friend she has met (`Cinema.FRIENDS`); with only the twins to ask, no question.
 func _choose_movie_friends() -> void:
 	var friends := Cinema.friends()
-	if friends.size() <= 1:
-		Cinema.choose(str(friends[0][0]))
-		Cinema.start_again()
-		_pocket_money_for_the_movie(true)
-		return
 	_control.enabled = false
-	var choices: Array = []
-	for f: Array in friends:
-		choices.append({"text": str(f[1]), "note": str(f[2])})
-	var card := ChoiceCard.ask(self, "Avec qui on fait la soirée ?", choices)
-	card.chose.connect(func(i: int) -> void:
+	var picker := GuestPicker.ask(self, "Qui veux-tu inviter ?", friends, Cinema.MAX_GUESTS)
+	picker.picked.connect(func(ids: Array) -> void:
 		_control.enabled = true
-		if i < 0 or i >= friends.size():
+		if ids.is_empty():
 			return
-		Cinema.choose(str(friends[i][0]))
+		Cinema.choose_guests(ids)
 		Cinema.start_again()
 		_pocket_money_for_the_movie(true))
 
@@ -1703,7 +1695,8 @@ func _build_movie_night() -> void:
 	# Up a little from the floor they sit on, so the cushions are under their hips.
 	_movie_nest.position = Vector2(2648.0, MOVIE_FLOOR - 18.0)
 	add_child(_movie_nest)
-	var who_comes: Array = Cinema.chosen()[3]
+	var who_comes: Array = Cinema.guests()
+	_movie_nest.people = who_comes.size() + 1
 	for i in who_comes.size():
 		var sister := Character.new()
 		sister.look = Cinema.look(str(who_comes[i]))
@@ -1713,10 +1706,11 @@ func _build_movie_night() -> void:
 		sister.facing = -1
 		add_child(sister)
 		_movie_twins.append(sister)
-	var spot := DoorSpot.make(Rect2(MOVIE_WAIT[0] - 70.0, 260.0, MOVIE_WAIT[1] - MOVIE_WAIT[0] + 140.0, 420.0), _start_movie, MOVIE_WAIT[0] - 120.0)
+	var last_wait: float = MOVIE_WAIT[maxi(who_comes.size() - 1, 0)]
+	var spot := DoorSpot.make(Rect2(MOVIE_WAIT[0] - 70.0, 260.0, last_wait - MOVIE_WAIT[0] + 140.0, 420.0), _start_movie, MOVIE_WAIT[0] - 120.0)
 	spot.condition = func() -> bool: return Cinema.step() == 3 and _control.enabled
 	add_child(spot)
-	add_child(QuestMark.make(Vector2((MOVIE_WAIT[0] + MOVIE_WAIT[1]) / 2.0, 250.0), func() -> bool: return Cinema.step() == 3 and _control.enabled))
+	add_child(QuestMark.make(Vector2((MOVIE_WAIT[0] + last_wait) / 2.0, 250.0), func() -> bool: return Cinema.step() == 3 and _control.enabled))
 	# Coming in, she remembers who is waiting for her.
 	if _charlotte.position.x < BEDROOM.x:
 		var hello := create_tween()
@@ -1783,7 +1777,7 @@ func _lights_down() -> void:
 	var who: Array[Character] = [_charlotte]
 	who.append_array(_movie_twins)
 	# With one friend, she sits on the other side of the bowl.
-	var seat_of := [0, 1, 2] if who.size() == 3 else [0, 2]
+	var seat_of: Array = [[0, 2], [0, 1, 2], [0, 1, 3, 2], [0, 1, 3, 2, 4]][clampi(who.size() - 2, 0, 3)]
 	for i in who.size():
 		var person := who[i]
 		person.position.x = MOVIE_SEATS[seat_of[i]][0]
@@ -1862,25 +1856,28 @@ func _movie_say(who: int, text: String) -> void:
 class _Nest:
 	extends Node2D
 	var bowl := false
+	## How many sit on it, Charlotte included (2 to 5): one cushion each.
+	var people := 3
 	var dark: Polygon2D
 	var lights: Array = []
 
 	func _draw() -> void:
 		# A plaid blanket, its near edge with a fringe.
-		var blanket := PackedVector2Array([Vector2(-250, -14), Vector2(170, -16), Vector2(196, 22), Vector2(-268, 24)])
+		var blanket := PackedVector2Array([Vector2(-350, -14), Vector2(270, -16), Vector2(296, 22), Vector2(-368, 24)])
 		draw_colored_polygon(blanket, Color("#C8445A"))
-		for i in 9:
-			var x := -240.0 + i * 50.0
+		for i in 13:
+			var x := -340.0 + i * 50.0
 			draw_line(Vector2(x, -14), Vector2(x - 6.0, 23), Color("#E9D8B4", 0.55), 5.0)
 		for y in [-4.0, 10.0]:
-			draw_line(Vector2(-255, y), Vector2(182, y), Color("#E9D8B4", 0.45), 4.0)
-		draw_polyline(PackedVector2Array([Vector2(-250, -14), Vector2(170, -16), Vector2(196, 22), Vector2(-268, 24), Vector2(-250, -14)]), Color("#8E2A3A"), 2.0, true)
-		for i in 30:
-			var x := -264.0 + i * 15.4
+			draw_line(Vector2(-355, y), Vector2(282, y), Color("#E9D8B4", 0.45), 4.0)
+		draw_polyline(PackedVector2Array([Vector2(-350, -14), Vector2(270, -16), Vector2(296, 22), Vector2(-368, 24), Vector2(-350, -14)]), Color("#8E2A3A"), 2.0, true)
+		for i in 42:
+			var x := -364.0 + i * 15.8
 			draw_line(Vector2(x, 24), Vector2(x - 1.0, 31), Color("#E9D8B4"), 2.0)
 		# The cushions where they sit (MOVIE_SEATS, from the nest's middle at x 2648).
-		for c in [[-103.0, Color("#F2A7C9")], [-203.0, Color("#7CCBC4")], [122.0, Color("#FFD23F")]]:
-			_cushion(Vector2(c[0], 0.0), c[1])
+		var cushions := [[-103.0, Color("#F2A7C9")], [122.0, Color("#FFD23F")], [-203.0, Color("#7CCBC4")], [-303.0, Color("#C084FC")], [222.0, Color("#FF8A3D")]]
+		for k in mini(people, cushions.size()):
+			_cushion(Vector2(cushions[k][0], 0.0), cushions[k][1])
 		if bowl:
 			# The big bowl with the chips and the candy.
 			var at := Vector2(20, 4)
