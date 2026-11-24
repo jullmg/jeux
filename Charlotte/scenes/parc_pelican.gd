@@ -90,6 +90,8 @@ func _ready() -> void:
 	_control.walk_top = FOOT - 120.0
 	add_child(_control)
 	_build_park_doors()
+	if Season.current in ["spring", "summer"]:
+		add_child(_Butterflies.new())
 	if Luge.step() == 2:
 		_build_luge()
 	elif ParkOuting.active():
@@ -124,6 +126,39 @@ func _process(delta: float) -> void:
 	_follow_charlotte()
 	_cheer_cool = maxf(0.0, _cheer_cool - delta)
 	_follow_papa(delta)
+	_papa_remarks()
+
+
+## Papa says a word the first time she comes to each place of the park (once a visit).
+const PAPA_PLACES := {
+	"pataugeoire": ["Ici, quand t'étais petite, tu adorais patauger !", "La pataugeoire dort sous la neige."],
+	"chiens": ["Regarde les beaux toutous qui courent !", "Les chiens adorent la neige, hein !"],
+	"chalet": ["Le chalet : si t'as froid ou envie de pipi, c'est ici.", "On peut se réchauffer au chalet, après."],
+	"piscine": ["La grande piscine ! L'été, on viendra nager.", "Ça glisse, la patinoire ! Tu veux patiner ?"],
+	"jeux": ["Les jeux ! Tu veux la balançoire ou la glissoire ?", "Ça gèle sur les modules, fais attention !"],
+	"court": ["On joue au ballon panier ? Ou au ping-pong ?", "Du hockey ! Tu veux qu'on joue un peu ?"],
+	"butte": ["La butte ! Dis-moi quand t'es prête à glisser.", "La butte ! Le traîneau est prêt, ma grande !"],
+}
+var _papa_seen := {}
+var _remark_cool := 0.0
+
+
+func _papa_remarks() -> void:
+	if _outing_papa == null or not is_instance_valid(_outing_papa) or _busy or _charlotte == null:
+		return
+	_remark_cool = maxf(0.0, _remark_cool - get_process_delta_time())
+	if _remark_cool > 0.0:
+		return
+	for sp: Array in SPOTS:
+		var id: String = sp[0]
+		if _papa_seen.has(id) or absf(_charlotte.position.x - float(sp[1])) > float(sp[2]) * 0.6:
+			continue
+		_papa_seen[id] = true
+		_remark_cool = 7.0
+		var lines: Array = PAPA_PLACES.get(id, [])
+		if lines.size() == 2:
+			_outing_papa.say(str(lines[1 if Season.is_winter() else 0]), 3.0)
+		return
 
 
 func room_name() -> String:
@@ -1243,6 +1278,39 @@ class _Ground:
 
 
 ## A person in the park: idle with a line or two, or (winter, "slide") a child climbing the hill and sliding down it on her bottom.
+## A few butterflies drifting over the lawn in spring and summer, wings beating.
+class _Butterflies:
+	extends Node2D
+	var _t := 0.0
+	var _seed := []
+
+	func _init() -> void:
+		var r := RandomNumberGenerator.new()
+		r.seed = 77
+		for i in 26:
+			_seed.append([r.randf_range(300.0, PARK_W - 300.0), r.randf_range(470.0, 590.0), r.randf_range(0.0, TAU), r.randf_range(0.6, 1.2),
+				[Color("#F6A9C9"), Color("#FFD23F"), Color("#9ECBFF"), Color("#FFFFFF")][i % 4]])
+		z_index = 2
+
+	func _process(delta: float) -> void:
+		_t += delta
+		if OnScreen.near(self, 1400.0):
+			queue_redraw()
+
+	func _draw() -> void:
+		for b: Array in _seed:
+			var ph: float = b[2]
+			var sp: float = b[3]
+			var p := Vector2(b[0] + sin(_t * 0.35 * sp + ph) * 120.0, b[1] + sin(_t * 0.8 * sp + ph * 2.0) * 22.0 + cos(_t * 0.23 + ph) * 18.0)
+			var flap := absf(sin(_t * 11.0 * sp + ph))
+			var col: Color = b[4]
+			for side in [-1.0, 1.0]:
+				var w := PackedVector2Array([p, p + Vector2(side * 15.0 * flap, -12.0), p + Vector2(side * 17.0 * flap, 2.0)])
+				draw_colored_polygon(w, col)
+				draw_colored_polygon(PackedVector2Array([p, p + Vector2(side * 10.0 * flap, 2.0), p + Vector2(side * 8.0 * flap, 10.0)]), col.darkened(0.12))
+			draw_line(p + Vector2(0, -5), p + Vector2(0, 5), Color("#4A3A30"), 2.4)
+
+
 class _Visitor:
 	extends Node2D
 
