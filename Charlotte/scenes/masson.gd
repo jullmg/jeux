@@ -386,6 +386,36 @@ func _data() -> Dictionary:
 	return _side_data
 
 
+## Masson is a busy shopping street (Julien: "there are no pedestrians on Rue Masson"): the two walkers every street has were lost
+## along its length, so a crowd is added, one person about every `CROWD_EVERY` px, spread evenly along it, with a random generator of
+## its own so nothing else on the street moves. Not on Halloween night (the street belongs to the children then).
+const CROWD_EVERY := 520.0
+
+
+func _build_passersby() -> void:
+	super._build_passersby()
+	if Halloween.night():
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + 77
+	var count := int(_street_width / CROWD_EVERY)
+	var ages := ["adult", "adult", "teen", "adult", "senior", "adult", "teen"]
+	for i in count:
+		var age: String = ages[rng.randi() % ages.size()]
+		var npc := Passerby.new()
+		npc.look = CharacterLook.random(rng, age)
+		Season.dress_for_weather(npc.look)
+		npc.walk_speed = rng.randf_range(110.0, 175.0)
+		npc.position = Vector2((i + rng.randf_range(0.15, 0.85)) * _street_width / count, NEIGHBOUR_Y)
+		npc.scale = Vector2.ONE * CHAR_SCALE
+		npc.facing = 1 if rng.randf() < 0.5 else -1
+		npc.bounds = Vector2(-140.0, _street_width + 140.0)
+		npc.modulate = Color(0.94, 0.94, 0.96)
+		add_child(npc)
+		if age == "adult" and rng.randf() < 0.25:
+			add_child(Dog.random(rng, npc))
+
+
 ## The scene of the other side of the street.
 func _other_side() -> String:
 	return "res://scenes/masson_%s.tscn" % ("pair" if side == "impair" else "impair")
