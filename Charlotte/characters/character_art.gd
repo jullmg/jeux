@@ -405,11 +405,11 @@ func _mouth_svg(kind: String) -> String:
 		"pursed":
 			s += _f('<ellipse cx="123" cy="170" rx="4.5" ry="5.5" fill="{mouth}" stroke="{mouth_line}" stroke-width="2"/>')
 		"sad":
-			s += _f('<path d="M109 177 Q123 164 137 177" stroke="{mouth_line}" stroke-width="3" fill="none" stroke-linecap="round"/>')
+			s += _f('<path d="M15.6 12 H33.4 Q35 22 34 30 Q33.6 36 31.4 36.4 Q29.4 36.6 29 34 Q28.6 40 26.2 40 Q23.8 40 23.4 36 Q22.8 38.4 21.4 38 Q19.4 37.4 19.2 32.6 Q18 35 16.8 33.8 Q14.4 31.4 15.6 12 Z" stroke="{mouth_line}" stroke-width="3" fill="none" stroke-linecap="round"/>')
 		"worry":
 			s += _f('<path d="M113 174 Q123 168 133 174" stroke="{mouth_line}" stroke-width="3" fill="none" stroke-linecap="round"/>')
 		"flat":
-			s += _f('<path d="M112 169 H134" stroke="{mouth_line}" stroke-width="3" fill="none" stroke-linecap="round"/>')
+			s += _f('<path d="M16 12 H33 Q34.4 22 33.6 29 Q33.4 36 31.2 36.4 Q29.4 36.6 29 34.6 Q28.6 38.4 26.4 38.4 Q24.2 38.4 23.8 36 Q23.2 37.4 21.8 37 Q20 36.4 19.8 33.6 Q18.8 35 17.6 34 Q15.4 32 16 22 Z" stroke="{mouth_line}" stroke-width="3" fill="none" stroke-linecap="round"/>')
 		"sleep":
 			s += _f('<path d="M114 169 Q123 174 132 169" stroke="{mouth_line}" stroke-width="2.6" fill="none" stroke-linecap="round"/>')
 		"talk_a":
@@ -1144,7 +1144,7 @@ func _hand_svg(mode: String, scale: float) -> String:
 	match mode:
 		"relaxed":
 			# A mitten: one soft mass for the four fingers (no separate sections), the thumb beside it.
-			s += _f('<path d="M16 12 H31 Q34 14 33.6 22 Q33 33 27.5 36.5 Q21.5 39 16.8 34 Q14.4 27 16 12 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
+			s += _f('<path d="M16 12 H33 Q34.4 22 33.6 29 Q33.2 34 31.2 34.4 Q29.4 34.6 29.0 32.6 Q28.6 37.4 26.4 37.4 Q24.2 37.4 23.8 34.4 Q23.2 36.4 21.8 36 Q20 35.6 19.8 31.8 Q18.8 33.6 17.6 32.6 Q15.4 31 16 22 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
 			s += _f('<path d="M16.6 3 H27.4 Q30.4 9 30.0 16 Q29.8 21.4 25.6 21.4 H18.4 Q14.2 21.4 14.0 16 Q13.6 9 16.6 3 Z" fill="{skin}" stroke="{skin_line}" stroke-width="1.7" stroke-linejoin="round"/>')
 			s += '<g transform="translate(29.2 8.5) rotate(-36)">'
 			s += _f('<rect x="-3.6" y="0" width="7.2" height="12" rx="3.6" fill="{skin}" stroke="{skin_line}" stroke-width="1.5"/></g>')
