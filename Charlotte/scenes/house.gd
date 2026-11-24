@@ -120,6 +120,10 @@ var _movie_twins: Array[Character] = []
 ## The film on tonight (a TvShows id).
 var _film := "film"
 var _film_sound: FilmSound
+var _sleepover := false
+var _camp: Sleepover.Camp
+var _shadow: Sleepover.ShadowShow
+var _shows_done := 0
 var _movie_nest: _Nest
 
 
@@ -1764,7 +1768,7 @@ func _roll_film(id: String) -> void:
 		for who: Character in [_charlotte] + _movie_twins:
 			who.express("happy", 2.4))
 	go.tween_interval(2.0)
-	go.tween_callback(func() -> void: Transition.through_black(self, _lights_up, 0.6))
+	go.tween_callback(func() -> void: Transition.through_black(self, _movie_over, 0.6))
 
 
 # Everyone on the cushions, the snacks in the bowl, the hall lights off and the film on.
@@ -1805,7 +1809,7 @@ func _lights_down() -> void:
 
 
 # The film is over: the twins go home, the blanket is folded away, the lights come back on.
-func _lights_up() -> void:
+func _lights_up(keep_friends := false) -> void:
 	if _film_sound and is_instance_valid(_film_sound):
 		_film_sound.stop()
 	_film_sound = null
@@ -1816,9 +1820,10 @@ func _lights_up() -> void:
 	_charlotte.modulate = Color.WHITE
 	_charlotte.position = Vector2(MOVIE_WAIT[0] - 120.0, FEET_Y)
 	_charlotte.facing = 1
-	for sister in _movie_twins:
-		sister.queue_free()
-	_movie_twins.clear()
+	if not keep_friends:
+		for sister in _movie_twins:
+			sister.queue_free()
+		_movie_twins.clear()
 	for light in _movie_nest.lights:
 		light.visible = true
 	if _movie_nest.dark:
@@ -1829,6 +1834,299 @@ func _lights_up() -> void:
 	_tv.channels = TvShows.ALL.duplicate()
 	_control.enabled = true
 	_say(_charlotte, "Quelle belle soirée !", 300.0)
+
+
+# ── The pyjama party (`Sleepover`) ───────────────────────────────
+
+# The film is over: the lights come back, and Charlotte decides whether her friends stay the night.
+func _movie_over() -> void:
+	_lights_up(true)
+	_control.enabled = false
+	var many := _movie_twins.size() > 1
+	var card := ChoiceCard.ask(self, "%s %s dormir ici ?" % [Cinema.names(), "restent" if many else "reste"], [
+		{"text": "Oui, une soirée pyjama !", "note": "dans ma chambre, sur des sacs de couchage", "color": Color("#C8B6F2")},
+		{"text": "Non, %s chez %s" % ["ils rentrent" if many else "il rentre", "eux" if many else "lui"], "note": "à la prochaine !", "color": Color("#DDE6F0")}])
+	card.chose.connect(func(i: int) -> void:
+		if i == 0:
+			_sleepover_begin()
+		else:
+			_friends_go_home())
+
+
+# No sleepover: the friends say goodbye and go.
+func _friends_go_home() -> void:
+	var steps := create_tween()
+	for k in _movie_twins.size():
+		var who: Character = _movie_twins[k]
+		steps.tween_callback(func() -> void: _say(who, MOVIE_END[mini(k, MOVIE_END.size() - 1)][1], 280.0, 2.4))
+		steps.tween_interval(2.6)
+	steps.tween_callback(func() -> void:
+		for sister in _movie_twins:
+			sister.queue_free()
+		_movie_twins.clear()
+		_control.enabled = true
+		_say(_charlotte, "Quelle belle soirée !", 300.0))
+
+
+# Yes: Maman says she'll call their parents, everyone puts on pyjamas, and the party moves to Charlotte's room.
+func _sleepover_begin() -> void:
+	_sleepover = true
+	_shows_done = 0
+	_mom.express("happy", 3.0)
+	_say(_mom, "Une soirée pyjama ? Bonne idée !\nJ'appelle leurs parents.", 400.0, 3.0)
+	var steps := create_tween()
+	steps.tween_interval(3.4)
+	steps.tween_callback(func() -> void:
+		Transition.through_black(self, _sleepover_to_bedroom, 0.7))
+
+
+func _sleepover_to_bedroom() -> void:
+	_control.stop()
+	# Pyjamas for everyone: Charlotte's own look is only lent (`_sleepover_morning` gives it back).
+	_charlotte.set_look(Sleepover.pyjama(CharacterLook.charlotte(), 0))
+	for k in _movie_twins.size():
+		_movie_twins[k].set_look(Sleepover.pyjama(_movie_twins[k].look, k + 1))
+	var x := BEDROOM.x
+	_camp = Sleepover.Camp.new()
+	var n := _movie_twins.size()
+	for k in n:
+		_camp.spots.append(x + 330.0 + k * 195.0)
+		_camp.colors.append(Color(Sleepover.COLORS[(k + 1) % Sleepover.COLORS.size()]).darkened(0.1))
+	add_child(_camp)
+	# The people sit on the bags: they are drawn one level above them.
+	_charlotte.z_index = 1
+	for k in n:
+		var friend: Character = _movie_twins[k]
+		friend.position = Vector2(_camp.spots[k] + 10.0, FEET_Y)
+		friend.facing = 1 if k % 2 == 0 else -1
+		friend.sitting = true
+		friend.sit_on_ground = true
+		friend.seat_h = 0.0
+		friend.fidgets = false
+		friend.z_index = 1
+		friend.modulate = Color.WHITE
+	_charlotte.position = Vector2(x + 300.0, FEET_Y)
+	_charlotte.facing = 1
+	_charlotte.sitting = true
+	_charlotte.sit_on_ground = true
+	_charlotte.seat_h = 0.0
+	_charlotte.modulate = Color.WHITE
+	_enter_area(BEDROOM)
+	# The room in the low light of a lamp.
+	var dim := CanvasModulate.new()
+	dim.name = "SleepoverDim"
+	dim.color = Color(0.8, 0.76, 0.92)
+	add_child(dim)
+	var steps := create_tween()
+	steps.tween_interval(1.2)
+	steps.tween_callback(func() -> void:
+		_movie_say(0, "On est dans ta chambre ! C'est ben beau, tes lumières !")
+		Sfx.play("chime", _charlotte.position))
+	steps.tween_interval(3.0)
+	steps.tween_callback(func() -> void:
+		_say(_charlotte, "Qu'est-ce qu'on fait en premier ?", 300.0, 2.4)
+		_sleepover_menu())
+
+
+# What to do, over and over, until it is time to sleep.
+func _sleepover_menu() -> void:
+	_control.enabled = false
+	var choices: Array = [
+		{"text": "Des histoires à la lampe de poche", "note": "lire un livre ensemble", "color": Color("#FFE27A")},
+		{"text": "Un spectacle d'ombres", "note": "des marionnettes sur le mur", "color": Color("#B6E3B0")},
+		{"text": "Une bataille d'oreillers !", "note": "attention aux plumes", "color": Color("#F7B6D2")},
+		{"text": "Dodo, on éteint la lumière", "note": "bonne nuit !", "color": Color("#9DC8F0")}]
+	var card := ChoiceCard.ask(self, "Qu'est-ce qu'on fait ?", choices)
+	card.chose.connect(func(i: int) -> void:
+		if i == 0:
+			_sleepover_story()
+		elif i == 1:
+			_sleepover_shadows()
+		elif i == 2:
+			_sleepover_pillows()
+		else:
+			_sleepover_sleep())
+
+
+func _sleepover_story() -> void:
+	var reader := BookReader.new()
+	reader.start_book = randi() % BookReader.BOOKS.size()
+	reader.tree_exited.connect(func() -> void:
+		if not is_inside_tree():
+			return
+		_movie_say(0, "Oh, encore ! J'adore cette histoire-là.")
+		var more := create_tween()
+		more.tween_interval(2.6)
+		more.tween_callback(_sleepover_menu))
+	add_child(reader)
+
+
+func _sleepover_shadows() -> void:
+	var picked: Array = Sleepover.SHADOWS[_shows_done % Sleepover.SHADOWS.size()]
+	_shows_done += 1
+	_shadow = Sleepover.ShadowShow.new()
+	_shadow.kind = str(picked[0])
+	_shadow.position = Vector2(BEDROOM.x + 1000.0, 360.0)
+	_shadow.z_index = 3
+	add_child(_shadow)
+	_say(_charlotte, "Regardez le mur !", 300.0, 1.8)
+	var steps := create_tween()
+	steps.tween_interval(3.6)
+	steps.tween_callback(func() -> void: _movie_say(0, str(picked[1])))
+	steps.tween_interval(2.8)
+	steps.tween_callback(func() -> void:
+		_say(_charlotte, str(picked[2]), 300.0, 2.6)
+		for who: Character in [_charlotte] + _movie_twins:
+			who.express("laugh", 2.0))
+	steps.tween_interval(3.0)
+	steps.tween_callback(func() -> void:
+		if _shadow:
+			_shadow.queue_free()
+			_shadow = null
+		_sleepover_menu())
+
+
+# Pillows fly across the room, feathers float down, everybody laughs.
+func _sleepover_pillows() -> void:
+	var everyone: Array[Character] = [_charlotte]
+	everyone.append_array(_movie_twins)
+	var steps := create_tween()
+	for k in 7:
+		steps.tween_callback(func() -> void:
+			var from: Character = everyone[k % everyone.size()]
+			var to: Character = everyone[(k + 1 + (k / everyone.size())) % everyone.size()]
+			_throw_pillow(from.position + Vector2(0, -90), to.position + Vector2(0, -90))
+			from.express("grin", 1.2)
+			Sfx.play("swoosh", from.position, -4.0, 1.0 + (k % 3) * 0.1))
+		steps.tween_interval(0.45)
+	steps.tween_callback(func() -> void:
+		for who: Character in everyone:
+			who.express("laugh", 2.4)
+		_say(_charlotte, "Haha ! J'en peux plus !", 300.0, 2.2)
+		Sfx.play("chime", _charlotte.position, -6.0))
+	steps.tween_interval(2.6)
+	steps.tween_callback(_sleepover_menu)
+
+
+func _throw_pillow(from: Vector2, to: Vector2) -> void:
+	var pillow := Polygon2D.new()
+	pillow.polygon = PackedVector2Array([Vector2(-22, -12), Vector2(22, -13), Vector2(24, 12), Vector2(-24, 13)])
+	pillow.color = Color("#FFFDF8")
+	pillow.z_index = 8
+	pillow.position = from
+	add_child(pillow)
+	var tw := create_tween()
+	tw.tween_method(func(u: float) -> void:
+		pillow.position = from.lerp(to, u) + Vector2(0, -sin(u * PI) * 70.0)
+		pillow.rotation = u * 9.0, 0.0, 1.0, 0.5)
+	tw.tween_callback(func() -> void:
+		for f in 5:
+			_feather(to + Vector2(randf_range(-20, 20), randf_range(-30, 0)))
+		pillow.queue_free())
+
+
+func _feather(at: Vector2) -> void:
+	var f := Polygon2D.new()
+	f.polygon = PackedVector2Array([Vector2(0, -6), Vector2(3, 0), Vector2(0, 6), Vector2(-3, 0)])
+	f.color = Color("#FFFFFF")
+	f.position = at
+	f.z_index = 8
+	add_child(f)
+	var tw := create_tween()
+	tw.tween_property(f, "position", at + Vector2(randf_range(-40, 40), 90.0), randf_range(1.4, 2.2))
+	tw.parallel().tween_property(f, "rotation", randf_range(-4.0, 4.0), 1.8)
+	tw.parallel().tween_property(f, "modulate:a", 0.0, 1.8)
+	tw.tween_callback(f.queue_free)
+
+
+# Maman says goodnight from the door, everybody whispers a bit, the light goes out and the night begins.
+func _sleepover_sleep() -> void:
+	_control.enabled = false
+	_mom.position.x = BEDROOM_DOOR_X - 90.0
+	_mom.facing = -1
+	_mom_routine.pause(40.0, _mom.position.x - 200.0)
+	_mom.express("happy", 3.0)
+	_say(_mom, "Allez, au dodo, les amis !\nBonne nuit, tout le monde.", 380.0, 3.0)
+	var steps := create_tween()
+	steps.tween_interval(3.4)
+	steps.tween_callback(func() -> void:
+		for who: Character in [_charlotte] + _movie_twins:
+			_say(who, "Bonne nuit !", 250.0, 1.6))
+	steps.tween_interval(2.2)
+	var whisper_who: Array = [_movie_twins[0], _charlotte, _movie_twins[0], _charlotte] if not _movie_twins.is_empty() else []
+	for k in whisper_who.size():
+		steps.tween_callback(func() -> void: _say(whisper_who[k], Sleepover.WHISPERS[k], 260.0, 2.2))
+		steps.tween_interval(2.4)
+	steps.tween_callback(func() -> void:
+		if _camp:
+			_camp.asleep = true
+			_camp.queue_redraw()
+		for sister in _movie_twins:
+			sister.visible = false
+		_go_to_sleep())
+
+
+# The morning after: they wake up in the room, Maman calls them for breakfast, then they thank her and go home.
+func _sleepover_morning() -> void:
+	_sleepover = false
+	if _camp:
+		_camp.asleep = false
+		_camp.queue_redraw()
+	var dim := get_node_or_null("SleepoverDim")
+	if dim:
+		dim.queue_free()
+	for k in _movie_twins.size():
+		var friend: Character = _movie_twins[k]
+		friend.visible = true
+		friend.position = Vector2(BEDROOM.x + 560.0 + k * 150.0, FEET_Y)
+		friend.sitting = false
+		friend.sit_on_ground = false
+		friend.facing = -1
+	_charlotte.sitting = false
+	_charlotte.sit_on_ground = false
+	_control.enabled = false
+	var steps := create_tween()
+	steps.tween_interval(1.4)
+	for k in Sleepover.MORNING.size():
+		steps.tween_callback(func() -> void:
+			if k == 2:
+				_mom.position.x = BEDROOM_DOOR_X - 90.0
+				_mom.facing = -1
+				_say(_mom, "Déjeuner ! J'ai fait des crêpes !", 380.0, 2.6)
+			elif k == 0:
+				_movie_say(0, Sleepover.MORNING[0])
+			else:
+				_say(_charlotte, Sleepover.MORNING[1], 300.0, 2.6))
+		steps.tween_interval(3.0)
+	steps.tween_callback(func() -> void:
+		_treat(InteriorArt.snack("apple"), "Un bon déjeuner avec ses amis !", 0.8)
+		Sfx.play("miam", _charlotte.position))
+	steps.tween_interval(3.0)
+	for k in _movie_twins.size():
+		steps.tween_callback(func() -> void:
+			var friend: Character = _movie_twins[k]
+			friend.express("happy", 2.4)
+			_say(friend, Sleepover.GOODBYE[k % Sleepover.GOODBYE.size()], 280.0, 2.6))
+		steps.tween_interval(2.8)
+	steps.tween_callback(func() -> void: Transition.through_black(self, _sleepover_end, 0.7))
+
+
+func _sleepover_end() -> void:
+	for sister in _movie_twins:
+		sister.queue_free()
+	_movie_twins.clear()
+	if _camp:
+		_camp.queue_free()
+		_camp = null
+	# Her own clothes back (the pyjamas were only lent), and her morning place.
+	_charlotte.set_look(CharacterLook.charlotte())
+	_charlotte.z_index = 0
+	_charlotte.position.x = BEDROOM.x + 840.0
+	_charlotte.fidgets = true
+	Cinema.clear()
+	_control.enabled = true
+	_say(_charlotte, "Quelle soirée pyjama !", 300.0)
+	Notebook.announce("step", "Soirée pyjama réussie ! Tes amis sont rentrés chez eux.", Cinema.HEADING)
 
 
 # A night-blue veil over the hallway, under the TV (so its picture and glow stay bright) and over the furniture.
@@ -2443,6 +2741,8 @@ func _go_to_sleep() -> void:
 		_charlotte.facing = -1
 		_charlotte.visible = true
 		Music.play(_music())
+		if _sleepover:
+			get_tree().create_timer(1.6).timeout.connect(_sleepover_morning)
 		Sfx.play("chime"))
 	tween.tween_property(words, "modulate:a", 1.0, 0.5)
 	tween.tween_interval(1.2)
