@@ -56,9 +56,59 @@ static func say(parent: Node, at: Vector2, text: String, seconds := 2.4) -> void
 				moved = true
 		if not moved:
 			break
+	_ensure_skipper(parent)
 	bubble.modulate.a = 0.0
 	var tween := bubble.create_tween()
 	tween.tween_property(bubble, "modulate:a", 1.0, 0.2)
 	tween.tween_interval(seconds)
 	tween.tween_property(bubble, "modulate:a", 0.0, 0.3)
 	tween.tween_callback(bubble.queue_free)
+
+
+# ── A click speeds a dialogue up (Julien) ─────────────────────
+
+## Added once to the tree by the first bubble: while a scripted dialogue runs (she can't walk: her control is off) a left
+## click fast-forwards time until the bubbles that were up are gone, so the next line comes sooner. It does nothing else.
+static func _ensure_skipper(from: Node) -> void:
+	var root := from.get_tree().root
+	if root.has_node("DialogueSkipper"):
+		return
+	var skipper := _Skipper.new()
+	skipper.name = "DialogueSkipper"
+	root.add_child.call_deferred(skipper)
+
+
+class _Skipper:
+	extends Node
+
+	var _watch: Array[Node] = []
+
+	func _init() -> void:
+		process_mode = Node.PROCESS_MODE_ALWAYS
+
+	func _input(event: InputEvent) -> void:
+		if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
+			return
+		if not get_tree().get_nodes_in_group("modal").is_empty() or get_tree().paused:
+			return
+		# Free roaming (she can walk): the click is hers, no fast-forward.
+		for control in get_tree().get_nodes_in_group("player_control"):
+			if control.enabled and not control.hands_off:
+				return
+		var live: Array[Node] = []
+		for b in get_tree().get_nodes_in_group("bubble"):
+			if not b.is_queued_for_deletion():
+				live.append(b)
+		if live.is_empty():
+			return
+		_watch = live
+		Engine.time_scale = 6.0
+
+	func _process(_delta: float) -> void:
+		if Engine.time_scale == 1.0:
+			return
+		for b in _watch:
+			if is_instance_valid(b) and not b.is_queued_for_deletion():
+				return
+		_watch.clear()
+		Engine.time_scale = 1.0

@@ -31,6 +31,7 @@ const WASD := {"ui_left": KEY_A, "ui_right": KEY_D, "ui_up": KEY_W, "ui_down": K
 
 
 func _init() -> void:
+	add_to_group("player_control")
 	# Run before the scene script so the camera follows the position set this frame.
 	process_priority = -1
 	for action: String in WASD:

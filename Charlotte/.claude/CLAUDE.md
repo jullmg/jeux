@@ -359,7 +359,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   Those crosswalks are click-only (`DoorSpot.click_only`): ↑ at the curb always turns the corner.
   `CrossStreet.guard = true` (the school's crosswalk on Dandurand) adds a `CrossingGuard`
   (`world/crossing_guard.gd`, neon-yellow coat and cap) who steps out with her ARRÊT paddle while Charlotte crosses.
-  `Bubble.say(parent, at, text)` shows a speech bubble anywhere (same speaker = replaces, others stack above; it stays at least its `seconds` but always long enough to be read, `Bubble.reading_time`: about twelve letters a second, up to 10 s, because Charlotte's age reads slowly); `DoorSpot` takes an optional `approach` and `condition`.
+  A left click during a scripted dialogue (her control off) fast-forwards time ×6 until the bubbles up at that moment are gone (`Bubble._Skipper`, in the root; free roaming keeps the click for walking). `Bubble.say(parent, at, text)` shows a speech bubble anywhere (same speaker = replaces, others stack above; it stays at least its `seconds` but always long enough to be read, `Bubble.reading_time`: about twelve letters a second, up to 10 s, because Charlotte's age reads slowly); `DoorSpot` takes an optional `approach` and `condition`.
 - Real-world rules (from the Google Maps view): back lanes (ruelles) only open onto the north-south avenues like 6e
   Avenue, never onto Dandurand or Holt (no "gap" walls or `ruelle` buildings there). Every intersection has a street-name
   post at both corners (`CrossStreet` SIGNS): the plate of the street we're on faces us, the cross street's plate is
