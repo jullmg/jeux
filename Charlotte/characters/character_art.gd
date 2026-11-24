@@ -204,7 +204,9 @@ func _head_svg(lids_only: bool) -> String:
 func _head_base_finish(s: String) -> String:
 	if look.age == "senior":
 		s += _f('<path d="M170 124 l9 -4 M171 133 l9 1 M60 150 q6 10 4 20" stroke="{skin_line}" stroke-width="2" fill="none" stroke-linecap="round"/>')
-	s += _f('<path d="M124 150 Q129 153 125 156" stroke="{nose}" stroke-width="2.5" fill="none" stroke-linecap="round"/>')
+	s += _f('<ellipse cx="124" cy="150.5" rx="6" ry="4.6" fill="{nose}" opacity="0.14"/>')
+	s += _f('<path d="M124 149 Q130 153 125 157" stroke="{nose}" stroke-width="2.8" fill="none" stroke-linecap="round"/>')
+	s += '<ellipse cx="121.6" cy="148.4" rx="2.2" ry="1.6" fill="#FFFFFF" opacity="0.25"/>'
 	if look.facial_hair == "beard":
 		s += _f('<path d="M52 146 C58 196 86 216 114 216 C144 216 172 196 180 146 C170 168 150 184 114 184 C80 184 60 168 52 146 Z" fill="{hair}" stroke="{hair_line}" stroke-width="2.5"/>')
 	elif look.facial_hair == "stubble":
@@ -361,7 +363,7 @@ func _almond_eyes(kind := "normal") -> String:
 
 
 func _brows_svg(kind: String) -> String:
-	var brow_w := "4.5" if look.age in ["adult", "senior"] and not look.lashes else "3.5"
+	var brow_w := "4.5" if look.age in ["adult", "senior"] and not look.lashes else "4.2"
 	# Outer end, the arch, the inner end of the left brow (the right one is its mirror about x = 122).
 	var base := [Vector2(80, 94), Vector2(93, 86), Vector2(106, 91)] if look.eyes != "almond" else [Vector2(78, 99), Vector2(93, 93), Vector2(108, 97)]
 	# (everything up by `dy`, the outer end by `out`, the inner end by `inn`, the arch by `arch`; positive = down)
