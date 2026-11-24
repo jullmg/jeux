@@ -146,6 +146,9 @@ func room_name() -> String:
 func _ready() -> void:
 	# Back inside (from the park or anywhere): an outing with Papa is over.
 	ParkOuting.end()
+	# A sled never comes home (a game saved with it in her arms is freed too).
+	if Carry.has("traineau"):
+		Carry.clear()
 	_build_shell()
 	_build_vestibule()
 	_build_salon()

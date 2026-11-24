@@ -346,12 +346,15 @@ func _leave_by_gate() -> void:
 				_control.enabled = true
 				return
 			ParkOuting.end()
+			Carry.put_down(_charlotte)  # the sled stays at the park
 			Transition.inside_x = School.HOME_X
 			Transition.street_x = NAN
 			Transition.arrive = ""
 			Transition.change_scene_saying(self, School.HOME, "Papa te ramène à la maison…", 1.4))
 		return
 	_control.enabled = false
+	if Carry.has("traineau"):
+		Carry.put_down(_charlotte)
 	# Out the way she came in: Masson's south side, at the lawn.
 	Transition.street_x = float(GameState.flags.get("park_from_x", NAN))
 	Transition.change_scene(self, "res://scenes/masson_pair.tscn")
