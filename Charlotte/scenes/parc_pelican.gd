@@ -1302,7 +1302,7 @@ class _Butterflies:
 			var ph: float = b[2]
 			var sp: float = b[3]
 			var p := Vector2(b[0] + sin(_t * 0.35 * sp + ph) * 120.0, b[1] + sin(_t * 0.8 * sp + ph * 2.0) * 22.0 + cos(_t * 0.23 + ph) * 18.0)
-			var flap := absf(sin(_t * 11.0 * sp + ph))
+			var flap := 0.25 + 0.75 * absf(sin(_t * 11.0 * sp + ph))
 			var col: Color = b[4]
 			for side in [-1.0, 1.0]:
 				var w := PackedVector2Array([p, p + Vector2(side * 15.0 * flap, -12.0), p + Vector2(side * 17.0 * flap, 2.0)])
