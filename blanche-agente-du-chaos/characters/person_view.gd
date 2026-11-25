@@ -2,7 +2,7 @@ class_name PersonView
 extends Node3D
 ## Maman, Papa ou Charlotte à l'écran. `pose` dit le geste en cours.
 
-## Les matières dont la couleur vient des sommets du modèle (tools/blender/mom_head.py).
+## Les matières dont la couleur vient des sommets du modèle (tools/blender/heads.py).
 const PAINTED := ["peau_visage", "cheveux_ombre"]
 
 ## "idle", "walk", "brasser", "couper", "laver", "frigo", "telephone", "four", "ilot", "surprise", "charlotte",
@@ -45,7 +45,7 @@ func _ready() -> void:
 	_set_mouth("Sourire")
 
 
-## Le visage et la chevelure de Maman sont peints aux sommets (joues roses, cheveux foncés à la racine).
+## Les visages et les chevelures sont peints aux sommets (joues roses, barbe, cheveux foncés à la racine).
 func _paint_by_vertex() -> void:
 	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 		for s in mesh.mesh.get_surface_count():
