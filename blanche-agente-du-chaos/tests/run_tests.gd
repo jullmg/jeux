@@ -554,3 +554,54 @@ func test_sans_sauvegarde() -> void:
 	var s := SaveData.new(TMP, false)
 	s.record(1, 100, 1)
 	check(not FileAccess.file_exists(TMP), "--no-save n'écrit rien")
+
+
+# ------------------------------------------------------------------ ressources
+
+func test_modeles_de_nourriture() -> void:
+	var foods: Node = (load("res://art/models/nourriture.glb") as PackedScene).instantiate()
+	for id in range(1, Levels.COUNT + 1):
+		for entry: Array in Levels.load_level(id).foods.values():
+			check(foods.find_child(entry[0], true, false) is MeshInstance3D, "niveau %d : modèle %s" % [id, entry[0]])
+	foods.free()
+
+
+func test_modeles_complets() -> void:
+	for name_: String in ["cuisine", "blanche", "maman", "papa", "charlotte"]:
+		var model: Node = (load("res://art/models/%s.glb" % name_) as PackedScene).instantiate()
+		if name_ == "cuisine":
+			for part: String in ["PorteFrigo", "Tabouret", "Ilot"]:
+				check(model.find_child(part, true, false) != null, "cuisine : " + part)
+		else:
+			var skeletons := model.find_children("*", "Skeleton3D", true, false)
+			check(skeletons.size() == 1, name_ + " : un squelette")
+			var bones: Array = ["jaw", "tail3", "lidL", "browR", "earL", "hpawR"] if name_ == "blanche" else ["head", "handR", "footL"]
+			for b: String in bones:
+				check(skeletons[0].find_bone(b) >= 0, "%s : os %s" % [name_, b])
+			if name_ != "blanche":
+				for mouth: String in ["Sourire", "Neutre", "Ouverte", "Fachee"]:
+					check(model.find_child("Bouche" + mouth, true, false) != null, name_ + " : bouche " + mouth)
+		model.free()
+
+
+func test_tous_les_sons_existent() -> void:
+	var regex := RegEx.new()
+	regex.compile("Sound\\.play\\(\"(\\w+)\"|\\[\"(couteau|brasse|eau|pas)\", [0-9.]+\\]|\"(tombe|fracas|miette|prise|combo|avale|tour|alerte|victoire|rate)\"")
+	var found := {}
+	for path: String in ["res://scenes/main.gd", "res://ui/menus.gd", "res://ui/ui_style.gd"]:
+		for m in regex.search_all(FileAccess.get_file_as_string(path)):
+			for i in range(1, 4):
+				if m.get_string(i) != "":
+					found[m.get_string(i)] = true
+	check(found.size() > 20, "sons trouvés dans le code : %d" % found.size())
+	for sound: String in found:
+		check(ResourceLoader.exists("res://audio/generated/%s.wav" % sound), "son absent : " + sound)
+	for track: String in ["menu", "jeu", "tension"]:
+		check(ResourceLoader.exists("res://audio/generated/musique_%s.wav" % track), "musique : " + track)
+
+
+func test_textes_complets() -> void:
+	for activity: String in Sim.ACTIVITY_WINDOWS:
+		check(Texts.ACTIVITY.has(activity), "activité sans texte : " + activity)
+	for id: String in map.stations:
+		check(Sim.ACTIVITY_WINDOWS.has(map.stations[id].activity), "poste sans durée : " + id)

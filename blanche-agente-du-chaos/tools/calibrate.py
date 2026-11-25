@@ -8,7 +8,7 @@ import argparse, concurrent.futures, json, os, pathlib, subprocess, sys, tempfil
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 GODOT = os.environ.get("GODOT", "/Applications/Godot.app/Contents/MacOS/Godot")
-PROFILES = ["sage_300", "sage_600", "prudent_300", "equilibre_300", "equilibre_500", "gourmand_300", "novice_700",
+PROFILES = ["sage_300", "prudent_300", "equilibre_300", "equilibre_500", "equilibre_700", "gourmand_300", "novice_700",
             "tetu_300", "spam_300", "miettes_300", "campeur_300"]
 # Part des débutants qui ratent chaque niveau, visée par le seuil de la première étoile.
 FAIL_TARGET = [3, 8, 12, 17, 22, 28, 34, 40]
