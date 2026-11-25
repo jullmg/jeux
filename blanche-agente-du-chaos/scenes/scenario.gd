@@ -121,6 +121,23 @@ func _poses() -> void:
 	await wait(0.9)
 	await shot("p_chien_piteux")
 	stage.dog.sad = false
+	# De face, puis dressée contre un comptoir, vue de côté.
+	stage.dog.pose = "sit"
+	stage.dog.rotation.y = 0.35
+	stage.photo = [spot + Vector3(0.3, 0.62, 0.95), spot + Vector3(0.0, 0.38, 0.05)]
+	await wait(0.9)
+	await shot("p_chien_face")
+	var edge: Dictionary = stage.map.spots.ilot_sud
+	var at := Vector3(edge.stand.x, 0, edge.stand.y)
+	var heading: Vector2 = edge.food - edge.stand
+	stage.dog.position = at
+	stage.dog.rotation.y = atan2(heading.x, heading.y)
+	stage.dog.surface_y = stage.map.data.counter_height
+	stage.dog.pose = "reach"
+	stage.dog.reach_progress = 0.7
+	stage.photo = [at + Vector3(1.75, 1.15, 0.45), at + Vector3(0.0, 0.62, -0.18)]
+	await wait(0.9)
+	await shot("p_chien_comptoir")
 	stage.dog.pose = "sit"
 	stage.dog.position = Vector3(3.5, 0, 6.0)
 	var stand := Vector3(-0.2, 0, 1.2)

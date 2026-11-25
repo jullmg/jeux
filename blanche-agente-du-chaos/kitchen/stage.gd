@@ -51,6 +51,8 @@ var _cam_pos := Vector3.ZERO
 var _cam_target := Vector3.ZERO
 var _mom_yaw := 0.0
 var _dog_yaw := 0.0
+## L'endroit à nourriture contre lequel Blanche se dresse ou vient de se dresser.
+var _reach_spot := ""
 var _ring_mesh: ArrayMesh
 var _ring_materials: Array[StandardMaterial3D] = []
 var _ring_shadow: StandardMaterial3D
@@ -90,7 +92,7 @@ func _ready() -> void:
 		_ring_materials.append(mat)
 	dog = DogView.new()
 	add_child(dog)
-	dog.add_child(_blob_shadow(0.34, 0.5))
+	dog.add_child(_blob_shadow(0.27, 0.5))
 	# Le shader de la silhouette se compile à l'écran titre, pas en pleine partie.
 	dog.set_see_through(true)
 	get_tree().create_timer(0.25).timeout.connect(dog.set_see_through.bind(false))
@@ -326,7 +328,7 @@ func food_model(size: int) -> MeshInstance3D:
 func item_position(item: Dictionary) -> Vector3:
 	var y := 0.0
 	if item.spot != "":
-		y = 0.9 if map.spots[item.spot].surface == "buffet" else float(map.data.counter_height)
+		y = _surface_height(item.spot)
 	return Vector3(item.pos.x, y, item.pos.y)
 
 
@@ -494,10 +496,14 @@ static func _turn(from: float, to: float, delta: float, speed: float) -> float:
 	return lerp_angle(from, to, 1.0 - exp(-delta * speed))
 
 
+func _surface_height(spot: String) -> float:
+	return 0.9 if map.spots[spot].surface == "buffet" else float(map.data.counter_height)
+
+
 ## Un meuble ou une personne passe-t-il entre la caméra et Blanche ?
 func _dog_covered() -> bool:
 	var eye := camera.global_position
-	for height: float in [0.18, 0.5]:
+	for height: float in [0.14, 0.42]:
 		var point := Vector3(sim.dog_pos.x, height, sim.dog_pos.y)
 		var box := AABB(Vector3(map.island.position.x, 0.0, map.island.position.y),
 			Vector3(map.island.size.x, 0.93, map.island.size.y))
@@ -540,9 +546,21 @@ static func _follow_floor(node: Node3D, to: Vector2, delta: float) -> void:
 
 
 func _show_dog(delta: float) -> void:
-	_follow_floor(dog, sim.dog_pos, delta)
+	if sim.dog_state == Sim.Dog.REACHING:
+		_reach_spot = sim.reach_item.spot
+	# Dressée, elle se place bien en face du morceau, les pattes sur le bord (à l'écran seulement).
+	var up: bool = sim.dog_state == Sim.Dog.REACHING \
+		or (sim.dog_state == Sim.Dog.LOWERING and sim.lower_left > Sim.DESCEND_TIME * 0.5)
+	var at := sim.dog_pos
+	var heading := sim.dog_dir
+	if up and _reach_spot != "":
+		var spot: Dictionary = map.spots[_reach_spot]
+		at = spot.stand
+		heading = spot.food - spot.stand
+		dog.surface_y = _surface_height(_reach_spot)
+	_follow_floor(dog, at, delta)
 	dog.speed = _speeds.get("blanche", 0.0)
-	_dog_yaw = _turn(_dog_yaw, atan2(sim.dog_dir.x, sim.dog_dir.y), delta, 14.0)
+	_dog_yaw = _turn(_dog_yaw, atan2(heading.x, heading.y), delta, 14.0)
 	dog.rotation.y = _dog_yaw
 	_surprised -= delta
 	dog.carrying = not sim.mouth.is_empty()
@@ -662,8 +680,8 @@ func _move_camera(delta: float) -> void:
 		return
 	if view == "titre":
 		var drift := 0.0 if reduced_motion else sin(_time * 0.23) * 0.09
-		pos = Vector3(-0.05 + drift, 1.5, 3.15)
-		target = Vector3(0.78, 0.58, 0.55)
+		pos = Vector3(0.1 + drift, 1.22, 2.92)
+		target = Vector3(0.86, 0.5, 0.66)
 	elif not reduced_motion and dog:
 		var want := Vector3(dog.position.x * 0.09, 0, dog.position.z * 0.05)
 		_follow = _follow.lerp(want, 1.0 - exp(-delta * 2.5))

@@ -21,7 +21,7 @@ cam_data = bpy.data.cameras.new("cam")
 cam_data.angle = math.radians(24)
 cam = bpy.data.objects.new("cam", cam_data)
 scene.collection.objects.link(cam)
-eye, target = (0.42, 0.78, 1.55), (0.0, 0.615, 0.38)
+eye, target = (0.46, 0.62, 1.49), (0.0, 0.437, 0.23)
 cam.location = C.G(eye)
 cam.rotation_euler = (Vector(C.G(target)) - Vector(C.G(eye))).to_track_quat("-Z", "Y").to_euler()
 scene.camera = cam
