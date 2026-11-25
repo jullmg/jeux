@@ -13,6 +13,9 @@ extends RefCounted
 ## writing on it sets the meta `keep_upright` so it is not mirrored when she faces left.
 
 const KEY := "carried"
+## The quest each thing belongs to: left in her arms after it, a thing is put down when the next scene opens.
+const OWNERS := {"milk": "milk", "can": "plants", "toy": "menage", "book": "livre", "chips": "chips", "gift": "fete",
+	"bonhomme": "bonhomme", "pelle": "souffleuse", "deco": "sapin", "lettre": "noel", "biscuits": "noel"}
 const FULL_HANDS := "J'ai déjà les mains pleines !"
 ## Where her hands hold the watering can, in the can's own space (its handle).
 const CAN_HANDLE := Vector2(18, -33)
@@ -65,6 +68,11 @@ static func put_down(who: Character) -> void:
 
 ## Gives the thing back to a fresh Character (a new scene, a loaded game); does nothing if her hands are already full.
 static func restore(who: Character) -> void:
+	# Something that belongs to a quest that is not running (finished, erased or never started) is not carried on.
+	var owner: String = str(OWNERS.get(what(), ""))
+	if busy() and owner != "" and not Quests.active(owner):
+		GameState.flags.erase(KEY)
+		return
 	if busy() and who and not who.is_holding():
 		_hold(who)
 
