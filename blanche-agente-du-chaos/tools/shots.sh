@@ -9,8 +9,8 @@ only=${3:-}
 log="$out/journal.txt"
 open -W -g -n -a /Applications/Godot.app --stdout "$log" --stderr "$log.err" --args --path "$PWD" \
 	--screen "$(tools/ecran_macbook.sh)" --audio-driver Dummy --resolution "$res" \
-	--quit-after 60000 -- --no-save "--scenario=$out" $only
-grep -E 'CAPTURE|situation' "$log" || true
+	--quit-after 60000 -- --no-save "--scenario=$out" $only ${4:-}
+grep -E 'CAPTURE|situation|PERF' "$log" || true
 if grep -E -A3 'SCRIPT ERROR|^ERROR|^WARNING' "$log.err"; then
 	exit 1
 fi

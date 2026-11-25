@@ -17,8 +17,10 @@ var model: Node3D
 var _mouths: Dictionary = {}
 var _time := 0.0
 var _phase := 0.0
-var _prop: Node3D
+var _props: Dictionary = {}         # nom → objet déjà fabriqué
 var _prop_kind := ""
+## Les matières des objets restent en mémoire : les recréer ferait recompiler leur shader en pleine partie.
+static var _materials: Dictionary = {}
 var who: String
 
 
@@ -213,11 +215,13 @@ func _process(delta: float) -> void:
 func _show_prop(kind: String) -> void:
 	if kind == _prop_kind:
 		return
+	if _props.has(_prop_kind):
+		_props[_prop_kind].visible = false
 	_prop_kind = kind
-	if is_instance_valid(_prop):
-		_prop.queue_free()
-	_prop = null
 	if kind == "":
+		return
+	if _props.has(kind):
+		_props[kind].visible = true
 		return
 	var bone := "handR"
 	var node := Node3D.new()
@@ -245,16 +249,18 @@ func _show_prop(kind: String) -> void:
 	# Les positions ci-dessus sont dans les axes du modèle, à partir de l'os au repos.
 	var rest := rig.skeleton.get_bone_global_rest(rig.bones[bone])
 	node.transform = rest.affine_inverse() * Transform3D(Basis.IDENTITY, rest.origin)
-	_prop = attach
+	_props[kind] = attach
 
 
 func _part(parent: Node3D, mesh: Mesh, color: Color, at: Vector3, degrees := Vector3.ZERO) -> void:
 	var m := MeshInstance3D.new()
 	m.mesh = mesh
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	mat.roughness = 0.5
-	m.material_override = mat
+	if not _materials.has(color):
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = color
+		mat.roughness = 0.5
+		_materials[color] = mat
+	m.material_override = _materials[color]
 	m.position = at
 	m.rotation_degrees = degrees
 	parent.add_child(m)

@@ -52,6 +52,7 @@ var _dog_yaw := 0.0
 var _ring_mesh: ArrayMesh
 var _ring_materials: Array[StandardMaterial3D] = []
 var _ring_shadow: StandardMaterial3D
+var _kept: Array[Resource] = []
 
 
 func _ready() -> void:
@@ -87,6 +88,9 @@ func _ready() -> void:
 	mom = PersonView.new("maman")
 	add_child(mom)
 	mom.add_child(_blob_shadow(0.32, 0.4))
+	# Les modèles qui vont et viennent restent chargés, pour éviter les à-coups.
+	for who: String in ["papa", "charlotte"]:
+		_kept.append(load("res://art/models/%s.glb" % who))
 	show_title()
 
 

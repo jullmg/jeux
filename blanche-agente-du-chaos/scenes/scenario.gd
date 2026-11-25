@@ -17,6 +17,9 @@ func _init(main_: Node, dir_: String) -> void:
 
 
 func _ready() -> void:
+	# La fenêtre doit rester de la taille demandée (certains gestionnaires de fenêtres l'agrandissent).
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_NO_FOCUS, true)
 	DirAccess.make_dir_recursive_absolute(dir)
 	_run.call_deferred()
 	get_tree().create_timer(170.0, true, false, true).timeout.connect(func() -> void: main.quit_game(2))
@@ -50,6 +53,48 @@ func play(level: int, style: String, seed_ := 5) -> void:
 	main.seed_override = seed_
 	main.start_level(level)
 	main.bot = Bot.new(main.sim, style, 0.3, 1.0, seed_)
+
+
+## Images par seconde sans synchronisation verticale, temps de chargement et mémoire.
+func _performance() -> void:
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	await wait(2.0)
+	for id: int in [1, 5, 8]:
+		var begin := Time.get_ticks_usec()
+		play(id, "equilibre", 40 + id)
+		await get_tree().process_frame
+		var load_ms := (Time.get_ticks_usec() - begin) / 1000.0
+		await wait(3.0)
+		var times: Array[float] = []
+		var last := Time.get_ticks_usec()
+		var until_ := last + 20_000_000
+		var calls := 0
+		while last < until_:
+			await get_tree().process_frame
+			var now := Time.get_ticks_usec()
+			times.append((now - last) / 1000.0)
+			if now - last > 40000 and OS.get_cmdline_user_args().has("--pics"):
+				print("PERF pic %.0f ms à t=%.2f maman=%d pose=%s cachee=%s soupcon=%.2f bruitages=%s" % [(now - last) / 1000.0,
+					main.sim.time, main.sim.mom_state, main.stage.dog.pose, main.stage.dog._xray, main.sim.suspicion,
+					str(Sound.history.slice(-3))])
+			last = now
+			calls = maxi(calls, RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME))
+		times.sort()
+		var total := 0.0
+		for t in times:
+			total += t
+		print("PERF niveau %d : %.0f images/s en moyenne, 99 %% des images sous %.1f ms, pire %.1f ms, %d appels de dessin, chargement %.0f ms, fenêtre %s" % [
+			id, 1000.0 / (total / times.size()), times[int(times.size() * 0.99)], times.back(), calls, load_ms,
+			str(DisplayServer.window_get_size())])
+	for i in 20:
+		play(1 + i % Levels.COUNT, "equilibre", i)
+		await wait(0.4)
+		main.go_title()
+		await wait(0.1)
+		if i == 1 or i == 19:
+			print("PERF mémoire après %d parties : %.1f Mo, objets %d, vidéo %.0f Mo" % [i + 1,
+				OS.get_static_memory_usage() / 1048576.0, Performance.get_monitor(Performance.OBJECT_COUNT),
+				Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0])
 
 
 ## Chaque posture vue de près, de côté.
@@ -118,6 +163,10 @@ func _run() -> void:
 		main.menus.show_credits()
 		await wait(0.4)
 		await shot("05_credits")
+	if only.has("perf"):
+		await _performance()
+		main.quit_game()
+		return
 	if wants("poses"):
 		await _poses()
 	if wants("jeu"):

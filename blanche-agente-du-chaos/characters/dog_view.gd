@@ -24,7 +24,8 @@ var _phase := 0.0
 var _blink := 2.0
 var _ground := 0.0
 var _held: Node3D
-var _xray_materials: Array[BaseMaterial3D] = []
+## Surfaces du poil : [maillage, surface, matière normale, matière avec silhouette].
+var _fur: Array[Array] = []
 var _xray := false
 
 
@@ -57,7 +58,10 @@ func _dress() -> void:
 				if name == "poil":
 					m.vertex_color_use_as_albedo = true
 					m.albedo_color = Color.WHITE
-				_xray_materials.append(m)
+				var through: BaseMaterial3D = m.duplicate()
+				through.stencil_mode = BaseMaterial3D.STENCIL_MODE_XRAY
+				through.stencil_color = Color(1.0, 0.72, 0.82, 0.7)
+				_fur.append([mesh, s, m, through])
 			mesh.set_surface_override_material(s, m)
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 
@@ -67,10 +71,8 @@ func set_see_through(on: bool) -> void:
 	if on == _xray:
 		return
 	_xray = on
-	for m in _xray_materials:
-		m.stencil_mode = BaseMaterial3D.STENCIL_MODE_XRAY if on else BaseMaterial3D.STENCIL_MODE_DISABLED
-		if on:
-			m.stencil_color = Color(1.0, 0.72, 0.82, 0.7)
+	for f in _fur:
+		f[0].set_surface_override_material(f[1], f[3] if on else f[2])
 
 
 func hold(item: Node3D) -> void:
