@@ -3,6 +3,8 @@ extends Node3D
 ## La lumière de la cuisine : un appoint doux venu du plafond, le soleil qui entre par la fenêtre, un contre-jour frais,
 ## les lumières sous les armoires, et le rendu (ombres de contact, halo, couleurs). Chaque mission a son moment.
 
+## La couche des personnages : un contre-jour qui n'éclaire qu'eux détache leur silhouette.
+const RIM_LAYER := 2
 ## Les moments : couleurs et forces des lumières, couleur de la vue par la fenêtre.
 const MOMENTS := {
 	"matin": {
@@ -62,6 +64,11 @@ func _ready() -> void:
 	_key.shadow_blur = 1.6
 	_fill = _sun(Vector3(-24, 138, 0), false)
 
+	var rim := _sun(Vector3(-28, 168, 0), false)
+	rim.light_color = Color(1.0, 0.93, 0.84)
+	rim.light_energy = 0.9
+	rim.light_cull_mask = RIM_LAYER
+
 	_window = SpotLight3D.new()
 	_window.position = Vector3(3.5, 2.75, -0.95)
 	_window.spot_range = 8.0
@@ -117,21 +124,30 @@ func set_moment(name_: String) -> void:
 	_capture_reflections()
 
 
+## Avant de quitter : la sonde rend ses images, sinon le moteur les signale comme oubliées.
+func release() -> void:
+	if _probe:
+		_probe.queue_free()
+		_probe = null
+
+
 ## La teinte à donner à la vue par la fenêtre.
 func sky_tint() -> Color:
 	return MOMENTS[moment].sky
 
 
 ## Une sonde photographie la pièce une fois : c'est elle que reflètent l'inox, le comptoir et le plancher verni.
+## La déplacer d'un cheveu lui fait reprendre sa photo.
 func _capture_reflections() -> void:
-	if _probe:
-		_probe.queue_free()
-	_probe = ReflectionProbe.new()
-	_probe.position = Vector3(0.0, 1.35, 0.35)
-	_probe.size = Vector3(4.3, 3.0, 5.6)
-	_probe.interior = true
-	_probe.box_projection = true
-	_probe.ambient_mode = ReflectionProbe.AMBIENT_DISABLED
-	_probe.update_mode = ReflectionProbe.UPDATE_ONCE
-	_probe.intensity = 0.8
-	add_child(_probe)
+	if _probe == null:
+		_probe = ReflectionProbe.new()
+		_probe.position = Vector3(0.0, 1.35, 0.35)
+		_probe.size = Vector3(4.3, 3.0, 5.6)
+		_probe.interior = true
+		_probe.box_projection = true
+		_probe.ambient_mode = ReflectionProbe.AMBIENT_DISABLED
+		_probe.update_mode = ReflectionProbe.UPDATE_ONCE
+		_probe.intensity = 0.8
+		add_child(_probe)
+	else:
+		_probe.position.y = 1.35 if _probe.position.y > 1.3505 else 1.351

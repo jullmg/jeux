@@ -138,7 +138,14 @@ func _poses() -> void:
 	stage.photo = [at + Vector3(1.75, 1.15, 0.45), at + Vector3(0.0, 0.62, -0.18)]
 	await wait(0.9)
 	await shot("p_chien_comptoir")
+	stage.dog.set_festive(true)
 	stage.dog.pose = "sit"
+	stage.dog.position = at + Vector3(0.0, 0.0, 0.35)
+	stage.dog.rotation.y = 0.4
+	stage.photo = [stage.dog.position + Vector3(0.4, 0.75, 1.1), stage.dog.position + Vector3(0.0, 0.42, 0.0)]
+	await wait(0.9)
+	await shot("p_chien_noel")
+	stage.dog.set_festive(false)
 	stage.dog.position = Vector3(3.5, 0, 6.0)
 	var stand := Vector3(-0.2, 0, 1.2)
 	stage.mom.position = stand

@@ -11,12 +11,66 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import common as C  # noqa: E402
 import heads  # noqa: E402
 import bpy  # noqa: E402
-from mathutils import Vector  # noqa: E402
+from mathutils import Vector, noise  # noqa: E402
+from mathutils.kdtree import KDTree  # noqa: E402
+
+
+def _soft(parts, armature, color, voxel, smoothing, fold_heights, k, streaks=0.0):
+    """Fond des pièces en une surface lisse, reprend leurs poids, puis y creuse des plis et peint le tissu."""
+    source = [Vector(v) for v in parts.verts]
+    weights = parts.groups
+    tree = KDTree(len(source))
+    for i, v in enumerate(source):
+        tree.insert(v, i)
+    tree.balance()
+    ob = parts.build()
+    ob.vertex_groups.clear()
+    C.remesh(ob, voxel, smoothing, 0.35)
+
+    def weights_at(p):
+        total = {}
+        for _co, i, d in tree.find_n(p, 8):
+            w = 1.0 / (d + 0.006) ** 3
+            for bone, share in weights[i].items():
+                total[bone] = total.get(bone, 0.0) + share * w
+        best = sorted(total.items(), key=lambda kv: -kv[1])[:3]
+        s = sum(v for _, v in best)
+        return {bone: v / s for bone, v in best}
+
+    def fold(p):
+        """Les plis : plus marqués près des coudes, de la taille et des genoux."""
+        near = sum(math.exp(-((p.y - h) / (0.075 * k)) ** 2) for h in fold_heights)
+        return noise.noise(Vector((p.x * 22.0, p.y * 55.0, p.z * 22.0))) * 0.0032 * k * min(1.0, near)
+
+    if color is not None:
+        folds = {}
+        normals = [v.normal.copy() for v in ob.data.vertices]
+        for i, v in enumerate(ob.data.vertices):
+            p = Vector((v.co.x, v.co.z, -v.co.y))
+            folds[i] = fold(p)
+            v.co += normals[i] * folds[i]
+        base = C.vec(color)
+        index = iter(range(len(ob.data.vertices)))
+
+        def color_at(p):
+            i = next(index)
+            grain = noise.noise(p * 260.0)
+            cloud = noise.noise(p * 13.0)
+            line = noise.noise(Vector((p.x * 210.0, p.y * 16.0, p.z * 210.0)))
+            shade = 1.0 + 0.10 * grain + 0.07 * cloud + 0.16 * streaks * line * (0.5 if streaks >= 1.0 else 1.0) \
+                + folds[i] * 22.0
+            # un peu d'éclat dans les tissus très foncés, pour qu'on lise les plis
+            return base * shade + Vector((1, 1, 1)) * 0.0025 * max(0.0, grain + cloud)
+
+        C.paint(ob, color_at)
+    C.weigh(ob, weights_at)
+    C.skin(ob, armature)
 
 
 def build(who, spec):
     C.reset()
     C._materials.clear()
+    C._painted.clear()
     rng = random.Random(sum(map(ord, who)))
     k = spec["height"] / 1.66          # tout est dessiné pour 1,66 m puis mis à l'échelle
     child = spec.get("child", False)
@@ -58,6 +112,12 @@ def build(who, spec):
     shoes = M("chaussures", spec["shoes"], 0.7)
 
     body = C.Obj("Corps")
+    # les parties fondues en une seule surface lisse : le haut (torse et bras), le bas (bassin et jambes), les mains
+    shirt = C.Obj("Haut")
+    trousers = C.Obj("Bas")
+    hands = C.Obj("Mains")
+    shirt_m = C.material("tissu_haut", "#ffffff", 0.92, vertex_colors=True)
+    trousers_m = C.material("tissu_bas", "#ffffff", 0.9, vertex_colors=True)
 
     def blend(a, b, y, mid, half):
         """Poids qui passe de l'os a (en haut) à l'os b (en bas) autour de la hauteur mid."""
@@ -76,12 +136,12 @@ def build(who, spec):
 
     # bassin et torse
     hip_r = spec.get("hip_r", 0.15)
-    body.tube([P(0, 0.84, 0), P(0, 0.93, 0), P(0, 1.0, 0)], [hip_r * 0.85 * k, hip_r * k, hip_r * 0.9 * k], pants, seg=28,
-              squash=(1.0, 0.72), weights=torso_w)
+    trousers.tube([P(0, 0.84, 0), P(0, 0.93, 0), P(0, 1.0, 0)], [hip_r * 0.82 * k, hip_r * 0.94 * k, hip_r * 0.80 * k], trousers_m,
+                  seg=28, squash=(1.0, 0.72), weights=torso_w)
     chest_r = spec.get("chest_r", 0.165)
     path, radii = C.curve([P(0, 0.94, 0), P(0, 1.03, 0.0), P(0, 1.12, 0.005), P(0, 1.22, 0.01), P(0, 1.30, 0.0), P(0, 1.36, 0)],
-                          [r * k for r in (hip_r * 0.98, hip_r * 0.92, chest_r * 0.95, chest_r, chest_r * 0.97, 0.11)], 3)
-    body.tube(path, radii, top, seg=32, squash=(1.08 * wide, 0.70), weights=torso_w)
+                          [r * k for r in (hip_r * 1.05, hip_r * 0.97, chest_r * 0.95, chest_r, chest_r * 0.97, 0.11)], 3)
+    shirt.tube(path, radii, shirt_m, seg=32, squash=(spec.get("torso_x", 1.08) * wide, 0.70), weights=torso_w)
     body.torus(P(0, 0.945, 0), hip_r * 0.97 * k, 0.013 * k, top2, sides=8, squash=0.70, weights={"hips": 1.0})
     for side, s in (("L", 1), ("R", -1)):
         a, f, h = "arm" + side, "forearm" + side, "hand" + side
@@ -97,19 +157,22 @@ def build(who, spec):
         r = spec.get("arm_r", 0.054)
         path, radii = C.curve([shoulder, P((sh_x + 0.025) * s, 1.22, 0), elbow, P((sh_x + 0.07) * s, 0.96, 0.008), wrist],
                               [v * k for v in (r * 0.96, r * 0.96, r * 0.84, r * 0.76, r * 0.62)], 5)
-        body.tube(path, radii, top, seg=18, weights=arm_w)
+        shirt.tube(path, radii, shirt_m, seg=18, weights=arm_w)
         body.torus(wrist, r * 0.62 * k, 0.012 * k, trim, axis=(0.12 * s, -1, 0.08), sides=8, weights={f: 1.0})
         # main : paume, pouce et doigts
         hw = {h: 1.0}
         palm = Vector(P((sh_x + 0.09) * s, 0.795, 0.025))
-        body.ball(palm, (0.024 * k, 0.045 * k, 0.034 * k), skin, weights=hw)
+        hands.ball(palm, (0.022 * k, 0.045 * k, 0.034 * k), skin, weights=hw)
         for i in range(4):
-            z = 0.002 + i * 0.016
+            z = 0.001 + i * 0.0172
             base = Vector(P((sh_x + 0.092) * s, 0.775, z))
-            body.tube([base, base + Vector((0.004 * s * k, -0.052 * k, 0.006 * k))], [0.0095 * k, 0.0075 * k], skin, seg=8,
-                      weights=hw, cap_rings=3)
-        body.tube([P((sh_x + 0.082) * s, 0.81, 0.045), P((sh_x + 0.07) * s, 0.765, 0.068)], [0.012 * k, 0.009 * k], skin,
-                  seg=8, weights=hw, cap_rings=3)
+            long = 0.050 if i in (1, 2) else 0.042
+            # des doigts un peu repliés vers la paume
+            hands.tube([base, base + Vector((0.004 * s * k, -long * 0.62 * k, 0.005 * k)),
+                        base + Vector((-0.010 * s * k, -long * k, 0.008 * k))], [0.0090 * k, 0.0082 * k, 0.0066 * k], skin,
+                       seg=8, weights=hw, cap_rings=3)
+        hands.tube([P((sh_x + 0.082) * s, 0.81, 0.045), P((sh_x + 0.07) * s, 0.765, 0.068)], [0.012 * k, 0.009 * k], skin,
+                   seg=8, weights=hw, cap_rings=3)
         # jambe
         t, sh, ft = "thigh" + side, "shin" + side, "foot" + side
 
@@ -122,7 +185,7 @@ def build(who, spec):
         path, radii = C.curve([P(0.082 * s, 0.9, 0), P(0.092 * s, 0.68, 0.004), P(0.095 * s, knee_y, 0.005),
                                P(0.095 * s, 0.28, -0.004), P(0.095 * s, 0.105, -0.01)],
                               [v * k for v in (lr, lr * 0.86, lr * 0.66, lr * 0.62, lr * 0.5)], 5)
-        body.tube(path, radii, pants, seg=18, weights=leg_w)
+        trousers.tube(path, radii, trousers_m, seg=18, weights=leg_w)
         fw = {ft: 1.0}
         body.tube([P(0.095 * s, 0.05, -0.03), P(0.095 * s, 0.042, 0.115)], [0.055 * k, 0.048 * k], shoes, seg=16,
                   squash=(1.0, 0.75), weights=fw)
@@ -140,13 +203,16 @@ def build(who, spec):
     for decoration in spec.get("extras", []):
         decoration(body, P, k, torso_w, M)
 
-    ob = body.build()
-    C.skin(ob, armature)
+    C.skin(body.build(), armature)
+    waist = 1.0 * k
+    _soft(shirt, armature, spec["top"], 0.0042, 10, [waist, 1.07 * k], k, streaks=1.0)
+    _soft(trousers, armature, spec["pants"], 0.0042, 6, [knee_y * k, 0.86 * k], k, streaks=spec.get("denim", 0.0))
+    _soft(hands, armature, None, 0.0022, 3, [], k)
     heads.build(who, armature, spec, hc, hr, rng)
 
-    heads.for_game(True)
+    C.for_game(True)
     C.export(spec["file"])
-    heads.for_game(False)
+    C.for_game(False)
     for o in bpy.data.objects:
         if o.name.startswith("Bouche") and o.name != "BoucheSourire":
             o.hide_render = True
@@ -202,10 +268,10 @@ build("maman", dict(
     hip_r=0.158, chest_r=0.155, shoulders=0.98, extras=[emblem]))
 
 build("papa", dict(
-    file="papa", height=1.82, skin="#dfaa8d", hair="#7d5b3c", hair2="#5e422c", hair_root="#422e1f", brow="#4a321f",
+    file="papa", height=1.82, skin="#dfaa8d", hair="#7d5b3c", hair2="#5e422c", hair_root="#422e1f", denim=1.0, brow="#4a321f",
     eyes="#6a93b3", eye_rim="#233a4c", lash="#6b4734", lips="#bd7a6c", mouth_line="#7d463d", stubble="#9a7260",
     top="#8a5a30", top2="#74491f", trim="#74491f", pants="#3f5675", shoes="#5b5a60", neck_r=0.057,
-    hip_r=0.15, chest_r=0.18, shoulders=1.14, arm_r=0.062, extras=[open_hoodie]))
+    hip_r=0.15, chest_r=0.17, shoulders=1.12, torso_x=0.97, arm_r=0.058, extras=[open_hoodie]))
 
 build("charlotte", dict(
     file="charlotte", height=1.28, child=True, skin="#efbea2", hair="#b88e5e", hair2="#8c6440", hair_root="#5c3e28",

@@ -314,3 +314,14 @@ def view(rng):
     grass = y < 0.035
     img[grass] = (_hex("#5e8c38") * (0.8 + 0.4 * _fbm(h, w, 4, 4))[..., None])[grass]
     return C.image("vue", np.clip(img, 0, 1))
+
+
+def fur():
+    """Le grain d'un pelage de chiot : de fines mèches couchées, qui accrochent la lumière par endroits."""
+    size = 512
+    strands = C.value_noise(size, size, 22, 2) * 0.6 + C.value_noise(size, size, 9, 1) * 0.4
+    tufts = _fbm(size, size, 48, 20, 3)
+    height = strands * 2.6 + tufts * 2.0
+    rough = 0.56 + 0.30 * (1.0 - strands) + 0.10 * (tufts - 0.5)
+    return dict(normal=C.image("poil_relief", _normal(height, 0.75), data=True),
+                orm=C.image("poil_brillance", np.dstack([np.ones_like(rough), rough, np.zeros_like(rough)]), data=True))

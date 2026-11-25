@@ -12,6 +12,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import common as C  # noqa: E402
+import textures as T  # noqa: E402
 import bpy  # noqa: E402
 from mathutils import Matrix, Vector, noise  # noqa: E402
 
@@ -57,7 +58,7 @@ armature = C.make_armature("Squelette", BONES)
 
 # ---------------------------------------------------------------- la peau
 
-coat = C.material("poil", "#ffffff", 0.62, vertex_colors=True)
+coat = C.material("poil", "#ffffff", 0.62, vertex_colors=True, **T.fur())
 body = C.Obj("Peau")
 # un corps dodu de bébé : ventre rond, petit poitrail bombé
 body.ball((0, 0.228, -0.03), (0.100, 0.095, 0.140), coat, seg=24, rings=18)
@@ -116,6 +117,13 @@ dec.ratio = 0.42
 bpy.ops.object.modifier_apply(modifier=dec.name)
 for p in skin.data.polygons:
     p.use_smooth = True
+# de quoi poser le grain du pelage : la peau est dépliée, puis l'image répétée
+bpy.ops.object.mode_set(mode="EDIT")
+bpy.ops.mesh.select_all(action="SELECT")
+bpy.ops.uv.smart_project(angle_limit=1.15, island_margin=0.001)
+bpy.ops.object.mode_set(mode="OBJECT")
+for loop in skin.data.uv_layers.active.data:
+    loop.uv *= 7.0
 
 
 def to_godot(v):

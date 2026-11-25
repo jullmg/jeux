@@ -47,6 +47,7 @@ var _curious_wait := 2.0
 var _curious_left := 0.0
 var _curious_side := 1.0
 var _held: Node3D
+var _hat: Node3D
 ## Surfaces du poil : [maillage, surface, matière normale, matière avec silhouette].
 var _fur: Array[Array] = []
 var _xray := false
@@ -64,6 +65,49 @@ func _ready() -> void:
 	attach.add_child(mouth_anchor)
 
 
+## Une tuque de père Noël, pour la dernière mission.
+func set_festive(on: bool) -> void:
+	if on and _hat == null:
+		_hat = _santa_hat()
+	if _hat:
+		_hat.visible = on
+
+
+func _santa_hat() -> Node3D:
+	var attach := BoneAttachment3D.new()
+	attach.bone_name = "head"
+	rig.skeleton.add_child(attach)
+	var hat := Node3D.new()
+	attach.add_child(hat)
+	var red := StandardMaterial3D.new()
+	red.albedo_color = Color("c4222c")
+	red.roughness = 0.95
+	var white := StandardMaterial3D.new()
+	white.albedo_color = Color("f6f3ec")
+	white.roughness = 1.0
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.008
+	cone.bottom_radius = 0.07
+	cone.height = 0.13
+	var band := TorusMesh.new()
+	band.inner_radius = 0.052
+	band.outer_radius = 0.088
+	var pompom := SphereMesh.new()
+	pompom.radius = 0.028
+	pompom.height = 0.056
+	for part: Array in [[cone, red, Vector3(0, 0.07, 0)], [band, white, Vector3(0, 0.008, 0)], [pompom, white, Vector3(0, 0.145, 0)]]:
+		var m := MeshInstance3D.new()
+		m.mesh = part[0]
+		m.material_override = part[1]
+		m.position = part[2]
+		m.layers = 1 | Ambiance.RIM_LAYER
+		hat.add_child(m)
+	var rest := rig.skeleton.get_bone_global_rest(rig.bones["head"])
+	var worn := Transform3D(Basis.from_euler(Vector3(-0.28, 0, -0.3)), Vector3(-0.012, 0.535, 0.165) * SIZE)
+	hat.transform = rest.affine_inverse() * worn
+	return attach
+
+
 ## Matières : poil peint aux sommets, liseré de lumière pour lire la silhouette noire, et silhouette à travers les meubles.
 func _dress() -> void:
 	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
@@ -73,10 +117,11 @@ func _dress() -> void:
 				continue
 			var m: BaseMaterial3D = base.duplicate()
 			var name := base.resource_name
+			mesh.layers = 1 | Ambiance.RIM_LAYER
 			if name.begins_with("poil"):
 				m.rim_enabled = true
-				m.rim = 0.35
-				m.rim_tint = 0.25
+				m.rim = 0.55
+				m.rim_tint = 0.4
 				if name == "poil":
 					m.vertex_color_use_as_albedo = true
 					m.albedo_color = Color.WHITE

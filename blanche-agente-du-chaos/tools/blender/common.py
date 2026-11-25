@@ -9,7 +9,7 @@ import sys
 
 import bpy
 import numpy as np
-from mathutils import Vector
+from mathutils import Vector, noise
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 MODELS = ROOT / "art" / "models"
@@ -435,6 +435,71 @@ def segment_distance(p, a, b):
     ab = b - a
     t = max(0.0, min(1.0, (p - a).dot(ab) / max(1e-9, ab.length_squared)))
     return (p - (a + ab * t)).length
+
+
+# ---------------------------------------------------------------- peaux lisses peintes aux sommets
+
+def smoothstep(a, b, x):
+    t = max(0.0, min(1.0, (x - a) / (b - a)))
+    return t * t * (3 - 2 * t)
+
+
+def vec(hex_color):
+    return Vector(lin(srgb(hex_color)))
+
+
+def remesh(ob, voxel, iterations, keep):
+    """Fond les formes en une seule surface lisse."""
+    bpy.context.view_layer.objects.active = ob
+    ob.select_set(True)
+    for kind, settings in (("REMESH", {"mode": "VOXEL", "voxel_size": voxel}),
+                           ("SMOOTH", {"factor": 0.6, "iterations": iterations}),
+                           ("DECIMATE", {"ratio": keep})):
+        mod = ob.modifiers.new(kind.lower(), kind)
+        for key, value in settings.items():
+            setattr(mod, key, value)
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+    ob.select_set(False)
+    for p in ob.data.polygons:
+        p.use_smooth = True
+
+
+_painted = []
+
+
+def paint(ob, color_at):
+    """Couleurs aux sommets ; `color_at` reçoit le point en coordonnées Godot."""
+    colors = ob.data.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
+    for i, v in enumerate(ob.data.vertices):
+        c = color_at(Vector((v.co.x, v.co.z, -v.co.y)))
+        colors.data[i].color = (c.x, c.y, c.z, 1.0)
+    _painted.append(ob)
+
+
+def for_game(encode):
+    """Les couleurs des sommets des personnages sont enregistrées en sRGB (le moteur mobile les lit ainsi ; le jeu le
+    dit à l'autre), alors que Blender les veut en linéaire : on les convertit pour l'exportation (`encode`), puis on les
+    remet pour les aperçus."""
+    def to_srgb(v):
+        return v * 12.92 if v <= 0.0031308 else 1.055 * v ** (1 / 2.4) - 0.055
+
+    def to_linear(v):
+        return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
+
+    convert = to_srgb if encode else to_linear
+    for ob in _painted:
+        for d in ob.data.color_attributes["Col"].data:
+            r, g, b, a = d.color
+            d.color = (convert(r), convert(g), convert(b), a)
+
+
+def weigh(ob, weights_at):
+    groups = {}
+    for i, v in enumerate(ob.data.vertices):
+        for bone, w in weights_at(Vector((v.co.x, v.co.z, -v.co.y))).items():
+            if bone not in groups:
+                groups[bone] = ob.vertex_groups.new(name=bone)
+            groups[bone].add([i], w, "REPLACE")
 
 
 # ---------------------------------------------------------------- export et aperçus

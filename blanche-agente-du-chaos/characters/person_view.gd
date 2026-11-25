@@ -3,7 +3,7 @@ extends Node3D
 ## Maman, Papa ou Charlotte à l'écran. `pose` dit le geste en cours.
 
 ## Les matières dont la couleur vient des sommets du modèle (tools/blender/heads.py).
-const PAINTED := ["peau_visage", "cheveux_ombre"]
+const PAINTED := ["peau_visage", "cheveux_ombre", "tissu_haut", "tissu_bas"]
 
 ## "idle", "walk", "brasser", "couper", "laver", "frigo", "telephone", "four", "ilot", "surprise", "charlotte",
 ## "hint", "feint", "round", "look", "point", "laugh", "wave", "carry", "snitch", "cheer", "chicane", "argue"
@@ -40,6 +40,8 @@ func _ready() -> void:
 	add_child(model)
 	rig = Rig.new(model)
 	_paint_by_vertex()
+	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		mesh.layers = 1 | Ambiance.RIM_LAYER
 	for mesh: MeshInstance3D in model.find_children("Bouche*", "MeshInstance3D", true, false):
 		_mouths[mesh.name.trim_prefix("Bouche")] = mesh
 	_set_mouth("Sourire")
@@ -288,10 +290,18 @@ func _show_prop(kind: String) -> void:
 			_part(node, _box(Vector3(0.018, 0.14, 0.07)), Color("26262c"), Vector3(0.01, -0.03, 0.02))
 		"panier":
 			bone = "chest"
-			_part(node, _box(Vector3(0.46, 0.2, 0.28)), Color("c9b08a"), Vector3(0, -0.09, 0.4))
-			_part(node, _sphere(0.11), Color("7fa8cf"), Vector3(-0.09, 0.03, 0.4))
-			_part(node, _sphere(0.12), Color("e8e3d8"), Vector3(0.09, 0.04, 0.39))
-			_part(node, _sphere(0.09), Color("d67b6a"), Vector3(0.0, 0.07, 0.43))
+			# Un panier d'osier tressé, plein de linge plié.
+			_part(node, _box(Vector3(0.42, 0.19, 0.25)), Color("a9803f"), Vector3(0, -0.095, 0.4))
+			for i in 4:
+				_part(node, _box(Vector3(0.445, 0.016, 0.275)), Color("c59a55"), Vector3(0, -0.17 + i * 0.047, 0.4))
+			for i in 7:
+				_part(node, _box(Vector3(0.014, 0.19, 0.28)), Color("8f6a32"), Vector3(-0.18 + i * 0.06, -0.095, 0.4))
+			_part(node, _box(Vector3(0.47, 0.028, 0.3)), Color("d6ac66"), Vector3(0, 0.005, 0.4))
+			# des serviettes roulées qui dépassent du panier
+			for roll: Array in [["7fa8cf", -0.1, 0.02, 0.37, 0.05, 6.0], ["e8e3d8", 0.09, 0.025, 0.43, 0.052, -10.0],
+					["d67b6a", 0.03, 0.06, 0.37, 0.043, 20.0], ["f2c95c", -0.07, 0.055, 0.45, 0.036, -24.0]]:
+				_part(node, _cylinder(roll[4], 0.19), Color(roll[0]), Vector3(roll[1], roll[2], roll[3]),
+					Vector3(0, roll[5], 90))
 	var attach := BoneAttachment3D.new()
 	attach.bone_name = bone
 	rig.skeleton.add_child(attach)

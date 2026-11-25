@@ -11,6 +11,7 @@ open -W -g -n -a /Applications/Godot.app --stdout "$log" --stderr "$log.err" --a
 	--screen "$(tools/ecran_macbook.sh)" --audio-driver Dummy --resolution "$res" \
 	--quit-after 60000 -- --no-save "--scenario=$out" $only ${4:-}
 grep -E 'CAPTURE|situation|PERF' "$log" || true
-if grep -E -A3 'SCRIPT ERROR|^ERROR|^WARNING' "$log.err"; then
+# Le moteur oublie à la fermeture les images de la sonde de reflets (rendu Forward+) : ce seul avertissement est ignoré.
+if sed '/RIDs of type "Texture" were leaked/,+1d' "$log.err" | grep -E -A3 'SCRIPT ERROR|^ERROR|^WARNING'; then
 	exit 1
 fi

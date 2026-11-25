@@ -62,71 +62,8 @@ LOOKS = {
 }
 
 
-def _smoothstep(a, b, x):
-    t = max(0.0, min(1.0, (x - a) / (b - a)))
-    return t * t * (3 - 2 * t)
-
-
-def _lin(hex_color):
-    return Vector(C.lin(C.srgb(hex_color)))
-
-
-def _remesh(ob, voxel, iterations, keep):
-    """Fond les formes en une seule surface lisse."""
-    bpy.context.view_layer.objects.active = ob
-    ob.select_set(True)
-    for kind, settings in (("REMESH", {"mode": "VOXEL", "voxel_size": voxel}),
-                           ("SMOOTH", {"factor": 0.6, "iterations": iterations}),
-                           ("DECIMATE", {"ratio": keep})):
-        mod = ob.modifiers.new(kind.lower(), kind)
-        for key, value in settings.items():
-            setattr(mod, key, value)
-        bpy.ops.object.modifier_apply(modifier=mod.name)
-    ob.select_set(False)
-    for p in ob.data.polygons:
-        p.use_smooth = True
-
-
-_painted = []
-
-
-def _paint(ob, color_at):
-    """Couleurs aux sommets ; `color_at` reçoit le point en coordonnées Godot."""
-    colors = ob.data.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
-    for i, v in enumerate(ob.data.vertices):
-        c = color_at(Vector((v.co.x, v.co.z, -v.co.y)))
-        colors.data[i].color = (c.x, c.y, c.z, 1.0)
-    _painted.append(ob)
-
-
-def for_game(encode):
-    """Le moteur du jeu (GL Compatibility) lit les couleurs des sommets en sRGB, Blender en linéaire : on les convertit
-    juste pour l'exportation (`encode`), puis on les remet pour les aperçus."""
-    def to_srgb(v):
-        return v * 12.92 if v <= 0.0031308 else 1.055 * v ** (1 / 2.4) - 0.055
-
-    def to_linear(v):
-        return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
-
-    convert = to_srgb if encode else to_linear
-    for ob in _painted:
-        for d in ob.data.color_attributes["Col"].data:
-            r, g, b, a = d.color
-            d.color = (convert(r), convert(g), convert(b), a)
-
-
-def _weigh(ob, weights_at):
-    groups = {}
-    for i, v in enumerate(ob.data.vertices):
-        for bone, w in weights_at(Vector((v.co.x, v.co.z, -v.co.y))).items():
-            if bone not in groups:
-                groups[bone] = ob.vertex_groups.new(name=bone)
-            groups[bone].add([i], w, "REPLACE")
-
-
 def build(who, armature, spec, hc, hr, rng):
     """`hc` : centre de la tête ; `hr` : échelle de la tête selon la taille du personnage."""
-    _painted.clear()
     look = LOOKS[who]
     hr *= look["size"]
 
@@ -161,13 +98,13 @@ def _face(armature, spec, look, hc, hr, H):
     for s in (1, -1):
         ball(wing * 1.18 * s, -0.025, 0.099, wing, wing * 0.9, wing * 1.04)
     ob = head.build()
-    _remesh(ob, 0.0036, 24, 0.4)
+    C.remesh(ob, 0.0036, 24, 0.4)
 
-    skin = _lin(spec["skin"])
-    blush = _lin("#d9786c")
-    rose = _lin("#d98a7c")
-    shade = _lin("#c9876f")
-    stubble = _lin(spec["stubble"]) if "stubble" in spec else None
+    skin = C.vec(spec["skin"])
+    blush = C.vec("#d9786c")
+    rose = C.vec("#d98a7c")
+    shade = C.vec("#c9876f")
+    stubble = C.vec(spec["stubble"]) if "stubble" in spec else None
     bx, by, amount = look["blush"]
     eye, mouth = look["eye"], look["mouth"]
 
@@ -176,26 +113,26 @@ def _face(armature, spec, look, hc, hr, H):
         c = skin.copy()
         if stubble is not None and q.z > -0.01:
             # la barbe : le bas des joues, le menton et le dessus de la lèvre, en grain irrégulier
-            edge = -0.030 - 0.016 * (1.0 - min(1.0, abs(q.x) / 0.055)) * _smoothstep(0.02, 0.05, abs(q.x))
-            cover = _smoothstep(edge + 0.008, edge - 0.012, q.y)
-            moustache = (1.0 - _smoothstep(0.5, 1.2, math.hypot(q.x / 0.030, (q.y - (mouth["y"] + 0.012)) / 0.008)))
+            edge = -0.030 - 0.016 * (1.0 - min(1.0, abs(q.x) / 0.055)) * C.smoothstep(0.02, 0.05, abs(q.x))
+            cover = C.smoothstep(edge + 0.008, edge - 0.012, q.y)
+            moustache = (1.0 - C.smoothstep(0.5, 1.2, math.hypot(q.x / 0.030, (q.y - (mouth["y"] + 0.012)) / 0.008)))
             grain = 0.75 + 0.45 * noise.noise(p * 330.0)
             c = c.lerp(stubble, min(1.0, 0.72 * max(cover, moustache * 0.8) * grain))
         for s in (1, -1):
             d = math.hypot((q.x - bx * s) / 0.025, (q.y - by) / 0.017)
             if q.z > 0.03:
-                c = c.lerp(blush, amount * (1.0 - _smoothstep(0.2, 1.15, d)))
+                c = c.lerp(blush, amount * (1.0 - C.smoothstep(0.2, 1.15, d)))
             # un creux d'ombre autour des yeux, pour qu'ils aient du relief
             d = math.hypot((q.x - eye["x"] * s) / 0.027, (q.y - eye["y"] - 0.003) / 0.019)
             if q.z > 0.06:
-                c = c.lerp(shade, 0.22 * (1.0 - _smoothstep(0.35, 1.1, d)))
+                c = c.lerp(shade, 0.22 * (1.0 - C.smoothstep(0.35, 1.1, d)))
         d = math.hypot(q.x / 0.016, (q.y + 0.022) / 0.013)
         if q.z > 0.09:
-            c = c.lerp(rose, 0.30 * (1.0 - _smoothstep(0.2, 1.0, d)))
+            c = c.lerp(rose, 0.30 * (1.0 - C.smoothstep(0.2, 1.0, d)))
         return c
 
-    _paint(ob, color_at)
-    _weigh(ob, lambda p: {"head": 1.0})
+    C.paint(ob, color_at)
+    C.weigh(ob, lambda p: {"head": 1.0})
     C.skin(ob, armature)
     tree = BVHTree.FromPolygons([v.co.copy() for v in ob.data.vertices], [list(p.vertices) for p in ob.data.polygons])
 
@@ -288,9 +225,9 @@ def _cap(hair, mat, H, rx, ry, rz, back, limit_at):
 
 def _hair_paint(ob, spec, hc, hr, low, high):
     """Foncé à la racine, la couleur au milieu, plus clair aux pointes, avec des filets de mèches."""
-    root = _lin(spec["hair_root"])
-    middle = _lin(spec["hair2"])
-    tips = _lin(spec["hair"])
+    root = C.vec(spec["hair_root"])
+    middle = C.vec(spec["hair2"])
+    tips = C.vec(spec["hair"])
 
     def color_at(p):
         q = (p - hc) / hr
@@ -300,12 +237,12 @@ def _hair_paint(ob, spec, hc, hr, low, high):
         fine = noise.noise(Vector((angle * 23.0, q.y * 5.0, 3.0)))
         h = q.y + streak * 0.035
         if h > low:
-            c = middle.lerp(root, _smoothstep(low + 0.015, high, h))
+            c = middle.lerp(root, C.smoothstep(low + 0.015, high, h))
         else:
-            c = middle.lerp(tips, _smoothstep(low, low - 0.095, h))
+            c = middle.lerp(tips, C.smoothstep(low, low - 0.095, h))
         return c * (1.0 + 0.22 * streak + 0.16 * fine)
 
-    _paint(ob, color_at)
+    C.paint(ob, color_at)
 
 
 def _long_hair(armature, spec, style, hc, hr, H, rng):
@@ -317,7 +254,7 @@ def _long_hair(armature, spec, style, hc, hr, H, rng):
     def limit_at(x, z):
         forehead = style["forehead"] - 3.6 * (x - part * 0.7) ** 2 - 1.4 * max(0.0, abs(x) - 0.044)
         sides = -0.040
-        return sides + (forehead - sides) * _smoothstep(-0.005, 0.045, z)
+        return sides + (forehead - sides) * C.smoothstep(-0.005, 0.045, z)
 
     _cap(hair, mat, H, 0.095, 0.128, 0.114, -0.010, limit_at)
 
@@ -358,15 +295,15 @@ def _long_hair(armature, spec, style, hc, hr, H, rng):
         lock([(0.100 * s, -0.030, -0.010), (0.128 * s, -0.100 * stretch, 0.012), (0.112 * s, -0.165 * stretch, 0.040),
               (0.136 * s, -0.215 * stretch, 0.050)], [0.016, 0.022, 0.017, 0.008])
     ob = hair.build()
-    _remesh(ob, 0.0042, 7, 0.42)
+    C.remesh(ob, 0.0042, 7, 0.42)
     _hair_paint(ob, spec, hc, hr, 0.0, 0.105)
 
     def weights_at(p):
         # de la tête au torse en douceur : un saut ferait déchirer les mèches quand elle tourne la tête
-        t = _smoothstep(0.045, 0.215, -(p.y - hc.y) / hr)
+        t = C.smoothstep(0.045, 0.215, -(p.y - hc.y) / hr)
         return {"head": 1.0 - 0.94 * t, "chest": 0.94 * t}
 
-    _weigh(ob, weights_at)
+    C.weigh(ob, weights_at)
     C.skin(ob, armature)
 
 
@@ -379,7 +316,7 @@ def _short_hair(armature, spec, style, hc, hr, H, rng):
         temples = 0.020 * math.exp(-((abs(x) - 0.052) / 0.020) ** 2)
         forehead = style["forehead"] + temples - 2.0 * max(0.0, abs(x) - 0.058)
         sides = -0.006 if z > -0.045 else -0.034
-        return sides + (forehead - sides) * _smoothstep(0.008, 0.058, z)
+        return sides + (forehead - sides) * C.smoothstep(0.008, 0.058, z)
 
     _cap(hair, mat, H, 0.092, 0.120, 0.108, -0.006, limit_at)
     # le dessus : des mèches couchées de l'avant vers l'arrière, un peu relevées au front et vers la droite
@@ -394,9 +331,9 @@ def _short_hair(armature, spec, style, hc, hr, H, rng):
                                H(x + lean, top - 0.007, z - 0.032)], [0.0075 * hr, 0.0090 * hr, 0.0028 * hr], 5)
         hair.tube(path, radii, mat, seg=8, squash=(1.0, 0.7), cap_rings=3)
     ob = hair.build()
-    _remesh(ob, 0.0030, 5, 0.36)
+    C.remesh(ob, 0.0030, 5, 0.36)
     _hair_paint(ob, spec, hc, hr, 0.075, 0.130)
-    _weigh(ob, lambda p: {"head": 1.0})
+    C.weigh(ob, lambda p: {"head": 1.0})
     C.skin(ob, armature)
 
 

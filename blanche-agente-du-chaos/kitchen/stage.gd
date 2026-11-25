@@ -18,6 +18,8 @@ var map: KitchenMap
 var sim: Sim
 var camera: Camera3D
 var ambiance: Ambiance
+var effects: Effects
+var _dust_wait := 0.0
 var dog: DogView
 var mom: PersonView
 var people: Dictionary = {}
@@ -89,6 +91,8 @@ func _ready() -> void:
 	_build_camera()
 	_build_effects()
 	_build_mask()
+	effects = Effects.new()
+	add_child(effects)
 	_ring_mesh = _make_ring(0.8, 1.0, 40)
 	_ring_shadow = StandardMaterial3D.new()
 	_ring_shadow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -123,6 +127,7 @@ func _set_moment(moment: String) -> void:
 	_outside.emission = ambiance.sky_tint()
 	_outside.emission_operator = BaseMaterial3D.EMISSION_OP_MULTIPLY
 	_christmas.visible = moment == "noel"
+	dog.set_festive(moment == "noel")
 
 
 func _build_lights() -> void:
@@ -455,11 +460,24 @@ func _clear_level() -> void:
 	_wobble = 0.0
 	if _mask_node:
 		_mask_node.visible = false
+	if effects:
+		effects.clear()
 
 
 ## Les réactions visibles aux événements de la partie.
 func on_event(e: Dictionary) -> void:
+	effects.reduced_motion = reduced_motion
 	match e.type:
+		"ate":
+			if e.item.size > Sim.Size.CRUMB:
+				effects.crumbs(_muzzle())
+			if e.item.size >= Sim.Size.BIG or e.mult > 1:
+				effects.stars(dog.head_position() + Vector3(0, 0.2, 0))
+		"grabbed":
+			effects.crumbs(_muzzle())
+		"meal_ready":
+			if e.stars > 0:
+				effects.hearts(dog.head_position() + Vector3(0, 0.15, 0))
 		"caught":
 			_shake = 1.0
 			_surprised = 0.45
@@ -474,11 +492,19 @@ func on_event(e: Dictionary) -> void:
 			_shake = maxf(_shake, 0.25)
 
 
+func _muzzle() -> Vector3:
+	return dog.head_position() + Vector3(sin(_dog_yaw) * 0.18, 0.02, cos(_dog_yaw) * 0.18)
+
+
 func _process(delta: float) -> void:
 	_time += delta
 	if sim != null:
 		_measure_speeds()
 		_show_dog(delta)
+		_dust_wait -= delta
+		if sim.dog_moving and _speeds.get("blanche", 0.0) > 1.2 and _dust_wait <= 0.0:
+			_dust_wait = 0.22
+			effects.dust(dog.position + Vector3(-sin(_dog_yaw) * 0.16, 0.04, -cos(_dog_yaw) * 0.16))
 		_show_mom(delta)
 		_show_people(delta)
 		_sync_food(delta)
