@@ -274,6 +274,15 @@ func _run() -> void:
 		await shot("43_tour")
 		play(7, "equilibre", 6)
 		main.speed = 3
+		main.sim.helpers.clear()
+		main.sim._add_helper("papa")
+		main.speed = 1
+		await until(func() -> bool: return main.sim.activity == "chicane", 900)
+		await wait(0.7)
+		await shot("46_chicane_maman")
+		await wait(1.5)
+		await shot("46_chicane_papa")
+		main.speed = 3
 		for who: String in ["charlotte", "papa"]:
 			main.sim.helpers.clear()
 			main.sim._add_helper(who)

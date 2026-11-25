@@ -156,6 +156,13 @@ func toast(text: String, seconds := 2.2) -> void:
 	_toast_left = seconds
 
 
+## Fait taire quelqu'un : sa bulle disparaît.
+func hush(who: PersonView) -> void:
+	if _bubbles.has(who):
+		_bubbles[who].panel.queue_free()
+		_bubbles.erase(who)
+
+
 ## Une bulle de paroles au-dessus d'un personnage ; elle le suit.
 func bubble(who: PersonView, text: String, seconds := 2.0) -> void:
 	if _bubbles.has(who):
@@ -251,8 +258,16 @@ func _place_bubble(who: PersonView) -> void:
 	var at := stage.on_screen(who.head_position() + Vector3(0, 0.27, 0))
 	panel.reset_size()
 	var pos := at - Vector2(panel.size.x / 2.0, panel.size.y + 20.0)
-	if who == stage.mom:
-		# À côté de sa tête, pour laisser le signe au-dessus bien visible.
+	var papa: PersonView = stage.people.get("papa")
+	if sim.activity == "chicane" and papa and (who == stage.mom or who == papa):
+		# Chacun sa bulle de son côté : on voit tout de suite qui parle.
+		var other: PersonView = papa if who == stage.mom else stage.mom
+		if stage.on_screen(who.head_position()).x < stage.on_screen(other.head_position()).x:
+			pos = at + Vector2(-panel.size.x - 40.0, -panel.size.y)
+		else:
+			pos = at + Vector2(40.0, -panel.size.y)
+	elif who == stage.mom:
+		# À côté de sa tête, de l'autre côté de ses signes.
 		pos = at + Vector2(96.0, -panel.size.y / 2.0)
 	pos.x = clampf(pos.x, 12.0, size.x - panel.size.x - 12.0)
 	pos.y = clampf(pos.y, 150.0, size.y - panel.size.y - 12.0)
@@ -427,7 +442,7 @@ func _draw_world(on: Control) -> void:
 	# Maman : ce qu'elle fait, et surtout l'indice, toujours à côté de sa tête
 	var beat := 1.0 + (0.0 if reduced_motion else sin(_time * 18.0) * 0.1)
 	match sim.mom_state:
-		Sim.Mom.BUSY:
+		Sim.Mom.BUSY when sim.activity != "chicane":
 			var text: String = sim.level.get("activity_text", {}).get(sim.activity, Texts.ACTIVITY.get(sim.activity, ""))
 			var width := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x + 30
 			var at := _beside_mom(width / 2.0)

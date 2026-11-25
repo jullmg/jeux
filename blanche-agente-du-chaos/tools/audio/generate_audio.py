@@ -109,6 +109,22 @@ def au_coin():
     return mix((0.0, o, 1.0), (0.34, k, 0.5), (0.37, wa, 1.15))
 
 
+def quarrel(base, seed):
+    """Quelques syllabes bougonnes, sans paroles : la voix monte et retombe à chacune."""
+    own = np.random.default_rng(seed)
+    sounds = (vowel((750, 600, 130, 1.0), (1350, 1150, 200, 0.6)), vowel((450, 520, 100, 1.0), (900, 850, 150, 0.7)),
+              vowel((400, 550, 100, 1.0), (2000, 1700, 220, 0.45)))
+    parts, at = [], 0.0
+    for i in range(6):
+        d = own.uniform(0.09, 0.16)
+        f = base * own.uniform(0.9, 1.3)
+        syllable = voice(lambda u, f=f: np.interp(u, [0, 0.45, 1], [f, f * 1.14, f * 0.85]), sounds[i % 3], d,
+                         attack=0.015, release=0.035)
+        parts.append((at, syllable, own.uniform(0.7, 1.0)))
+        at += d * 0.95
+    return mix(*parts)
+
+
 def mom_hmm(up=True):
     return voice(lambda u: np.interp(u, [0, 0.6, 1], [215, 225, 330 if up else 185]),
                  vowel((280, 300, 90, 1.0), (1100, 1200, 200, 0.25)), 0.38, breath=0.015, attack=0.04, release=0.09)
@@ -392,5 +408,8 @@ if __name__ == "__main__":
     loop(126, 16, menu_parts, "musique_menu", 0.75)
     loop(GAME_BPM, 16, game_parts, "musique_jeu", 0.75)
     loop(GAME_BPM, 16, tension_parts, "musique_tension", 0.65)
+    # à la fin, pour ne pas changer le hasard des sons précédents
+    save("chicane_maman", quarrel(265, 21), 0.7)
+    save("chicane_papa", quarrel(128, 34), 0.8)
     files = sorted(OUT.glob("*.wav"))
     print(f"AUDIO {len(files)} fichiers, {sum(f.stat().st_size for f in files) // 1024} Ko")

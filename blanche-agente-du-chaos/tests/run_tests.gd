@@ -353,6 +353,72 @@ func test_papa_ressort_par_la_porte() -> void:
 	check(sim.helpers.is_empty() and last.distance_to(map.helper_door) < 0.1, "parti par la porte (%s)" % last)
 
 
+## Papa dans le chemin : Maman se chicane avec lui, tournée vers lui, sans rien remarquer (demande de Julien).
+func test_chicane() -> void:
+	var sim := lab({"helpers": ["papa"]})
+	sim._add_helper("papa")
+	var argued := false
+	for i in 600:
+		sim.step(DT, Vector2.ZERO, false)
+		if types(sim).has("argue"):
+			argued = true
+			break
+	check(argued, "la chicane commence")
+	var papa: Dictionary = sim.helpers[0]
+	check(sim.activity == "chicane" and papa.pos.distance_to(sim.mom_pos) < 1.0, "Papa est à côté d'elle")
+	check(sim.mom_dir.dot((papa.pos - sim.mom_pos).normalized()) > 0.99, "elle lui fait face")
+	at(sim, "lave_vaisselle")
+	put(sim, Sim.Size.BIG, "lave_vaisselle")
+	var seen := false
+	var holding := int((Sim.GRAB_TIMES[Sim.Size.BIG] + 0.3) / DT)
+	for i in int((Sim.ARGUE_TIME - 0.2) / DT):
+		sim.step(DT, Vector2.ZERO, i < holding)
+		seen = seen or sim.watching() or sim.warning()
+	check(not seen and sim.caught_count == 0 and sim.eaten[Sim.Size.BIG] == 1, "une occasion sans surveillance")
+	run(sim, 0.5)
+	check(sim.activity != "chicane" and papa.state == "leave", "puis chacun retourne à ses affaires")
+	# Un vacarme coupe la chicane : l'indice vient vite.
+	var loud := lab({"helpers": ["papa"], "noise": true})
+	loud._add_helper("papa")
+	for i in 600:
+		loud.step(DT, Vector2.ZERO, false)
+		if loud.activity == "chicane":
+			break
+	loud._noise(loud.dog_pos, "tabouret")
+	run(loud, 0.4)
+	check(loud.activity != "chicane" and loud.mom_state != Sim.Mom.BUSY, "le bruit coupe la chicane")
+
+
+## Debout à côté de Maman, Papa ne ferme jamais le passage : le chiot lui passe entre les jambes.
+func test_papa_ne_coince_pas() -> void:
+	var sim := lab({"helpers": ["papa"]})
+	sim._add_helper("papa")
+	check(sim.people_circles().size() == 2, "en marche, on le contourne")
+	for i in 600:
+		sim.step(DT, Vector2.ZERO, false)
+		if sim.activity == "chicane":
+			break
+	check(sim.people_circles().size() == 1, "immobile, il laisse passer")
+
+
+## Dans de vraies parties, presque chaque passage de Papa finit en chicane.
+func test_chicane_presque_a_chaque_passage() -> void:
+	var passes := 0
+	var arguments := 0
+	for g in 20:
+		var sim := Sim.new(map, Levels.load_level(7 + g % 2), 300 + g, nav, mom_nav)
+		var bot := Bot.new(sim, "equilibre", 0.3, 0.9, g)
+		while not sim.over:
+			bot.step(DT)
+			sim.step(DT, bot.move, bot.grab)
+			for e in sim.drain_events():
+				if e.type == "helper_in" and e.who == "papa" and sim.time_left > 15.0:
+					passes += 1
+				if e.type == "argue":
+					arguments += 1
+	check(passes > 10 and arguments >= passes * 0.7, "%d chicanes pour %d passages" % [arguments, passes])
+
+
 func test_manger_est_plus_lent_en_marchant() -> void:
 	var a := lab()
 	var b := lab()
@@ -442,7 +508,7 @@ func test_toute_surveillance_suit_un_indice() -> void:
 						check(kind == "real", "niveau %d : demi-tour après une feinte" % id)
 				previous = now
 	for type: String in ["hint", "look", "walk", "round", "surprise", "noise", "feint_end", "caught", "distract",
-			"snitch", "snitch_call", "papa_drop", "treasure", "meal_ready", "dropped", "corner_arrive"]:
+			"snitch", "snitch_call", "papa_drop", "argue", "treasure", "meal_ready", "dropped", "corner_arrive"]:
 		check(seen.has(type), "jamais arrivé pendant les parties : " + type)
 
 

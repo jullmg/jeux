@@ -6,7 +6,7 @@ extends Node3D
 const PAINTED := ["peau_visage", "cheveux_ombre"]
 
 ## "idle", "walk", "brasser", "couper", "laver", "frigo", "telephone", "four", "ilot", "surprise", "charlotte",
-## "hint", "feint", "round", "look", "point", "laugh", "wave", "carry", "snitch", "cheer"
+## "hint", "feint", "round", "look", "point", "laugh", "wave", "carry", "snitch", "cheer", "chicane", "argue"
 var pose := "idle"
 var speed := 0.0
 ## "Sourire", "Neutre", "Ouverte", "Fachee"
@@ -218,6 +218,21 @@ func _process(delta: float) -> void:
 			quick["forearmR"] = Vector3(0, 0, sin(t * 9.0) * 24)
 			_arm("L", 0, 6, 12)
 			rig.add("head", Vector3(-8, 0, sin(t * 2.0) * 8))
+		"chicane":
+			# Un poing sur la hanche, l'autre main qui s'agite, la tête qui dit « non, là ».
+			_fist_on_hip("L")
+			_arm("R", 52 + sin(t * 7.0) * 24, 16, 55 + sin(t * 7.0 + 1.2) * 30)
+			rig.add("spine", Vector3(9, 0, 0))
+			rig.add("head", Vector3(0, sin(t * 8.0) * 9, sin(t * 2.7) * 6))
+			shown = "Fachee"
+		"argue":
+			# Les bras pleins, il hausse les épaules et se défend de la tête.
+			for s: String in ["L", "R"]:
+				_arm(s, 34, -4 + maxf(0.0, sin(t * 3.4)) * 9, 62)
+			rig.add("spine", Vector3(-5, 0, 0))
+			rig.add("head", Vector3(-6, sin(t * 5.0) * 15, sin(t * 2.2) * 11))
+			prop = "panier"
+			shown = "Neutre"
 		"snitch":
 			_arm("R", 78, 4, 6)
 			_arm("L", 40, 4, 125)
@@ -235,7 +250,8 @@ func _process(delta: float) -> void:
 	if talking > 0.0:
 		talking -= delta
 		if pose != "point":
-			shown = "Ouverte" if fmod(t, 0.24) < 0.12 else "Sourire"
+			var closed := "Fachee" if pose == "chicane" else ("Neutre" if pose == "argue" else "Sourire")
+			shown = "Ouverte" if fmod(t, 0.24) < 0.12 else closed
 	_set_mouth(shown)
 	_show_prop(prop)
 	rig.apply(delta, 10.0, quick)

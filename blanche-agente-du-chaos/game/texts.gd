@@ -70,7 +70,7 @@ const TICKING := "Le repas est presque prêt !"
 const ACTIVITY := {
 	"brasser": "brasse la sauce", "four": "surveille le four", "couper": "coupe des légumes", "laver": "lave la vaisselle",
 	"frigo": "fouille dans le frigo", "telephone": "jase au téléphone", "ilot": "pétrit sur l'îlot",
-	"surprise": "sauve son chaudron", "charlotte": "écoute Charlotte",
+	"surprise": "sauve son chaudron", "charlotte": "écoute Charlotte", "chicane": "se chicane avec Papa",
 }
 
 const MOM := {
@@ -92,6 +92,17 @@ const CHARLOTTE := {
 	"snitch": ["Hon !", "Hooon !"],
 	"call": ["Maman ! Blanche !", "Mamaaan ! Blanche vole de la bouffe !"],
 }
+## La chicane quand Papa est dans le chemin : les répliques alternent, Maman d'abord.
+const CHICANE := [
+	["Tu vois pas que t'es dans mon chemin ?", "Ben là, je fais juste passer !", "T'es planté en plein milieu !",
+		"Ok, ok, je me tasse…"],
+	["Ôte-toi de d'là, je cuisine !", "Relaxe, je veux juste prendre de quoi.", "Astheure ? En plein souper ?",
+		"Ben quoi, j'ai faim, moi !"],
+	["Eille, tu me bloques !", "C'est pas moi, c'est la cuisine qui est petite.", "La cuisine est ben correcte !",
+		"C'est ça, c'est de ma faute."],
+	["T'avais pas d'affaire à passer là !", "Y a rien qu'un chemin, tsé.", "Fais le tour de l'îlot !",
+		"Avec un panier de même ?"],
+]
 const PAPA := {
 	"in": ["Je fais juste passer !", "Chaud devant !", "Tassez-vous, j'ai les bras pleins."],
 	"drop": ["Oups…", "J'ai rien vu."],

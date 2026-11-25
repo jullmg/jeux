@@ -29,6 +29,9 @@ const NEAR_MOM := 1.05
 const GRAB_TIMES := [0.3, 1.0, 2.0, 3.5]
 const EAT_TIMES := [0.0, 0.5, 1.5, 3.0]
 const BASE_POINTS := [10, 50, 150, 500]
+## La chicane quand Papa est dans le chemin : Maman ne regarde plus que lui.
+const ARGUE_TIME := 6.0
+const AFTER_ARGUE := [0.9, 1.6]
 ## Les noms des tailles dans les données des niveaux.
 const SIZE_KEYS := ["crumb", "small", "big", "treasure"]
 ## Ce qui rend Maman méfiante d'un coup (la jauge va de 0 à 1) : un morceau qui disparaît, selon sa taille, un bruit,
@@ -44,12 +47,12 @@ const TREASURE_RETURN := 12.0
 const ACTIVITY_WINDOWS := {
 	"brasser": [3.5, 5.0], "four": [3.0, 4.5], "couper": [2.2, 3.2], "laver": [3.2, 4.8], "frigo": [5.0, 6.5],
 	"telephone": [6.0, 8.0], "ilot": [2.8, 4.0], "surprise": [7.0, 9.0], "charlotte": [6.0, 7.5],
+	"chicane": [ARGUE_TIME, ARGUE_TIME],
 }
 ## Le tour de l'îlot (points au sol, dans le sens des aiguilles).
 const RING := [Vector2(0.72, -1.14), Vector2(0.76, -0.2), Vector2(0.74, 0.95), Vector2(-0.1, 1.06),
 	Vector2(-1.02, 0.9), Vector2(-1.1, -0.1), Vector2(-0.98, -1.14), Vector2(-0.1, -1.15)]
-const PAPA_PATH := [Vector2(-1.0, 1.35), Vector2(0.0, 1.28), Vector2(0.86, 0.98), Vector2(0.86, -0.1),
-	Vector2(0.86, 0.98), Vector2(0.0, 1.28), Vector2(-1.0, 1.35)]
+
 
 var map: KitchenMap
 var level: Dictionary
@@ -227,11 +230,13 @@ func scaled_window(seconds: float) -> float:
 	return seconds * float(level.window_mult) * (1.0 - WARY_WINDOW * suspicion)
 
 
-## Les personnes présentes, comme cercles [centre, rayon].
+## Les personnes à contourner, comme cercles [centre, rayon]. Quelqu'un debout et immobile n'en est pas une : le
+## chiot lui passe entre les jambes (sinon Papa et Maman pourraient le coincer pendant toute une chicane).
 func people_circles() -> Array:
 	var out: Array = [[mom_pos, MOM_RADIUS]]
 	for h in helpers:
-		out.append([h.pos, HELPER_RADIUS])
+		if h.state in ["enter", "cross", "leave"]:
+			out.append([h.pos, HELPER_RADIUS])
 	return out
 
 
@@ -453,11 +458,19 @@ func _step_mom(dt: float) -> void:
 	match mom_state:
 		Mom.BUSY:
 			var drain := 1.0
-			if dog_state == Dog.REACHING and dog_pos.distance_to(mom_pos) < NEAR_MOM:
+			# Pendant la chicane, elle ne remarque rien de ce qui se passe à côté d'elle.
+			if activity != "chicane" and dog_state == Dog.REACHING and dog_pos.distance_to(mom_pos) < NEAR_MOM:
 				drain = 1.5
 			mom_left -= dt * drain
 			if mom_left <= 0.0:
-				_end_window()
+				if activity == "chicane":
+					# La chicane finie, elle retourne à ses affaires, mais pas pour longtemps : « Où est Blanche ? »
+					# La surveillance viendra, comme toujours, avec son indice.
+					_back_to_work()
+					_set_timer(rng.randf_range(AFTER_ARGUE[0], AFTER_ARGUE[1]))
+					feinted = true
+				else:
+					_end_window()
 		Mom.HINT:
 			mom_left -= dt
 			if mom_left <= 0.0:
@@ -592,7 +605,22 @@ func _follow_mom(dt: float, speed: float) -> bool:
 	return mom_path.is_empty()
 
 
+func _back_to_work() -> void:
+	var st: Dictionary = map.stations[station]
+	mom_dir = st.face
+	_enter_busy(st.activity)
+
+
+## Papa s'en vient et la chicane n'a pas encore eu lieu.
+func _papa_coming() -> bool:
+	return helpers.any(func(h: Dictionary) -> bool: return h.who == "papa" and h.state in ["cross", "wait"])
+
+
 func _next_activity() -> void:
+	if _papa_coming():
+		# Elle reste à son poste : Papa va finir dans son chemin.
+		_back_to_work()
+		return
 	if time > 15.0 and rng.randf() < float(level.surprise_chance):
 		var to := "cuisiniere" if level.stations.has("cuisiniere") else str(level.stations[0])
 		_emit("surprise")
@@ -631,6 +659,10 @@ func _enter_busy(what: String, extra := 0.0) -> void:
 func _noise(pos: Vector2, what: String) -> void:
 	_wary(WARY_NOISE, "noise")
 	_emit("noise", {"pos": pos, "what": what})
+	if mom_state == Mom.BUSY and activity == "chicane":
+		# Le vacarme coupe la chicane net.
+		activity = map.stations[station].activity
+		mom_dir = map.stations[station].face
 	if mom_state == Mom.BUSY:
 		mom_left = minf(mom_left, 0.2)
 		feinted = true
@@ -782,47 +814,87 @@ func _step_helpers(dt: float) -> void:
 			_add_helper(who)
 		return
 	var h := helpers[0]
-	if h.state == "stay":
-		h.t -= dt
-		if h.t <= 0.0:
-			h.state = "leave"
-			h.path = nav.path(h.pos, map.helper_door)
-	else:
-		_follow_helper(h, dt)
-		if h.path.is_empty():
-			if h.state == "enter":
-				h.state = "stay"
-				h.t = 4.5
-				if mom_state == Mom.BUSY:
-					_enter_busy("charlotte")
-					_emit("distract")
-			else:
-				helpers.clear()
-				helper_left = rng.randf_range(16.0, 26.0)
-				_emit("helper_out", {"who": h.who})
-				return
+	match h.state:
+		"stay":
+			h.t -= dt
+			if h.t <= 0.0:
+				_leave(h)
+		"argue":
+			h.t -= dt
+			if h.t <= 0.0 or mom_state != Mom.BUSY or activity != "chicane":
+				_leave(h)
+		"wait":
+			_wait_for_mom(h, dt)
+		_:
+			_follow_helper(h, dt)
+			if h.path.is_empty():
+				match h.state:
+					"enter":
+						h.state = "stay"
+						h.t = 4.5
+						if mom_state == Mom.BUSY:
+							_enter_busy("charlotte")
+							_emit("distract")
+					"cross":
+						h.state = "wait"
+					_:
+						helpers.clear()
+						helper_left = rng.randf_range(16.0, 26.0)
+						_emit("helper_out", {"who": h.who})
+						return
 	if h.who == "charlotte":
 		_step_snitch(h, dt)
-	elif h.drop_at >= 0 and h.index >= h.drop_at:
-		h.drop_at = -1
-		var p := map.resolve(h.pos + Vector2(-0.3, 0.05), 0.1)
-		_add_item(Size.SMALL, "", p)
-		_emit("papa_drop", {"pos": p})
+	elif h.drop_in >= 0.0 and h.state == "cross":
+		h.drop_in -= dt
+		if h.drop_in < 0.0:
+			var p := map.resolve(h.pos + Vector2(-0.3, 0.05), 0.1)
+			_add_item(Size.SMALL, "", p)
+			_emit("papa_drop", {"pos": p})
+
+
+func _leave(h: Dictionary) -> void:
+	h.state = "leave"
+	h.path = nav.path(h.pos, map.helper_door)
+
+
+## Une place libre tout près de Maman : là où se tenir pour lui parler (Charlotte), ou juste à côté d'elle, dans son
+## chemin (Papa : de côté, on les voit se faire face).
+func _beside_mom(who := "charlotte") -> Vector2:
+	var offsets := [Vector2(0.0, 0.6), Vector2(-0.6, 0.35), Vector2(0.6, 0.35), Vector2(-0.65, 0.0), Vector2(0.65, 0.0)]
+	if who == "papa":
+		offsets = [Vector2(0.65, 0.05), Vector2(-0.65, 0.05), Vector2(0.6, 0.35), Vector2(-0.6, 0.35), Vector2(0.0, 0.6)]
+	for offset: Vector2 in offsets:
+		if map.is_free(mom_pos + offset, HELPER_RADIUS):
+			return mom_pos + offset
+	return map.resolve(mom_pos + Vector2(0.0, 0.7), HELPER_RADIUS, [[mom_pos, MOM_RADIUS]])
+
+
+## Papa est arrivé : la chicane part dès que Maman a la tête à ses chaudrons.
+func _wait_for_mom(h: Dictionary, dt: float) -> void:
+	h.t += dt
+	if mom_state == Mom.BUSY:
+		if h.pos.distance_to(mom_pos) > 1.0:
+			h.state = "cross"
+			h.path = nav.path(h.pos, _beside_mom(h.who))
+			return
+		h.state = "argue"
+		h.t = ARGUE_TIME
+		feinted = false
+		activity = "chicane"
+		_set_timer(ARGUE_TIME)
+		mom_dir = (h.pos - mom_pos).normalized()
+		_emit("argue")
+	elif h.t > 8.0:
+		_leave(h)
 
 
 func _add_helper(who: String) -> void:
 	var h := {"who": who, "pos": map.helper_door, "dir": Vector2.UP, "state": "enter", "t": 0.0, "snitch": 0.0,
-		"cool": 0.0, "index": 0, "drop_at": -1, "path": PackedVector2Array()}
+		"cool": 0.0, "drop_in": -1.0, "path": nav.path(map.helper_door, _beside_mom(who))}
 	if who == "papa":
-		h.path = PackedVector2Array(PAPA_PATH)
-		h.path.append(map.helper_door)
+		# Les bras pleins, il lui arrive d'échapper quelque chose en chemin.
 		h.state = "cross"
-		h.drop_at = rng.randi_range(2, 4) if rng.randf() < 0.75 else -1
-	else:
-		var goal := mom_pos + Vector2(0.0, 0.6)
-		if not map.is_free(goal, HELPER_RADIUS):
-			goal = mom_pos + Vector2(-0.6, 0.35)
-		h.path = nav.path(h.pos, goal)
+		h.drop_in = rng.randf_range(0.6, 1.6) if rng.randf() < 0.75 else -1.0
 	helpers.append(h)
 	_emit("helper_in", {"who": who})
 
@@ -832,7 +904,6 @@ func _follow_helper(h: Dictionary, dt: float) -> void:
 	h.pos = step_.pos
 	h.dir = step_.dir
 	h.path = step_.path
-	h.index += step_.done
 	_nudge_dog(h.pos, HELPER_RADIUS)
 
 

@@ -48,6 +48,9 @@ var _end_left := 0.0
 var _need_release := false
 var _rng := RandomNumberGenerator.new()
 var _ticking_said := false
+## La chicane en cours : ses répliques et la dernière qui a été dite.
+var _argument: Array = []
+var _argument_line := -1
 
 
 func _ready() -> void:
@@ -366,6 +369,7 @@ func _physics_process(delta: float) -> void:
 		sim.step(STEP, c[0], c[1])
 		_handle_events()
 	_sounds(delta * speed)
+	_argue()
 	if sim.over:
 		if _result.is_empty():
 			_record()
@@ -467,6 +471,9 @@ func _event_words(e: Dictionary) -> void:
 			say.call(stage.mom, Texts.MOM.noise, 1.2)
 		"distract":
 			say.call(stage.mom, Texts.MOM.distract, 2.2)
+		"argue":
+			_argument = Texts.CHICANE[_rng.randi_range(0, Texts.CHICANE.size() - 1)]
+			_argument_line = -1
 		"helper_in":
 			if stage.people.has(e.who):
 				var who: PersonView = stage.people[e.who]
@@ -488,6 +495,23 @@ func _event_words(e: Dictionary) -> void:
 func _greet(who: PersonView, lines: Array) -> void:
 	if sim != null and who.visible:
 		hud.bubble(who, Texts.pick(lines, _rng), 2.0)
+
+
+## La chicane se dit une réplique à la fois, Maman puis Papa, au fil du temps qu'elle dure.
+func _argue() -> void:
+	if sim.mom_state != Sim.Mom.BUSY or sim.activity != "chicane" or not stage.people.has("papa"):
+		return
+	var step := Sim.ARGUE_TIME / _argument.size()
+	var line := mini(int((Sim.ARGUE_TIME - sim.mom_left) / step), _argument.size() - 1)
+	if line == _argument_line:
+		return
+	_argument_line = line
+	var moms := line % 2 == 0
+	var speaker: PersonView = stage.mom if moms else stage.people.papa
+	# Une seule bulle à la fois : on lit la chicane comme un ping-pong.
+	hud.hush(stage.people.papa if moms else stage.mom)
+	hud.bubble(speaker, _argument[line], step)
+	Sound.play("chicane_maman" if moms else "chicane_papa", -2.0)
 
 
 ## Les bruits qui accompagnent ce qui dure : la cuisine, les pas, la mastication, la musique.

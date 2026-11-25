@@ -11,6 +11,9 @@ const RING_SIZE := [0.095, 0.15, 0.2, 0.26]
 const RING_COLORS := [Color(1, 1, 1, 0.85), Color(0.2, 0.75, 1.0, 0.95), Color(1.0, 0.5, 0.05, 1.0),
 	Color(1.0, 0.82, 0.05, 1.0)]
 
+## Pendant une chicane, les deux se tournent un peu vers nous pour qu'on voie leur visage.
+const TOWARD_CAMERA := Vector2(0.0, 0.75)
+
 var map: KitchenMap
 var sim: Sim
 var camera: Camera3D
@@ -597,6 +600,8 @@ func _show_mom(delta: float) -> void:
 	_follow_floor(mom, sim.mom_pos, delta)
 	mom.speed = _speeds.get("maman", 0.0)
 	var dir := sim.mom_dir
+	if sim.mom_state == Sim.Mom.BUSY and sim.activity == "chicane":
+		dir += TOWARD_CAMERA
 	var yaw := atan2(dir.x, dir.y)
 	_mom_yaw = _turn(_mom_yaw, yaw, delta, 16.0)
 	mom.rotation.y = _mom_yaw
@@ -646,11 +651,13 @@ func _show_people(delta: float) -> void:
 		p.speed = _speeds.get(h.who, 0.0)
 		var moving: bool = h.state != "stay"
 		var dir: Vector2 = h.dir if moving else sim.mom_pos - h.pos
+		if h.state == "argue":
+			dir = dir.normalized() + TOWARD_CAMERA
 		if h.who == "charlotte" and h.snitch > 0.0:
 			dir = sim.dog_pos - h.pos
 			p.pose = "snitch"
 		elif h.who == "papa":
-			p.pose = "carry"
+			p.pose = "argue" if h.state == "argue" else "carry"
 		else:
 			p.pose = "walk" if moving else "wave"
 		var yaw := atan2(dir.x, dir.y)
