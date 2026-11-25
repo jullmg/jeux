@@ -27,6 +27,12 @@ var speed := 1
 
 var _follower: Follower
 var _touch_goal := Vector2.INF
+## Temps passé à viser un point sans avancer, et dernière position : on abandonne un but hors d'atteinte.
+var _touch_stuck := 0.0
+var _touch_last := Vector2.ZERO
+var _grab_prev := false
+## Le résultat de la partie finie, déjà noté, en attente de l'écran.
+var _result: Dictionary = {}
 var _nav: Nav
 var _mom_nav: Nav
 var _ambient_left := 0.0
@@ -49,7 +55,8 @@ func _ready() -> void:
 	if args.has("--graine"):
 		seed_override = int(args["--graine"])
 	_setup_input()
-	save = SaveData.new("user://aucune.json" if testing else "user://save.json", not testing)
+	var keeps := not testing and not demo
+	save = SaveData.new("user://save.json" if keeps else "user://aucune.json", keeps)
 	_rng.randomize()
 	stage = Stage.new()
 	stage.process_mode = Node.PROCESS_MODE_PAUSABLE
@@ -110,16 +117,19 @@ static func _setup_input() -> void:
 			InputMap.action_add_event(action, e)
 		if buttons.has(action):
 			var b := InputEventJoypadButton.new()
+			b.device = -1
 			b.button_index = buttons[action]
 			InputMap.action_add_event(action, b)
 		if axes.has(action):
 			var m := InputEventJoypadMotion.new()
+			m.device = -1
 			m.axis = axes[action][0]
 			m.axis_value = axes[action][1]
 			InputMap.action_add_event(action, m)
 	# La manette doit aussi parcourir les menus.
 	for pair: Array in [["ui_accept", JOY_BUTTON_A], ["ui_cancel", JOY_BUTTON_B]]:
 		var b := InputEventJoypadButton.new()
+		b.device = -1
 		b.button_index = pair[1]
 		if not InputMap.action_has_event(pair[0], b):
 			InputMap.action_add_event(pair[0], b)
@@ -176,6 +186,8 @@ func start_level(id: int) -> void:
 	_touch_goal = Vector2.INF
 	_ambient_left = 0.5
 	_end_left = 0.0
+	_result = {}
+	_grab_prev = false
 	_need_release = true
 	_ticking_said = false
 	menus.close()
@@ -195,7 +207,8 @@ func _say_later(text: String) -> void:
 
 
 func pause_game() -> void:
-	if state != "jeu":
+	# Le repas servi, la partie est jouée : plus de pause qui ferait perdre le résultat de vue.
+	if state != "jeu" or sim == null or sim.over:
 		return
 	state = "pause"
 	get_tree().paused = true
@@ -235,7 +248,10 @@ func _notification(what: int) -> void:
 # ------------------------------------------------------------------ commandes
 
 func _unhandled_input(event: InputEvent) -> void:
-	if state == "jeu":
+	if state == "pause" and menus.screen == "pause" and event.is_action_pressed("pause"):
+		get_viewport().set_input_as_handled()
+		resume_game()
+	elif state == "jeu":
 		if event.is_action_pressed("pause"):
 			get_viewport().set_input_as_handled()
 			pause_game()
@@ -261,8 +277,18 @@ func tap(screen: Vector2) -> void:
 			best = item.pos if item.spot == "" else sim.map.spots[item.spot].stand
 	if best == Vector2.INF:
 		best = stage.floor_point(screen)
-	if best != Vector2.INF:
-		_touch_goal = best
+	if best == Vector2.INF:
+		return
+	if not stage.map.is_free(best, Sim.DOG_RADIUS):
+		# Un meuble ou un mur : on vise la place libre la plus proche.
+		best = _nav.center(_nav.nearest_open(best))
+	_touch_goal = best
+	_touch_stuck = 0.0
+
+
+func _forget_goal() -> void:
+	_touch_goal = Vector2.INF
+	_follower.clear()
 
 
 func _commands(delta: float) -> Array:
@@ -271,18 +297,20 @@ func _commands(delta: float) -> Array:
 		return [bot.move, bot.grab]
 	var keys := Input.get_vector("move_left", "move_right", "move_down", "move_up")
 	var move := Vector2.ZERO
+	var grab := Input.is_action_pressed("grab") or hud.grab_held
+	# Un nouvel appui arrête la marche ; un but touché pendant que le bouton reste tenu, lui, compte.
+	if grab and not _grab_prev:
+		_forget_goal()
+	_grab_prev = grab
 	if keys.length() > 0.1:
 		move = stage.floor_direction(keys)
-		_touch_goal = Vector2.INF
-		_follower.clear()
+		_forget_goal()
 	elif _touch_goal != Vector2.INF and sim.dog_state == Sim.Dog.FREE:
 		move = _follower.steer(delta, sim.dog_pos, _touch_goal, [[sim.mom_pos, Sim.MOM_RADIUS]])
-		if move == Vector2.ZERO or sim.dog_pos.distance_to(_touch_goal) < 0.1:
-			_touch_goal = Vector2.INF
-			_follower.clear()
-	var grab := Input.is_action_pressed("grab") or hud.grab_held
-	if grab:
-		_touch_goal = Vector2.INF
+		_touch_stuck = _touch_stuck + delta if sim.dog_pos.distance_to(_touch_last) < 0.008 else 0.0
+		_touch_last = sim.dog_pos
+		if move == Vector2.ZERO or sim.dog_pos.distance_to(_touch_goal) < 0.1 or _touch_stuck > 0.4:
+			_forget_goal()
 	if _need_release:
 		if not grab:
 			_need_release = false
@@ -303,27 +331,34 @@ func _physics_process(delta: float) -> void:
 		_handle_events()
 	_sounds(delta * speed)
 	if sim.over:
-		if _end_left == 0.0:
+		if _result.is_empty():
+			_record()
 			_end_left = 2.4
 		_end_left -= delta * speed
 		if _end_left <= 0.0:
 			_finish()
 
 
-func _finish() -> void:
-	state = "fin"
+## Le résultat est noté dès que le repas est prêt : fermer le jeu juste après ne le perd pas.
+func _record() -> void:
 	var stars := sim.stars()
 	var new_best := save.record(level_id, sim.score, stars)
-	var result := {"level": level_id, "score": sim.score, "stars": stars, "eaten": sim.eaten, "caught": sim.caught_count,
+	_result = {"level": level_id, "score": sim.score, "stars": stars, "eaten": sim.eaten, "caught": sim.caught_count,
 		"new_best": new_best and sim.score > 0, "target": int(sim.level.stars[0])}
+
+
+func _finish() -> void:
+	state = "fin"
 	Sound.music("")
-	Sound.play("victoire" if stars > 0 else "rate")
+	Sound.play("victoire" if _result.stars > 0 else "rate")
 	hud.visible = false
-	menus.show_results(result)
+	menus.show_results(_result)
 
 
 func _handle_events() -> void:
 	for e: Dictionary in sim.drain_events():
+		if e.type == "caught":
+			_forget_goal()
 		stage.on_event(e)
 		hud.on_event(e)
 		_event_sound(e)

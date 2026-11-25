@@ -787,8 +787,8 @@ func _follow_helper(h: Dictionary, dt: float) -> void:
 ## Charlotte voit Blanche faire : « Hon ! », puis elle appelle Maman si ça continue.
 func _step_snitch(h: Dictionary, dt: float) -> void:
 	h.cool -= dt
-	var sees: bool = h.cool <= 0.0 and dog_state == Dog.REACHING and h.pos.distance_to(dog_pos) < 2.3 \
-		and not map.hidden_by_island(h.pos, dog_pos)
+	# Les pattes en l'air, Blanche dépasse toujours : l'îlot ne la cache pas à Charlotte non plus.
+	var sees: bool = h.cool <= 0.0 and dog_state == Dog.REACHING and h.pos.distance_to(dog_pos) < 2.3
 	if not sees:
 		h.snitch = 0.0
 		return

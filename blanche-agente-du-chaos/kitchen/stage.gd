@@ -53,6 +53,10 @@ var _ring_mesh: ArrayMesh
 var _ring_materials: Array[StandardMaterial3D] = []
 var _ring_shadow: StandardMaterial3D
 var _kept: Array[Resource] = []
+## Positions au dernier pas des règles : l'écran peut aller plus vite que les 60 pas par seconde.
+var _last_time := -1.0
+var _last_pos: Dictionary = {}
+var _speeds: Dictionary = {}
 
 
 func _ready() -> void:
@@ -401,6 +405,9 @@ func start_level(sim_: Sim) -> void:
 	_clear_level()
 	sim = sim_
 	view = "jeu"
+	_last_time = -1.0
+	_last_pos.clear()
+	_speeds.clear()
 	_mask_node.visible = true
 	_mask_viewer = Vector2.INF
 	dog.position = Vector3(sim.dog_pos.x, 0, sim.dog_pos.y)
@@ -456,6 +463,7 @@ func on_event(e: Dictionary) -> void:
 func _process(delta: float) -> void:
 	_time += delta
 	if sim != null:
+		_measure_speeds()
 		_show_dog(delta)
 		_show_mom(delta)
 		_show_people(delta)
@@ -495,11 +503,30 @@ func hidden_center() -> Vector2:
 	return _mask_center
 
 
+## La vitesse de chacun, mesurée seulement quand les règles ont avancé.
+func _measure_speeds() -> void:
+	if sim.time == _last_time:
+		return
+	var now := {"blanche": sim.dog_pos, "maman": sim.mom_pos}
+	for h in sim.helpers:
+		now[h.who] = h.pos
+	for who: String in now:
+		var moved: float = now[who].distance_to(_last_pos.get(who, now[who]))
+		_speeds[who] = moved / maxf(sim.time - _last_time, 0.001) if _last_time >= 0.0 else 0.0
+	_last_pos = now
+	_last_time = sim.time
+
+
+## Rejoint la position des règles en douceur (sans traîner).
+static func _follow_floor(node: Node3D, to: Vector2, delta: float) -> void:
+	var f := 1.0 - exp(-delta * 45.0)
+	node.position.x = lerpf(node.position.x, to.x, f)
+	node.position.z = lerpf(node.position.z, to.y, f)
+
+
 func _show_dog(delta: float) -> void:
-	var before := dog.position
-	dog.position.x = sim.dog_pos.x
-	dog.position.z = sim.dog_pos.y
-	dog.speed = Vector2(before.x, before.z).distance_to(sim.dog_pos) / maxf(delta, 0.001)
+	_follow_floor(dog, sim.dog_pos, delta)
+	dog.speed = _speeds.get("blanche", 0.0)
 	_dog_yaw = _turn(_dog_yaw, atan2(sim.dog_dir.x, sim.dog_dir.y), delta, 14.0)
 	dog.rotation.y = _dog_yaw
 	_surprised -= delta
@@ -534,10 +561,8 @@ func _show_dog(delta: float) -> void:
 
 
 func _show_mom(delta: float) -> void:
-	var before := mom.position
-	mom.position.x = sim.mom_pos.x
-	mom.position.z = sim.mom_pos.y
-	mom.speed = Vector2(before.x, before.z).distance_to(sim.mom_pos) / maxf(delta, 0.001)
+	_follow_floor(mom, sim.mom_pos, delta)
+	mom.speed = _speeds.get("maman", 0.0)
 	var dir := sim.mom_dir
 	var yaw := atan2(dir.x, dir.y)
 	_mom_yaw = _turn(_mom_yaw, yaw, delta, 16.0)
@@ -576,11 +601,13 @@ func _show_people(delta: float) -> void:
 	for h in sim.helpers:
 		var p: PersonView = people[h.who]
 		present[h.who] = true
-		var before := p.position
 		var was_visible := p.visible
 		p.visible = true
-		p.position = Vector3(h.pos.x, 0, h.pos.y)
-		p.speed = Vector2(before.x, before.z).distance_to(h.pos) / maxf(delta, 0.001) if was_visible else 0.0
+		if was_visible:
+			_follow_floor(p, h.pos, delta)
+		else:
+			p.position = Vector3(h.pos.x, 0, h.pos.y)
+		p.speed = _speeds.get(h.who, 0.0)
 		var moving: bool = h.state != "stay"
 		var dir: Vector2 = h.dir if moving else sim.mom_pos - h.pos
 		if h.who == "charlotte" and h.snitch > 0.0:

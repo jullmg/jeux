@@ -49,8 +49,9 @@ func tap_key(code: Key) -> void:
 	await frames(2)
 
 
-func pad(button: JoyButton, down: bool) -> void:
+func pad(button: JoyButton, down: bool, device := 0) -> void:
 	var e := InputEventJoypadButton.new()
+	e.device = device
 	e.button_index = button
 	e.pressed = down
 	send(e)
@@ -312,15 +313,87 @@ func test_souris_et_gros_bouton() -> void:
 	check(main.state == "pause", "bouton pause à l'écran")
 
 
-func test_deuxieme_doigt() -> void:
-	var sim := await calm()
-	var goal := Vector2(-0.9, 1.3)
+func finger(at: Vector2, index: int) -> void:
 	var e := InputEventScreenTouch.new()
-	e.index = 1
+	e.index = index
 	e.pressed = true
-	e.position = main.stage.on_screen(Vector3(goal.x, 0, goal.y))
+	e.position = at
 	get_viewport().push_input(e, true)
-	check(await run_until(func() -> bool: return sim.dog_pos.distance_to(goal) < 0.15), "un doigt sur le plancher")
+
+
+func test_deuxieme_doigt() -> void:
+	# Le bouton reste tenu après la prise, et un autre doigt montre où aller.
+	var sim := await calm()
+	sim.dog_pos = sim.map.spots.lave_vaisselle.stand
+	sim._add_item(Sim.Size.TREASURE, "lave_vaisselle", sim.map.spots.lave_vaisselle.food)
+	await frames(3)
+	main.hud.grab_held = true
+	check(await run_until(func() -> bool: return not sim.mouth.is_empty() and sim.dog_state == Sim.Dog.FREE), "attrapé")
+	var goal := Vector2(0.45, 1.3)
+	finger(main.stage.on_screen(Vector3(goal.x, 0, goal.y)), 1)
+	check(await run_until(func() -> bool: return sim.dog_pos.distance_to(goal) < 0.15, 90),
+		"bouton tenu : le deuxième doigt la déplace (%s)" % sim.dog_pos)
+	main.hud.grab_held = false
+
+
+func test_but_hors_d_atteinte() -> void:
+	var sim := await calm(4)
+	for aim: Vector3 in [Vector3(sim.map.stool_pos.x, 0.6, sim.map.stool_pos.y), Vector3(1.8, 0.9, -0.6),
+			Vector3(0.0, 0.9, -0.1)]:
+		main.tap(main.stage.on_screen(aim))
+		check(await run_until(func() -> bool: return main._touch_goal == Vector2.INF, 480), "le but est abandonné : %s" % aim)
+		var still := sim.dog_pos
+		await frames(20)
+		check(sim.dog_pos.distance_to(still) < 0.01, "elle ne pousse plus contre le meuble")
+
+
+func test_au_coin_oublie_le_but() -> void:
+	var sim := await calm()
+	sim.dog_pos = Vector2(-1.0, 1.4)
+	sim.mouth = {"id": 99, "size": 3, "points": 500, "eat_left": 3.0, "spot": "", "pos": Vector2.ZERO}
+	main.tap(main.stage.on_screen(Vector3(1.0, 0, 0.9)))
+	sim.mom_state = Sim.Mom.LOOK
+	sim._set_timer(0.5)
+	check(await run_until(func() -> bool: return sim.caught_count == 1, 60), "prise en chemin")
+	check(await run_until(func() -> bool: return sim.dog_state == Sim.Dog.FREE, 900), "puis libérée")
+	await frames(40)
+	check(sim.dog_pos.distance_to(sim.map.corner) < 0.1, "elle reste au coin tant qu'on ne dit rien (%s)" % sim.dog_pos)
+
+
+func test_manette_numero_deux() -> void:
+	var sim := await calm()
+	sim.dog_pos = sim.map.spots.lave_vaisselle.stand
+	sim._add_item(Sim.Size.BIG, "lave_vaisselle", sim.map.spots.lave_vaisselle.food)
+	await frames(3)
+	pad(JOY_BUTTON_A, true, 1)
+	await frames(15)
+	check(sim.dog_state == Sim.Dog.REACHING, "n'importe quelle manette attrape")
+	pad(JOY_BUTTON_A, false, 1)
+	await frames(20)
+
+
+func test_start_et_p_reprennent() -> void:
+	await calm()
+	await tap_pad(JOY_BUTTON_START)
+	check(main.state == "pause", "Start : pause")
+	await tap_pad(JOY_BUTTON_START)
+	check(main.state == "jeu" and not get_tree().paused, "Start : reprise")
+	await tap_key(KEY_P)
+	await tap_key(KEY_P)
+	check(main.state == "jeu", "P : pause puis reprise")
+
+
+func test_resultat_note_tout_de_suite() -> void:
+	main.save.reset_defaults()
+	var sim := await calm()
+	sim.score = int(sim.level.stars[2])
+	sim.time_left = 0.02
+	await frames(6)
+	check(sim.over and main.save.stars_of(1) == 3 and main.save.unlocked == 2, "noté avant l'écran des résultats")
+	await tap_key(KEY_ESCAPE)
+	check(main.state == "jeu" and not get_tree().paused, "pas de pause une fois le repas prêt")
+	check(await run_until(func() -> bool: return main.menus.screen == "resultats", 400), "les résultats arrivent")
+	main.save.reset_defaults()
 
 
 func test_perte_du_focus() -> void:
