@@ -1,0 +1,78 @@
+{
+  "id": 4,
+  "meal": "Les biscuits",
+  "novelty": "Les bruits",
+  "intro": [
+    "Une clochette marque les endroits bruyants : attraper là fait du vacarme.",
+    "Le tabouret aussi fait du bruit si tu fonces dedans.",
+    "Le bruit fait monter le soupçon. Assise dans ton coin, tu le fais redescendre."
+  ],
+  "duration": 130,
+  "hint_min": 0.65,
+  "window_mult": 1.05,
+  "look": [
+    1.2,
+    1.9
+  ],
+  "stations": [
+    "cuisiniere",
+    "four",
+    "planche",
+    "evier"
+  ],
+  "move_chance": 0.5,
+  "feint_chance": 0.0,
+  "surprise_chance": 0.08,
+  "round_chance": 0.0,
+  "noise": true,
+  "noisy_spots": [
+    "nord_droite",
+    "ilot_est"
+  ],
+  "helpers": [],
+  "spots": [
+    "nord_gauche",
+    "nord_droite",
+    "est_evier",
+    "lave_vaisselle",
+    "ilot_est",
+    "ilot_sud",
+    "ilot_ouest",
+    "coin_brique"
+  ],
+  "weights": [
+    0.35,
+    0.45,
+    0.2
+  ],
+  "spawn": [
+    1.8,
+    3.0
+  ],
+  "max_items": 5,
+  "treasure_at": 0.6,
+  "treasure_points": 500,
+  "stars": [
+    750,
+    1650,
+    2400
+  ],
+  "foods": {
+    "crumb": [
+      "miette",
+      "Miette de biscuit"
+    ],
+    "small": [
+      "biscuit",
+      "Biscuit tout chaud"
+    ],
+    "big": [
+      "pate",
+      "Boule de pâte"
+    ],
+    "treasure": [
+      "plaque_biscuits",
+      "La plaque de biscuits"
+    ]
+  }
+}

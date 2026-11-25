@@ -1,0 +1,80 @@
+{
+  "id": 6,
+  "meal": "Le spaghetti",
+  "novelty": "Le tour de l'îlot",
+  "intro": [
+    "Maman se méfie : parfois elle fait le tour de l'îlot.",
+    "Un « ! » entouré d'une flèche l'annonce. Garde l'îlot entre vous deux !",
+    "Rester cachée trop longtemps la fait venir voir."
+  ],
+  "duration": 130,
+  "hint_min": 0.5,
+  "window_mult": 0.95,
+  "look": [
+    1.2,
+    1.9
+  ],
+  "stations": [
+    "cuisiniere",
+    "planche",
+    "evier",
+    "frigo",
+    "telephone"
+  ],
+  "move_chance": 0.5,
+  "feint_chance": 0.2,
+  "surprise_chance": 0.1,
+  "round_chance": 0.18,
+  "noise": true,
+  "noisy_spots": [
+    "coin_brique",
+    "ilot_sud"
+  ],
+  "helpers": [],
+  "spots": [
+    "nord_gauche",
+    "nord_droite",
+    "est_evier",
+    "lave_vaisselle",
+    "ilot_est",
+    "ilot_sud",
+    "ilot_ouest",
+    "coin_brique",
+    "buffet"
+  ],
+  "weights": [
+    0.35,
+    0.45,
+    0.2
+  ],
+  "spawn": [
+    1.8,
+    3.0
+  ],
+  "max_items": 5,
+  "treasure_at": 0.6,
+  "treasure_points": 500,
+  "stars": [
+    550,
+    2000,
+    2900
+  ],
+  "foods": {
+    "crumb": [
+      "bout_nouille",
+      "Bout de nouille"
+    ],
+    "small": [
+      "boulette",
+      "Boulette de viande"
+    ],
+    "big": [
+      "pain_beurre",
+      "Pain au beurre"
+    ],
+    "treasure": [
+      "grosse_boulette",
+      "La boulette géante"
+    ]
+  }
+}

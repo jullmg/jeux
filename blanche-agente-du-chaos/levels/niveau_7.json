@@ -1,0 +1,83 @@
+{
+  "id": 7,
+  "meal": "Le souper de la visite",
+  "novelty": "Papa et Charlotte",
+  "intro": [
+    "Charlotte peut retenir l'attention de Maman… ou te dénoncer ! Si elle dit « Hon ! », redescends.",
+    "Papa traverse la cuisine les bras chargés. Il bouche le chemin et échappe des morceaux.",
+    "Un petit morceau tombé par terre, ça se ramasse d'un coup."
+  ],
+  "duration": 130,
+  "hint_min": 0.45,
+  "window_mult": 0.92,
+  "look": [
+    1.2,
+    1.9
+  ],
+  "stations": [
+    "cuisiniere",
+    "planche",
+    "evier",
+    "frigo",
+    "ilot"
+  ],
+  "move_chance": 0.55,
+  "feint_chance": 0.2,
+  "surprise_chance": 0.08,
+  "round_chance": 0.1,
+  "noise": true,
+  "noisy_spots": [
+    "nord_droite",
+    "ilot_ouest"
+  ],
+  "helpers": [
+    "charlotte",
+    "papa"
+  ],
+  "spots": [
+    "nord_gauche",
+    "nord_droite",
+    "est_evier",
+    "lave_vaisselle",
+    "ilot_est",
+    "ilot_sud",
+    "ilot_ouest",
+    "coin_brique",
+    "buffet"
+  ],
+  "weights": [
+    0.35,
+    0.45,
+    0.2
+  ],
+  "spawn": [
+    1.7,
+    2.8
+  ],
+  "max_items": 5,
+  "treasure_at": 0.6,
+  "treasure_points": 500,
+  "stars": [
+    400,
+    1550,
+    2250
+  ],
+  "foods": {
+    "crumb": [
+      "miette",
+      "Miette de craquelin"
+    ],
+    "small": [
+      "saucisson",
+      "Tranche de saucisson"
+    ],
+    "big": [
+      "roti",
+      "Tranche de rôti"
+    ],
+    "treasure": [
+      "plateau_fromages",
+      "Le plateau de fromages"
+    ]
+  }
+}

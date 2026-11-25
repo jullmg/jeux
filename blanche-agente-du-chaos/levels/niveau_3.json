@@ -1,0 +1,75 @@
+{
+  "id": 3,
+  "meal": "La soupe",
+  "novelty": "Les activités de Maman",
+  "intro": [
+    "La tête dans le frigo ou au téléphone : la fenêtre est longue.",
+    "Quand elle coupe, c'est court… mais des miettes tombent par terre.",
+    "Maman change de place : la cachette change aussi. La minuterie la tient occupée longtemps."
+  ],
+  "duration": 130,
+  "hint_min": 0.7,
+  "window_mult": 1.05,
+  "look": [
+    1.2,
+    1.9
+  ],
+  "stations": [
+    "cuisiniere",
+    "planche",
+    "evier",
+    "frigo"
+  ],
+  "move_chance": 0.55,
+  "feint_chance": 0.0,
+  "surprise_chance": 0.1,
+  "round_chance": 0.0,
+  "noise": false,
+  "noisy_spots": [],
+  "helpers": [],
+  "spots": [
+    "nord_gauche",
+    "nord_droite",
+    "est_evier",
+    "lave_vaisselle",
+    "ilot_est",
+    "ilot_sud",
+    "ilot_ouest",
+    "coin_brique"
+  ],
+  "weights": [
+    0.35,
+    0.45,
+    0.2
+  ],
+  "spawn": [
+    1.8,
+    3.0
+  ],
+  "max_items": 5,
+  "treasure_at": 0.6,
+  "treasure_points": 500,
+  "stars": [
+    800,
+    2300,
+    3300
+  ],
+  "foods": {
+    "crumb": [
+      "bout_carotte",
+      "Bout de carotte"
+    ],
+    "small": [
+      "pain",
+      "Quignon de pain"
+    ],
+    "big": [
+      "poulet_morceau",
+      "Morceau de poulet"
+    ],
+    "treasure": [
+      "poulet_roti",
+      "Le poulet rôti"
+    ]
+  }
+}

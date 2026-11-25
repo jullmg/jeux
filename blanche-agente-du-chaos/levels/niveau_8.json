@@ -1,0 +1,86 @@
+{
+  "id": 8,
+  "meal": "La dinde de Noël",
+  "novelty": "La grande mission",
+  "intro": [
+    "Tout ce que tu as appris, en même temps.",
+    "La dinde apparaîtra vers la fin. Elle vaut le coup…",
+    "Bonne chance, agente Blanche."
+  ],
+  "duration": 160,
+  "hint_min": 0.4,
+  "window_mult": 0.88,
+  "look": [
+    1.3,
+    2.1
+  ],
+  "stations": [
+    "cuisiniere",
+    "four",
+    "planche",
+    "evier",
+    "frigo",
+    "telephone",
+    "ilot"
+  ],
+  "move_chance": 0.55,
+  "feint_chance": 0.25,
+  "surprise_chance": 0.1,
+  "round_chance": 0.14,
+  "noise": true,
+  "noisy_spots": [
+    "nord_droite",
+    "coin_brique",
+    "ilot_est"
+  ],
+  "helpers": [
+    "charlotte",
+    "papa"
+  ],
+  "spots": [
+    "nord_gauche",
+    "nord_droite",
+    "est_evier",
+    "lave_vaisselle",
+    "ilot_est",
+    "ilot_sud",
+    "ilot_ouest",
+    "coin_brique",
+    "buffet"
+  ],
+  "weights": [
+    0.35,
+    0.45,
+    0.2
+  ],
+  "spawn": [
+    1.6,
+    2.6
+  ],
+  "max_items": 5,
+  "treasure_at": 0.7,
+  "treasure_points": 1000,
+  "stars": [
+    550,
+    1850,
+    3850
+  ],
+  "foods": {
+    "crumb": [
+      "miette",
+      "Miette de farce"
+    ],
+    "small": [
+      "farce",
+      "Bouchée de farce"
+    ],
+    "big": [
+      "cuisse",
+      "La cuisse"
+    ],
+    "treasure": [
+      "dinde",
+      "LA DINDE"
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "id": 2,
+  "meal": "Les sandwichs",
+  "novelty": "L'îlot",
+  "intro": [
+    "L'îlot te cache : au sol, derrière lui, Maman ne te voit pas.",
+    "La zone cachée est dessinée sur le plancher. L'œil te dit si on te voit.",
+    "Il porte aussi de la nourriture… mais les pattes en l'air, on te voit toujours !"
+  ],
+  "duration": 130,
+  "hint_min": 0.8,
+  "window_mult": 1.2,
+  "look": [
+    1.2,
+    1.9
+  ],
+  "stations": [
+    "cuisiniere",
+    "planche"
+  ],
+  "move_chance": 0.35,
+  "feint_chance": 0.0,
+  "surprise_chance": 0.0,
+  "round_chance": 0.0,
+  "noise": false,
+  "noisy_spots": [],
+  "helpers": [],
+  "spots": [
+    "nord_gauche",
+    "nord_droite",
+    "est_evier",
+    "lave_vaisselle",
+    "ilot_est",
+    "ilot_sud",
+    "ilot_ouest"
+  ],
+  "weights": [
+    0.35,
+    0.45,
+    0.2
+  ],
+  "spawn": [
+    1.8,
+    3.0
+  ],
+  "max_items": 5,
+  "treasure_at": 0.6,
+  "treasure_points": 500,
+  "stars": [
+    800,
+    2300,
+    3250
+  ],
+  "foods": {
+    "crumb": [
+      "miette",
+      "Miette de pain"
+    ],
+    "small": [
+      "fromage",
+      "Tranche de fromage"
+    ],
+    "big": [
+      "sandwich",
+      "Sandwich club"
+    ],
+    "treasure": [
+      "paquet_jambon",
+      "Le paquet de jambon"
+    ]
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "id": 1,
+  "meal": "Les crêpes du déjeuner",
+  "novelty": "Première mission",
+  "intro": [
+    "Pars de ton coin et approche-toi d'un comptoir.",
+    "Maintiens le bouton pour attraper. Relâche-le pour redescendre.",
+    "Quand tu vois le « ! », redescends vite et aie l'air sage."
+  ],
+  "duration": 120,
+  "hint_min": 0.9,
+  "window_mult": 1.35,
+  "look": [
+    1.1,
+    1.6
+  ],
+  "stations": [
+    "cuisiniere"
+  ],
+  "move_chance": 0.0,
+  "feint_chance": 0.0,
+  "surprise_chance": 0.0,
+  "round_chance": 0.0,
+  "noise": false,
+  "noisy_spots": [],
+  "helpers": [],
+  "spots": [
+    "nord_gauche",
+    "nord_droite",
+    "est_evier",
+    "lave_vaisselle"
+  ],
+  "weights": [
+    0.35,
+    0.5,
+    0.15
+  ],
+  "spawn": [
+    1.5,
+    2.6
+  ],
+  "max_items": 5,
+  "treasure_at": 0.55,
+  "treasure_points": 500,
+  "stars": [
+    1500,
+    2650,
+    3750
+  ],
+  "foods": {
+    "crumb": [
+      "miette",
+      "Miette de crêpe"
+    ],
+    "small": [
+      "crepe",
+      "Petite crêpe roulée"
+    ],
+    "big": [
+      "pile_crepes",
+      "Pile de crêpes"
+    ],
+    "treasure": [
+      "saucisse",
+      "La grosse saucisse"
+    ]
+  }
+}

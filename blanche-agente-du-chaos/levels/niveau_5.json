@@ -1,0 +1,78 @@
+{
+  "id": 5,
+  "meal": "La pizza",
+  "novelty": "Les feintes",
+  "intro": [
+    "Parfois Maman lève juste la tête : un « ? » gris. Elle ne se retournera pas.",
+    "Le vrai danger, c'est le « ! » rouge avec les épaules qui tournent.",
+    "Quand elle travaille à l'îlot, elle voit par-dessus : la cachette rapetisse."
+  ],
+  "duration": 130,
+  "hint_min": 0.55,
+  "window_mult": 1.0,
+  "look": [
+    1.2,
+    1.9
+  ],
+  "stations": [
+    "cuisiniere",
+    "ilot",
+    "evier",
+    "frigo",
+    "telephone"
+  ],
+  "move_chance": 0.5,
+  "feint_chance": 0.3,
+  "surprise_chance": 0.08,
+  "round_chance": 0.0,
+  "noise": true,
+  "noisy_spots": [
+    "nord_gauche"
+  ],
+  "helpers": [],
+  "spots": [
+    "nord_gauche",
+    "nord_droite",
+    "est_evier",
+    "lave_vaisselle",
+    "ilot_est",
+    "ilot_sud",
+    "ilot_ouest",
+    "coin_brique"
+  ],
+  "weights": [
+    0.35,
+    0.45,
+    0.2
+  ],
+  "spawn": [
+    1.8,
+    3.0
+  ],
+  "max_items": 5,
+  "treasure_at": 0.6,
+  "treasure_points": 500,
+  "stars": [
+    850,
+    2500,
+    3600
+  ],
+  "foods": {
+    "crumb": [
+      "miette",
+      "Miette de pâte"
+    ],
+    "small": [
+      "pepperoni",
+      "Rondelle de pepperoni"
+    ],
+    "big": [
+      "pointe_pizza",
+      "Pointe de pizza"
+    ],
+    "treasure": [
+      "pizza",
+      "La pizza entière"
+    ]
+  }
+}
