@@ -77,3 +77,17 @@ elle change.
 - Les arguments d'essai (`--autotest`, `--scenario`, `--sauvegarde`) restent dans l'application : ils n'écrivent qu'à
   l'endroit qu'on leur donne en la lançant à la main.
 - Le titre contient un nom de famille et les personnages représentent des proches : à considérer avant tout partage.
+
+## 6. Assurance qualité finale (2026-11-24)
+
+| Essai | Résultat |
+|---|---|
+| `tools/test.sh --complet` | 44 essais de règles (2829 vérifications), 102 vérifications d'intégration, parcours des huit missions, équilibrage à 1000 parties par niveau et par profil : **tout passe** |
+| Équité | Le robot « sage » n'est pris aucune fois, sur 8000 parties |
+| Stratégies dégénérées | Marteler, camper : 0 % de réussite ; miettes : moins de 1 % ; ne jamais redescendre : 13 à 23 %, jamais trois étoiles |
+| Débutant robot (réaction 0,7 s) | Réussit de 86 à 100 % des parties ; trois étoiles de 58 % (mission 1) à 10 % (mission 8) |
+| Performance, 1920×1080, M1 Pro | 67 à 79 images/s en moyenne, 99 % sous 20 ms, pire 31 ms ; chargement d'un niveau sous 0,15 s ; mémoire stable sur 20 parties |
+| Formats d'écran | 16:9, 16:10 et 4:3 vérifiés sur captures |
+| Application macOS exportée | Universelle, signée « ad hoc », sans photo, autotest réussi deux fois, sauvegarde conservée au redémarrage, captures vérifiées |
+
+Non vérifié : écoute du son, manette et écran tactile réels, ouverture sur un autre Mac, plaisir de jeu.
