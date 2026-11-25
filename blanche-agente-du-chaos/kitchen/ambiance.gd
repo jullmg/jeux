@@ -48,9 +48,6 @@ func _ready() -> void:
 	_env.ssao_radius = 0.32
 	_env.ssao_intensity = 2.6
 	_env.ssao_power = 1.6
-	_env.ssil_enabled = true
-	_env.ssil_radius = 1.2
-	_env.ssil_intensity = 0.7
 	_env.glow_enabled = true
 	_env.glow_intensity = 0.45
 	_env.glow_bloom = 0.02
@@ -62,7 +59,7 @@ func _ready() -> void:
 	add_child(world)
 
 	_key = _sun(Vector3(-62, -24, 0), true)
-	_key.light_angular_distance = 2.5
+	_key.shadow_blur = 1.6
 	_fill = _sun(Vector3(-24, 138, 0), false)
 
 	_window = SpotLight3D.new()
@@ -71,7 +68,7 @@ func _ready() -> void:
 	_window.spot_angle = 26.0
 	_window.spot_attenuation = 0.4
 	_window.shadow_enabled = true
-	_window.light_size = 0.12
+	_window.shadow_blur = 2.0
 	add_child(_window)
 	_window.look_at(Vector3(0.1, 0.0, 0.15))
 

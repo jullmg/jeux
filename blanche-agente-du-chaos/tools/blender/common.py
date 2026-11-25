@@ -43,7 +43,7 @@ _tex_scale = {}
 
 
 def material(name, color="#ffffff", rough=0.8, metal=0.0, texture=None, tex_size=1.0, emit=None, emit_power=1.0,
-             alpha=1.0, vertex_colors=False):
+             alpha=1.0, vertex_colors=False, normal=None, orm=None):
     if name in _materials:
         return _materials[name]
     m = bpy.data.materials.new(name)
@@ -57,6 +57,20 @@ def material(name, color="#ffffff", rough=0.8, metal=0.0, texture=None, tex_size
         node.image = texture
         m.node_tree.links.new(node.outputs["Color"], bsdf.inputs["Base Color"])
         _tex_scale[name] = tex_size
+    if normal is not None:
+        node = m.node_tree.nodes.new("ShaderNodeTexImage")
+        node.image = normal
+        bump = m.node_tree.nodes.new("ShaderNodeNormalMap")
+        m.node_tree.links.new(node.outputs["Color"], bump.inputs["Color"])
+        m.node_tree.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+    if orm is not None:
+        # glTF : rugosité dans le vert, métal dans le bleu
+        node = m.node_tree.nodes.new("ShaderNodeTexImage")
+        node.image = orm
+        split = m.node_tree.nodes.new("ShaderNodeSeparateColor")
+        m.node_tree.links.new(node.outputs["Color"], split.inputs["Color"])
+        m.node_tree.links.new(split.outputs["Green"], bsdf.inputs["Roughness"])
+        m.node_tree.links.new(split.outputs["Blue"], bsdf.inputs["Metallic"])
     if vertex_colors:
         node = m.node_tree.nodes.new("ShaderNodeVertexColor")
         node.layer_name = "Col"
@@ -72,10 +86,12 @@ def material(name, color="#ffffff", rough=0.8, metal=0.0, texture=None, tex_size
     return m
 
 
-def image(name, rgb):
-    """rgb : tableau (hauteur, largeur, 3) en sRGB 0-1."""
+def image(name, rgb, data=False):
+    """rgb : tableau (hauteur, largeur, 3) en sRGB 0-1. `data` : des nombres (relief, brillance), pas des couleurs."""
     h, w, _ = rgb.shape
     img = bpy.data.images.new(name, w, h, alpha=True)
+    if data:
+        img.colorspace_settings.name = "Non-Color"
     rgba = np.ones((h, w, 4), dtype=np.float32)
     rgba[..., :3] = np.clip(rgb, 0, 1)
     img.pixels.foreach_set(rgba.ravel())

@@ -10,7 +10,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import common as C  # noqa: E402
-import numpy as np  # noqa: E402
+import textures as T  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
 C.reset()
@@ -20,135 +20,31 @@ H = PLAN["counter_height"]
 rng = random.Random(5)
 
 
-# ---------------------------------------------------------------- textures
-
-def tex_floor():
-    size = 1024
-    meters = 1.6
-    rows = 28
-    img = np.zeros((size, size, 3))
-    colors = [C.srgb(c) for c in ("#a9692f", "#b87938", "#c48844", "#9d5f2a", "#b27234", "#cd934c", "#a26630")]
-    grain = C.value_noise(size, size, 3, 90) * 0.6 + C.value_noise(size, size, 2, 28) * 0.4
-    wear = C.value_noise(size, size, 70, 160)
-    ph = size / rows
-    for r in range(rows):
-        y0, y1 = int(r * ph), int((r + 1) * ph)
-        x = rng.randrange(size)
-        covered = 0
-        while covered < size:
-            length = rng.randrange(180, 520)
-            length = min(length, size - covered)
-            col = np.array(colors[rng.randrange(len(colors))])
-            xs = (np.arange(x, x + length)) % size
-            block = col[None, None, :] * (0.86 + 0.28 * grain[y0:y1][:, xs, None])
-            block *= 1.0 + 0.12 * (wear[y0:y1][:, xs, None] - 0.5)
-            img[np.ix_(range(y0, y1), xs)] = block
-            # joint au bout de la latte
-            img[y0:y1, x % size] *= 0.45
-            x += length
-            covered += length
-        img[y0:y0 + 2] *= 0.52
-    scratches = C.value_noise(size, size, 2, 6)
-    img *= 1.0 - 0.18 * (scratches > 0.83)[..., None]
-    return C.image("plancher", img), meters
-
-
-def tex_wood(name, light, dark, vertical=True, meters=0.8):
-    size = 512
-    a = np.array(C.srgb(light))
-    b = np.array(C.srgb(dark))
-    if vertical:
-        n = C.value_noise(size, size, 150, 5) * 0.65 + C.value_noise(size, size, 60, 2) * 0.35
-    else:
-        n = C.value_noise(size, size, 5, 150) * 0.65 + C.value_noise(size, size, 2, 60) * 0.35
-    n = np.clip((n - 0.3) * 1.6, 0, 1)
-    img = a + (b - a) * n[..., None]
-    return C.image(name, img), meters
-
-
-def tex_butcher():
-    size = 512
-    img = np.zeros((size, size, 3))
-    grain = C.value_noise(size, size, 80, 3)
-    strips = 12
-    w = size // strips
-    cols = ["#e2c28d", "#d9b47c", "#e8cc9a", "#d3ab72"]
-    for i in range(strips):
-        col = np.array(C.srgb(cols[rng.randrange(4)]))
-        img[:, i * w:(i + 1) * w] = col * (0.92 + 0.16 * grain[:, i * w:(i + 1) * w, None])
-        img[:, i * w:i * w + 1] *= 0.85
-    img[:, strips * w:] = img[:, :size - strips * w]
-    return C.image("billot", img), 0.7
-
-
-def tex_counter():
-    size = 512
-    img = np.ones((size, size, 3)) * np.array(C.srgb("#39414f"))
-    img *= 0.9 + 0.2 * C.value_noise(size, size, 26, 26)[..., None]
-    speck = np.random.rand(size, size)
-    img[speck > 0.965] = C.srgb("#8591a6")
-    img[speck < 0.03] = C.srgb("#1d222c")
-    return C.image("comptoir", img), 0.5
-
-
-def tex_brick():
-    size = 512
-    img = np.ones((size, size, 3)) * np.array(C.srgb("#b9ab9c"))
-    bh, bw = 40, 118
-    cols = ["#8f5546", "#7d473a", "#9c6250", "#6f4136", "#a56f5c"]
-    for r in range(size // bh + 1):
-        off = (r % 2) * bw // 2
-        for c in range(-1, size // bw + 1):
-            x0, y0 = c * bw + off + 4, r * bh + 4
-            xs = np.arange(x0, x0 + bw - 7) % size
-            ys = np.arange(y0, min(y0 + bh - 7, size))
-            if len(ys) == 0:
-                continue
-            img[np.ix_(ys, xs)] = np.array(C.srgb(cols[rng.randrange(len(cols))]))
-    img *= 0.85 + 0.3 * C.value_noise(size, size, 8, 8)[..., None]
-    return C.image("brique", img), 0.75
-
-
-def tex_tile():
-    size = 256
-    img = np.ones((size, size, 3)) * np.array(C.srgb("#eeeae2"))
-    img *= 0.97 + 0.05 * C.value_noise(size, size, 64, 64)[..., None]
-    for k in range(0, size, 64):
-        img[k:k + 3] = C.srgb("#c6c0b6")
-        img[:, k:k + 3] = C.srgb("#c6c0b6")
-    return C.image("carreaux", img), 0.44
-
-
-def tex_fabric(name, color, meters=0.25):
-    size = 256
-    img = np.ones((size, size, 3)) * np.array(C.srgb(color))
-    img *= 0.86 + 0.28 * (C.value_noise(size, size, 3, 3) * 0.6 + C.value_noise(size, size, 40, 40) * 0.4)[..., None]
-    return C.image(name, img), meters
-
-
-def mat_tex(name, tex, rough=0.7, metal=0.0):
-    return C.material(name, "#ffffff", rough, metal, texture=tex[0], tex_size=tex[1])
-
-
 M = C.material
-floor_m = mat_tex("plancher", tex_floor(), 0.38)
-maple = mat_tex("erable", tex_wood("erable", "#dcb178", "#c4935a"), 0.55)
-maple_panel = mat_tex("erable_panneau", tex_wood("erable_p", "#d4a76c", "#bd8a52"), 0.55)
-butcher = mat_tex("billot", tex_butcher(), 0.5)
-counter = mat_tex("comptoir", tex_counter(), 0.35)
-brick = mat_tex("brique", tex_brick(), 0.9)
-tile = mat_tex("carreaux", tex_tile(), 0.35)
-cushion_m = mat_tex("coussin", tex_fabric("coussin", "#767a84"), 0.95)
-grey_wood = mat_tex("bois_gris", tex_wood("bois_gris", "#b9b6af", "#8b8880", False, 0.4), 0.7)
-buffet_top = mat_tex("dessus_buffet", tex_wood("dessus_buffet", "#c29a6a", "#8f6a43", False, 0.9), 0.55)
-towel = mat_tex("linge", tex_fabric("linge", "#d8d6d2", 0.12), 0.95)
 
-wall = M("mur", "#e7e3da", 0.92)
+
+def mat(name, maps, **kw):
+    return M(name, **maps, **kw)
+
+
+floor_m = mat("plancher", T.floor(rng))
+maple = mat("erable", T.wood("erable", "#e2b980", "#bf8e55", contrast=0.5))
+maple_panel = mat("erable_panneau", T.wood("erable_panneau", "#dab077", "#b58450", contrast=0.45))
+butcher = mat("billot", T.butcher(rng))
+counter = mat("comptoir", T.quartz())
+brick = mat("brique", T.bricks(rng))
+tile = mat("carreaux", T.tiles(rng))
+cushion_m = mat("coussin", T.fabric("coussin", "#767a86", 0.25, 7))
+grey_wood = mat("bois_gris", T.wood("bois_gris", "#c2bfb7", "#87837a", False, 0.4, 0.6))
+buffet_top = mat("dessus_buffet", T.wood("dessus_buffet", "#c89c68", "#85603a", False, 0.9, 0.36))
+towel = mat("linge", T.fabric("linge", "#dedcd7", 0.14, 5))
+
+wall = mat("mur", T.plaster("mur", "#ebe4d6"))
 soffit = M("soffite", "#f1eee7", 0.9)
 white = M("blanc", "#f3f1ec", 0.45)
 white_soft = M("blanc_mat", "#e9e6df", 0.75)
-steel = M("inox", "#c3c6cb", 0.32, 0.55)
-steel_dark = M("inox_fonce", "#8d9198", 0.35, 0.6)
+steel = mat("inox", T.brushed("inox", "#e4e8ee", 0.9, 0.34, 0.7))
+steel_dark = mat("inox_fonce", T.brushed("inox_fonce", "#aab0ba", 0.9, 0.38, 0.7))
 black = M("noir", "#17161a", 0.35)
 black_glass = M("vitre_noire", "#0e0f13", 0.12, 0.2)
 black_mat = M("noir_mat", "#232227", 0.7)
