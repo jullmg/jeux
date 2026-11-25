@@ -106,5 +106,9 @@ Sept chantiers de `PROMPT-GRAPHIQUES.md`, chacun vérifié par captures, essais 
 
 Au tout premier lancement, quelques à-coups de 50 à 100 ms viennent de la préparation des shaders.
 
+Batterie complète (`tools/test.sh --complet`) après la refonte : 49 essais de règles (2830 vérifications),
+102 vérifications d'intégration, parcours des huit missions et équilibrage à 1000 parties par niveau et par profil :
+**tout passe**. Le robot « sage » n'est pris aucune fois.
+
 Ce qui reste faible : les mains et la démarche des personnages restent simples ; les cheveux sont des masses lisses ;
 les cartes de missions verrouillées ne montrent qu'une silhouette ; le moteur mobile n'est pas réglé.
