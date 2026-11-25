@@ -9,9 +9,9 @@ const FEET := ["pawL", "pawR", "hpawL", "hpawR"]
 const HIND_FEET := ["hpawL", "hpawR"]
 ## Longueur d'une foulée : des petites pattes qui trottinent.
 const STRIDE := 0.30
-## Rotation des paupières : tout à fait fermées (90° + LID_REST de dog.py), et mi-closes quand elle a l'air piteuse.
-const LID_CLOSED := 142.0
-const LID_SAD := 62.0
+## Rotation des paupières : tout à fait fermées (88° + LID_REST de dog.py), et mi-closes quand elle a l'air piteuse.
+const LID_CLOSED := 128.0
+const LID_SAD := 48.0
 ## Dressée contre un meuble : les poignets, à cette distance devant elle, juste au-dessus du dessus du meuble.
 const PAW_REACH := 0.235
 const PAW_ABOVE := 0.035

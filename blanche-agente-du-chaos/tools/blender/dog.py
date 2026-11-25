@@ -37,7 +37,8 @@ BONES = [
     ("tail2", "tail1", (0, 0.31, -0.262), (0, 0.357, -0.308)),
     ("tail3", "tail2", (0, 0.357, -0.308), (0, 0.405, -0.322)),
 ]
-EYE = Vector((0.054, 0.446, 0.2745))
+EYE = Vector((0.055, 0.441, 0.2665))
+EYE_R = 0.027
 for side, s in (("L", 1), ("R", -1)):
     eye = (EYE.x * s, EYE.y, EYE.z)
     BONES += [
@@ -201,11 +202,10 @@ lid_m = C.material("poil_paupiere", "#241e21", 0.65)
 brow_m = C.material("poil_sourcil", "#292224", 0.7)
 nose_m = C.material("truffe", "#2a2427", 0.22)
 hole = C.material("narine", "#060405", 0.9)
-sclera = C.material("oeil", "#140d0b", 0.08)
-iris_rim = C.material("iris_bord", "#5c2f0e", 0.12)
-iris = C.material("iris", "#c97a22", 0.08, emit="#4a2606", emit_power=0.6)
-iris_low = C.material("iris_clair", "#f0ad45", 0.08, emit="#8a4a0c", emit_power=0.7)
-pupil = C.material("pupille", "#0b0605", 0.05)
+eye_m = C.material("oeil", "#1a0f0c", 0.2)
+iris = C.material("iris", "#4a2a1a", 0.18)
+iris_low = C.material("iris_clair", "#6b3d24", 0.14)
+pupil = C.material("pupille", "#0d0705", 0.1)
 shine = C.material("reflet", "#ffffff", 0.2, emit="#ffffff", emit_power=1.0)
 mouth_m = C.material("gueule", "#5a232b", 0.7)
 tongue = C.material("langue", "#f07f8e", 0.4, emit="#3a0f14", emit_power=0.5)
@@ -250,7 +250,7 @@ def ribbon(points, widths, thick, across, mat, weights, seg=24):
 
 wh = {"head": 1.0}
 # de combien les paupières ouvertes sont rejetées en arrière (voir DogView : les fermer demande 90 + LID_REST degrés)
-LID_REST = 54
+LID_REST = 40
 for side, s in (("L", 1), ("R", -1)):
     # oreilles : de grands pans mous qui retombent de chaque côté, un peu tournés vers l'avant
     ear = {"ear" + side: 1.0}
@@ -258,24 +258,26 @@ for side, s in (("L", 1), ("R", -1)):
             (0.145 * s, 0.400, 0.216), (0.142 * s, 0.368, 0.222), (0.134 * s, 0.348, 0.226)],
            [0.019, 0.033, 0.042, 0.047, 0.046, 0.037, 0.020], [0.012, 0.016, 0.017, 0.016, 0.014, 0.012, 0.009],
            Vector((0.55 * s, 0.0, 0.83)), fur, ear)
-    # grands yeux : globe sombre, iris ambré cerclé, grosse pupille et deux reflets
+    # des yeux de chiot : doux, brun foncé, à peine bombés, grosse pupille et deux reflets (rien qui luise)
     c = Vector((EYE.x * s, EYE.y, EYE.z))
     # tournés un peu vers l'extérieur pour épouser la rondeur de la tête
     turn = Matrix.Rotation(0.2 * s, 3, "Y")
 
-    def disc(dx, dy, dz, radii, mat, **kw):
-        parts.ball(c + turn @ Vector((dx, dy, dz)), radii, mat, weights=wh, matrix=turn, **kw)
+    def disc(dx, dy, dz, rx, ry, rz, mat, **kw):
+        """Une pastille bombée devant le globe ; tout est en rayons de l'œil."""
+        parts.ball(c + turn @ (Vector((dx, dy, dz)) * EYE_R), (rx * EYE_R, ry * EYE_R, rz * EYE_R), mat, weights=wh,
+                   matrix=turn, **kw)
 
-    disc(0, 0, 0, (0.0298, 0.0298, 0.0298), sclera, seg=24, rings=18)
-    disc(0, 0, 0.0218, (0.0262, 0.0272, 0.0102), iris_rim, seg=24)
-    disc(0, 0, 0.0227, (0.0242, 0.0252, 0.0111), iris, seg=24)
-    disc(0, -0.0154, 0.0274, (0.0146, 0.0068, 0.0060), iris_low, seg=20)
-    disc(0, 0.0012, 0.0293, (0.0162, 0.0172, 0.0078), pupil, seg=24)
-    disc(0.0092, 0.0102, 0.0331, (0.0074, 0.0077, 0.0036), shine, seg=14, rings=10)
-    disc(-0.0087, -0.0082, 0.0346, (0.0031, 0.0031, 0.0021), shine, seg=10, rings=8)
+    disc(0, 0, 0, 1.0, 1.0, 1.0, eye_m, seg=24, rings=18)
+    disc(0, 0, 0.74, 0.76, 0.78, 0.34, iris, seg=24)
+    disc(0, 0.06, 0.93, 0.66, 0.68, 0.27, pupil, seg=24)
+    # une lueur chaude au bas de la pupille, à peine posée dessus
+    disc(0, -0.38, 1.10, 0.36, 0.15, 0.09, iris_low, seg=20)
+    disc(0.27, 0.32, 1.13, 0.25, 0.26, 0.12, shine, seg=14, rings=10)
+    disc(-0.28, -0.14, 1.19, 0.10, 0.10, 0.06, shine, seg=10, rings=8)
     # paupière : une calotte rejetée en arrière, qui descend quand l'os tourne
     lid = {"lid" + side: 1.0}
-    r = 0.0397
+    r = EYE_R * 1.36
     pole = turn @ Vector((0, math.cos(math.radians(LID_REST)), -math.sin(math.radians(LID_REST))))
     u = turn @ Vector((1, 0, 0))
     v = pole.cross(u)
@@ -291,9 +293,9 @@ for side, s in (("L", 1), ("R", -1)):
             a, b = i * seg + k, i * seg + (k + 1) % seg
             faces.append([a, b, b + seg, a + seg])
     parts.add(verts, faces, lid_m, smooth=True, weights=lid)
-    # sourcils : deux petites bosses de poil, à peine visibles, qui portent les expressions
-    arc, thick = C.curve([(0.036 * s, 0.4978, 0.2732), (0.045 * s, 0.5014, 0.2742), (0.055 * s, 0.5026, 0.2740),
-                          (0.065 * s, 0.5010, 0.2708), (0.073 * s, 0.4975, 0.2640)], [0.0008, 0.0023, 0.0027, 0.0022, 0.0008])
+    # sourcils : deux petites bosses de poil, à peine visibles ; le dedans relevé, pour l'air doux
+    arc, thick = C.curve([(0.036 * s, 0.4970, 0.2700), (0.045 * s, 0.4986, 0.2712), (0.055 * s, 0.4976, 0.2710),
+                          (0.064 * s, 0.4944, 0.2680), (0.071 * s, 0.4900, 0.2620)], [0.0007, 0.0019, 0.0021, 0.0017, 0.0006])
     parts.tube(arc, thick, brow_m, seg=10, weights={"brow" + side: 1.0})
     # points de moustaches
     for dx, dy in ((0.024, 0.000), (0.037, 0.004), (0.031, -0.010)):
