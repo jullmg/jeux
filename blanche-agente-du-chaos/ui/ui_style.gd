@@ -30,16 +30,28 @@ static func box(color: Color, radius := 22, border := Color.TRANSPARENT, width :
 	return s
 
 
+## Un bouton « bonbon » : un épais bord du bas qui s'écrase quand on appuie.
+static func candy(color: Color, pressed := false, border := Color.TRANSPARENT) -> StyleBoxFlat:
+	var s := box(color, 30, color.darkened(0.32) if border == Color.TRANSPARENT else border, 3)
+	s.border_width_bottom = 3 if pressed else 10
+	s.content_margin_top += 7 if pressed else 0
+	s.content_margin_bottom += 0 if pressed else 7
+	s.shadow_size = 3 if pressed else 8
+	s.shadow_offset = Vector2(0, 2 if pressed else 7)
+	s.anti_aliasing_size = 1.2
+	return s
+
+
 static func theme() -> Theme:
 	var t := Theme.new()
 	t.default_font = load("res://art/fonts/fredoka.tres")
 	t.default_font_size = 32
 	t.set_color("font_color", "Label", INK)
-	t.set_stylebox("normal", "Button", box(PINK, 26, PINK_DARK, 3))
-	t.set_stylebox("hover", "Button", box(PINK.lightened(0.12), 26, CREAM, 4))
-	t.set_stylebox("pressed", "Button", box(PINK_DARK, 26, CREAM, 4))
-	t.set_stylebox("disabled", "Button", box(Color("b9aa9c"), 26, Color("9a8a7c"), 3))
-	var focus := box(Color.TRANSPARENT, 28, GOLD, 7)
+	t.set_stylebox("normal", "Button", candy(PINK))
+	t.set_stylebox("hover", "Button", candy(PINK.lightened(0.12)))
+	t.set_stylebox("pressed", "Button", candy(PINK_DARK.lightened(0.08), true))
+	t.set_stylebox("disabled", "Button", candy(Color("b9aa9c")))
+	var focus := box(Color.TRANSPARENT, 32, GOLD, 7)
 	focus.shadow_size = 0
 	focus.set_expand_margin_all(5)
 	t.set_stylebox("focus", "Button", focus)
@@ -90,7 +102,24 @@ static func button(text: String, action: Callable, size := 40, width := 420.0) -
 	b.mouse_entered.connect(func() -> void:
 		if not b.disabled:
 			b.grab_focus())
+	_lively(b)
 	return b
+
+
+## Le bouton choisi grossit un peu, et un reflet court sur sa moitié du haut.
+static func _lively(b: Button) -> void:
+	b.resized.connect(func() -> void: b.pivot_offset = b.size / 2.0)
+	var grow := func(to: float) -> void:
+		if b.is_inside_tree():
+			b.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_ignore_time_scale(true) \
+				.tween_property(b, "scale", Vector2.ONE * to, 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	b.focus_entered.connect(grow.bind(1.045))
+	b.focus_exited.connect(grow.bind(1.0))
+	var shine := box(Color(1, 1, 1, 0.15), 22, Color.TRANSPARENT, 0, 0)
+	shine.shadow_size = 0
+	b.draw.connect(func() -> void:
+		if not b.disabled:
+			b.draw_style_box(shine, Rect2(14, 8, b.size.x - 28, b.size.y * 0.32)))
 
 
 static func column(spacing := 18) -> VBoxContainer:

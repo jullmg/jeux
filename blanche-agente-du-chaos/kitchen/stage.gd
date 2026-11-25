@@ -250,15 +250,29 @@ func _build_mask() -> void:
 render_mode unshaded, blend_mix, depth_draw_never, cull_disabled, shadows_disabled;
 uniform sampler2D mask : filter_linear, repeat_disable;
 uniform float strength = 1.0;
+uniform float motion = 1.0;
 varying vec3 at;
 void vertex() { at = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz; }
+// Une trace de patte dans chaque case, en quinconce : un coussinet et trois doigts.
+float paw(vec2 p) {
+	p.x += step(1.0, mod(p.y, 2.0)) * 0.5;
+	vec2 q = fract(p) - 0.5;
+	float d = length(q * vec2(1.0, 1.2) - vec2(0.0, 0.08)) - 0.17;
+	d = min(d, length(q - vec2(-0.19, -0.12)) - 0.075);
+	d = min(d, length(q - vec2(0.0, -0.22)) - 0.075);
+	d = min(d, length(q - vec2(0.19, -0.12)) - 0.075);
+	return 1.0 - smoothstep(-0.015, 0.015, d);
+}
 void fragment() {
 	float m = texture(mask, UV).r;
 	float inside = smoothstep(0.38, 0.62, m);
-	float edge = smoothstep(0.28, 0.5, m) * (1.0 - smoothstep(0.5, 0.74, m));
-	float stripe = smoothstep(0.45, 0.55, abs(fract((at.x + at.z) * 5.5) - 0.5) * 2.0);
-	ALBEDO = mix(mix(vec3(0.02, 0.05, 0.3), vec3(0.1, 0.28, 0.85), stripe), vec3(0.75, 0.9, 1.0), edge);
-	ALPHA = (inside * 0.5 + edge * 0.95) * strength;
+	float edge = smoothstep(0.30, 0.48, m) * (1.0 - smoothstep(0.52, 0.72, m));
+	float halo = smoothstep(0.45, 0.62, m) * (1.0 - smoothstep(0.62, 0.98, m));
+	float print = paw(at.xz * 6.2);
+	float dash = 0.72 + 0.28 * smoothstep(-0.2, 0.2, sin((at.x + at.z) * 38.0 - TIME * 3.0 * motion));
+	vec3 fill = mix(vec3(0.03, 0.12, 0.55), vec3(0.55, 0.80, 1.0), print);
+	ALBEDO = mix(mix(fill, vec3(0.35, 0.65, 1.0), halo * 0.7), vec3(0.85, 0.96, 1.0), edge);
+	ALPHA = max(inside * (0.40 + print * 0.22 + halo * 0.22), edge * 0.95 * dash) * strength;
 }
 """
 	var mat := ShaderMaterial.new()
@@ -426,6 +440,7 @@ func start_level(sim_: Sim) -> void:
 	_last_pos.clear()
 	_speeds.clear()
 	_mask_node.visible = true
+	(_mask_node.material_override as ShaderMaterial).set_shader_parameter("motion", 0.0 if reduced_motion else 1.0)
 	_mask_viewer = Vector2.INF
 	dog.position = Vector3(sim.dog_pos.x, 0, sim.dog_pos.y)
 	_dog_yaw = atan2(sim.dog_dir.x, sim.dog_dir.y)

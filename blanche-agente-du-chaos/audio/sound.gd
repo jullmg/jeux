@@ -16,6 +16,8 @@ var _hum: AudioStreamPlayer
 var _humming := false
 var _tension_wanted := 0.0
 var _tension_now := 0.0
+## Vrai quand le jeu se ferme : plus aucun son ne repart.
+var _closed := false
 ## Les derniers bruitages joués (pour les tests).
 var history: Array[String] = []
 
@@ -69,7 +71,15 @@ func _set_bus(bus: String, value: float) -> void:
 	AudioServer.set_bus_volume_db(i, linear_to_db(maxf(value, 0.001)))
 
 
+## Avant de quitter : le silence, et rien ne recommence.
+func close() -> void:
+	_closed = true
+	silence()
+
+
 func play(sound: String, volume_db := 0.0, pitch := 1.0) -> void:
+	if _closed:
+		return
 	var path := SFX_DIR % sound
 	if not _cache.has(sound):
 		if not ResourceLoader.exists(path):
@@ -110,7 +120,7 @@ func _looped(stream: AudioStream) -> AudioStream:
 
 ## Le fredonnement de Maman : il s'arrête net quand elle se doute de quelque chose.
 func hum(on: bool) -> void:
-	if on == _humming:
+	if _closed or on == _humming:
 		return
 	_humming = on
 	if not on:
@@ -126,7 +136,7 @@ func hum(on: bool) -> void:
 
 ## « menu » ou « jeu ». En jeu, la couche de tension suit le soupçon.
 func music(track: String) -> void:
-	if track == _music_name:
+	if _closed or track == _music_name:
 		return
 	_music_name = track
 	_music.stop()

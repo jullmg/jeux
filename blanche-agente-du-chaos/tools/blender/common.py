@@ -14,6 +14,7 @@ from mathutils import Vector, noise
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 MODELS = ROOT / "art" / "models"
 PREVIEWS = ROOT / "art" / "previews"
+UI = ROOT / "art" / "ui"
 
 
 def G(p):
@@ -512,11 +513,18 @@ def export(name):
     print(f"EXPORT {path} {path.stat().st_size // 1024} Ko")
 
 
-def render(name, eye, target, fov=44.0, size=(1600, 900)):
-    if "--sans-apercu" in sys.argv:
+def render_icon(name, eye, target, fov, size):
+    """Une image carrée à fond transparent pour l'interface du jeu (art/ui/)."""
+    render(name, eye, target, fov, (size, size), UI, True)
+
+
+def render(name, eye, target, fov=44.0, size=(1600, 900), folder=None, transparent=False):
+    if folder is None and "--sans-apercu" in sys.argv:
         return
-    PREVIEWS.mkdir(parents=True, exist_ok=True)
+    folder = folder or PREVIEWS
+    folder.mkdir(parents=True, exist_ok=True)
     scene = bpy.context.scene
+    scene.render.film_transparent = transparent
     cam_data = bpy.data.cameras.new("cam")
     cam_data.sensor_fit = "VERTICAL"
     cam_data.angle = math.radians(fov)
@@ -552,7 +560,7 @@ def render(name, eye, target, fov=44.0, size=(1600, 900)):
     scene.render.engine = "BLENDER_EEVEE"
     scene.view_settings.view_transform = "Standard"
     scene.render.resolution_x, scene.render.resolution_y = size
-    scene.render.filepath = str(PREVIEWS / f"{name}.png")
+    scene.render.filepath = str(folder / f"{name}.png")
     bpy.ops.render.render(write_still=True)
     for o in extra:
         bpy.data.objects.remove(o)

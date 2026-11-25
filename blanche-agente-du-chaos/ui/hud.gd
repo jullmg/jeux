@@ -43,6 +43,7 @@ var _world: Control
 var _top: Control
 var _font: Font
 var _styles: Dictionary = {}
+var _dishes: Array[Texture2D] = []
 
 
 func _ready() -> void:
@@ -50,6 +51,8 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_font = load("res://art/fonts/fredoka.tres")
 	theme = UiStyle.theme()
+	for id in range(1, Levels.COUNT + 1):
+		_dishes.append(load("res://art/ui/plat_%d.png" % id))
 	_world = _layer(_draw_world)
 	_top = _layer(_draw_panels)
 	_grab = Button.new()
@@ -336,11 +339,15 @@ func _draw_panels(on: Control) -> void:
 	# le repas qui cuit
 	var meal := Rect2(w / 2.0 - 330, 24, 660, 118)
 	_card(on, meal)
-	_text(on, Vector2(meal.position.x, 66), str(sim.level.meal), 34, UiStyle.INK, HORIZONTAL_ALIGNMENT_CENTER, meal.size.x)
+	_text(on, Vector2(meal.position.x + 80, 66), str(sim.level.meal), 34, UiStyle.INK, HORIZONTAL_ALIGNMENT_CENTER,
+		meal.size.x - 80)
 	var left := int(ceil(sim.time_left))
 	var urgent := sim.time_left < 20.0
-	_bar(on, Rect2(meal.position.x + 34, 90, meal.size.x - 190, 22), 1.0 - sim.time_left / float(sim.level.duration),
+	_bar(on, Rect2(meal.position.x + 130, 90, meal.size.x - 290, 22), 1.0 - sim.time_left / float(sim.level.duration),
 		UiStyle.RED if urgent else UiStyle.GREEN)
+	# Le plat de la mission, qui dépasse un peu de son carton et sautille quand le temps presse.
+	var hop := absf(sin(_time * 7.0)) * 8.0 if urgent and not reduced_motion else 0.0
+	on.draw_texture_rect(_dishes[int(sim.level.id) - 1], Rect2(meal.position + Vector2(-8, -12 - hop), Vector2(142, 142)), false)
 	_text(on, Vector2(meal.end.x - 140, 113), "%d:%02d" % [left / 60, left % 60], 36,
 		UiStyle.RED if urgent else UiStyle.INK, HORIZONTAL_ALIGNMENT_CENTER, 110.0)
 	_draw_wary(on, w)

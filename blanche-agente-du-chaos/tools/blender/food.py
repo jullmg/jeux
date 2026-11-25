@@ -279,6 +279,14 @@ def _(o):
 @food("dinde")
 def _(o):
     bird(o, 1.35)
+    # le houx des fêtes
+    for a in (0.55, 2.5, 4.9):
+        x, z = math.cos(a) * 0.2, math.sin(a) * 0.2
+        for k in range(3):
+            o.ball((x + math.cos(k * 2.1) * 0.012, 0.036, z + math.sin(k * 2.1) * 0.012), 0.013, tomato, seg=10, rings=8)
+        for k in (-1, 1):
+            o.ball((x + k * 0.032, 0.026, z - k * 0.012), (0.03, 0.004, 0.017), herb, seg=10, rings=6,
+                   matrix=Matrix.Rotation(a + k * 0.5, 3, "Y"))
 
 
 def cookie(o, x, y, z, r):
@@ -457,6 +465,30 @@ def _(o):
     drumstick(o, (-0.08, 0.052, 0.0), (1.0, 0.04, 0.12), 0.135)
 
 
+# la soupe de la troisième mission : seulement pour son image
+@food("bol_soupe")
+def _(o):
+    bowl = m("bol_bleu", "#2f6f9e", 0.18)
+    o.cyl((0, 0, 0), 0.085, 0.085, bowl, seg=48, top=0.165)
+    o.torus((0, 0.086, 0), 0.158, 0.011, plate, seg=56, sides=10)
+    o.cyl((0, 0.074, 0), 0.15, 0.008, tasty("bouillon", "#e59a2c", [("#f4bd55", 0.55, 0.8)], [("#3f7a24", 0.01)], 0.08), seg=48)
+    for i in range(9):
+        a = i * 2.4
+        r = 0.11 * math.sqrt((i + 0.4) / 9)
+        x, z = math.cos(a) * r, math.sin(a) * r
+        if i % 3 == 0:
+            o.cyl((x, 0.082, z), 0.022, 0.008, carrot, seg=18, bevel=0.002)
+        elif i % 3 == 1:
+            o.torus((x, 0.086, z), 0.018, 0.0065, pasta, sides=8, seg=14, arc=(a, a + 4.2))
+        else:
+            o.box(x - 0.014, 0.08, z - 0.012, x + 0.014, 0.092, z + 0.012, golden, bevel=0.005, seg=2)
+    for i in range(7):
+        a = i * 1.9
+        o.ball((math.cos(a) * 0.06, 0.086, math.sin(a) * 0.05), (0.011, 0.002, 0.006), herb, seg=8, rings=5)
+    o.tube([(0.06, 0.085, 0.02), (0.17, 0.13, 0.05), (0.24, 0.13, 0.07)], [0.012, 0.01, 0.016], platter, seg=10,
+           squash=(1.4, 0.7))
+
+
 levels = [json.loads((C.ROOT / "levels" / f"niveau_{i}.json").read_text()) for i in range(1, 9)]
 needed = {entry[0] for level in levels for entry in level["foods"].values()}
 missing = needed - {o.name for o in made}
@@ -465,6 +497,23 @@ if missing:
 
 objects = [o.build() for o in made]
 C.export("nourriture")
+
+# les images des plats, pour les cartes de mission (fond transparent)
+PLATS = {1: "pile_crepes", 2: "sandwich", 3: "bol_soupe", 4: "plaque_biscuits", 5: "pizza", 6: "grosse_boulette",
+         7: "plateau_fromages", 8: "dinde"}
+by_name = {o.name: o for o in objects}
+for level, name in PLATS.items():
+    for o in objects:
+        o.hide_render = o.name != name
+    points = [Vector((v.co.x, v.co.z, -v.co.y)) for v in by_name[name].data.vertices]
+    low = Vector([min(p[i] for p in points) for i in range(3)])
+    high = Vector([max(p[i] for p in points) for i in range(3)])
+    center = (low + high) / 2
+    reach = max((p - center).length for p in points)
+    eye = center + Vector((0.25, 0.85, 1.0)).normalized() * reach * 3.35
+    C.render_icon(f"plat_{level}", tuple(eye), tuple(center), 29, 384)
+for o in objects:
+    o.hide_render = False
 for i, ob in enumerate(objects):
     col, row = i % 8, i // 8
     ob.location = C.G(((col - 3.5) * 0.5, 0.0, (row - 1.5) * 0.5))

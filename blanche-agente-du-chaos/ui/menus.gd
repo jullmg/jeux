@@ -62,6 +62,23 @@ func _begin(name_: String, shade := 0.62) -> Control:
 	return _holder
 
 
+## Les réglages qui calment les animations des menus.
+func _calm() -> bool:
+	return save != null and save.options.reduced_motion
+
+
+## L'image d'un plat, pour les cartes et les résultats.
+func _dish(id: int, side: float) -> TextureRect:
+	var picture := TextureRect.new()
+	picture.texture = load("res://art/ui/plat_%d.png" % id)
+	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	picture.custom_minimum_size = Vector2(side, side)
+	picture.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return picture
+
+
 ## Un carton au centre, et la colonne où y mettre les choses.
 func _card(holder: Control, width := 900.0, spacing := 18) -> VBoxContainer:
 	var center := CenterContainer.new()
@@ -73,6 +90,15 @@ func _card(holder: Control, width := 900.0, spacing := 18) -> VBoxContainer:
 	center.add_child(panel)
 	var column := UiStyle.column(spacing)
 	panel.add_child(column)
+	if not _calm():
+		# Le carton arrive en grossissant un peu.
+		panel.modulate.a = 0.0
+		panel.resized.connect(func() -> void: panel.pivot_offset = panel.size / 2.0)
+		var tween := panel.create_tween().set_parallel().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS) \
+			.set_ignore_time_scale(true)
+		tween.tween_property(panel, "modulate:a", 1.0, 0.16)
+		tween.tween_property(panel, "scale", Vector2.ONE, 0.26).from(Vector2.ONE * 0.9).set_trans(Tween.TRANS_BACK) \
+			.set_ease(Tween.EASE_OUT)
 	return column
 
 
@@ -118,6 +144,10 @@ func _stars_control(count: int, radius: float, animate := false) -> Control:
 func _light_star(c: Control, i: int) -> void:
 	c.set_meta("shown", i + 1)
 	c.queue_redraw()
+	if not _calm():
+		c.pivot_offset = c.size / 2.0
+		c.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_ignore_time_scale(true) \
+			.tween_property(c, "scale", Vector2.ONE, 0.3).from(Vector2.ONE * 1.18).set_trans(Tween.TRANS_BACK)
 	Sound.play("etoile", 0.0, 1.0 + i * 0.12)
 
 
@@ -146,19 +176,15 @@ func show_title() -> void:
 	box.offset_left = 90
 	box.offset_right = 900
 	holder.add_child(box)
-	var name_label := UiStyle.label(Texts.TITLE, 104, UiStyle.CREAM)
-	var sub := UiStyle.label(Texts.SUBTITLE, 74, UiStyle.GOLD)
-	for l: Label in [name_label, sub]:
-		l.add_theme_color_override("font_outline_color", UiStyle.INK)
-		l.add_theme_constant_override("outline_size", 24)
-		box.add_child(l)
-	sub.add_theme_constant_override("line_spacing", -10)
+	var logo := Logo.new()
+	logo.reduced_motion = _calm()
+	box.add_child(logo)
 	var tag := UiStyle.label(Texts.TAGLINE, 30, UiStyle.CREAM)
 	tag.add_theme_color_override("font_outline_color", UiStyle.INK)
 	tag.add_theme_constant_override("outline_size", 10)
 	box.add_child(tag)
 	var spacer := Control.new()
-	spacer.custom_minimum_size = Vector2(0, 26)
+	spacer.custom_minimum_size = Vector2(0, 8)
 	box.add_child(spacer)
 	var started := save.total_stars() > 0 or save.unlocked > 1
 	var first := _center_button(box, Texts.CONTINUE if started else Texts.PLAY,
@@ -184,28 +210,38 @@ func show_select() -> void:
 	for id in range(1, Levels.COUNT + 1):
 		var level := Levels.load_level(id)
 		var open := id <= save.unlocked
-		var b := UiStyle.button("", func() -> void: brief.emit(id), 30, 340)
-		b.custom_minimum_size = Vector2(340, 270)
+		var b := UiStyle.button("", func() -> void: brief.emit(id), 30, 350)
+		b.custom_minimum_size = Vector2(350, 378)
 		b.disabled = not open
 		b.focus_mode = Control.FOCUS_ALL if open else Control.FOCUS_NONE
-		var inside := UiStyle.column(6)
+		var face := Color("fffaf0") if open else Color("d9cbbb")
+		for state: Array in [["normal", face, false], ["hover", face.lightened(0.3), false], ["pressed", face.darkened(0.08), true],
+				["disabled", face, false]]:
+			b.add_theme_stylebox_override(state[0], UiStyle.candy(state[1], state[2], Color("c9a87e") if open else Color("a99682")))
+		var inside := UiStyle.column(2)
 		inside.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		inside.offset_top = 8
+		inside.offset_bottom = -14
 		inside.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.add_child(inside)
-		inside.add_child(UiStyle.label(Texts.MISSION % id, 26, UiStyle.CREAM))
-		var meal := _wrapped(str(level.meal), 300, 34, Color.WHITE)
+		inside.add_child(UiStyle.label(Texts.MISSION % id, 24, UiStyle.PINK_DARK if open else UiStyle.INK_SOFT))
+		var picture := _dish(id, 170)
+		if not open:
+			picture.modulate = Color(0.12, 0.08, 0.06, 0.4)
+		inside.add_child(picture)
+		var meal := _wrapped(str(level.meal), 320, 29, UiStyle.INK if open else UiStyle.INK_SOFT)
 		meal.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		inside.add_child(meal)
 		if open:
-			inside.add_child(UiStyle.label(str(level.novelty), 24, UiStyle.CREAM))
-			inside.add_child(_stars_control(save.stars_of(id), 22))
-			inside.add_child(UiStyle.label(Texts.BEST % save.best_of(id), 22, UiStyle.CREAM))
+			inside.add_child(_stars_control(save.stars_of(id), 21))
+			var best := save.best_of(id)
+			inside.add_child(UiStyle.label(Texts.BEST % best if best > 0 else str(level.novelty), 20, UiStyle.INK_SOFT))
 		else:
 			var lock := Control.new()
-			lock.custom_minimum_size = Vector2(0, 90)
-			lock.draw.connect(func() -> void: Icons.lock(lock, lock.size / 2.0, 36, Color("fff3df")))
+			lock.custom_minimum_size = Vector2(0, 52)
+			lock.draw.connect(func() -> void: Icons.lock(lock, lock.size / 2.0, 24, UiStyle.INK_SOFT))
 			inside.add_child(lock)
-			inside.add_child(UiStyle.label(Texts.LOCKED, 24, UiStyle.CREAM))
+			inside.add_child(UiStyle.label(Texts.LOCKED, 20, UiStyle.INK_SOFT))
 		grid.add_child(b)
 		if id == save.unlocked:
 			focus = b
@@ -219,7 +255,10 @@ func show_brief(id: int) -> void:
 	var holder := _begin("consignes", 0.45)
 	var column := _card(holder, 1040)
 	column.add_child(UiStyle.label(Texts.MISSION % id, 30, UiStyle.INK_SOFT))
-	column.add_child(UiStyle.label(str(level.meal), 62))
+	var heading := UiStyle.row(28)
+	column.add_child(heading)
+	heading.add_child(_dish(id, 190))
+	heading.add_child(UiStyle.label(str(level.meal), 62))
 	column.add_child(UiStyle.label(Texts.NEW % level.novelty, 38, UiStyle.PINK_DARK))
 	for line: String in level.intro:
 		var row := UiStyle.row(16)
@@ -271,7 +310,18 @@ func show_results(result: Dictionary) -> void:
 	var id: int = result.level
 	column.add_child(UiStyle.label(Texts.WON if won else Texts.LOST, 64, UiStyle.PINK_DARK if won else UiStyle.INK))
 	column.add_child(_stars_control(result.stars, 64, true))
-	column.add_child(UiStyle.label(str(result.score), 96))
+	var total := UiStyle.row(30)
+	column.add_child(total)
+	total.add_child(_dish(id, 160))
+	var score := UiStyle.label(str(result.score), 96)
+	total.add_child(score)
+	if not _calm():
+		# Le pointage monte jusqu'à son total.
+		score.text = "0"
+		score.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_ignore_time_scale(true).tween_method(
+			func(v: float) -> void: score.text = str(int(round(v))), 0.0, float(result.score), 1.2).set_ease(Tween.EASE_OUT)
+		if won:
+			holder.add_child(Confetti.new(60 + 50 * int(result.stars)))
 	if result.new_best:
 		column.add_child(UiStyle.label(Texts.NEW_RECORD, 34, UiStyle.GREEN.darkened(0.2)))
 	if not won:
@@ -311,9 +361,12 @@ func show_end() -> void:
 		for i in 7:
 			Icons.paw(paws, Vector2(paws.size.x / 2.0 + (i - 3) * 110, 55 + (18 if i % 2 else -18)), 34, UiStyle.PINK))
 	column.add_child(paws)
+	column.add_child(_dish(Levels.COUNT, 250))
 	column.add_child(_wrapped(Texts.END_TEXT % [save.total_stars(), Levels.COUNT * 3], 1000, 38))
 	var first := _center_button(column, Texts.MENU, func() -> void: to_title.emit())
 	_back = func() -> void: to_title.emit()
+	if not _calm():
+		holder.add_child(Confetti.new(220))
 	Sound.play("victoire")
 	_focus(first)
 

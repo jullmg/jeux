@@ -248,7 +248,7 @@ func quit_game(code := 0) -> void:
 		return
 	state = "adieu"
 	save.save_file()
-	Sound.silence()
+	Sound.close()
 	stage.ambiance.release()
 	# Le serveur audio met quelques images à lâcher les sons.
 	await get_tree().create_timer(0.4, true, false, true).timeout
