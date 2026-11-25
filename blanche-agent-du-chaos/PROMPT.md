@@ -1,13 +1,13 @@
-# Blanche la tannante : prompt de réalisation
+# Blanche Pronovost agent du Chaos : prompt de réalisation
 
 > Brouillon à réviser. Les choix marqués **(P)** sont des propositions : garde-les, change-les ou raye-les.
 > Les questions ouvertes sont à la fin.
 
 ## 1. Ta mission
 
-Tu construis un jeu 3D complet, **prêt à être livré**, dans `blanche-la-tannante/` : conception, art, code, son,
-interface, tests, revues, exportation et documentation. Un prototype ou une démo ne suffit pas : à la fin, on installe le
-jeu et on y joue du début à la fin sans toi.
+Tu construis **Blanche Pronovost agent du Chaos**, un jeu 3D complet, **prêt à être livré**, dans
+`blanche-agent-du-chaos/` : conception, art, code, son, interface, tests, revues, exportation et documentation. Un
+prototype ou une démo ne suffit pas : à la fin, on installe le jeu et on y joue du début à la fin sans toi.
 
 **Le jeu :** on est Blanche, une chienne dans la cuisine familiale. Maman cuisine. Quand elle a le dos tourné, on attrape
 de la nourriture sur le comptoir. Quand elle regarde, on a intérêt à avoir l'air sage.
