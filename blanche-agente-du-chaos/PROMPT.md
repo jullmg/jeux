@@ -1,7 +1,7 @@
 # Blanche Pronovost agente du Chaos : prompt de réalisation
 
 > Brouillon à réviser. Les choix marqués **(P)** sont des propositions : garde-les, change-les ou raye-les.
-> Les questions ouvertes sont à la fin.
+> Les réponses de Julien sont intégrées au texte et reproduites à la fin.
 
 ## 1. Ta mission
 
@@ -13,9 +13,12 @@ prototype ou une démo ne suffit pas : à la fin, on installe le jeu et on y jou
 de la nourriture sur le comptoir ou sur l'îlot. Quand elle regarde, on a intérêt à avoir l'air sage, ou à être cachée
 derrière l'îlot.
 
+**Les plateformes :** **Mac d'abord** (version 1.0), puis iPad et Android. Le jeu est pensé pour le tactile dès le
+début.
+
 **Le ton :** drôle, chaleureux, jamais punitif ni méchant. Maman chicane, soupire et finit souvent par rire.
 
-**Le public (P) :** toute la famille, dès 6 ans, avec assez de défi dans les derniers niveaux pour un adulte.
+**Le public :** de 9 à 99 ans, avec assez de défi dans les derniers niveaux pour un adulte.
 
 ## 2. Le jeu
 
@@ -96,18 +99,16 @@ L'îlot au centre de la cuisine (dessus en bois blond, pattes blanches, un tabou
 - La nourriture est posée sur les comptoirs et sur l'îlot.
 - Des miettes tombent aussi par terre quand Maman coupe : peu de points, peu de risque.
 - **Combo (P) :** les prises réussies d'affilée multiplient les points (×2, ×3) ; se faire prendre remet à ×1.
-- **Aliments dangereux (P, dès le niveau 6) :** chocolat, oignon, raisins. Les reconnaître et les laisser donne un bonus ;
-  les prendre coûte des points et Maman réagit. Jamais d'image de Blanche malade.
 
 ### 2.5 Réussite et échec
 
 - Un niveau dure le temps de préparer le repas (2 à 3 minutes), avec un score à atteindre.
 - 1 à 3 étoiles selon le score ; 1 étoile ouvre le niveau suivant.
-- **(P)** Pas de vies : on n'est jamais éliminé en cours de niveau. Le niveau est raté si le score n'est pas atteint
+- Pas de vies : on n'est jamais éliminé en cours de niveau. Le niveau est raté si le score n'est pas atteint
   quand le repas est prêt.
 - La distance entre le coin et la nourriture compte : les meilleures prises sont souvent les plus loin de la porte.
 
-### 2.6 Niveaux (P)
+### 2.6 Niveaux
 
 Chaque niveau ajoute **une seule** nouveauté et la montre avant de la punir.
 
@@ -118,9 +119,12 @@ Chaque niveau ajoute **une seule** nouveauté et la montre avant de la punir.
 | 3 | Soupe | Les activités de Maman changent la fenêtre et déplacent la cachette | 700 ms |
 | 4 | Biscuits | Bruits et jauge de soupçon | 650 ms |
 | 5 | Pizza | Feintes | 550 ms |
-| 6 | Spaghetti | Aliments dangereux | 500 ms |
-| 7 | Souper de la visite | Quelqu'un d'autre traverse la cuisine | 450 ms |
+| 6 | Spaghetti | Maman fait le tour de l'îlot pour vérifier **(P)** | 500 ms |
+| 7 | Souper de la visite | Papa et Charlotte traversent la cuisine | 450 ms |
 | 8 | Dinde de Noël | Tout combiné, grand trésor final | 400 ms |
+
+**Papa et Charlotte (P) :** Charlotte peut retenir l'attention de Maman (longue fenêtre) ou, si elle voit Blanche faire,
+la dénoncer après un indice. Papa passe avec les bras chargés, bouche un chemin et peut échapper un morceau par terre.
 
 **Équité, non négociable :** redescendre prend moins de temps que le plus court indice (250 ms au plus). Aucun
 flagrant délit ne doit être impossible à éviter pour un joueur qui réagit à l'indice.
@@ -130,7 +134,7 @@ flagrant délit ne doit être impossible à éviter pour un joueur qui réagit �
 - Clavier : flèches (ou WASD) pour se déplacer au sol dans les quatre directions et contourner l'îlot, Espace maintenu
   pour attraper, Échap pour la pause. Se cacher ne demande aucun bouton : tout dépend de la position.
 - Manette : stick ou croix, bouton A, Start.
-- Tactile (version web) (P) : toucher le plancher pour y aller, un grand bouton pour attraper.
+- Tactile (iPad et Android, essayé à la souris sur Mac) **(P)** : toucher le plancher pour y aller, un grand bouton pour attraper.
 
 ## 3. Direction artistique
 
@@ -138,6 +142,9 @@ flagrant délit ne doit être impossible à éviter pour un joueur qui réagit �
 
 Julien dépose les photos dans `reference/` (jamais versionné : ce sont des photos de famille et le dépôt va sur GitHub).
 Aucune photo, ni texture tirée d'une photo, ne se retrouve dans le jeu ou dans git sans son accord.
+
+Les personnages **Maman**, **Papa** et **Charlotte** sont modelés d'après leurs photos, dans le même style que Blanche :
+reconnaissables, sans réalisme photographique.
 
 À partir des photos, tu écris d'abord `docs/fiche-reference.md` : plan de la cuisine (dont l'îlot, le tabouret, la
 porte et le coin de Blanche), dimensions estimées (comptoir à environ 90 cm), couleurs, électroménagers, armoires, poignées, plancher, lumière ; pour Blanche : taille, robe, taches,
@@ -157,6 +164,7 @@ oreilles, queue, museau, yeux. Tu y notes ce qui manque et tu demandes les photo
   mâchouillage, air sage, tapie derrière l'îlot, surprise, retour piteux au coin, victoire. Queue et oreilles vivantes.
 - **Maman :** une par tâche (couper, brasser, laver, frigo, téléphone, four, travail à l'îlot), indice, demi-tour,
   regard, tour de l'îlot, « AU COIN ! » le doigt pointé, rire, feinte.
+- **Papa et Charlotte :** attente, marche, demi-tour et leurs gestes du niveau 7.
 
 ### 3.4 Chaîne de production
 
@@ -171,10 +179,11 @@ oreilles, queue, museau, yeux. Tu y notes ce qui manque et tu demandes les photo
 
 - Effets : jappements, pas de pattes, mâchouillage, cuisine (couteau, chaudron, frigo, minuterie), indice, flagrant
   délit, victoire. Synthétisés par code ou libres (CC0), chaque source notée dans `SOURCES.md`.
-- Musique : une ambiance au menu, une en jeu qui se tend quand le soupçon monte. Julien peut fournir ses morceaux ;
-  le jeu fonctionne sans eux.
+- Musique : **tu la génères** (composée et synthétisée par code) : une ambiance au menu, une en jeu qui se tend quand le
+  soupçon monte. Chaque morceau peut être remplacé par un fichier audio sans toucher au code.
 - Tout le texte est en **français du Québec** ; Maman parle québécois (« ben là », « astheure », « tsé »). Toutes les
-  répliques sont dans un seul fichier, avec plusieurs variantes pour éviter la répétition.
+  répliques sont dans un seul fichier, avec plusieurs variantes pour éviter la répétition. Pas de voix enregistrée : les
+  répliques s'affichent, accompagnées d'un son.
 
 ## 5. Écrans
 
@@ -182,11 +191,12 @@ Titre · choix du niveau avec étoiles · tutoriel intégré au niveau 1 · jeu 
 repas) · pause · niveau réussi · niveau raté · fin du jeu · options (volumes, plein écran, commandes, mouvements
 réduits, indices plus longs) · crédits.
 
-Interface grosse et lisible, utilisable entièrement au clavier, à la manette et à la souris.
+Interface grosse et lisible, utilisable entièrement au clavier, à la manette, à la souris et au doigt.
 
 ## 6. Technique
 
-- **Godot 4.7**, GDScript typé, moteur de rendu **Compatibility (P)** pour permettre la version web. 1920×1080 de base,
+- **Godot 4.7**, GDScript typé, moteur de rendu **Compatibility (P)** pour que le jeu tourne
+  aussi sur iPad et Android. 1920×1080 de base,
   autres formats sans coupure.
 - **Les règles sont séparées de l'affichage** : fenêtre, détection, ligne de vue (calculée sur le plan du plancher),
   soupçon et score fonctionnent sans 3D et avec une graine fixe, pour être testés et simulés.
@@ -233,9 +243,8 @@ s'écrivent **en même temps** que le code ; chaque bogue corrigé reçoit un te
 4. **Visuels** : captures de chaque écran, niveau et animation clé, en 16:9, 16:10 et un format étroit. **Tu les
    regardes** : découpes, modèles qui se traversent, texte coupé, indice peu lisible.
 5. **Performance** : 60 images/s en 1080p sur le MacBook (M1 Pro), chargement d'un niveau en moins de 3 s, mémoire
-   stable après 20 parties de suite, taille de la version web notée.
-6. **Versions exportées** : lancer l'application macOS et la version web (servie localement, dans un navigateur), faire un
-   niveau, vérifier la sauvegarde après redémarrage.
+   stable après 20 parties de suite.
+6. **Version exportée** : lancer l'application macOS, faire un niveau, vérifier la sauvegarde après redémarrage.
 7. **Essais humains** : tu ne peux pas juger seul le plaisir. Prépare une grille courte (compris sans explication ?
    injustice ressentie ? niveau trop dur ?), puis corrige à partir des réponses de Julien et de sa famille.
 
@@ -257,8 +266,9 @@ Chaque revue laisse une trace dans `docs/revues.md` : trouvé, corrigé, ou lais
 
 ## 10. Livraison
 
-- Application **macOS** et version **web** **(P)**, produites par `tools/export.sh` (les modèles d'exportation Godot sont
-  à installer). Sans compte développeur Apple, l'application ne sera pas notariée : documenter comment l'ouvrir.
+- Version 1.0 : application **macOS**, produite par `tools/export.sh` (les modèles d'exportation Godot sont à installer).
+  Sans compte développeur Apple, l'application ne sera pas notariée : documenter comment l'ouvrir.
+- Ensuite : **iPad** (demande Xcode et un compte Apple) et **Android** (demande le SDK Android), dans une étape à part.
 - Icône, écran de démarrage, nom et numéro de version.
 - `README.md` (jouer, tester, exporter), `CHANGELOG.md`, `SOURCES.md`, `CLAUDE.md` à jour.
 - Étiquette git `blanche-v1.0.0` à la version acceptée.
@@ -268,7 +278,7 @@ Chaque revue laisse une trace dans `docs/revues.md` : trouvé, corrigé, ou lais
 
 - [ ] les 8 niveaux se jouent du début à la fin, avec leurs étoiles et la fin du jeu ;
 - [ ] `tools/test.sh` passe, et la sortie est montrée ;
-- [ ] les versions exportées sont testées ;
+- [ ] la version macOS exportée est testée ;
 - [ ] aucune forme provisoire, aucun texte de remplissage, aucun bogue connu bloquant ;
 - [ ] les revues sont consignées et les corrections faites ;
 - [ ] la documentation permet de reprendre le projet sans toi ;
@@ -288,18 +298,18 @@ Chaque revue laisse une trace dans `docs/revues.md` : trouvé, corrigé, ou lais
 
 ## 12. Hors de la version 1.0 (P)
 
-Multijoueur, mode sans fin, autres pièces que la cuisine, boutique ou costumes, classement en ligne, autres langues,
-magasins d'applications.
+Versions iPad et Android (étape suivante), version web, multijoueur, mode sans fin, autres pièces que la cuisine,
+boutique ou costumes, classement en ligne, autres langues, magasins d'applications.
 
-## 13. Questions à régler
+## 13. Réponses de Julien
 
-1. Où le jeu doit-il tourner : Mac seulement, web, iPad, Windows ?
-2. Qui jouera, et quel âge ont les plus jeunes ?
-3. Maman : à partir d'une photo, d'une description, ou inventée ?
-4. D'autres personnages (niveau 7) : Papa, un enfant, un chat ?
-5. Les 8 repas conviennent-ils ? Y a-t-il des recettes ou des habitudes de la famille à mettre ?
-6. As-tu des répliques typiques de Maman ou des manies de Blanche à reproduire ?
-7. Musique : tes propres morceaux ?
-8. Les aliments dangereux : on les garde ?
-9. Veux-tu enregistrer la vraie voix de Maman qui crie « AU COIN ! » (et d'autres répliques) ?
-10. Sans vies, avec le temps perdu comme seule punition : ça te va, ou faut-il une limite de « AU COIN ! » par niveau ?
+1. Où le jeu doit-il tourner : Mac seulement, web, iPad, Windows ? Mac, ipad, android, mais pour l'instant Mac en priorité
+2. Qui jouera, et quel âge ont les plus jeunes ? plus jeune 9 ans plus vieux 99 ans :)  
+3. Maman : à partir d'une photo, d'une description, ou inventée ? photo
+4. D'autres personnages (niveau 7) : Papa, un enfant, un chat ? Papa, une petite fille charlotte, voir photos
+5. Les 8 repas conviennent-ils ? Y a-t-il des recettes ou des habitudes de la famille à mettre ? cest ok
+6. As-tu des répliques typiques de Maman ou des manies de Blanche à reproduire ? non
+7. Musique : tes propres morceaux ? jen ai pas tu peux la générer
+8. Les aliments dangereux : on les garde ? non
+9. Veux-tu enregistrer la vraie voix de Maman qui crie « AU COIN ! » (et d'autres répliques) ? non
+10. Sans vies, avec le temps perdu comme seule punition : ça te va, ou faut-il une limite de « AU COIN ! » par niveau ? oui cest bon
