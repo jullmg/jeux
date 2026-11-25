@@ -2,7 +2,7 @@
 
 Jeu 3D Godot 4.7 (GL Compatibility, 1920×1080) : la chienne Blanche vole de la nourriture pendant que Maman cuisine.
 Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et décisions : `docs/etat.md` ; revues :
-`docs/revues.md`. Version 1.0.0-rc1 : Mac d'abord, iPad et Android ensuite.
+`docs/revues.md`. Version 1.0.0-rc2 : Mac d'abord, iPad et Android ensuite.
 
 ## Vérifier
 
@@ -43,6 +43,10 @@ Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et 
 
 - **Ne jamais modifier un `.glb` ni un `.wav` à la main** : changer le script (`tools/blender/*.py`,
   `tools/audio/generate_audio.py`) et régénérer. Aperçus dans `art/previews/` (non versionnés) : les regarder.
+- Blanche est un **chiot de cinq mois**, petit et mignon (demande de Julien). Sa taille est `TAILLE` dans `dog.py` et
+  `DogView.SIZE` (même valeur, testée) ; dressée, elle est soulevée et étirée pour accrocher ses pattes au meuble
+  (`DogView._plant_feet`, `STRETCH`), et `stage.gd` la place en face du morceau.
+- Musique **joyeuse** (demande de Julien) : `jeu` et `tension` ont le même tempo, la même durée et les mêmes accords.
 - `common.py` : tout est écrit en coordonnées Godot. Les personnages sont une peau liée à un squelette ; les noms d'os
   sont utilisés par le code (`test_modeles_complets`).
 - Performance : ne pas créer de matière ou d'objet 3D en pleine partie (recompilation de shader, à-coup de 135 ms) : les

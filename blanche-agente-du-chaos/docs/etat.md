@@ -46,6 +46,6 @@ Point de reprise d'une session à l'autre. Julien a demandé de tout faire sans 
 ## Questions pour Julien
 
 1. Après y avoir joué : la difficulté et les étoiles conviennent-elles ?
-2. Blanche, Maman, Papa et Charlotte sont-ils assez ressemblants ? Que changer en premier ?
-3. La musique générée te convient-elle, ou veux-tu la remplacer (`audio/music/`) ?
+2. La nouvelle Blanche (rc2) te plaît-elle ? Maman, Papa et Charlotte sont-ils assez ressemblants ?
+3. La nouvelle musique joyeuse (rc2) te convient-elle ?
 4. Style « agente secrète » (`docs/idees.md`) ?

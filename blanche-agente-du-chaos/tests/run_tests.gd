@@ -654,6 +654,12 @@ func test_modeles_complets() -> void:
 		model.free()
 
 
+func test_taille_de_blanche() -> void:
+	# Le jeu place la gueule d'après la taille du modèle : le script Blender doit dire la même.
+	var script := FileAccess.get_file_as_string("res://tools/blender/dog.py")
+	check(script.contains("\nTAILLE = %s\n" % str(DogView.SIZE)), "DogView.SIZE diffère de TAILLE (dog.py)")
+
+
 func test_tous_les_sons_existent() -> void:
 	var regex := RegEx.new()
 	regex.compile("Sound\\.play\\(\"(\\w+)\"|\\[\"(couteau|brasse|eau|pas)\", [0-9.]+\\]|\"(tombe|fracas|miette|prise|combo|avale|tour|alerte|victoire|rate)\"")
@@ -668,6 +674,10 @@ func test_tous_les_sons_existent() -> void:
 		check(ResourceLoader.exists("res://audio/generated/%s.wav" % sound), "son absent : " + sound)
 	for track: String in ["menu", "jeu", "tension"]:
 		check(ResourceLoader.exists("res://audio/generated/musique_%s.wav" % track), "musique : " + track)
+	# La couche de tension joue par-dessus la musique du jeu : les deux boucles doivent durer pareil.
+	var game_track: AudioStream = load("res://audio/generated/musique_jeu.wav")
+	var tension_track: AudioStream = load("res://audio/generated/musique_tension.wav")
+	check(absf(game_track.get_length() - tension_track.get_length()) < 0.001, "jeu et tension de même durée")
 
 
 func test_textes_complets() -> void:
