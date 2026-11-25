@@ -43,6 +43,8 @@ func _screen(name_: String) -> void:
 
 func _run() -> void:
 	await _frames(10)
+	report.start_unlocked = main.save.unlocked
+	report.start_stars = main.save.total_stars()
 	_screen("titre")
 	main.menus.show_select()
 	await _frames(5)
@@ -86,7 +88,7 @@ func _run() -> void:
 		_expect(main.sim.over, "niveau %d non terminé" % id)
 		report.levels.append({"level": id, "score": main.sim.score, "stars": main.sim.stars(), "caught": main.sim.caught_count})
 		_expect(main.sim.score > 0, "niveau %d sans un point" % id)
-		_expect(main.save.best_of(id) == main.sim.score, "record non noté au niveau %d" % id)
+		_expect(main.save.best_of(id) >= main.sim.score, "record non noté au niveau %d" % id)
 	main.menus.show_end()
 	await _frames(5)
 	_screen("fin")
@@ -95,6 +97,7 @@ func _run() -> void:
 	_screen("titre")
 	_expect(main.sim == null, "partie encore active au titre")
 	report.min_fps = Engine.get_frames_per_second()
+	report.end_stars = main.save.total_stars()
 	report.memory_mb = OS.get_static_memory_usage() / 1048576.0
 	report.nodes = get_tree().get_node_count()
 	_end()

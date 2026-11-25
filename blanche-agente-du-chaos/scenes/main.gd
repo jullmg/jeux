@@ -3,7 +3,7 @@ extends Node
 ##
 ## Arguments d'essai (après « -- ») : --no-save, --niveau=N, --demo (un robot joue), --graine=N,
 ## --autotest=fichier.json (parcourt le jeu tout seul et écrit le résultat), --scenario=dossier (captures d'écran),
-## --verif (démarre puis quitte).
+## --verif (démarre puis quitte), --sauvegarde=user://fichier.json (essais de la sauvegarde).
 
 const STEP := 1.0 / 60.0
 const AMBIENT := {"couper": ["couteau", 0.34], "brasser": ["brasse", 1.1], "laver": ["eau", 1.15], "ilot": ["pas", 0.42],
@@ -56,7 +56,12 @@ func _ready() -> void:
 		seed_override = int(args["--graine"])
 	_setup_input()
 	var keeps := not testing and not demo
-	save = SaveData.new("user://save.json" if keeps else "user://aucune.json", keeps)
+	var path := "user://save.json" if keeps else "user://aucune.json"
+	if args.has("--sauvegarde"):
+		# Essais de la sauvegarde : un fichier à part.
+		path = args["--sauvegarde"]
+		keeps = true
+	save = SaveData.new(path, keeps)
 	_rng.randomize()
 	stage = Stage.new()
 	stage.process_mode = Node.PROCESS_MODE_PAUSABLE
