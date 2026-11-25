@@ -286,13 +286,12 @@ func show_results(result: Dictionary) -> void:
 	buttons.add_child(retry)
 	focus = retry
 	if won:
-		var next := UiStyle.button(Texts.NEXT, func() -> void:
-			if id >= Levels.COUNT:
+		var last := id >= Levels.COUNT
+		var next := UiStyle.button(Texts.CONTINUE if last else Texts.NEXT, func() -> void:
+			if last:
 				show_end()
 			else:
 				brief.emit(id + 1), 36, 360)
-		if id >= Levels.COUNT:
-			next.text = Texts.CONTINUE
 		buttons.add_child(next)
 		focus = next
 	_back = func() -> void: to_title.emit()
@@ -371,16 +370,12 @@ func show_options(from: Callable) -> void:
 	var leave := func() -> void:
 		save.save_file()
 		from.call()
-	if screen_is_title(from):
+	if from == show_title:
 		var erase := UiStyle.button(Texts.ERASE, show_erase.bind(from), 30, 440)
 		buttons.add_child(erase)
 	buttons.add_child(UiStyle.button(Texts.BACK, leave, 36, 340))
 	_back = leave
 	_focus(first)
-
-
-func screen_is_title(from: Callable) -> bool:
-	return from.get_method() == "show_title"
 
 
 func show_erase(from: Callable) -> void:

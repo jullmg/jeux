@@ -1,6 +1,6 @@
 {
   "_comment": "Plan de la cuisine, source unique pour le jeu (Godot) et les modèles (Blender). Mètres ; x vers l'est, z vers le sud (vers la caméra). Les rectangles sont [x0, z0, x1, z1].",
-  "room": { "x0": -2.0, "z0": -2.1, "x1": 2.0, "z1": 2.1, "height": 2.8 },
+  "room": { "x0": -2.0, "z0": -2.1, "x1": 2.0, "z1": 2.1 },
   "counter_height": 0.92,
   "obstacles": {
     "pantry": [-2.0, -2.1, -1.45, -1.48],
@@ -17,7 +17,6 @@
   "cushion": [1.18, 1.10, 1.96, 1.92],
   "door": { "z0": 0.95, "z1": 1.90 },
   "sink": [-0.95, -0.18],
-  "stove": [-0.12, 0.64],
   "dishwasher": [0.10, 0.72],
   "window": [-1.05, 0.02],
   "camera": { "pos": [-0.55, 3.75, 4.05], "target": [0.1, 0.45, -0.34], "fov": 44.0 },

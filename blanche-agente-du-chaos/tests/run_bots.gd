@@ -23,8 +23,8 @@ func _init() -> void:
 			"--out":
 				out = kv[1]
 	var map := KitchenMap.new()
-	var nav := Nav.new(map, Sim.DOG_RADIUS - 0.01)
-	var mom_nav := Nav.new(map, Sim.MOM_RADIUS - 0.02)
+	var nav := Sim.dog_grid(map)
+	var mom_nav := Sim.mom_grid(map)
 	var results: Array = []
 	for id: int in levels:
 		var level := Levels.load_level(id)
@@ -77,6 +77,6 @@ static func run(map: KitchenMap, nav: Nav, mom_nav: Nav, level: Dictionary, prof
 	return {
 		"level": level.id, "profile": profile, "games": games,
 		"median": scores[games / 2], "q25": scores[games / 4], "q75": scores[games * 3 / 4],
-		"q90": scores[games * 9 / 10], "pass_rate": 100.0 * passed / games, "three_rate": 100.0 * three / games,
+		"pass_rate": 100.0 * passed / games, "three_rate": 100.0 * three / games,
 		"caught": float(caught) / games, "treasure": 100.0 * treasure / games, "stuck": stuck, "scores": scores,
 	}

@@ -120,7 +120,7 @@ func calm(level := 1) -> Sim:
 	sim.mom_left = 9999.0
 	sim.spawn_left = 9999.0
 	sim.helper_left = 9999.0
-	sim.treasure_done = true
+	sim.treasure_due = -1.0
 	sim.food.clear()
 	return sim
 

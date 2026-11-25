@@ -10,7 +10,6 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import common as C  # noqa: E402
-import bpy  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
 C.reset()
@@ -287,11 +286,10 @@ def wedge(o, a0, a1, r, y, h, mat, steps=10):
 def _(o):
     a0, a1 = 1.15, 2.0
     off = wedge(o, a0, a1, 0.19, 0.0, 0.018, dough)
-    wedge_off = off
     wedge(o, a0 + 0.04, a1 - 0.04, 0.165, 0.018, 0.008, cheese)
     for r, a in ((0.07, 1.55), (0.125, 1.35), (0.13, 1.78)):
-        disc(o, 0.026, 0.022, 0.006, pepperoni, math.cos(a) * r + wedge_off[0], math.sin(a) * r + wedge_off[1])
-    pts = [(math.cos(a) * 0.178 + wedge_off[0], 0.026, math.sin(a) * 0.178 + wedge_off[1])
+        disc(o, 0.026, 0.022, 0.006, pepperoni, math.cos(a) * r + off[0], math.sin(a) * r + off[1])
+    pts = [(math.cos(a) * 0.178 + off[0], 0.026, math.sin(a) * 0.178 + off[1])
            for a in [a0 + (a1 - a0) * i / 8 for i in range(9)]]
     o.tube(pts, 0.018, crust, seg=12)
 

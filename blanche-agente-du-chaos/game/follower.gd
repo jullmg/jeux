@@ -17,20 +17,18 @@ func clear() -> void:
 	path = PackedVector2Array()
 
 
-func active() -> bool:
-	return goal != Vector2.INF
-
-
 ## La direction à suivre depuis `from` pour aller à `to` (zéro une fois arrivée).
 func steer(dt: float, from: Vector2, to: Vector2, blockers: Array = [], arrive := 0.07) -> Vector2:
 	_age += dt
+	if from.distance_to(to) <= arrive:
+		# Arrivée : inutile de chercher un chemin.
+		goal = to
+		path = PackedVector2Array()
+		return Vector2.ZERO
 	if goal == Vector2.INF or goal.distance_to(to) > 0.12 or _age > 0.6 or path.is_empty():
 		goal = to
 		path = nav.path(from, to, blockers)
 		_age = 0.0
-	if from.distance_to(to) <= arrive:
-		path = PackedVector2Array()
-		return Vector2.ZERO
 	while not path.is_empty() and from.distance_to(path[0]) <= maxf(arrive, 0.09):
 		path.remove_at(0)
 	if path.is_empty():

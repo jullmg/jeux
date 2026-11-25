@@ -15,8 +15,8 @@ var current := ""
 
 func _init() -> void:
 	map = KitchenMap.new()
-	nav = Nav.new(map, Sim.DOG_RADIUS - 0.01)
-	mom_nav = Nav.new(map, Sim.MOM_RADIUS - 0.02)
+	nav = Sim.dog_grid(map)
+	mom_nav = Sim.mom_grid(map)
 	var filter := ""
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--filtre="):
@@ -621,9 +621,9 @@ func test_sauvegarde_abimee() -> void:
 
 func test_sans_sauvegarde() -> void:
 	DirAccess.remove_absolute(TMP)
-	var s := SaveData.new(TMP, false)
+	var s := SaveData.new("")
 	s.record(1, 100, 1)
-	check(not FileAccess.file_exists(TMP), "--no-save n'écrit rien")
+	check(s.unlocked == 2 and not s.save_file() and not FileAccess.file_exists(TMP), "--no-save n'écrit rien")
 
 
 # ------------------------------------------------------------------ ressources

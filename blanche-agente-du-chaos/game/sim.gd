@@ -29,6 +29,10 @@ const NEAR_MOM := 1.05
 const GRAB_TIMES := [0.3, 1.0, 2.0, 3.5]
 const EAT_TIMES := [0.0, 0.5, 1.5, 3.0]
 const BASE_POINTS := [10, 50, 150, 500]
+## Les noms des tailles dans les données des niveaux.
+const SIZE_KEYS := ["crumb", "small", "big", "treasure"]
+## Au bout de combien de temps un trésor perdu revient sur un meuble.
+const TREASURE_RETURN := 12.0
 ## Durée d'une fenêtre selon ce que fait Maman (secondes, avant les ajustements).
 const ACTIVITY_WINDOWS := {
 	"brasser": [3.5, 5.0], "four": [3.0, 4.5], "couper": [2.2, 3.2], "laver": [3.2, 4.8], "frigo": [5.0, 6.5],
@@ -80,8 +84,6 @@ var mom_path := PackedVector2Array()
 ## Ce qu'elle fait en arrivant à son nouveau poste.
 var walk_activity := ""
 var walk_speed := MOM_WALK
-## Quand le trésor perdu dans un flagrant délit revient sur un meuble (-1 : rien à rendre).
-var treasure_back := -1.0
 var round_points := PackedVector2Array()
 var unseen_time := 0.0
 var _caught_timer := 0.0
@@ -89,7 +91,8 @@ var _caught_timer := 0.0
 var food: Array[Dictionary] = []
 var _next_id := 1
 var spawn_left := 0.0
-var treasure_done := false
+## Quand le trésor doit apparaître (ou réapparaître) ; -1 : rien d'attendu.
+var treasure_due := -1.0
 var crumb_left := 1.5
 
 var helpers: Array[Dictionary] = []
@@ -106,10 +109,11 @@ var eaten := [0, 0, 0, 0]
 func _init(map_: KitchenMap, level_: Dictionary, seed_ := 1, nav_: Nav = null, mom_nav_: Nav = null) -> void:
 	map = map_
 	level = level_
-	nav = nav_ if nav_ != null else Nav.new(map, DOG_RADIUS - 0.01)
-	mom_nav = mom_nav_ if mom_nav_ != null else Nav.new(map, MOM_RADIUS - 0.02)
+	nav = nav_ if nav_ != null else dog_grid(map)
+	mom_nav = mom_nav_ if mom_nav_ != null else mom_grid(map)
 	rng.seed = seed_
 	time_left = level.duration
+	treasure_due = float(level.duration) * float(level.treasure_at)
 	dog_pos = map.corner
 	dog_dir = map.corner_face
 	station = level.stations[0]
@@ -124,10 +128,33 @@ func _init(map_: KitchenMap, level_: Dictionary, seed_ := 1, nav_: Nav = null, m
 		_spawn_food(Size.SMALL if i == 0 else -1)
 
 
+## Les grilles de déplacement de Blanche et de Maman (à partager entre les parties).
+static func dog_grid(map_: KitchenMap) -> Nav:
+	return Nav.new(map_, DOG_RADIUS - 0.01)
+
+
+static func mom_grid(map_: KitchenMap) -> Nav:
+	return Nav.new(map_, MOM_RADIUS - 0.02)
+
+
 # ------------------------------------------------------------------ lecture
 
 func watching() -> bool:
 	return mom_state == Mom.LOOK or mom_state == Mom.ROUND
+
+
+## Un vrai indice (pas une feinte) : elle va se retourner ou faire le tour.
+func warning() -> bool:
+	return mom_state == Mom.HINT and hint_kind != "feint"
+
+
+func snitching() -> bool:
+	return helpers.any(func(h: Dictionary) -> bool: return h.snitch > 0.0)
+
+
+## En route vers le coin, ou assise à y purger sa peine.
+func punished() -> bool:
+	return dog_state == Dog.TO_CORNER or dog_state == Dog.IN_CORNER
 
 
 func paws_up() -> bool:
@@ -150,7 +177,7 @@ func mom_at_island() -> bool:
 
 ## Ce qui vaudrait un « AU COIN ! » si Maman regardait.
 func dog_infraction() -> bool:
-	if dog_state == Dog.TO_CORNER or dog_state == Dog.IN_CORNER:
+	if punished():
 		return false
 	if paws_up():
 		return true
@@ -183,20 +210,32 @@ func drain_events() -> Array[Dictionary]:
 	return out
 
 
+## Où se tenir pour prendre un morceau.
+func stand_of(item: Dictionary) -> Vector2:
+	return item.pos if item.spot == "" else map.spots[item.spot].stand
+
+
+## La durée d'une fenêtre de ce niveau, raccourcie par le soupçon.
+func scaled_window(seconds: float) -> float:
+	return seconds * float(level.window_mult) * (1.0 - 0.35 * suspicion)
+
+
+## Les personnes présentes, comme cercles [centre, rayon].
+func people_circles() -> Array:
+	var out: Array = [[mom_pos, MOM_RADIUS]]
+	for h in helpers:
+		out.append([h.pos, HELPER_RADIUS])
+	return out
+
+
 ## Le morceau que Blanche peut attraper d'ici ({} s'il n'y en a pas).
 func reachable_item() -> Dictionary:
 	var best: Dictionary = {}
 	var best_d := INF
 	for item in food:
-		var d: float
-		if item.spot == "":
-			d = dog_pos.distance_to(item.pos)
-			if d > FLOOR_REACH:
-				continue
-		else:
-			d = dog_pos.distance_to(map.spots[item.spot].stand)
-			if d > REACH_DIST:
-				continue
+		var d := dog_pos.distance_to(stand_of(item))
+		if d > (FLOOR_REACH if item.spot == "" else REACH_DIST):
+			continue
 		if d < best_d:
 			best_d = d
 			best = item
@@ -204,7 +243,7 @@ func reachable_item() -> Dictionary:
 
 
 func food_name(item: Dictionary) -> String:
-	return level.foods[["crumb", "small", "big", "treasure"][item.size]][1]
+	return level.foods[SIZE_KEYS[item.size]][1]
 
 
 # ------------------------------------------------------------------ avancer
@@ -253,7 +292,6 @@ func _step_dog(dt: float, move: Vector2, grab: bool, pressed: bool) -> void:
 		Dog.LOWERING:
 			if pressed and not mouth.is_empty():
 				_drop()
-				_grab_used = true
 			lower_left -= dt
 			if lower_left <= 0.0:
 				dog_state = Dog.FREE
@@ -262,7 +300,6 @@ func _step_dog(dt: float, move: Vector2, grab: bool, pressed: bool) -> void:
 			if not mouth.is_empty():
 				if pressed:
 					_drop()
-					_grab_used = true
 				else:
 					mouth.eat_left -= dt * (0.35 if dog_moving else 1.0)
 					if mouth.eat_left <= 0.0:
@@ -309,10 +346,7 @@ func _move_dog(dt: float, move: Vector2) -> void:
 ## Les corps qui bloquent Blanche. Si quelqu'un lui a marché dessus, elle peut toujours se glisser dehors.
 func _body_circles(from: Vector2, move: Vector2) -> Array:
 	var circles: Array = [[map.stool_pos, map.stool_r]]
-	var people: Array = [[mom_pos, MOM_RADIUS]]
-	for h in helpers:
-		people.append([h.pos, HELPER_RADIUS])
-	for c: Array in people:
+	for c: Array in people_circles():
 		var away: Vector2 = from - c[0]
 		if away.length() < DOG_RADIUS + c[1] - 0.01 and move.normalized().dot(away.normalized()) > -0.35:
 			continue
@@ -346,6 +380,8 @@ func _take(item: Dictionary) -> void:
 func _drop() -> void:
 	var item := mouth
 	mouth = {}
+	# Il faut relâcher le bouton avant de reprendre quoi que ce soit.
+	_grab_used = true
 	var pos := map.resolve(dog_pos + dog_dir * 0.24, 0.06)
 	item.pos = pos
 	item.spot = ""
@@ -375,18 +411,33 @@ func _walk_to_corner(dt: float) -> void:
 		corner_left = 2.0 + 0.5 * minf(caught_count - 1, 4)
 		_emit("corner_arrive")
 		return
-	var left := SULK_SPEED * dt
-	while left > 0.0 and not corner_path.is_empty():
-		var d := dog_pos.distance_to(corner_path[0])
-		if d <= left:
-			dog_pos = corner_path[0]
-			corner_path.remove_at(0)
-			left -= d
-		else:
-			dog_dir = (corner_path[0] - dog_pos).normalized()
-			dog_pos += dog_dir * left
-			left = 0.0
+	var step_ := _advance(dog_pos, dog_dir, corner_path, SULK_SPEED * dt)
+	dog_pos = step_.pos
+	dog_dir = step_.dir
+	corner_path = step_.path
 	dog_moving = true
+
+
+## Avance de `length` le long d'un chemin : nouvelle position, direction, chemin restant et points franchis.
+static func _advance(pos: Vector2, dir: Vector2, path: PackedVector2Array, length: float) -> Dictionary:
+	var done := 0
+	while length > 0.0 and done < path.size():
+		var d := pos.distance_to(path[done])
+		if d <= length:
+			pos = path[done]
+			done += 1
+			length -= d
+		else:
+			dir = (path[done] - pos).normalized()
+			pos += dir * length
+			length = 0.0
+	return {"pos": pos, "dir": dir, "path": path.slice(done), "done": done}
+
+
+## Personne ne traverse Blanche : on la pousse un peu.
+func _nudge_dog(from: Vector2, radius: float) -> void:
+	if dog_state == Dog.FREE and dog_pos.distance_to(from) < radius + DOG_RADIUS:
+		dog_pos = map.resolve(dog_pos, DOG_RADIUS, [[from, radius], [map.stool_pos, map.stool_r]])
 
 
 # ------------------------------------------------------------------ Maman
@@ -526,20 +577,11 @@ func _start_round() -> void:
 
 ## Avance le long du chemin ; vrai quand elle est arrivée.
 func _follow_mom(dt: float, speed: float) -> bool:
-	var left := speed * dt
-	while left > 0.0 and not mom_path.is_empty():
-		var d := mom_pos.distance_to(mom_path[0])
-		if d <= left:
-			mom_pos = mom_path[0]
-			mom_path.remove_at(0)
-			left -= d
-		else:
-			mom_dir = (mom_path[0] - mom_pos).normalized()
-			mom_pos += mom_dir * left
-			left = 0.0
-	# Elle ne traverse pas Blanche : elle la pousse un peu.
-	if dog_state == Dog.FREE and dog_pos.distance_to(mom_pos) < MOM_RADIUS + DOG_RADIUS:
-		dog_pos = map.resolve(dog_pos, DOG_RADIUS, [[mom_pos, MOM_RADIUS], [map.stool_pos, map.stool_r]])
+	var step_ := _advance(mom_pos, mom_dir, mom_path, speed * dt)
+	mom_pos = step_.pos
+	mom_dir = step_.dir
+	mom_path = step_.path
+	_nudge_dog(mom_pos, MOM_RADIUS)
 	return mom_path.is_empty()
 
 
@@ -569,10 +611,11 @@ func _next_activity() -> void:
 
 func _enter_busy(what: String, extra := 0.0) -> void:
 	activity = what
+	walk_activity = ""
 	mom_state = Mom.BUSY
 	feinted = false
 	var span: Array = ACTIVITY_WINDOWS[what]
-	var t := rng.randf_range(span[0], span[1]) * float(level.window_mult) * (1.0 - 0.35 * suspicion)
+	var t := scaled_window(rng.randf_range(span[0], span[1]))
 	_set_timer(maxf(1.0, t) + extra)
 	_emit("busy", {"station": station, "activity": what})
 
@@ -600,7 +643,7 @@ func _check_caught(dt: float) -> void:
 	var lost := mouth
 	if not lost.is_empty() and lost.size == Size.TREASURE:
 		# Maman le remet sur le comptoir un peu plus tard.
-		treasure_back = time + 12.0
+		treasure_due = time + TREASURE_RETURN
 	mouth = {}
 	reach_item = {}
 	reach_progress = 0.0
@@ -643,10 +686,8 @@ func _step_food(dt: float) -> void:
 	if spawn_left <= 0.0:
 		spawn_left = _rand(level.spawn)
 		_spawn_food(-1)
-	if not treasure_done and time >= float(level.duration) * float(level.treasure_at):
-		treasure_done = _spawn_food(Size.TREASURE)
-	if treasure_back >= 0.0 and time >= treasure_back and _spawn_food(Size.TREASURE):
-		treasure_back = -1.0
+	if treasure_due >= 0.0 and time >= treasure_due and _spawn_food(Size.TREASURE):
+		treasure_due = -1.0
 	if mom_state == Mom.BUSY and activity == "couper":
 		crumb_left -= dt
 		if crumb_left <= 0.0:
@@ -774,22 +815,12 @@ func _add_helper(who: String) -> void:
 
 
 func _follow_helper(h: Dictionary, dt: float) -> void:
-	var left: float = (0.8 if h.who == "papa" else 1.0) * dt
-	var path: PackedVector2Array = h.path
-	while left > 0.0 and not path.is_empty():
-		var d: float = h.pos.distance_to(path[0])
-		if d <= left:
-			h.pos = path[0]
-			path.remove_at(0)
-			h.index += 1
-			left -= d
-		else:
-			h.dir = (path[0] - h.pos).normalized()
-			h.pos += h.dir * left
-			left = 0.0
-	h.path = path
-	if dog_state == Dog.FREE and dog_pos.distance_to(h.pos) < HELPER_RADIUS + DOG_RADIUS:
-		dog_pos = map.resolve(dog_pos, DOG_RADIUS, [[h.pos, HELPER_RADIUS], [map.stool_pos, map.stool_r]])
+	var step_ := _advance(h.pos, h.dir, h.path, (0.8 if h.who == "papa" else 1.0) * dt)
+	h.pos = step_.pos
+	h.dir = step_.dir
+	h.path = step_.path
+	h.index += step_.done
+	_nudge_dog(h.pos, HELPER_RADIUS)
 
 
 ## Charlotte voit Blanche faire : « Hon ! », puis elle appelle Maman si ça continue.

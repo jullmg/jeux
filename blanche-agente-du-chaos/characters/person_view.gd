@@ -43,10 +43,14 @@ func _ready() -> void:
 
 ## Les poings sur les hanches : coudes écartés, mains ramenées vers la taille.
 func _fists_on_hips() -> void:
-	for s: String in ["L", "R"]:
-		var side := 1.0 if s == "L" else -1.0
-		rig.add("arm" + s, Vector3(14, 0, 36 * side))
-		rig.add("forearm" + s, Vector3(-18, 0, -88 * side))
+	_fist_on_hip("L")
+	_fist_on_hip("R")
+
+
+func _fist_on_hip(s: String) -> void:
+	var side := 1.0 if s == "L" else -1.0
+	rig.add("arm" + s, Vector3(14, 0, 36 * side))
+	rig.add("forearm" + s, Vector3(-18, 0, -88 * side))
 
 
 func say(seconds: float) -> void:
@@ -69,6 +73,9 @@ func _arm(side: String, forward: float, out: float, bend: float, twist := 0.0) -
 
 
 func _process(delta: float) -> void:
+	# Papa et Charlotte attendent hors champ : rien à animer.
+	if not is_visible_in_tree():
+		return
 	_time += delta
 	rig.begin()
 	var quick := {}
@@ -178,8 +185,7 @@ func _process(delta: float) -> void:
 				rig.add("head", Vector3(-18, head_yaw, 0))
 			else:
 				_arm("R", 82, 14, 4)
-				rig.add("armL", Vector3(14, 0, 36))
-				rig.add("forearmL", Vector3(-18, 0, -88))
+				_fist_on_hip("L")
 				var shake := 14.0 if scold_style == 1 else 4.0
 				quick["armR"] = Vector3(sin(t * 14.0) * 4, sin(t * 11.0) * shake, 0)
 				rig.add("spine", Vector3(14 if scold_style != 1 else 6, 0, 0))

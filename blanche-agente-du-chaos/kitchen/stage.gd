@@ -5,7 +5,6 @@ extends Node3D
 const KITCHEN := "res://art/models/cuisine.glb"
 const FOODS := "res://art/models/nourriture.glb"
 const MASK_CELL := 0.06
-const SIZE_KEYS := ["crumb", "small", "big", "treasure"]
 ## Les morceaux sont grossis pour se lire de haut.
 const FOOD_SCALE := [1.7, 1.55, 1.3, 1.12]
 const RING_SIZE := [0.095, 0.15, 0.2, 0.26]
@@ -36,6 +35,9 @@ var _mask_viewer := Vector2.INF
 var _mask_island := false
 var _mask_wait := 0.0
 var _mask_center := Vector2.INF
+var _mask_bytes := PackedByteArray()
+var _mask_index := PackedInt32Array()
+var _mask_points := PackedVector2Array()
 var _steam: CPUParticles3D
 var _fridge_light: OmniLight3D
 var _time := 0.0
@@ -89,6 +91,9 @@ func _ready() -> void:
 	dog = DogView.new()
 	add_child(dog)
 	dog.add_child(_blob_shadow(0.34, 0.5))
+	# Le shader de la silhouette se compile à l'écran titre, pas en pleine partie.
+	dog.set_see_through(true)
+	get_tree().create_timer(0.25).timeout.connect(dog.set_see_through.bind(false))
 	mom = PersonView.new("maman")
 	add_child(mom)
 	mom.add_child(_blob_shadow(0.32, 0.4))
@@ -225,8 +230,17 @@ func _build_mask() -> void:
 	_mask_rect = map.island.grow(1.15).intersection(map.room)
 	var w := int(_mask_rect.size.x / MASK_CELL)
 	var h := int(_mask_rect.size.y / MASK_CELL)
-	_mask_image = Image.create(w, h, false, Image.FORMAT_RGBA8)
+	_mask_image = Image.create(w, h, false, Image.FORMAT_R8)
 	_mask_texture = ImageTexture.create_from_image(_mask_image)
+	_mask_bytes.resize(w * h)
+	# Les seules cases qui peuvent un jour être cachées : libres et assez près de l'îlot.
+	var inner := map.island.grow(-0.02)
+	for y in h:
+		for x in w:
+			var p := _mask_rect.position + Vector2(x + 0.5, y + 0.5) * MASK_CELL
+			if map.is_free(p, 0.07) and p.distance_to(p.clamp(inner.position, inner.end)) <= KitchenMap.SHADOW_MAX:
+				_mask_index.append(y * w + x)
+				_mask_points.append(p)
 	var plane := PlaneMesh.new()
 	plane.size = _mask_rect.size
 	var shader := Shader.new()
@@ -268,15 +282,14 @@ func _update_mask(delta: float) -> void:
 	_mask_island = at_island
 	var sum := Vector2.ZERO
 	var cells := 0
-	for x in _mask_image.get_width():
-		for y in _mask_image.get_height():
-			var p := _mask_rect.position + Vector2(x + 0.5, y + 0.5) * MASK_CELL
-			var on := map.is_free(p, 0.07) and map.hidden_by_island(sim.mom_pos, p, at_island)
-			_mask_image.set_pixel(x, y, Color(1.0 if on else 0.0, 0, 0))
-			if on:
-				sum += p
-				cells += 1
+	for i in _mask_index.size():
+		var on := map.hidden_by_island(sim.mom_pos, _mask_points[i], at_island)
+		_mask_bytes[_mask_index[i]] = 255 if on else 0
+		if on:
+			sum += _mask_points[i]
+			cells += 1
 	_mask_center = sum / cells if cells > 12 else Vector2.INF
+	_mask_image.set_data(_mask_image.get_width(), _mask_image.get_height(), false, Image.FORMAT_R8, _mask_bytes)
 	_mask_texture.update(_mask_image)
 
 
@@ -303,7 +316,7 @@ static func _make_ring(inner: float, outer: float, seg: int) -> ArrayMesh:
 
 
 func food_model(size: int) -> MeshInstance3D:
-	var model: String = sim.level.foods[SIZE_KEYS[size]][0]
+	var model: String = sim.level.foods[Sim.SIZE_KEYS[size]][0]
 	var m := MeshInstance3D.new()
 	m.mesh = _food_meshes[model]
 	return m
@@ -534,7 +547,7 @@ func _show_dog(delta: float) -> void:
 	_surprised -= delta
 	dog.carrying = not sim.mouth.is_empty()
 	dog.chewing = false
-	dog.sad = sim.dog_state == Sim.Dog.TO_CORNER or sim.dog_state == Sim.Dog.IN_CORNER
+	dog.sad = sim.punished()
 	dog.look_up = 1.0 if sim.watching() else 0.0
 	if sim.over:
 		dog.pose = "happy" if sim.stars() > 0 else "sit"

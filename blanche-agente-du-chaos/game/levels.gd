@@ -37,7 +37,7 @@ static func validate(level: Dictionary, map: KitchenMap) -> PackedStringArray:
 	for s: String in level.noisy_spots:
 		if not level.spots.has(s):
 			out.append("endroit bruyant absent du niveau : " + s)
-	for k: String in ["crumb", "small", "big", "treasure"]:
+	for k: String in Sim.SIZE_KEYS:
 		if not level.foods.has(k):
 			out.append("nourriture manquante : " + k)
 	if level.stars.size() != 3 or not (level.stars[0] < level.stars[1] and level.stars[1] < level.stars[2]):

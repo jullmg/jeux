@@ -6,6 +6,9 @@ extends Node
 ## --verif (démarre puis quitte), --sauvegarde=user://fichier.json (essais de la sauvegarde).
 
 const STEP := 1.0 / 60.0
+const LONG_HINT_BONUS := 0.25
+## Le nom des répliques et des poses selon la sorte d'indice.
+const HINT_KEYS := {"real": "hint", "feint": "feint", "round": "round"}
 const AMBIENT := {"couper": ["couteau", 0.34], "brasser": ["brasse", 1.1], "laver": ["eau", 1.15], "ilot": ["pas", 0.42],
 	"surprise": ["brasse", 0.55]}
 
@@ -58,19 +61,14 @@ func _ready() -> void:
 	if args.has("--graine"):
 		seed_override = int(args["--graine"])
 	_setup_input()
-	var keeps := not testing and not demo
-	var path := "user://save.json" if keeps else "user://aucune.json"
-	if args.has("--sauvegarde"):
-		# Essais de la sauvegarde : un fichier à part.
-		path = args["--sauvegarde"]
-		keeps = true
-	save = SaveData.new(path, keeps)
+	# Les essais et la démo ne gardent rien, sauf dans le fichier qu'on leur désigne.
+	save = SaveData.new(args.get("--sauvegarde", "" if testing or demo else "user://save.json"))
 	_rng.randomize()
 	stage = Stage.new()
 	stage.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(stage)
-	_nav = Nav.new(stage.map, Sim.DOG_RADIUS - 0.01)
-	_mom_nav = Nav.new(stage.map, Sim.MOM_RADIUS - 0.02)
+	_nav = Sim.dog_grid(stage.map)
+	_mom_nav = Sim.mom_grid(stage.map)
 	_follower = Follower.new(_nav)
 	var hud_layer := CanvasLayer.new()
 	hud_layer.layer = 10
@@ -79,6 +77,7 @@ func _ready() -> void:
 	hud.process_mode = Node.PROCESS_MODE_PAUSABLE
 	hud_layer.add_child(hud)
 	hud.pause_pressed.connect(pause_game)
+	hud.grab_pressed.connect(func() -> void: _grab_tapped = true)
 	var menu_layer := CanvasLayer.new()
 	menu_layer.layer = 20
 	add_child(menu_layer)
@@ -148,14 +147,19 @@ func apply_options() -> void:
 	Sound.set_volumes(o.music, o.sfx)
 	stage.reduced_motion = o.reduced_motion
 	hud.reduced_motion = o.reduced_motion
-	if sim:
-		sim.hint_bonus = 0.25 if o.long_hints else 0.0
+	_apply_hints()
 	if not testing and DisplayServer.get_name() != "headless":
 		# Seulement quand le réglage change : bouger un volume ne doit pas défaire un plein écran choisi autrement.
 		var full: bool = o.fullscreen
 		if full != _fullscreen_applied:
 			_fullscreen_applied = full
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if full else DisplayServer.WINDOW_MODE_WINDOWED)
+
+
+## Le réglage « indices plus longs ».
+func _apply_hints() -> void:
+	if sim:
+		sim.hint_bonus = LONG_HINT_BONUS if save.options.long_hints else 0.0
 
 
 # ------------------------------------------------------------------ écrans
@@ -167,7 +171,6 @@ func go_title() -> void:
 	bot = null
 	hud.clear()
 	stage.show_title()
-	Sound.hum(false)
 	Sound.music("menu")
 	menus.show_title()
 
@@ -190,7 +193,7 @@ func start_level(id: int) -> void:
 	var level := Levels.load_level(id)
 	var seed_ := seed_override if seed_override >= 0 else _rng.randi()
 	sim = Sim.new(stage.map, level, seed_, _nav, _mom_nav)
-	sim.hint_bonus = 0.25 if save.options.long_hints else 0.0
+	_apply_hints()
 	bot = Bot.new(sim, "equilibre", 0.35, 0.95, 3) if demo else null
 	_follower.clear()
 	_touch_goal = Vector2.INF
@@ -199,7 +202,6 @@ func start_level(id: int) -> void:
 	_result = {}
 	_grab_prev = false
 	_grab_tapped = false
-	hud.grab_tapped = false
 	_need_release = true
 	_ticking_said = false
 	menus.close()
@@ -223,7 +225,6 @@ func pause_game() -> void:
 	if state != "jeu" or sim == null or sim.over:
 		return
 	state = "pause"
-	Sound.hum(false)
 	get_tree().paused = true
 	menus.show_pause()
 
@@ -237,7 +238,6 @@ func resume_game() -> void:
 	_need_release = true
 	_grab_tapped = false
 	hud.grab_held = false
-	hud.grab_tapped = false
 
 
 func quit_game(code := 0) -> void:
@@ -306,7 +306,7 @@ func tap(screen: Vector2) -> void:
 		var d := stage.on_screen(stage.item_position(item)).distance_to(screen)
 		if d < best_d:
 			best_d = d
-			best = item.pos if item.spot == "" else sim.map.spots[item.spot].stand
+			best = sim.stand_of(item)
 	if best == Vector2.INF:
 		best = ground
 	if best == Vector2.INF:
@@ -329,9 +329,8 @@ func _commands(delta: float) -> Array:
 		return [bot.move, bot.grab]
 	var keys := Input.get_vector("move_left", "move_right", "move_down", "move_up")
 	var move := Vector2.ZERO
-	var grab := Input.is_action_pressed("grab") or hud.grab_held or _grab_tapped or hud.grab_tapped
+	var grab := Input.is_action_pressed("grab") or hud.grab_held or _grab_tapped
 	_grab_tapped = false
-	hud.grab_tapped = false
 	# Un nouvel appui arrête la marche ; un but touché pendant que le bouton reste tenu, lui, compte.
 	if grab and not _grab_prev:
 		_forget_goal()
@@ -355,6 +354,9 @@ func _commands(delta: float) -> Array:
 # ------------------------------------------------------------------ la partie
 
 func _physics_process(delta: float) -> void:
+	# Elle fredonne tant qu'elle est occupée : le silence est un indice de plus. Déduit de l'état, rien à éteindre ailleurs.
+	Sound.hum(state == "jeu" and sim != null and not sim.over and sim.mom_state == Sim.Mom.BUSY \
+		and sim.activity != "telephone")
 	if state != "jeu" or sim == null:
 		return
 	for i in speed:
@@ -383,7 +385,6 @@ func _record() -> void:
 
 func _finish() -> void:
 	state = "fin"
-	Sound.hum(false)
 	Sound.music("")
 	Sound.play("victoire" if _result.stars > 0 else "rate")
 	hud.visible = false
@@ -455,7 +456,7 @@ func _event_words(e: Dictionary) -> void:
 		"hint":
 			var chance := 1.0 if e.kind == "round" else 0.7
 			if _rng.randf() < chance:
-				say.call(stage.mom, Texts.MOM[{"real": "hint", "feint": "feint", "round": "round"}[e.kind]], 1.2)
+				say.call(stage.mom, Texts.MOM[HINT_KEYS[e.kind]], 1.2)
 		"caught":
 			say.call(stage.mom, Texts.MOM.caught, 2.0)
 		"corner_arrive":
@@ -491,8 +492,6 @@ func _greet(who: PersonView, lines: Array) -> void:
 
 ## Les bruits qui accompagnent ce qui dure : la cuisine, les pas, la mastication, la musique.
 func _sounds(delta: float) -> void:
-	# Elle fredonne tant qu'elle est occupée : le silence est un indice de plus.
-	Sound.hum(sim.mom_state == Sim.Mom.BUSY and not sim.over and sim.activity != "telephone")
 	_ambient_left -= delta
 	if sim.mom_state == Sim.Mom.BUSY and AMBIENT.has(sim.activity) and _ambient_left <= 0.0:
 		var a: Array = AMBIENT[sim.activity]
@@ -507,7 +506,7 @@ func _sounds(delta: float) -> void:
 		_step_left = 0.24
 		Sound.play("pas", -10.0, _rng.randf_range(0.9, 1.15))
 	var tense := sim.suspicion * 0.85
-	if sim.mom_state == Sim.Mom.HINT and sim.hint_kind != "feint" or sim.watching():
+	if sim.warning() or sim.watching():
 		tense += 0.45
 	if sim.time_left < 20.0:
 		tense += 0.3

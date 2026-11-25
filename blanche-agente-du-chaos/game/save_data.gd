@@ -8,9 +8,8 @@ const DEFAULT_OPTIONS := {
 	"music": 0.7, "sfx": 0.9, "fullscreen": false, "reduced_motion": false, "long_hints": false,
 }
 
+## Vide pour les essais (`--no-save`) : rien n'est lu ni écrit.
 var path: String
-## Faux pour les essais (`--no-save`) : rien n'est écrit.
-var enabled := true
 var unlocked := 1
 var stars: Dictionary = {}
 var best: Dictionary = {}
@@ -18,9 +17,8 @@ var options: Dictionary = DEFAULT_OPTIONS.duplicate()
 var finished_seen := false
 
 
-func _init(path_ := "user://save.json", enabled_ := true) -> void:
+func _init(path_ := "user://save.json") -> void:
 	path = path_
-	enabled = enabled_
 	load_file()
 
 
@@ -39,8 +37,7 @@ func load_file() -> void:
 	var json := JSON.new()
 	if json.parse(FileAccess.get_file_as_string(path)) != OK or not json.data is Dictionary:
 		# On garde le fichier abîmé à côté plutôt que de l'écraser sans trace.
-		if enabled:
-			DirAccess.copy_absolute(path, path + ".abime")
+		DirAccess.copy_absolute(path, path + ".abime")
 		return
 	var d: Dictionary = json.data
 	unlocked = clampi(int(_number(d.get("unlocked"), 1)), 1, Levels.COUNT)
@@ -68,7 +65,7 @@ static func _number(v: Variant, fallback: float) -> float:
 
 
 func save_file() -> bool:
-	if not enabled:
+	if path == "":
 		return false
 	var data := {"version": VERSION, "unlocked": unlocked, "stars": stars, "best": best, "options": options,
 		"finished_seen": finished_seen}

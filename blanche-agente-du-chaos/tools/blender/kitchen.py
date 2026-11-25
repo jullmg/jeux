@@ -16,7 +16,6 @@ from mathutils import Matrix, Vector  # noqa: E402
 C.reset()
 PLAN = json.loads((C.ROOT / "data" / "kitchen.json").read_text())
 OB = PLAN["obstacles"]
-SPOTS = PLAN["spots"]
 H = PLAN["counter_height"]
 rng = random.Random(5)
 
@@ -155,7 +154,6 @@ black_glass = M("vitre_noire", "#0e0f13", 0.12, 0.2)
 black_mat = M("noir_mat", "#232227", 0.7)
 brass = M("poignee", "#d8bd8e", 0.35, 0.6)
 chrome = M("chrome", "#e2e4e8", 0.2, 0.8)
-dark_gap = M("fente", "#6a4a2e", 0.9)
 sky = M("ciel", "#bfd9ee", 1.0, emit="#a9cdea", emit_power=0.9)
 yard = M("cour", "#a9654f", 1.0, emit="#7e4a3a", emit_power=0.5)
 leaf = M("feuille", "#4f8a3d", 0.8)
@@ -524,11 +522,11 @@ y = 0.9
 while y < 1.9:
     east.box(1.936, y, gz0, 1.941, y + 0.004, gz1, steel_dark)
     y += 0.036
-for a, b in ((0.18, 0.7), ):
-    for t in (a, b):
-        east.box(1.944, t, gz0, 1.956, t + 0.025, gz1, white_soft, bevel=0.004, seg=1)
-    for t in (gz0, gz1 - 0.025):
-        east.box(1.944, a, t, 1.956, b, t + 0.025, white_soft, bevel=0.004, seg=1)
+# panneau mouluré au bas de la porte
+for t in (0.18, 0.7):
+    east.box(1.944, t, gz0, 1.956, t + 0.025, gz1, white_soft, bevel=0.004, seg=1)
+for t in (gz0, gz1 - 0.025):
+    east.box(1.944, 0.18, t, 1.956, 0.7, t + 0.025, white_soft, bevel=0.004, seg=1)
 east.cyl((1.95, 1.02, dz0 + 0.07), 0.028, 0.025, steel_dark, axis=(-1, 0, 0))
 east.tube([(1.915, 1.02, dz0 + 0.07), (1.915, 1.02, dz0 + 0.18)], 0.012, steel_dark, seg=8)
 east.cyl((1.95, 1.18, dz0 + 0.07), 0.025, 0.018, brass, axis=(-1, 0, 0))
@@ -657,7 +655,6 @@ stool.build()
 corner = C.Obj("Coin")
 x0, z0, x1, z1 = PLAN["cushion"]
 corner.box(x0, 0.0, z0, x1, 0.055, z1, cushion_m, bevel=0.027, seg=3)
-corner.torus(((x0 + x1) / 2, 0.032, (z0 + z1) / 2), 0.001, 0.001, cushion_m, sides=4, seg=4)
 for a, b, c, d in ((x0 + 0.02, x1 - 0.02, z0 + 0.02, z0 + 0.03), (x0 + 0.02, x1 - 0.02, z1 - 0.03, z1 - 0.02),
                    (x0 + 0.02, x0 + 0.03, z0 + 0.02, z1 - 0.02), (x1 - 0.03, x1 - 0.02, z0 + 0.02, z1 - 0.02)):
     corner.box(a, 0.04, c, b, 0.062, d, M("passepoil", "#60646d", 0.9), bevel=0.008, seg=1)

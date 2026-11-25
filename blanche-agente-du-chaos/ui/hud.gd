@@ -3,14 +3,14 @@ extends Control
 ## L'affichage en cours de partie : score, repas, soupçon, signes au-dessus de Maman, bulles et tutoriel.
 
 signal pause_pressed
+## Chaque appui sur le gros bouton, même très bref.
+signal grab_pressed
 
 var sim: Sim
 var stage: Stage
 var reduced_motion := false
 ## Vrai tant que le gros bouton à l'écran est enfoncé.
 var grab_held := false
-## Un appui sur le gros bouton, gardé jusqu'à ce que la partie l'ait vu (même très bref).
-var grab_tapped := false
 ## "clavier", "manette" ou "pointeur" : ce que dit le gros bouton.
 var input_kind := "clavier"
 
@@ -26,12 +26,13 @@ var _toast_left := 0.0
 var _tutorial: PanelContainer
 var _tutorial_label: Label
 var _tutorial_key := ""
-var _learned := {}
+var _has_eaten := false
 var _grab: Button
 var _pause: Button
 var _world: Control
 var _top: Control
 var _font: Font
+var _styles: Dictionary = {}
 
 
 func _ready() -> void:
@@ -49,7 +50,7 @@ func _ready() -> void:
 		_grab.add_theme_stylebox_override(state, s)
 	_grab.button_down.connect(func() -> void:
 		grab_held = true
-		grab_tapped = true)
+		grab_pressed.emit())
 	_grab.button_up.connect(func() -> void: grab_held = false)
 	var grab_face := Control.new()
 	grab_face.name = "face"
@@ -112,14 +113,13 @@ func start(sim_: Sim, stage_: Stage) -> void:
 	sim = sim_
 	stage = stage_
 	visible = true
-	_learned = {}
+	_has_eaten = false
 
 
 func clear() -> void:
 	sim = null
 	visible = false
 	grab_held = false
-	grab_tapped = false
 	_shown_score = 0.0
 	_banner = 0.0
 	_flash = 0.0
@@ -173,10 +173,9 @@ func on_event(e: Dictionary) -> void:
 			var text := "+%d" % e.points + ("  " + Texts.COMBO % e.mult if e.mult > 1 else "")
 			_floater(text, at, UiStyle.GOLD if e.item.size >= Sim.Size.BIG else Color.WHITE, 38 + e.item.size * 12)
 			_score_pop = 1.0
-			_learned.ate = true
+			_has_eaten = true
 		"caught":
 			_banner = 1.35
-			_learned.caught = true
 		"treasure":
 			toast(Texts.TREASURE_ALERT % sim.food_name(e.item), 3.0)
 		"noise":
@@ -184,8 +183,6 @@ func on_event(e: Dictionary) -> void:
 		"hint":
 			if e.kind != "feint":
 				_flash = 1.0
-		"grabbed":
-			_learned.grabbed = true
 		"dropped":
 			if e.combo_lost:
 				_floater(Texts.COMBO_LOST, stage.dog.head_position() + Vector3(0, 0.2, 0), Color.WHITE, 36)
@@ -244,15 +241,32 @@ func _text(on: CanvasItem, pos: Vector2, text: String, font_size: int, color := 
 	on.draw_string(_font, pos, text, align, width, font_size, color)
 
 
+## Une boîte arrondie, fabriquée à la première demande puis réutilisée.
+func _style(color: Color, radius: int, border := Color.TRANSPARENT, width := 0) -> StyleBoxFlat:
+	var key := [color, radius, border, width]
+	if not _styles.has(key):
+		_styles[key] = UiStyle.box(color, radius, border, width, 0)
+	return _styles[key]
+
+
+## Une barre qui se remplit : les deux boîtes sont préparées à l'avance par couleur.
 func _bar(on: CanvasItem, rect: Rect2, value: float, color: Color) -> void:
-	on.draw_style_box(UiStyle._bar(Color("dccab0")), rect)
+	on.draw_style_box(_bar_style(Color("dccab0")), rect)
 	if value > 0.005:
 		var filled := Rect2(rect.position, Vector2(maxf(rect.size.y, rect.size.x * clampf(value, 0.0, 1.0)), rect.size.y))
-		on.draw_style_box(UiStyle._bar(color), filled)
+		on.draw_style_box(_bar_style(color), filled)
+
+
+func _bar_style(color: Color) -> StyleBoxFlat:
+	# Les couleurs qui glissent (le soupçon) sont arrondies pour ne pas fabriquer une boîte par nuance.
+	var key := color.to_rgba32() & 0xf8f8f8ff
+	if not _styles.has(key):
+		_styles[key] = UiStyle._bar(Color.hex(key))
+	return _styles[key]
 
 
 func _card(on: CanvasItem, rect: Rect2) -> void:
-	on.draw_style_box(UiStyle.box(Color(UiStyle.CREAM, 0.95), 26, Color("d8bf9c"), 3, 0), rect)
+	on.draw_style_box(_style(Color(UiStyle.CREAM, 0.95), 26, Color("d8bf9c"), 3), rect)
 
 
 func _draw_panels(on: Control) -> void:
@@ -299,8 +313,8 @@ func _draw_panels(on: Control) -> void:
 	# visible ou cachée, et ce qu'on a dans la gueule
 	var hidden := sim.dog_hidden()
 	var badge := Rect2(28, h - 142, 300, 114)
-	on.draw_style_box(UiStyle.box(Color(UiStyle.BLUE if hidden else UiStyle.CREAM, 0.95), 26,
-		Color.WHITE if hidden else Color("d8bf9c"), 4, 0), badge)
+	on.draw_style_box(_style(Color(UiStyle.BLUE if hidden else UiStyle.CREAM, 0.95), 26,
+		Color.WHITE if hidden else Color("d8bf9c"), 4), badge)
 	Icons.eye(on, badge.position + Vector2(66, 57), 40.0, not hidden)
 	_text(on, badge.position + Vector2(124, 74), Texts.HIDDEN if hidden else Texts.VISIBLE, 44,
 		Color.WHITE if hidden else UiStyle.INK)
@@ -325,21 +339,15 @@ func _grab_state() -> String:
 
 func _danger() -> bool:
 	if sim.mom_state == Sim.Mom.HINT:
-		return sim.hint_kind != "feint"
-	if sim.mom_state == Sim.Mom.TURN or sim.watching():
-		return true
-	for h in sim.helpers:
-		if h.snitch > 0.0:
-			return true
-	return false
+		return sim.warning()
+	return sim.mom_state == Sim.Mom.TURN or sim.watching() or sim.snitching()
 
 
 func _draw_grab(face: Control) -> void:
 	if sim == null:
 		return
 	var c := face.size / 2.0
-	var busy := sim.dog_state == Sim.Dog.TO_CORNER or sim.dog_state == Sim.Dog.IN_CORNER
-	var ready := not busy and (not sim.mouth.is_empty() or not sim.reachable_item().is_empty() or sim.paws_up())
+	var ready := not sim.punished() and (not sim.mouth.is_empty() or not sim.reachable_item().is_empty() or sim.paws_up())
 	_grab.modulate = Color(1, 1, 1, 1.0 if ready else 0.5)
 	Icons.paw(face, c + Vector2(0, -38), 46.0, Color.WHITE)
 	_text(face, Vector2(0, c.y + 50), _grab_state(), 38, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, face.size.x, 8)
@@ -384,7 +392,7 @@ func _draw_world(on: Control) -> void:
 		Sim.Mom.BUSY:
 			var text: String = sim.level.get("activity_text", {}).get(sim.activity, Texts.ACTIVITY.get(sim.activity, ""))
 			var width := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x + 30
-			on.draw_style_box(UiStyle.box(Color(0.1, 0.06, 0.04, 0.6), 18, Color.TRANSPARENT, 0, 0),
+			on.draw_style_box(_style(Color(0.1, 0.06, 0.04, 0.6), 18),
 				Rect2(head + Vector2(-width / 2.0, -20), Vector2(width, 38)))
 			_text(on, head + Vector2(-width / 2.0 + 15, 7), text, 24, Color.WHITE)
 		Sim.Mom.HINT:
@@ -413,7 +421,7 @@ func _draw_banner(on: Control) -> void:
 	var size_ := on.size
 	# le bord de l'écran rougit quand Maman va se retourner ou regarde
 	var alarm := _flash
-	if sim.mom_state == Sim.Mom.HINT and sim.hint_kind != "feint":
+	if sim.warning():
 		alarm = 1.0
 	elif sim.watching():
 		alarm = maxf(alarm, 0.45)
@@ -453,7 +461,7 @@ func _update_tutorial() -> void:
 	var key := ""
 	if sim.over:
 		key = ""
-	elif sim.dog_state == Sim.Dog.TO_CORNER or sim.dog_state == Sim.Dog.IN_CORNER:
+	elif sim.punished():
 		key = "corner"
 	elif (sim.mom_state == Sim.Mom.HINT or sim.mom_state == Sim.Mom.TURN or sim.watching()) and sim.time > 2.0:
 		key = "warning"
@@ -463,7 +471,7 @@ func _update_tutorial() -> void:
 		key = "keep"
 	elif not sim.mouth.is_empty():
 		key = "eat"
-	elif _learned.get("ate", false):
+	elif _has_eaten:
 		key = "good" if sim.time < 75.0 else ""
 	elif not sim.reachable_item().is_empty():
 		key = "hold"

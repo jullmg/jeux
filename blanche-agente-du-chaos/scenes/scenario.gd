@@ -40,6 +40,8 @@ func until(condition: Callable, max_frames := 3000) -> bool:
 	for i in max_frames:
 		if main.sim == null or condition.call():
 			return true
+		if main.sim.over:
+			break
 		await get_tree().physics_frame
 	print("situation jamais atteinte")
 	return false
@@ -228,13 +230,14 @@ func _run() -> void:
 			await shot("3%d_niveau" % id)
 	if wants("situations"):
 		play(5, "equilibre", 3)
-		main.speed = 3
-		for what: String in ["frigo", "telephone", "ilot", "laver"]:
-			await until(func() -> bool: return main.sim.mom_state == Sim.Mom.BUSY and main.sim.activity == what, 9000)
-			main.speed = 1
+		# Maman est envoyée à chaque poste, sans attendre que le hasard l'y mène.
+		for station: String in ["frigo", "telephone", "ilot", "evier"]:
+			var what: String = main.stage.map.stations[station].activity
+			main.sim._start_walk(station, what)
+			await until(func() -> bool: return main.sim.mom_state == Sim.Mom.BUSY and main.sim.activity == what, 900)
 			await wait(0.9)
 			await shot("40_" + what)
-			main.speed = 3
+		main.speed = 3
 		await until(func() -> bool: return main.sim.mom_state == Sim.Mom.HINT and main.sim.hint_kind == "feint", 9000)
 		main.speed = 1
 		await wait(0.25)
@@ -250,15 +253,14 @@ func _run() -> void:
 		play(7, "equilibre", 6)
 		main.speed = 3
 		for who: String in ["charlotte", "papa"]:
-			await until(func() -> bool: return not main.sim.helpers.is_empty() and main.sim.helpers[0].who == who, 9000)
+			main.sim.helpers.clear()
+			main.sim._add_helper(who)
 			main.speed = 1
 			await wait(1.6)
 			await shot("44_" + who)
-			main.speed = 3
-			await until(func() -> bool: return main.sim.helpers.is_empty(), 9000)
 		play(8, "equilibre", 8)
 		main.speed = 6
-		await until(func() -> bool: return main.sim.treasure_done, 20000)
+		await until(func() -> bool: return main.sim.treasure_due < 0.0, 20000)
 		main.speed = 1
 		await wait(0.8)
 		await shot("45_dinde")

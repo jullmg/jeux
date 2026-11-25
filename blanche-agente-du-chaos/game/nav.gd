@@ -113,11 +113,3 @@ func _clear(a: Vector2, b: Vector2, blockers: Array) -> bool:
 				return false
 	return true
 
-
-static func length(from: Vector2, pts: PackedVector2Array) -> float:
-	var total := 0.0
-	var here := from
-	for p in pts:
-		total += here.distance_to(p)
-		here = p
-	return total

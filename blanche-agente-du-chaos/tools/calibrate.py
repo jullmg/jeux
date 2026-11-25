@@ -48,12 +48,6 @@ def table(results):
 
 def write_stars(games):
     """1 étoile : au-dessus de ce qu'on obtient sans jamais redescendre ; 3 étoiles : une courbe qui se resserre."""
-    for level in range(1, 9):
-        path = ROOT / "levels" / f"niveau_{level}.json"
-        data = json.loads(path.read_text())
-        # Des seuils impossibles à franchir pendant la mesure : on lit seulement les scores.
-        data["stars"] = [1, 2, 3]
-        path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
     results = simulate(games, ["novice_700", "tetu_300"])
     round50 = lambda v: int(round(v / 50.0) * 50)
     for level in range(1, 9):

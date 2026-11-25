@@ -59,6 +59,7 @@ func _run() -> void:
 		main.show_brief(id)
 		await _frames(5)
 		_screen("consignes")
+		var before: int = main.save.best_of(id)
 		var started := Time.get_ticks_msec()
 		main.seed_override = 100 + id
 		main.start_level(id)
@@ -88,7 +89,7 @@ func _run() -> void:
 		_expect(main.sim.over, "niveau %d non terminé" % id)
 		report.levels.append({"level": id, "score": main.sim.score, "stars": main.sim.stars(), "caught": main.sim.caught_count})
 		_expect(main.sim.score > 0, "niveau %d sans un point" % id)
-		_expect(main.save.best_of(id) >= main.sim.score, "record non noté au niveau %d" % id)
+		_expect(main.save.best_of(id) == maxi(before, main.sim.score), "record non noté au niveau %d" % id)
 	main.menus.show_end()
 	await _frames(5)
 	_screen("fin")

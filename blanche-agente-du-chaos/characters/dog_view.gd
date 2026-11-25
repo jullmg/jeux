@@ -95,11 +95,6 @@ func drop_held() -> void:
 	_held = null
 
 
-## Où est le museau, dans le monde.
-func nose_position() -> Vector3:
-	return rig.skeleton.global_transform * rig.skeleton.get_bone_global_pose(rig.bones.jaw).origin
-
-
 func head_position() -> Vector3:
 	return rig.skeleton.global_transform * rig.position_of("head")
 

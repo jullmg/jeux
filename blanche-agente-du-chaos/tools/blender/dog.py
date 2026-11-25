@@ -17,10 +17,6 @@ C.reset()
 rng = random.Random(8)
 
 
-def mirror(p, s):
-    return (p[0] * s, p[1], p[2])
-
-
 # ---------------------------------------------------------------- squelette
 
 BONES = [

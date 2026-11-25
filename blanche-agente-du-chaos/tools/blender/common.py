@@ -9,7 +9,7 @@ import sys
 
 import bpy
 import numpy as np
-from mathutils import Matrix, Vector
+from mathutils import Vector
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 MODELS = ROOT / "art" / "models"
@@ -424,7 +424,7 @@ def export(name):
     print(f"EXPORT {path} {path.stat().st_size // 1024} Ko")
 
 
-def render(name, eye, target, fov=44.0, size=(1600, 900), lights=True):
+def render(name, eye, target, fov=44.0, size=(1600, 900)):
     if "--sans-apercu" in sys.argv:
         return
     PREVIEWS.mkdir(parents=True, exist_ok=True)
@@ -439,23 +439,22 @@ def render(name, eye, target, fov=44.0, size=(1600, 900), lights=True):
     cam.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
     scene.camera = cam
     extra = [cam]
-    if lights:
-        sun = bpy.data.lights.new("sun", "SUN")
-        sun.energy = 2.2
-        sun.color = (1.0, 0.94, 0.86)
-        so = bpy.data.objects.new("sun", sun)
-        so.rotation_euler = (math.radians(38), math.radians(-24), 0)
-        scene.collection.objects.link(so)
-        extra.append(so)
-        for pos, power in (((-0.8, 2.6, 0.2), 28), ((0.9, 2.5, -0.7), 22), ((0.4, 2.4, 1.6), 16)):
-            l = bpy.data.lights.new("p", "POINT")
-            l.energy = power
-            l.color = (1.0, 0.88, 0.72)
-            l.shadow_soft_size = 0.35
-            lo = bpy.data.objects.new("p", l)
-            lo.location = G(pos)
-            scene.collection.objects.link(lo)
-            extra.append(lo)
+    sun = bpy.data.lights.new("sun", "SUN")
+    sun.energy = 2.2
+    sun.color = (1.0, 0.94, 0.86)
+    so = bpy.data.objects.new("sun", sun)
+    so.rotation_euler = (math.radians(38), math.radians(-24), 0)
+    scene.collection.objects.link(so)
+    extra.append(so)
+    for pos, power in (((-0.8, 2.6, 0.2), 28), ((0.9, 2.5, -0.7), 22), ((0.4, 2.4, 1.6), 16)):
+        l = bpy.data.lights.new("p", "POINT")
+        l.energy = power
+        l.color = (1.0, 0.88, 0.72)
+        l.shadow_soft_size = 0.35
+        lo = bpy.data.objects.new("p", l)
+        lo.location = G(pos)
+        scene.collection.objects.link(lo)
+        extra.append(lo)
     world = bpy.data.worlds.new("w")
     world.use_nodes = True
     bg = world.node_tree.nodes["Background"]
