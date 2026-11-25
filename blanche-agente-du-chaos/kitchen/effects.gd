@@ -57,6 +57,12 @@ func _ready() -> void:
 	_dust.color_ramp = _fade(Color(0.86, 0.74, 0.58, 0.55), 0.2)
 
 
+## Tirés une fois sous le plancher, à l'écran titre : leurs shaders sont prêts avant la première partie.
+func warm_up() -> void:
+	for p: CPUParticles3D in [_crumbs, _stars, _hearts, _dust]:
+		_fire(p, Vector3(0.0, -0.6, 0.4))
+
+
 func crumbs(at: Vector3) -> void:
 	_fire(_crumbs, at)
 

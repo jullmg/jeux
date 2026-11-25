@@ -93,6 +93,7 @@ func _ready() -> void:
 	_build_mask()
 	effects = Effects.new()
 	add_child(effects)
+	effects.warm_up()
 	_ring_mesh = _make_ring(0.8, 1.0, 40)
 	_ring_shadow = StandardMaterial3D.new()
 	_ring_shadow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
