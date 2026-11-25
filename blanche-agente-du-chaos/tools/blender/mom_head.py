@@ -11,6 +11,10 @@ from mathutils import Vector, noise
 from mathutils.bvhtree import BVHTree
 
 
+# la tête de Maman, un peu plus petite que celle du gabarit commun
+SIZE = 0.95
+
+
 def _smoothstep(a, b, x):
     t = max(0.0, min(1.0, (x - a) / (b - a)))
     return t * t * (3 - 2 * t)
@@ -76,6 +80,7 @@ def _weigh(ob, weights_at):
 def build(armature, spec, hc, hr, rng):
     """`hc` : centre de la tête ; `hr` : échelle de la tête."""
     _painted.clear()
+    hr *= SIZE
 
     def H(x, y, z):
         return hc + Vector((x, y, z)) * hr
@@ -93,11 +98,11 @@ def _face(armature, spec, hc, hr, H):
     def ball(x, y, z, rx, ry, rz):
         head.ball(H(x, y, z), (rx * hr, ry * hr, rz * hr), skin_m, seg=32, rings=24)
 
-    ball(0, 0.002, 0.0, 0.097, 0.115, 0.102)
-    ball(0, -0.040, 0.020, 0.083, 0.066, 0.079)           # le bas du visage, plein et rond
-    ball(0, -0.070, 0.044, 0.040, 0.032, 0.046)           # le menton
+    ball(0, 0.004, -0.002, 0.083, 0.112, 0.099)
+    ball(0, -0.040, 0.020, 0.058, 0.056, 0.067)           # le bas du visage, qui s'affine (un ovale)
+    ball(0, -0.076, 0.052, 0.022, 0.021, 0.030)           # le menton, bien dessiné
     for s in (1, -1):
-        ball(0.030 * s, -0.030, 0.056, 0.036, 0.034, 0.039)   # les joues
+        ball(0.031 * s, -0.020, 0.057, 0.025, 0.023, 0.030)   # les pommettes, discrètes
     head.tube([H(0, 0.004, 0.092), H(0, -0.016, 0.101)], [0.0055 * hr, 0.0075 * hr], skin_m, seg=12)
     ball(0, -0.022, 0.103, 0.0115, 0.0095, 0.0105)        # le bout du nez
     for s in (1, -1):
@@ -114,7 +119,7 @@ def _face(armature, spec, hc, hr, H):
         q = (p - hc) / hr
         c = skin.copy()
         for s in (1, -1):
-            d = math.hypot((q.x - 0.052 * s) / 0.028, (q.y + 0.030) / 0.019)
+            d = math.hypot((q.x - 0.046 * s) / 0.025, (q.y + 0.026) / 0.017)
             if q.z > 0.03:
                 c = c.lerp(blush, 0.34 * (1.0 - _smoothstep(0.2, 1.15, d)))
             # un creux d'ombre autour des yeux, pour qu'ils aient du relief
@@ -157,7 +162,7 @@ def _features(armature, spec, hr, H, surface):
     EX, EY = 0.036, 0.007
     E = 1.12          # la taille des yeux
     for s in (1, -1):
-        parts.ball(H(0.096 * s, -0.008, -0.004), (0.014 * hr, 0.027 * hr, 0.019 * hr), skin, weights=w)
+        parts.ball(H(0.083 * s, -0.008, -0.006), (0.012 * hr, 0.025 * hr, 0.018 * hr), skin, weights=w)
         center = surface(EX * s, EY, -0.0042)
         front = center.z
 
@@ -202,10 +207,10 @@ def _hair(armature, spec, hc, hr, H, rng):
         lat = -math.pi / 2 + math.pi * i / rings
         for j in range(seg):
             lon = 2 * math.pi * j / seg
-            x = math.cos(lat) * math.cos(lon) * 0.108
+            x = math.cos(lat) * math.cos(lon) * 0.095
             y = math.sin(lat) * 0.128 + 0.008
             z = math.cos(lat) * math.sin(lon) * 0.114 - 0.010
-            forehead = 0.076 - 3.0 * (x - 0.018) ** 2 - 1.2 * max(0.0, abs(x) - 0.05)
+            forehead = 0.076 - 3.6 * (x - 0.016) ** 2 - 1.4 * max(0.0, abs(x) - 0.044)
             sides = -0.040
             blend = _smoothstep(-0.005, 0.045, z)
             limit = sides + (forehead - sides) * blend
@@ -220,8 +225,9 @@ def _hair(armature, spec, hc, hr, H, rng):
             faces.append([a, a + seg, b + seg, b])
     hair.add(verts, faces, mat, smooth=True)
 
-    def lock(points, widths, squash=(1.0, 0.7)):
-        path, radii = C.curve([H(*p) for p in points], [r * hr for r in widths], 5)
+    def lock(points, widths, squash=(1.0, 0.7), narrow=0.885):
+        # `narrow` resserre les mèches autour du visage
+        path, radii = C.curve([H(x * narrow, y, z) for x, y, z in points], [r * hr for r in widths], 5)
         hair.tube(path, radii, mat, seg=12, squash=squash, cap_rings=3)
 
     # la masse du dos, d'un côté à l'autre en passant par derrière
