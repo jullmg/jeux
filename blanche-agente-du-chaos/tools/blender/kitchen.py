@@ -11,6 +11,7 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import common as C  # noqa: E402
 import textures as T  # noqa: E402
+import bpy  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
 C.reset()
@@ -25,6 +26,17 @@ M = C.material
 
 def mat(name, maps, **kw):
     return M(name, **maps, **kw)
+
+
+def picture(name, corners, material_):
+    """Un rectangle qui montre une image entière : coins bas-gauche, bas-droit, haut-droit, haut-gauche (vus de face)."""
+    mesh = bpy.data.meshes.new(name)
+    mesh.from_pydata([C.G(c) for c in corners], [], [[0, 1, 2, 3]])
+    mesh.materials.append(material_)
+    uv = mesh.uv_layers.new(name="UVMap")
+    for i, at in enumerate(((0, 0), (1, 0), (1, 1), (0, 1))):
+        uv.data[i].uv = at
+    bpy.context.scene.collection.objects.link(bpy.data.objects.new(name, mesh))
 
 
 floor_m = mat("plancher", T.floor(rng))
@@ -50,10 +62,10 @@ black_glass = M("vitre_noire", "#0e0f13", 0.12, 0.2)
 black_mat = M("noir_mat", "#232227", 0.7)
 brass = M("poignee", "#d8bd8e", 0.35, 0.6)
 chrome = M("chrome", "#e2e4e8", 0.2, 0.8)
-sky = M("ciel", "#bfd9ee", 1.0, emit="#a9cdea", emit_power=0.9)
-yard = M("cour", "#a9654f", 1.0, emit="#7e4a3a", emit_power=0.5)
-leaf = M("feuille", "#4f8a3d", 0.8)
-leaf_d = M("feuille_fonce", "#356b32", 0.8)
+leaf = M("feuille", "#4f9440", 0.6)
+leaf_d = M("feuille_fonce", "#2f6a30", 0.65)
+leaf_l = M("feuille_claire", "#79b04a", 0.6)
+soil = M("terre", "#3a2a1c", 1.0)
 pot_clay = M("pot", "#b9704a", 0.85)
 pot_white = M("pot_blanc", "#ddd8ce", 0.5)
 glass = M("verre", "#cfe3ea", 0.08, alpha=0.28)
@@ -108,16 +120,41 @@ def cabinet_front(o, axis, plane, a0, a1, y0, y1, handle="h", mat=None):
         slab(u - 0.014, u + 0.014, yy - 0.014, yy + 0.014, 0.028, 0.055, brass, 0.012)
 
 
+def blade(o, at, direction, length, width, mat):
+    """Une feuille pointue, un peu pliée le long de sa nervure et retombante."""
+    a = Vector(at)
+    d = Vector(direction).normalized()
+    side = d.cross(Vector((0, 1, 0)))
+    side = side.normalized() if side.length > 0.01 else Vector((1, 0, 0))
+    up = side.cross(d).normalized()
+    if up.y < 0:
+        up = -up
+    verts, faces = [], []
+    n = 6
+    for i in range(n + 1):
+        t = i / n
+        mid = a + d * length * t + up * (math.sin(t * math.pi) * length * 0.16) - Vector((0, t * t * length * 0.22, 0))
+        w = width * math.sin(math.pi * min(0.999, t * 0.86 + 0.07)) * (1.0 - t ** 3)
+        verts += [tuple(mid - side * w + up * w * 0.35), tuple(mid), tuple(mid + side * w + up * w * 0.35)]
+    for i in range(n):
+        for j in (0, 1):
+            p = i * 3 + j
+            faces.append([p, p + 3, p + 4, p + 1])
+    o.add(verts, faces, mat, smooth=True)
+
+
 def plant(o, base, r, height, leaves, mat_pot=pot_clay, trailing=0):
-    o.cyl(base, r * 0.75, r * 1.2, mat_pot, top=r, seg=16)
+    o.cyl(base, r * 0.75, r * 1.2, mat_pot, top=r, seg=20)
+    o.torus(Vector(base) + Vector((0, r * 1.18, 0)), r, r * 0.09, mat_pot, sides=8)
     top = Vector(base) + Vector((0, r * 1.2, 0))
+    o.cyl(top - Vector((0, 0.012, 0)), r * 0.9, 0.008, soil, seg=20)
     for i in range(leaves):
         a = rng.uniform(0, math.tau)
         d = rng.uniform(0.2, 1.0)
-        tip = top + Vector((math.cos(a) * r * 1.8 * d, rng.uniform(0.2, 1.0) * height, math.sin(a) * r * 1.8 * d))
-        o.tube([top, (top + tip) / 2 + Vector((0, 0.02, 0))], 0.004, leaf_d, seg=5)
-        rot = Matrix.Rotation(a, 3, "Y") @ Matrix.Rotation(rng.uniform(-0.8, 0.8), 3, "Z")
-        o.ball(tip, (0.04, 0.009, 0.024), leaf if i % 3 else leaf_d, seg=8, rings=5, matrix=rot)
+        tip = top + Vector((math.cos(a) * r * 1.5 * d, rng.uniform(0.15, 1.0) * height, math.sin(a) * r * 1.5 * d))
+        o.tube([top, (top + tip) / 2 + Vector((0, 0.02, 0))], 0.0035, leaf_d, seg=5)
+        out = Vector((math.cos(a), rng.uniform(-0.1, 0.8), math.sin(a)))
+        blade(o, tip, out, rng.uniform(0.07, 0.11), rng.uniform(0.022, 0.034), (leaf, leaf_d, leaf_l)[i % 3])
     for k in range(trailing):
         a = k * math.tau / max(1, trailing)
         p = [top + Vector((math.cos(a) * r, 0, math.sin(a) * r))]
@@ -125,7 +162,8 @@ def plant(o, base, r, height, leaves, mat_pot=pot_clay, trailing=0):
             p.append(p[0] + Vector((math.cos(a) * 0.015 * j, -0.07 * j, math.sin(a) * 0.015 * j)))
         o.tube(p, 0.004, leaf_d, seg=5)
         for q in p[1:]:
-            o.ball(q, (0.032, 0.008, 0.022), leaf, seg=8, rings=5, matrix=Matrix.Rotation(rng.uniform(0, 6), 3, "Y"))
+            b = rng.uniform(0, math.tau)
+            blade(o, q, (math.cos(b), -0.2, math.sin(b)), 0.07, 0.024, leaf)
 
 
 # ---------------------------------------------------------------- pièce
@@ -372,12 +410,10 @@ cabinet_front(east, "x", ux, -1.74, -1.45, 1.42, 2.27, "right")
 cabinet_front(east, "x", ux, -1.45, -1.16, 1.42, 2.27, "left")
 east.box(ux, 1.42, 0.16, 2.0, 2.27, 0.76, maple_panel)
 cabinet_front(east, "x", ux, 0.16, 0.76, 1.42, 2.27, "left")
-# fenêtre
-east.box(2.09, wy0 - 0.02, wz0 - 0.02, 2.1, wy1 + 0.02, wz1 + 0.02, sky)
-east.box(2.085, wy0, wz0, 2.09, wy0 + 0.3, wz1, yard)
-for k in range(9):
-    east.ball((2.08, wy0 + rng.uniform(0.24, 0.42), rng.uniform(wz0 + 0.05, wz1 - 0.05)), (0.01, 0.1, 0.11), leaf_d,
-              seg=10, rings=6)
+# fenêtre : la vue dehors est peinte juste derrière l'ouverture
+picture("Vue", ((2.13, wy0 - 0.12, wz0 - 0.16), (2.13, wy0 - 0.12, wz1 + 0.16), (2.13, wy1 + 0.12, wz1 + 0.16),
+                (2.13, wy1 + 0.12, wz0 - 0.16)),
+        M("vue", "#000000", 1.0, glow=T.view(rng), emit_power=1.0))
 for a, b, c, d in ((wy0, wy0 + 0.05, wz0, wz1), (wy1 - 0.05, wy1, wz0, wz1), (wy0, wy1, wz0, wz0 + 0.05),
                    (wy0, wy1, wz1 - 0.05, wz1), (1.57, 1.61, wz0, wz1), (wy0, wy1, mid - 0.0, mid + 0.025)):
     east.box(1.975, a, c, 2.03, b, d, white, bevel=0.005, seg=1)
@@ -405,6 +441,7 @@ for k in range(6):
 east.cyl((1.9, H, 0.66), 0.045, 0.09, black_mat)
 # porte blanche, imposte et climatiseur
 dz0, dz1 = PLAN["door"]["z0"], PLAN["door"]["z1"]
+dz0_door, dz1_door = dz0, dz1
 east.box(1.985, 0, dz0 - 0.08, 2.0, 2.54, dz0, white, bevel=0.005, seg=1)
 east.box(1.985, 0, dz1, 2.0, 2.54, dz1 + 0.08, white, bevel=0.005, seg=1)
 east.box(1.975, 2.08, dz0 - 0.08, 2.0, 2.16, dz1 + 0.08, white, bevel=0.005, seg=1)
@@ -552,6 +589,154 @@ for k, bz in enumerate((mid - 0.065, mid + 0.065)):
     corner.torus((bx, 0.214, bz), 0.062, 0.005, chrome, sides=6)
     corner.cyl((bx, 0.2135, bz), 0.056, 0.001, M("eau", "#9fc6d8", 0.05, 0.3) if k == 0 else steel_dark, seg=24)
 corner.build()
+
+# ---------------------------------------------------------------- la maison coupée : murs prolongés et dessus sombres
+
+cut = C.Obj("Coupe")
+dark = M("coupe", "#000000", 1.0, emit="#1b110f", emit_power=1.0)
+trim = M("moulure", "#f6f3ec", 0.5)
+# les murs de côté se prolongent vers la caméra, et un dessus sombre cache tout ce qui est hors de la pièce
+cut.box(-2.15, 0, 2.15, -2.0, 2.8, 3.4, wall)
+cut.box(2.0, 0, 2.15, 2.15, 2.8, 3.4, wall)
+for x0_, x1_, z0_, z1_ in ((-7.0, -2.045, -6.0, 5.0), (2.045, 7.0, -6.0, 5.0), (-2.045, 2.045, -6.0, -2.145)):
+    cut.box(x0_, 2.8, z0_, x1_, 2.82, z1_, dark)
+for x0_, x1_, z0_, z1_ in ((-2.045, -2.0, -2.1, 3.4), (2.0, 2.045, -2.1, 3.4), (-2.045, 2.045, -2.145, -2.1)):
+    cut.box(x0_, 2.76, z0_, x1_, 2.815, z1_, trim, bevel=0.006, seg=1)
+# les plinthes qui manquaient
+cut.box(-2.0, 0, 2.15, -1.985, 0.1, 3.4, white)
+cut.box(1.985, 0, 2.15, 2.0, 0.1, 3.4, white)
+cut.build()
+
+# ---------------------------------------------------------------- le décor du quotidien (loin des endroits à nourriture)
+
+deco = C.Obj("Decor")
+curtain = mat("rideau", T.fabric("rideau", "#d9695a", 0.18, 8))
+glow_warm = M("lueur", "#fff2d6", 1.0, emit="#ffd9a0", emit_power=2.2)
+# la tringle et sa cantonnière plissée
+deco.tube([(1.93, wy1 + 0.07, wz0 - 0.1), (1.93, wy1 + 0.07, wz1 + 0.1)], 0.009, brass, seg=8)
+for k_ in range(22):
+    zz = wz0 - 0.06 + k_ * (wz1 - wz0 + 0.12) / 21
+    low = wy1 - 0.12 - 0.045 * abs(math.sin(k_ * math.pi / 5.25))
+    deco.tube([(1.935 + 0.012 * (k_ % 2), wy1 + 0.075, zz), (1.93 + 0.018 * (k_ % 2), low, zz)], [0.026, 0.031], curtain,
+              seg=8, squash=(0.55, 1.0), cap_rings=2)
+# les réglettes allumées sous les armoires
+for a_, b_ in (((-0.62, 1.405, -1.93), (-0.15, 1.418, -1.87)), ((0.70, 1.275, -1.9), (1.34, 1.288, -1.84)),
+               ((1.76, 1.405, -1.7), (1.82, 1.418, -1.2)), ((1.76, 1.405, 0.2), (1.82, 1.418, 0.72))):
+    deco.box(*a_, *b_, glow_warm)
+# les ustensiles suspendus à gauche de la cuisinière
+deco.tube([(-0.58, 1.37, -2.07), (-0.18, 1.37, -2.07)], 0.008, chrome, seg=8)
+for k_, ux_ in enumerate((-0.53, -0.43, -0.33, -0.23)):
+    deco.tube([(ux_, 1.37, -2.062), (ux_, 1.22, -2.062)], 0.006, chrome if k_ % 2 == 0 else maple, seg=7)
+    if k_ == 0:
+        deco.ball((ux_, 1.19, -2.055), (0.032, 0.032, 0.014), chrome)
+    elif k_ == 1:
+        deco.box(ux_ - 0.028, 1.15, -2.066, ux_ + 0.028, 1.23, -2.056, maple, bevel=0.012, seg=2)
+    elif k_ == 2:
+        for a_ in range(4):
+            deco.torus((ux_, 1.185, -2.058), 0.026, 0.0025, chrome, axis=(math.cos(a_ * 0.8), 0, math.sin(a_ * 0.8)),
+                       sides=5, squash=1.6)
+    else:
+        deco.ball((ux_, 1.18, -2.055), (0.022, 0.045, 0.01), maple)
+# l'étagère à épices du coin de brique
+deco.box(1.75, 1.52, -1.88, 1.99, 1.545, -1.79, maple, bevel=0.005, seg=1)
+for k_ in range(4):
+    cx_ = 1.78 + k_ * 0.058
+    deco.cyl((cx_, 1.545, -1.835), 0.022, 0.07, (red, orange, green_v, dark_glass_bottle)[k_], seg=14)
+    deco.cyl((cx_, 1.615, -1.835), 0.023, 0.016, chrome, seg=14)
+# le bol de fruits sur le frigo
+deco.cyl((-1.0, 1.805, -1.75), 0.09, 0.07, M("bol", "#2f6f8f", 0.3), top=0.16, seg=24)
+for fx_, fz_, col_ in ((-1.07, -1.74, red), (-0.98, -1.70, orange), (-0.94, -1.80, green_v), (-1.03, -1.81, red)):
+    deco.ball((fx_, 1.9, fz_), 0.052, col_)
+    deco.tube([(fx_, 1.945, fz_), (fx_ + 0.008, 1.975, fz_)], 0.004, leaf_d, seg=5)
+banana = M("banane", "#f2cf3a", 0.55)
+for k_ in range(3):
+    deco.tube([(-1.12 + k_ * 0.02, 1.9, -1.69 + k_ * 0.015), (-1.04 + k_ * 0.02, 1.945, -1.66 + k_ * 0.02),
+               (-0.93 + k_ * 0.02, 1.935, -1.68 + k_ * 0.02)], [0.012, 0.022, 0.009], banana, seg=10)
+# le tapis devant l'évier (sous la zone cachée, qui se dessine par-dessus)
+rug_m = mat("tapis", T.rug("tapis", "#d8c8a8", "#9a4a3c", "#3f6a73", 0.54))
+deco.box(0.82, 0.0, -0.86, 1.32, 0.004, 0.52, rug_m)
+for k_ in range(26):
+    xx_ = 0.83 + k_ * 0.0192
+    for zz_, s_ in ((-0.86, -1), (0.52, 1)):
+        deco.box(xx_, 0.0, min(zz_, zz_ + s_ * 0.035), xx_ + 0.006, 0.003, max(zz_, zz_ + s_ * 0.035), white_soft)
+# l'horloge et les dessins encadrés du mur ouest
+deco.cyl((-1.995, 1.74, 1.55), 0.17, 0.02, M("cadran", "#fbf8f0", 0.6), axis=(1, 0, 0), seg=40)
+deco.torus((-1.975, 1.74, 1.55), 0.17, 0.018, M("horloge", "#2f6f8f", 0.35), axis=(1, 0, 0), seg=40, sides=10)
+for k_ in range(12):
+    a_ = k_ * math.tau / 12
+    deco.ball((-1.972, 1.74 + 0.135 * math.cos(a_), 1.55 + 0.135 * math.sin(a_)), 0.008, black_mat, seg=8, rings=6)
+deco.tube([(-1.968, 1.74, 1.55), (-1.968, 1.82, 1.60)], 0.008, black, seg=8)
+deco.tube([(-1.966, 1.74, 1.55), (-1.966, 1.68, 1.43)], 0.006, black, seg=8)
+deco.ball((-1.964, 1.74, 1.55), 0.014, red, seg=10, rings=8)
+frame_m = M("cadre", "#6b4630", 0.45)
+for cy_, cz_, h_, w_, kind_ in ((1.62, -1.12, 0.34, 0.28, "maison"), (1.20, -0.82, 0.28, 0.34, "soleil"),
+                                (1.66, -0.70, 0.22, 0.22, "coeur")):
+    deco.box(-2.0, cy_ - h_ / 2, cz_ - w_ / 2, -1.975, cy_ + h_ / 2, cz_ + w_ / 2, frame_m, bevel=0.006, seg=1)
+    deco.box(-1.976, cy_ - h_ / 2 + 0.028, cz_ - w_ / 2 + 0.028, -1.971, cy_ + h_ / 2 - 0.028, cz_ + w_ / 2 - 0.028, paper[0])
+    x_ = -1.968
+    if kind_ == "maison":
+        deco.box(x_ - 0.002, cy_ - 0.1, cz_ - 0.07, x_, cy_, cz_ + 0.07, red)
+        deco.tube([(x_, cy_, cz_ - 0.09), (x_, cy_ + 0.08, cz_), (x_, cy_, cz_ + 0.09)], 0.011, black_mat, seg=6)
+        deco.box(x_ - 0.001, cy_ - 0.1, cz_ - 0.02, x_ + 0.001, cy_ - 0.05, cz_ + 0.02, orange)
+    elif kind_ == "soleil":
+        deco.cyl((x_ - 0.002, cy_ + 0.03, cz_ + 0.06), 0.035, 0.002, yellow, axis=(1, 0, 0))
+        deco.box(x_ - 0.002, cy_ - 0.09, cz_ - 0.13, x_, cy_ - 0.05, cz_ + 0.13, leaf)
+        deco.ball((x_, cy_ - 0.02, cz_ - 0.05), (0.004, 0.035, 0.045), black)
+    else:
+        for dz_ in (-0.025, 0.025):
+            deco.cyl((x_ - 0.002, cy_ + 0.015, cz_ + dz_), 0.032, 0.002, red, axis=(1, 0, 0))
+        deco.tube([(x_, cy_ + 0.01, cz_ - 0.04), (x_, cy_ - 0.05, cz_), (x_, cy_ + 0.01, cz_ + 0.04)], 0.012, red, seg=6)
+deco.build()
+
+# ---------------------------------------------------------------- Noël : montré seulement à la dernière mission
+
+xmas = C.Obj("Noel")
+pine = M("sapin", "#1f5c38", 0.8)
+pine_l = M("sapin_clair", "#2f7a46", 0.8)
+bulbs = [M(f"ampoule{i}", c, 0.3, emit=c, emit_power=3.0) for i, c in enumerate(("#ff4a3d", "#ffc23d", "#4fd56a", "#58a8ff"))]
+ribbon_m = M("ruban", "#c8202c", 0.45)
+
+
+def garland(points, sag, step=0.028):
+    total = 0
+    for (a_, b_) in zip(points, points[1:]):
+        a_, b_ = Vector(a_), Vector(b_)
+        n_ = max(1, int((b_ - a_).length / step))
+        for i_ in range(n_):
+            t_ = i_ / n_
+            p_ = a_.lerp(b_, t_) - Vector((0, sag * math.sin(t_ * math.pi), 0))
+            for _ in range(3):
+                d_ = Vector((rng.uniform(-1, 1), rng.uniform(-1, 0.7), rng.uniform(-1, 1)))
+                blade(xmas, p_, d_, rng.uniform(0.045, 0.075), 0.009, pine if rng.random() < 0.6 else pine_l)
+            if total % 5 == 2:
+                xmas.ball(p_ + Vector((rng.uniform(-0.02, 0.02), -0.035, rng.uniform(-0.02, 0.02))), 0.017,
+                          bulbs[(total // 5) % 4], seg=10, rings=8)
+            total += 1
+
+
+garland([(-1.98, 2.30, -1.70), (-1.25, 2.30, -1.70), (-0.45, 2.30, -1.70), (0.35, 2.30, -1.70), (1.0, 2.30, -1.70),
+         (1.6, 2.30, -1.70)], 0.09)
+garland([(1.6, 2.30, -1.70), (1.6, 2.30, -0.85), (1.6, 2.30, -0.05), (1.6, 2.30, 0.78)], 0.09)
+# la couronne sur la porte et son nœud
+wz_ = (dz0_door + dz1_door) / 2
+for k_ in range(150):
+    a_ = k_ * math.tau / 150
+    p_ = Vector((1.915, 1.52 + 0.2 * math.sin(a_), wz_ + 0.2 * math.cos(a_)))
+    d_ = Vector((rng.uniform(-0.5, 0.1), math.cos(a_) + rng.uniform(-0.5, 0.5), -math.sin(a_) + rng.uniform(-0.5, 0.5)))
+    blade(xmas, p_, d_, rng.uniform(0.05, 0.085), 0.011, pine if k_ % 3 else pine_l)
+    if k_ % 11 == 0:
+        xmas.ball(p_ + Vector((-0.04, 0, 0)), 0.018, bulbs[(k_ // 11) % 4], seg=10, rings=8)
+for s_ in (-1, 1):
+    xmas.ball((1.88, 1.33, wz_ + s_ * 0.06), (0.018, 0.035, 0.06), ribbon_m, matrix=Matrix.Rotation(0.35 * s_, 3, "X"))
+    xmas.tube([(1.885, 1.32, wz_), (1.89, 1.18, wz_ + s_ * 0.07)], [0.018, 0.026], ribbon_m, seg=8, squash=(0.3, 1.0))
+xmas.ball((1.875, 1.33, wz_), 0.027, ribbon_m)
+# les bas de Noël accrochés au buffet
+for k_, zz_ in enumerate((-0.28, 0.62, 1.02)):
+    col_ = ribbon_m if k_ != 1 else pine_l
+    xmas.tube([(-1.525, 0.80, zz_), (-1.525, 0.60, zz_), (-1.52, 0.56, zz_ + 0.07)], [0.05, 0.048, 0.04], col_, seg=14,
+              squash=(0.45, 1.0))
+    xmas.box(-1.55, 0.78, zz_ - 0.065, -1.50, 0.85, zz_ + 0.065, M("fourrure", "#f4f1ea", 1.0), bevel=0.022, seg=2)
+xmas.build()
 
 C.export("cuisine")
 cam = PLAN["camera"]

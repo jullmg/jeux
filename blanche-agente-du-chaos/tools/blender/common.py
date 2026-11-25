@@ -43,7 +43,7 @@ _tex_scale = {}
 
 
 def material(name, color="#ffffff", rough=0.8, metal=0.0, texture=None, tex_size=1.0, emit=None, emit_power=1.0,
-             alpha=1.0, vertex_colors=False, normal=None, orm=None):
+             alpha=1.0, vertex_colors=False, normal=None, orm=None, glow=None):
     if name in _materials:
         return _materials[name]
     m = bpy.data.materials.new(name)
@@ -75,6 +75,13 @@ def material(name, color="#ffffff", rough=0.8, metal=0.0, texture=None, tex_size
         node = m.node_tree.nodes.new("ShaderNodeVertexColor")
         node.layer_name = "Col"
         m.node_tree.links.new(node.outputs["Color"], bsdf.inputs["Base Color"])
+    if glow is not None:
+        # une image qui brille d'elle-même (la vue par la fenêtre)
+        node = m.node_tree.nodes.new("ShaderNodeTexImage")
+        node.image = glow
+        m.node_tree.links.new(node.outputs["Color"], bsdf.inputs["Emission Color"])
+        bsdf.inputs["Emission Strength"].default_value = emit_power
+        _tex_scale[name] = tex_size
     if emit is not None:
         bsdf.inputs["Emission Color"].default_value = (*lin(srgb(emit)), 1.0)
         bsdf.inputs["Emission Strength"].default_value = emit_power

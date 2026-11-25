@@ -271,3 +271,46 @@ def rug(name, base, stripe, border, meters=1.0):
         color[band] = _hex(stripe if k % 2 == 0 else border)
     color *= (0.90 + 0.07 * weave + 0.2 * (fuzz - 0.5))[..., None]
     return _pack(name, color, weave * 1.2 + fuzz, np.full((size, size), 0.95), meters, 0.8)
+
+
+def view(rng):
+    """La vue par la fenêtre : le ciel et ses nuages, les arbres de la ruelle, la maison de brique d'en face."""
+    w, h = 512, 448
+    y = np.linspace(0, 1, h)[:, None] * np.ones((1, w))          # 0 en bas, 1 en haut (comme Blender)
+    x = np.linspace(0, 1, w)[None, :] * np.ones((h, 1))
+    img = _ramp(y, [(0.3, "#e9f3fb"), (0.65, "#aed2f2"), (1.0, "#6fa9e4")])
+    clouds = np.clip((_fbm(h, w, 90, 170, 5) - 0.56) * 5, 0, 1) * np.clip((y - 0.5) * 4, 0, 1)
+    img = img + (_hex("#ffffff") - img) * clouds[..., None]
+    # la maison d'en face et son toit
+    house = (x > 0.06) & (x < 0.58) & (y < 0.60)
+    brick_rows = ((y * 56).astype(int) + 0) % 2
+    mortar = (((y * 56) % 1 < 0.16) | (((x * 34 + brick_rows * 0.5) % 1) < 0.07))
+    wall_ = _hex("#a85b47") * (0.88 + 0.24 * _fbm(h, w, 14, 24))[..., None]
+    wall_[mortar] = C.srgb("#cbb7a5")
+    img[house] = wall_[house]
+    roof = (x > 0.03) & (x < 0.61) & (y >= 0.60) & (y < 0.66)
+    img[roof] = C.srgb("#4a4550")
+    for wx in (0.12, 0.28, 0.44):
+        for wy in (0.20, 0.40):
+            frame = (x > wx - 0.008) & (x < wx + 0.098) & (y > wy - 0.01) & (y < wy + 0.135)
+            pane = (x > wx) & (x < wx + 0.09) & (y > wy) & (y < wy + 0.125)
+            img[frame] = C.srgb("#f2eee6")
+            glass = _ramp((y - wy) / 0.125, [(0.0, "#3d5774"), (1.0, "#9cc0de")])
+            img[pane] = glass[pane]
+            img[pane & (np.abs(x - wx - 0.045) < 0.004)] = C.srgb("#f2eee6")
+            img[pane & (np.abs(y - wy - 0.065) < 0.004)] = C.srgb("#f2eee6")
+    # les arbres : des boules de feuillage à plusieurs tons
+    gy, gx = np.mgrid[0:h, 0:w]
+    ragged = (_fbm(h, w, 10, 10, 3) - 0.5) * 22
+    for cx, cy, r, tone in ((0.70, 0.36, 76, "#6d9a3e"), (0.86, 0.45, 92, "#86ad45"), (0.96, 0.27, 70, "#577f34"),
+                            (0.76, 0.18, 66, "#4c7230"), (0.02, 0.16, 55, "#5d8a39"), (0.60, 0.14, 42, "#79a342")):
+        d = np.hypot(gx - cx * w, gy - cy * h) + ragged
+        leaves = _hex(tone) * (0.72 + 0.62 * _fbm(h, w, 8, 8, 3))[..., None]
+        leaves *= (0.86 + 0.28 * np.clip((gy - cy * h) / r + 0.5, 0, 1))[..., None]
+        img[d < r] = leaves[d < r]
+    # la clôture de bois et le gazon
+    fence = (y < 0.15) & (((x * 22) % 1) < 0.86)
+    img[fence] = (_hex("#b98c5c") * (0.85 + 0.3 * _fbm(h, w, 40, 6))[..., None])[fence]
+    grass = y < 0.035
+    img[grass] = (_hex("#5e8c38") * (0.8 + 0.4 * _fbm(h, w, 4, 4))[..., None])[grass]
+    return C.image("vue", np.clip(img, 0, 1))

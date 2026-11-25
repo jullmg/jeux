@@ -28,6 +28,9 @@ var photo: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
 
 var _kitchen: Node3D
 var _fridge_door: Node3D
+var _christmas: Node3D
+## La matière de la vue par la fenêtre, teintée selon le moment.
+var _outside: StandardMaterial3D
 var _stool: Node3D
 var _food_meshes: Dictionary = {}
 var _items: Dictionary = {}
@@ -73,6 +76,11 @@ func _ready() -> void:
 	add_child(_kitchen)
 	_fridge_door = _kitchen.find_child("PorteFrigo", true, false)
 	_stool = _kitchen.find_child("Tabouret", true, false)
+	_christmas = _kitchen.find_child("Noel", true, false)
+	var view_mesh: MeshInstance3D = _kitchen.find_child("Vue", true, false)
+	_outside = view_mesh.mesh.surface_get_material(0).duplicate()
+	view_mesh.set_surface_override_material(0, _outside)
+	view_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var foods: Node = (load(FOODS) as PackedScene).instantiate()
 	for m: MeshInstance3D in foods.find_children("*", "MeshInstance3D", true, false):
 		_food_meshes[String(m.name)] = m.mesh
@@ -107,6 +115,14 @@ func _ready() -> void:
 	for who: String in ["papa", "charlotte"]:
 		_kept.append(load("res://art/models/%s.glb" % who))
 	show_title()
+
+
+## Le moment de la journée : la lumière, la vue par la fenêtre et les décorations.
+func _set_moment(moment: String) -> void:
+	ambiance.set_moment(moment)
+	_outside.emission = ambiance.sky_tint()
+	_outside.emission_operator = BaseMaterial3D.EMISSION_OP_MULTIPLY
+	_christmas.visible = moment == "noel"
 
 
 func _build_lights() -> void:
@@ -380,7 +396,7 @@ func _sync_food(delta: float) -> void:
 # ------------------------------------------------------------------ vie
 
 func show_title() -> void:
-	ambiance.set_moment("matin")
+	_set_moment("matin")
 	sim = null
 	view = "titre"
 	_clear_level()
@@ -399,7 +415,7 @@ func show_title() -> void:
 func start_level(sim_: Sim) -> void:
 	_clear_level()
 	sim = sim_
-	ambiance.set_moment(sim.level.get("moment", "midi"))
+	_set_moment(sim.level.get("moment", "midi"))
 	view = "jeu"
 	_last_time = -1.0
 	_last_pos.clear()

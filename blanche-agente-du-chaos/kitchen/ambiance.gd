@@ -17,12 +17,12 @@ const MOMENTS := {
 	},
 	"soir": {
 		"ambient": [Color(0.66, 0.56, 0.60), 0.50], "key": [Color(1.0, 0.85, 0.68), 0.60],
-		"window": [Color(1.0, 0.55, 0.30), 4.2], "fill": [Color(0.70, 0.66, 0.95), 0.14], "lamps": 0.62,
+		"window": [Color(1.0, 0.55, 0.30), 4.2], "fill": [Color(0.76, 0.70, 0.92), 0.11], "lamps": 0.62,
 		"sky": Color(1.0, 0.58, 0.44), "exposure": 1.08, "saturation": 1.08,
 	},
 	"noel": {
-		"ambient": [Color(0.54, 0.50, 0.66), 0.48], "key": [Color(1.0, 0.83, 0.64), 0.52],
-		"window": [Color(0.45, 0.60, 1.0), 2.2], "fill": [Color(0.50, 0.58, 1.0), 0.16], "lamps": 0.80,
+		"ambient": [Color(0.64, 0.52, 0.56), 0.46], "key": [Color(1.0, 0.82, 0.62), 0.56],
+		"window": [Color(0.45, 0.60, 1.0), 2.2], "fill": [Color(0.55, 0.62, 1.0), 0.09], "lamps": 0.85,
 		"sky": Color(0.16, 0.24, 0.52), "exposure": 1.10, "saturation": 1.12,
 	},
 }
