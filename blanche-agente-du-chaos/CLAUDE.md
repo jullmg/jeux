@@ -1,8 +1,9 @@
 # Blanche Pronovost agente du Chaos – contexte du projet
 
-Jeu 3D Godot 4.7 (GL Compatibility, 1920×1080) : la chienne Blanche vole de la nourriture pendant que Maman cuisine.
+Jeu 3D Godot 4.7 (Forward+ sur Mac, 1920×1080) : la chienne Blanche vole de la nourriture pendant que Maman cuisine.
 Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et décisions : `docs/etat.md` ; revues :
-`docs/revues.md`. Version 1.0.0-rc2 : Mac d'abord, iPad et Android ensuite.
+`docs/revues.md` ; refonte graphique : `PROMPT-GRAPHIQUES.md`. Version 1.0.0-rc3 : Mac d'abord, iPad et Android
+ensuite.
 
 ## Vérifier
 
@@ -26,8 +27,10 @@ Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et 
 - `data/kitchen.json` : **plan unique** (meubles, endroits à nourriture, postes de Maman, caméra), lu par Godot et par
   Blender. Mètres, x vers l'est, z vers la caméra.
 - `levels/niveau_N.json` : les huit missions. Étoiles recalculées par `tools/calibrate.py --write-stars`.
-- `kitchen/stage.gd` : la scène 3D qui montre une `Sim`. `characters/` : `rig.gd` (poses par code, rotations dans les
-  axes du modèle), `dog_view.gd`, `person_view.gd`. `ui/` : `hud.gd`, `menus.gd`, `ui_style.gd`, `icons.gd`.
+- `kitchen/stage.gd` : la scène 3D qui montre une `Sim` ; `kitchen/ambiance.gd` : lumières, rendu et moments du jour
+  (`"moment"` de chaque niveau) ; `kitchen/effects.gd` : les particules. `characters/` : `rig.gd` (poses par code, rotations dans les
+  axes du modèle), `dog_view.gd`, `person_view.gd`. `ui/` : `hud.gd`, `menus.gd`, `ui_style.gd`, `icons.gd`,
+  `logo.gd`, `confetti.gd`.
 - `scenes/main.gd` : états, commandes, sons, sauvegarde. `scenes/autotest.gd`, `scenes/scenario.gd` : essais.
 - `audio/sound.gd` (autoload `Sound`).
 
@@ -38,6 +41,10 @@ Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et 
 - Les pattes en l'air, Blanche n'est jamais cachée (ni de Maman, ni de Charlotte).
 - Aucun poste de Maman ne doit coincer Blanche (`test_maman_ne_coince_jamais`) : le revérifier si le plan change.
 - Les stratégies dégénérées (marteler, camper, miettes seulement, ne jamais redescendre) ne gagnent pas.
+- La méfiance (`Sim.suspicion`, constantes `WARY_*`) doit **se voir monter** dans toutes les missions (testé).
+- La chicane (`activity == "chicane"`) : Maman ne surveille pas ; ce qui suit repasse toujours par un indice. Quelqu'un
+  d'immobile n'est pas un obstacle (`Sim.people_circles`), sinon Blanche peut rester coincée.
+- Après tout changement de règle : `tools/calibrate.py --games 400 --write-stars`, puis `tools/test.sh`.
 
 ## Art et son
 
@@ -46,6 +53,18 @@ Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et 
 - Blanche est un **chiot de cinq mois**, petit et mignon (demande de Julien). Sa taille est `TAILLE` dans `dog.py` et
   `DogView.SIZE` (même valeur, testée) ; dressée, elle est soulevée et étirée pour accrocher ses pattes au meuble
   (`DogView._plant_feet`, `STRETCH`), et `stage.gd` la place en face du morceau.
+- Têtes des personnages : `tools/blender/heads.py` (`LOOKS` par personne) ; corps fondus en surfaces lisses dans
+  `people.py` (`_soft`). Matières : `tools/blender/textures.py` (couleur, relief, brillance).
+- Les couleurs peintes aux sommets des personnages sont enregistrées en **sRGB** (`C.for_game`) ;
+  `PersonView._paint_by_vertex` le dit au moteur Forward+ (le moteur mobile les prend telles quelles).
+- Maman ne doit pas avoir un visage large (demande de Julien) ; son visage reste visible quand elle regarde (signes à
+  côté de sa tête, `Hud._beside_mom`, tête haute dans la pose « look »).
+- Les images des plats des menus (`art/ui/plat_N.png`) sont rendues par `food.py` (`PLATS`).
+- Décor de la cuisine : rien près des endroits à nourriture ; l'objet `Noel` n'est montré qu'au moment « noel » ; le
+  tapis reste sous la zone cachée (hauteur < 0,006).
+- Sur le moteur mobile (iPad, Android), le jeu démarre mais la lumière est trop forte : à régler avant d'y livrer.
+- `tools/shots.sh` ignore un avertissement du moteur à la fermeture (images de la sonde de reflets).
+- Performance de référence (M1 Pro, 1920×1080) : environ 90 images/s, mémoire vidéo environ 630 Mo.
 - Musique **joyeuse** (demande de Julien) : `jeu` et `tension` ont le même tempo, la même durée et les mêmes accords.
 - `common.py` : tout est écrit en coordonnées Godot. Les personnages sont une peau liée à un squelette ; les noms d'os
   sont utilisés par le code (`test_modeles_complets`).

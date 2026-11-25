@@ -91,3 +91,20 @@ elle change.
 | Application macOS exportée | Universelle, signée « ad hoc », sans photo, autotest réussi deux fois, sauvegarde conservée au redémarrage, captures vérifiées |
 
 Non vérifié : écoute du son, manette et écran tactile réels, ouverture sur un autre Mac, plaisir de jeu.
+
+## 7. Refonte graphique (2026-11-25)
+
+Sept chantiers de `PROMPT-GRAPHIQUES.md`, chacun vérifié par captures, essais et mesures.
+
+| Mesure, 1920×1080, M1 Pro | Avant (rc2) | Après (rc3) |
+|---|---|---|
+| Images par seconde, en moyenne | 62 à 74 | 87 à 92 |
+| 99 % des images sous | 17 à 23 ms | 12 à 15 ms |
+| Pire image (deuxième lancement) | 21 à 35 ms | 25 à 52 ms |
+| Chargement d'une mission | sous 0,16 s | sous 0,11 s |
+| Mémoire vidéo | 146 Mo | environ 630 Mo |
+
+Au tout premier lancement, quelques à-coups de 50 à 100 ms viennent de la préparation des shaders.
+
+Ce qui reste faible : les mains et la démarche des personnages restent simples ; les cheveux sont des masses lisses ;
+les cartes de missions verrouillées ne montrent qu'une silhouette ; le moteur mobile n'est pas réglé.

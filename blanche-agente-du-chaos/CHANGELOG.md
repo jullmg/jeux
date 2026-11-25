@@ -1,5 +1,27 @@
 # Journal des versions
 
+## 1.0.0-rc3 (2026-11-25) : deuxième série de retours et refonte graphique
+
+Retours :
+
+- Blanche a des yeux de chiot, bruns et doux, sans lueur.
+- Le radiateur en avant-plan est retiré.
+- Les signes au-dessus de Maman ne cachent plus son visage.
+- Maman, Papa et Charlotte ont de nouveaux visages ; celui de Maman est affiné.
+- La jauge « Méfiance de Maman » monte à vue d'œil, dit son état et pourquoi elle monte.
+- Nouveau : Papa qui passe se met dans le chemin, et la chicane qui s'ensuit est une occasion pour Blanche.
+
+Graphiques (`PROMPT-GRAPHIQUES.md`) :
+
+- Rendu Forward+ sur Mac : ombres de contact, ombres douces, reflets, halo ; un moment du jour par mission.
+- Matières avec relief et brillance : bois, quartz, céramique, brique, inox, plâtre, tissus.
+- Une cuisine habitée, une vue par la fenêtre, des murs coupés net, et Noël à la dernière mission.
+- Personnages lissés, vêtements plissés, pelage de Blanche, contre-jour, tuque de Noël, petits effets.
+- Nourriture texturée et garnie.
+- Interface refaite : lettrage du titre, boutons à relief, cartes illustrées par leur plat, résultats avec confettis,
+  zone cachée à traces de pattes.
+- Étoiles recalculées.
+
 ## 1.0.0-rc2 (2026-11-25) : retours du premier essai
 
 - Cuisine : le sac accroché à côté de la porte est retiré.

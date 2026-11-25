@@ -32,6 +32,9 @@ Confidentialité et sécurité → Ouvrir quand même**.
 - **Derrière l'îlot**, au sol, on n'est pas vue. Les pattes en l'air, on dépasse toujours.
 - Trois prises de suite doublent les points, six les triplent.
 - Pas de vies : la punition, c'est le temps perdu au coin.
+- La **méfiance de Maman** monte quand la nourriture disparaît ou qu'on fait du bruit : elle laisse alors moins de
+  temps. Assise dans son coin, Blanche la calme.
+- Quand **Papa** est dans le chemin, ils se chicanent : c'est le temps d'en profiter.
 
 Options : volumes, plein écran, mouvements réduits, **indices plus longs** (un quart de seconde de plus).
 
@@ -52,4 +55,4 @@ Il faut Godot 4.7.2 (avec ses modèles d'exportation macOS) et Blender 5.3. Les 
 ## Remplacer la musique
 
 Déposer `menu`, `jeu` ou `tension` (`.ogg`, `.mp3` ou `.wav`) dans `audio/music/`. Les pistes `jeu` et `tension` jouent
-ensemble : la seconde monte avec le soupçon, elles doivent donc avoir le même tempo et la même durée.
+ensemble : la seconde monte avec la méfiance de Maman, elles doivent donc avoir le même tempo et la même durée.
