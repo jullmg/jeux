@@ -10,6 +10,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import common as C  # noqa: E402
+import textures as T  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
 C.reset()
@@ -21,34 +22,43 @@ def m(name, color, rough=0.65, **kw):
     return M(name, color, rough, **kw)
 
 
-plate = m("assiette", "#f2efe8", 0.35)
-platter = m("plateau", "#c9ccd2", 0.3, metal=0.5)
-wood = m("planche", "#b88350", 0.6)
-dough = m("pate", "#ead3a6", 0.8)
-golden = m("dore", "#d9963f", 0.55)
-golden_d = m("dore_fonce", "#a9621f", 0.55)
-crust = m("croute", "#c07b34", 0.7)
-crumb_c = m("mie", "#f0d9a4", 0.85)
-pink = m("jambon", "#e58f8d", 0.55)
-pink_l = m("jambon_pale", "#f2b9b2", 0.6)
-cheese = m("fromage", "#f6c33b", 0.45)
-cheese_w = m("fromage_blanc", "#f5ecd2", 0.45)
-meat = m("viande", "#7c3f24", 0.6)
-meat_l = m("viande_rose", "#b9685a", 0.55)
-sauce = m("sauce", "#c63523", 0.35)
-carrot = m("carotte", "#ef7f1f", 0.55)
-lettuce = m("laitue", "#7fbf4a", 0.7)
-herb = m("herbe", "#4d8b3a", 0.7)
-tomato = m("tomate", "#d8392c", 0.4)
-pepperoni = m("pepperoni", "#b3301f", 0.45)
-fat = m("gras", "#f0c3ae", 0.5)
-butter = m("beurre", "#ffe37a", 0.35)
-pasta = m("nouille", "#f1d27a", 0.5)
-bone = m("os", "#f3ead6", 0.5)
-syrup = m("sirop", "#9a4d12", 0.15)
-dot = m("point_biscuit", "#8a5a2a", 0.7)
-blue = m("etiquette", "#3a6fb5", 0.5)
-skin_c = m("peau_doree", "#c9781f", 0.35)
+def tasty(name, base, patches=(), speckles=(), rough=0.5, **kw):
+    return M(name, **T.food(name, base, patches, speckles, rough, **kw))
+
+
+plate = m("assiette", "#f6f3ec", 0.18)
+rim = m("liseret", "#3a6fb5", 0.2)
+platter = m("plateau", "#d3d6dc", 0.22, metal=0.6)
+wood = M("planche", **T.wood("planche", "#cf9d62", "#8f6234", False, 0.3, 0.45, 0.6))
+dough = tasty("pate", "#efd9ac", [("#dcbc83", 0.55, 0.8)], [("#fff3d8", 0.04)], 0.75)
+golden = tasty("dore", "#e6a84c", [("#b56a1f", 0.52, 0.9), ("#f6cd7e", 0.58, 0.8)], [("#8c4f18", 0.012)], 0.45)
+golden_d = tasty("dore_fonce", "#ab6420", [("#6f3a10", 0.52, 0.8)], [("#d99543", 0.03)], 0.42)
+crust = tasty("croute", "#c98036", [("#8a4b17", 0.5, 0.9), ("#e5ae62", 0.58, 0.7)], [("#f7e2bc", 0.018)], 0.6, relief=1.8)
+crumb_c = tasty("mie", "#f4e0ad", [("#e2c586", 0.55, 0.9)], [("#d3ae6d", 0.04), ("#fff2cf", 0.04)], 0.85, relief=2.0, cells=20)
+pink = tasty("jambon", "#e6878a", [("#f4bcb6", 0.57, 0.9), ("#cf6670", 0.55, 0.6)], (), 0.35)
+pink_l = tasty("jambon_pale", "#f1b2ab", [("#fbddd6", 0.57, 0.9)], (), 0.35)
+cheese = tasty("fromage", "#f8c437", [("#ffdc6e", 0.55, 0.8), ("#e09a1c", 0.63, 0.9)], (), 0.32)
+cheese_w = tasty("fromage_blanc", "#f7efd6", [("#fffaea", 0.55, 0.8), ("#e6d8ae", 0.6, 0.7)], [("#7d8f5e", 0.006)], 0.35)
+meat = tasty("viande", "#80411f", [("#4b2110", 0.5, 0.9), ("#b26a3a", 0.6, 0.8)], [("#d9a176", 0.02)], 0.42, relief=2.2)
+meat_l = tasty("viande_rose", "#bd6a59", [("#e8b0a0", 0.58, 0.9), ("#8f3f33", 0.55, 0.6)], (), 0.4)
+sauce = tasty("sauce", "#cb331f", [("#8f1a0d", 0.52, 0.8), ("#ea6a3c", 0.62, 0.7)], [("#3f6b22", 0.008)], 0.16)
+carrot = m("carotte", "#f2801c", 0.4)
+lettuce = tasty("laitue", "#84c747", [("#b9e47a", 0.55, 0.8), ("#559a2a", 0.55, 0.7)], (), 0.55, relief=2.0)
+herb = m("herbe", "#3f8a30", 0.55)
+tomato = tasty("tomate", "#dd3a28", [("#f47052", 0.58, 0.8)], [("#f6d9a0", 0.012)], 0.22)
+pepperoni = tasty("pepperoni", "#b62f1d", [("#7c1a0e", 0.52, 0.8), ("#e2804f", 0.64, 0.9)], (), 0.3, cells=20)
+fat = m("gras", "#f4cbb4", 0.35)
+butter = m("beurre", "#ffe673", 0.18)
+pasta = tasty("nouille", "#f4d478", [("#dcae4a", 0.55, 0.8)], (), 0.25)
+bone = m("os", "#f6eede", 0.35)
+syrup = m("sirop", "#a8540f", 0.05)
+dot = m("point_biscuit", "#52301a", 0.25)
+blue = m("etiquette", "#3a6fb5", 0.4)
+skin_c = tasty("peau_doree", "#cf7c1c", [("#8e440c", 0.5, 0.9), ("#eca93f", 0.58, 0.9)], [("#3f6b22", 0.006)], 0.24, relief=1.6)
+olive = m("olive", "#26231f", 0.2)
+mushroom = m("champignon", "#e6d3b3", 0.55)
+pepper = m("poivron", "#3f9c3a", 0.3)
+lemon = m("citron", "#f6d52e", 0.3)
 
 made = []
 
@@ -75,6 +85,34 @@ def crumbs(o, mat, count=7, r=0.05, size=0.016):
 
 def disc(o, y, r, h, mat, x=0.0, z=0.0, bevel=0.0):
     o.cyl((x, y, z), r, h, mat, seg=28, bevel=bevel)
+
+
+def dish(o, r):
+    """Une assiette creuse au rebord arrondi, avec son liseré bleu."""
+    o.cyl((0, 0.0, 0), r * 0.78, 0.012, plate, seg=40, top=r)
+    o.torus((0, 0.0125, 0), r * 0.965, 0.006, plate, seg=48, sides=8)
+    o.torus((0, 0.0132, 0), r * 0.86, 0.0022, rim, seg=48, sides=6, squash=1.0)
+
+
+def wavy(o, y, r, h, mat, x=0.0, z=0.0, ripple=0.05):
+    """Un disque au bord irrégulier et bombé (une crêpe)."""
+    seg = 30
+    phase = rng.uniform(0, 6)
+    rings = ((0.0, r * 0.86), (h * 0.45, r), (h, r * 0.9), (h * 1.1, r * 0.4))
+    verts, faces = [], []
+    for yy, rr in rings:
+        for i in range(seg):
+            a = math.tau * i / seg
+            k = 1.0 + ripple * math.sin(a * 5 + phase) + ripple * 0.6 * math.sin(a * 11 + phase * 2)
+            verts.append((x + math.cos(a) * rr * k, y + yy + h * 0.12 * math.sin(a * 3 + phase) * (rr / r),
+                          z + math.sin(a) * rr * k))
+    for j in range(len(rings) - 1):
+        for i in range(seg):
+            a, b = j * seg + i, j * seg + (i + 1) % seg
+            faces.append([a, a + seg, b + seg, b])
+    faces.append(list(range(seg)))
+    faces.append([(len(rings) - 1) * seg + i for i in range(seg)][::-1])
+    o.add(verts, faces, mat, smooth=True)
 
 
 def lumpy(o, center, radii, mat, lumps=14, r=0.35):
@@ -131,10 +169,15 @@ def _(o):
 
 @food("pile_crepes")
 def _(o):
-    disc(o, 0.0, 0.14, 0.012, plate)
+    dish(o, 0.15)
     for i in range(7):
-        disc(o, 0.012 + i * 0.017, 0.108 - rng.uniform(0, 0.008), 0.016, golden if i % 2 else dough,
-             rng.uniform(-0.007, 0.007), rng.uniform(-0.007, 0.007), 0.006)
+        wavy(o, 0.012 + i * 0.017, 0.108 - rng.uniform(0, 0.008), 0.0145, golden if i % 3 else dough,
+             rng.uniform(-0.008, 0.008), rng.uniform(-0.008, 0.008))
+    # des petits fruits autour
+    for a in (1.3, 3.5, 5.4):
+        for k in range(3):
+            o.ball((math.cos(a + k * 0.16) * 0.128, 0.026, math.sin(a + k * 0.16) * 0.128), 0.014,
+                   tomato if a < 4 else olive, seg=10, rings=8)
     disc(o, 0.131, 0.075, 0.007, syrup, bevel=0.003)
     for a in (0.4, 2.5, 4.4):
         o.tube([(math.cos(a) * 0.06, 0.134, math.sin(a) * 0.06), (math.cos(a) * 0.108, 0.09, math.sin(a) * 0.108)],
@@ -144,7 +187,9 @@ def _(o):
 
 @food("saucisse")
 def _(o):
-    disc(o, 0.0, 0.15, 0.012, plate)
+    dish(o, 0.155)
+    o.tube([(-0.09, 0.016, -0.075), (-0.02, 0.018, -0.09), (0.07, 0.016, -0.07)], [0.012, 0.016, 0.008], lettuce, seg=10,
+           squash=(1.6, 0.5))
     path, radii = C.curve([(-0.12, 0.05, 0.035), (-0.045, 0.052, -0.012), (0.045, 0.052, -0.012), (0.12, 0.05, 0.035)],
                           [0.042] * 4, 8)
     o.tube(path, radii, meat, seg=20)
@@ -213,10 +258,17 @@ def bird(o, scale, bow=False):
         path, radii = C.curve([(0.095 * s * d, 0.09 * s, -0.04 * s), (0.13 * s * d, 0.06 * s, 0.0),
                                (0.1 * s * d, 0.04 * s, 0.04 * s)], [0.03 * s, 0.025 * s, 0.012 * s], 5)
         o.tube(path, radii, golden_d, seg=14)
-    for i in range(12):
-        a = i * math.tau / 12
-        o.ball((math.cos(a) * 0.15 * s, 0.022, math.sin(a) * 0.15 * s), (0.016 * s, 0.01 * s, 0.016 * s),
-               herb if i % 3 else tomato, seg=10, rings=7)
+    for i in range(14):
+        a = i * math.tau / 14
+        x, z = math.cos(a) * 0.148 * s, math.sin(a) * 0.148 * s
+        if i % 3 == 0:
+            o.cyl((x, 0.014, z), 0.024 * s, 0.008, lemon, seg=18, bevel=0.002)
+            o.cyl((x, 0.0222, z), 0.016 * s, 0.001, butter, seg=18)
+        elif i % 3 == 1:
+            o.ball((x, 0.026, z), 0.017 * s, tomato, seg=12, rings=9)
+        for k in range(3):
+            o.ball((x * 0.96 + (k - 1) * 0.012 * s, 0.02 + k * 0.003, z * 0.96), (0.017 * s, 0.004 * s, 0.007 * s), herb,
+                   seg=8, rings=5, matrix=Matrix.Rotation(a + k * 0.7, 3, "Y"))
 
 
 @food("poulet_roti")
@@ -231,10 +283,11 @@ def _(o):
 
 def cookie(o, x, y, z, r):
     o.cyl((x, y, z), r, 0.018, golden, seg=22, top=r * 0.88, bevel=0.006)
-    for i in range(6):
+    for i in range(9):
         a = i * 2.4
-        d = r * 0.65 * ((i % 3 + 1) / 3)
-        o.ball((x + math.cos(a) * d, y + 0.018, z + math.sin(a) * d), (0.008, 0.004, 0.008), dot, seg=8, rings=6)
+        d = r * 0.72 * math.sqrt((i + 0.3) / 9)
+        o.ball((x + math.cos(a) * d, y + 0.0175, z + math.sin(a) * d), (0.0095, 0.0058, 0.0082), dot, seg=8, rings=6,
+               matrix=Matrix.Rotation(a, 3, "Y"))
 
 
 @food("biscuit")
@@ -308,6 +361,14 @@ def _(o):
     for i in range(7):
         a = i * 1.7 + 1
         o.ball((math.cos(a) * 0.08, 0.045, math.sin(a) * 0.08), (0.012, 0.003, 0.007), herb, seg=8, rings=5)
+    for i in range(6):
+        a = i * 1.05 + 0.35
+        x, z = math.cos(a) * (0.06 + 0.06 * (i % 2)), math.sin(a) * (0.06 + 0.06 * (i % 2))
+        if i % 2:
+            o.torus((x, 0.043, z), 0.011, 0.0055, olive, sides=8, seg=16)
+            o.ball((x + 0.025, 0.043, z + 0.01), (0.017, 0.006, 0.013), mushroom, seg=10, rings=6)
+        else:
+            o.torus((x, 0.042, z), 0.02, 0.0045, pepper, sides=6, seg=16, arc=(a, a + 3.6))
 
 
 @food("boulette")
@@ -325,8 +386,8 @@ def _(o):
 
 @food("grosse_boulette")
 def _(o):
-    disc(o, 0.0, 0.17, 0.014, plate)
-    for i in range(26):
+    dish(o, 0.175)
+    for i in range(34):
         pts = []
         a = rng.uniform(0, math.tau)
         r = rng.uniform(0.02, 0.12)

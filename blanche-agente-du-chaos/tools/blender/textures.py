@@ -325,3 +325,21 @@ def fur():
     rough = 0.56 + 0.30 * (1.0 - strands) + 0.10 * (tufts - 0.5)
     return dict(normal=C.image("poil_relief", _normal(height, 0.75), data=True),
                 orm=C.image("poil_brillance", np.dstack([np.ones_like(rough), rough, np.zeros_like(rough)]), data=True))
+
+
+def food(name, base, patches=(), speckles=(), rough=0.5, relief=1.2, meters=0.16, cells=44):
+    """Une matière à manger : une couleur de fond, des plages (dorées, grillées, marbrées) et des grains.
+
+    patches = [("#couleur", seuil, force)] : là où un nuage dépasse le seuil ; speckles = [("#couleur", part)]."""
+    size = 256
+    cloud = _fbm(size, size, cells, cells, 4)
+    color = np.ones((size, size, 3)) * _hex(base) * (0.93 + 0.14 * _fbm(size, size, 12, 12, 3))[..., None]
+    for i, (tone, threshold, strength) in enumerate(patches):
+        field = cloud if i % 2 == 0 else _fbm(size, size, cells // 2, cells // 2, 4)
+        amount = np.clip((field - threshold) * 7.0, 0, 1) * strength
+        color = color + (_hex(tone) - color) * amount[..., None]
+    for tone, share in speckles:
+        dots = np.random.rand(size // 2, size // 2).repeat(2, axis=0).repeat(2, axis=1)
+        color[dots < share] = C.srgb(tone)
+    height = _fbm(size, size, 10, 10, 3) * 2.0 + cloud * 1.5
+    return _pack(name, np.clip(color, 0, 1), height, np.clip(rough + (cloud - 0.5) * 0.2, 0.05, 1), meters, relief)
