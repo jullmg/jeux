@@ -283,6 +283,76 @@ func test_bouche_pleine_cachee() -> void:
 	check(sim.caught_count == 1 and sim.mouth.is_empty(), "visible, la gueule pleine : au coin, morceau perdu")
 
 
+func test_cachee_elle_le_reste_pendant_un_regard() -> void:
+	# Qui s'est bien cachée avant que Maman regarde n'est pas découverte sans un nouvel indice.
+	for station: String in map.stations:
+		var sim := lab({"stations": map.stations.keys(), "move_chance": 1.0})
+		sim.station = station
+		sim.mom_pos = map.stations[station].pos
+		sim.mom_dir = map.stations[station].face
+		var spot := Vector2.INF
+		for x in range(-22, 23):
+			for z in range(-22, 23):
+				var p := Vector2(x, z) * 0.08
+				if spot == Vector2.INF and map.is_free(p, Sim.DOG_RADIUS) and p.distance_to(sim.mom_pos) > 0.6 \
+						and map.hidden_by_island(sim.mom_pos, p, station == "ilot"):
+					spot = p
+		if spot == Vector2.INF:
+			continue
+		sim.dog_pos = spot
+		sim.mouth = {"id": 99, "size": 3, "points": 500, "eat_left": 999.0, "spot": "", "pos": Vector2.ZERO}
+		sim.mom_left = 0.01
+		var looked := false
+		for i in 900:
+			sim.step(DT, Vector2.ZERO, false)
+			looked = looked or sim.mom_state == Sim.Mom.LOOK
+			if looked and sim.mom_state == Sim.Mom.BUSY:
+				break
+		check(looked and sim.caught_count == 0, "%s : cachée, jamais prise (%d)" % [station, sim.caught_count])
+
+
+func test_lacher_coute_le_combo() -> void:
+	var sim := lab()
+	sim.streak = 7
+	sim.mouth = {"id": 99, "size": 2, "points": 150, "eat_left": 9.0, "spot": "", "pos": Vector2.ZERO}
+	run(sim, 0.05, Vector2.ZERO, true)
+	check(sim.mouth.is_empty() and sim.streak == 0 and sim.multiplier() == 1, "combo remis à zéro")
+
+
+func test_lacher_pendant_la_descente() -> void:
+	var sim := lab()
+	at(sim, "lave_vaisselle")
+	put(sim, Sim.Size.SMALL, "lave_vaisselle")
+	run(sim, 1.02, Vector2.ZERO, true)
+	check(sim.dog_state == Sim.Dog.LOWERING, "en train de redescendre")
+	run(sim, DT)
+	run(sim, 0.8, Vector2.ZERO, true)
+	check(sim.mouth.is_empty() and sim.food.size() == 1, "lâché pour de bon, même bouton tenu")
+
+
+func test_tresor_rendu() -> void:
+	var sim := lab()
+	sim.dog_pos = map.spots.lave_vaisselle.stand
+	sim.mouth = {"id": 99, "size": 3, "points": 500, "eat_left": 3.0, "spot": "", "pos": Vector2.ZERO}
+	force_look(sim)
+	run(sim, 0.2)
+	check(sim.caught_count == 1 and sim.food.is_empty(), "échappé")
+	run(sim, 13.0)
+	check(sim.food.any(func(i: Dictionary) -> bool: return i.size == Sim.Size.TREASURE), "le trésor revient sur un meuble")
+
+
+func test_papa_ressort_par_la_porte() -> void:
+	var sim := lab({"helpers": ["papa"]})
+	sim._add_helper("papa")
+	var last := Vector2.ZERO
+	for i in 3000:
+		sim.step(DT, Vector2.ZERO, false)
+		if sim.helpers.is_empty():
+			break
+		last = sim.helpers[0].pos
+	check(sim.helpers.is_empty() and last.distance_to(map.helper_door) < 0.1, "parti par la porte (%s)" % last)
+
+
 func test_manger_est_plus_lent_en_marchant() -> void:
 	var a := lab()
 	var b := lab()
@@ -360,8 +430,8 @@ func test_toute_surveillance_suit_un_indice() -> void:
 				if now != previous:
 					if previous == Sim.Mom.HINT:
 						hint_len = sim.time - hint_start
-					var watching_now := now == Sim.Mom.LOOK or now == Sim.Mom.WALK or now == Sim.Mom.ROUND
-					var was := previous == Sim.Mom.LOOK or previous == Sim.Mom.WALK or previous == Sim.Mom.ROUND
+					var watching_now := now == Sim.Mom.LOOK or now == Sim.Mom.ROUND
+					var was := previous == Sim.Mom.LOOK or previous == Sim.Mom.ROUND
 					if watching_now and not was:
 						var from_turn := previous == Sim.Mom.TURN and now == Sim.Mom.LOOK
 						var from_round := previous == Sim.Mom.HINT and now == Sim.Mom.ROUND and kind == "round"

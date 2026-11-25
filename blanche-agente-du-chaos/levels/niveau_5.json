@@ -53,9 +53,9 @@
   "treasure_at": 0.6,
   "treasure_points": 500,
   "stars": [
-    850,
-    2500,
-    3600
+    1300,
+    2200,
+    3050
   ],
   "foods": {
     "crumb": [
@@ -74,5 +74,10 @@
       "pizza",
       "La pizza entière"
     ]
+  },
+  "activity_text": {
+    "brasser": "brasse la sauce tomate",
+    "four": "surveille la pizza",
+    "ilot": "pétrit la pâte sur l'îlot"
   }
 }

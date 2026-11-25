@@ -11,6 +11,9 @@ var mouth := "Sourire"
 var talking := 0.0
 ## Direction du regard, en degrés autour de la verticale (relative au corps).
 var head_yaw := 0.0
+## La façon de chicaner : 0 doigt pointé, 1 doigt qui secoue et poing sur la hanche, 2 les bras au ciel puis le doigt.
+var scold_style := 0
+var _scold_time := 0.0
 
 var rig: Rig
 var model: Node3D
@@ -169,12 +172,18 @@ func _process(delta: float) -> void:
 			rig.add("head", Vector3(14, head_yaw + sin(t * 2.2) * 12, 0))
 			shown = "Neutre"
 		"point":
-			_arm("R", 82, 14, 4)
-			rig.add("armL", Vector3(14, 0, 36))
-			rig.add("forearmL", Vector3(-18, 0, -88))
-			quick["armR"] = Vector3(sin(t * 14.0) * 4, 0, 0)
-			rig.add("spine", Vector3(14, 0, 0))
-			rig.add("head", Vector3(14, head_yaw, 0))
+			if scold_style == 2 and _scold_time < 0.55:
+				for s: String in ["L", "R"]:
+					_arm(s, 24, 118, 42)
+				rig.add("head", Vector3(-18, head_yaw, 0))
+			else:
+				_arm("R", 82, 14, 4)
+				rig.add("armL", Vector3(14, 0, 36))
+				rig.add("forearmL", Vector3(-18, 0, -88))
+				var shake := 14.0 if scold_style == 1 else 4.0
+				quick["armR"] = Vector3(sin(t * 14.0) * 4, sin(t * 11.0) * shake, 0)
+				rig.add("spine", Vector3(14 if scold_style != 1 else 6, 0, 0))
+				rig.add("head", Vector3(14, head_yaw, sin(t * 9.0) * 8 if scold_style == 1 else 0.0))
 			shown = "Fachee" if talking <= 0.0 else "Ouverte"
 		"laugh":
 			for s: String in ["L", "R"]:
@@ -200,6 +209,7 @@ func _process(delta: float) -> void:
 			for s: String in ["L", "R"]:
 				_arm(s, sin(t * 1.3) * 2, 3, 12)
 			rig.add("head", Vector3(0, head_yaw + sin(t * 0.7) * 7, 0))
+	_scold_time = _scold_time + delta if pose == "point" else 0.0
 	if talking > 0.0:
 		talking -= delta
 		if pose != "point":

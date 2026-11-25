@@ -21,7 +21,7 @@ const MENU := "Menu principal"
 const PAUSE := "Pause"
 const LOCKED := "À débloquer"
 const MISSION := "Mission %d"
-const NEW := "Nouveau : %s"
+const NEW := "Nouveauté — %s"
 const BEST := "Record : %d"
 const SCORE := "Score"
 const TARGET := "1re étoile : %d"
@@ -34,7 +34,10 @@ const VISIBLE := "Visible"
 const GRAB := "Attraper"
 const DROP := "Lâcher"
 const LET_GO := "Relâche !"
-const KEY_HINT := "Espace"
+const KEY_HINTS := {"clavier": "Espace", "manette": "Bouton A", "pointeur": "Maintiens"}
+const DROP_NOW := "Lâche !"
+const COMBO_LOST := "Combo perdu"
+const SEE_END := "Revoir la fin"
 const WON := "Mission réussie !"
 const LOST := "Le repas est servi…"
 const LOST_TEXT := "Il manque %d points pour la première étoile."
@@ -73,10 +76,10 @@ const MOM := {
 		"Reste couchée, ma belle."],
 	"hint": ["Hmm ?", "Hein ?", "C'tait quoi, ça ?", "Coudonc…"],
 	"feint": ["La la la…", "Où j'ai mis le sel ?", "Mmm…", "Bon…"],
-	"round": ["Où c'est qu'a l'est ?", "Blanche ? T'es où, là ?", "C'est ben tranquille…"],
+	"round": ["Est où, elle, là ?", "Blanche ? T'es où, là ?", "C'est ben tranquille…"],
 	"caught": ["Blanche ! AU COIN !", "Eille ! AU COIN !", "Ben là ! AU COIN !", "Je t'ai vue ! AU COIN !",
-		"Pas sur mon comptoir ! AU COIN !", "Tannante ! AU COIN !"],
-	"scold_after": ["Astheure, tu restes là.", "Franchement…", "Qu'est-ce qu'on va faire avec toi ?",
+		"Pas touche ! AU COIN !", "Tannante ! AU COIN !"],
+	"scold_after": ["Astheure, tu restes là.", "Pfff… Franchement.", "Qu'est-ce qu'on va faire avec toi ?",
 		"Fais-moi pas ces yeux-là.", "T'es chanceuse d'être cute."],
 	"surprise": ["Mon chaudron !", "La minuterie !", "Ça déborde !"],
 	"noise": ["C'est quoi ce bruit-là ?", "Qu'est-ce qui tombe ?"],
@@ -85,7 +88,7 @@ const MOM := {
 const CHARLOTTE := {
 	"in": ["Maman, regarde mon dessin !", "Maman, j'ai faim !", "Maman, c'est quand qu'on mange ?"],
 	"snitch": ["Hon !", "Hooon !"],
-	"call": ["Maman ! Blanche !", "Mamaaan ! Elle vole !"],
+	"call": ["Maman ! Blanche !", "Mamaaan ! Blanche vole de la bouffe !"],
 }
 const PAPA := {
 	"in": ["Je fais juste passer !", "Chaud devant !", "Tassez-vous, j'ai les bras pleins."],
@@ -99,6 +102,8 @@ const TUTORIAL := {
 	"keep": "Garde le bouton enfoncé jusqu'au bout !",
 	"eat": "Tu mâches… Les points comptent quand c'est avalé.",
 	"warning": "Maman se retourne : redescends et aie l'air sage !",
+	"drop": "La gueule pleine ! Appuie encore pour lâcher, ou file derrière l'îlot !",
+	"safe": "Bien cachée ! Ne bouge pas.",
 	"corner": "Au coin ! Tu repars dans un petit instant.",
 	"good": "Bravo ! Remplis ton score avant que le repas soit prêt.",
 }

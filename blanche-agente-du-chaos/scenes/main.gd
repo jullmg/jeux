@@ -31,6 +31,9 @@ var _touch_goal := Vector2.INF
 var _touch_stuck := 0.0
 var _touch_last := Vector2.ZERO
 var _grab_prev := false
+## Un appui clavier ou manette, gardé jusqu'au prochain pas des règles.
+var _grab_tapped := false
+var _fullscreen_applied := false
 ## Le résultat de la partie finie, déjà noté, en attente de l'écran.
 var _result: Dictionary = {}
 var _nav: Nav
@@ -148,9 +151,10 @@ func apply_options() -> void:
 	if sim:
 		sim.hint_bonus = 0.25 if o.long_hints else 0.0
 	if not testing and DisplayServer.get_name() != "headless":
+		# Seulement quand le réglage change : bouger un volume ne doit pas défaire un plein écran choisi autrement.
 		var full: bool = o.fullscreen
-		var is_full := DisplayServer.window_get_mode() >= DisplayServer.WINDOW_MODE_FULLSCREEN
-		if full != is_full:
+		if full != _fullscreen_applied:
+			_fullscreen_applied = full
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if full else DisplayServer.WINDOW_MODE_WINDOWED)
 
 
@@ -163,6 +167,7 @@ func go_title() -> void:
 	bot = null
 	hud.clear()
 	stage.show_title()
+	Sound.hum(false)
 	Sound.music("menu")
 	menus.show_title()
 
@@ -193,6 +198,8 @@ func start_level(id: int) -> void:
 	_end_left = 0.0
 	_result = {}
 	_grab_prev = false
+	_grab_tapped = false
+	hud.grab_tapped = false
 	_need_release = true
 	_ticking_said = false
 	menus.close()
@@ -216,6 +223,7 @@ func pause_game() -> void:
 	if state != "jeu" or sim == null or sim.over:
 		return
 	state = "pause"
+	Sound.hum(false)
 	get_tree().paused = true
 	menus.show_pause()
 
@@ -227,7 +235,9 @@ func resume_game() -> void:
 	get_tree().paused = false
 	state = "jeu"
 	_need_release = true
+	_grab_tapped = false
 	hud.grab_held = false
+	hud.grab_tapped = false
 
 
 func quit_game(code := 0) -> void:
@@ -252,11 +262,25 @@ func _notification(what: int) -> void:
 
 # ------------------------------------------------------------------ commandes
 
+## Retient ce qui sert à jouer, pour que le bouton à l'écran nomme la bonne touche.
+func _input(event: InputEvent) -> void:
+	if hud == null:
+		return
+	if event is InputEventKey:
+		hud.input_kind = "clavier"
+	elif event is InputEventJoypadButton or (event is InputEventJoypadMotion and absf(event.axis_value) > 0.4):
+		hud.input_kind = "manette"
+	elif event is InputEventScreenTouch or event is InputEventMouseButton:
+		hud.input_kind = "pointeur"
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if state == "pause" and menus.screen == "pause" and event.is_action_pressed("pause"):
 		get_viewport().set_input_as_handled()
 		resume_game()
 	elif state == "jeu":
+		if event.is_action_pressed("grab"):
+			_grab_tapped = true
 		if event.is_action_pressed("pause"):
 			get_viewport().set_input_as_handled()
 			pause_game()
@@ -274,14 +298,17 @@ func tap(screen: Vector2) -> void:
 	if sim == null:
 		return
 	var best := Vector2.INF
-	var best_d := 80.0
+	var ground := stage.floor_point(screen)
+	# Dans la cachette, c'est le plancher qu'on vise : seul un morceau touché de près l'emporte.
+	var hiding := ground != Vector2.INF and stage.map.hidden_by_island(sim.mom_pos, ground, sim.mom_at_island())
+	var best_d := 32.0 if hiding else 62.0
 	for item in sim.food:
 		var d := stage.on_screen(stage.item_position(item)).distance_to(screen)
 		if d < best_d:
 			best_d = d
 			best = item.pos if item.spot == "" else sim.map.spots[item.spot].stand
 	if best == Vector2.INF:
-		best = stage.floor_point(screen)
+		best = ground
 	if best == Vector2.INF:
 		return
 	if not stage.map.is_free(best, Sim.DOG_RADIUS):
@@ -302,7 +329,9 @@ func _commands(delta: float) -> Array:
 		return [bot.move, bot.grab]
 	var keys := Input.get_vector("move_left", "move_right", "move_down", "move_up")
 	var move := Vector2.ZERO
-	var grab := Input.is_action_pressed("grab") or hud.grab_held
+	var grab := Input.is_action_pressed("grab") or hud.grab_held or _grab_tapped or hud.grab_tapped
+	_grab_tapped = false
+	hud.grab_tapped = false
 	# Un nouvel appui arrête la marche ; un but touché pendant que le bouton reste tenu, lui, compte.
 	if grab and not _grab_prev:
 		_forget_goal()
@@ -354,6 +383,7 @@ func _record() -> void:
 
 func _finish() -> void:
 	state = "fin"
+	Sound.hum(false)
 	Sound.music("")
 	Sound.play("victoire" if _result.stars > 0 else "rate")
 	hud.visible = false
@@ -461,6 +491,8 @@ func _greet(who: PersonView, lines: Array) -> void:
 
 ## Les bruits qui accompagnent ce qui dure : la cuisine, les pas, la mastication, la musique.
 func _sounds(delta: float) -> void:
+	# Elle fredonne tant qu'elle est occupée : le silence est un indice de plus.
+	Sound.hum(sim.mom_state == Sim.Mom.BUSY and not sim.over and sim.activity != "telephone")
 	_ambient_left -= delta
 	if sim.mom_state == Sim.Mom.BUSY and AMBIENT.has(sim.activity) and _ambient_left <= 0.0:
 		var a: Array = AMBIENT[sim.activity]

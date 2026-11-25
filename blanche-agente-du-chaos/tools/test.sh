@@ -5,7 +5,7 @@
 set -eu
 cd "$(dirname "$0")/.."
 G=${GODOT:-/Applications/Godot.app/Contents/MacOS/Godot}
-games=60
+games=150
 [ "${1:-}" = "--complet" ] && games=1000
 tmp=$(mktemp -d)
 trap '/bin/rm -rf "$tmp"' EXIT

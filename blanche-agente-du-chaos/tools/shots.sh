@@ -1,6 +1,6 @@
 #!/bin/sh
 # Captures d'écran du jeu, sans son, en arrière-plan, sur l'écran du MacBook.
-#   tools/shots.sh dossier [résolution] [--seulement=menus,jeu,cachette,niveaux,situations,fin]
+#   tools/shots.sh dossier [résolution] [--seulement=menus,jeu,tutoriel,cachette,niveaux,situations,fin,poses,perf]
 set -eu
 cd "$(dirname "$0")/.."
 out=$(mkdir -p "$1" && cd "$1" && pwd)

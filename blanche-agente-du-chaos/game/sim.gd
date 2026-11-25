@@ -4,7 +4,8 @@ extends RefCounted
 ## On appelle step() avec les commandes ; l'affichage lit l'état et la liste d'événements.
 
 enum Dog { FREE, REACHING, LOWERING, TO_CORNER, IN_CORNER }
-enum Mom { BUSY, HINT, TURN, LOOK, TURN_BACK, SCOLD, WALK, ROUND, RUSH }
+## WALK : elle change de place sans surveiller. ROUND : le tour de l'îlot, les yeux ouverts, toujours annoncé.
+enum Mom { BUSY, HINT, TURN, LOOK, TURN_BACK, SCOLD, WALK, ROUND }
 enum Size { CRUMB, SMALL, BIG, TREASURE }
 
 const DOG_RADIUS := 0.2
@@ -76,8 +77,11 @@ var activity := ""
 var hint_kind := "real"
 var feinted := false
 var mom_path := PackedVector2Array()
-## Ce qu'elle fait en arrivant après avoir marché sans regarder.
-var rush_activity := ""
+## Ce qu'elle fait en arrivant à son nouveau poste.
+var walk_activity := ""
+var walk_speed := MOM_WALK
+## Quand le trésor perdu dans un flagrant délit revient sur un meuble (-1 : rien à rendre).
+var treasure_back := -1.0
 var round_points := PackedVector2Array()
 var unseen_time := 0.0
 var _caught_timer := 0.0
@@ -123,7 +127,7 @@ func _init(map_: KitchenMap, level_: Dictionary, seed_ := 1, nav_: Nav = null, m
 # ------------------------------------------------------------------ lecture
 
 func watching() -> bool:
-	return mom_state == Mom.LOOK or mom_state == Mom.WALK or mom_state == Mom.ROUND
+	return mom_state == Mom.LOOK or mom_state == Mom.ROUND
 
 
 func paws_up() -> bool:
@@ -249,6 +253,7 @@ func _step_dog(dt: float, move: Vector2, grab: bool, pressed: bool) -> void:
 		Dog.LOWERING:
 			if pressed and not mouth.is_empty():
 				_drop()
+				_grab_used = true
 			lower_left -= dt
 			if lower_left <= 0.0:
 				dog_state = Dog.FREE
@@ -346,7 +351,10 @@ func _drop() -> void:
 	item.spot = ""
 	item.erase("eat_left")
 	food.append(item)
-	_emit("dropped", {"item": item})
+	# Lâcher coûte le combo : se cacher derrière l'îlot vaut mieux.
+	var broke := streak >= 3
+	streak = 0
+	_emit("dropped", {"item": item, "combo_lost": broke})
 
 
 func _score(item: Dictionary) -> void:
@@ -416,12 +424,9 @@ func _step_mom(dt: float) -> void:
 		Mom.LOOK:
 			mom_left -= dt
 			if mom_left <= 0.0:
-				if level.stations.size() > 1 and rng.randf() < float(level.move_chance):
-					_start_walk()
-				else:
-					mom_state = Mom.TURN_BACK
-					_set_timer(TURN_BACK_TIME)
-					_emit("turn_back")
+				mom_state = Mom.TURN_BACK
+				_set_timer(TURN_BACK_TIME)
+				_emit("turn_back")
 		Mom.TURN_BACK:
 			mom_left -= dt
 			mom_dir = _turned(maxf(0.0, mom_left / mom_len))
@@ -434,21 +439,21 @@ func _step_mom(dt: float) -> void:
 				var st: Dictionary = map.stations[station]
 				if mom_pos.distance_to(st.pos) > 0.15:
 					# Elle retourne à ses chaudrons sans regarder : jamais de surveillance sans indice.
-					_start_rush(station, st.activity)
+					_start_walk(station, st.activity)
 				else:
 					mom_dir = _look_dir()
 					mom_state = Mom.TURN_BACK
 					_set_timer(TURN_BACK_TIME)
 					_emit("turn_back")
-		Mom.WALK, Mom.RUSH:
-			if _follow_mom(dt, MOM_WALK if mom_state == Mom.WALK else MOM_WALK * 1.4):
+		Mom.WALK:
+			if _follow_mom(dt, walk_speed):
 				var st: Dictionary = map.stations[station]
 				mom_pos = st.pos
 				mom_dir = st.face
-				_enter_busy(rush_activity if mom_state == Mom.RUSH else st.activity)
+				_enter_busy(walk_activity)
 		Mom.ROUND:
 			if _follow_mom(dt, ROUND_WALK):
-				_start_walk(station)
+				_start_walk(station, map.stations[station].activity)
 
 
 func _end_window() -> void:
@@ -494,25 +499,14 @@ func _turned(f: float) -> Vector2:
 	return face.rotated(PI * clampf(f, 0.0, 1.0))
 
 
-func _start_walk(to := "") -> void:
-	if to == "":
-		var options: Array = level.stations.duplicate()
-		options.erase(station)
-		to = options[rng.randi_range(0, options.size() - 1)]
+func _start_walk(to: String, what: String, speed := MOM_WALK) -> void:
 	station = to
 	activity = ""
+	walk_activity = what
+	walk_speed = speed
 	mom_state = Mom.WALK
 	mom_path = mom_nav.path(mom_pos, map.stations[station].pos)
 	_emit("walk", {"station": station})
-
-
-func _start_rush(to: String, what: String) -> void:
-	station = to
-	activity = ""
-	rush_activity = what
-	mom_state = Mom.RUSH
-	mom_path = mom_nav.path(mom_pos, map.stations[station].pos)
-	_emit("rush", {"station": station})
 
 
 func _start_round() -> void:
@@ -554,10 +548,16 @@ func _next_activity() -> void:
 		var to := "cuisiniere" if level.stations.has("cuisiniere") else str(level.stations[0])
 		_emit("surprise")
 		if to != station:
-			_start_rush(to, "surprise")
+			_start_walk(to, "surprise", MOM_WALK * 1.4)
 		else:
 			mom_dir = map.stations[station].face
 			_enter_busy("surprise")
+		return
+	if level.stations.size() > 1 and rng.randf() < float(level.move_chance):
+		var options: Array = level.stations.duplicate()
+		options.erase(station)
+		var next: String = options[rng.randi_range(0, options.size() - 1)]
+		_start_walk(next, map.stations[next].activity)
 		return
 	var verify := rng.randf() < suspicion * 0.45
 	mom_dir = map.stations[station].face
@@ -598,6 +598,9 @@ func _check_caught(dt: float) -> void:
 	_caught_timer = 0.0
 	caught_count += 1
 	var lost := mouth
+	if not lost.is_empty() and lost.size == Size.TREASURE:
+		# Maman le remet sur le comptoir un peu plus tard.
+		treasure_back = time + 12.0
 	mouth = {}
 	reach_item = {}
 	reach_progress = 0.0
@@ -623,6 +626,8 @@ func _step_suspicion(dt: float) -> void:
 			change -= 0.035
 	if seen and not at_corner() and (dog_state == Dog.FREE):
 		change += 0.025
+	if unseen_time > 3.0 and watching() and dog_hidden():
+		change += 0.05
 	suspicion = clampf(suspicion + change * dt, 0.0, 1.0)
 	if watching() and dog_hidden():
 		unseen_time += dt
@@ -640,6 +645,8 @@ func _step_food(dt: float) -> void:
 		_spawn_food(-1)
 	if not treasure_done and time >= float(level.duration) * float(level.treasure_at):
 		treasure_done = _spawn_food(Size.TREASURE)
+	if treasure_back >= 0.0 and time >= treasure_back and _spawn_food(Size.TREASURE):
+		treasure_back = -1.0
 	if mom_state == Mom.BUSY and activity == "couper":
 		crumb_left -= dt
 		if crumb_left <= 0.0:
@@ -754,6 +761,7 @@ func _add_helper(who: String) -> void:
 		"cool": 0.0, "index": 0, "drop_at": -1, "path": PackedVector2Array()}
 	if who == "papa":
 		h.path = PackedVector2Array(PAPA_PATH)
+		h.path.append(map.helper_door)
 		h.state = "cross"
 		h.drop_at = rng.randi_range(2, 4) if rng.randf() < 0.75 else -1
 	else:

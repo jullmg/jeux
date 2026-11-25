@@ -15,6 +15,8 @@ var speed := 0.0
 var look_up := 0.0
 ## Les yeux piteux : après un « AU COIN ! ».
 var sad := false
+## De quel côté elle penche la tête quand elle a l'air piteuse.
+var tilt := 1.0
 
 var rig: Rig
 var model: Node3D
@@ -220,7 +222,7 @@ func _process(delta: float) -> void:
 		ears = -4.0
 		wag *= 0.2
 		rig.add("neck", Vector3(10, 0, 0))
-		rig.add("head", Vector3(8, 0, 10))
+		rig.add("head", Vector3(8, 0, 13 * tilt))
 	if pose != "happy":
 		position.y = 0.0
 	if carrying and pose != "reach":

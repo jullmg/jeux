@@ -12,6 +12,8 @@ var _next := 0
 var _music: AudioStreamPlayer
 var _tension: AudioStreamPlayer
 var _music_name := ""
+var _hum: AudioStreamPlayer
+var _humming := false
 var _tension_wanted := 0.0
 var _tension_now := 0.0
 ## Les derniers bruitages joués (pour les tests).
@@ -36,6 +38,10 @@ func _ready() -> void:
 	_tension.bus = "Music"
 	_tension.volume_db = -60.0
 	add_child(_tension)
+	_hum = AudioStreamPlayer.new()
+	_hum.bus = "Effects"
+	_hum.volume_db = -15.0
+	add_child(_hum)
 
 
 func _exit_tree() -> void:
@@ -45,7 +51,8 @@ func _exit_tree() -> void:
 ## Coupe tout et lâche les sons : à appeler quelques images avant de quitter, pour ne rien laisser derrière.
 func silence() -> void:
 	_music_name = ""
-	for p in _players + [_music, _tension]:
+	_humming = false
+	for p in _players + [_music, _tension, _hum]:
 		p.stop()
 		p.stream = null
 	_cache.clear()
@@ -99,6 +106,22 @@ func _looped(stream: AudioStream) -> AudioStream:
 	elif stream != null and "loop" in stream:
 		stream.loop = true
 	return stream
+
+
+## Le fredonnement de Maman : il s'arrête net quand elle se doute de quelque chose.
+func hum(on: bool) -> void:
+	if on == _humming:
+		return
+	_humming = on
+	if not on:
+		_hum.stop()
+		return
+	if _hum.stream == null:
+		var path := SFX_DIR % "fredon"
+		if not ResourceLoader.exists(path):
+			return
+		_hum.stream = _looped(load(path))
+	_hum.play()
 
 
 ## « menu » ou « jeu ». En jeu, la couche de tension suit le soupçon.

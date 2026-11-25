@@ -58,9 +58,9 @@
   "treasure_at": 0.6,
   "treasure_points": 500,
   "stars": [
-    400,
-    1550,
-    2250
+    700,
+    1250,
+    1800
   ],
   "foods": {
     "crumb": [
@@ -79,5 +79,9 @@
       "plateau_fromages",
       "Le plateau de fromages"
     ]
+  },
+  "activity_text": {
+    "brasser": "brasse la sauce",
+    "ilot": "prépare le plateau sur l'îlot"
   }
 }

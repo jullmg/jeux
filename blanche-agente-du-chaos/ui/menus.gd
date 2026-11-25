@@ -15,6 +15,8 @@ var save: SaveData
 ## Nom de l'écran affiché ("" : aucun).
 var screen := ""
 var _back := Callable()
+## Juste après la fin d'une partie, « valider » est ignoré : on ne saute pas les résultats en martelant le bouton.
+var _quiet_until := 0
 var _holder: Control
 
 
@@ -31,6 +33,12 @@ func close() -> void:
 		_holder = null
 	screen = ""
 	_back = Callable()
+	_quiet_until = 0
+
+
+func _input(event: InputEvent) -> void:
+	if Time.get_ticks_msec() < _quiet_until and (event.is_action("ui_accept") or event is InputEventMouseButton):
+		get_viewport().set_input_as_handled()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -257,6 +265,7 @@ func show_pause() -> void:
 ## `result` : {level, score, stars, eaten, caught, new_best, target}
 func show_results(result: Dictionary) -> void:
 	var holder := _begin("resultats", 0.5)
+	_quiet_until = Time.get_ticks_msec() + 1100
 	var column := _card(holder, 1040)
 	var won: bool = result.stars > 0
 	var id: int = result.level
@@ -294,6 +303,7 @@ func show_end() -> void:
 	save.finished_seen = true
 	save.save_file()
 	var holder := _begin("fin", 0.55)
+	_quiet_until = Time.get_ticks_msec() + 1100
 	var column := _card(holder, 1100, 26)
 	column.add_child(UiStyle.label(Texts.END_TITLE, 54, UiStyle.PINK_DARK))
 	var paws := Control.new()
@@ -389,6 +399,8 @@ func show_credits() -> void:
 	var holder := _begin("credits")
 	var column := _card(holder, 1100)
 	column.add_child(_wrapped(Texts.CREDITS_TEXT, 1020, 32))
+	if save.finished_seen:
+		_center_button(column, Texts.SEE_END, show_end, 360)
 	var back := _center_button(column, Texts.BACK, show_title, 320)
 	_back = show_title
 	_focus(back)

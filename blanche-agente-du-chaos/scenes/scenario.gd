@@ -198,6 +198,18 @@ func _run() -> void:
 		await wait(0.4)
 		await shot("18_pause")
 		main.resume_game()
+	if wants("tutoriel"):
+		# La gueule pleine quand Maman se doute : la consigne doit dire de lâcher.
+		play(1, "equilibre", 5)
+		await until(func() -> bool: return not main.sim.mouth.is_empty() and main.sim.mouth.size >= Sim.Size.SMALL)
+		main.bot = null
+		main.sim.mom_left = 0.01
+		await until(func() -> bool: return main.sim.mom_state == Sim.Mom.HINT, 60)
+		await wait(0.2)
+		await shot("19_lacher")
+		await until(func() -> bool: return main.sim.mom_state == Sim.Mom.SCOLD, 200)
+		await wait(0.25)
+		await shot("19_chicane")
 	if wants("cachette"):
 		play(2, "campeur")
 		await wait(3.4)

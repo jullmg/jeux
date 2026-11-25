@@ -225,7 +225,7 @@ func _danger(view: Dictionary) -> bool:
 			if _last_hint_changed(view):
 				_hint_believed = rng.randf() > attentive
 			return _hint_believed
-		Sim.Mom.TURN, Sim.Mom.LOOK, Sim.Mom.WALK, Sim.Mom.ROUND:
+		Sim.Mom.TURN, Sim.Mom.LOOK, Sim.Mom.ROUND:
 			return true
 	_hint_id = 0.0
 	return false

@@ -5,7 +5,8 @@
   "intro": [
     "L'îlot te cache : au sol, derrière lui, Maman ne te voit pas.",
     "La zone cachée est dessinée sur le plancher. L'œil te dit si on te voit.",
-    "Il porte aussi de la nourriture… mais les pattes en l'air, on te voit toujours !"
+    "Il porte aussi de la nourriture… mais les pattes en l'air, on te voit toujours !",
+    "Lâcher un morceau fait perdre ton combo : mieux vaut te cacher."
   ],
   "duration": 130,
   "hint_min": 0.8,
@@ -47,9 +48,9 @@
   "treasure_at": 0.6,
   "treasure_points": 500,
   "stars": [
-    800,
-    2300,
-    3250
+    550,
+    1450,
+    2350
   ],
   "foods": {
     "crumb": [
@@ -68,5 +69,8 @@
       "paquet_jambon",
       "Le paquet de jambon"
     ]
+  },
+  "activity_text": {
+    "brasser": "fait griller du pain"
   }
 }

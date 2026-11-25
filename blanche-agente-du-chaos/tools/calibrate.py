@@ -10,11 +10,15 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 GODOT = os.environ.get("GODOT", "/Applications/Godot.app/Contents/MacOS/Godot")
 PROFILES = ["sage_300", "prudent_300", "equilibre_300", "equilibre_500", "equilibre_700", "gourmand_300", "novice_700",
             "tetu_300", "spam_300", "miettes_300", "campeur_300"]
-# Part des débutants qui ratent chaque niveau, visée par le seuil de la première étoile.
-FAIL_TARGET = [3, 8, 12, 17, 22, 28, 34, 40]
-# Une personne est moins efficace qu'un robot (elle vise, hésite, regarde ailleurs) : part des scores robots demandée
-# pour 1, 2 et 3 étoiles. À ajuster après les essais humains.
-HUMAN = [0.45, 0.5, 0.72]
+# Cibles des seuils, mesurées sur le robot débutant (lent à réagir et à se décider) :
+# part qui rate le niveau (1re étoile), puis part qui obtient trois étoiles.
+FAIL_TARGET = [3, 4, 5, 6, 7, 8, 9, 10]
+THREE_TARGET = [58, 50, 43, 36, 28, 21, 15, 9]
+# Une personne est moins efficace qu'un robot (elle vise, hésite, regarde ailleurs) : la 1re étoile ne demande qu'une
+# part du score des débutants. À ajuster après les essais humains.
+HUMAN = 0.45
+# La première étoile du tutoriel reste facile, et la dernière mission reste gagnable.
+STAR1_MAX = {1: 700, 8: 850}
 
 
 def run(level, profile, games, folder):
@@ -43,25 +47,23 @@ def table(results):
 
 
 def write_stars(games):
-    """Seuils : 1 étoile selon les débutants, 2 et 3 étoiles selon les bons joueurs, avec une marge pour des humains."""
-    sys.path.insert(0, str(ROOT / "tools"))
+    """1 étoile : au-dessus de ce qu'on obtient sans jamais redescendre ; 3 étoiles : une courbe qui se resserre."""
     for level in range(1, 9):
         path = ROOT / "levels" / f"niveau_{level}.json"
         data = json.loads(path.read_text())
         # Des seuils impossibles à franchir pendant la mesure : on lit seulement les scores.
         data["stars"] = [1, 2, 3]
         path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
-    with tempfile.TemporaryDirectory() as folder, concurrent.futures.ThreadPoolExecutor(max(2, os.cpu_count() - 2)) as pool:
-        def scores(level, profile):
-            return run(level, profile, games, folder)
-        jobs = {(l, p): pool.submit(scores, l, p) for l in range(1, 9) for p in ["novice_700", "equilibre_500", "equilibre_300"]}
-        results = {k: v.result() for k, v in jobs.items()}
+    results = simulate(games, ["novice_700", "tetu_300"])
     round50 = lambda v: int(round(v / 50.0) * 50)
     for level in range(1, 9):
         novice = sorted(results[(level, "novice_700")]["scores"])
-        s1 = round50(max(300, novice[int(len(novice) * FAIL_TARGET[level - 1] / 100)] * HUMAN[0]))
-        s2 = round50(max(results[(level, "equilibre_500")]["median"] * HUMAN[1], s1 * 1.5))
-        s3 = round50(max(results[(level, "equilibre_300")]["median"] * HUMAN[2], s2 * 1.3))
+        stubborn = sorted(results[(level, "tetu_300")]["scores"])
+        quantile = lambda scores, percent: scores[min(len(scores) - 1, int(len(scores) * percent / 100))]
+        s1 = max(300, quantile(novice, FAIL_TARGET[level - 1]) * HUMAN, quantile(stubborn, 82))
+        s1 = round50(min(s1, STAR1_MAX.get(level, s1)))
+        s3 = round50(max(quantile(novice, 100 - THREE_TARGET[level - 1]), s1 * 1.9))
+        s2 = round50(s1 + (s3 - s1) * 0.5)
         path = ROOT / "levels" / f"niveau_{level}.json"
         data = json.loads(path.read_text())
         data["stars"] = [s1, s2, s3]

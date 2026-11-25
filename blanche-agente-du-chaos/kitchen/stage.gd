@@ -451,9 +451,11 @@ func on_event(e: Dictionary) -> void:
 		"caught":
 			_shake = 1.0
 			_surprised = 0.45
-		"turn_back":
-			if dog and sim and sim.dog_state != Sim.Dog.FREE and randf() < 0.5:
-				_laugh = 1.4
+			mom.scold_style = (mom.scold_style + 1 + randi() % 2) % 3
+			dog.tilt = -1.0 if randf() < 0.5 else 1.0
+		"corner_arrive":
+			if randf() < 0.6:
+				_laugh = 1.6
 		"noise":
 			if e.what == "tabouret":
 				_wobble = 1.0
@@ -470,7 +472,7 @@ func _process(delta: float) -> void:
 		_sync_food(delta)
 		_update_mask(delta)
 		dog.set_see_through(_dog_covered())
-		_steam.emitting = sim.activity == "brasser" or sim.activity == "surprise" or sim.mom_state == Sim.Mom.RUSH
+		_steam.emitting = sim.activity == "brasser" or sim.activity == "surprise" or sim.walk_activity == "surprise"
 	_show_furniture(delta)
 	_move_camera(delta)
 
@@ -583,15 +585,18 @@ func _show_mom(delta: float) -> void:
 			if not sim.dog_hidden():
 				mom.head_yaw = clampf(relative, -55.0, 55.0)
 		Sim.Mom.TURN_BACK:
-			mom.pose = "laugh" if _laugh > 0.0 else "idle"
+			mom.pose = "idle"
 		Sim.Mom.SCOLD:
 			mom.pose = "point"
 			var corner := map.corner - sim.mom_pos
 			# Elle regarde Blanche et pointe le coin.
 			_mom_yaw = _turn(_mom_yaw, atan2(corner.x, corner.y), delta, 20.0)
 			mom.head_yaw = clampf(relative, -40.0, 40.0)
-		Sim.Mom.WALK, Sim.Mom.RUSH, Sim.Mom.ROUND:
+		Sim.Mom.WALK, Sim.Mom.ROUND:
 			mom.pose = "walk"
+	# Elle ne peut pas s'empêcher de rire une fois Blanche rendue au coin.
+	if _laugh > 0.0 and (sim.mom_state == Sim.Mom.BUSY or sim.mom_state == Sim.Mom.TURN_BACK):
+		mom.pose = "laugh"
 	if sim.over:
 		mom.pose = "cheer" if sim.stars() > 0 else "laugh"
 

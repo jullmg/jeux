@@ -53,9 +53,9 @@
   "treasure_at": 0.6,
   "treasure_points": 500,
   "stars": [
-    750,
-    1650,
-    2400
+    500,
+    1200,
+    1850
   ],
   "foods": {
     "crumb": [
@@ -74,5 +74,9 @@
       "plaque_biscuits",
       "La plaque de biscuits"
     ]
+  },
+  "activity_text": {
+    "brasser": "fait fondre le beurre",
+    "four": "surveille les biscuits"
   }
 }

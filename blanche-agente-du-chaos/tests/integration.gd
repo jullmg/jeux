@@ -489,6 +489,50 @@ func test_fin_du_jeu() -> void:
 	main.save.reset_defaults()
 
 
+func test_marteler_ne_saute_pas_les_resultats() -> void:
+	main.save.reset_defaults()
+	var sim := await calm()
+	sim.score = int(sim.level.stars[0])
+	sim.time_left = 0.02
+	check(await run_until(func() -> bool: return main.menus.screen == "resultats", 400), "résultats")
+	for i in 4:
+		await tap_key(KEY_SPACE)
+		await tap_key(KEY_ENTER)
+	check(main.menus.screen == "resultats", "toujours aux résultats : " + main.menus.screen)
+	await get_tree().create_timer(1.3, true, false, true).timeout
+	await tap_key(KEY_ENTER)
+	check(main.menus.screen == "consignes", "puis la validation marche : " + main.menus.screen)
+	main.save.reset_defaults()
+
+
+func test_appui_tres_bref() -> void:
+	var sim := await calm()
+	sim.dog_pos = Vector2(-1.0, 1.4)
+	for source: String in ["clavier", "bouton"]:
+		sim.mouth = {"id": 99, "size": 3, "points": 500, "eat_left": 30.0, "spot": "", "pos": Vector2.ZERO}
+		sim.food.clear()
+		await frames(5)
+		if source == "clavier":
+			key(KEY_SPACE, true)
+			key(KEY_SPACE, false)
+		else:
+			main.hud._grab.button_down.emit()
+			main.hud._grab.button_up.emit()
+		await frames(5)
+		check(sim.mouth.is_empty(), "appui éclair (%s) : le morceau est lâché" % source)
+		check(main.hud.input_kind == "clavier", "le bouton nomme la touche")
+	await tap_pad(JOY_BUTTON_DPAD_LEFT)
+	check(main.hud.input_kind == "manette", "puis le bouton de la manette")
+
+
+func test_revoir_la_fin() -> void:
+	main.save.finished_seen = true
+	main.menus.show_credits()
+	await press(Texts.SEE_END)
+	check(main.menus.screen == "fin", "la fin se revoit")
+	main.save.reset_defaults()
+
+
 func test_vingt_parties_de_suite() -> void:
 	var before := 0
 	var nodes := 0

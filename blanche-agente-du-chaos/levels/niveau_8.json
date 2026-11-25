@@ -1,7 +1,7 @@
 {
   "id": 8,
   "meal": "La dinde de Noël",
-  "novelty": "La grande mission",
+  "novelty": "La dinde",
   "intro": [
     "Tout ce que tu as appris, en même temps.",
     "La dinde apparaîtra vers la fin. Elle vaut le coup…",
@@ -61,9 +61,9 @@
   "treasure_at": 0.7,
   "treasure_points": 1000,
   "stars": [
-    550,
-    1850,
-    3850
+    850,
+    1950,
+    3050
   ],
   "foods": {
     "crumb": [
@@ -82,5 +82,10 @@
       "dinde",
       "LA DINDE"
     ]
+  },
+  "activity_text": {
+    "brasser": "brasse la sauce",
+    "four": "arrose la dinde",
+    "ilot": "prépare la farce sur l'îlot"
   }
 }

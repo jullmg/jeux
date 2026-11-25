@@ -9,6 +9,10 @@ var stage: Stage
 var reduced_motion := false
 ## Vrai tant que le gros bouton à l'écran est enfoncé.
 var grab_held := false
+## Un appui sur le gros bouton, gardé jusqu'à ce que la partie l'ait vu (même très bref).
+var grab_tapped := false
+## "clavier", "manette" ou "pointeur" : ce que dit le gros bouton.
+var input_kind := "clavier"
 
 var _time := 0.0
 var _shown_score := 0.0
@@ -43,7 +47,9 @@ func _ready() -> void:
 	for state: String in ["normal", "hover", "pressed"]:
 		var s := UiStyle.box(UiStyle.PINK if state != "pressed" else UiStyle.PINK_DARK, 115, UiStyle.CREAM, 7, 0)
 		_grab.add_theme_stylebox_override(state, s)
-	_grab.button_down.connect(func() -> void: grab_held = true)
+	_grab.button_down.connect(func() -> void:
+		grab_held = true
+		grab_tapped = true)
 	_grab.button_up.connect(func() -> void: grab_held = false)
 	var grab_face := Control.new()
 	grab_face.name = "face"
@@ -113,6 +119,7 @@ func clear() -> void:
 	sim = null
 	visible = false
 	grab_held = false
+	grab_tapped = false
 	_shown_score = 0.0
 	_banner = 0.0
 	_flash = 0.0
@@ -179,6 +186,9 @@ func on_event(e: Dictionary) -> void:
 				_flash = 1.0
 		"grabbed":
 			_learned.grabbed = true
+		"dropped":
+			if e.combo_lost:
+				_floater(Texts.COMBO_LOST, stage.dog.head_position() + Vector3(0, 0.2, 0), Color.WHITE, 36)
 
 
 func _process(delta: float) -> void:
@@ -255,6 +265,11 @@ func _draw_panels(on: Control) -> void:
 	_text(on, Vector2(52, 62), Texts.SCORE, 28, UiStyle.INK_SOFT)
 	var pop := 1.0 + _score_pop * 0.12
 	_text(on, Vector2(52, 118), str(int(round(_shown_score))), int(58 * pop))
+	var next := Texts.ALL_STARS
+	for i in range(2, -1, -1):
+		if sim.score < sim.level.stars[i]:
+			next = Texts.NEXT_STAR % int(sim.level.stars[i])
+	_text(on, Vector2(200, 112), next, 22, UiStyle.INK_SOFT, HORIZONTAL_ALIGNMENT_RIGHT, 236.0)
 	if sim.multiplier() > 1:
 		on.draw_circle(Vector2(400, 66), 34, UiStyle.PINK, true, -1.0, true)
 		_text(on, Vector2(366, 80), Texts.COMBO % sim.multiplier(), 38, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, 68.0)
@@ -290,7 +305,8 @@ func _draw_panels(on: Control) -> void:
 	_text(on, badge.position + Vector2(124, 74), Texts.HIDDEN if hidden else Texts.VISIBLE, 44,
 		Color.WHITE if hidden else UiStyle.INK)
 	if not sim.mouth.is_empty():
-		var chew := Rect2(350, h - 142, 380, 114)
+		# Au-dessus de l'œil, pour laisser la place au tutoriel.
+		var chew := Rect2(28, h - 272, 380, 114)
 		_card(on, chew)
 		_text(on, chew.position + Vector2(24, 46), sim.food_name(sim.mouth), 30, UiStyle.INK, HORIZONTAL_ALIGNMENT_LEFT, 340.0)
 		var total: float = Sim.EAT_TIMES[sim.mouth.size]
@@ -303,7 +319,7 @@ func _grab_state() -> String:
 	if sim.dog_state == Sim.Dog.REACHING and _danger():
 		return Texts.LET_GO
 	if not sim.mouth.is_empty():
-		return Texts.DROP
+		return Texts.DROP_NOW if _danger() and not sim.dog_hidden() else Texts.DROP
 	return Texts.GRAB
 
 
@@ -327,7 +343,7 @@ func _draw_grab(face: Control) -> void:
 	_grab.modulate = Color(1, 1, 1, 1.0 if ready else 0.5)
 	Icons.paw(face, c + Vector2(0, -38), 46.0, Color.WHITE)
 	_text(face, Vector2(0, c.y + 50), _grab_state(), 38, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, face.size.x, 8)
-	_text(face, Vector2(0, c.y + 86), Texts.KEY_HINT, 24, UiStyle.CREAM, HORIZONTAL_ALIGNMENT_CENTER, face.size.x)
+	_text(face, Vector2(0, c.y + 86), Texts.KEY_HINTS[input_kind], 24, UiStyle.CREAM, HORIZONTAL_ALIGNMENT_CENTER, face.size.x)
 
 
 func _draw_world(on: Control) -> void:
@@ -366,7 +382,7 @@ func _draw_world(on: Control) -> void:
 	var beat := 1.0 + (0.0 if reduced_motion else sin(_time * 18.0) * 0.1)
 	match sim.mom_state:
 		Sim.Mom.BUSY:
-			var text: String = Texts.ACTIVITY.get(sim.activity, "")
+			var text: String = sim.level.get("activity_text", {}).get(sim.activity, Texts.ACTIVITY.get(sim.activity, ""))
 			var width := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x + 30
 			on.draw_style_box(UiStyle.box(Color(0.1, 0.06, 0.04, 0.6), 18, Color.TRANSPARENT, 0, 0),
 				Rect2(head + Vector2(-width / 2.0, -20), Vector2(width, 38)))
@@ -381,7 +397,7 @@ func _draw_world(on: Control) -> void:
 				# le temps qui reste avant qu'elle regarde
 				var f := clampf(sim.mom_left / sim.mom_len, 0.0, 1.0)
 				_bar(on, Rect2(head + Vector2(-70, 56), Vector2(140, 14)), f, UiStyle.RED)
-		Sim.Mom.TURN, Sim.Mom.LOOK, Sim.Mom.WALK, Sim.Mom.ROUND:
+		Sim.Mom.TURN, Sim.Mom.LOOK, Sim.Mom.ROUND:
 			on.draw_circle(head, 50.0, UiStyle.RED, true, -1.0, true)
 			on.draw_arc(head, 50.0, 0, TAU, 40, Color.WHITE, 5.0, true)
 			Icons.eye(on, head, 36.0, true)
@@ -441,6 +457,8 @@ func _update_tutorial() -> void:
 		key = "corner"
 	elif (sim.mom_state == Sim.Mom.HINT or sim.mom_state == Sim.Mom.TURN or sim.watching()) and sim.time > 2.0:
 		key = "warning"
+		if not sim.mouth.is_empty():
+			key = "safe" if sim.dog_hidden() else "drop"
 	elif sim.dog_state == Sim.Dog.REACHING:
 		key = "keep"
 	elif not sim.mouth.is_empty():

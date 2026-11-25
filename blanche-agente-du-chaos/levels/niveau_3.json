@@ -50,9 +50,9 @@
   "treasure_at": 0.6,
   "treasure_points": 500,
   "stars": [
-    800,
-    2300,
-    3300
+    1050,
+    1800,
+    2600
   ],
   "foods": {
     "crumb": [
@@ -71,5 +71,8 @@
       "poulet_roti",
       "Le poulet rôti"
     ]
+  },
+  "activity_text": {
+    "brasser": "brasse la soupe"
   }
 }

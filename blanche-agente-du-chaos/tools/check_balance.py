@@ -29,11 +29,13 @@ def main():
         need(get(level, "sage_300")["caught"] == 0, f"équité : le robot sage est pris au niveau {level}")
         need(get(level, "equilibre_300")["pass_rate"] >= 95, f"niveau {level} : un bon joueur ne le réussit pas toujours")
         need(get(level, "equilibre_300")["three_rate"] >= 25, f"niveau {level} : trois étoiles trop rares")
-        need(get(level, "novice_700")["pass_rate"] >= 88, f"niveau {level} : trop dur pour un débutant")
+        # Les deux dernières missions ont le droit de résister davantage.
+        need(get(level, "novice_700")["pass_rate"] >= (88 if level <= 6 else 78), f"niveau {level} : trop dur pour un débutant")
         for profile in ("spam_300", "campeur_300"):
             need(get(level, profile)["pass_rate"] <= 1, f"niveau {level} : {profile} réussit")
         need(get(level, "miettes_300")["pass_rate"] <= 5, f"niveau {level} : les miettes suffisent")
         need(get(level, "tetu_300")["three_rate"] <= 3, f"niveau {level} : s'entêter donne trois étoiles")
+        need(get(level, "tetu_300")["pass_rate"] <= 35, f"niveau {level} : s'entêter suffit souvent à réussir")
         need(get(level, "tetu_300")["median"] < 0.6 * get(level, "novice_700")["median"],
              f"niveau {level} : s'entêter vaut presque un jeu honnête")
         for profile in HONEST:

@@ -1,11 +1,12 @@
 {
   "id": 1,
   "meal": "Les crêpes du déjeuner",
-  "novelty": "Première mission",
+  "novelty": "Le coin et le comptoir",
   "intro": [
     "Pars de ton coin et approche-toi d'un comptoir.",
     "Maintiens le bouton pour attraper. Relâche-le pour redescendre.",
-    "Quand tu vois le « ! », redescends vite et aie l'air sage."
+    "Quand tu vois le « ! », aie l'air sage. La gueule pleine ? Appuie encore pour lâcher.",
+    "Prise sur le fait ? « AU COIN ! »… et tu repars après un petit moment."
   ],
   "duration": 120,
   "hint_min": 0.9,
@@ -43,9 +44,9 @@
   "treasure_at": 0.55,
   "treasure_points": 500,
   "stars": [
-    1500,
-    2650,
-    3750
+    700,
+    1550,
+    2400
   ],
   "foods": {
     "crumb": [
@@ -65,5 +66,8 @@
       "La grosse saucisse"
     ]
   },
-  "tutorial": true
+  "tutorial": true,
+  "activity_text": {
+    "brasser": "fait sauter les crêpes"
+  }
 }

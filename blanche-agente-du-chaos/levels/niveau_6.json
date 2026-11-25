@@ -55,9 +55,9 @@
   "treasure_at": 0.6,
   "treasure_points": 500,
   "stars": [
-    550,
-    2000,
-    2900
+    900,
+    1600,
+    2350
   ],
   "foods": {
     "crumb": [
@@ -76,5 +76,8 @@
       "grosse_boulette",
       "La boulette géante"
     ]
+  },
+  "activity_text": {
+    "brasser": "brasse la sauce"
   }
 }

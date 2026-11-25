@@ -174,6 +174,11 @@ def sfx():
     save("maman_appel", maman_call(), 0.75)
     save("tombe", mix((0, noise(0.1, 60, 600, decay=0.025), 1), (0.01, sine(130, 0.12, decay=0.03), 0.8)), 0.6)
     save("jappe", bark(), 0.8)
+    tune = (67, 71, 72, 71, 69, 67, 64, 67, 69, 72, 71, 67)
+    notes = [(i * 0.42, voice(lambda u, f=hz(n - 12): np.full_like(u, f), vowel((250, 250, 80, 1.0), (1100, 1100, 200, 0.12)),
+                                0.46 if i % 4 == 3 else 0.38, breath=0.008, attack=0.07, release=0.12), 1.0)
+             for i, n in enumerate(tune)]
+    save("fredon", mix(*notes, (len(tune) * 0.42, np.zeros(int(0.9 * SR)), 1.0)), 0.5)
     save("libre", mix((0, sine(523, 0.08, release=0.03), 1), (0.07, sine(784, 0.12, decay=0.05), 1)), 0.45)
     save("clic", sine(1200, 0.045, decay=0.014), 0.4)
     save("choix", sine(900, 0.035, decay=0.01), 0.25)

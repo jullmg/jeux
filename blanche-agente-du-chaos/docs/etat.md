@@ -8,22 +8,44 @@ Point de reprise d'une session à l'autre. Julien a demandé de tout faire sans 
 | Étape | État |
 |---|---|
 | 0. Préparation | fait |
-| 1. Prototype (règles) | fait : règles sans affichage, 35 tests, robots joueurs |
+| 1. Prototype (règles) | fait : règles sans affichage, tests, robots joueurs |
 | 2. Direction artistique | fait : cuisine, Blanche, Maman, Papa, Charlotte, nourriture |
-| 3. Tranche complète | à faire |
-| 4. Production | à faire (les 8 niveaux existent en données) |
-| 5. Finition | à faire |
-| 6. Assurance qualité | à faire |
-| 7. Livraison | à faire (modèles d'exportation Godot téléchargés) |
+| 3. Tranche complète | fait |
+| 4. Production | fait : les huit missions |
+| 5. Finition | fait : équilibrage, performance, accessibilité, icône |
+| 6. Assurance qualité | revues faites et corrigées (`docs/revues.md`) |
+| 7. Livraison | version macOS 1.0.0-rc1 exportée et testée ; **acceptation de Julien à venir** |
 
-## Choix faits en l'absence de Julien
+## Choix faits en l'absence de Julien (à réviser)
 
 - Le prototype gris à l'écran a été sauté : personne n'était là pour juger s'il est amusant. Les règles ont été
-  validées par des tests et des robots joueurs.
-- Personnages : modèles générés par script (pas de modèles libres adaptés).
-- Appuyer sur le bouton la gueule pleine **lâche** le morceau (on peut le reprendre). Sans cela, un gros morceau en
-  bouche pouvait rendre un flagrant délit inévitable.
-- Les sorties de punition et les retours de Maman à son poste se font sans qu'elle surveille : toute surveillance est
-  précédée d'un indice.
+  validées par des tests et des robots joueurs. Le « plaisir » reste à vérifier par des essais humains.
+- Personnages : modèles générés par script (la voie « modèle libre adapté » n'a pas été montrée).
+- Appuyer la gueule pleine **lâche** le morceau, et **fait perdre le combo** : sans le lâcher, un gros morceau pouvait
+  rendre un flagrant délit inévitable ; sans le coût, l'îlot ne servait plus à rien.
+- Maman change de poste **sans surveiller** : qui s'est bien caché n'est jamais découvert sans nouvel indice. Le seul
+  regard en marchant est le tour de l'îlot, annoncé.
+- Un trésor perdu dans un « AU COIN ! » revient sur un meuble 12 secondes plus tard.
 - Plan ajusté pour qu'aucun poste de Maman ne coince Blanche (frigo, planche, buffet).
-- Radiateur raccourci et déplacé pour ne pas cacher le coin ; le rail de luminaires n'est pas montré (il boucherait la vue).
+- Radiateur raccourci et déplacé pour ne pas cacher le coin ; le rail de luminaires n'est pas montré (il boucherait la
+  vue).
+- Étoiles calibrées sur des robots, avec une marge pour des humains : première chose à revoir après les essais.
+- Pas de version web (retirée avec les réponses du 2026-11-24).
+
+## Pas fait ou fait en partie
+
+- **Essais humains** (`docs/grille-essais.md`) et acceptation. L'étiquette git `blanche-v1.0.0` attend celle-ci.
+- Commandes sur du matériel réel : manette, écran tactile et clic « toucher pour cliquer » ne sont essayés que par
+  des entrées simulées. Le son n'a pas été **écouté** : il est synthétisé, les essais sont muets.
+- iPad et Android (étape suivante).
+- Pas de bouton « yeux piteux » ni de jappement commandé : l'air sage vient en restant immobile.
+- Le tabouret grince et vacille, mais ne tombe pas, et la vitesse n'y change rien.
+- La mission 1 annonce « AU COIN ! » dans ses consignes sans le jouer d'avance.
+- L'application n'est pas notariée (compte développeur Apple requis).
+
+## Questions pour Julien
+
+1. Après y avoir joué : la difficulté et les étoiles conviennent-elles ?
+2. Blanche, Maman, Papa et Charlotte sont-ils assez ressemblants ? Que changer en premier ?
+3. La musique générée te convient-elle, ou veux-tu la remplacer (`audio/music/`) ?
+4. Style « agente secrète » (`docs/idees.md`) ?
