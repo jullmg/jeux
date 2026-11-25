@@ -204,25 +204,24 @@ def marimba(f, seconds):
 
 
 def pluck(f, seconds, bright=0.5):
-    """Corde pincée (Karplus-Strong)."""
+    """Corde pincée (Karplus-Strong), accordée juste."""
     n = int(seconds * SR)
     period = max(2, int(SR / f))
     buf = rng.uniform(-1, 1, period)
     buf = bright * buf + (1 - bright) * np.convolve(buf, np.ones(5) / 5, mode="same")
-    out = np.zeros(n)
-    for i in range(0, n, period):
-        k = min(period, n - i)
+    # la période est un nombre entier d'échantillons (plus un demi du filtre) : on relit au bon rythme pour la justesse
+    ratio = f * (period + 0.5) / SR
+    out = np.zeros(int(n * ratio) + 2)
+    for i in range(0, len(out), period):
+        k = min(period, len(out) - i)
         out[i:i + k] = buf[:k]
         buf = 0.994 * 0.5 * (buf + np.roll(buf, 1))
+    out = np.interp(np.arange(n) * ratio, np.arange(len(out)), out)
     return out * env(n, 0.002, 0.04)
 
 
 def kick():
     return sweep(140, 45, 0.14, attack=0.002, release=0.08)
-
-
-def brush(strong=False):
-    return noise(0.09, 2500, 8000, decay=0.03 if strong else 0.014)
 
 
 def loop(bpm, bars, parts_of, name, peak):
@@ -240,80 +239,158 @@ def loop(bpm, bars, parts_of, name, peak):
     save(name, out, peak)
 
 
-def menu_parts(beat):
-    chords = [(48, [60, 64, 67]), (45, [57, 60, 64]), (41, [57, 60, 65]), (43, [59, 62, 67])] * 2
-    melody = [
-        [76, None, 79, 76, 72, None, 74, 76], [72, None, 76, 72, 69, None, 71, 72],
-        [69, 72, 77, None, 76, 74, 72, None], [71, None, 74, 79, 77, 74, 71, None],
-        [76, 76, 79, None, 84, None, 79, 76], [72, 72, 76, None, 81, None, 76, 72],
-        [77, 76, 74, 72, 69, None, 72, 74], [79, None, 77, 74, 72, None, None, None],
-    ]
-    for bar, (root, chord) in enumerate(chords):
-        at = bar * 4 * beat
-        for k, note in enumerate((root, root + 7, root, root + 7)):
-            yield at + k * beat, pluck(hz(note), beat * 0.9, 0.3), 0.55
-        for k in (1, 3):
-            for note in chord:
-                yield at + (k + 0.5) * beat, pluck(hz(note), beat * 0.4, 0.55), 0.14
-        for k, note in enumerate(melody[bar]):
-            if note:
-                yield at + k * beat / 2, marimba(hz(note), beat * 1.3), 0.42
-        yield at, kick(), 0.5
-        yield at + 2 * beat, kick(), 0.4
+# Les instruments du jeu : ukulélé, tuba, sifflet, clochettes, claquements de mains.
+
+def strum(notes, seconds, up=False):
+    """Un coup d'ukulélé : les cordes l'une après l'autre."""
+    parts = []
+    for k, n in enumerate(reversed(notes) if up else notes):
+        string = pluck(hz(n), seconds, 0.75)
+        parts.append((k * 0.011, string * np.exp(-t(seconds)[:len(string)] / 0.28), 0.8 if up else 1.0))
+    return mix(*parts)
+
+
+def tuba(f, seconds):
+    s = t(seconds)
+    x = np.sin(2 * np.pi * f * s) + 0.45 * np.sin(2 * np.pi * 2 * f * s) + 0.12 * np.sin(2 * np.pi * 3 * f * s)
+    return x * np.exp(-s * 4.5) * env(len(s), 0.012, 0.05)
+
+
+def whistle(f, seconds):
+    s = t(seconds)
+    scoop = 1 - 0.035 * np.exp(-s / 0.025)
+    vibrato = 1 + 0.009 * np.sin(2 * np.pi * 5.8 * s) * np.clip((s - 0.09) / 0.1, 0, 1)
+    phase = 2 * np.pi * np.cumsum(f * scoop * vibrato) / SR
+    x = np.sin(phase) + 0.06 * np.sin(2 * phase) + noise(seconds, f * 0.9, f * 1.2) * 0.03
+    return x * env(len(s), 0.028, 0.06)
+
+
+def glock(f, seconds):
+    s = t(seconds)
+    x = np.sin(2 * np.pi * f * s) * np.exp(-s * 5) + 0.4 * np.sin(2 * np.pi * f * 2.76 * s) * np.exp(-s * 11) \
+        + 0.15 * np.sin(2 * np.pi * f * 5.4 * s) * np.exp(-s * 20)
+    return x * env(len(s), 0.002, 0.05)
+
+
+def clap():
+    burst = lambda: noise(0.03, 900, 3600, attack=0.001, decay=0.007)
+    return mix((0.0, burst(), 0.7), (0.011, burst(), 0.8), (0.022, noise(0.14, 900, 3200, attack=0.001, decay=0.035), 1.0))
+
+
+def shaker():
+    return noise(0.07, 5000, 9500, attack=0.014, decay=0.02)
+
+
+def woodblock(f):
+    s = t(0.09)
+    return (np.sin(2 * np.pi * f * s) * np.exp(-s * 55) + 0.4 * np.sin(2 * np.pi * f * 2.4 * s) * np.exp(-s * 120)) \
+        * env(len(s), 0.001, 0.02)
+
+
+# accord : (cordes de l'ukulélé, basse, quinte)
+CHORDS = {
+    "C": ([60, 64, 67, 72], 48, 43), "F": ([60, 65, 69, 72], 41, 48), "G": ([59, 62, 67, 71], 43, 50),
+    "Am": ([60, 64, 69, 72], 45, 40), "D7": ([60, 62, 66, 69], 38, 45), "G7": ([59, 62, 65, 67], 43, 38),
+}
+# une mesure : un accord, ou deux (un par moitié)
+SONG = ["C", "C", "F", "G", "C", "Am", ("F", "G"), "C", "F", "C", "G", "Am", "F", "C", "D7", "G7"]
+MENU_SONG = ["C", "G", "Am", "F", "C", "G", ("F", "G"), "C"]
+# huit croches par mesure
+GAME_TUNE = [
+    [76, None, 79, 79, None, 76, 72, None], [74, 76, None, 79, None, None, 67, 69],
+    [72, None, 81, None, 79, 77, 76, 77], [79, None, None, 74, 71, None, 74, None],
+    [76, None, 79, 79, None, 76, 72, None], [76, 76, None, 81, None, 79, 76, None],
+    [77, None, 81, 77, 74, None, 79, 83], [84, None, None, None, 79, None, None, None],
+    [81, 84, 81, None, 77, None, 81, None], [79, 84, 79, None, 76, None, 79, None],
+    [74, 79, 74, None, 71, None, 74, 76], [76, None, 72, None, 69, None, 72, 76],
+    [77, 77, 81, None, 79, 77, None, 81], [79, 79, 76, None, 79, 84, None, None],
+    [74, 78, 81, None, 86, None, 81, 78], [79, None, 83, None, 74, None, 71, 74],
+]
+MENU_TUNE = [
+    [72, None, 76, 79, 84, None, 79, None], [74, None, 79, 83, 81, 79, None, None],
+    [76, None, 81, 84, 81, None, 76, None], [77, 79, 81, None, 77, None, None, None],
+    [72, None, 76, 79, 84, None, 88, None], [86, 83, 79, None, 74, None, 79, None],
+    [81, 81, 77, None, 83, 83, 79, None], [84, None, 79, None, 84, None, None, None],
+]
+GAME_BPM = 118  # la couche de tension joue par-dessus la musique du jeu : même tempo, même longueur
+SHUFFLE = 0.08  # les croches « en l'air » traînent un peu : ça sautille
+
+
+def chord_at(bar, when):
+    c = bar if isinstance(bar, str) else bar[0 if when < 2 else 1]
+    return CHORDS[c]
+
+
+def at_beat(bar_start, when, beat):
+    return bar_start + (when + (SHUFFLE if when % 1 else 0.0)) * beat
+
+
+def band(song, beat, claps=True):
+    """L'accompagnement : ukulélé, basse sautillante, grosse caisse, mains et maracas."""
+    for bar, chords in enumerate(song):
+        start = bar * 4 * beat
+        for when, up, gain in ((0, False, 1.0), (1, False, 0.75), (1.5, True, 0.6), (2.5, True, 0.65),
+                               (3, False, 0.8), (3.5, True, 0.6)):
+            yield at_beat(start, when, beat), strum(chord_at(chords, when)[0], beat * 0.75, up), 0.11 * gain
+        for when, which in ((0, 1), (2, 2)):
+            root = chord_at(chords, when)[which if isinstance(chords, str) else 1]
+            yield start + when * beat, tuba(hz(root), beat * 0.85), 0.42
+        if bar % 2 == 1:
+            yield at_beat(start, 3.5, beat), tuba(hz(chord_at(chords, 3.5)[2]), beat * 0.45), 0.3
+        for when in (0, 2):
+            yield start + when * beat, kick(), 0.4
+        if claps:
+            for when in (1, 3):
+                yield start + when * beat, clap(), 0.2
         for k in range(8):
-            yield at + k * beat / 2, brush(k % 2 == 1), 0.07 if k % 2 == 0 else 0.11
+            yield at_beat(start, k / 2, beat), shaker(), 0.075 if k % 2 else 0.045
 
 
-BASS = [[38, 45, 41, 45], [38, 45, 41, 44], [43, 50, 46, 50], [45, 49, 52, 49],
-        [38, 45, 41, 45], [46, 41, 45, 40], [43, 46, 45, 44], [38, 45, 38, None]]
+def melody(tune, beat, instrument, gain, octave=0, from_bar=0):
+    for bar, notes in enumerate(tune):
+        for k, note in enumerate(notes):
+            if note is None:
+                continue
+            # une note tient jusqu'à la suivante
+            hold = 1
+            while k + hold < 8 and notes[k + hold] is None:
+                hold += 1
+            start = (from_bar + bar) * 4 * beat
+            yield at_beat(start, k / 2, beat), instrument(hz(note + octave), beat * min(hold, 3) * 0.48), gain
+
+
+def menu_parts(beat):
+    """Le thème d'accueil : d'abord aux clochettes, puis sifflé."""
+    yield from band(MENU_SONG * 2, beat)
+    yield from melody(MENU_TUNE, beat, glock, 0.3)
+    yield from melody(MENU_TUNE, beat, whistle, 0.2, from_bar=8)
+    yield from melody(MENU_TUNE, beat, marimba, 0.16, -12, from_bar=8)
 
 
 def game_parts(beat):
-    """Ambiance d'espionnage : contrebasse qui marche, pizzicatos et claquements de doigts."""
-    motif = [
-        [None, 74, None, 77, 76, None, 74, None], [None, 74, None, 77, 80, 81, None, None],
-        [None, 79, None, 82, 81, None, 79, None], [76, None, 73, None, 69, None, None, None],
-        [None, 74, None, 77, 76, None, 74, 72], [70, None, 69, None, None, 65, 69, None],
-        [67, None, 70, 69, None, 68, None, None], [74, None, None, None, None, 69, 71, 73],
-    ]
-    for bar in range(8):
-        at = bar * 4 * beat
-        for k, note in enumerate(BASS[bar]):
-            if note:
-                swing = beat * 0.04 if k % 2 else 0
-                yield at + k * beat + swing, pluck(hz(note), beat * 0.95, 0.18), 0.7
-        for k, note in enumerate(motif[bar]):
-            if note:
-                swing = beat * 0.12 if k % 2 else 0
-                yield at + k * beat / 2 + swing, pluck(hz(note), beat * 0.7, 0.65), 0.24
-        for k in (1, 3):
-            yield at + k * beat, noise(0.05, 1500, 4500, decay=0.01), 0.22
-        for k in range(8):
-            swing = beat * 0.12 if k % 2 else 0
-            yield at + k * beat / 2 + swing, brush(), 0.045
-        if bar % 4 == 3:
-            yield at + 3 * beat, marimba(hz(86), beat), 0.14
+    """En jeu : un petit air sifflé qui trotte, repris aux clochettes."""
+    yield from band(SONG, beat)
+    yield from melody(GAME_TUNE[:8], beat, whistle, 0.2)
+    yield from melody(GAME_TUNE[8:], beat, glock, 0.27, from_bar=8)
+    yield from melody(GAME_TUNE[8:], beat, marimba, 0.18, -12, from_bar=8)
 
 
 def tension_parts(beat):
-    """La couche qui monte avec le soupçon : tic-tac, basse pressante et trémolo."""
-    for bar in range(8):
-        at = bar * 4 * beat
-        root = BASS[bar][0]
-        for k in range(16):
-            yield at + k * beat / 4, noise(0.025, 4000, 9000, decay=0.006), 0.25 if k % 4 == 0 else 0.13
+    """La couche qui monte avec le soupçon : tic-tac de bois et basse qui presse, sans devenir inquiétant."""
+    for bar, chords in enumerate(SONG):
+        start = bar * 4 * beat
         for k in range(8):
-            yield at + k * beat / 2, pluck(hz(root), beat * 0.45, 0.25), 0.35
-        s = t(4 * beat)
-        trem = (np.sin(2 * np.pi * hz(root + 24) * s) + np.sin(2 * np.pi * hz(root + 25) * s)) * (
-            0.5 + 0.5 * np.sin(2 * np.pi * 9 * s))
-        yield at, trem * env(len(s), 0.3, 0.3), 0.07
+            yield at_beat(start, k / 2, beat), woodblock(1180 if k % 2 == 0 else 880), 0.34 if k % 2 == 0 else 0.22
+            yield at_beat(start, k / 2, beat), pluck(hz(chord_at(chords, k / 2)[1] + 12), beat * 0.4, 0.4), 0.28
+        if bar % 4 == 3:
+            for k in range(8):
+                yield start + (3 + k / 8) * beat, clap(), 0.06 + 0.025 * k
 
 
 if __name__ == "__main__":
     sfx()
-    loop(112, 8, menu_parts, "musique_menu", 0.7)
-    loop(104, 8, game_parts, "musique_jeu", 0.7)
-    loop(104, 8, tension_parts, "musique_tension", 0.6)
+    loop(126, 16, menu_parts, "musique_menu", 0.75)
+    loop(GAME_BPM, 16, game_parts, "musique_jeu", 0.75)
+    loop(GAME_BPM, 16, tension_parts, "musique_tension", 0.65)
     files = sorted(OUT.glob("*.wav"))
     print(f"AUDIO {len(files)} fichiers, {sum(f.stat().st_size for f in files) // 1024} Ko")
