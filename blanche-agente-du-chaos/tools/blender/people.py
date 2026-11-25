@@ -9,6 +9,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import common as C  # noqa: E402
+import mom_head  # noqa: E402
 import bpy  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
@@ -148,119 +149,121 @@ def build(who, spec):
     def H(x, y, z):
         return hc + Vector((x, y, z)) * hr
 
-    body.ball(hc, (0.098 * hr, 0.118 * hr, 0.105 * hr), skin, seg=36, rings=28, weights=hw)
-    jaw = spec.get("jaw", 1.0)
-    body.ball(H(0, -0.05, 0.022), (0.075 * jaw * hr, 0.06 * hr, 0.075 * hr), skin, seg=24, weights=hw)
-    for s in (1, -1):
-        body.ball(H(0.097 * s, -0.008, -0.004), (0.014 * hr, 0.027 * hr, 0.019 * hr), skin, weights=hw)
-        if child:
-            body.ball(H(0.054 * s, -0.03, 0.0775), (0.017 * hr, 0.01 * hr, 0.0065 * hr), skin_pink, weights=hw,
-                      matrix=Matrix.Rotation(0.55 * s, 3, "Y"))
-        # yeux
-        eye = H(0.036 * s, 0.006, 0.093)
-        er = 1.18 if child else 1.0
-        body.ball(eye, (0.0185 * er * hr, 0.0125 * er * hr, 0.0105 * hr), eye_white, weights=hw)
-        body.ball(eye + Vector((-0.001 * s, -0.0005, 0.0085)) * hr, (0.0092 * er * hr, 0.0095 * er * hr, 0.0042 * hr), iris,
-                  weights=hw)
-        body.ball(eye + Vector((-0.001 * s, -0.0005, 0.0121)) * hr, (0.0045 * hr, 0.0047 * hr, 0.0016 * hr), pupil, weights=hw)
-        body.ball(eye + Vector((0.0025, 0.0035, 0.0134)) * hr, 0.0019 * hr, shine, weights=hw, seg=8, rings=6)
-        body.tube([H(0.017 * s, 0.015, 0.101), H(0.036 * s, 0.0215, 0.1035), H(0.056 * s, 0.014, 0.094)],
-                  [0.0022 * hr, 0.003 * hr, 0.0018 * hr], brow if not child else hair, seg=8, weights=hw)
-    body.tube([H(0, 0.002, 0.1), H(0, -0.028, 0.114)], [0.0075 * hr, 0.012 * hr], skin, seg=12, weights=hw)
-
-    # cheveux
-    def cap(scale, up, back, mat, cut_y, cut_front):
-        """Une calotte : la sphère de la tête, sans la partie du visage."""
-        verts, faces, seg, rings = [], [], 40, 28
-        for i in range(rings + 1):
-            lat = -math.pi / 2 + math.pi * i / rings
-            for j in range(seg):
-                lon = 2 * math.pi * j / seg
-                x = math.cos(lat) * math.cos(lon) * 0.098 * scale
-                y = math.sin(lat) * 0.118 * scale + up
-                z = math.cos(lat) * math.sin(lon) * 0.105 * scale + back
-                # devant, la ligne des cheveux remonte en arc au-dessus du front
-                limit = cut_front - 0.9 * x * x / 0.098 if z > 0.035 else cut_y
-                if z > -0.005 and z <= 0.035:
-                    limit = cut_y + (cut_front - 0.015 - cut_y) * (z + 0.005) / 0.04
-                if y < limit:
-                    y = limit
-                    x *= 0.93
-                    z *= 0.93
-                verts.append(tuple(H(x, y, z)))
-        for i in range(rings):
-            for j in range(seg):
-                a, b = i * seg + j, i * seg + (j + 1) % seg
-                faces.append([a, a + seg, b + seg, b])
-        body.add(verts, faces, mat, smooth=True, weights=hw)
-
-    style = spec["style"]
-    if style == "short":
-        cap(1.075, 0.008, -0.006, hair, -0.012, 0.074)
-        for _ in range(110):
-            a = rng.uniform(0, math.tau)
-            r = rng.uniform(0.0, 0.072)
-            x, z = math.cos(a) * r, math.sin(a) * r * 1.05 - 0.008
-            y = 0.126 * math.sqrt(max(0.05, 1 - (x / 0.108) ** 2 - (z / 0.115) ** 2)) + 0.004
-            body.tube([H(x, y - 0.007, z - 0.006), H(x + rng.uniform(-0.006, 0.006), y + 0.001, z + 0.016)],
-                      [0.011 * hr, 0.005 * hr], hair, seg=7, weights=hw, cap_rings=2)
-    else:
-        cap(1.09, 0.008, -0.007, hair2 if style == "mid" else hair, -0.045, 0.068)
-        length = 0.19 if style == "mid" else 0.33
-        wave = 0.006 if style == "mid" else 0.011
-
-        def hair_w(v):
-            y = (v.y - hc.y) / hr
-            if y > -0.07:
-                return {"head": 1.0}
-            if y > -0.14:
-                return {"head": 0.5, "chest": 0.5}
-            return {"chest": 1.0}
-
-        count = 26
-        for i in range(count):
-            a = math.radians(-22 - i * (136 / (count - 1)))          # de côté à côté en passant par derrière
-            dirx, dirz = math.cos(a), math.sin(a)
-            side = abs(dirx)
-            L = length * (1.0 - 0.18 * side) * rng.uniform(0.9, 1.08)
-            pts, rr = [], []
-            for j in range(9):
-                t = j / 8
-                y = 0.045 - t * (L + 0.045)
-                spread = 0.096 + 0.022 * math.sin(math.pi * min(1.0, t * 1.4)) + 0.02 * t * (1 if style == "long" else 0.4)
-                w = math.sin(t * math.pi * (3.2 if style == "long" else 2.0) + i * 1.9) * wave * t * 2
-                pts.append(H(dirx * spread + w, y, dirz * spread * 1.02 + w * 0.6 - 0.006))
-                rr.append((0.025 - 0.019 * t ** 2.2) * hr)
-            path, radii = C.curve(pts, rr, 2)
-            m = hair if (i % 4 or style == "long") else hair2
-            body.tube(path, radii, m, seg=10, squash=(1.0, 0.75), weights=hair_w, cap_rings=3)
-        # mèches qui encadrent le visage, avec une raie
+    soft = spec.get("soft_face", False)
+    if not soft:
+        body.ball(hc, (0.098 * hr, 0.118 * hr, 0.105 * hr), skin, seg=36, rings=28, weights=hw)
+        jaw = spec.get("jaw", 1.0)
+        body.ball(H(0, -0.05, 0.022), (0.075 * jaw * hr, 0.06 * hr, 0.075 * hr), skin, seg=24, weights=hw)
         for s in (1, -1):
-            for j, (dz, ln) in enumerate(((0.062, 0.12), (0.04, 0.17), (0.018, 0.2))):
-                pts = [H(0.004 * s, 0.1215 - j * 0.005, 0.022 + dz * 0.62), H(0.055 * s, 0.096 - j * 0.006, 0.03 + dz * 0.72),
-                       H(0.091 * s, 0.04, dz - 0.006), H((0.104 + 0.006 * j) * s, -0.05, dz - 0.018),
-                       H((0.1 + wave * j) * s, -ln * (1.4 if style == "long" else 1.0), dz - 0.024)]
-                path, radii = C.curve(pts, [v * hr for v in (0.006, 0.0125, 0.0145, 0.014, 0.004)], 4)
-                body.tube(path, radii, hair if j != 1 else (hair2 if style == "mid" else hair), seg=10, squash=(1.0, 0.7),
-                          weights=hair_w, cap_rings=3)
+            body.ball(H(0.097 * s, -0.008, -0.004), (0.014 * hr, 0.027 * hr, 0.019 * hr), skin, weights=hw)
+            if child:
+                body.ball(H(0.054 * s, -0.03, 0.0775), (0.017 * hr, 0.01 * hr, 0.0065 * hr), skin_pink, weights=hw,
+                          matrix=Matrix.Rotation(0.55 * s, 3, "Y"))
+            # yeux
+            eye = H(0.036 * s, 0.006, 0.093)
+            er = 1.18 if child else 1.0
+            body.ball(eye, (0.0185 * er * hr, 0.0125 * er * hr, 0.0105 * hr), eye_white, weights=hw)
+            body.ball(eye + Vector((-0.001 * s, -0.0005, 0.0085)) * hr, (0.0092 * er * hr, 0.0095 * er * hr, 0.0042 * hr), iris,
+                      weights=hw)
+            body.ball(eye + Vector((-0.001 * s, -0.0005, 0.0121)) * hr, (0.0045 * hr, 0.0047 * hr, 0.0016 * hr), pupil, weights=hw)
+            body.ball(eye + Vector((0.0025, 0.0035, 0.0134)) * hr, 0.0019 * hr, shine, weights=hw, seg=8, rings=6)
+            body.tube([H(0.017 * s, 0.015, 0.101), H(0.036 * s, 0.0215, 0.1035), H(0.056 * s, 0.014, 0.094)],
+                      [0.0022 * hr, 0.003 * hr, 0.0018 * hr], brow if not child else hair, seg=8, weights=hw)
+        body.tube([H(0, 0.002, 0.1), H(0, -0.028, 0.114)], [0.0075 * hr, 0.012 * hr], skin, seg=12, weights=hw)
 
-    # barbe de quelques jours : une pellicule sur la mâchoire
-    if spec.get("stubble"):
-        stub = M("barbe", spec["stubble"], 0.85)
-        verts, faces, seg, rings = [], [], 28, 10
-        for i in range(rings + 1):
-            lat = math.radians(-78 + i * 58 / rings)
-            for j in range(seg + 1):
-                lon = math.radians(8 + j * 164 / seg)
-                x = math.cos(lat) * math.cos(lon) * 0.0765 * jaw
-                y = -0.05 + math.sin(lat) * 0.0612
-                z = 0.022 + math.cos(lat) * math.sin(lon) * 0.0763
-                verts.append(tuple(H(x, y, z)))
-        for i in range(rings):
-            for j in range(seg):
-                a = i * (seg + 1) + j
-                faces.append([a, a + seg + 1, a + seg + 2, a + 1])
-        body.add(verts, faces, stub, smooth=True, weights=hw)
+        # cheveux
+        def cap(scale, up, back, mat, cut_y, cut_front):
+            """Une calotte : la sphère de la tête, sans la partie du visage."""
+            verts, faces, seg, rings = [], [], 40, 28
+            for i in range(rings + 1):
+                lat = -math.pi / 2 + math.pi * i / rings
+                for j in range(seg):
+                    lon = 2 * math.pi * j / seg
+                    x = math.cos(lat) * math.cos(lon) * 0.098 * scale
+                    y = math.sin(lat) * 0.118 * scale + up
+                    z = math.cos(lat) * math.sin(lon) * 0.105 * scale + back
+                    # devant, la ligne des cheveux remonte en arc au-dessus du front
+                    limit = cut_front - 0.9 * x * x / 0.098 if z > 0.035 else cut_y
+                    if z > -0.005 and z <= 0.035:
+                        limit = cut_y + (cut_front - 0.015 - cut_y) * (z + 0.005) / 0.04
+                    if y < limit:
+                        y = limit
+                        x *= 0.93
+                        z *= 0.93
+                    verts.append(tuple(H(x, y, z)))
+            for i in range(rings):
+                for j in range(seg):
+                    a, b = i * seg + j, i * seg + (j + 1) % seg
+                    faces.append([a, a + seg, b + seg, b])
+            body.add(verts, faces, mat, smooth=True, weights=hw)
+
+        style = spec["style"]
+        if style == "short":
+            cap(1.075, 0.008, -0.006, hair, -0.012, 0.074)
+            for _ in range(110):
+                a = rng.uniform(0, math.tau)
+                r = rng.uniform(0.0, 0.072)
+                x, z = math.cos(a) * r, math.sin(a) * r * 1.05 - 0.008
+                y = 0.126 * math.sqrt(max(0.05, 1 - (x / 0.108) ** 2 - (z / 0.115) ** 2)) + 0.004
+                body.tube([H(x, y - 0.007, z - 0.006), H(x + rng.uniform(-0.006, 0.006), y + 0.001, z + 0.016)],
+                          [0.011 * hr, 0.005 * hr], hair, seg=7, weights=hw, cap_rings=2)
+        else:
+            cap(1.09, 0.008, -0.007, hair2 if style == "mid" else hair, -0.045, 0.068)
+            length = 0.19 if style == "mid" else 0.33
+            wave = 0.006 if style == "mid" else 0.011
+
+            def hair_w(v):
+                y = (v.y - hc.y) / hr
+                if y > -0.07:
+                    return {"head": 1.0}
+                if y > -0.14:
+                    return {"head": 0.5, "chest": 0.5}
+                return {"chest": 1.0}
+
+            count = 26
+            for i in range(count):
+                a = math.radians(-22 - i * (136 / (count - 1)))          # de côté à côté en passant par derrière
+                dirx, dirz = math.cos(a), math.sin(a)
+                side = abs(dirx)
+                L = length * (1.0 - 0.18 * side) * rng.uniform(0.9, 1.08)
+                pts, rr = [], []
+                for j in range(9):
+                    t = j / 8
+                    y = 0.045 - t * (L + 0.045)
+                    spread = 0.096 + 0.022 * math.sin(math.pi * min(1.0, t * 1.4)) + 0.02 * t * (1 if style == "long" else 0.4)
+                    w = math.sin(t * math.pi * (3.2 if style == "long" else 2.0) + i * 1.9) * wave * t * 2
+                    pts.append(H(dirx * spread + w, y, dirz * spread * 1.02 + w * 0.6 - 0.006))
+                    rr.append((0.025 - 0.019 * t ** 2.2) * hr)
+                path, radii = C.curve(pts, rr, 2)
+                m = hair if (i % 4 or style == "long") else hair2
+                body.tube(path, radii, m, seg=10, squash=(1.0, 0.75), weights=hair_w, cap_rings=3)
+            # mèches qui encadrent le visage, avec une raie
+            for s in (1, -1):
+                for j, (dz, ln) in enumerate(((0.062, 0.12), (0.04, 0.17), (0.018, 0.2))):
+                    pts = [H(0.004 * s, 0.1215 - j * 0.005, 0.022 + dz * 0.62), H(0.055 * s, 0.096 - j * 0.006, 0.03 + dz * 0.72),
+                           H(0.091 * s, 0.04, dz - 0.006), H((0.104 + 0.006 * j) * s, -0.05, dz - 0.018),
+                           H((0.1 + wave * j) * s, -ln * (1.4 if style == "long" else 1.0), dz - 0.024)]
+                    path, radii = C.curve(pts, [v * hr for v in (0.006, 0.0125, 0.0145, 0.014, 0.004)], 4)
+                    body.tube(path, radii, hair if j != 1 else (hair2 if style == "mid" else hair), seg=10, squash=(1.0, 0.7),
+                              weights=hair_w, cap_rings=3)
+
+        # barbe de quelques jours : une pellicule sur la mâchoire
+        if spec.get("stubble"):
+            stub = M("barbe", spec["stubble"], 0.85)
+            verts, faces, seg, rings = [], [], 28, 10
+            for i in range(rings + 1):
+                lat = math.radians(-78 + i * 58 / rings)
+                for j in range(seg + 1):
+                    lon = math.radians(8 + j * 164 / seg)
+                    x = math.cos(lat) * math.cos(lon) * 0.0765 * jaw
+                    y = -0.05 + math.sin(lat) * 0.0612
+                    z = 0.022 + math.cos(lat) * math.sin(lon) * 0.0763
+                    verts.append(tuple(H(x, y, z)))
+            for i in range(rings):
+                for j in range(seg):
+                    a = i * (seg + 1) + j
+                    faces.append([a, a + seg + 1, a + seg + 2, a + 1])
+            body.add(verts, faces, stub, smooth=True, weights=hw)
 
     # vêtements propres à chacun
     for decoration in spec.get("extras", []):
@@ -269,35 +272,42 @@ def build(who, spec):
     ob = body.build()
     C.skin(ob, armature)
 
-    # bouches : une seule visible à la fois dans le jeu
-    my = -0.056
-    mz = 0.099
-    for name in ("Sourire", "Neutre", "Ouverte", "Fachee"):
-        mouth = C.Obj("Bouche" + name)
-        if name == "Sourire":
-            mouth.ball(H(0, my - 0.001, mz - 0.004), (0.024 * hr, 0.0095 * hr, 0.007 * hr), inside, weights=hw)
-            mouth.ball(H(0, my + 0.0035, mz - 0.001), (0.019 * hr, 0.0042 * hr, 0.0055 * hr), teeth, weights=hw)
-            mouth.tube([H(-0.029, my + 0.011, mz - 0.008), H(-0.016, my + 0.002, mz + 0.002), H(0, my - 0.001, mz + 0.004),
-                        H(0.016, my + 0.002, mz + 0.002), H(0.029, my + 0.011, mz - 0.008)], 0.0001, lips, seg=4, weights=hw)
-            mouth.tube([H(-0.027, my + 0.009, mz - 0.006), H(-0.014, my - 0.008, mz), H(0, my - 0.0115, mz + 0.0015),
-                        H(0.014, my - 0.008, mz), H(0.027, my + 0.009, mz - 0.006)], 0.0036 * hr, lips, seg=8, weights=hw)
-            mouth.tube([H(-0.027, my + 0.009, mz - 0.006), H(-0.012, my + 0.0075, mz + 0.001), H(0, my + 0.008, mz + 0.002),
-                        H(0.012, my + 0.0075, mz + 0.001), H(0.027, my + 0.009, mz - 0.006)], 0.003 * hr, lips, seg=8,
-                       weights=hw)
-        elif name == "Neutre":
-            mouth.tube([H(-0.02, my, mz - 0.003), H(0, my - 0.002, mz + 0.002), H(0.02, my, mz - 0.003)], 0.0042 * hr, lips,
-                       seg=10, weights=hw)
-        elif name == "Ouverte":
-            mouth.ball(H(0, my - 0.005, mz - 0.003), (0.017 * hr, 0.019 * hr, 0.0075 * hr), inside, weights=hw)
-            mouth.torus(H(0, my - 0.005, mz + 0.0025), 0.017 * hr, 0.0035 * hr, lips, axis=(0, 0, 1), sides=8, squash=1.12,
-                        weights=hw)
-            mouth.ball(H(0, my + 0.006, mz), (0.011 * hr, 0.0035 * hr, 0.0055 * hr), teeth, weights=hw)
-        else:
-            mouth.tube([H(-0.025, my - 0.012, mz - 0.006), H(-0.012, my - 0.001, mz), H(0, my + 0.001, mz + 0.002),
-                        H(0.012, my - 0.001, mz), H(0.025, my - 0.012, mz - 0.006)], 0.0042 * hr, lips, seg=8, weights=hw)
-        C.skin(mouth.build(), armature)
+    if soft:
+        mom_head.build(armature, spec, hc, hr, rng)
+    else:
+        # bouches : une seule visible à la fois dans le jeu
+        my = -0.056
+        mz = 0.099
+        for name in ("Sourire", "Neutre", "Ouverte", "Fachee"):
+            mouth = C.Obj("Bouche" + name)
+            if name == "Sourire":
+                mouth.ball(H(0, my - 0.001, mz - 0.004), (0.024 * hr, 0.0095 * hr, 0.007 * hr), inside, weights=hw)
+                mouth.ball(H(0, my + 0.0035, mz - 0.001), (0.019 * hr, 0.0042 * hr, 0.0055 * hr), teeth, weights=hw)
+                mouth.tube([H(-0.029, my + 0.011, mz - 0.008), H(-0.016, my + 0.002, mz + 0.002), H(0, my - 0.001, mz + 0.004),
+                            H(0.016, my + 0.002, mz + 0.002), H(0.029, my + 0.011, mz - 0.008)], 0.0001, lips, seg=4, weights=hw)
+                mouth.tube([H(-0.027, my + 0.009, mz - 0.006), H(-0.014, my - 0.008, mz), H(0, my - 0.0115, mz + 0.0015),
+                            H(0.014, my - 0.008, mz), H(0.027, my + 0.009, mz - 0.006)], 0.0036 * hr, lips, seg=8, weights=hw)
+                mouth.tube([H(-0.027, my + 0.009, mz - 0.006), H(-0.012, my + 0.0075, mz + 0.001), H(0, my + 0.008, mz + 0.002),
+                            H(0.012, my + 0.0075, mz + 0.001), H(0.027, my + 0.009, mz - 0.006)], 0.003 * hr, lips, seg=8,
+                           weights=hw)
+            elif name == "Neutre":
+                mouth.tube([H(-0.02, my, mz - 0.003), H(0, my - 0.002, mz + 0.002), H(0.02, my, mz - 0.003)], 0.0042 * hr, lips,
+                           seg=10, weights=hw)
+            elif name == "Ouverte":
+                mouth.ball(H(0, my - 0.005, mz - 0.003), (0.017 * hr, 0.019 * hr, 0.0075 * hr), inside, weights=hw)
+                mouth.torus(H(0, my - 0.005, mz + 0.0025), 0.017 * hr, 0.0035 * hr, lips, axis=(0, 0, 1), sides=8, squash=1.12,
+                            weights=hw)
+                mouth.ball(H(0, my + 0.006, mz), (0.011 * hr, 0.0035 * hr, 0.0055 * hr), teeth, weights=hw)
+            else:
+                mouth.tube([H(-0.025, my - 0.012, mz - 0.006), H(-0.012, my - 0.001, mz), H(0, my + 0.001, mz + 0.002),
+                            H(0.012, my - 0.001, mz), H(0.025, my - 0.012, mz - 0.006)], 0.0042 * hr, lips, seg=8, weights=hw)
+            C.skin(mouth.build(), armature)
 
+    if soft:
+        mom_head.for_game(True)
     C.export(spec["file"])
+    if soft:
+        mom_head.for_game(False)
     for o in bpy.data.objects:
         if o.name.startswith("Bouche") and o.name != "BoucheSourire":
             o.hide_render = True
@@ -348,8 +358,8 @@ def fleece(body, P, k, torso_w, M):
 
 
 build("maman", dict(
-    file="maman", height=1.66, style="mid", skin="#e3ab8f", hair="#b99a70", hair2="#6f5138", brow="#6a4b34",
-    eyes="#6b5a2e", top="#1d1c20", top2="#151418", trim="#26242a", pants="#2a2930", shoes="#c98a8f", lips="#b4605a",
+    file="maman", height=1.66, soft_face=True, style="mid", skin="#e8b49a", hair="#c7b193", hair2="#8c7055",
+    hair_root="#463023", brow="#5a3d2a", eyes="#7a5426", top="#1d1c20", top2="#151418", trim="#26242a", pants="#2a2930", shoes="#c98a8f", lips="#c46e6c",
     hip_r=0.158, chest_r=0.155, shoulders=0.98, extras=[emblem]))
 
 build("papa", dict(

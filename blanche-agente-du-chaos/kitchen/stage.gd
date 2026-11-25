@@ -614,7 +614,7 @@ func _show_mom(delta: float) -> void:
 		Sim.Mom.LOOK:
 			mom.pose = "look"
 			if not sim.dog_hidden():
-				mom.head_yaw = clampf(relative, -55.0, 55.0)
+				mom.head_yaw = clampf(relative, -28.0, 28.0)
 		Sim.Mom.TURN_BACK:
 			mom.pose = "idle"
 		Sim.Mom.SCOLD:
@@ -622,7 +622,7 @@ func _show_mom(delta: float) -> void:
 			var corner := map.corner - sim.mom_pos
 			# Elle regarde Blanche et pointe le coin.
 			_mom_yaw = _turn(_mom_yaw, atan2(corner.x, corner.y), delta, 20.0)
-			mom.head_yaw = clampf(relative, -40.0, 40.0)
+			mom.head_yaw = clampf(relative, -28.0, 28.0)
 		Sim.Mom.WALK, Sim.Mom.ROUND:
 			mom.pose = "walk"
 	# Elle ne peut pas s'empêcher de rire une fois Blanche rendue au coin.

@@ -150,6 +150,11 @@ func _poses() -> void:
 		stage.mom.speed = 1.0
 		await wait(0.8)
 		await shot("p_maman_" + pose)
+	stage.mom.rotation.y = 0.1
+	stage.mom.pose = "idle"
+	stage.photo = [stand + Vector3(0.12, 1.56, 0.95), stand + Vector3(0.0, 1.47, 0.0)]
+	await wait(0.8)
+	await shot("p_maman_visage")
 	stage.mom.position = Vector3(3.5, 0, 6.0)
 	for who: String in ["papa", "charlotte"]:
 		var p := PersonView.new(who)

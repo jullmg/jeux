@@ -2,6 +2,9 @@ class_name PersonView
 extends Node3D
 ## Maman, Papa ou Charlotte à l'écran. `pose` dit le geste en cours.
 
+## Les matières dont la couleur vient des sommets du modèle (tools/blender/mom_head.py).
+const PAINTED := ["peau_visage", "cheveux_ombre"]
+
 ## "idle", "walk", "brasser", "couper", "laver", "frigo", "telephone", "four", "ilot", "surprise", "charlotte",
 ## "hint", "feint", "round", "look", "point", "laugh", "wave", "carry", "snitch", "cheer"
 var pose := "idle"
@@ -36,9 +39,22 @@ func _ready() -> void:
 	model = (load("res://art/models/%s.glb" % who) as PackedScene).instantiate()
 	add_child(model)
 	rig = Rig.new(model)
+	_paint_by_vertex()
 	for mesh: MeshInstance3D in model.find_children("Bouche*", "MeshInstance3D", true, false):
 		_mouths[mesh.name.trim_prefix("Bouche")] = mesh
 	_set_mouth("Sourire")
+
+
+## Le visage et la chevelure de Maman sont peints aux sommets (joues roses, cheveux foncés à la racine).
+func _paint_by_vertex() -> void:
+	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		for s in mesh.mesh.get_surface_count():
+			var base := mesh.mesh.surface_get_material(s) as BaseMaterial3D
+			if base and base.resource_name in PAINTED:
+				var m: BaseMaterial3D = base.duplicate()
+				m.vertex_color_use_as_albedo = true
+				m.albedo_color = Color.WHITE
+				mesh.set_surface_override_material(s, m)
 
 
 ## Les poings sur les hanches : coudes écartés, mains ramenées vers la taille.
@@ -176,7 +192,7 @@ func _process(delta: float) -> void:
 			shown = "Neutre"
 		"look":
 			_fists_on_hips()
-			rig.add("head", Vector3(14, head_yaw + sin(t * 2.2) * 12, 0))
+			rig.add("head", Vector3(-8, head_yaw + sin(t * 2.2) * 8, 0))
 			shown = "Neutre"
 		"point":
 			if scold_style == 2 and _scold_time < 0.55:
@@ -189,7 +205,7 @@ func _process(delta: float) -> void:
 				var shake := 14.0 if scold_style == 1 else 4.0
 				quick["armR"] = Vector3(sin(t * 14.0) * 4, sin(t * 11.0) * shake, 0)
 				rig.add("spine", Vector3(14 if scold_style != 1 else 6, 0, 0))
-				rig.add("head", Vector3(14, head_yaw, sin(t * 9.0) * 8 if scold_style == 1 else 0.0))
+				rig.add("head", Vector3(0, head_yaw, sin(t * 9.0) * 8 if scold_style == 1 else 0.0))
 			shown = "Fachee" if talking <= 0.0 else "Ouverte"
 		"laugh":
 			for s: String in ["L", "R"]:
