@@ -18,7 +18,7 @@ THREE_TARGET = [58, 50, 43, 36, 28, 21, 15, 9]
 # part du score des débutants. À ajuster après les essais humains.
 HUMAN = 0.45
 # La première étoile du tutoriel reste facile, et la dernière mission reste gagnable.
-STAR1_MAX = {1: 700, 8: 900}
+STAR1_MAX = {1: 700, 8: 950}
 
 
 def run(level, profile, games, folder):
