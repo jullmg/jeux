@@ -532,11 +532,6 @@ east.tube([(1.915, 1.02, dz0 + 0.07), (1.915, 1.02, dz0 + 0.18)], 0.012, steel_d
 east.cyl((1.95, 1.18, dz0 + 0.07), 0.025, 0.018, brass, axis=(-1, 0, 0))
 east.box(1.8, 2.5, 0.98, 2.0, 2.76, 1.80, white, bevel=0.05, seg=3)
 east.box(1.795, 2.53, 1.03, 1.81, 2.56, 1.75, steel_dark)
-# sac accroché près de la porte
-bag = M("sac", "#c9a35a", 0.8)
-east.box(1.86, 1.12, 1.97, 1.99, 1.44, 2.12, bag, bevel=0.06, seg=3)
-east.torus((1.94, 1.46, 2.045), 0.05, 0.008, black, axis=(1, 0, 0))
-east.box(1.9, 0.62, 1.99, 1.99, 1.12, 2.04, black_mat, bevel=0.02)
 east.build()
 
 # ---------------------------------------------------------------- mur ouest : buffet et armoire vitrée
