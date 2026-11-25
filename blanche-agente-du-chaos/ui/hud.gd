@@ -23,6 +23,11 @@ var _time := 0.0
 var _shown_score := 0.0
 var _score_pop := 0.0
 var _banner := 0.0
+## La méfiance qui vient de monter : le temps qu'il reste à dire pourquoi, la raison, et si le conseil a été donné.
+var _wary_left := 0.0
+var _wary_why := ""
+var _wary_jump := 0.0
+var _wary_tipped := false
 var _flash := 0.0
 var _bubbles: Dictionary = {}       # personnage → {panel, left}
 var _floaters: Array[Dictionary] = []
@@ -130,6 +135,9 @@ func clear() -> void:
 	_flash = 0.0
 	_score_pop = 0.0
 	_toast_left = 0.0
+	_wary_left = 0.0
+	_wary_jump = 0.0
+	_wary_tipped = false
 	if _toast:
 		_toast.text = ""
 	for b: Dictionary in _bubbles.values():
@@ -181,6 +189,12 @@ func on_event(e: Dictionary) -> void:
 			_has_eaten = true
 		"caught":
 			_banner = 1.35
+		"wary":
+			_wary_jump = 0.4
+			# Le conseil, une fois affiché, reste le temps d'être lu.
+			if _wary_why != "tip" or _wary_left <= 0.0:
+				_wary_why = e.why
+				_wary_left = 2.0
 		"treasure":
 			toast(Texts.TREASURE_ALERT % sim.food_name(e.item), 3.0)
 		"noise":
@@ -202,6 +216,12 @@ func _process(delta: float) -> void:
 	_banner = maxf(0.0, _banner - delta)
 	_flash = maxf(0.0, _flash - delta * 1.1)
 	_toast_left -= delta
+	_wary_left -= delta
+	_wary_jump = maxf(0.0, _wary_jump - delta)
+	if not _wary_tipped and sim.suspicion >= 0.4:
+		_wary_tipped = true
+		_wary_why = "tip"
+		_wary_left = 4.5
 	_toast.modulate.a = clampf(_toast_left * 3.0, 0.0, 1.0)
 	for who: PersonView in _bubbles.keys():
 		_bubbles[who].left -= delta
@@ -308,13 +328,7 @@ func _draw_panels(on: Control) -> void:
 		UiStyle.RED if urgent else UiStyle.GREEN)
 	_text(on, Vector2(meal.end.x - 140, 113), "%d:%02d" % [left / 60, left % 60], 36,
 		UiStyle.RED if urgent else UiStyle.INK, HORIZONTAL_ALIGNMENT_CENTER, 110.0)
-	# soupçon
-	var sus := Rect2(w - 520, 24, 380, 100)
-	_card(on, sus)
-	_text(on, Vector2(sus.position.x + 26, 62), Texts.SUSPICION, 28, UiStyle.INK_SOFT)
-	var sc := UiStyle.GREEN.lerp(UiStyle.RED, sim.suspicion)
-	_bar(on, Rect2(sus.position.x + 26, 76, 260, 24), sim.suspicion, sc)
-	Icons.eye(on, Vector2(sus.end.x - 52, 72), 28.0 + sim.suspicion * 8.0, sim.suspicion > 0.12)
+	_draw_wary(on, w)
 	# visible ou cachée, et ce qu'on a dans la gueule
 	var hidden := sim.dog_hidden()
 	var badge := Rect2(28, h - 142, 300, 114)
@@ -330,6 +344,27 @@ func _draw_panels(on: Control) -> void:
 		_text(on, chew.position + Vector2(24, 46), sim.food_name(sim.mouth), 30, UiStyle.INK, HORIZONTAL_ALIGNMENT_LEFT, 340.0)
 		var total: float = Sim.EAT_TIMES[sim.mouth.size]
 		_bar(on, Rect2(chew.position + Vector2(24, 68), Vector2(332, 24)), 1.0 - sim.mouth.eat_left / total, UiStyle.PINK)
+
+
+## La méfiance de Maman : la jauge, son état en un mot et, quand elle monte, pourquoi.
+func _draw_wary(on: Control, w: float) -> void:
+	var box := Rect2(w - 580, 24, 440, 100)
+	_card(on, box)
+	var value := sim.suspicion
+	var state := 0 if value < 0.25 else (1 if value < 0.55 else 2)
+	var color: Color = [UiStyle.GREEN, Color("e07b1c"), UiStyle.RED][state]
+	_text(on, Vector2(box.position.x + 24, 60), Texts.SUSPICION, 26, UiStyle.INK_SOFT)
+	_text(on, Vector2(box.end.x - 184, 60), Texts.WARY_STATES[state], 26, color, HORIZONTAL_ALIGNMENT_RIGHT, 160.0)
+	# La barre gonfle un instant quand la jauge saute.
+	var swell := _wary_jump * 16.0 if not reduced_motion else 0.0
+	var bar := Rect2(box.position.x + 24, 76, box.size.x - 48, 24).grow(swell)
+	_bar(on, bar, value, color)
+	if _wary_left > 0.0:
+		var text: String = Texts.WARY_WHY[_wary_why]
+		var width := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 26).x + 36
+		var chip := Rect2(box.end.x - width, box.end.y + 10, width, 42)
+		on.draw_style_box(_style(Color(UiStyle.INK, 0.85), 21), chip)
+		_text(on, chip.position + Vector2(18, 30), text, 26, Color.WHITE)
 
 
 func _grab_state() -> String:

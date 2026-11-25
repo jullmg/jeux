@@ -26,7 +26,12 @@ const BEST := "Record : %d"
 const SCORE := "Score"
 const NEXT_STAR := "Prochaine étoile : %d"
 const ALL_STARS := "Trois étoiles !"
-const SUSPICION := "Soupçon"
+const SUSPICION := "Méfiance de Maman"
+## L'état de la jauge, du plus tranquille au plus méfiant, et ce qui vient de la faire monter.
+const WARY_STATES := ["Calme", "Se méfie", "Aux aguets !"]
+## « tip » est le conseil donné une fois par mission.
+const WARY_WHY := {"food": "Il manque de la bouffe…", "noise": "Elle a entendu !", "caught": "Prise sur le fait !",
+	"tip": "Assise dans ton coin, tu la calmes."}
 const HIDDEN := "Cachée"
 const VISIBLE := "Visible"
 const GRAB := "Attraper"

@@ -31,6 +31,13 @@ const EAT_TIMES := [0.0, 0.5, 1.5, 3.0]
 const BASE_POINTS := [10, 50, 150, 500]
 ## Les noms des tailles dans les données des niveaux.
 const SIZE_KEYS := ["crumb", "small", "big", "treasure"]
+## Ce qui rend Maman méfiante d'un coup (la jauge va de 0 à 1) : un morceau qui disparaît, selon sa taille, un bruit,
+## Blanche prise sur le fait.
+const WARY_FOOD := [0.0, 0.06, 0.13, 0.24]
+const WARY_NOISE := 0.18
+const WARY_CAUGHT := 0.3
+## La part des fenêtres que la méfiance retranche, quand la jauge est pleine.
+const WARY_WINDOW := 0.3
 ## Au bout de combien de temps un trésor perdu revient sur un meuble.
 const TREASURE_RETURN := 12.0
 ## Durée d'une fenêtre selon ce que fait Maman (secondes, avant les ajustements).
@@ -217,7 +224,7 @@ func stand_of(item: Dictionary) -> Vector2:
 
 ## La durée d'une fenêtre de ce niveau, raccourcie par le soupçon.
 func scaled_window(seconds: float) -> float:
-	return seconds * float(level.window_mult) * (1.0 - 0.35 * suspicion)
+	return seconds * float(level.window_mult) * (1.0 - WARY_WINDOW * suspicion)
 
 
 ## Les personnes présentes, comme cercles [centre, rayon].
@@ -365,8 +372,8 @@ func _take(item: Dictionary) -> void:
 	var noisy: bool = item.spot != "" and item.size >= Size.SMALL and level.noisy_spots.has(item.spot)
 	food.erase(item)
 	_emit("grabbed", {"item": item})
-	if item.size >= Size.BIG:
-		suspicion = minf(1.0, suspicion + 0.04)
+	if item.size > Size.CRUMB:
+		_wary(WARY_FOOD[item.size], "food")
 	if item.size == Size.CRUMB:
 		_score(item)
 	else:
@@ -622,7 +629,7 @@ func _enter_busy(what: String, extra := 0.0) -> void:
 
 ## Un bruit : la fenêtre se referme vite.
 func _noise(pos: Vector2, what: String) -> void:
-	suspicion = minf(1.0, suspicion + 0.15)
+	_wary(WARY_NOISE, "noise")
 	_emit("noise", {"pos": pos, "what": what})
 	if mom_state == Mom.BUSY:
 		mom_left = minf(mom_left, 0.2)
@@ -648,7 +655,7 @@ func _check_caught(dt: float) -> void:
 	reach_item = {}
 	reach_progress = 0.0
 	streak = 0
-	suspicion = minf(1.0, suspicion + 0.3)
+	_wary(WARY_CAUGHT, "caught")
 	corner_path = nav.path(dog_pos, map.corner, [[mom_pos, MOM_RADIUS]])
 	if corner_path.is_empty():
 		corner_path = nav.path(dog_pos, map.corner)
@@ -659,16 +666,22 @@ func _check_caught(dt: float) -> void:
 	_emit("caught", {"lost": lost})
 
 
+func _wary(amount: float, why: String) -> void:
+	suspicion = minf(1.0, suspicion + amount)
+	_emit("wary", {"why": why})
+
+
+## La méfiance retombe avec le temps, plus vite quand Blanche reste sage, surtout dans son coin.
 func _step_suspicion(dt: float) -> void:
-	var change := -0.012
+	var change := -0.013
 	var seen := watching() and not dog_hidden()
 	if not dog_moving and not paws_up() and mouth.is_empty():
 		if at_corner():
-			change -= 0.06
+			change -= 0.07
 		elif seen:
-			change -= 0.035
+			change -= 0.03
 	if seen and not at_corner() and (dog_state == Dog.FREE):
-		change += 0.025
+		change += 0.02
 	if unseen_time > 3.0 and watching() and dog_hidden():
 		change += 0.05
 	suspicion = clampf(suspicion + change * dt, 0.0, 1.0)

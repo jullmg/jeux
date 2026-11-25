@@ -460,7 +460,7 @@ func test_bruit_referme_la_fenetre() -> void:
 	at(sim, "lave_vaisselle")
 	put(sim, Sim.Size.SMALL, "lave_vaisselle")
 	run(sim, 1.05, Vector2.ZERO, true)
-	check(sim.suspicion > 0.1, "le soupçon monte")
+	check(sim.suspicion > 0.1, "la méfiance monte")
 	check(sim.mom_state != Sim.Mom.BUSY or sim.mom_left <= 0.2, "la fenêtre se referme")
 	var events := types(sim)
 	check(events.has("noise"), "bruit signalé")
@@ -487,6 +487,35 @@ func test_soupcon() -> void:
 	short._enter_busy("brasser")
 	long._enter_busy("brasser")
 	check(short.mom_left < long.mom_left, "soupçon élevé : fenêtre plus courte")
+
+
+## La jauge doit se voir bouger (demande de Julien) : chaque morceau la fait monter, plus il est gros.
+func test_mefiance_visible() -> void:
+	var before := 0.0
+	for size: int in [Sim.Size.SMALL, Sim.Size.BIG, Sim.Size.TREASURE]:
+		var sim := lab()
+		var item := put(sim, size, "nord_gauche")
+		sim._take(item)
+		check(sim.suspicion > before and sim.suspicion >= 0.05, "morceau %d : méfiance %.2f" % [size, sim.suspicion])
+		before = sim.suspicion
+		check(types(sim).has("wary"), "la raison est signalée")
+	var crumb := lab()
+	crumb._take(put(crumb, Sim.Size.CRUMB, "nord_gauche"))
+	check(crumb.suspicion == 0.0, "une miette ne se remarque pas")
+	# Et pendant une vraie partie, même la première mission la fait monter nettement.
+	var map := KitchenMap.new()
+	var peaks := 0.0
+	for g in 10:
+		var sim := Sim.new(map, Levels.load_level(1), 100 + g)
+		var bot := Bot.new(sim, "equilibre", 0.4, 0.9, 200 + g)
+		var peak := 0.0
+		while not sim.over:
+			bot.step(0.05)
+			sim.step(0.05, bot.move, bot.grab)
+			sim.events.clear()
+			peak = maxf(peak, sim.suspicion)
+		peaks += peak
+	check(peaks / 10.0 > 0.25, "sommet moyen de la mission 1 : %.2f" % (peaks / 10.0))
 
 
 func test_tour_de_l_ilot_contre_le_camping() -> void:
