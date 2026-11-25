@@ -419,6 +419,18 @@ func test_chicane_presque_a_chaque_passage() -> void:
 	check(passes > 10 and arguments >= passes * 0.7, "%d chicanes pour %d passages" % [arguments, passes])
 
 
+## Le jeu reste fluide sur un grand écran (retour de Julien : 45 images/s en 3440×1440).
+func test_fluidite_selon_l_ecran() -> void:
+	check(Fluidity.scale_for(Vector2i(1920, 1080)) == 1.0, "en 1080p, tout est calculé")
+	check(Fluidity.scale_for(Vector2i(1440, 810)) == 1.0, "petite fenêtre aussi")
+	for window: Vector2i in [Vector2i(3440, 1440), Vector2i(3456, 2234), Vector2i(3840, 2160)]:
+		var s := Fluidity.scale_for(window)
+		var pixels := window.x * window.y * s * s
+		check(s < 0.75 and s >= Fluidity.LOWEST and pixels <= Fluidity.BUDGET * 1.01, "%s : %.2f" % [window, s])
+	check(Fluidity.scale_for(Vector2i(7680, 4320)) == Fluidity.LOWEST, "jamais sous le plancher")
+	check(Fluidity.cap_for(120.0) == 60 and Fluidity.cap_for(60.0) == 0 and Fluidity.cap_for(-1.0) == 0, "cadence")
+
+
 func test_manger_est_plus_lent_en_marchant() -> void:
 	var a := lab()
 	var b := lab()

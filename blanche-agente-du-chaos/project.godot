@@ -5,7 +5,7 @@ config_version=5
 [application]
 
 config/name="Blanche Pronovost agente du Chaos"
-config/version="1.0.0-rc3"
+config/version="1.0.0-rc4"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://art/icon.png"
@@ -36,18 +36,23 @@ theme/custom_font="res://art/fonts/fredoka.tres"
 
 pointing/emulate_touch_from_mouse=false
 
+[physics]
+
+; l'affichage interpole lui-même entre les pas des règles (kitchen/stage.gd)
+common/physics_jitter_fix=0.0
+
 [rendering]
 
 renderer/rendering_method="forward_plus"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
-anti_aliasing/quality/msaa_3d=2
-lights_and_shadows/directional_shadow/size=4096
-lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
+anti_aliasing/quality/msaa_3d=1
+lights_and_shadows/directional_shadow/size=2048
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=2
 lights_and_shadows/positional_shadow/atlas_size=2048
-lights_and_shadows/positional_shadow/soft_shadow_filter_quality=3
+lights_and_shadows/positional_shadow/soft_shadow_filter_quality=2
 anti_aliasing/quality/use_debanding=true
-environment/ssao/quality=3
-environment/ssao/half_size=false
+environment/ssao/quality=2
+environment/ssao/half_size=true
 reflections/reflection_atlas/reflection_size=256
 reflections/reflection_atlas/reflection_count=4

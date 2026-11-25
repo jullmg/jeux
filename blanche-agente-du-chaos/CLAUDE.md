@@ -2,7 +2,7 @@
 
 Jeu 3D Godot 4.7 (Forward+ sur Mac, 1920×1080) : la chienne Blanche vole de la nourriture pendant que Maman cuisine.
 Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et décisions : `docs/etat.md` ; revues :
-`docs/revues.md` ; refonte graphique : `PROMPT-GRAPHIQUES.md`. Version 1.0.0-rc3 : Mac d'abord, iPad et Android
+`docs/revues.md` ; refonte graphique : `PROMPT-GRAPHIQUES.md`. Version 1.0.0-rc4 : Mac d'abord, iPad et Android
 ensuite.
 
 ## Vérifier
@@ -64,7 +64,11 @@ ensuite.
   tapis reste sous la zone cachée (hauteur < 0,006).
 - Sur le moteur mobile (iPad, Android), le jeu démarre mais la lumière est trop forte : à régler avant d'y livrer.
 - `tools/shots.sh` ignore un avertissement du moteur à la fermeture (images de la sonde de reflets).
-- Performance de référence (M1 Pro, 1920×1080) : environ 90 images/s, mémoire vidéo environ 630 Mo.
+- **Mesurer la performance aux tailles des écrans de Julien** (3440×1440 et plein écran Retina 3456×2160), pas
+  seulement en 1080p : `tools/shots.sh dossier 3440x1440 --seulement=perf` (sans limite ; `--cadence` pour le jeu tel
+  qu'on y joue). Référence M1 Pro : environ 105 images/s en 3440×1440, 95 en Retina.
+- `kitchen/fluidity.gd` règle la part calculée en 3D et la cadence ; `stage.tick()` interpole les positions entre les
+  pas des règles (`physics_jitter_fix` à 0).
 - Musique **joyeuse** (demande de Julien) : `jeu` et `tension` ont le même tempo, la même durée et les mêmes accords.
 - `common.py` : tout est écrit en coordonnées Godot. Les personnages sont une peau liée à un squelette ; les noms d'os
   sont utilisés par le code (`test_modeles_complets`).

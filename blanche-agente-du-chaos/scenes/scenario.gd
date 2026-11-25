@@ -60,6 +60,11 @@ func play(level: int, style: String, seed_ := 5) -> void:
 ## Images par seconde sans synchronisation verticale, temps de chargement et mémoire.
 func _performance() -> void:
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	# « --cadence » mesure le jeu tel qu'on y joue ; sinon, sans limite, pour voir la marge.
+	if not OS.get_cmdline_user_args().has("--cadence"):
+		Fluidity.measuring = true
+	else:
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
 	await wait(2.0)
 	for id: int in [1, 5, 8]:
 		var begin := Time.get_ticks_usec()
@@ -85,6 +90,7 @@ func _performance() -> void:
 		var total := 0.0
 		for t in times:
 			total += t
+		print("PERF 3D calculée à %.0f %%" % (get_window().scaling_3d_scale * 100.0))
 		print("PERF niveau %d : %.0f images/s en moyenne, 99 %% des images sous %.1f ms, pire %.1f ms, %d appels de dessin, chargement %.0f ms, fenêtre %s" % [
 			id, 1000.0 / (total / times.size()), times[int(times.size() * 0.99)], times.back(), calls, load_ms,
 			str(DisplayServer.window_get_size())])

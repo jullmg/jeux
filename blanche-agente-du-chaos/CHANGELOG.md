@@ -1,5 +1,13 @@
 # Journal des versions
 
+## 1.0.0-rc4 (2026-11-25) : fluidité
+
+- Le jeu saccadait sur les grands écrans (45 images/s en 3440×1440, 31 en plein écran sur le MacBook). La 3D est
+  maintenant calculée à une taille proche du 1080p puis agrandie (textes et boutons nets), avec des ombres et un
+  anticrénelage un peu plus légers.
+- Les personnages sont affichés entre deux pas des règles : plus d'à-coups dans les mouvements.
+- Sur un écran à 120 Hz, le jeu tient 60 images régulières.
+
 ## 1.0.0-rc3 (2026-11-25) : deuxième série de retours et refonte graphique
 
 Retours :

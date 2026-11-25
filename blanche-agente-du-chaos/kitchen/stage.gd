@@ -66,6 +66,10 @@ var _ring_mesh: ArrayMesh
 var _ring_materials: Array[StandardMaterial3D] = []
 var _ring_shadow: StandardMaterial3D
 var _kept: Array[Resource] = []
+## Les positions des deux derniers pas des règles : entre deux, l'écran montre un point intermédiaire.
+var _before: Dictionary = {}
+var _after: Dictionary = {}
+var _screen_wait := 0.0
 ## Positions au dernier pas des règles : l'écran peut aller plus vite que les 60 pas par seconde.
 var _last_time := -1.0
 var _last_pos: Dictionary = {}
@@ -150,6 +154,7 @@ func _build_camera() -> void:
 	camera.far = 40.0
 	get_viewport().size_changed.connect(_fit_camera)
 	_fit_camera()
+	Fluidity.apply(get_window())
 
 
 ## Sur un écran étroit, on garde la largeur de la cuisine plutôt que sa hauteur.
@@ -438,6 +443,8 @@ func start_level(sim_: Sim) -> void:
 	_set_moment(sim.level.get("moment", "midi"))
 	view = "jeu"
 	_last_time = -1.0
+	_before.clear()
+	_after.clear()
 	_last_pos.clear()
 	_speeds.clear()
 	_mask_node.visible = true
@@ -514,6 +521,11 @@ func _muzzle() -> Vector3:
 
 func _process(delta: float) -> void:
 	_time += delta
+	# La fenêtre peut changer de taille ou passer sur un autre écran.
+	_screen_wait -= delta
+	if _screen_wait <= 0.0:
+		_screen_wait = 0.5
+		Fluidity.apply(get_window())
 	if sim != null:
 		_measure_speeds()
 		_show_dog(delta)
@@ -564,6 +576,22 @@ func hidden_center() -> Vector2:
 
 
 ## La vitesse de chacun, mesurée seulement quand les règles ont avancé.
+## Appelé après chaque pas des règles.
+func tick() -> void:
+	_before = _after
+	_after = {"blanche": sim.dog_pos, "maman": sim.mom_pos}
+	for h in sim.helpers:
+		_after[h.who] = h.pos
+
+
+## Où montrer quelqu'un : entre ses deux dernières positions, selon le temps écoulé depuis le dernier pas. Sans cela,
+## les mouvements saccadent dès que l'écran ne tourne pas exactement à 60 images par seconde.
+func _smooth(who: String, now: Vector2) -> Vector2:
+	if not _after.has(who) or not _before.has(who) or _after[who].distance_to(now) > 0.001:
+		return now
+	return (_before[who] as Vector2).lerp(now, Engine.get_physics_interpolation_fraction())
+
+
 func _measure_speeds() -> void:
 	if sim.time == _last_time:
 		return
@@ -590,7 +618,7 @@ func _show_dog(delta: float) -> void:
 	# Dressée, elle se place bien en face du morceau, les pattes sur le bord (à l'écran seulement).
 	var up: bool = sim.dog_state == Sim.Dog.REACHING \
 		or (sim.dog_state == Sim.Dog.LOWERING and sim.lower_left > Sim.DESCEND_TIME * 0.5)
-	var at := sim.dog_pos
+	var at := _smooth("blanche", sim.dog_pos)
 	var heading := sim.dog_dir
 	if up and _reach_spot != "":
 		var spot: Dictionary = map.spots[_reach_spot]
@@ -633,7 +661,7 @@ func _show_dog(delta: float) -> void:
 
 
 func _show_mom(delta: float) -> void:
-	_follow_floor(mom, sim.mom_pos, delta)
+	_follow_floor(mom, _smooth("maman", sim.mom_pos), delta)
 	mom.speed = _speeds.get("maman", 0.0)
 	var dir := sim.mom_dir
 	if sim.mom_state == Sim.Mom.BUSY and sim.activity == "chicane":
@@ -681,7 +709,7 @@ func _show_people(delta: float) -> void:
 		var was_visible := p.visible
 		p.visible = true
 		if was_visible:
-			_follow_floor(p, h.pos, delta)
+			_follow_floor(p, _smooth(h.who, h.pos), delta)
 		else:
 			p.position = Vector3(h.pos.x, 0, h.pos.y)
 		p.speed = _speeds.get(h.who, 0.0)

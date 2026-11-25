@@ -112,3 +112,15 @@ Batterie complète (`tools/test.sh --complet`) après la refonte : 49 essais de 
 
 Ce qui reste faible : les mains et la démarche des personnages restent simples ; les cheveux sont des masses lisses ;
 les cartes de missions verrouillées ne montrent qu'une silhouette ; le moteur mobile n'est pas réglé.
+
+## 8. Fluidité (2026-11-25)
+
+Julien a trouvé le jeu moins fluide. Les mesures de la section 7 n'étaient faites qu'en 1920×1080, plus petit que ses
+écrans : c'était l'erreur. Mesures sans limite d'images, M1 Pro :
+
+| Taille de la fenêtre | rc3 | rc4 | 99 % des images (rc4) |
+|---|---|---|---|
+| 3440×1440 (écran large) | 45 images/s | 105 à 109 | sous 11 ms |
+| 3416×2064 (Retina) | 31 images/s | 93 à 97 | sous 12 ms |
+
+En jeu, la cadence est celle de l'écran à 60 Hz, et 60 images/s sur un écran à 120 Hz.

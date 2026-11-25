@@ -14,7 +14,7 @@ Point de reprise d'une session à l'autre. Julien a demandé de tout faire sans 
 | 4. Production | fait : les huit missions |
 | 5. Finition | fait : équilibrage, performance, accessibilité, icône |
 | 6. Assurance qualité | fait : revues corrigées, batterie complète réussie (`docs/revues.md`) |
-| 7. Livraison | version macOS 1.0.0-rc3 exportée et testée ; **acceptation de Julien à venir** |
+| 7. Livraison | version macOS 1.0.0-rc4 exportée et testée ; **acceptation de Julien à venir** |
 
 ## Choix faits en l'absence de Julien (à réviser)
 

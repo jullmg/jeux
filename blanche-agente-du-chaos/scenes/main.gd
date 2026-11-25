@@ -368,6 +368,7 @@ func _physics_process(delta: float) -> void:
 			break
 		var c := _commands(STEP)
 		sim.step(STEP, c[0], c[1])
+		stage.tick()
 		_handle_events()
 	_sounds(delta * speed)
 	_argue()
