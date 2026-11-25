@@ -6,6 +6,11 @@ signal pause_pressed
 ## Chaque appui sur le gros bouton, même très bref.
 signal grab_pressed
 
+## La tête de Maman, en mètres : la hauteur du visage au-dessus de l'os, et sa demi-largeur avec les cheveux.
+const FACE_UP := 0.13
+const HEAD_HALF := 0.17
+const SIGNS_TOP := 205.0
+
 var sim: Sim
 var stage: Stage
 var reduced_motion := false
@@ -384,21 +389,21 @@ func _draw_world(on: Control) -> void:
 			var at := stage.on_screen(stage.item_position(near))
 			_text(on, at + Vector2(-200, 62), "%s · %d" % [sim.food_name(near), near.points], 28, Color.WHITE,
 				HORIZONTAL_ALIGNMENT_CENTER, 400.0, 9)
-	# Maman : ce qu'elle fait, et surtout l'indice
-	var head := stage.on_screen(stage.mom.head_position() + Vector3(0, 0.42, 0))
-	head.y = maxf(head.y, 250.0)
+	# Maman : ce qu'elle fait, et surtout l'indice, toujours à côté de sa tête
 	var beat := 1.0 + (0.0 if reduced_motion else sin(_time * 18.0) * 0.1)
 	match sim.mom_state:
 		Sim.Mom.BUSY:
 			var text: String = sim.level.get("activity_text", {}).get(sim.activity, Texts.ACTIVITY.get(sim.activity, ""))
 			var width := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x + 30
+			var at := _beside_mom(width / 2.0)
 			on.draw_style_box(_style(Color(0.1, 0.06, 0.04, 0.6), 18),
-				Rect2(head + Vector2(-width / 2.0, -20), Vector2(width, 38)))
-			_text(on, head + Vector2(-width / 2.0 + 15, 7), text, 24, Color.WHITE)
+				Rect2(at + Vector2(-width / 2.0, -20), Vector2(width, 38)))
+			_text(on, at + Vector2(-width / 2.0 + 15, 7), text, 24, Color.WHITE)
 		Sim.Mom.HINT:
 			if sim.hint_kind == "feint":
-				Icons.question(on, head, 34.0)
+				Icons.question(on, _beside_mom(34.0), 34.0)
 			else:
+				var head := _beside_mom(96.0 if sim.hint_kind == "round" else 72.0)
 				Icons.warning(on, head, 54.0 * beat, UiStyle.RED if sim.hint_kind == "real" else Color("e07b1c"))
 				if sim.hint_kind == "round":
 					Icons.around(on, head + Vector2(0, 4), 84.0, Color("e07b1c"))
@@ -406,13 +411,25 @@ func _draw_world(on: Control) -> void:
 				var f := clampf(sim.mom_left / sim.mom_len, 0.0, 1.0)
 				_bar(on, Rect2(head + Vector2(-70, 56), Vector2(140, 14)), f, UiStyle.RED)
 		Sim.Mom.TURN, Sim.Mom.LOOK, Sim.Mom.ROUND:
-			on.draw_circle(head, 50.0, UiStyle.RED, true, -1.0, true)
-			on.draw_arc(head, 50.0, 0, TAU, 40, Color.WHITE, 5.0, true)
-			Icons.eye(on, head, 36.0, true)
+			var head := _beside_mom(40.0)
+			on.draw_circle(head, 40.0, UiStyle.RED, true, -1.0, true)
+			on.draw_arc(head, 40.0, 0, TAU, 40, Color.WHITE, 4.0, true)
+			Icons.eye(on, head, 29.0, true)
 	for h in sim.helpers:
 		if h.who == "charlotte" and h.snitch > 0.0:
 			var at := stage.on_screen(stage.people.charlotte.head_position() + Vector3(0, 0.35, 0))
 			Icons.warning(on, at, 34.0 * beat, Color("e07b1c"))
+
+
+## Où poser un signe de Maman sans cacher son visage : à gauche de sa tête (sa bulle est à droite), à droite si la
+## place manque. `half` est la demi-largeur du signe.
+func _beside_mom(half: float) -> Vector2:
+	var face := stage.mom.head_position() + Vector3(0, FACE_UP, 0)
+	var at := stage.on_screen(face)
+	var gap := stage.on_screen(face + stage.camera.global_basis.x * HEAD_HALF).x - at.x + half + 12.0
+	var x := at.x - gap if at.x - gap - half >= 12.0 else at.x + gap
+	# Plus bas que les panneaux du haut ; de côté, elle reste visible.
+	return Vector2(x, maxf(at.y, SIGNS_TOP))
 
 
 func _draw_banner(on: Control) -> void:
