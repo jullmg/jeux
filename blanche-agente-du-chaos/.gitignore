@@ -1,4 +1,9 @@
-# Photos de famille (cuisine, chienne) : jamais dans git
+# Photos de famille (cuisine, chienne, personnes) : jamais dans git
 reference/
 .godot/
+# Scènes et scripts temporaires
 zz_*
+# Versions exportées et sorties de tests
+build/
+art/previews/
+tests/output/
