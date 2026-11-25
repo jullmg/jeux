@@ -570,23 +570,6 @@ west.box(-1.9, 2.10, 0.66, -1.74, 2.34, 0.78, M("boite_menthe", "#69c3a8", 0.6),
 plant(west, (-1.82, 1.52 + 0.78, -1.2 + 0.0), 0.06, 0.1, 14, pot_white, 4)
 west.build()
 
-# ---------------------------------------------------------------- mur sud : radiateur
-
-south = C.Obj("Radiateur")
-x0, z0, x1, z1 = OB["radiator"]
-radiator_m = M("radiateur", "#efece4", 0.5)
-n = 9
-for k in range(n):
-    x = x0 + 0.05 + k * (x1 - x0 - 0.1) / (n - 1)
-    for zz in (z0 + 0.05, z1 - 0.05):
-        south.tube([(x, 0.10, zz), (x, 0.42, zz)], 0.027, radiator_m, seg=10)
-    south.box(x - 0.027, 0.12, z0 + 0.05, x + 0.027, 0.19, z1 - 0.05, radiator_m, bevel=0.02)
-    south.box(x - 0.027, 0.33, z0 + 0.05, x + 0.027, 0.40, z1 - 0.05, radiator_m, bevel=0.02)
-for x in (x0 + 0.05, x1 - 0.05):
-    south.cyl((x, 0.0, z0 + 0.09), 0.025, 0.14, radiator_m, seg=10)
-south.tube([(x0 + 0.02, 0.15, z0 + 0.09), (x0 - 0.1, 0.15, z0 + 0.09), (x0 - 0.1, 0.0, z0 + 0.09)], 0.018, radiator_m, seg=8)
-south.build()
-
 # ---------------------------------------------------------------- îlot et tabouret
 
 island = C.Obj("Ilot")
