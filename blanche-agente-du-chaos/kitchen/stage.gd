@@ -17,6 +17,7 @@ const TOWARD_CAMERA := Vector2(0.0, 0.75)
 var map: KitchenMap
 var sim: Sim
 var camera: Camera3D
+var ambiance: Ambiance
 var dog: DogView
 var mom: PersonView
 var people: Dictionary = {}
@@ -109,33 +110,8 @@ func _ready() -> void:
 
 
 func _build_lights() -> void:
-	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.13, 0.09, 0.08)
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.66, 0.63, 0.64)
-	env.ambient_light_energy = 0.5
-	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_white = 2.2
-	var world := WorldEnvironment.new()
-	world.environment = env
-	add_child(world)
-	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-56, -28, 0)
-	sun.light_color = Color(1.0, 0.94, 0.87)
-	sun.light_energy = 0.38
-	sun.shadow_enabled = true
-	sun.directional_shadow_max_distance = 12.0
-	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
-	sun.shadow_bias = 0.03
-	add_child(sun)
-	for spec: Array in [[Vector3(-0.7, 2.35, 0.35), 0.3], [Vector3(0.85, 2.15, -0.85), 0.22], [Vector3(1.1, 2.1, 1.3), 0.16]]:
-		var lamp := OmniLight3D.new()
-		lamp.position = spec[0]
-		lamp.light_color = Color(1.0, 0.86, 0.66)
-		lamp.light_energy = spec[1]
-		lamp.omni_range = 3.6
-		add_child(lamp)
+	ambiance = Ambiance.new()
+	add_child(ambiance)
 	_fridge_light = OmniLight3D.new()
 	_fridge_light.position = Vector3(-1.05, 1.35, -1.45)
 	_fridge_light.light_color = Color(0.9, 0.97, 1.0)
@@ -404,6 +380,7 @@ func _sync_food(delta: float) -> void:
 # ------------------------------------------------------------------ vie
 
 func show_title() -> void:
+	ambiance.set_moment("matin")
 	sim = null
 	view = "titre"
 	_clear_level()
@@ -422,6 +399,7 @@ func show_title() -> void:
 func start_level(sim_: Sim) -> void:
 	_clear_level()
 	sim = sim_
+	ambiance.set_moment(sim.level.get("moment", "midi"))
 	view = "jeu"
 	_last_time = -1.0
 	_last_pos.clear()

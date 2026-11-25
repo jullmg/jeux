@@ -53,6 +53,8 @@ func _paint_by_vertex() -> void:
 			if base and base.resource_name in PAINTED:
 				var m: BaseMaterial3D = base.duplicate()
 				m.vertex_color_use_as_albedo = true
+				# Ces couleurs sont enregistrées en sRGB (tools/blender/heads.py) : seul le moteur mobile les prend telles quelles.
+				m.vertex_color_is_srgb = RenderingServer.get_current_rendering_method() != "gl_compatibility"
 				m.albedo_color = Color.WHITE
 				mesh.set_surface_override_material(s, m)
 
