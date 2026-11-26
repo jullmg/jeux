@@ -58,6 +58,12 @@ def main():
              f"la difficulté recule au niveau {level} (trois étoiles)")
     need(get(8, "equilibre_700")["caught"] >= get(1, "equilibre_700")["caught"] + 2, "la cuisine n'est pas plus dure à la fin")
     need(get(8, "novice_700")["three_rate"] <= get(1, "novice_700")["three_rate"] - 40, "la courbe de difficulté est trop plate")
+    # La finale se joue dans une autre pièce que la mission d'avant (les deux pièces réunies) : elle peut y envoyer moins
+    # souvent au coin, mais elle reste la plus dure à réussir.
+    need(get(last, "novice_700")["pass_rate"] <= get(last - 1, "novice_700")["pass_rate"],
+         "la dernière mission se réussit plus souvent que celle d'avant")
+    need(get(last, "novice_700")["three_rate"] <= get(last - 1, "novice_700")["three_rate"],
+         "la dernière mission donne plus souvent trois étoiles que celle d'avant")
     first_new = min(ROOM_START)
     need(get(last, "novice_700")["three_rate"] <= get(first_new, "novice_700")["three_rate"] - 20,
          "la dernière mission n'est pas plus dure que le début de la salle à manger (trois étoiles)")

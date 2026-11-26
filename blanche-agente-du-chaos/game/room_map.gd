@@ -226,14 +226,6 @@ static func _under(h: Dictionary, viewer: Vector2, target: Vector2, low: bool) -
 	return signf(target[axis] - c[axis]) != signf(viewer[axis] - c[axis])
 
 
-## Le premier bloc nommé (sert à l'affichage : l'îlot, le divan), ou {}.
-func hide_named(hide_id: String) -> Dictionary:
-	for h in hides:
-		if h.id == hide_id:
-			return h
-	return {}
-
-
 ## Le rectangle qui contient toutes les cachettes, agrandi de `margin` et gardé dans la pièce.
 func hides_area(margin: float) -> Rect2:
 	var out := Rect2()

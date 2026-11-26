@@ -5,8 +5,6 @@ extends Node3D
 
 const KITCHEN := "res://art/models/cuisine.glb"
 const MODELS := "res://art/models/%s.glb"
-## Les personnages du jeu (la visite a ses propres modèles).
-const PEOPLE := ["maman", "papa", "charlotte", "tante", "oncle"]
 const FOODS := "res://art/models/nourriture.glb"
 const MASK_CELL := 0.06
 ## Les morceaux sont grossis pour se lire de haut.
@@ -52,7 +50,7 @@ var _mask_texture: ImageTexture
 var _mask_rect: Rect2
 var _mask_node: MeshInstance3D
 var _mask_viewer := Vector2.INF
-var _mask_island := ""
+var _mask_key := ""
 var _mask_wait := 0.0
 var _mask_center := Vector2.INF
 var _mask_bytes := PackedByteArray()
@@ -63,8 +61,8 @@ var _fridge_light: OmniLight3D
 var _time := 0.0
 var _shake := 0.0
 var _wobble := 0.0
-## Le petit meuble qui vacille (le tabouret, une chaise) : son indice dans le plan.
-var _wobble_index := -1
+## La chaise qui vacille (trouvée une fois, au choc).
+var _wobble_node: Node3D
 var _held_id := -1
 var _laugh := 0.0
 var _surprised := 0.0
@@ -132,7 +130,7 @@ func _ready() -> void:
 	dog.set_see_through(true)
 	get_tree().create_timer(0.25).timeout.connect(dog.set_see_through.bind(false))
 	# Tous les personnages sont fabriqués d'avance et gardés : pas d'à-coup quand ils entrent en scène.
-	for who: String in PEOPLE:
+	for who: String in Levels.PEOPLE:
 		_person(who)
 	mom = _person("maman")
 	for piece: String in ["salle_a_manger", "salon", "fetes"]:
@@ -396,11 +394,11 @@ func _update_mask(delta: float) -> void:
 	var low := sim.mom_low()
 	var view_key := "%s|%s" % [close, low]
 	var eye := sim.viewpoint()
-	if _mask_wait > 0.0 or (eye.distance_to(_mask_viewer) < 0.03 and view_key == _mask_island):
+	if _mask_wait > 0.0 or (eye.distance_to(_mask_viewer) < 0.03 and view_key == _mask_key):
 		return
 	_mask_wait = 0.08
 	_mask_viewer = eye
-	_mask_island = view_key
+	_mask_key = view_key
 	var sum := Vector2.ZERO
 	var cells := 0
 	for i in _mask_index.size():
@@ -620,7 +618,7 @@ func on_event(e: Dictionary) -> void:
 		"noise":
 			if e.what in ["tabouret", "chaise"]:
 				_wobble = 1.0
-				_wobble_index = e.index
+				_wobble_chair(e.index)
 			_shake = maxf(_shake, 0.25)
 
 
@@ -883,6 +881,15 @@ func _show_people(delta: float) -> void:
 			people[who].visible = false
 
 
+## La chaise bousculée vacille ; celle qui vacillait reprend sa place.
+func _wobble_chair(index: int) -> void:
+	if _wobble_node:
+		_wobble_node.rotation.y = 0.0
+	_wobble_node = null
+	if _room_node != _kitchen and index >= 0 and index < map.stools.size():
+		_wobble_node = _room_node.find_child("Chaise_" + str(map.stools[index].name), true, false) as Node3D
+
+
 ## Vers la caméra, au sol, depuis `from` (pour se tourner un peu vers nous).
 func toward_camera(from: Vector2) -> Vector2:
 	var cam: Array = map.data.camera.pos
@@ -897,10 +904,11 @@ func _show_furniture(delta: float) -> void:
 	_wobble = maxf(0.0, _wobble - delta * 1.4)
 	if _stool and _room_node == _kitchen:
 		_stool.rotation.z = sin(_time * 24.0) * 0.14 * _wobble
-	elif _wobble_index >= 0 and _wobble_index < map.stools.size():
-		var chair := _room_node.find_child("Chaise_" + str(map.stools[_wobble_index].name), true, false) as Node3D
-		if chair:
-			chair.rotation.y = sin(_time * 24.0) * 0.05 * _wobble
+	elif _wobble_node:
+		_wobble_node.rotation.y = sin(_time * 24.0) * 0.05 * _wobble
+		if _wobble <= 0.0:
+			_wobble_node.rotation.y = 0.0
+			_wobble_node = null
 
 
 func _move_camera(delta: float) -> void:

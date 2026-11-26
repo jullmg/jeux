@@ -1061,6 +1061,36 @@ func test_visite_qui_circule() -> void:
 	check(walked > 5.0 and bad == 0, "elle circule (%.1f m) sans traverser les meubles (%d)" % [walked, bad])
 
 
+## En pleine chicane, Maman n'entend pas la visite : la chicane va au bout.
+func test_la_visite_ne_coupe_pas_la_chicane() -> void:
+	var sim := lab_in("salle_a_manger", {"stations": ["buffet"],
+		"seated": [{"who": "charlotte", "seat": "sud_est", "role": "complice"},
+			{"who": "oncle", "seat": "nord_est", "role": "temoin"}]})
+	sim._bust(sim.seated[0])
+	var guest: Dictionary = sim.seated[1]
+	guest.state = "regarde"
+	guest.t = 99.0
+	at(sim, "table_nord")
+	put(sim, Sim.Size.BIG, "table_nord")
+	var heard := false
+	for i in int((Sim.ARGUE_TIME - 0.3) / DT):
+		sim.step(DT, Vector2.ZERO, i < 60)
+		heard = heard or types(sim).has("snitch_call")
+	check(heard and sim.activity == "chicane" and sim.mom_state == Sim.Mom.BUSY, "la chicane continue")
+
+
+## Un niveau mal écrit est refusé avant d'être joué.
+func test_niveau_mal_ecrit() -> void:
+	var m: RoomMap = grids("fetes")[0]
+	var level := Levels.load_level(15)
+	level.walkers = [{"who": "tante", "start": "entree", "points": ["entree"]}]
+	level.surprise = {"activity": "but "}
+	level.dark = {"near": 2.0}
+	level.seated = [{"who": "ginette", "seat": "sud_est", "role": "complice"}]
+	var problems := Levels.validate(level, m)
+	check(problems.size() >= 4, "problèmes trouvés : %s" % ", ".join(problems))
+
+
 ## Les chaises grincent quand on fonce dedans, comme le tabouret.
 func test_chaise_grince() -> void:
 	var sim := lab_in("salle_a_manger", {"stations": ["buffet"], "noise": true})

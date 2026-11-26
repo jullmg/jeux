@@ -10,6 +10,7 @@ const REQUIRED := [
 	"spawn", "max_items", "treasure_at", "treasure_points", "stars",
 ]
 const WATCHERS := ["maman", "papa"]
+const PEOPLE := ["maman", "papa", "charlotte", "tante", "oncle"]
 const ROLES := ["complice", "temoin", "decor"]
 
 
@@ -57,10 +58,27 @@ static func validate(level: Dictionary, map: RoomMap) -> PackedStringArray:
 			out.append("place inconnue : " + str(p.get("seat")))
 		if not ROLES.has(p.get("role", "")):
 			out.append("rôle inconnu : " + str(p.get("role")))
+		if not PEOPLE.has(p.get("who", "")):
+			out.append("personne inconnue : " + str(p.get("who")))
 	for w: Dictionary in level.get("walkers", []):
-		for name_: String in w.points + [w.start]:
+		if not PEOPLE.has(w.get("who", "")):
+			out.append("personne inconnue : " + str(w.get("who")))
+		var points: Array = w.get("points", [])
+		var distinct := {}
+		for name_: String in points:
+			distinct[name_] = true
+		if distinct.size() < 2 or not points.has(w.get("start", "")):
+			out.append("la visite qui circule a besoin de deux endroits et d'un départ parmi eux")
+		for name_: String in points:
 			if not map.data.get("waypoints", {}).has(name_):
 				out.append("point de passage inconnu : " + name_)
+	if level.has("surprise") and not Sim.ACTIVITY_WINDOWS.has(str(level.surprise.get("activity", ""))):
+		out.append("surprise inconnue : " + str(level.surprise))
+	if level.has("dark") and not (level.dark.has("near") and level.dark.has("far") and level.dark.near < level.dark.far):
+		out.append("le noir demande near < far")
+	for key: String in ["slip_wait", "spawn", "look"]:
+		if level.has(key) and (level[key].size() != 2 or level[key][0] > level[key][1]):
+			out.append("intervalle mal formé : " + key)
 	var outside: Array = level.stations.filter(func(s: String) -> bool: return map.stations.has(s) and map.stations[s].outside)
 	if not outside.is_empty() and map.mom_door == Vector2.INF:
 		out.append("sortie sans porte dans le plan")

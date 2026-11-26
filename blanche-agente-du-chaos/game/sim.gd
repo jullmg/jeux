@@ -261,10 +261,13 @@ func mom_close() -> String:
 
 ## Assise à table ou penchée pendant son tour : elle voit sous la table, de son côté.
 func mom_low() -> bool:
-	if mom_state == Mom.ROUND:
-		return true
+	return mom_state == Mom.ROUND or mom_seated()
+
+
+## Assise à son poste (à table, au divan).
+func mom_seated() -> bool:
 	var st: Dictionary = map.stations[station]
-	return st.seated and mom_state != Mom.WALK and mom_pos.distance_to(st.pos) < 0.2
+	return st.seated and mom_state != Mom.WALK and mom_state != Mom.ROUND and mom_pos.distance_to(st.pos) < 0.2
 
 
 ## Jusqu'où on voit : partout, sauf dans le noir, où ça dépend de la lumière de la télé.
@@ -324,7 +327,7 @@ func scaled_window(seconds: float) -> float:
 ## sortie de la pièce, la personne qui surveille n'en est pas une non plus.
 func people_circles() -> Array:
 	var out: Array = []
-	if not mom_out and (mom_state == Mom.ROUND or not mom_low()):
+	if not mom_out and not mom_seated():
 		out.append([mom_pos, MOM_RADIUS])
 	for h in helpers:
 		if h.state in ["enter", "cross", "leave"]:
@@ -1057,20 +1060,8 @@ func _follow_helper(h: Dictionary, dt: float) -> void:
 func _step_snitch(h: Dictionary, dt: float) -> void:
 	h.cool -= dt
 	# Les pattes en l'air, Blanche dépasse toujours : l'îlot ne la cache pas à Charlotte non plus.
-	var sees: bool = h.cool <= 0.0 and dog_state == Dog.REACHING and h.pos.distance_to(dog_pos) < 2.3
-	if not sees:
-		h.snitch = 0.0
-		return
-	if h.snitch == 0.0:
-		_emit("snitch")
-	h.snitch += dt
-	if h.snitch >= 0.9:
-		h.snitch = 0.0
-		h.cool = 2.5
-		_emit("snitch_call")
-		if mom_state == Mom.BUSY or (mom_state == Mom.HINT and hint_kind == "feint"):
-			feinted = true
-			_hint("real", _hint_time())
+	var sees: bool = h.cool <= 0.0 and dog_state == Dog.REACHING and h.pos.distance_to(dog_pos) < SNITCH_SIGHT
+	_snitch_step(h, sees, dt)
 
 
 # ------------------------------------------------------------------ hors de la pièce
@@ -1213,6 +1204,9 @@ func _snitch_step(h: Dictionary, sees: bool, dt: float) -> void:
 			# Appelée de la cuisine, elle revient (son retour s'annonce comme toujours).
 			if mom_state == Mom.BUSY:
 				mom_left = minf(mom_left, 0.2)
+		elif mom_state == Mom.BUSY and activity == "chicane":
+			# En pleine chicane, elle n'entend rien d'autre.
+			pass
 		elif mom_state == Mom.BUSY or (mom_state == Mom.HINT and hint_kind == "feint"):
 			feinted = true
 			_hint("real", _hint_time())

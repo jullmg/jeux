@@ -124,3 +124,32 @@ Julien a trouvé le jeu moins fluide. Les mesures de la section 7 n'étaient fai
 | 3416×2064 (Retina) | 31 images/s | 93 à 97 | sous 12 ms |
 
 En jeu, la cadence est celle de l'écran à 60 Hz, et 60 images/s sur un écran à 120 Hz.
+
+## Salle à manger et salon : revue après le chantier 3 (2026-11-25)
+
+### Revue de code (`/code-review high`)
+
+| Trouvé | Suite |
+|---|---|
+| L'exportation attendait encore 8 missions débloquées | Elle lit le nombre de missions dans le rapport de l'autotest |
+| La visite qui dénonce coupait une chicane en cours | En pleine chicane, Maman n'entend rien d'autre (essai ajouté) |
+| La chaise qui vacille était cherchée dans l'arbre à chaque image | Trouvée une fois au choc, remise en place à la fin |
+| Des clés de niveau mal écrites ne plantaient qu'en partie | `Levels.validate` les vérifie (essai ajouté) |
+| La finale échappait à la vérification « la difficulté ne recule pas » | Elle doit être la plus dure à réussir (réussite et trois étoiles) |
+| La fin et les cartes 9 à 15 montrent l'image des crêpes | Laissé au chantier 6 (images des plats) |
+| `CLAUDE.md` disait les missions 9 à 14 « à faire » | Corrigé |
+
+### Simplification (`/simplify`)
+
+Les quatre relecteurs automatiques n'ont pas pu tourner (limite d'utilisation du modèle) : passe faite à la main.
+
+- Le « Hon ! » de Charlotte dans la cuisine passe par la même règle que la visite (`_snitch_step`) : mêmes parties,
+  vérifié par la non-régression.
+- `mom_seated()` sépare « assise » de « penchée pendant son tour » ; la condition des obstacles se lit d'un coup.
+- Code mort retiré (`RoomMap.hide_named`), liste des personnages en un seul endroit (`Levels.PEOPLE`).
+- Laissé tel quel, exprès : le temps d'attraper d'un morceau au sol reste celui de sa taille dans les règles (le changer
+  changerait les parties de la cuisine) ; seuls les robots comptent zéro pour les morceaux glissés par Charlotte.
+
+### Regard neuf (sous-agent Sonnet)
+
+À faire : la limite d'utilisation du modèle était atteinte. Reporté à la revue finale (chantier 8).

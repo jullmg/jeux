@@ -55,7 +55,7 @@ done
 import json, sys
 first, second = (json.load(open(p)) for p in sys.argv[1:])
 assert first["start_unlocked"] == 1 and first["start_stars"] == 0, "la première ouverture n'était pas neuve"
-assert second["start_unlocked"] == 8 and second["start_stars"] == first["end_stars"] > 0, \
+assert second["start_unlocked"] == first["levels_count"] and second["start_stars"] == first["end_stars"] > 0, \
     f"la sauvegarde n'a pas survécu au redémarrage : {second['start_unlocked']}, {second['start_stars']}"
 print(f"   sauvegarde conservée après redémarrage : {second['start_stars']} étoiles, mission {second['start_unlocked']}")
 PY

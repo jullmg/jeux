@@ -1,5 +1,5 @@
 extends Node
-## Le jeu se teste lui-même : titre, missions, les huit niveaux joués par un robot, pause, résultats et fin.
+## Le jeu se teste lui-même : titre, missions, tous les niveaux joués par un robot, pause, résultats et fin.
 ## Sert aussi à vérifier la version exportée. Écrit un rapport JSON puis quitte (code 0 si tout va bien).
 
 var main: Node
@@ -44,6 +44,7 @@ func _screen(name_: String) -> void:
 func _run() -> void:
 	await _frames(10)
 	report.start_unlocked = main.save.unlocked
+	report.levels_count = Levels.COUNT
 	report.start_stars = main.save.total_stars()
 	_screen("titre")
 	main.menus.show_select()
