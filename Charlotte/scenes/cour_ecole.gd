@@ -66,6 +66,10 @@ var _toys: Array[Node2D] = []
 func _ready() -> void:
 	street_key = "cour_ecole"
 	_garde = Sledding.in_yard()
+	# Back in the yard with the lesson still to come (the game closed on the way through the pupils' door, or the debug
+	# menu): it is recess again, so the bell rings and the door takes her to class.
+	if not _garde and XmasTree.step() != 2 and School.step() == 3:
+		School.set_step(2)
 	seed_value = 7313
 	_rng.seed = seed_value
 	_street_width = YARD_W
@@ -328,11 +332,16 @@ func _build_doors() -> void:
 		if _sale:
 			_charlotte_says("C'est fermé, c'est samedi !\nOn est venus pour les sapins.")
 			return
+		# Class is over: no bell to wait for, the door leads back to the service de garde.
+		if School.step() == 4:
+			_go_to_garde()
+			return
 		if not _bell_rung:
 			_charlotte_says("La cloche a pas encore sonné !\nC'est encore la récré !")
 			return
 		_go_to_class(), DOOR_X))
-	add_child(QuestMark.make(Vector2(DOOR_X, WALL_FOOT - 170.0), func() -> bool: return _bell_rung and _control.enabled))
+	add_child(QuestMark.make(Vector2(DOOR_X, WALL_FOOT - 170.0), func() -> bool:
+		return (_bell_rung or School.step() == 4 and not _garde) and _control.enabled))
 	if not _sale:
 		add_child(DoorSpot.make(Rect2(SHED_X - 120.0, 596.0 - 150.0, 240.0, 160.0), _shed, SHED_X))
 		if Season.is_winter():
@@ -687,6 +696,12 @@ func _go_to_class() -> void:
 	if School.step() == 2:
 		School.set_step(3)
 	Transition.change_scene(self, School.CLASS)
+
+
+func _go_to_garde() -> void:
+	_control.enabled = false
+	Sfx.play("door")
+	Transition.change_scene_saying(self, School.GARDE, "Au service de garde…", 1.4)
 
 
 # Out by the gate when it isn't a school day (only the debug menu brings her here then): home.

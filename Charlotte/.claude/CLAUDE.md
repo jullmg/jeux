@@ -799,6 +799,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
        (`School._sum`, 3e-année level: carrying and borrowing, up to `SUM_MAX`; the wrong answers are the usual slips), read out
        by `Voice` (`say`: "plus" / "moins"), answered on a `ChoiceCard` ("Presque ! Essaie encore." when wrong), a sticker (`flags.ecole_stickers`), the bell;
        At the fifth sticker Madame Nadia opens her treasure box (`classe.gd _surprise`, `SURPRISE_AT`): 3 $, three lollipops in the stash or a gold medal (`flags.ecole_medal`, not shown anywhere yet).
+    The yard never strands her: loaded at step 3 (closed on the way through the pupils' door, or the debug menu) it goes
+    back to step 2, recess and bell; at step 4 the pupils' door leads straight to the garde (`cour_ecole.gd`).
     4. the service de garde (`scenes/service_de_garde.gd`): Jade the educator asks for **a drawing for her parents** (Julien):
        the craft table ("!") opens the `DrawingPad` (`done_text` "Pour Papa et Maman !"), the drawing is kept apart
        (`DrawingPad.pending`, `slot_dir()/dessin_a_rapporter.png`) and carried home in her arms (`Carry` "drawing"), she shows
