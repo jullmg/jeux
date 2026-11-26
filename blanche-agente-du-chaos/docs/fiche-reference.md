@@ -54,3 +54,98 @@ Stylisés, reconnaissables par la silhouette, la coiffure et les vêtements, san
 
 Aucun visage des photos du frigo ni aucune inscription n'est reproduit : le frigo porte des papiers et des dessins
 génériques. Aucune texture ne vient d'une photo.
+
+## La salle à manger et le salon (missions 9 à 15)
+
+D'après les quatre photos de `reference/photos-8/` (2026-11-25). Les pièces sont montrées **en ordre** : le désordre
+du moment est retiré. Les dimensions sont **estimées** ; elles vivent dans `data/pieces/*.json` et
+`tools/blender/double_salon.py`.
+
+### Où elles sont
+
+Un double salon de plex montréalais : **une seule longue pièce** d'environ 3,3 m de large sur 7,4 m, sans cloison,
+avec deux luminaires au plafond. Le **salon** est à l'avant, sur la rue (sa fenêtre) ; la **salle à manger** derrière,
+du côté de la cuisine. Un **corridor** longe le mur ouest jusqu'à la cuisine (réponse de Julien) : la porte de bois de
+la salle à manger et la grande ouverture du salon donnent sur lui. La cuisine est au bout du corridor, au nord ; on y
+arrive par son coin sud-ouest (la porte d'où viennent Papa et Charlotte dans la cuisine).
+
+Repère commun aux deux pièces (mètres) : x vers l'est, z vers le sud (la rue), l'origine au milieu de la limite entre
+les deux pièces. Salle à manger : z de −3,6 à 0 ; salon : z de 0 à 3,8 ; murs à x = ±1,65. Plafond à 2,9 m.
+
+```
+                 nord (mur ardoise)
+     ┌──porte┬cage┬──buffet + étagère──┬────────┐
+     │ bois  └────┘                    │        │
+     │            ┌───── table ─────┐  │ trois  │
+  co-│            │  quatre chaises │  │affiches│
+  rri│            └─────────────────┘  │ lampe  │
+  dor│                                 │ sur    │
+     ┼ - - - - - - - - - - - - - - - - ┼ pied - ┤  limite des deux pièces (aucune cloison)
+     │grande     ┌──── divan ────┐     │        │
+     │ouverture  └───────────────┘     │ mur de │
+     │                ┌table basse┐    │ cadres │
+     │fauteuil        └───────────┘    │berçante│
+     │marine                           │plante  │
+     │piano + télé   │ fenêtre │  étagère de coin
+     └───────────────┴─────────┴──────────────────┘
+                 sud (la rue)
+```
+
+### Commun aux deux pièces
+
+| Élément | Retenu |
+|---|---|
+| Plancher | lattes étroites d'érable miel, luisantes, posées dans la longueur |
+| Murs, plafond | blanc cassé ; corniche de plâtre moulurée ; une **rosace** de plâtre au-dessus de chaque luminaire |
+| Plinthes, cadres de porte | bois foncé verni (noyer) |
+| Lumière | jour froid et clair par la fenêtre du salon ; lampes chaudes ; plafond haut |
+
+### La salle à manger (environ 3,3 × 3,6 m)
+
+| Mur | De gauche à droite (vu du salon) |
+|---|---|
+| Nord | Mur **ardoise très foncée** (gris-bleu presque noir) : la cage de Blanche dans le coin ouest, le buffet bas noir, l'étagère au-dessus |
+| Ouest | Porte de bois verni (vers le corridor et la cuisine), près du coin nord ; une affiche |
+| Est | Trois affiches encadrées (motifs inventés) ; lampe sur pied en laiton à globe de verre fumé, près du salon |
+
+- **Étagère :** montants de fer noir, quatre planches de bois blond (environ 1,4 m de large), couverte de
+  **céramiques artisanales** : tasses, bols, vases et assiettes aux glaçures pastel (crème, rose, vert d'eau, bleu
+  pâle, jaune), une plante retombante.
+- **Buffet :** bas (environ 75 cm), noir mat, 1,6 × 0,45 m ; dessus : tourne-disque, une pile de disques, deux jeux de
+  société, quelques céramiques. Côté cage : rien de près de la nourriture.
+- **La cage de Blanche :** caisse de fil noir (environ 75 × 55 × 60 cm), porte ouverte vers la pièce, couverture à
+  motifs crème et arc-en-ciel, coussin mauve. **C'est le coin de Blanche dans cette pièce** (« DANS TA CAGE ! »).
+- **Table :** bois foncé, coins arrondis, environ 1,5 × 0,9 m, **75 cm** de haut ; on passe dessous.
+- **Chaises :** quatre, style scandinave : dossier courbé de noyer, siège rembourré noir, pattes fuselées.
+- **Suspension :** globe de verre opale sur une tige de laiton, au-dessus de la table.
+
+### Le salon (environ 3,3 × 3,8 m)
+
+| Mur | De gauche à droite (vu de la salle à manger) |
+|---|---|
+| Est | **Mur de cadres** (cadres noirs, un miroir ovale doré, une horloge de bois) ; fauteuil berçant blanc à structure de bois blond ; une plante sur une petite boîte de bois et un panier |
+| Sud | Étagère de coin ancienne en bois foncé ; grande **fenêtre à guillotine**, rideaux marine, radiateur blanc dessous, garde-corps de fer forgé dehors ; **piano numérique noir** et la **grande télé** au-dessus (Julien : c'est bien un piano) |
+| Ouest | Fauteuil marine ; la **grande ouverture** vers le corridor (cadre blanc) |
+
+- **Divan :** velours côtelé **moutarde**, environ 2,1 × 0,95 m, dos à la salle à manger, face à la télé.
+- **Table basse :** rétro, bois, environ 1,0 × 0,55 m, **45 cm**, avec une tablette en dessous.
+- **Plafonnier** à trois spots sur sa rosace ; la lampe sur pied de laiton éclaire le coin du divan.
+- **Coin de Blanche :** un coussin près du radiateur.
+
+### Ce qui a été retiré pour « en ordre »
+
+Ordinateur, boîtes de mouchoirs, casque d'écoute, couvertures en boule, fils, papiers, bouteilles, objets sur la
+table, la lingette et les pots de crayons du buffet. Les céramiques et les disques sont simplifiés en quelques formes
+lisibles. Le banc du piano est rangé dessous.
+
+### Vie privée
+
+Les cadres, les affiches et l'écran de la télé montrent des images **fabriquées par script** (paysage, motifs, chien
+stylisé, carte du ciel inventée, partie de hockey dessinée). Aucune photo de famille, aucun visage, aucune affiche ni
+inscription ne vient des photos.
+
+### Ce qui manque (non bloquant)
+
+- Les dimensions réelles des deux pièces et de la table.
+- La moitié sud du salon vue de face (la fenêtre, le piano et la télé ne sont vus que de biais).
+- Le corridor et la porte de bois vue du corridor : le chemin de Maman vers la cuisine est imaginé.

@@ -16,6 +16,32 @@ Point de reprise d'une session à l'autre. Julien a demandé de tout faire sans 
 | 6. Assurance qualité | fait : revues corrigées, batterie complète réussie (`docs/revues.md`) |
 | 7. Livraison | version macOS 1.0.0-rc4 exportée et testée ; **acceptation de Julien à venir** |
 
+## Salle à manger et salon (`PROMPT-PIECES.md`, commencé le 2026-11-25)
+
+| Chantier | État |
+|---|---|
+| 1. Fiche de référence | fait |
+| 2. Moteur multi-pièces | à faire |
+| 3. Les missions en données | à faire |
+| 4. Les pièces en 3D | à faire |
+| 5. Personnages et animations | à faire |
+| 6. La nourriture | à faire |
+| 7. Lumière, son et interface | à faire |
+| 8. Finition et livraison | à faire |
+
+Réponses de Julien (2026-11-25) : un corridor mène de la salle à manger à la cuisine ; le meuble noir sous la télé est
+un piano ; la cage comme coin et « DANS TA CAGE ! », c'est bon ; les six missions conviennent, **et on peut ajouter un
+souper avec des invités**.
+
+### Choix faits en l'absence de Julien (salle à manger et salon)
+
+- **Sept nouvelles missions au lieu de six** : le souper avec des invités (demandé par Julien) devient la mission 12,
+  dans la salle à manger ; la soirée du hockey, le film et le party des Fêtes passent à 13, 14 et 15.
+- Les deux pièces forment un **seul modèle 3D**, le double salon (il n'y a pas de cloison entre elles) ; chaque mission
+  choisit sa caméra : vers le mur ardoise pour la salle à manger, vers la fenêtre pour le salon, et les deux pièces à
+  la fois pour le party des Fêtes.
+- Maman part à la cuisine par la **porte de bois** de la salle à manger (elle donne sur le corridor).
+
 ## Choix faits en l'absence de Julien (à réviser)
 
 - Le prototype gris à l'écran a été sauté : personne n'était là pour juger s'il est amusant. Les règles ont été

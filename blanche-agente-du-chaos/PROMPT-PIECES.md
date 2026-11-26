@@ -178,7 +178,7 @@ des textes (français du Québec), de la vie privée (aucune photo ni inscriptio
 
 ## 8. Questions pour Julien (notées dans `docs/etat.md`, non bloquantes)
 
-1. La porte de bois de la salle à manger mène-t-elle à la cuisine ? Sinon, par où Maman passe-t-elle ?
-2. Le meuble noir sous la télé est-il un piano ?
-3. La cage est-elle vraiment le coin de Blanche dans cette pièce, et « DANS TA CAGE ! » te fait-il rire ?
-4. Les six missions et leur ordre te conviennent-ils ? D'autres repas ou habitudes de la famille à mettre ?
+1. La porte de bois de la salle à manger mène-t-elle à la cuisine ? Sinon, par où Maman passe-t-elle ? Il y a un corridor jusqua la cuisine
+2. Le meuble noir sous la télé est-il un piano ? oui
+3. La cage est-elle vraiment le coin de Blanche dans cette pièce, et « DANS TA CAGE ! » te fait-il rire ? oui cest bon
+4. Les six missions et leur ordre te conviennent-ils ? D'autres repas ou habitudes de la famille à mettre ? cest parfait! on peut ajouter un souper avec des invites
