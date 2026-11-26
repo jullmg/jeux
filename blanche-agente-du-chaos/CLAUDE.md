@@ -2,7 +2,8 @@
 
 Jeu 3D Godot 4.7 (Forward+ sur Mac, 1920×1080) : la chienne Blanche vole de la nourriture pendant que Maman cuisine.
 Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et décisions : `docs/etat.md` ; revues :
-`docs/revues.md` ; refonte graphique : `PROMPT-GRAPHIQUES.md`. Version 1.0.0-rc4 : Mac d'abord, iPad et Android
+`docs/revues.md` ; refonte graphique : `PROMPT-GRAPHIQUES.md` ; salle à manger et salon (missions 9 à 14, à faire) :
+`PROMPT-PIECES.md`, photos dans `reference/photos-8/`. Version 1.0.0-rc4 : Mac d'abord, iPad et Android
 ensuite.
 
 ## Vérifier
