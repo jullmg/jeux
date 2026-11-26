@@ -10,7 +10,7 @@ const LONG_HINT_BONUS := 0.25
 ## Le nom des répliques et des poses selon la sorte d'indice.
 const HINT_KEYS := {"real": "hint", "feint": "feint", "round": "round"}
 const AMBIENT := {"couper": ["couteau", 0.34], "brasser": ["brasse", 1.1], "laver": ["eau", 1.15], "ilot": ["pas", 0.42],
-	"surprise": ["brasse", 0.55]}
+	"surprise": ["brasse", 0.55], "hockey": ["foule", 2.6], "but": ["foule", 1.6]}
 
 var save: SaveData
 var stage: Stage
@@ -224,6 +224,8 @@ func start_level(id: int) -> void:
 	hud.start(sim, stage)
 	state = "jeu"
 	Sound.music("jeu")
+	if level.get("moment", "") == "noel":
+		Sound.play("clochettes", -4.0)
 	_say_later(Texts.pick(_lines("intro"), _rng))
 	_handle_events()
 
@@ -448,9 +450,13 @@ func _event_sound(e: Dictionary) -> void:
 		"caught":
 			Sound.play("au_coin", 2.0)
 		"noise":
-			Sound.play("tombe" if e.what == "tabouret" else "fracas")
+			Sound.play({"tabouret": "tombe", "chaise": "chaise"}.get(e.what, "fracas"))
 		"surprise":
-			Sound.play("minuterie")
+			if sim.watcher == "papa":
+				Sound.play("sirene")
+				Sound.play("foule", -2.0)
+			else:
+				Sound.play("minuterie")
 		"treasure":
 			Sound.play("tresor")
 		"distract", "snitch_call":
@@ -460,7 +466,7 @@ func _event_sound(e: Dictionary) -> void:
 		"helper_in", "out", "back_in":
 			Sound.play("porte")
 		"served":
-			Sound.play("prise", -4.0, 0.8)
+			Sound.play("assiette")
 		"busted":
 			Sound.play("maman_appel")
 		"papa_drop":
@@ -474,6 +480,8 @@ func _event_sound(e: Dictionary) -> void:
 		"busy":
 			if e.activity == "frigo":
 				Sound.play("frigo")
+			elif e.activity == "disque":
+				Sound.play("disque", -3.0)
 
 
 ## Les répliques de la personne qui surveille : Papa au hockey, Maman qui chuchote pendant le film, ou Maman.

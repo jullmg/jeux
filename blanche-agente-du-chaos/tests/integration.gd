@@ -181,7 +181,10 @@ func test_missions_verrouillees() -> void:
 	main.menus.show_select()
 	await frames()
 	var grid: Array = main.menus.find_children("*", "GridContainer", true, false)
-	check(grid.size() == 1 and grid[0].get_child_count() == Levels.COUNT, "huit missions")
+	check(grid.size() == 1 and grid[0].get_child_count() == 8, "les huit missions de la cuisine")
+	var tabs: Array = main.menus.find_children("onglet_*", "Button", true, false)
+	check(tabs.size() == 4, "un onglet par pièce : %d" % tabs.size())
+	check(tabs.filter(func(b: Button) -> bool: return not b.disabled).size() == 1, "seule la cuisine est ouverte")
 	var open := 0
 	for b: Button in grid[0].get_children():
 		open += int(not b.disabled)
@@ -194,6 +197,16 @@ func test_missions_verrouillees() -> void:
 	for b: Button in grid.back().get_children():
 		open += int(not b.disabled)
 	check(open == 2, "la deuxième s'ouvre : %d" % open)
+	# La cuisine finie, la salle à manger s'ouvre ; son onglet montre ses quatre missions.
+	main.save.record(8, 9000, 3)
+	main.menus.show_select()
+	await frames()
+	var dining := main.menus.find_child("onglet_salle_a_manger", true, false) as Button
+	check(dining != null and not dining.disabled, "l'onglet de la salle à manger s'ouvre")
+	dining.pressed.emit()
+	await frames()
+	grid = main.menus.find_children("*", "GridContainer", true, false)
+	check(grid.back().get_child_count() == 4, "quatre missions dans la salle à manger : %d" % grid.back().get_child_count())
 	main.save.reset_defaults()
 
 

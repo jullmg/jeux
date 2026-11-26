@@ -23,24 +23,26 @@ const MOMENTS := {
 		"sky": Color(1.0, 0.58, 0.44), "exposure": 1.08, "saturation": 1.06,
 	},
 	"brunch": {
-		"ambient": [Color(0.78, 0.75, 0.76), 0.56], "key": [Color(1.0, 0.95, 0.89), 0.68],
-		"window": [Color(1.0, 0.86, 0.62), 5.5], "fill": [Color(0.86, 0.90, 1.0), 0.14], "lamps": 0.30,
+		"ambient": [Color(0.80, 0.77, 0.76), 0.60], "key": [Color(1.0, 0.95, 0.88), 0.72],
+		"window": [Color(1.0, 0.86, 0.62), 6.0], "fill": [Color(0.86, 0.90, 1.0), 0.16], "lamps": 0.32,
 		"sky": Color(1.0, 1.0, 1.0), "exposure": 1.10, "saturation": 1.10,
 	},
 	"fete": {
-		"ambient": [Color(0.80, 0.78, 0.76), 0.58], "key": [Color(1.0, 0.97, 0.93), 0.76],
-		"window": [Color(1.0, 0.94, 0.82), 4.0], "fill": [Color(0.88, 0.92, 1.0), 0.14], "lamps": 0.22,
-		"sky": Color(1.0, 1.0, 1.0), "exposure": 1.06, "saturation": 1.08,
+		"ambient": [Color(0.82, 0.78, 0.76), 0.58], "key": [Color(1.0, 0.96, 0.90), 0.72],
+		"window": [Color(1.0, 0.90, 0.74), 4.6], "fill": [Color(0.90, 0.88, 1.0), 0.14], "lamps": 0.4,
+		"sky": Color(1.0, 0.96, 0.9), "exposure": 1.08, "saturation": 1.12,
 	},
+	# Le soir de hockey : dehors il fait nuit, la lampe sur pied et la télé éclairent le salon.
 	"hockey": {
-		"ambient": [Color(0.72, 0.62, 0.55), 0.48], "key": [Color(1.0, 0.86, 0.70), 0.60],
-		"window": [Color(1.0, 0.55, 0.30), 4.2], "fill": [Color(0.88, 0.80, 0.80), 0.09], "lamps": 0.62,
-		"sky": Color(1.0, 0.58, 0.44), "exposure": 1.08, "saturation": 1.06,
+		"ambient": [Color(0.70, 0.56, 0.50), 0.30], "key": [Color(1.0, 0.80, 0.60), 0.22],
+		"window": [Color(0.45, 0.55, 0.95), 1.2], "fill": [Color(0.80, 0.80, 0.95), 0.05], "lamps": 1.4,
+		"sky": Color(0.18, 0.24, 0.48), "exposure": 1.16, "saturation": 1.08,
 	},
+	# Le film : les lumières éteintes ; seule la télé éclaire la pièce, par éclats (la même valeur que les règles).
 	"film": {
-		"ambient": [Color(0.72, 0.62, 0.55), 0.48], "key": [Color(1.0, 0.86, 0.70), 0.60],
-		"window": [Color(1.0, 0.55, 0.30), 4.2], "fill": [Color(0.88, 0.80, 0.80), 0.09], "lamps": 0.62,
-		"sky": Color(1.0, 0.58, 0.44), "exposure": 1.08, "saturation": 1.06,
+		"ambient": [Color(0.46, 0.50, 0.68), 0.20], "key": [Color(0.62, 0.68, 0.95), 0.10],
+		"window": [Color(0.40, 0.50, 0.90), 0.9], "fill": [Color(0.70, 0.74, 0.95), 0.05], "lamps": 0.0,
+		"sky": Color(0.10, 0.14, 0.30), "exposure": 1.18, "saturation": 1.0,
 	},
 	"noel": {
 		"ambient": [Color(0.68, 0.55, 0.50), 0.44], "key": [Color(1.0, 0.82, 0.62), 0.56],

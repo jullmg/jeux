@@ -63,6 +63,8 @@ var _tv_light: OmniLight3D
 var _tv_on := false
 ## Les matières des vues par la fenêtre, teintées selon le moment.
 var _views: Dictionary = {}
+## Dans le noir : jusqu'où voit la personne qui surveille (un cercle au plancher, de la taille des règles).
+var _sight: MeshInstance3D
 var _time := 0.0
 var _shake := 0.0
 var _wobble := 0.0
@@ -118,6 +120,7 @@ func _ready() -> void:
 	add_child(effects)
 	effects.warm_up()
 	_ring_mesh = _make_ring(0.8, 1.0, 40)
+	_build_sight_ring()
 	_ring_shadow = StandardMaterial3D.new()
 	_ring_shadow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_ring_shadow.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -222,7 +225,8 @@ func _set_moment(moment: String) -> void:
 	_christmas.visible = moment == "noel" and _room_node == _kitchen
 	if _room_node != _kitchen:
 		# Le double salon : Noël au party, l'écran de la télé selon la soirée, la rue teintée selon l'heure.
-		var shown := {"Noel": moment == "noel", "EcranHockey": moment == "hockey", "EcranFilm": moment == "film"}
+		var shown := {"Noel": moment == "noel", "EcranHockey": moment == "hockey", "EcranFilm": moment == "film",
+			"Ampoule": moment != "film"}
 		shown.EcranNoir = not (shown.EcranHockey or shown.EcranFilm)
 		for part: String in shown:
 			var node := _room_node.get_node_or_null(part) as Node3D
@@ -341,6 +345,33 @@ func _build_effects() -> void:
 	_steam.mesh = quad
 	_steam.emitting = false
 	add_child(_steam)
+
+
+# ------------------------------------------------------------------ le noir
+
+func _build_sight_ring() -> void:
+	_sight = MeshInstance3D.new()
+	_sight.mesh = _make_ring(0.95, 1.0, 72)
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(0.92, 0.97, 1.0, 0.9)
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_sight.material_override = mat
+	_sight.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_sight.visible = false
+	add_child(_sight)
+
+
+## Le cercle de lumière autour de la personne qui surveille : dedans, on te voit.
+func _show_sight() -> void:
+	var dark := sim != null and sim.level.has("dark")
+	_sight.visible = dark
+	if dark:
+		var eye := sim.viewpoint()
+		var r := minf(sim.sight_range(), 8.0)
+		_sight.position = Vector3(eye.x, 0.012, eye.y)
+		_sight.scale = Vector3(r, 1.0, r)
 
 
 # ------------------------------------------------------------------ zone cachée
@@ -624,6 +655,8 @@ func _clear_level() -> void:
 	_wobble = 0.0
 	if _mask_node:
 		_mask_node.visible = false
+	if _sight:
+		_sight.visible = false
 	if effects:
 		effects.clear()
 
@@ -681,6 +714,7 @@ func _process(delta: float) -> void:
 		_show_people(delta)
 		_sync_food(delta)
 		_update_mask(delta)
+		_show_sight()
 		dog.set_see_through(_dog_covered())
 		_steam.emitting = _room_node == _kitchen and (sim.activity == "brasser" or sim.activity == "surprise" \
 			or sim.walk_activity == "surprise")

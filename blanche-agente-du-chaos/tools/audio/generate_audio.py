@@ -403,6 +403,33 @@ def tension_parts(beat):
                 yield start + (3 + k / 8) * beat, clap(), 0.06 + 0.025 * k
 
 
+def rooms():
+    """Les sons de la salle à manger et du salon (après tous les autres : le hasard des sons d'avant ne change pas)."""
+    # la foule du hockey : une rumeur qui monte, quelques « ooh »
+    crowd = noise(2.2, 250, 2600, attack=0.4, release=0.8) * (0.7 + 0.3 * np.sin(2 * np.pi * 1.3 * t(2.2)))
+    oohs = [(0.3 + k * 0.45, voice(lambda u, f=f: f * (1 + 0.15 * u), vowel((420, 420, 90, 1.0), (800, 800, 140, 0.4)), 0.7,
+                                   breath=0.08, attack=0.1, release=0.3), 0.25) for k, f in enumerate((170, 220, 196, 247))]
+    save("foule", mix((0, crowd, 1.0), *oohs), 0.5)
+    # la sirène du but : un klaxon grave et riche, qui tient
+    s = t(1.6)
+    horn = sum(np.sin(2 * np.pi * 196 * h * s * (1 + 0.004 * np.sin(2 * np.pi * 5 * s))) / h ** 1.2 for h in range(1, 12))
+    save("sirene", mix((0, horn * env(len(s), 0.06, 0.4), 1.0), (0.2, crowd[:int(1.4 * SR)], 0.5)), 0.7)
+    # une assiette posée sur la table
+    save("assiette", mix((0, sine(2350, 0.25, decay=0.05), 1.0), (0.004, sine(3420, 0.2, decay=0.04), 0.6),
+                         (0, noise(0.04, 1500, 7000, decay=0.01), 0.5), (0.0, sine(240, 0.08, decay=0.03), 0.6)), 0.5)
+    # une chaise qui grince et frotte le plancher
+    scrape = noise(0.32, 180, 1100, attack=0.03, release=0.08) * (0.6 + 0.4 * np.sin(2 * np.pi * 31 * t(0.32)))
+    save("chaise", mix((0, scrape, 1.0), (0.05, sweep(520, 380, 0.22, attack=0.03, release=0.1), 0.35)), 0.55)
+    # le tourne-disque : le crépitement, puis quelques notes joyeuses
+    crackle = noise(1.6, 1500, 8000) * (rng.random(int(1.6 * SR)) > 0.985) * 1.0
+    melody_ = [(0.35 + i * 0.18, marimba(hz(n), 0.4), 0.7) for i, n in enumerate((72, 76, 79, 84, 79, 76))]
+    save("disque", mix((0, crackle, 0.5), (0, noise(1.6, 60, 300, attack=0.1, release=0.3), 0.12), *melody_), 0.55)
+    # les clochettes des Fêtes
+    bells = [(rng.uniform(0, 0.9), mix((0, sine(f, 0.35, decay=0.08), 1.0), (0, sine(f * 2.76, 0.2, decay=0.05), 0.4)),
+              rng.uniform(0.4, 1.0)) for f in rng.uniform(2200, 3600, 16)]
+    save("clochettes", mix(*bells), 0.5)
+
+
 if __name__ == "__main__":
     sfx()
     loop(126, 16, menu_parts, "musique_menu", 0.75)
@@ -411,5 +438,6 @@ if __name__ == "__main__":
     # à la fin, pour ne pas changer le hasard des sons précédents
     save("chicane_maman", quarrel(265, 21), 0.7)
     save("chicane_papa", quarrel(128, 34), 0.8)
+    rooms()
     files = sorted(OUT.glob("*.wav"))
     print(f"AUDIO {len(files)} fichiers, {sum(f.stat().st_size for f in files) // 1024} Ko")

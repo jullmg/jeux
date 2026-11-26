@@ -419,8 +419,11 @@ arc = [(lcx, 1.55, lcz), (lcx - 0.05, 1.66, lcz), (lcx - 0.16, 1.68, lcz), (lcx 
 pts, radii = C.curve(arc, [0.011] * 4, 6)
 lamp.tube(pts, radii, brass, seg=8)
 lamp.ball((lcx - 0.26, 1.48, lcz), 0.12, smoke, seg=24, rings=16)
-lamp.ball((lcx - 0.26, 1.49, lcz), 0.035, bulb, seg=12, rings=8)
 lamp.build()
+# l'ampoule à part : le jeu l'éteint pendant le film
+light_bulb = C.Obj("Ampoule")
+light_bulb.ball((lcx - 0.26, 1.49, lcz), 0.035, bulb, seg=12, rings=8)
+light_bulb.build()
 
 
 # ---------------------------------------------------------------- le salon

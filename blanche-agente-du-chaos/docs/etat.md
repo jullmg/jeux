@@ -26,7 +26,7 @@ Point de reprise d'une session à l'autre. Julien a demandé de tout faire sans 
 | 4. Les pièces en 3D | fait : le double salon d'un seul modèle (`tools/blender/double_salon.py`), une caméra et un éclairage par pièce |
 | 5. Personnages et animations | fait : assis à table et au divan, servir, manger, le but, la télécommande, Charlotte qui glisse un morceau, la visite (deux nouveaux modèles), Blanche qui rampe et tend le nez |
 | 6. La nourriture | fait : 21 nouveaux morceaux (brunch, pâté chinois, fête, lasagne, hockey, film, buffet des Fêtes) et les images des plats 9 à 15 |
-| 7. Lumière, son et interface | à faire |
+| 7. Lumière, son et interface | fait : une lumière par soirée (brunch, fête, souper, hockey, film dans le noir, Fêtes), le cercle de vue du noir, six nouveaux sons, l'écran des missions par pièce |
 | 8. Finition et livraison | à faire |
 
 Réponses de Julien (2026-11-25) : un corridor mène de la salle à manger à la cuisine ; le meuble noir sous la télé est
@@ -52,6 +52,10 @@ souper avec des invités**.
   à la fois (une personne assise a besoin de son siège dans le décor).
 - Au party, la caméra montre **les deux pièces d'un coup**, de côté (depuis le mur est) : tout est plus petit que dans
   la cuisine, mais Maman, Blanche, le coin et la nourriture restent dans le cadre.
+- Dans le noir, **un cercle clair au plancher** montre jusqu'où voit la personne qui surveille (la même valeur que
+  les règles) ; la télé éclaire la pièce avec la même lumière.
+- L'écran des missions a **un onglet par pièce** (la cuisine, la salle à manger, le salon, le party des Fêtes) ; une
+  pièce s'ouvre quand sa première mission l'est.
 - Les chaises, le fauteuil berçant et le piano sont simplifiés ; le banc du piano est rangé ; les céramiques sont des
   formes simples (tasses, bols, vases, piles d'assiettes) aux glaçures pastel.
 - **Le party des Fêtes (15)** a demandé des réglages pour que s'entêter (ne jamais redescendre) ne paie pas :

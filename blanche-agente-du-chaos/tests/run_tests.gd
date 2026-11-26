@@ -1192,7 +1192,8 @@ func test_modeles_complets() -> void:
 ## Le double salon a toutes les parties que les plans et la scène nomment.
 func test_double_salon_complet() -> void:
 	var model: Node = (load("res://art/models/double_salon.glb") as PackedScene).instantiate()
-	var names := ["Noel", "EcranHockey", "EcranFilm", "EcranNoir", "VueSalon", "SalleAManger", "Salon", "Lampe", "Plancher"]
+	var names := ["Noel", "EcranHockey", "EcranFilm", "EcranNoir", "VueSalon", "SalleAManger", "Salon", "Lampe", "Ampoule",
+		"Plancher"]
 	for piece: String in ["salle_a_manger", "salon", "fetes"]:
 		var m: RoomMap = grids(piece)[0]
 		names.append_array(m.data.get("cache", []))
@@ -1211,7 +1212,7 @@ func test_taille_de_blanche() -> void:
 
 func test_tous_les_sons_existent() -> void:
 	var regex := RegEx.new()
-	regex.compile("Sound\\.play\\(\"(\\w+)\"|\\[\"(couteau|brasse|eau|pas)\", [0-9.]+\\]|\"(tombe|fracas|miette|prise|combo|avale|tour|alerte|victoire|rate)\"")
+	regex.compile("Sound\\.play\\(\"(\\w+)\"|\\[\"(couteau|brasse|eau|pas|foule)\", [0-9.]+\\]|\"(tombe|fracas|miette|prise|combo|avale|tour|alerte|victoire|rate|chaise)\"")
 	var found := {}
 	for path: String in ["res://scenes/main.gd", "res://ui/menus.gd", "res://ui/ui_style.gd"]:
 		for m in regex.search_all(FileAccess.get_file_as_string(path)):

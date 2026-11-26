@@ -196,22 +196,53 @@ func show_title() -> void:
 	_focus(first)
 
 
-func show_select() -> void:
+## Les missions, regroupées par pièce : un onglet par pièce, et les cartes de la pièce choisie.
+func show_select(room := "") -> void:
+	var rooms := _rooms()
+	if room == "" or not rooms.has(room):
+		room = Levels.piece_of(Levels.load_level(save.unlocked))
 	var holder := _begin("missions")
-	var column := _card(holder, 1560, 22)
-	column.add_child(UiStyle.label(Texts.LEVELS, 60))
+	var column := _card(holder, 1560, 16)
+	column.add_child(UiStyle.label(Texts.LEVELS, 54))
+	var tabs := UiStyle.row(14)
+	tabs.alignment = BoxContainer.ALIGNMENT_CENTER
+	column.add_child(tabs)
+	var chosen: Button
+	for name_: String in rooms:
+		var ids: Array = rooms[name_]
+		var open: bool = ids[0] <= save.unlocked
+		var got := 0
+		for id: int in ids:
+			got += save.stars_of(id)
+		var label := "%s   ★ %d/%d" % [Texts.ROOMS.get(name_, name_), got, ids.size() * 3]
+		var tab := UiStyle.button(label, show_select.bind(name_), 26, 350)
+		tab.name = "onglet_" + name_
+		tab.disabled = not open
+		tab.focus_mode = Control.FOCUS_ALL if open else Control.FOCUS_NONE
+		var face := Color(UiStyle.PINK) if name_ == room else Color("fffaf0")
+		if not open:
+			face = Color("d9cbbb")
+		for state: Array in [["normal", face, false], ["hover", face.lightened(0.2), false], ["pressed", face.darkened(0.08), true],
+				["disabled", face, false]]:
+			tab.add_theme_stylebox_override(state[0], UiStyle.candy(state[1], state[2], Color("c9a87e")))
+		if name_ == room:
+			tab.add_theme_color_override("font_color", Color.WHITE)
+			tab.add_theme_color_override("font_hover_color", Color.WHITE)
+			tab.add_theme_color_override("font_focus_color", Color.WHITE)
+			chosen = tab
+		tabs.add_child(tab)
 	var grid := GridContainer.new()
 	grid.columns = 4
 	grid.add_theme_constant_override("h_separation", 22)
-	grid.add_theme_constant_override("v_separation", 22)
+	grid.add_theme_constant_override("v_separation", 18)
 	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	column.add_child(grid)
 	var focus: Button
-	for id in range(1, Levels.COUNT + 1):
+	for id: int in rooms[room]:
 		var level := Levels.load_level(id)
 		var open := id <= save.unlocked
-		var b := UiStyle.button("", func() -> void: brief.emit(id), 30, 350)
-		b.custom_minimum_size = Vector2(350, 378)
+		var b := UiStyle.button("", func() -> void: brief.emit(id), 30, 340)
+		b.custom_minimum_size = Vector2(340, 352)
 		b.disabled = not open
 		b.focus_mode = Control.FOCUS_ALL if open else Control.FOCUS_NONE
 		var face := Color("fffaf0") if open else Color("d9cbbb")
@@ -221,33 +252,44 @@ func show_select() -> void:
 		var inside := UiStyle.column(2)
 		inside.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		inside.offset_top = 8
-		inside.offset_bottom = -14
+		inside.offset_bottom = -12
 		inside.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.add_child(inside)
 		inside.add_child(UiStyle.label(Texts.MISSION % id, 24, UiStyle.PINK_DARK if open else UiStyle.INK_SOFT))
-		var picture := _dish(id, 170)
+		var picture := _dish(id, 150)
 		if not open:
 			picture.modulate = Color(0.12, 0.08, 0.06, 0.4)
 		inside.add_child(picture)
-		var meal := _wrapped(str(level.meal), 320, 29, UiStyle.INK if open else UiStyle.INK_SOFT)
+		var meal := _wrapped(str(level.meal), 310, 28, UiStyle.INK if open else UiStyle.INK_SOFT)
 		meal.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		inside.add_child(meal)
 		if open:
-			inside.add_child(_stars_control(save.stars_of(id), 21))
+			inside.add_child(_stars_control(save.stars_of(id), 20))
 			var best := save.best_of(id)
 			inside.add_child(UiStyle.label(Texts.BEST % best if best > 0 else str(level.novelty), 20, UiStyle.INK_SOFT))
 		else:
 			var lock := Control.new()
-			lock.custom_minimum_size = Vector2(0, 52)
-			lock.draw.connect(func() -> void: Icons.lock(lock, lock.size / 2.0, 24, UiStyle.INK_SOFT))
+			lock.custom_minimum_size = Vector2(0, 48)
+			lock.draw.connect(func() -> void: Icons.lock(lock, lock.size / 2.0, 22, UiStyle.INK_SOFT))
 			inside.add_child(lock)
 			inside.add_child(UiStyle.label(Texts.LOCKED, 20, UiStyle.INK_SOFT))
 		grid.add_child(b)
-		if id == save.unlocked:
+		if id == save.unlocked or (focus == null and open and id == rooms[room].back()):
 			focus = b
 	var back := _center_button(column, Texts.BACK, func() -> void: to_title.emit(), 320)
 	_back = func() -> void: to_title.emit()
-	_focus(focus if focus else back)
+	_focus(focus if focus else (chosen if chosen else back))
+
+
+## Les pièces dans l'ordre des missions : pièce → numéros de ses missions.
+static func _rooms() -> Dictionary:
+	var out := {}
+	for id in range(1, Levels.COUNT + 1):
+		var piece := Levels.piece_of(Levels.load_level(id))
+		if not out.has(piece):
+			out[piece] = []
+		out[piece].append(id)
+	return out
 
 
 func show_brief(id: int) -> void:
