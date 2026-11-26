@@ -560,77 +560,142 @@ static func bunting(w: float) -> ImageTexture:
 
 # ── Charlotte's bedroom ──────────────────────────────────────
 
-## Canvas 560x300: white metal bed with a pink duvet, lilac pillow and a plush bunny. Floor at y 300.
+## Canvas 560x300: Charlotte's turquoise bed (Julien, 2026-11-25: almost everything in her room turquoise): a tall upholstered
+## headboard with a cloud-scalloped top and buttoned tufting, a lower footboard to match, a turquoise wooden rail over a white
+## ruffled skirt, a plump turquoise duvet quilted in puffy channels and sprinkled with little white hearts and dots, the white
+## sheet turned over it, a big white pillow with a turquoise frill, a cushion with a heart, a chunky knitted throw at the foot
+## and the plush bunny. Floor at y 300.
 static func bed() -> ImageTexture:
 	var s := '<defs>'
-	s += '<linearGradient id="duvet" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#F8C0CF"/><stop offset="0.45" stop-color="#F4A4B9"/><stop offset="1" stop-color="#E4829F"/></linearGradient>'
-	s += '<linearGradient id="duvet_v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.35"/><stop offset="0.6" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="1" stop-color="#7A2A44" stop-opacity="0.28"/></linearGradient>'
-	s += '<linearGradient id="pillow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F0E6F8"/><stop offset="1" stop-color="#C7B0DE"/></linearGradient>'
-	s += '<linearGradient id="iron" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.5" stop-color="#F0EDE6"/><stop offset="1" stop-color="#CFC9BB"/></linearGradient>'
-	s += '<linearGradient id="ticking" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E4DED2"/></linearGradient>'
+	s += '<linearGradient id="bd_fab" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#86E0D8"/><stop offset="0.5" stop-color="#44C0B9"/><stop offset="1" stop-color="#1E9893"/></linearGradient>'
+	s += '<linearGradient id="bd_duvet" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#78D8D0"/><stop offset="0.45" stop-color="#42BFB8"/><stop offset="1" stop-color="#22A09A"/></linearGradient>'
+	s += '<linearGradient id="bd_duvet_v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.4"/><stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="1" stop-color="#0B5A5C" stop-opacity="0.32"/></linearGradient>'
+	s += '<linearGradient id="bd_rail" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#40BCB5"/><stop offset="1" stop-color="#16807D"/></linearGradient>'
+	s += '<linearGradient id="bd_pillow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D9EEEB"/></linearGradient>'
+	s += '<linearGradient id="bd_knit" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#F2FBFA"/><stop offset="1" stop-color="#C4E9E4"/></linearGradient>'
 	s += '</defs>'
-	# Shade on the floor under it (the box of sweets peeks out of it).
-	s += '<ellipse cx="300" cy="296" rx="250" ry="6" fill="#000000" opacity="0.14"/>'
-	# The headboard: a white iron arch, bars with their balls, two rails, and a finial on each post.
-	s += '<path d="M20 296 V60 Q20 20 70 20 Q120 20 120 60 V296" fill="none" stroke="#C9C2B4" stroke-width="12"/>'
-	s += '<path d="M20 296 V60 Q20 20 70 20 Q120 20 120 60 V296" fill="none" stroke="url(#iron)" stroke-width="9"/>'
-	s += '<path d="M17 296 V62 Q17 24 66 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" opacity="0.9"/>'
-	for x in [44.0, 70.0, 96.0]:
-		s += '<path d="M%s 50 V196" stroke="#C9C2B4" stroke-width="7"/><path d="M%s 50 V196" stroke="url(#iron)" stroke-width="5"/><circle cx="%s" cy="86" r="6" fill="#E9E5DA" stroke="#B8B2A2" stroke-width="1.5"/><circle cx="%s" cy="84" r="2" fill="#FFFFFF"/>' % [x, x, x, x]
-	for y in [122.0, 190.0]:
-		s += '<path d="M22 %s H118" stroke="#C9C2B4" stroke-width="9"/><path d="M22 %s H118" stroke="url(#iron)" stroke-width="6.5"/>' % [y, y]
-	for fx in [20.0, 120.0]:
-		s += '<circle cx="%s" cy="58" r="8" fill="#F4F0E6" stroke="#B8B2A2" stroke-width="1.8"/><circle cx="%s" cy="55" r="2.6" fill="#FFFFFF"/>' % [fx, fx - 2.0]
-	# The side of the mattress: quilted ticking with a piped edge, then the bed's base and its short feet.
-	s += '<path d="M44 222 Q300 240 548 222 V258 Q300 276 44 258 Z" fill="url(#ticking)" stroke="#BDB6A6" stroke-width="2.2"/>'
-	for x in range(80, 540, 46):
-		s += '<path d="M%d 226 Q%d 244 %d 262" stroke="#CFC8B8" stroke-width="1.2" fill="none" opacity="0.7"/>' % [x, x + 4, x + 2]
-	s += '<path d="M44 224 Q300 242 548 224" stroke="#F7B6C6" stroke-width="3.5" fill="none"/>'
-	s += '<path d="M44 256 Q300 274 548 256" stroke="#F7B6C6" stroke-width="3" fill="none" opacity="0.8"/>'
-	s += '<path d="M46 262 Q300 280 546 262 V272 Q300 290 46 272 Z" fill="#E9E5DA" stroke="#B8B2A2" stroke-width="1.8"/>'
-	for x in [70.0, 520.0]:
-		s += '<path d="M%s 270 V296" stroke="#C9C2B4" stroke-width="9" stroke-linecap="round"/><path d="M%s 270 V296" stroke="url(#iron)" stroke-width="6" stroke-linecap="round"/>' % [x, x]
-	# The big pillow (a pillowcase with a sewn border and creases) and the little cushion.
-	s += '<path d="M52 132 Q48 100 84 100 H196 Q222 100 220 134 Q220 166 194 168 H84 Q52 168 52 132 Z" fill="url(#pillow)" stroke="#9E86B5" stroke-width="2.6"/>'
-	s += '<path d="M62 134 Q62 112 86 112 H194 Q210 112 210 134" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.7" stroke-dasharray="4 5"/>'
-	s += '<path d="M76 118 Q140 106 206 116" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.7"/>'
-	s += '<path d="M96 150 Q140 140 188 150" stroke="#A58CC0" stroke-width="2" fill="none" opacity="0.6"/><path d="M120 128 Q140 138 168 132" stroke="#A58CC0" stroke-width="1.6" fill="none" opacity="0.5"/>'
-	s += '<path d="M196 146 Q192 122 218 120 H288 Q312 122 310 148 Q310 172 288 174 H218 Q196 172 196 146 Z" fill="#FBDCE8" stroke="#C26A84" stroke-width="2.4"/>'
-	s += '<path d="M208 138 Q240 126 292 130" stroke="#FFFFFF" stroke-width="4.5" fill="none" stroke-linecap="round" opacity="0.8"/>'
-	s += '<path d="M250 132 q-8 -10 -16 -2 q-6 8 16 24 q22 -16 16 -24 q-8 -8 -16 2 Z" fill="#F08AAE" opacity="0.65"/>'
-	# The duvet: scalloped hem at the front, the sheet turned over at the top, soft light from the left, quilted diamonds.
-	s += '<path d="M56 176 Q90 150 200 158 Q380 142 546 158 L550 226 Q300 250 50 226 Z" fill="url(#duvet)" stroke="#C26A84" stroke-width="3"/>'
-	s += '<path d="M56 176 Q90 150 200 158 Q380 142 546 158 L550 226 Q300 250 50 226 Z" fill="url(#duvet_v)"/>'
-	s += '<path d="M54 206 Q64 226 78 214 Q92 232 108 218 Q122 236 138 222 Q154 240 170 224 Q186 242 202 226 Q218 244 234 228 Q250 246 266 229 Q282 247 298 230 Q314 247 330 230 Q346 246 362 229 Q378 244 394 227 Q410 242 426 225 Q442 238 458 222 Q474 234 490 218 Q506 228 522 213 Q538 220 550 208" fill="#EE8FA9" stroke="#C26A84" stroke-width="2.4"/>'
-	for x in range(70, 540, 40):
-		s += '<path d="M%d 176 L%d 196 L%d 216 M%d 176 L%d 196 L%d 216" stroke="#E07C9A" stroke-width="1.6" fill="none" stroke-dasharray="4 5" opacity="0.55"/>' % [x, x + 20, x, x + 40, x + 20, x + 40]
-	s += '<path d="M64 168 Q200 146 340 154 Q440 148 548 156 L550 178 Q440 168 340 176 Q200 170 62 190 Z" fill="#FFFBF4" stroke="#D6CCC0" stroke-width="2"/>'
-	s += '<path d="M64 180 Q200 160 340 168 Q440 162 548 170" stroke="#F2A7B9" stroke-width="2.2" fill="none" stroke-dasharray="3 4"/>'
-	# Folds in the duvet over the sleeper's feet, and its shade on the sheet.
-	s += '<path d="M340 178 Q356 196 348 218 M420 176 Q436 194 428 214 M270 182 Q282 198 276 216" stroke="#D56F8E" stroke-width="2.4" fill="none" opacity="0.55" stroke-linecap="round"/>'
-	s += '<path d="M60 186 Q200 168 340 176 Q440 170 548 176" stroke="#B85A76" stroke-width="3" fill="none" opacity="0.18"/>'
-	# The footboard: a lower iron rail with posts and finials.
-	s += '<path d="M440 148 V296 M544 138 V296" stroke="#C9C2B4" stroke-width="10"/><path d="M440 148 V296 M544 138 V296" stroke="url(#iron)" stroke-width="7"/>'
-	for x in [462.0, 484.0, 506.0, 526.0]:
-		s += '<path d="M%s 152 V204" stroke="#C9C2B4" stroke-width="6"/><path d="M%s 152 V204" stroke="url(#iron)" stroke-width="4"/>' % [x, x]
-	s += '<path d="M434 146 H548" stroke="#C9C2B4" stroke-width="10"/><path d="M434 146 H548" stroke="url(#iron)" stroke-width="7"/>'
-	for fx in [440.0, 544.0]:
-		s += '<circle cx="%s" cy="138" r="7" fill="#F4F0E6" stroke="#B8B2A2" stroke-width="1.8"/><circle cx="%s" cy="135" r="2.4" fill="#FFFFFF"/>' % [fx, fx - 2.0]
-	# A soft knitted blanket folded across the foot, with its stripes and fringe, and light from the left over the whole bed.
-	s += '<path d="M330 182 Q420 170 536 178 L540 214 Q430 230 326 214 Z" fill="#F7E2A8" stroke="#C9A24A" stroke-width="2.2"/>'
-	for y in [190.0, 200.0, 208.0]:
-		s += '<path d="M332 %s Q430 %s 538 %s" stroke="#F29BB2" stroke-width="3" fill="none" opacity="0.8"/>' % [y, y - 8.0, y - 2.0]
-	for x in range(334, 538, 8):
-		s += '<path d="M%d 212 l-1 8" stroke="#C9A24A" stroke-width="1.6" stroke-linecap="round"/>' % x
-	s += '<path d="M60 160 Q200 150 340 156" stroke="#FFFFFF" stroke-width="5" fill="none" opacity="0.28" stroke-linecap="round"/>'
-	s += '<path d="M470 190 Q500 200 540 196 V226 Q500 240 468 228 Z" fill="#000000" opacity="0.1"/>'
-	# A plush bunny leaning on the pillows.
-	s += '<ellipse cx="254" cy="150" rx="22" ry="15" fill="#FBD2DE" stroke="#C26A84" stroke-width="2.2"/><circle cx="276" cy="136" r="12" fill="#FBD2DE" stroke="#C26A84" stroke-width="2.2"/>'
-	s += '<path d="M270 126 q-5 -22 2 -24 q7 2 5 24 M281 126 q3 -22 9 -22 q5 4 -2 24" fill="#FBD2DE" stroke="#C26A84" stroke-width="2.2"/>'
-	s += '<path d="M272 118 q-1 -12 1 -14 M286 118 q2 -12 4 -12" stroke="#F08AAE" stroke-width="2.4" fill="none" stroke-linecap="round"/>'
-	s += '<circle cx="279" cy="135" r="1.9" fill="#2B2B2B"/><circle cx="287" cy="139" r="2" fill="#F08AAE"/>'
-	s += '<circle cx="236" cy="152" r="6" fill="#FFFFFF" stroke="#E4B8C6" stroke-width="1.4"/>'
+	# Its shade on the floor (the box of sweets peeks out of it).
+	s += '<ellipse cx="290" cy="296" rx="262" ry="7" fill="#000000" opacity="0.16"/>'
+	# The headboard: white turned legs, a deep turquoise frame round a padded panel, buttons in a diamond grid.
+	for lx in [24.0, 126.0]:
+		s += '<path d="M%s 276 h12 l-2 22 h-8 z" fill="#F7FBFA" stroke="#8FC2BD" stroke-width="2"/>' % (lx - 6.0)
+	s += _cloud_board(10.0, 142.0, 12.0, 282.0, 52.0, 220.0)
+	# The white ruffled skirt under the rail: gathers, a ribbon and a scalloped hem picked out in turquoise.
+	var skirt := "M34 254 H500 V284"
+	var sx := 500.0
+	while sx > 40.0:
+		skirt += " Q%s 296 %s 284" % [sx - 11.0, sx - 22.0]
+		sx -= 22.0
+	s += '<path d="%s L34 284 Z" fill="#FBFEFD" stroke="#9FCFCB" stroke-width="2"/>' % skirt
+	for gx in range(44, 500, 13):
+		s += '<path d="M%d 262 Q%d 274 %d 286" stroke="#D3EBE8" stroke-width="1.6" fill="none"/>' % [gx, gx + 3, gx]
+	s += '<path d="M34 270 H500" stroke="#5CCAC2" stroke-width="3"/>'
+	for dx in range(46, 500, 22):
+		s += '<circle cx="%d" cy="283" r="2.2" fill="#3FBDB6"/>' % (dx + 0)
+	# The rail: painted wood with a moulding and a little carved heart.
+	s += '<rect x="30" y="234" width="470" height="26" rx="7" fill="url(#bd_rail)" stroke="#0E6E6C" stroke-width="2.4"/>'
+	s += '<path d="M40 240 H490" stroke="#FFFFFF" stroke-width="2" opacity="0.35" stroke-linecap="round"/>'
+	s += '<path d="M40 254 H490" stroke="#0B5A5C" stroke-width="1.4" opacity="0.35"/>'
+	s += '<path d="M265 244 c-4 -5 -10 -1 0 8 c10 -9 4 -13 0 -8 z" fill="#E8FAF7" opacity="0.8"/>'
+	# The mattress, white with turquoise piping (it shows by the pillows; the duvet hangs over the rest).
+	s += '<rect x="36" y="208" width="470" height="30" rx="11" fill="#F8FCFB" stroke="#A9CFCB" stroke-width="2"/>'
+	s += '<path d="M44 210 H498 M44 236 H498" stroke="#47C1BA" stroke-width="2.4" stroke-linecap="round"/>'
+	# The big pillow: a frilled turquoise edge, the white case, its seam and creases.
+	var pillow := "M50 136 Q46 102 84 100 H186 Q214 100 212 134 Q212 168 186 172 H84 Q50 170 50 136 Z"
+	s += '<path d="%s" fill="#6FD3CB" stroke="#6FD3CB" stroke-width="14" stroke-linejoin="round"/>' % pillow
+	s += '<path d="%s" fill="none" stroke="#A8E8E2" stroke-width="14" stroke-dasharray="5 5" stroke-linejoin="round"/>' % pillow
+	s += '<path d="%s" fill="url(#bd_pillow)" stroke="#8FC4BF" stroke-width="2"/>' % pillow
+	s += '<path d="M62 134 Q62 112 86 112 H194 Q204 112 204 130" fill="none" stroke="#7FD6CE" stroke-width="1.8" stroke-dasharray="4 4"/>'
+	s += '<path d="M76 116 Q140 106 202 116" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.9"/>'
+	s += '<path d="M96 152 Q140 142 188 152 M120 130 Q140 140 166 134" stroke="#B5D9D5" stroke-width="1.8" fill="none"/>'
+	# A deep turquoise cushion with a white heart and piping, leaning on the pillow.
+	s += '<g transform="rotate(-7 210 148)"><rect x="170" y="114" width="80" height="66" rx="16" fill="#2FB0AA" stroke="#137C79" stroke-width="2.6"/>'
+	s += '<rect x="176" y="120" width="68" height="54" rx="12" fill="none" stroke="#C9F0EB" stroke-width="1.6" stroke-dasharray="3 3"/>'
+	s += '<path d="M210 140 c-8 -10 -20 -2 0 16 c20 -18 8 -26 0 -16 z" fill="#FFFFFF" opacity="0.95"/>'
+	s += '<path d="M180 124 Q200 116 226 120" stroke="#FFFFFF" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.4"/></g>'
+	# The duvet: plump, quilted in channels, little white hearts and dots, a white piped hem.
+	var duvet := "M56 186 Q90 166 200 170 Q380 158 498 166 L500 240 Q300 258 52 238 Z"
+	s += '<path d="%s" fill="url(#bd_duvet)" stroke="#137C79" stroke-width="2.8"/>' % duvet
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	for i in 44:
+		var px := rng.randf_range(70.0, 488.0)
+		var py := rng.randf_range(188.0, 236.0)
+		if i % 3 == 0:
+			s += '<path d="M%.1f %.1f c-3 -4 -7 0 0 6 c7 -6 3 -10 0 -6 z" fill="#FFFFFF" opacity="0.9"/>' % [px, py]
+		else:
+			s += '<circle cx="%.1f" cy="%.1f" r="2.3" fill="#E8FAF7" opacity="0.85"/>' % [px, py]
+	for qx in range(100, 498, 52):
+		s += '<path d="M%d 178 Q%d 210 %d 244" stroke="#178E8A" stroke-width="2.2" fill="none" opacity="0.55"/>' % [qx, qx + 7, qx]
+		s += '<path d="M%d 182 Q%d 210 %d 240" stroke="#FFFFFF" stroke-width="5" fill="none" opacity="0.18" stroke-linecap="round"/>' % [qx + 10, qx + 17, qx + 10]
+	s += '<path d="%s" fill="url(#bd_duvet_v)"/>' % duvet
+	s += '<path d="M54 236 Q300 256 500 238" stroke="#FFFFFF" stroke-width="3" fill="none" opacity="0.85"/>'
+	# The white sheet turned over the top, embroidered with a turquoise line.
+	s += '<path d="M62 170 Q200 150 340 156 Q440 150 498 156 L498 178 Q440 170 340 178 Q200 172 60 192 Z" fill="#FFFFFF" stroke="#B9DAD6" stroke-width="2"/>'
+	s += '<path d="M64 182 Q200 162 340 170 Q440 164 496 170" stroke="#3FBDB6" stroke-width="2.2" fill="none" stroke-dasharray="5 3"/>'
+	s += '<path d="M60 188 Q200 170 340 178 Q440 172 498 178" stroke="#0B5A5C" stroke-width="3" fill="none" opacity="0.16"/>'
+	# A chunky knitted throw folded across the foot: cables, two turquoise bands, pompoms.
+	s += '<path d="M350 180 Q430 168 496 174 L498 222 Q430 236 346 222 Z" fill="url(#bd_knit)" stroke="#7DBDB7" stroke-width="2.2"/>'
+	for by in [192.0, 206.0]:
+		s += '<path d="M350 %s Q430 %s 497 %s" stroke="#2FB0AA" stroke-width="5" fill="none" opacity="0.9"/>' % [by, by - 10.0, by - 4.0]
+	for ky in [185.0, 199.0, 213.0]:
+		for kx in range(356, 492, 9):
+			var yy: float = ky - (kx - 350) * 0.05
+			s += '<path d="M%d %.1f l3.5 4 l3.5 -4" stroke="#A9D9D3" stroke-width="1.6" fill="none" stroke-linecap="round"/>' % [kx, yy]
+	for px in range(352, 496, 13):
+		s += '<circle cx="%d" cy="%s" r="4.2" fill="#2FB0AA" stroke="#178E8A" stroke-width="1"/>' % [px, 225.0 + (px - 350) * -0.04]
+	# The footboard, lower, to match the headboard.
+	for lx in [498.0, 548.0]:
+		s += '<path d="M%s 276 h12 l-2 22 h-8 z" fill="#F7FBFA" stroke="#8FC2BD" stroke-width="2"/>' % (lx - 6.0)
+	s += _cloud_board(486.0, 558.0, 124.0, 282.0, 160.0, 250.0)
+	# Soft light from the left over the whole bed.
+	s += '<path d="M64 162 Q200 150 340 156" stroke="#FFFFFF" stroke-width="5" fill="none" opacity="0.3" stroke-linecap="round"/>'
+	# The plush bunny leaning on the pillows: white, turquoise inside its ears, a turquoise bow.
+	s += '<ellipse cx="270" cy="152" rx="22" ry="15" fill="#FFFFFF" stroke="#7FB8B2" stroke-width="2.2"/><circle cx="292" cy="138" r="12" fill="#FFFFFF" stroke="#7FB8B2" stroke-width="2.2"/>'
+	s += '<path d="M286 128 q-5 -22 2 -24 q7 2 5 24 M297 128 q3 -22 9 -22 q5 4 -2 24" fill="#FFFFFF" stroke="#7FB8B2" stroke-width="2.2"/>'
+	s += '<path d="M288 120 q-1 -12 1 -14 M302 120 q2 -12 4 -12" stroke="#5CCAC2" stroke-width="2.6" fill="none" stroke-linecap="round"/>'
+	s += '<circle cx="295" cy="137" r="1.9" fill="#2B2B2B"/><circle cx="303" cy="141" r="2" fill="#F4A6BC"/>'
+	s += '<path d="M282 148 l-8 -5 v10 z M282 148 l8 -5 v10 z" fill="#2FB0AA" stroke="#137C79" stroke-width="1.2"/><circle cx="282" cy="148" r="2.4" fill="#178E8A"/>'
+	s += '<circle cx="252" cy="154" r="6" fill="#FFFFFF" stroke="#B9DAD6" stroke-width="1.4"/>'
 	return tex(560, 300, s)
+
+
+# An upholstered bed end from x0 to x1, top at `top` (a cloud-scalloped crown: a high middle and two shoulders), down to
+# `bottom`: a deep turquoise frame round a padded panel, tufted in diamonds (rows of buttons from `row0` to `row1`, every
+# other row shifted half a step, with the creases between them and a soft puff of light in each diamond).
+static func _cloud_board(x0: float, x1: float, top: float, bottom: float, row0: float, row1: float) -> String:
+	var shape := func(a: float, b: float, t: float, bot: float) -> String:
+		var w := b - a
+		return "M%s %s V%s Q%s %s %s %s Q%s %s %s %s Q%s %s %s %s Q%s %s %s %s V%s Z" % [a, bot, t + w * 0.3,
+			a, t + w * 0.14, a + w * 0.2, t + w * 0.13, a + w * 0.26, t, a + w * 0.5, t,
+			a + w * 0.74, t, a + w * 0.8, t + w * 0.13, b, t + w * 0.14, b, t + w * 0.3, bot]
+	var s := '<path d="%s" fill="#13817E" stroke="#0B5A5C" stroke-width="2.4" stroke-linejoin="round"/>' % shape.call(x0, x1, top, bottom)
+	s += '<path d="%s" fill="url(#bd_fab)" stroke="#0E6E6C" stroke-width="1.6" stroke-linejoin="round"/>' % shape.call(x0 + 8.0, x1 - 8.0, top + 8.0, bottom - 8.0)
+	var step := 34.0
+	var rise := 30.0
+	var buttons: Array[Vector2] = []
+	var row := 0
+	var y := row0
+	while y <= row1 + 0.1:
+		var bx := x0 + 26.0 + (step * 0.5 if row % 2 == 1 else 0.0)
+		while bx <= x1 - 25.0:
+			buttons.append(Vector2(bx, y))
+			bx += step
+		y += rise
+		row += 1
+	# The puffs of padding between the creases, then the creases from each button to its diagonal neighbours.
+	for b in buttons:
+		s += '<ellipse cx="%s" cy="%s" rx="7" ry="5" fill="#FFFFFF" opacity="0.14"/>' % [b.x - 4.0, b.y + rise * 0.5 - 3.0]
+	for i in buttons.size():
+		for j in range(i + 1, buttons.size()):
+			var d: Vector2 = buttons[j] - buttons[i]
+			if absf(d.y - rise) < 0.5 and absf(absf(d.x) - step * 0.5) < 0.5:
+				s += '<path d="M%s %s L%s %s" stroke="#178A86" stroke-width="1.5" opacity="0.55"/>' % [buttons[i].x, buttons[i].y, buttons[j].x, buttons[j].y]
+	for b in buttons:
+		s += '<circle cx="%s" cy="%s" r="3.6" fill="#137C79"/><circle cx="%s" cy="%s" r="1.3" fill="#B7EDE8"/>' % [b.x, b.y, b.x - 1.0, b.y - 1.2]
+	# The light on the padding's left edge.
+	s += '<path d="M%s %s V%s" stroke="#FFFFFF" stroke-width="4" opacity="0.3" stroke-linecap="round"/>' % [x0 + 14.0, top + (x1 - x0) * 0.32, bottom - 20.0]
+	return s
 
 
 ## Canvas 360x380: white dresser with the hamster's glass terrarium on top, in two layers so the hamster
@@ -643,10 +708,10 @@ static func terrarium(front: bool) -> ImageTexture:
 		s += '<rect x="10" y="20" width="300" height="150" fill="none" stroke="#B9C9C4" stroke-width="3"/>'
 		s += '<path d="M10 20 L30 4 H330 L310 20 M310 20 L330 4 V154 L310 170" fill="none" stroke="#B9C9C4" stroke-width="2"/>'
 		s += '<path d="M20 24 L60 24 L26 120 L20 120 Z M250 24 L262 24 L214 168 L202 168 Z" fill="#FFFFFF" opacity="0.28"/>'
-		s += '<rect x="30" y="134" width="48" height="42" fill="#2B2B2B"/><rect x="36" y="140" width="36" height="30" fill="#8E9AA6"/>'
+		s += '<rect x="30" y="134" width="48" height="42" fill="#178E8A"/><rect x="36" y="140" width="36" height="30" fill="#8E9AA6"/>'
 		s += '<rect x="86" y="146" width="36" height="30" fill="#F4F2EC" stroke="#2B2B2B" stroke-width="3"/><rect x="92" y="152" width="24" height="18" fill="#C9A88A"/>'
 		s += '<path d="M240 176 v-40 h44 v40 z" fill="#F2C14E" stroke="#B58A24" stroke-width="2"/><path d="M262 136 q-4 -10 0 -18 q4 8 0 18" fill="#FFB347"/>'
-		s += '<circle cx="306" cy="152" r="14" fill="#F7D6E0" stroke="#D97A9A" stroke-width="2"/><rect x="298" y="164" width="16" height="12" fill="#E04F7A"/>'
+		s += '<circle cx="306" cy="152" r="14" fill="#D3F4F0" stroke="#3FBDB6" stroke-width="2"/><rect x="298" y="164" width="16" height="12" fill="#2AA39D"/>'
 		return tex(360, 380, s)
 	s += '<rect x="10" y="20" width="300" height="150" fill="#DDEFE8" fill-opacity="0.45"/>'
 	s += '<path d="M10 20 L30 4 H330 L310 20 Z M310 20 L330 4 V154 L310 170 Z" fill="#E8F2EE" fill-opacity="0.4"/>'
@@ -664,20 +729,33 @@ static func terrarium(front: bool) -> ImageTexture:
 	s += '<rect x="278" y="40" width="18" height="56" rx="8" fill="#BFE3F2" fill-opacity="0.8" stroke="#7FA8BA" stroke-width="2"/>'
 	s += '<rect x="278" y="62" width="18" height="34" rx="8" fill="#7FC4E0" fill-opacity="0.7"/>'
 	s += '<path d="M287 96 L282 118" stroke="#9A9A9A" stroke-width="3"/><rect x="276" y="40" width="22" height="8" fill="#E04F5F"/>'
-	s += '<rect x="0" y="176" width="340" height="18" fill="#F4F2EC" stroke="#C9C2B4" stroke-width="2.5"/>'
-	s += '<rect x="10" y="194" width="320" height="186" fill="#F7F6F2" stroke="#C9C2B4" stroke-width="2.5"/>'
-	for y in [204.0, 264.0, 324.0]:
-		s += '<rect x="22" y="%s" width="296" height="50" fill="none" stroke="#D9D2C4" stroke-width="2"/><rect x="156" y="%s" width="28" height="5" rx="2" fill="#C9C2B4"/>' % [y, y + 22]
+	# The dresser, painted turquoise (Julien): a white top with a rounded lip, three drawers with their panels and two white
+	# knobs each, a scalloped apron, little white feet, light from the left.
+	s += '<defs><linearGradient id="dr_body" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#58CBC3"/><stop offset="1" stop-color="#2AA39D"/></linearGradient>'
+	s += '<linearGradient id="dr_face" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#86DED7"/><stop offset="1" stop-color="#3DB8B1"/></linearGradient></defs>'
+	for fx in [22.0, 302.0]:
+		s += '<path d="M%s 358 h18 l-4 22 h-10 z" fill="#F7FBFA" stroke="#8FC2BD" stroke-width="2"/>' % fx
+	s += '<rect x="10" y="188" width="320" height="170" rx="5" fill="url(#dr_body)" stroke="#137C79" stroke-width="2.5"/>'
+	s += '<path d="M14 352 H326 V356 Q292 374 250 362 Q210 376 170 364 Q130 376 90 362 Q48 374 14 356 Z" fill="#2AA39D" stroke="#137C79" stroke-width="2" stroke-linejoin="round"/>'
+	for y in [198.0, 250.0, 302.0]:
+		s += '<rect x="22" y="%s" width="296" height="44" rx="5" fill="url(#dr_face)" stroke="#137C79" stroke-width="2"/>' % y
+		s += '<rect x="31" y="%s" width="278" height="30" rx="4" fill="none" stroke="#C9F2EE" stroke-width="1.6" opacity="0.85"/>' % (y + 7.0)
+		for kx in [108.0, 232.0]:
+			s += '<ellipse cx="%s" cy="%s" rx="7" ry="3" fill="#0B5A5C" opacity="0.25"/>' % [kx + 2.0, y + 28.0]
+			s += '<circle cx="%s" cy="%s" r="6.5" fill="#FFFFFF" stroke="#8FC2BD" stroke-width="1.6"/><circle cx="%s" cy="%s" r="2" fill="#FFFFFF"/><circle cx="%s" cy="%s" r="6.5" fill="none" stroke="#DDEFEC" stroke-width="2" stroke-dasharray="6 30"/>' % [kx, y + 22.0, kx - 2.0, y + 20.0, kx, y + 22.0]
+	s += '<path d="M16 194 V350" stroke="#FFFFFF" stroke-width="4" opacity="0.28" stroke-linecap="round"/>'
+	s += '<rect x="0" y="176" width="340" height="16" rx="6" fill="#FBFAF6" stroke="#9FCFCB" stroke-width="2.5"/>'
+	s += '<path d="M8 180 H330" stroke="#FFFFFF" stroke-width="2" opacity="0.9" stroke-linecap="round"/><rect x="12" y="192" width="316" height="5" fill="#0B5A5C" opacity="0.15"/>'
 	return tex(360, 380, s)
 
 
-## Canvas 200x150: yellow checkerboard painting with pink flowers.
+## Canvas 200x150: turquoise checkerboard painting with pink flowers, in a white frame.
 static func flower_painting() -> ImageTexture:
-	var inner := '<rect width="170" height="118" fill="#F6EFD6"/>'
+	var inner := '<rect width="170" height="118" fill="#E4F8F5"/>'
 	for r in 4:
 		for c in 5:
 			if (r + c) % 2 == 0:
-				inner += '<rect x="%d" y="%d" width="34" height="30" fill="#F2C12E" opacity="0.85"/>' % [c * 34, r * 30]
+				inner += '<rect x="%d" y="%d" width="34" height="30" fill="#4CC7C1" opacity="0.85"/>' % [c * 34, r * 30]
 	inner += '<path d="M30 112 Q85 56 140 112 Z" fill="#3E8E5A"/><path d="M44 108 Q85 72 126 108" stroke="#5FB07A" stroke-width="2" fill="none"/>'
 	for x in [54.0, 78.0, 100.0, 124.0]:
 		inner += '<path d="M%s 100 v-14" stroke="#2F6A40" stroke-width="2"/>' % x
@@ -685,16 +763,16 @@ static func flower_painting() -> ImageTexture:
 			var ang := TAU * a / 5.0
 			inner += '<ellipse cx="%s" cy="%s" rx="6" ry="4" fill="#F2A7C9" stroke="#C0678F" stroke-width="0.8" transform="rotate(%s %s %s)"/>' % [x + cos(ang) * 6.0, 84.0 + sin(ang) * 6.0, rad_to_deg(ang), x + cos(ang) * 6.0, 84.0 + sin(ang) * 6.0]
 		inner += '<circle cx="%s" cy="84" r="3.6" fill="#FFF0B0" stroke="#D8A93A" stroke-width="0.8"/>' % x
-	return tex(190, 140, _framed("flower", 2.0, 2.0, 184.0, 134.0, "wood", inner, 8.0, 7.0, "#FBF7EA"))
+	return tex(190, 140, _framed("flower", 2.0, 2.0, 184.0, 134.0, "white", inner, 8.0, 7.0, "#F2FBFA"))
 
 
-## Canvas 120x160: strawberry poster on a pink checkerboard.
+## Canvas 120x160: strawberry poster on a turquoise checkerboard.
 static func strawberry_poster() -> ImageTexture:
-	var s := '<rect x="0" y="0" width="104" height="142" fill="#F7E0EA"/>'
+	var s := '<rect x="0" y="0" width="104" height="142" fill="#E2F7F4"/>'
 	for r in 8:
 		for c in 6:
 			if (r + c) % 2 == 0:
-				s += '<rect x="%d" y="%d" width="18" height="18" fill="#E9A3C3"/>' % [c * 18, r * 18]
+				s += '<rect x="%d" y="%d" width="18" height="18" fill="#8EDDD6"/>' % [c * 18, r * 18]
 	for p in [[44.0, 58.0, 24.0], [78.0, 84.0, 20.0]]:
 		var cx: float = p[0]
 		var top: float = p[1]
@@ -704,7 +782,7 @@ static func strawberry_poster() -> ImageTexture:
 		for k in 7:
 			s += '<ellipse cx="%s" cy="%s" rx="1.6" ry="2.4" fill="#F7D774"/>' % [cx + [-12, 0, 12, -6, 6, -10, 10][k] * r / 24.0, top + [8, 6, 8, 20, 20, 30, 30][k] * r / 24.0]
 		s += '<path d="M%s %s l-12 -4 l9 -3 l-2 -9 l7 7 l7 -7 l-2 9 l9 3 l-12 4 z" fill="#3E8E5A" stroke="#2A6A40" stroke-width="1.5"/>' % [cx, top + 2]
-	return tex(124, 164, _framed("straw", 2.0, 2.0, 116.0, 156.0, "white", s, 7.0, 5.0, "#FFF6F8"))
+	return tex(124, 164, _framed("straw", 2.0, 2.0, 116.0, 156.0, "white", s, 7.0, 5.0, "#F2FBFA"))
 
 
 ## Canvas 170x250: three white picture-book ledges. Not flat rectangles: every book has its own height, width
@@ -809,25 +887,27 @@ static func _edge() -> String:
 	return 'stroke="#3A332C" stroke-width="1.3" stroke-linejoin="round"'
 
 
-## Canvas 180x170: fluffy white sheepskin chair. Floor at y 170.
+## Canvas 180x170: fluffy turquoise sherpa chair on wooden legs. Floor at y 170.
 static func fluffy_chair() -> ImageTexture:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 3
 	var s := '<path d="M20 170 L40 120 M160 170 L140 120" stroke="#8A6A40" stroke-width="5"/>'
-	s += '<path d="M14 120 Q4 40 60 20 Q90 0 130 20 Q176 40 166 120 Q90 140 14 120 Z" fill="#F7F4EE" stroke="#C9C2B4" stroke-width="3"/>'
+	s += '<path d="M14 120 Q4 40 60 20 Q90 0 130 20 Q176 40 166 120 Q90 140 14 120 Z" fill="#86DCD4" stroke="#2C9F99" stroke-width="3"/>'
+	s += '<path d="M30 110 Q22 50 66 32" stroke="#FFFFFF" stroke-width="8" fill="none" opacity="0.25" stroke-linecap="round"/>'
 	for i in 40:
 		var x := rng.randf_range(24, 156)
 		var y := rng.randf_range(30, 118)
-		s += '<path d="M%.1f %.1f q4 -6 8 0" stroke="#DDD6CA" stroke-width="2" fill="none"/>' % [x, y]
+		s += '<path d="M%.1f %.1f q4 -6 8 0" stroke="#4FC2BA" stroke-width="2" fill="none"/>' % [x, y]
+	s += '<path d="M24 118 Q90 134 158 118" stroke="#2C9F99" stroke-width="3" fill="none" opacity="0.5"/>'
 	return tex(180, 170, s)
 
 
-## Canvas 360x260: white desk under a pile of bags and clothes, with the red office chair. Floor at y 260.
+## Canvas 360x260: white desk with turquoise drawers, her things on it, and the turquoise office chair. Floor at y 260.
 static func desk() -> ImageTexture:
 	var s := '<defs>'
 	s += '<linearGradient id="dk_top" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.6" stop-color="#F3EFE6"/><stop offset="1" stop-color="#DAD3C4"/></linearGradient>'
 	s += '<linearGradient id="dk_body" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FBF9F4"/><stop offset="1" stop-color="#E2DCCD"/></linearGradient>'
-	s += '<linearGradient id="dk_chair" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EE5B63"/><stop offset="1" stop-color="#B8222E"/></linearGradient>'
+	s += '<linearGradient id="dk_chair" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5ED0C8"/><stop offset="1" stop-color="#17857F"/></linearGradient>'
 	s += '<linearGradient id="dk_lamp" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE69A"/><stop offset="1" stop-color="#F2B94A"/></linearGradient>'
 	s += '</defs>'
 	# Its shade on the floor.
@@ -842,9 +922,9 @@ static func desk() -> ImageTexture:
 	s += '<rect x="248" y="116" width="100" height="140" fill="url(#dk_body)" stroke="#C9C2B4" stroke-width="2.4"/>'
 	for k in 3:
 		var y := 122.0 + k * 44.0
-		s += '<rect x="256" y="%s" width="84" height="38" rx="3" fill="#FFFFFF" stroke="#D2CABA" stroke-width="2"/>' % y
-		s += '<rect x="258" y="%s" width="80" height="6" fill="#FFFFFF" opacity="0.8"/>' % (y + 2)
-		s += '<circle cx="298" cy="%s" r="5" fill="#F2B94A" stroke="#A47A12" stroke-width="1.6"/><circle cx="296.6" cy="%s" r="1.6" fill="#FFF3C4"/>' % [y + 20.0, y + 18.6]
+		s += '<rect x="256" y="%s" width="84" height="38" rx="3" fill="#5ACCC4" stroke="#178A86" stroke-width="2"/>' % y
+		s += '<rect x="258" y="%s" width="80" height="6" fill="#FFFFFF" opacity="0.3"/>' % (y + 2)
+		s += '<circle cx="298" cy="%s" r="5" fill="#FFFFFF" stroke="#178A86" stroke-width="1.6"/><circle cx="296.6" cy="%s" r="1.6" fill="#DDF5F2"/>' % [y + 20.0, y + 18.6]
 	s += '<rect x="250" y="116" width="6" height="140" fill="#000000" opacity="0.06"/>'
 	# Her things on the desk: a pencil cup, a little lamp with its warm shade, a stack of books and a plush frog.
 	s += '<rect x="166" y="64" width="26" height="30" rx="4" fill="#7FB5D9" stroke="#3E6F99" stroke-width="2"/><rect x="169" y="66" width="5" height="26" fill="#FFFFFF" opacity="0.4"/>'
@@ -858,13 +938,13 @@ static func desk() -> ImageTexture:
 	s += '<path d="M218 85 H246 M220 73 H246" stroke="#FFFFFF" stroke-width="1.4" opacity="0.6"/>'
 	s += '<ellipse cx="318" cy="88" rx="18" ry="9" fill="#7BC47F" stroke="#3E8E5A" stroke-width="2"/><circle cx="308" cy="78" r="6" fill="#FFFFFF" stroke="#3E8E5A" stroke-width="1.6"/><circle cx="326" cy="78" r="6" fill="#FFFFFF" stroke="#3E8E5A" stroke-width="1.6"/>'
 	s += '<circle cx="309" cy="78" r="2.4" fill="#2B2B2B"/><circle cx="325" cy="78" r="2.4" fill="#2B2B2B"/><path d="M312 90 Q318 94 324 90" stroke="#3E8E5A" stroke-width="1.8" fill="none"/>'
-	# Red office chair with a cushion, a white sweater over the back, shine from the upper left.
-	s += '<path d="M38 40 Q38 18 70 18 H122 Q144 18 144 40 V132 H38 Z" fill="url(#dk_chair)" stroke="#8E1A24" stroke-width="3"/>'
+	# Turquoise office chair with a cushion, a white sweater over the back, shine from the upper left.
+	s += '<path d="M38 40 Q38 18 70 18 H122 Q144 18 144 40 V132 H38 Z" fill="url(#dk_chair)" stroke="#0F6E6C" stroke-width="3"/>'
 	s += '<path d="M46 30 Q50 22 70 22 H100" stroke="#FFFFFF" stroke-width="3" fill="none" opacity="0.5" stroke-linecap="round"/>'
 	s += '<path d="M60 26 Q90 14 132 30 L128 122 Q100 138 70 122 Z" fill="#F7F2E8" stroke="#B9B4AA" stroke-width="2.5"/>'
 	s += '<path d="M72 40 Q96 34 120 42 M74 64 Q98 58 122 66 M74 90 Q98 86 122 92" stroke="#D8D1C4" stroke-width="2" fill="none"/>'
 	s += '<path d="M62 30 Q80 20 108 24" stroke="#FFFFFF" stroke-width="3.5" fill="none" opacity="0.8" stroke-linecap="round"/>'
-	s += '<rect x="28" y="136" width="134" height="24" rx="9" fill="url(#dk_chair)" stroke="#8E1A24" stroke-width="3"/>'
+	s += '<rect x="28" y="136" width="134" height="24" rx="9" fill="url(#dk_chair)" stroke="#0F6E6C" stroke-width="3"/>'
 	s += '<path d="M38 142 H110" stroke="#FFFFFF" stroke-width="3" opacity="0.45" stroke-linecap="round"/>'
 	s += '<path d="M95 160 V222 M50 242 L95 222 L140 242 M95 222 V246" stroke="#6E747A" stroke-width="7" stroke-linecap="round"/>'
 	s += '<path d="M93 160 V222" stroke="#C4C9CE" stroke-width="2" opacity="0.8"/>'
@@ -892,13 +972,13 @@ static func homework_book() -> ImageTexture:
 	return tex(112, 64, s)
 
 
-## Canvas 140x120: little white kids' table and chair. Floor at y 120.
+## Canvas 140x120: little turquoise kids' table and chair. Floor at y 120.
 static func kid_table() -> ImageTexture:
-	var s := '<rect x="40" y="50" width="96" height="10" fill="#F7F6F2" stroke="#C9C2B4" stroke-width="2"/>'
-	s += '<path d="M50 60 V120 M126 60 V120" stroke="#F4F2EC" stroke-width="7"/><path d="M50 60 V120 M126 60 V120" stroke="#C9C2B4" stroke-width="1.5"/>'
-	s += '<path d="M10 20 V120 M10 70 H44 V120" stroke="#F4F2EC" stroke-width="7" fill="none"/>'
-	s += '<path d="M10 20 V120 M10 70 H44 V120" stroke="#C9C2B4" stroke-width="1.5" fill="none"/>'
-	s += '<path d="M10 30 H30 M10 46 H30" stroke="#F4F2EC" stroke-width="5"/>'
+	var s := '<rect x="40" y="50" width="96" height="10" rx="3" fill="#4CC7C1" stroke="#178A86" stroke-width="2"/>'
+	s += '<path d="M50 60 V120 M126 60 V120" stroke="#3DB8B1" stroke-width="7"/><path d="M50 60 V120 M126 60 V120" stroke="#178A86" stroke-width="1.5"/>'
+	s += '<path d="M10 20 V120 M10 70 H44 V120" stroke="#3DB8B1" stroke-width="7" fill="none"/>'
+	s += '<path d="M10 20 V120 M10 70 H44 V120" stroke="#178A86" stroke-width="1.5" fill="none"/>'
+	s += '<path d="M10 30 H30 M10 46 H30" stroke="#86DCD4" stroke-width="5"/>'
 	s += '<circle cx="96" cy="40" r="10" fill="#F2C14E" stroke="#B58A24" stroke-width="2"/>'
 	return tex(140, 120, s)
 
@@ -1332,22 +1412,29 @@ static func house_plant(kind: String, thirsty: bool) -> ImageTexture:
 			s += _curved_leaf(top, 0.1, 50.0, 26.0, t * 1.2, leaf, line, t, "fiddle")
 			s += _pot(cx, h, 96.0, 78.0, "#5E7E9A", "#36506A", t)
 		"lily":
-			# Peace lily: glossy dark leaves and white spathes; the textbook thirsty plant, flat over its pot.
+			# Peace lily (prettier for Julien, 2026-11-25): a full clump of glossy leaves in two greens, each with its shine, white
+			# spathes cupped round a cream spadix, in a glazed turquoise pot on its saucer. The textbook thirsty plant, flat over its pot.
 			var soil := Vector2(cx, h - 74.0)
-			for k in 9:
-				var a := lerpf(-1.1, 1.1, k / 8.0) + rng.randf_range(-0.1, 0.1)
-				var bend := signf(a) * t * 1.9 + a * 0.2
-				s += '<path d="M%s %s Q%s %s %s %s" stroke="%s" stroke-width="3" fill="none"/>' % [soil.x, soil.y, soil.x + sin(a) * 20.0, soil.y - 50.0 * (1.0 - t * 0.6),
-					soil.x + sin(a + bend * 0.5) * 70.0 * (1.0 - t * 0.2), soil.y - cos(a + bend * 0.5) * 70.0, _hex(line)]
-				s += _curved_leaf(soil + Vector2(sin(a + bend * 0.5), -cos(a + bend * 0.5)) * 70.0 * Vector2(1.0 - t * 0.2, 1.0), a + bend * 0.7, 70.0, 26.0, bend * 0.4, leaf.darkened(0.12), line, t, "leaf")
-			for k in 3:
-				var a := -0.35 + k * 0.35
+			for k in 13:
+				var a := lerpf(-1.25, 1.25, k / 12.0) + rng.randf_range(-0.08, 0.08)
+				var bend := signf(a) * t * 1.9 + a * 0.25
+				var reach := (62.0 + 18.0 * cos(a * 1.3)) * (1.0 - t * 0.2)
+				var tip := soil + Vector2(sin(a + bend * 0.5), -cos(a + bend * 0.5)) * Vector2(reach, reach / (1.0 - t * 0.2))
+				var tone := (Color("#2F7A3C") if k % 2 == 0 else Color("#3F9A4C")).lerp(Color("#A59A45"), t * 0.85)
+				s += '<path d="M%s %s Q%s %s %.1f %.1f" stroke="%s" stroke-width="3" fill="none"/>' % [soil.x, soil.y, soil.x + sin(a) * 18.0, soil.y - 46.0 * (1.0 - t * 0.6), tip.x, tip.y, _hex(line)]
+				s += _curved_leaf(tip, a + bend * 0.7, 66.0 + 8.0 * float(k % 3), 27.0, bend * 0.4 + 0.12 * signf(a), tone, line, t, "leaf")
+				var d := Vector2(sin(a + bend * 0.7), -cos(a + bend * 0.7))
+				var p1 := tip + d * 14.0 + d.orthogonal() * 4.0
+				var p2 := tip + d * 44.0 + d.orthogonal() * 3.0
+				s += '<path d="M%.1f %.1f L%.1f %.1f" stroke="#FFFFFF" stroke-width="3" opacity="%.2f" stroke-linecap="round"/>' % [p1.x, p1.y, p2.x, p2.y, 0.32 * (1.0 - t)]
+			for k in 4:
+				var a := -0.42 + k * 0.28
 				var bend := (t * 2.0 if a >= 0.0 else -t * 2.0) + a * 0.2
-				var tip := soil + Vector2(sin(a + bend * 0.4), -cos(a + bend * 0.4)) * 130.0 * (1.0 - t * 0.35)
-				s += '<path d="M%s %s Q%s %s %s %s" stroke="%s" stroke-width="2.5" fill="none"/>' % [soil.x, soil.y, soil.x + sin(a) * 20.0, soil.y - 80.0 * (1.0 - t * 0.6), tip.x, tip.y, _hex(line)]
-				s += _curved_leaf(tip, a + bend * 0.8, 40.0, 22.0, bend * 0.3, Color("#F7F6F0").lerp(Color("#D8CFA0"), t * 0.6), Color("#B9B6A8"), 0.0, "leaf")
-				s += '<ellipse cx="%s" cy="%s" rx="3" ry="9" fill="#F2E7A8" transform="rotate(%s %s %s)"/>' % [tip.x, tip.y - 10.0, rad_to_deg(a + bend * 0.8), tip.x, tip.y]
-			s += _pot(cx, h, 86.0, 70.0, "#E8E4DA", "#A8A296", t)
+				var tip := soil + Vector2(sin(a + bend * 0.4), -cos(a + bend * 0.4)) * (124.0 + 14.0 * float(k % 2)) * (1.0 - t * 0.35)
+				s += '<path d="M%s %s Q%s %s %.1f %.1f" stroke="%s" stroke-width="2.5" fill="none"/>' % [soil.x, soil.y, soil.x + sin(a) * 20.0, soil.y - 80.0 * (1.0 - t * 0.6), tip.x, tip.y, _hex(line)]
+				s += _curved_leaf(tip, a + bend * 0.8, 46.0, 28.0, bend * 0.3 - 0.15, Color("#FFFFFF").lerp(Color("#D8CFA0"), t * 0.6), Color("#B9C4BC"), 0.0, "leaf")
+				s += '<ellipse cx="%.1f" cy="%.1f" rx="3.4" ry="10" fill="#F4E2A0" stroke="#D2B862" stroke-width="1" transform="rotate(%s %.1f %.1f)"/>' % [tip.x, tip.y - 11.0, rad_to_deg(a + bend * 0.8), tip.x, tip.y]
+			s += _glazed_pot(cx, h, 92.0, 70.0, t)
 	# Fallen dead leaves on the floor by the pot.
 	if thirsty and kind != "pothos":
 		for k in 3:
@@ -1430,6 +1517,25 @@ static func _pot(cx: float, bottom: float, w: float, ph: float, fill: String, li
 	s += '<path d="M%s %s H%s L%s %s H%s Z" fill="%s" stroke="%s" stroke-width="3" stroke-linejoin="round"/>' % [cx - w / 2.0, top, cx + w / 2.0, cx + w * 0.38, bottom - 2.0, cx - w * 0.38, fill, line]
 	s += '<rect x="%s" y="%s" width="%s" height="13" rx="3" fill="%s" stroke="%s" stroke-width="2.5"/>' % [cx - w / 2.0 - 5.0, top - 4.0, w + 10.0, fill, line]
 	s += '<path d="M%s %s L%s %s" stroke="#FFFFFF" stroke-width="6" opacity="0.18" stroke-linecap="round"/>' % [cx - w * 0.36, top + 14.0, cx - w * 0.3, bottom - 10.0]
+	return s
+
+
+# A glazed turquoise pot on its saucer (her peace lily): a rolled rim, a white wave painted round it, the glaze's shine.
+static func _glazed_pot(cx: float, bottom: float, w: float, ph: float, t: float) -> String:
+	var top := bottom - ph
+	var s := '<defs><linearGradient id="glaze" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7FDCD4"/><stop offset="0.45" stop-color="#36B7B0"/><stop offset="1" stop-color="#17807C"/></linearGradient></defs>'
+	s += '<ellipse cx="%s" cy="%s" rx="%s" ry="6" fill="#2AA39D" stroke="#137C79" stroke-width="2"/>' % [cx, bottom - 5.0, w * 0.48]
+	s += _soil(cx, top + 4.0, w * 0.46, t)
+	s += '<path d="M%s %s H%s Q%s %s %s %s H%s Q%s %s %s %s Z" fill="url(#glaze)" stroke="#137C79" stroke-width="2.6" stroke-linejoin="round"/>' % [cx - w / 2.0, top, cx + w / 2.0, cx + w * 0.46, bottom - 20.0, cx + w * 0.34, bottom - 8.0, cx - w * 0.34, cx - w * 0.46, bottom - 20.0, cx - w / 2.0, top]
+	var wave := "M%s %s" % [cx - w * 0.47, top + 34.0]
+	for i in 8:
+		wave += " q%s %s %s 0" % [w * 0.94 / 16.0, -7.0 if i % 2 == 0 else 7.0, w * 0.94 / 8.0]
+	s += '<path d="%s" stroke="#FFFFFF" stroke-width="3" fill="none" opacity="0.85" stroke-linecap="round"/>' % wave
+	for i in 6:
+		s += '<circle cx="%s" cy="%s" r="2" fill="#FFFFFF" opacity="0.8"/>' % [cx - w * 0.36 + w * 0.72 * i / 5.0, top + 50.0]
+	s += '<rect x="%s" y="%s" width="%s" height="14" rx="6" fill="#40BCB5" stroke="#137C79" stroke-width="2.4"/>' % [cx - w / 2.0 - 5.0, top - 5.0, w + 10.0]
+	s += '<path d="M%s %s H%s" stroke="#FFFFFF" stroke-width="2.4" opacity="0.5" stroke-linecap="round"/>' % [cx - w / 2.0, top - 1.0, cx + w * 0.2]
+	s += '<path d="M%s %s Q%s %s %s %s" stroke="#FFFFFF" stroke-width="6" fill="none" opacity="0.3" stroke-linecap="round"/>' % [cx - w * 0.36, top + 14.0, cx - w * 0.38, bottom - 30.0, cx - w * 0.28, bottom - 14.0]
 	return s
 
 
@@ -1558,21 +1664,36 @@ static func runner(w: float) -> ImageTexture:
 
 ## Canvas 420x90: round pink rug for the bedroom, in perspective.
 static func round_rug() -> ImageTexture:
-	var s := '<ellipse cx="210" cy="45" rx="206" ry="42" fill="#F2B6CF" stroke="#C97B9A" stroke-width="2"/>'
-	s += '<ellipse cx="210" cy="45" rx="160" ry="30" fill="none" stroke="#FBE3EC" stroke-width="6"/>'
-	s += '<ellipse cx="210" cy="45" rx="100" ry="18" fill="none" stroke="#E79AB8" stroke-width="5"/>'
+	# A soft round turquoise rug: a fringe of tassels, a white ring, a deeper band, a pale heart in the middle, a fluffy pile.
+	var s := '<ellipse cx="212" cy="49" rx="202" ry="38" fill="#000000" opacity="0.1"/>'
+	for k in 64:
+		var d := Vector2.from_angle(TAU * k / 64.0)
+		s += '<path d="M%.1f %.1f L%.1f %.1f" stroke="#5CCAC2" stroke-width="3" stroke-linecap="round"/>' % [210 + d.x * 192.0, 45 + d.y * 36.0, 210 + d.x * 206.0, 45 + d.y * 43.0]
+	s += '<ellipse cx="210" cy="45" rx="196" ry="37" fill="#7FD6CE" stroke="#2AA39D" stroke-width="2"/>'
+	s += '<ellipse cx="210" cy="45" rx="166" ry="30" fill="none" stroke="#FFFFFF" stroke-width="6" opacity="0.9"/>'
+	s += '<ellipse cx="210" cy="45" rx="138" ry="24" fill="#3FBDB6"/>'
+	s += '<ellipse cx="210" cy="45" rx="100" ry="17" fill="none" stroke="#C9F0EB" stroke-width="4" stroke-dasharray="8 6"/>'
+	s += '<ellipse cx="210" cy="45" rx="62" ry="10" fill="#D6F4F0"/>'
+	s += '<path d="M210 42 c-8 -6 -18 0 0 9 c18 -9 8 -15 0 -9 z" fill="#3FBDB6"/>'
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 21
+	for i in 70:
+		var d := Vector2.from_angle(rng.randf() * TAU) * sqrt(rng.randf())
+		s += '<path d="M%.1f %.1f q3 -3 6 0" stroke="#FFFFFF" stroke-width="1.4" fill="none" opacity="0.3"/>' % [210 + d.x * 180.0, 45 + d.y * 32.0]
+	s += '<ellipse cx="160" cy="34" rx="90" ry="8" fill="#FFFFFF" opacity="0.12"/>'
 	return tex(420, 90, s)
 
 
-## Canvas 120x110: wicker laundry basket overflowing with clothes. Floor at y 110.
+## Canvas 120x110: turquoise woven laundry basket overflowing with clothes. Floor at y 110.
 static func laundry_basket() -> ImageTexture:
 	var s := '<path d="M30 30 Q20 0 60 8 Q96 0 92 30 Z" fill="#7FB3D5" stroke="#4E7E9E" stroke-width="2"/>'
 	s += '<path d="M60 30 q20 -30 40 -6 q4 10 -8 6 z" fill="#F2A7B9" stroke="#C26A84" stroke-width="2"/>'
-	s += '<path d="M12 30 H108 L98 108 H22 Z" fill="#D9B88A" stroke="#8A6A40" stroke-width="3"/>'
+	s += '<path d="M12 30 H108 L98 108 H22 Z" fill="#5ACCC4" stroke="#137C79" stroke-width="3"/>'
 	for y in range(42, 104, 12):
-		s += '<path d="M16 %d H104" stroke="#B8915A" stroke-width="2"/>' % y
+		s += '<path d="M16 %d H104" stroke="#2AA39D" stroke-width="2"/>' % y
 	for x in range(28, 100, 14):
-		s += '<path d="M%d 32 V106" stroke="#C9A472" stroke-width="2"/>' % x
+		s += '<path d="M%d 32 V106" stroke="#8EDDD6" stroke-width="2"/>' % x
+	s += '<rect x="8" y="26" width="104" height="9" rx="4" fill="#3FBDB6" stroke="#137C79" stroke-width="2"/>'
 	return tex(120, 110, s)
 
 
@@ -1831,12 +1952,10 @@ static func mess(kind: String) -> ImageTexture:
 
 # ── Wall and ceiling decorations (for any room, especially a child's) ───────────────
 
-## Canvas 110x120: a crescent moon wall decal with two small stars, pale yellow with a soft edge.
+## Canvas 110x120: a crescent moon wall decal, pale yellow with a soft edge (no stars: Julien wants none on her walls).
 static func moon_decal() -> ImageTexture:
 	var s := '<path d="M70 12 A44 44 0 1 0 98 86 A34 34 0 1 1 70 12 Z" fill="#FFE9A8" stroke="#E8C86A" stroke-width="2.5" stroke-linejoin="round"/>'
 	s += '<path d="M46 30 Q34 50 40 78" stroke="#FFFFFF" stroke-width="5" fill="none" opacity="0.5" stroke-linecap="round"/>'
-	s += '<path d="M92 22 l3 7 l8 1 l-6 5 l2 8 l-7 -4 l-7 4 l2 -8 l-6 -5 l8 -1 z" fill="#FFE9A8" stroke="#E8C86A" stroke-width="1.5"/>'
-	s += '<path d="M24 98 l2 5 l6 1 l-4 4 l1 6 l-5 -3 l-5 3 l1 -6 l-4 -4 l6 -1 z" fill="#FFE9A8" stroke="#E8C86A" stroke-width="1.2"/>'
 	return tex(110, 120, s)
 
 
@@ -1844,7 +1963,7 @@ static func moon_decal() -> ImageTexture:
 ## moon, a cloud, a heart), swaying a little (the scene rotates the node).
 static func mobile() -> ImageTexture:
 	var s := '<path d="M45 0 V40" stroke="#B9B1A0" stroke-width="2"/><path d="M8 44 H82" stroke="#C9A26E" stroke-width="4" stroke-linecap="round"/><circle cx="45" cy="42" r="5" fill="#E8C86A"/>'
-	for k in [[12, 110, "#FFD23F", "star"], [34, 150, "#9ECFF0", "moon"], [56, 130, "#FFFFFF", "cloud"], [78, 160, "#FF8FB0", "heart"]]:
+	for k in [[12, 110, "#FFD23F", "star"], [34, 150, "#9ECFF0", "moon"], [56, 130, "#FFFFFF", "cloud"], [78, 160, "#4CC7C1", "heart"]]:
 		s += '<path d="M%d 46 V%d" stroke="#B9B1A0" stroke-width="1.6"/>' % [k[0], k[1] - 16]
 		match k[3]:
 			"star":
@@ -1854,17 +1973,20 @@ static func mobile() -> ImageTexture:
 			"cloud":
 				s += '<circle cx="%d" cy="%d" r="8" fill="%s" stroke="#C9D2D8" stroke-width="1.5"/><circle cx="%d" cy="%d" r="10" fill="%s" stroke="#C9D2D8" stroke-width="1.5"/><circle cx="%d" cy="%d" r="7" fill="%s" stroke="#C9D2D8" stroke-width="1.5"/>' % [k[0] - 8, k[1], k[2], k[0], k[1] - 4, k[2], k[0] + 9, k[1] + 1, k[2]]
 			_:
-				s += '<path d="M%d %d c-12 -10 -16 6 0 16 c16 -10 12 -26 0 -16 z" fill="%s" stroke="#C2406E" stroke-width="1.5"/>' % [k[0], k[1] - 6, k[2]]
+				s += '<path d="M%d %d c-12 -10 -16 6 0 16 c16 -10 12 -26 0 -16 z" fill="%s" stroke="#178A86" stroke-width="1.5"/>' % [k[0], k[1] - 6, k[2]]
 	return tex(90, 230, s)
 
 
 ## Canvas 80x80: a round wall clock with a pastel rim and fat hands, ticking at the time it was painted (10 past 10).
-static func wall_clock() -> ImageTexture:
+## `turquoise`: the rim in turquoise instead of pink (Charlotte's room).
+static func wall_clock(turquoise := false) -> ImageTexture:
+	var rim: Array = ["#8EE3DB", "#2FB0AA", "#137C79", "#0F6E6C", "#1E9893"] if turquoise else ["#F59AB8", "#D8527E", "#A83460", "#8A2A50", "#B8406A"]
 	var s := '<defs><radialGradient id="clockface" cx="0.4" cy="0.35"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F1E4CA"/></radialGradient>'
-	s += '<linearGradient id="clockrim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F59AB8"/><stop offset="0.55" stop-color="#D8527E"/><stop offset="1" stop-color="#A83460"/></linearGradient></defs>'
+	s += '<linearGradient id="clockrim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%s"/><stop offset="0.55" stop-color="%s"/><stop offset="1" stop-color="%s"/></linearGradient></defs>' % [rim[0], rim[1], rim[2]]
 	s += '<ellipse cx="43" cy="44" rx="36" ry="36" fill="#000000" opacity="0.18"/>'
-	s += '<circle cx="40" cy="40" r="37" fill="url(#clockrim)" stroke="#8A2A50" stroke-width="1.6"/>'
-	s += '<circle cx="40" cy="40" r="31" fill="#B8406A"/><circle cx="40" cy="40" r="30" fill="url(#clockface)" stroke="#E2CFA6" stroke-width="1.2"/>'
+	s += '<circle cx="40" cy="40" r="37" fill="url(#clockrim)" stroke="%s" stroke-width="1.6"/>' % rim[3]
+	s += '<circle cx="40" cy="40" r="31" fill="%s"/>' % rim[4]
+	s += '<circle cx="40" cy="40" r="30" fill="url(#clockface)" stroke="#E2CFA6" stroke-width="1.2"/>'
 	for k in 60:
 		var d := Vector2.from_angle(TAU * k / 60.0)
 		if k % 5 == 0:
@@ -1873,7 +1995,7 @@ static func wall_clock() -> ImageTexture:
 			s += '<circle cx="%.1f" cy="%.1f" r="0.6" fill="#B9A0A8"/>' % [40 + d.x * 27.0, 40 + d.y * 27.0]
 	s += '<path d="M42 42 L30 32" stroke="#000000" stroke-width="4" stroke-linecap="round" opacity="0.2"/><path d="M42 42 L60 30" stroke="#000000" stroke-width="3" stroke-linecap="round" opacity="0.2"/>'
 	s += '<path d="M40 40 L28 30" stroke="#4A2E3C" stroke-width="4" stroke-linecap="round"/><path d="M40 40 L58 28" stroke="#4A2E3C" stroke-width="2.8" stroke-linecap="round"/>'
-	s += '<path d="M40 46 L44 22" stroke="#D8283A" stroke-width="1.2" stroke-linecap="round"/><circle cx="40" cy="40" r="3.4" fill="#D8527E" stroke="#8A2A50" stroke-width="1"/><circle cx="39" cy="39" r="1.1" fill="#FFFFFF" opacity="0.8"/>'
+	s += '<path d="M40 46 L44 22" stroke="#D8283A" stroke-width="1.2" stroke-linecap="round"/><circle cx="40" cy="40" r="3.4" fill="%s" stroke="%s" stroke-width="1"/><circle cx="39" cy="39" r="1.1" fill="#FFFFFF" opacity="0.8"/>' % [rim[1], rim[3]]
 	s += '<path d="M16 28 Q28 12 48 11" stroke="#FFFFFF" stroke-width="3" fill="none" opacity="0.5" stroke-linecap="round"/>'
 	s += '<ellipse cx="32" cy="26" rx="14" ry="8" fill="#FFFFFF" opacity="0.12" transform="rotate(-30 32 26)"/>'
 	return tex(86, 86, s)

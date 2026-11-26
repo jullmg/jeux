@@ -410,6 +410,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - `scenes/house.gd` (extends `Interior`): Charlotte's flat, from the photos in `reference/maison_charlotte/interieur`:
   vestibule (0–640) → oak glass doorway → salon (–2260) → hallway → kitchen (3400–3960); Charlotte's bedroom is a separate
   area (5000–6650) reached through the "chacha" door (fade, camera limits switch). Charlotte is at scale 0.5 inside.
+  **Her bedroom is turquoise** (Julien, 2026-11-25: "almost everything turquoise, except my books"): plain turquoise walls and
+  wainscot (no stars anywhere on them), no fairy lights or bunting (a `_ceiling_light` on her switch), the upholstered bed
+  (`InteriorArt.bed`, `_cloud_board`: tufted headboard and footboard, quilted duvet with white hearts, ruffled skirt, knitted
+  throw), the dresser, rug, sherpa chair, desk drawers and chair, kid table, basket, clock (`wall_clock(true)`), the
+  checkerboard pictures and the peace lily's glazed pot (`_glazed_pot`). Keep new things in her room turquoise.
 - `scenes/depanneur.gd` (extends `Interior`): inside dépanneur Xin-Xin, entered from its door on Rue Dandurand (bell). A
   crammed corner store: cash machine, newspapers, counter (till, scratch tickets) with the shopkeeper (an Asian man: short
   black hair, warm light skin, dark eyes; on a raised floor behind the counter) and a wall of shelves behind her, a real-time

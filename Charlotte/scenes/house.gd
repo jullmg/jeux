@@ -70,7 +70,7 @@ var _sofa_front: Sprite2D
 var _sofa_seat: Seat
 var _floor_lamp: Array = []
 var _hall_lights: Array = []
-var _bedroom_lights: FairyLights
+var _bedroom_light: Sprite2D
 # The Christmas tree in front of the salon window (quest "sapin"), its box of decorations, the glow of its lights.
 const XMAS_X := 1690.0
 const XMAS_SCALE := 0.95
@@ -194,7 +194,8 @@ func _build_shell() -> void:
 		{"from": 0.0, "to": VESTIBULE_END, "wall": Color("#ECE8DF"), "base": Color("#F4F1EA"), "wainscot": Color("#DCD6C8"), "wainscot_height": 170.0},
 		{"from": VESTIBULE_END, "to": SALON_END, "wall": Color("#E9DCC2"), "base": Color("#6E4424"), "pattern": "stripes", "pattern_color": Color("#C9B48A"), "pattern_alpha": 0.5},
 		{"from": SALON_END, "to": HALL.y, "wall": Color("#EEEBE5"), "base": Color("#F4F1EA"), "pattern": "diamonds", "pattern_color": Color("#C9C2B4"), "pattern_alpha": 0.45, "wainscot": Color("#E6E0D2"), "wainscot_height": 150.0},
-		{"from": BEDROOM.x, "to": BEDROOM.y, "wall": Color("#F2E6EE"), "base": Color("#F4F1EA"), "pattern": "stars", "pattern_color": Color("#E6A3C2"), "pattern_alpha": 0.5, "wainscot": Color("#F7C9DA"), "wainscot_height": 150.0},
+		# Her room in turquoise, plain walls without stars (Julien, 2026-11-25).
+		{"from": BEDROOM.x, "to": BEDROOM.y, "wall": Color("#CDEFEA"), "base": Color("#F4F1EA"), "wainscot": Color("#72D2C9"), "wainscot_height": 150.0},
 	]
 	shell.chair_rails = [{"from": 0.0, "to": VESTIBULE_END, "y": 420.0}]
 	shell.posts = [SALON_END]
@@ -2459,7 +2460,7 @@ func _build_switches() -> void:
 	_switchable(_switch_area(1780.0, 330.0), 1790.0, [_salon_pendant], Vector2(VESTIBULE_END, SALON_END))
 	_switchable(Rect2(1470.0, 230.0, 110.0, 370.0), 1525.0, _floor_lamp)
 	_switchable(_switch_area(2480.0, 330.0), 2490.0, _hall_lights, Vector2(SALON_END, HALL.y))
-	_switchable(_switch_area(BEDROOM.x + 1300.0, 330.0), BEDROOM.x + 1310.0, [_bedroom_lights], BEDROOM)
+	_switchable(_switch_area(BEDROOM.x + 1300.0, 330.0), BEDROOM.x + 1310.0, [_bedroom_light], BEDROOM)
 
 
 func _build_doors() -> void:
@@ -3074,8 +3075,8 @@ func _build_bedroom() -> void:
 	var marks := GrowthMarks.new()
 	marks.position = Vector2(x + 1364.0, WALL_BASE)
 	add_child(marks)
-	_put(InteriorArt.wall_clock(), x + 1300.0, 260.0, 0.8, "wall")
-	# A baby mobile over the bed, turning gently; stars on the ceiling that glow a little.
+	_put(InteriorArt.wall_clock(true), x + 1300.0, 260.0, 0.8, "wall")
+	# A baby mobile over the bed, turning gently.
 	var mobile := _put(InteriorArt.mobile(), x + 540.0, 270.0, 0.8)
 	mobile.centered = true
 	mobile.offset = Vector2(45.0, 0.0)
@@ -3083,19 +3084,6 @@ func _build_bedroom() -> void:
 	var sway := create_tween().set_loops()
 	sway.tween_property(mobile, "rotation", 0.06, 2.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	sway.tween_property(mobile, "rotation", -0.06, 2.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 33
-	for i in 16:
-		var star := Polygon2D.new()
-		var c := Vector2(x + rng.randf_range(20.0, 1620.0), rng.randf_range(CEILING + 2.0, CEILING + 30.0))
-		var r := rng.randf_range(2.5, 4.5)
-		var pts := PackedVector2Array()
-		for k in 10:
-			pts.append(Vector2.from_angle(-PI / 2.0 + TAU * k / 10.0) * (r if k % 2 == 0 else r * 0.45))
-		star.polygon = pts
-		star.position = c
-		star.color = Color("#E8F3A8", 0.55)
-		add_child(star)
 	_plant("chambre", "lily", x + 272.0, 606.0, 0.5)
 	_put(InteriorArt.bed(), x + 360.0, 608.0, 0.8, "floor")
 	# Her capybara plush from Christmas, sitting on her bed by the pillow.
@@ -3115,8 +3103,8 @@ func _build_bedroom() -> void:
 	_put(InteriorArt.plushies(), x + 770.0, 626.0, 0.8, "floor")
 	_put(InteriorArt.panel_door(), BEDROOM_DOOR_X, WALL_BASE)
 	_candle(Vector2(x + 30.0 + 262.0 * 0.85, 606.0 - 240.0 * 0.85), 80.0)
-	_put(InteriorArt.bunting(440.0), x + 650.0, 230.0)
-	_bedroom_lights = _fairy_lights(x + 40.0, 40)
+	# No more fairy lights or bunting (Julien): a ceiling light, which her wall switch turns on and off.
+	_bedroom_light = _ceiling_light(x + 820.0)
 
 
 # Paper sign taped to the bedroom door, each letter in a different marker colour.
