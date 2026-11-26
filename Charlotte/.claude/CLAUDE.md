@@ -773,7 +773,9 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     dimmed, the TV on `TvShows` "film" (« Le petit renard des neiges », an original cartoon, `FILM_LENGTH`, not in `ALL`),
     a few lines (`MOVIE_LINES`, per film), then the quest is done and the twins go home. **Once it is done she can ask Maman for
     another one** (Julien): Maman's `ChoiceCard` (`house.gd _ask_mom`: soirée cinéma / école if not yet today / câlin) runs the
-    same evening again from step 2 (`Cinema.start_again`, flag `cinema_again`), and in front of the TV she picks the film
+    same evening again from step 2 (`Cinema.start_again`, flag `cinema_again`) with the friends she ticks (`GuestPicker`,
+    `Cinema.FRIENDS` she has met, **all six at once** since 2026-11-25: `Cinema.MAX_GUESTS` 6, seven `MOVIE_SEATS` and cushions on the
+    `_Nest`'s wider blanket, six `MOVIE_WAIT` spots, six sleeping bags, seven `Sleepover.COLORS`), and in front of the TV she picks the film
     (`Cinema.FILMS`: « Le Grinch », « Maman, j'ai raté l'avion », « Ratatouille », « La Reine des neiges » and the fox; the real
     titles, but the pictures are scenes of our own, `TvShows._grinch` …, no character of theirs). `Shop._errand_marks` puts the "!" over the
     chips and the candy while an errand needs them. `Shop._buy(…, then)` runs `then` instead of the stash for quest purchases.

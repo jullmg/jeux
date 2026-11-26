@@ -31,8 +31,8 @@ const FRIENDS := [
 	["alyzee", "Alyzée", "met_alyzee"],
 	["emilia", "Emilia", "met_emilia"],
 ]
-## How many friends fit on the blanket (with her, five on the cushions).
-const MAX_GUESTS := 4
+## How many friends fit on the blanket: all six of them (Julien, 2026-11-25), seven on the cushions with her.
+const MAX_GUESTS := 6
 const GUESTS := "cinema_guests"
 const TWINS: Array = ["alphee", "constance"]
 

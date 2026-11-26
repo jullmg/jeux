@@ -6,8 +6,8 @@ extends RefCounted
 ## morning after (breakfast, goodbyes). The staging is in `house.gd` (`_sleepover_*`); this file holds what is drawn and said.
 
 ## Pyjama colours and patterns, one pair per friend in turn.
-const COLORS := ["#9DC8F0", "#F7B6D2", "#B6E3B0", "#FFD98A", "#C8B6F2"]
-const PATTERNS := ["stars", "dots", "hearts", "cats", "clouds"]
+const COLORS := ["#9DC8F0", "#F7B6D2", "#B6E3B0", "#FFD98A", "#C8B6F2", "#FFB98A", "#8EDDD6"]
+const PATTERNS := ["stars", "dots", "hearts", "cats", "clouds", "checks", "rainbow"]
 
 ## The shadow puppets, in the order they come: [kind, what the friends guess, what it was].
 const SHADOWS := [

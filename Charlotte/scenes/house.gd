@@ -1347,12 +1347,12 @@ func _hockey_night() -> void:
 
 # Where everyone sits on the cushions (x, facing), and the floor under them: in front of the hallway TV, nearer than where
 # she walks. Charlotte first, then Alphée and Constance.
-const MOVIE_SEATS := [[2545.0, 1], [2445.0, 1], [2770.0, -1], [2345.0, 1], [2870.0, -1]]
+const MOVIE_SEATS := [[2545.0, 1], [2445.0, 1], [2770.0, -1], [2345.0, 1], [2870.0, -1], [2970.0, -1], [2245.0, 1]]
 const MOVIE_FLOOR := 690.0
 const CUSHION_H := 10.0
 # Where the twins wait for her before the film, and what is said during it ([seconds into the film, who: -1 Charlotte,
 # 0 Alphée, 1 Constance, words]).
-const MOVIE_WAIT := [2700.0, 2830.0, 2960.0, 3090.0]
+const MOVIE_WAIT := [2700.0, 2795.0, 2890.0, 2985.0, 3080.0, 3175.0]
 const MOVIE_LINES := {
 	"film": [
 		[1.5, 1, "Chut ! Ça commence !"],
@@ -1506,7 +1506,7 @@ func _ask_mom() -> void:
 	var choices: Array = [{"text": "On cuisine ensemble ?", "note": "pizza, muffins, biscuits…"}]
 	var kinds: Array = ["cook"]
 	if movie:
-		choices.append({"text": "On fait une soirée cinéma ?", "note": "avec un ou une amie"})
+		choices.append({"text": "On fait une soirée cinéma ?", "note": "avec tes amis"})
 		kinds.append("movie")
 	if school:
 		choices.append({"text": "Je vais à l'école ?"})
@@ -1785,7 +1785,7 @@ func _lights_down() -> void:
 	var who: Array[Character] = [_charlotte]
 	who.append_array(_movie_twins)
 	# With one friend, she sits on the other side of the bowl.
-	var seat_of: Array = [[0, 2], [0, 1, 2], [0, 1, 3, 2], [0, 1, 3, 2, 4]][clampi(who.size() - 2, 0, 3)]
+	var seat_of: Array = [[0, 2], [0, 1, 2], [0, 1, 3, 2], [0, 1, 3, 2, 4], [0, 1, 3, 2, 4, 5], [0, 1, 3, 6, 2, 4, 5]][clampi(who.size() - 2, 0, 5)]
 	for i in who.size():
 		var person := who[i]
 		person.position.x = MOVIE_SEATS[seat_of[i]][0]
@@ -1896,7 +1896,8 @@ func _sleepover_to_bedroom() -> void:
 	_camp = Sleepover.Camp.new()
 	var n := _movie_twins.size()
 	for k in n:
-		_camp.spots.append(x + 330.0 + k * 195.0)
+		# Up to six bags: closer together when there are many.
+		_camp.spots.append(x + 400.0 + k * (195.0 if n <= 4 else 150.0))
 		_camp.colors.append(Color(Sleepover.COLORS[(k + 1) % Sleepover.COLORS.size()]).darkened(0.1))
 	add_child(_camp)
 	# The people sit on the bags: they are drawn one level above them.
@@ -1926,7 +1927,7 @@ func _sleepover_to_bedroom() -> void:
 	var steps := create_tween()
 	steps.tween_interval(1.2)
 	steps.tween_callback(func() -> void:
-		_movie_say(0, "On est dans ta chambre ! C'est ben beau, tes lumières !")
+		_movie_say(0, "On est dans ta chambre ! Wow, tout est turquoise !")
 		Sfx.play("chime", _charlotte.position))
 	steps.tween_interval(3.0)
 	steps.tween_callback(func() -> void:
@@ -2164,26 +2165,32 @@ func _movie_say(who: int, text: String) -> void:
 class _Nest:
 	extends Node2D
 	var bowl := false
-	## How many sit on it, Charlotte included (2 to 5): one cushion each.
+	## How many sit on it, Charlotte included (2 to 7): one cushion each.
 	var people := 3
 	var dark: Polygon2D
 	var lights: Array = []
 
 	func _draw() -> void:
 		# A plaid blanket, its near edge with a fringe.
-		var blanket := PackedVector2Array([Vector2(-350, -14), Vector2(270, -16), Vector2(296, 22), Vector2(-368, 24)])
+		# Wider when the whole gang comes (six or seven on it).
+		var l := -350.0 if people <= 5 else -452.0
+		var r := 270.0 if people <= 5 else 372.0
+		var blanket := PackedVector2Array([Vector2(l, -14), Vector2(r, -16), Vector2(r + 26.0, 22), Vector2(l - 18.0, 24)])
 		draw_colored_polygon(blanket, Color("#C8445A"))
-		for i in 13:
-			var x := -340.0 + i * 50.0
+		var x := l + 10.0
+		while x < r:
 			draw_line(Vector2(x, -14), Vector2(x - 6.0, 23), Color("#E9D8B4", 0.55), 5.0)
+			x += 50.0
 		for y in [-4.0, 10.0]:
-			draw_line(Vector2(-355, y), Vector2(282, y), Color("#E9D8B4", 0.45), 4.0)
-		draw_polyline(PackedVector2Array([Vector2(-350, -14), Vector2(270, -16), Vector2(296, 22), Vector2(-368, 24), Vector2(-350, -14)]), Color("#8E2A3A"), 2.0, true)
-		for i in 42:
-			var x := -364.0 + i * 15.8
+			draw_line(Vector2(l - 5.0, y), Vector2(r + 12.0, y), Color("#E9D8B4", 0.45), 4.0)
+		draw_polyline(blanket + PackedVector2Array([blanket[0]]), Color("#8E2A3A"), 2.0, true)
+		x = l - 14.0
+		while x < r + 24.0:
 			draw_line(Vector2(x, 24), Vector2(x - 1.0, 31), Color("#E9D8B4"), 2.0)
+			x += 15.8
 		# The cushions where they sit (MOVIE_SEATS, from the nest's middle at x 2648).
-		var cushions := [[-103.0, Color("#F2A7C9")], [122.0, Color("#FFD23F")], [-203.0, Color("#7CCBC4")], [-303.0, Color("#C084FC")], [222.0, Color("#FF8A3D")]]
+		var cushions := [[-103.0, Color("#F2A7C9")], [122.0, Color("#FFD23F")], [-203.0, Color("#7CCBC4")], [-303.0, Color("#C084FC")], [222.0, Color("#FF8A3D")],
+			[322.0, Color("#8FCBF2")], [-403.0, Color("#B8E986")]]
 		for k in mini(people, cushions.size()):
 			_cushion(Vector2(cushions[k][0], 0.0), cushions[k][1])
 		if bowl:
