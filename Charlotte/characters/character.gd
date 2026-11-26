@@ -66,6 +66,11 @@ var _snap := [false, false]
 var _dt := 0.016
 var _hair_angle := 0.0
 var _hair_vel := 0.0
+## Little life in the movement: a quick paper-doll turn when she changes side, a soft settle when she stops walking.
+var _turn := 0.0
+var _settle := 0.0
+var _last_facing := 1
+var _was_walking := false
 var _blink_in := 2.0
 var _pet_time := 0.0
 var _pet := 0.0
@@ -138,6 +143,7 @@ var _next_gesture := 6.0
 
 
 func _ready() -> void:
+	_last_facing = facing
 	if look == null:
 		look = CharacterLook.charlotte()
 	_blink_in = randf_range(1.0, 4.0)
@@ -449,6 +455,14 @@ func _process(delta: float) -> void:
 		if _sit <= 0.0 and not sitting:
 			_stand_y = NAN
 	_dt = delta
+	if facing != _last_facing:
+		_last_facing = facing
+		_turn = 1.0
+	if _was_walking and not is_walking:
+		_settle = 1.0
+	_was_walking = is_walking
+	_turn = move_toward(_turn, 0.0, delta * 7.0)
+	_settle = move_toward(_settle, 0.0, delta * 3.5)
 	_express_left = maxf(_express_left - delta, 0.0)
 	_pet_time = maxf(_pet_time - delta, 0.0)
 	_pet = move_toward(_pet, 1.0 if _pet_time > 0.0 else 0.0, delta * 4.0)
@@ -541,7 +555,8 @@ func _apply_pose() -> void:
 	var tilt := bounce if is_walking else sin(_time * 2.2) * 0.6
 	_head.rotation = deg_to_rad(2.0) * tilt + deg_to_rad(10.0) * _pet - deg_to_rad(4.0) * _run
 	_torso.skew = 0.035 * swing
-	_body.scale.x = facing
+	var settle := sin((1.0 - _settle) * PI) if _settle > 0.0 else 0.0
+	_body.scale = Vector2(facing * (1.0 - 0.22 * _turn) * (1.0 + 0.025 * settle), 1.0 - 0.025 * settle)
 	# The face is turned a little the way she looks (eyes, brows and mouth slide toward `facing`): the puppets are drawn front-on, so
 	# this is what lets two people who talk be seen looking at each other (Julien).
 	for spr: Sprite2D in [_eyes_spr, _brows_spr, _mouth_spr]:

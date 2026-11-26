@@ -50,6 +50,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   - **Never overwrite a save**: any run that opens a scene by itself (a test scene, a runner that instantiates `main.tscn`…)
     must pass `-- --no-save`, or its `Saver` writes over the game in progress. `GameState.enabled()` is false for
     `--no-save`, `--screenshot=`, `--x=` and `-s`/`--script` runs, and for nothing else.
+  - `tools/fuzz_interact.tscn -- --no-save --scene=res://scenes/x.tscn [--from=N]` calls `interact` on every interactable of a
+    scene to flush out script errors (prints `NEXT=i` when one changes the scene: run again from there; `END` when done).
   - Logic tests (clicks, quests, scene changes): headless `extends SceneTree` scripts run with `-s`, with their own quit
     timer; send clicks straight to `scene._control._unhandled_input(event)` (headless window size skews `Input.parse_input_event`).
     Windows only for screenshots, and they must quit by themselves.
@@ -735,7 +737,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   - everything she holds in her arms goes through `world/carry.gd` (`Carry`): ONE saved flag `flags.carried` ("milk", "can" or
     "cat:<id>"), one thing at a time. `Carry.take(who, kind, id)` is the only way to put something in her arms and returns
     false when her hands are full (say `Carry.FULL_HANDS`); `put_down`, `has(kind)`, `busy()`, `cat_id()`; scenes call
-    `Carry.restore` as they open, so it follows her through doors and saves (old saves are migrated). A NEW thing to carry =
+    `Carry.restore` as they open, so it follows her through doors and saves (old saves are migrated). A thing listed in `Carry.OWNERS` is dropped at the next scene when its quest isn't active (the movie snacks are left out: movie nights are replayed after the quest is done); a sled never comes into the flat. A NEW thing to carry =
     one more case in `Carry._build()`, then `Carry.take` / `Carry.put_down` in the quest: nothing else to remember;
   - amies: Mom gives it, the very first one she gives: go and make friends in the middle lane, where the twins Turcotte play; meeting them (`Twins._meet`, flag `met_twins`) completes it, and if she met them first Mom just congratulates her; the notebook's friends page lists them from that flag;
   - cachette: the twins' first quest, after "amies" (`Twins._play_hide_and_seek`): they ask, Charlotte counts with her eyes shut, then each sister (`Twins._Hider`) peeks over a solid fence (`ruelle.gd` `_hide_spots`: boards or cedar, `HIDE_FROM` lots or more away, drawn just behind that fence's sprite, one each side when it can), giggles when Charlotte comes close, and a click finds her; `flags.cachette_found` keeps who has been found across scenes; both found completes it. **Once done, she can ask for another game** (Julien): clicking the twins with nothing else on opens a `ChoiceCard` (cachette / jaser, `Twins._ask_what_to_do`); a replay sets `cachette_again` and bumps `cachette_round`, which reseeds `ruelle.gd _hide_spots(round)` (tôle fences too, both may hide on one side) so they hide somewhere else;
@@ -796,7 +798,8 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
        on the card (`School.draw_shape`, `ChoiceCard.ask(…, picture)`), then an addition and a subtraction made up for the day
        (`School._sum`, 3e-année level: carrying and borrowing, up to `SUM_MAX`; the wrong answers are the usual slips), read out
        by `Voice` (`say`: "plus" / "moins"), answered on a `ChoiceCard` ("Presque ! Essaie encore." when wrong), a sticker (`flags.ecole_stickers`), the bell;
-       4. the service de garde (`scenes/service_de_garde.gd`): Jade the educator asks for **a drawing for her parents** (Julien):
+       At the fifth sticker Madame Nadia opens her treasure box (`classe.gd _surprise`, `SURPRISE_AT`): 3 $, three lollipops in the stash or a gold medal (`flags.ecole_medal`, not shown anywhere yet).
+    4. the service de garde (`scenes/service_de_garde.gd`): Jade the educator asks for **a drawing for her parents** (Julien):
        the craft table ("!") opens the `DrawingPad` (`done_text` "Pour Papa et Maman !"), the drawing is kept apart
        (`DrawingPad.pending`, `slot_dir()/dessin_a_rapporter.png`) and carried home in her arms (`Carry` "drawing"), she shows
        it to Papa, and at home a click on the fridge ("!") puts it up (`house.gd _drawing_on_fridge`, `put_pending_on_fridge`);
