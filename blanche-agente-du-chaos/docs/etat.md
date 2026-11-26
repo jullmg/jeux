@@ -25,7 +25,7 @@ Point de reprise d'une session à l'autre. Julien a demandé de tout faire sans 
 | 3. Les missions en données | fait : missions 9 à 15, répliques, tests des nouvelles règles, étoiles calibrées |
 | 4. Les pièces en 3D | fait : le double salon d'un seul modèle (`tools/blender/double_salon.py`), une caméra et un éclairage par pièce |
 | 5. Personnages et animations | fait : assis à table et au divan, servir, manger, le but, la télécommande, Charlotte qui glisse un morceau, la visite (deux nouveaux modèles), Blanche qui rampe et tend le nez |
-| 6. La nourriture | à faire |
+| 6. La nourriture | fait : 21 nouveaux morceaux (brunch, pâté chinois, fête, lasagne, hockey, film, buffet des Fêtes) et les images des plats 9 à 15 |
 | 7. Lumière, son et interface | à faire |
 | 8. Finition et livraison | à faire |
 
