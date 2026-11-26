@@ -1993,57 +1993,55 @@ func _sleepover_shadows() -> void:
 		_sleepover_menu())
 
 
-# Pillows fly across the room, feathers float down, everybody laughs.
+# The pillow fight (`PillowFight`, Julien: everyone gets up with a pillow, a click on a friend whacks them): then back on the
+# sleeping bags, laughing, and the menu again.
 func _sleepover_pillows() -> void:
-	var everyone: Array[Character] = [_charlotte]
-	everyone.append_array(_movie_twins)
-	var steps := create_tween()
-	for k in 7:
-		steps.tween_callback(func() -> void:
-			var from: Character = everyone[k % everyone.size()]
-			var to: Character = everyone[(k + 1 + (k / everyone.size())) % everyone.size()]
-			_throw_pillow(from.position + Vector2(0, -90), to.position + Vector2(0, -90))
-			from.express("grin", 1.2)
-			Sfx.play("swoosh", from.position, -4.0, 1.0 + (k % 3) * 0.1))
-		steps.tween_interval(0.45)
-	steps.tween_callback(func() -> void:
-		for who: Character in everyone:
-			who.express("laugh", 2.4)
-		_say(_charlotte, "Haha ! J'en peux plus !", 300.0, 2.2)
-		Sfx.play("chime", _charlotte.position, -6.0))
-	steps.tween_interval(2.6)
-	steps.tween_callback(_sleepover_menu)
+	_control.enabled = false
+	_control.stop()
+	var fight := PillowFight.new()
+	fight.charlotte = _charlotte
+	fight.friends = _movie_twins
+	fight.left = BEDROOM.x + 150.0
+	fight.right = BEDROOM.x + 1380.0
+	fight.floor_y = FEET_Y
+	fight.say = func(who: Character, text: String) -> void: _say(who, text, 260.0, 1.8)
+	fight.z_index = 2
+	add_child(fight)
+	fight.finished.connect(func(_hits: int, _taken: int) -> void:
+		Transition.through_black(self, func() -> void:
+			fight.queue_free()
+			_sit_on_bags()
+			var more := create_tween()
+			more.tween_interval(0.8)
+			more.tween_callback(func() -> void:
+				for who: Character in [_charlotte] + _movie_twins:
+					who.express("laugh", 2.4)
+				_say(_charlotte, "Haha ! J'en peux plus !", 300.0, 2.2))
+			more.tween_interval(2.6)
+			more.tween_callback(_sleepover_menu), 0.5))
+	fight.start()
 
 
-func _throw_pillow(from: Vector2, to: Vector2) -> void:
-	var pillow := Polygon2D.new()
-	pillow.polygon = PackedVector2Array([Vector2(-22, -12), Vector2(22, -13), Vector2(24, 12), Vector2(-24, 13)])
-	pillow.color = Color("#FFFDF8")
-	pillow.z_index = 8
-	pillow.position = from
-	add_child(pillow)
-	var tw := create_tween()
-	tw.tween_method(func(u: float) -> void:
-		pillow.position = from.lerp(to, u) + Vector2(0, -sin(u * PI) * 70.0)
-		pillow.rotation = u * 9.0, 0.0, 1.0, 0.5)
-	tw.tween_callback(func() -> void:
-		for f in 5:
-			_feather(to + Vector2(randf_range(-20, 20), randf_range(-30, 0)))
-		pillow.queue_free())
-
-
-func _feather(at: Vector2) -> void:
-	var f := Polygon2D.new()
-	f.polygon = PackedVector2Array([Vector2(0, -6), Vector2(3, 0), Vector2(0, 6), Vector2(-3, 0)])
-	f.color = Color("#FFFFFF")
-	f.position = at
-	f.z_index = 8
-	add_child(f)
-	var tw := create_tween()
-	tw.tween_property(f, "position", at + Vector2(randf_range(-40, 40), 90.0), randf_range(1.4, 2.2))
-	tw.parallel().tween_property(f, "rotation", randf_range(-4.0, 4.0), 1.8)
-	tw.parallel().tween_property(f, "modulate:a", 0.0, 1.8)
-	tw.tween_callback(f.queue_free)
+# Everyone back on their sleeping bag (and Charlotte in front of her bed), sitting on the floor.
+func _sit_on_bags() -> void:
+	for k in _movie_twins.size():
+		var friend: Character = _movie_twins[k]
+		friend.position = Vector2(_camp.spots[k] + 10.0, FEET_Y)
+		friend.facing = 1 if k % 2 == 0 else -1
+		friend.sitting = true
+		friend.sit_on_ground = true
+		friend.seat_h = 0.0
+		friend.is_walking = false
+		friend.running = false
+		friend.rotation = 0.0
+	_charlotte.position = Vector2(BEDROOM.x + 300.0, FEET_Y)
+	_charlotte.facing = 1
+	_charlotte.sitting = true
+	_charlotte.sit_on_ground = true
+	_charlotte.seat_h = 0.0
+	_charlotte.is_walking = false
+	_charlotte.running = false
+	_charlotte.rotation = 0.0
 
 
 # Maman says goodnight from the door, everybody whispers a bit, the light goes out and the night begins.
