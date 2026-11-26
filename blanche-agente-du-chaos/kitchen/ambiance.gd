@@ -3,6 +3,8 @@ extends Node3D
 ## La lumière de la cuisine : un appoint doux venu du plafond, le soleil qui entre par la fenêtre, un contre-jour frais,
 ## les lumières sous les armoires, et le rendu (ombres de contact, halo, couleurs). Chaque mission a son moment.
 
+## La sonde de reflets de la cuisine (centre, taille), aussi celle d'une pièce qui n'en dit rien.
+const DEFAULT_PROBE := [Vector3(0.0, 1.35, 0.35), Vector3(4.3, 3.0, 5.6)]
 ## La couche des personnages : un contre-jour qui n'éclaire qu'eux détache leur silhouette.
 const RIM_LAYER := 2
 ## Les moments : couleurs et forces des lumières, couleur de la vue par la fenêtre.
@@ -63,7 +65,7 @@ var _probe: ReflectionProbe
 ## Les lumières propres à chaque pièce : modèle → [fenêtre, lampes].
 var _rigs: Dictionary = {}
 ## La boîte de la sonde de reflets pour la pièce montrée.
-var _probe_box := [Vector3(0.0, 1.35, 0.35), Vector3(4.3, 3.0, 5.6)]
+var _probe_box := DEFAULT_PROBE
 
 
 func _ready() -> void:
@@ -98,21 +100,23 @@ func _ready() -> void:
 	rim.light_cull_mask = RIM_LAYER
 
 	# La cuisine : le soleil par la fenêtre de l'est, les réglettes sous les armoires, un halo près de la porte.
-	_rig("cuisine", [Vector3(3.5, 2.75, -0.95), Vector3(0.1, 0.0, 0.15)], [Vector3(-0.39, 1.36, -1.78),
-		Vector3(1.0, 1.24, -1.74), Vector3(1.78, 1.36, 0.45), Vector3(1.78, 1.36, -1.45), Vector3(1.2, 2.2, 1.35)])
+	_rig("cuisine", [Vector3(3.5, 2.75, -0.95), Vector3(0.1, 0.0, 0.15), 8.0], [[Vector3(-0.39, 1.36, -1.78), 1.25],
+		[Vector3(1.0, 1.24, -1.74), 1.25], [Vector3(1.78, 1.36, 0.45), 1.25], [Vector3(1.78, 1.36, -1.45), 1.25],
+		[Vector3(1.2, 2.2, 1.35), 3.0]])
 	# Le double salon : le jour par la fenêtre du salon (au sud), la suspension de la salle à manger, la lampe sur pied,
 	# le plafonnier du salon et un peu de lumière dans le corridor.
-	_rig("double_salon", [Vector3(0.65, 2.75, 6.2), Vector3(0.1, 0.0, 1.2)], [Vector3(0.15, 1.78, -1.8),
-		Vector3(1.23, 1.45, 0.0), Vector3(0.0, 2.6, 1.9), Vector3(-2.3, 2.3, -0.4)])
+	# Des portées courtes : chaque lampe n'éclaire que son coin (moins de lumières à calculer par point).
+	_rig("double_salon", [Vector3(0.65, 2.75, 6.2), Vector3(0.1, 0.0, 1.2), 9.0], [[Vector3(0.15, 1.78, -1.8), 2.2],
+		[Vector3(1.23, 1.45, 0.0), 2.2], [Vector3(0.0, 2.6, 1.9), 2.6], [Vector3(-2.3, 2.3, -0.4), 2.6]])
 	set_room("cuisine")
 	set_moment("matin")
 
 
-## Les lumières d'une pièce : la fenêtre [position, cible] et les lampes (une portée de plus de 2 m : un halo).
+## Les lumières d'une pièce : la fenêtre [position, cible, portée] et les lampes [position, portée].
 func _rig(model: String, window: Array, lamps: Array) -> void:
 	var spot := SpotLight3D.new()
 	spot.position = window[0]
-	spot.spot_range = 9.0
+	spot.spot_range = window[2]
 	spot.spot_angle = 26.0
 	spot.spot_attenuation = 0.4
 	spot.shadow_enabled = true
@@ -120,15 +124,14 @@ func _rig(model: String, window: Array, lamps: Array) -> void:
 	add_child(spot)
 	spot.look_at(window[1])
 	var list: Array[OmniLight3D] = []
-	for at: Vector3 in lamps:
+	for spec: Array in lamps:
 		var lamp := OmniLight3D.new()
-		lamp.position = at
+		lamp.position = spec[0]
 		lamp.light_color = Color(1.0, 0.80, 0.54)
-		# Des portées courtes : chaque lampe n'éclaire que son coin (moins de lumières à calculer par point).
-		lamp.omni_range = (3.0 if at.y > 2.0 else 1.25) if model == "cuisine" else (2.6 if at.y > 2.0 else 2.2)
+		lamp.omni_range = spec[1]
 		add_child(lamp)
 		list.append(lamp)
-	_rigs[model] = [spot, list]
+	_rigs[model] = {"window": spot, "lamps": list}
 
 
 ## Montre les lumières d'une pièce (et cache celles de l'autre). `probe` : [centre, taille] de la sonde de reflets.
@@ -136,16 +139,14 @@ func set_room(model: String, probe: Array = []) -> void:
 	room = model
 	for name_: String in _rigs:
 		var on: bool = name_ == model
-		_rigs[name_][0].visible = on
-		for lamp: OmniLight3D in _rigs[name_][1]:
+		_rigs[name_].window.visible = on
+		for lamp: OmniLight3D in _rigs[name_].lamps:
 			lamp.visible = on
-	_window = _rigs[model][0]
-	_lamps = _rigs[model][1]
-	_probe_box = probe if not probe.is_empty() else [Vector3(0.0, 1.35, 0.35), Vector3(4.3, 3.0, 5.6)]
-	var m := moment
+	_window = _rigs[model].window
+	_lamps = _rigs[model].lamps
+	_probe_box = probe if not probe.is_empty() else DEFAULT_PROBE
+	# Le prochain set_moment() s'applique en entier (et photographie les reflets une seule fois).
 	moment = ""
-	if m != "":
-		set_moment(m)
 
 
 func _sun(degrees: Vector3, shadows: bool) -> DirectionalLight3D:

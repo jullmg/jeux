@@ -45,7 +45,8 @@
     {
       "who": "papa",
       "seat": "divan_papa",
-      "role": "decor"
+      "role": "decor",
+      "pose": "jaser"
     }
   ],
   "walkers": [
@@ -122,8 +123,8 @@
   },
   "stars": [
     950,
-    2000,
-    3000
+    2050,
+    3150
   ],
   "slip_wait": [
     14.0,

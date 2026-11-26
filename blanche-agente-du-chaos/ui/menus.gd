@@ -219,12 +219,8 @@ func show_select(room := "") -> void:
 		tab.name = "onglet_" + name_
 		tab.disabled = not open
 		tab.focus_mode = Control.FOCUS_ALL if open else Control.FOCUS_NONE
-		var face := Color(UiStyle.PINK) if name_ == room else Color("fffaf0")
-		if not open:
-			face = Color("d9cbbb")
-		for state: Array in [["normal", face, false], ["hover", face.lightened(0.2), false], ["pressed", face.darkened(0.08), true],
-				["disabled", face, false]]:
-			tab.add_theme_stylebox_override(state[0], UiStyle.candy(state[1], state[2], Color("c9a87e")))
+		var face := Color("d9cbbb") if not open else (Color(UiStyle.PINK) if name_ == room else Color("fffaf0"))
+		_candy_states(tab, face, 0.2, Color("c9a87e"))
 		if name_ == room:
 			tab.add_theme_color_override("font_color", Color.WHITE)
 			tab.add_theme_color_override("font_hover_color", Color.WHITE)
@@ -245,10 +241,7 @@ func show_select(room := "") -> void:
 		b.custom_minimum_size = Vector2(340, 352)
 		b.disabled = not open
 		b.focus_mode = Control.FOCUS_ALL if open else Control.FOCUS_NONE
-		var face := Color("fffaf0") if open else Color("d9cbbb")
-		for state: Array in [["normal", face, false], ["hover", face.lightened(0.3), false], ["pressed", face.darkened(0.08), true],
-				["disabled", face, false]]:
-			b.add_theme_stylebox_override(state[0], UiStyle.candy(state[1], state[2], Color("c9a87e") if open else Color("a99682")))
+		_candy_states(b, Color("fffaf0") if open else Color("d9cbbb"), 0.3, Color("c9a87e") if open else Color("a99682"))
 		var inside := UiStyle.column(2)
 		inside.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		inside.offset_top = 8
@@ -281,15 +274,25 @@ func show_select(room := "") -> void:
 	_focus(focus if focus else (chosen if chosen else back))
 
 
-## Les pièces dans l'ordre des missions : pièce → numéros de ses missions.
+## Les quatre états d'un bouton-carton : la couleur du carton, un peu plus claire au survol.
+static func _candy_states(b: Button, face: Color, hover: float, border: Color) -> void:
+	for state: Array in [["normal", face, false], ["hover", face.lightened(hover), false], ["pressed", face.darkened(0.08), true],
+			["disabled", face, false]]:
+		b.add_theme_stylebox_override(state[0], UiStyle.candy(state[1], state[2], border))
+
+
+## Les pièces dans l'ordre des missions : pièce → numéros de ses missions (lu une seule fois).
+static var _room_cache := {}
+
+
 static func _rooms() -> Dictionary:
-	var out := {}
-	for id in range(1, Levels.COUNT + 1):
-		var piece := Levels.piece_of(Levels.load_level(id))
-		if not out.has(piece):
-			out[piece] = []
-		out[piece].append(id)
-	return out
+	if _room_cache.is_empty():
+		for id in range(1, Levels.COUNT + 1):
+			var piece := Levels.piece_of(Levels.load_level(id))
+			if not _room_cache.has(piece):
+				_room_cache[piece] = []
+			_room_cache[piece].append(id)
+	return _room_cache
 
 
 func show_brief(id: int) -> void:
@@ -324,10 +327,12 @@ func show_brief(id: int) -> void:
 	column.add_child(goal)
 	var buttons := UiStyle.row(24)
 	column.add_child(buttons)
-	buttons.add_child(UiStyle.button(Texts.BACK, show_select, 40, 300))
+	# Retour à la liste, sur l'onglet de la pièce de cette mission.
+	var room_list := show_select.bind(Levels.piece_of(level))
+	buttons.add_child(UiStyle.button(Texts.BACK, room_list, 40, 300))
 	var go := UiStyle.button(Texts.START, func() -> void: play.emit(id), 40, 440)
 	buttons.add_child(go)
-	_back = show_select
+	_back = room_list
 	_focus(go)
 
 

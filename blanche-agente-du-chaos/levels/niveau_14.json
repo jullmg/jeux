@@ -37,12 +37,14 @@
     {
       "who": "papa",
       "seat": "divan_papa",
-      "role": "decor"
+      "role": "decor",
+      "pose": "film"
     },
     {
       "who": "charlotte",
       "seat": "berceuse",
-      "role": "decor"
+      "role": "decor",
+      "pose": "film"
     }
   ],
   "spots": [
@@ -86,8 +88,8 @@
     "film": "regarde le film"
   },
   "stars": [
-    950,
-    1650,
+    1000,
+    1700,
     2350
   ],
   "repeat_max": 6

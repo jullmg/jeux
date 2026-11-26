@@ -151,7 +151,7 @@ baseboard(north, "x", ZN, X0, X1, 1)
 crown(north, "x", ZN, X0, X1, 1)
 # l'interrupteur, près du coin de la cage
 north.box(-1.5, 1.18, ZN, -1.42, 1.3, ZN + 0.012, white_paint, bevel=0.004, seg=1)
-north_ob = north.build()
+north.build()
 
 # Le mur sud, sur la rue : la fenêtre à guillotine.
 south = C.Obj("MurSud")
@@ -188,7 +188,7 @@ for k in range(13):
         south.torus((x + 0.045, wy0 + 0.2, ZS + 0.32), 0.04, 0.005, iron, axis=(0, 0, 1), seg=14, sides=4)
 for y in (wy0 + 0.55, wy0 + 0.02):
     south.tube([(wx0 - 0.1, y, ZS + 0.32), (wx1 + 0.1, y, ZS + 0.32)], 0.014, iron, seg=6)
-south_ob = south.build()
+south.build()
 view_img = T.street(rng)
 D.wall_picture("VueSalon", view_img, ((wx0 + wx1) / 2, (wy0 + wy1) / 2 + 0.1, ZS + 0.5),
                (wx1 - wx0 + 1.1, wy1 - wy0 + 1.0), "-z", None, emit=1.0)
@@ -210,7 +210,7 @@ for y0, y1 in ((0.2, 0.95), (1.15, 2.0)):
     west_sam.box(X0 - 0.178, y0, DOOR[0] + 0.1, X0 - 0.165, y1, DOOR[1] - 0.1, corner_wood, bevel=0.006, seg=1,
                  matrix=leaf_door)
 west_sam.box(X0 + 0.01, 1.16, -1.74, X0 + 0.03, 1.24, -1.66, white_paint, bevel=0.004, seg=1)
-west_sam_ob = west_sam.build()
+west_sam.build()
 
 west_salon = C.Obj("MurOuestSalon")
 wall_z(west_salon, X0, 0.0, ZS + WALL, wall_m, [(OPENING[0], OPENING[1], 0.0, 2.35)])
@@ -219,7 +219,7 @@ crown(west_salon, "z", X0, 0.0, ZS, 1)
 for a, b, c, d in ((OPENING[0] - 0.09, OPENING[0], 0, 2.44), (OPENING[1], OPENING[1] + 0.09, 0, 2.44),
                    (OPENING[0] - 0.09, OPENING[1] + 0.09, 2.35, 2.44)):
     west_salon.box(X0 - 0.13, c, a, X0 + 0.025, d, b, white_paint, bevel=0.008, seg=1)
-west_salon_ob = west_salon.build()
+west_salon.build()
 
 # Le mur est : les trois affiches (salle à manger) et le mur de cadres (salon).
 east_sam = C.Obj("MurEstSAM")
@@ -320,7 +320,7 @@ for ux in (-0.73, 0.69):
         sam.box(ux - 0.012, y - 0.02, -3.6, ux + 0.012, y, -3.385, iron)
 for y in SH:
     sam.box(-0.78, y, -3.6, 0.74, y + 0.028, -3.36, blond, bevel=0.005, seg=1)
-for row, y in enumerate(SH[:3]):
+for y in SH[:3]:
     x = -0.66
     while x < 0.6:
         kind = rng.random()
@@ -353,8 +353,7 @@ sam.box(cx0, 0.0, cz0, cx1, 0.025, cz1, M("plateau_cage", "#2a2a2e", 0.5), bevel
 bars = 0.055
 x = cx0
 while x <= cx1 + 1e-6:
-    for z in (cz0,):
-        sam.tube([(x, 0.02, z), (x, CH, z)], 0.0035, iron, seg=5, caps=False)
+    sam.tube([(x, 0.02, cz0), (x, CH, cz0)], 0.0035, iron, seg=5, caps=False)
     sam.tube([(x, CH, cz0), (x, CH, cz1)], 0.0035, iron, seg=5, caps=False)
     x += bars
 z = cz0
@@ -498,7 +497,6 @@ cush = [(rx0 + 0.08, 0.42, 0), (rx0 + 0.4, 0.36, 0), (rx1 - 0.12, 0.46, 0), (rx1
 pts, _ = C.curve(cush, [0.0] * 4, 5)
 for k in range(len(pts) - 1):
     a, b = pts[k], pts[k + 1]
-    zm = (rz0 + rz1) / 2
     salon.box(min(a[0], b[0]) - 0.02, min(a[1], b[1]) - 0.035, rz0 + 0.07, max(a[0], b[0]) + 0.02,
               max(a[1], b[1]) + 0.035, rz1 - 0.07, white_cushion, bevel=0.03, seg=2)
 # la plante sur sa petite boîte de bois, et le panier
@@ -510,8 +508,7 @@ salon.box(bx0_ + 0.06, 0.0, bz1_ - 0.12, bx1_ - 0.04, 0.18, bz1_ - 0.01, basket_
 ex0, ez0, ex1, ez1 = rect(OB["etagere_coin"])
 for k, y in enumerate((0.0, 0.42, 0.8, 1.18, 1.56)):
     salon.box(ex0 + 0.03, y, ez0 + 0.03, ex1, y + 0.03, ez1, corner_wood, bevel=0.006, seg=1)
-for zz in (ez0 + 0.03,):
-    salon.box(ex0 + 0.03, 0.0, zz, ex0 + 0.06, 1.62, zz + 0.03, corner_wood)
+salon.box(ex0 + 0.03, 0.0, ez0 + 0.03, ex0 + 0.06, 1.62, ez0 + 0.06, corner_wood)
 salon.box(ex0 + 0.03, 0.0, ez1 - 0.04, ex0 + 0.06, 1.62, ez1, corner_wood)
 salon.box(ex1 - 0.04, 0.0, ez0 + 0.03, ex1, 1.62, ez0 + 0.06, corner_wood)
 for k, y in enumerate((0.45, 0.83, 1.21)):

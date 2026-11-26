@@ -238,5 +238,30 @@
     "MurEstSalon",
     "CoupeEst",
     "Lampe"
-  ]
+  ],
+  "montre": {
+    "Noel": [
+      "noel"
+    ],
+    "EcranHockey": [
+      "hockey"
+    ],
+    "EcranFilm": [
+      "film"
+    ]
+  },
+  "cache_au": {
+    "EcranNoir": [
+      "hockey",
+      "film"
+    ],
+    "Ampoule": [
+      "film"
+    ]
+  },
+  "vue": "VueSalon",
+  "tele": {
+    "pos": [-0.85, 1.5, 3.45],
+    "portee": 3.9
+  }
 }

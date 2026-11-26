@@ -516,7 +516,8 @@ func _draw_people_signs(on: Control, beat: float) -> void:
 	for list: Array in [sim.helpers, sim.seated, sim.walkers]:
 		for h: Dictionary in list:
 			var view: PersonView = stage.people.get(h.who)
-			if view == null or not view.visible:
+			var signed: bool = h.snitch > 0.0 or h.get("role", "") == "temoin" or h.state == "slip"
+			if view == null or not view.visible or not signed:
 				continue
 			var at := stage.on_screen(view.head_position() + Vector3(0, 0.35, 0))
 			if h.snitch > 0.0:

@@ -153,3 +153,79 @@ Les quatre relecteurs automatiques n'ont pas pu tourner (limite d'utilisation du
 ### Regard neuf (sous-agent Sonnet)
 
 À faire : la limite d'utilisation du modèle était atteinte. Reporté à la revue finale (chantier 8).
+
+## Salle à manger et salon : revues finales (chantier 8, 2026-11-26)
+
+### Regard neuf (sous-agent Sonnet, sans contexte, reporté du chantier 3)
+
+Lecture du code et des plans seulement, plus un remplissage du plancher des trois plans en Python : toutes les places,
+postes, points de passage, portes et la cage sont reliés, aucune poche. Chaque entrée dans un regard ou un tour passe
+par un indice d'au moins `hint_min` (retour, visite qui appelle Maman, fin de chicane, retour à la porte).
+
+| Trouvé | Suite |
+|---|---|
+| Dans le noir, la lumière de la télé pouvait monter pendant l'indice : une chienne cachée par le noir devenait visible au regard | La lumière ne monte plus pendant l'indice non plus (essai `test_portee_dans_le_noir` élargi) |
+| L'œil de la zone cachée se posait entre les deux cachettes de la finale, sur du plancher à découvert | Il se pose sur la case cachée la plus proche du centre |
+| Un tour de la table lancé depuis le divan traversait le divan et durait 8 à 10 s | Pas de tour loin de la table (`_ring_near`, essai `test_pas_de_tour_loin_de_la_table`) |
+| Papa debout pendant le regard qui suit un but | Il reste assis (l'activité « but » ne le lève plus) |
+| « Les étoiles de la cuisine ont changé » | Faux positif : comparé à un commit d'avant ce travail ; aucune différence depuis `9901b11` |
+
+Notés sans correction : un passant de la visite peut s'arrêter tout près de Maman (cosmétique) ; Maman au divan voit
+Charlotte derrière elle (cohérent avec « elle voit toute la pièce »).
+
+### Revue de code (`/code-review high`, `d8c2147..HEAD`)
+
+| Trouvé | Suite |
+|---|---|
+| Après les changements de règles, la finale laissait réussir le robot « têtu » (36,7 % pour 35 % permis, 60 parties) | Étoiles recalculées (`calibrate.py --games 400 --write-stars` : seules 14 et 15 bougent) ; batterie complète |
+| Retour depuis la fiche d'une mission : la liste revenait sur la pièce de la dernière mission débloquée | Le bouton revient sur la pièce de la mission vue |
+| La portée du soleil de la cuisine était passée de 8 à 9 m | Portée par pièce : 8 m dans la cuisine (comme avant), 9 m au double salon |
+| La sonde de reflets était photographiée deux fois à chaque début de partie | `set_room` n'est appelé que si la pièce change et ne réapplique plus le moment |
+| « Où est la télécommande ? » pouvait être dit par Papa debout | Décidé par les règles (`remote_hint`, Papa assis, sans hasard), la réplique et la pose le lisent |
+| Assise, Maman tournait la tête depuis la position des règles, pas depuis le siège | La visée part de l'endroit affiché |
+| En s'assoyant ou en se levant, Maman sautait d'un coup entre ses pieds et le siège | Glissement doux pendant 0,45 s |
+
+### Simplification (`/simplify`, quatre relecteurs : réutilisation, simplification, efficacité, altitude)
+
+- Faits : aides communes dans `stage.gd` (matières plates, teinte, visée) ; cachettes et noir mis en cache plutôt que
+  recalculés à chaque image ; ce que chaque moment montre ou cache, et l'écran de la télé, décrits dans les plans
+  (`montre`, `cache_au`, `vue`, `tele`) plutôt que codés en dur ; la pose des personnes assises du décor dite dans les
+  niveaux (`"pose"`) ; liste des pièces du menu en cache et états des boutons en une aide (`_candy_states`) ; lumières
+  décrites par pièce (`_rig` : portées en données) ; code mort retiré de `double_salon.py` et `food.py`.
+- Laissé exprès : le temps d'attraper d'un morceau au sol reste celui des règles de la cuisine (le changer changerait les
+  parties 1 à 8) ; `kitchen.py` ne passe pas par `decor.py` (il faudrait régénérer la cuisine, qui ne doit pas bouger).
+- Vérifié après : non-régression 144 parties, 0 différente ; 66 essais de règles verts.
+
+### Sécurité et vie privée (`/security-review`)
+
+Aucune faille trouvée. Rien de `reference/` n'est suivi par git ni ne l'a jamais été ; l'exportation exclut
+`reference/*`, `tests/*`, `tools/*`, `docs/*`, `zz_*`, et `tools/export.sh` échoue si l'application contient une
+photo ou la trace de `reference/`. Aucun script ne lit d'image dans `reference/` : les cadres et affiches du double
+salon sont dessinés par script (lettres, lune, aquarelle, falaise), les visages de la visite sont inventés. La
+sauvegarde est lue en JSON, chaque champ vérifié et borné ; rien n'est chargé depuis `user://` ; aucun `OS.execute`,
+`Expression` ni `eval` dans le jeu. Le pixel des images générées n'a pas été inspecté par la revue : la garantie repose
+sur les scripts et la vérification de l'exportation.
+
+### Performance (M1 Pro, `tools/shots.sh --seulement=perf`)
+
+| Mission | 3440×1440 | Retina 3416×2064 |
+|---|---|---|
+| 1 (cuisine) | 111 images/s | 100 |
+| 8 (cuisine) | 105 | 97 |
+| 9 (brunch) | 105 | 102 |
+| 12 (souper des invités) | 104 | 95 |
+| 13 (hockey) | 105 | 95 |
+| 14 (film) | 99 | 90 |
+| 15 (party des Fêtes) | 102 | 102 |
+
+Chargement d'une mission : 15 à 120 ms. Mémoire après 2 puis 20 parties : 131,1 → 131,2 Mo (Retina 141,2 → 141,0).
+Le film en Retina (90) reste un peu sous la cuisine (97 à 100) ; à 60 Hz ou 120 Hz plafonné à 60, ça ne se voit pas.
+
+### Batterie complète (`tools/test.sh --complet`, 1000 parties par mission et par profil)
+
+« TOUS LES TESTS PASSENT » (43 min) : 66 essais de règles (5607 vérifications), non-régression 144 parties sans
+différence, intégration (106 vérifications), parcours complet, équilibrage des 15 missions. Les robots honnêtes ne
+restent jamais coincés. Le robot « têtu » reste immobile plus de 6 s dans 15 à 26 % des parties de la salle à manger
+(2 à 10 sur 1000 dans la cuisine) : quand Maman est au buffet, la place devant le côté nord de la table est dans son
+cercle et il pousse tout droit dessus ; un joueur attrape ce morceau à 10 cm de là, depuis dessous la table. Défaut
+du robot, pas une poche (`test_aucune_poche` le vérifie avec Maman à chacun de ses postes).

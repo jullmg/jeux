@@ -14,6 +14,9 @@
   onglet par pièce.
 - Les missions 1 à 8 jouent exactement comme avant (essai de non-régression) ; une partie qui avait fini la cuisine
   ouvre la salle à manger.
+- Corrections des revues finales : dans le noir, la lumière de la télé ne monte plus pendant un indice ; pas de tour
+  de la table lancé depuis le divan ; Papa reste assis après un but ; on s'assoit et se lève en douceur ; « Retour »
+  depuis une fiche revient sur la bonne pièce ; la cuisine garde exactement sa lumière d'avant.
 
 ## 1.0.0-rc4 (2026-11-25) : fluidité
 

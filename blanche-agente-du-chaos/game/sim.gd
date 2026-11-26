@@ -123,6 +123,8 @@ var walk_speed := MOM_WALK
 var mom_out := false
 ## Elle revient de la cuisine avec un plat : elle le pose en arrivant.
 var _serving := false
+## L'indice en cours est Papa qui cherche la télécommande.
+var _remote_hint := false
 ## Avec qui elle se chicane : "papa" ou "charlotte".
 var chicane_with := "papa"
 ## "maman" ou "papa".
@@ -682,7 +684,9 @@ func _hint(kind: String, duration: float) -> void:
 	hint_kind = kind
 	mom_state = Mom.HINT
 	_set_timer(duration)
-	_emit("hint", {"kind": kind})
+	# Papa assis annonce parfois son regard en cherchant la télécommande (un indice sur deux, sans tirage au hasard).
+	_remote_hint = watcher == "papa" and kind == "real" and mom_seated() and int(time * 4.0) % 2 == 0
+	_emit("hint", {"kind": kind, "remote": _remote_hint})
 
 
 func _set_timer(t: float) -> void:
@@ -1094,7 +1098,7 @@ func _setup_people() -> void:
 	for s: Dictionary in level.get("seated", []):
 		var seat: Dictionary = map.seats[s.seat]
 		var p := {"who": s.who, "seat": s.seat, "role": s.role, "pos": seat.pos, "dir": seat.face, "state": "eat",
-			"t": 0.0, "snitch": 0.0, "cool": 0.0, "dropped": 0}
+			"t": 0.0, "snitch": 0.0, "cool": 0.0, "pose": s.get("pose", "manger")}
 		match s.role:
 			"complice":
 				p.t = _rand(level.get("slip_wait", SLIP_WAIT))
@@ -1253,6 +1257,16 @@ func _step_walkers(dt: float) -> void:
 
 
 # ------------------------------------------------------------------ le noir
+
+## Elle rapporte un plat de la cuisine (pour l'affichage).
+func serving() -> bool:
+	return _serving
+
+
+## L'indice en cours : Papa cherche la télécommande (pour le geste et la réplique).
+func remote_hint() -> bool:
+	return mom_state == Mom.HINT and _remote_hint
+
 
 ## La lumière de la télé change d'une scène à l'autre ; elle ne monte jamais pendant qu'on regarde.
 func _step_tv(dt: float) -> void:

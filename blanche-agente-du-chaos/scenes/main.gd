@@ -516,7 +516,7 @@ func _event_words(e: Dictionary) -> void:
 				return
 			var chance := 1.0 if e.kind == "round" else 0.7
 			var key: String = HINT_KEYS[e.kind]
-			if sim.watcher == "papa" and e.kind == "real" and stage.hint_flavor == 1:
+			if e.get("remote", false):
 				# Il cherche la télécommande : il le dit, toujours.
 				key = "remote"
 				chance = 1.0

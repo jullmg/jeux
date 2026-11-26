@@ -14,7 +14,7 @@ Point de reprise d'une session à l'autre. Julien a demandé de tout faire sans 
 | 4. Production | fait : les huit missions |
 | 5. Finition | fait : équilibrage, performance, accessibilité, icône |
 | 6. Assurance qualité | fait : revues corrigées, batterie complète réussie (`docs/revues.md`) |
-| 7. Livraison | version macOS 1.0.0-rc4 exportée et testée ; **acceptation de Julien à venir** |
+| 7. Livraison | version macOS 1.0.0-rc4 exportée et testée ; puis 1.1.0-rc1 avec les missions 9 à 15 ; **acceptation de Julien à venir** |
 
 ## Salle à manger et salon (`PROMPT-PIECES.md`, commencé le 2026-11-25)
 
@@ -27,7 +27,7 @@ Point de reprise d'une session à l'autre. Julien a demandé de tout faire sans 
 | 5. Personnages et animations | fait : assis à table et au divan, servir, manger, le but, la télécommande, Charlotte qui glisse un morceau, la visite (deux nouveaux modèles), Blanche qui rampe et tend le nez |
 | 6. La nourriture | fait : 21 nouveaux morceaux (brunch, pâté chinois, fête, lasagne, hockey, film, buffet des Fêtes) et les images des plats 9 à 15 |
 | 7. Lumière, son et interface | fait : une lumière par soirée (brunch, fête, souper, hockey, film dans le noir, Fêtes), le cercle de vue du noir, six nouveaux sons, l'écran des missions par pièce |
-| 8. Finition et livraison | à faire |
+| 8. Finition et livraison | fait : performance mesurée aux tailles de tes écrans, revues finales corrigées (`docs/revues.md`), batterie complète, version macOS 1.1.0-rc1 exportée et vérifiée |
 
 Réponses de Julien (2026-11-25) : un corridor mène de la salle à manger à la cuisine ; le meuble noir sous la télé est
 un piano ; la cage comme coin et « DANS TA CAGE ! », c'est bon ; les six missions conviennent, **et on peut ajouter un
@@ -94,6 +94,13 @@ souper avec des invités**.
 - Le tabouret grince et vacille, mais ne tombe pas, et la vitesse n'y change rien.
 - La mission 1 annonce « AU COIN ! » dans ses consignes sans le jouer d'avance.
 - L'application n'est pas notariée (compte développeur Apple requis).
+- Salle à manger et salon : **aucun essai humain** (le plaisir et la difficulté des missions 9 à 15 ne sont jugés que
+  par les robots) ; les nouveaux sons (foule, sirène, assiette, chaise, tourne-disque, clochettes) n'ont pas été
+  écoutés.
+- Le film en Retina tourne à 90 images/s (la cuisine à 97 à 100) : invisible à 60 Hz, mais un peu sous la cuisine.
+- Au party des Fêtes, la vue des deux pièces d'un coup rend tout plus petit (voir les questions).
+- Les chaises, le fauteuil berçant et le piano sont simplifiés ; `kitchen.py` n'utilise pas encore les aides de
+  `decor.py` (il faudrait régénérer la cuisine, qui ne devait pas bouger).
 
 ## Questions pour Julien (salle à manger et salon)
 

@@ -1213,11 +1213,13 @@ func test_modeles_complets() -> void:
 ## Le double salon a toutes les parties que les plans et la scène nomment.
 func test_double_salon_complet() -> void:
 	var model: Node = (load("res://art/models/double_salon.glb") as PackedScene).instantiate()
-	var names := ["Noel", "EcranHockey", "EcranFilm", "EcranNoir", "VueSalon", "SalleAManger", "Salon", "Lampe", "Ampoule",
-		"Plancher"]
+	var names := ["SalleAManger", "Salon", "Lampe", "Plancher"]
 	for piece: String in ["salle_a_manger", "salon", "fetes"]:
 		var m: RoomMap = grids(piece)[0]
 		names.append_array(m.data.get("cache", []))
+		names.append_array(m.data.get("montre", {}).keys())
+		names.append_array(m.data.get("cache_au", {}).keys())
+		names.append(str(m.data.get("vue", "")))
 		for s in m.stools:
 			names.append("Chaise_" + str(s.name))
 	for part: String in names:
