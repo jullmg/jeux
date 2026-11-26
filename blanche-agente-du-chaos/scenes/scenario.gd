@@ -22,7 +22,7 @@ func _ready() -> void:
 	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_NO_FOCUS, true)
 	DirAccess.make_dir_recursive_absolute(dir)
 	_run.call_deferred()
-	get_tree().create_timer(170.0, true, false, true).timeout.connect(func() -> void: main.quit_game(2))
+	get_tree().create_timer(400.0, true, false, true).timeout.connect(func() -> void: main.quit_game(2))
 
 
 func wait(seconds: float) -> void:
@@ -66,7 +66,11 @@ func _performance() -> void:
 	else:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
 	await wait(2.0)
-	for id: int in [1, 5, 8]:
+	var ids: Array = [1, 8, 9, 12, 13, 14, 15]
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--perf="):
+			ids = Array(a.get_slice("=", 1).split(",")).map(func(s: String) -> int: return int(s))
+	for id: int in ids:
 		var begin := Time.get_ticks_usec()
 		play(id, "equilibre", 40 + id)
 		await get_tree().process_frame

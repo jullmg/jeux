@@ -256,7 +256,7 @@ func _build_lights() -> void:
 	_tv_light = OmniLight3D.new()
 	_tv_light.position = Vector3(-0.85, 1.5, 3.45)
 	_tv_light.light_color = Color(0.78, 0.88, 1.0)
-	_tv_light.omni_range = 4.6
+	_tv_light.omni_range = 3.9
 	_tv_light.light_energy = 0.0
 	add_child(_tv_light)
 
@@ -473,7 +473,15 @@ func _update_mask(delta: float) -> void:
 		if on:
 			sum += _mask_points[i]
 			cells += 1
-	_mask_center = sum / cells if cells > 12 else Vector2.INF
+	_mask_center = Vector2.INF
+	if cells > 12:
+		# L'œil se pose sur une case cachée (au party, il y a deux cachettes : le milieu des deux serait à découvert).
+		var mid := sum / cells
+		var best := INF
+		for i in _mask_index.size():
+			if _mask_bytes[_mask_index[i]] > 0 and _mask_points[i].distance_squared_to(mid) < best:
+				best = _mask_points[i].distance_squared_to(mid)
+				_mask_center = _mask_points[i]
 	_mask_image.set_data(_mask_image.get_width(), _mask_image.get_height(), false, Image.FORMAT_R8, _mask_bytes)
 	_mask_texture.update(_mask_image)
 
@@ -859,7 +867,8 @@ func _show_mom(delta: float) -> void:
 		return
 	# Assise à son poste (sauf pendant un but : Papa saute debout), on la montre sur son siège.
 	var st: Dictionary = map.stations[sim.station]
-	var seated := sim.mom_seated() and sim.activity != "but"
+	# Pendant le but (et seulement pendant), Papa saute debout ; le regard qui suit, il le fait assis.
+	var seated := sim.mom_seated() and not (sim.mom_state == Sim.Mom.BUSY and sim.activity == "but")
 	mom.seat_y = st.seat_y if seated else 0.0
 	var shown_at: Vector2 = st.hips if seated else _smooth("maman", sim.mom_pos)
 	if not was:
@@ -1014,10 +1023,12 @@ func _show_furniture(delta: float) -> void:
 	# La télé éclaire la pièce : par éclats pendant le film (la même lumière que celle des règles), plus doucement au hockey.
 	var tv := 0.0
 	if _tv_on and _room_node != _kitchen:
-		tv = 0.35 + 0.12 * sin(_time * 7.0) * sin(_time * 2.3)
+		tv = 0.35 + (0.0 if reduced_motion else 0.12 * sin(_time * 7.0) * sin(_time * 2.3))
 		if sim != null and sim.level.has("dark"):
 			tv = lerpf(0.25, 2.6, sim.tv_light)
 	_tv_light.light_energy = lerpf(_tv_light.light_energy, tv, 1.0 - exp(-delta * 10.0))
+	# Éteinte, elle ne coûte rien.
+	_tv_light.visible = _tv_light.light_energy > 0.01
 	_wobble = maxf(0.0, _wobble - delta * 1.4)
 	if _stool and _room_node == _kitchen:
 		_stool.rotation.z = sin(_time * 24.0) * 0.14 * _wobble

@@ -3,7 +3,9 @@
 Maman cuisine, le comptoir est plein, et Blanche est dans son coin… pour l'instant. Attrape de la nourriture quand
 Maman a le dos tourné. Si elle te prend en flagrant délit : **AU COIN !**
 
-Un jeu 3D pour Mac (Godot 4.7, modèles Blender), de 9 à 99 ans. Huit missions, une par repas.
+Un jeu 3D pour Mac (Godot 4.7, modèles Blender), de 9 à 99 ans. Quinze missions, une par repas, dans trois pièces :
+la cuisine (1 à 8), la salle à manger (9 à 12), le salon (13 et 14), puis le party des Fêtes dans les deux pièces
+réunies (15).
 
 ## Jouer
 
@@ -35,6 +37,18 @@ Confidentialité et sécurité → Ouvrir quand même**.
 - La **méfiance de Maman** monte quand la nourriture disparaît ou qu'on fait du bruit : elle laisse alors moins de
   temps. Assise dans son coin, Blanche la calme.
 - Quand **Papa** est dans le chemin, ils se chicanent : c'est le temps d'en profiter.
+
+### Dans la salle à manger et le salon
+
+- **Sous la table**, couchée, personne debout ne te voit. Assis à table, on voit sous la table de son côté.
+- Ton coin, dans la salle à manger, c'est **ta cage** : « DANS TA CAGE ! ».
+- Maman fait des **allers-retours à la cuisine** : son retour s'annonce toujours (des pas, « J'arrive ! », une icône
+  à la porte).
+- **Charlotte** glisse des morceaux sous la table pour toi ; si Maman la voit, ça chicane.
+- **La visite** à table voit son côté de la table quand elle ne jase pas (un œil au-dessus de la tête : elle regarde).
+- Au salon, **Papa surveille** du divan ; sur la **table basse**, on attrape le nez tendu, plus vite ; juste derrière
+  le divan, il ne te voit pas. Un but des Canadiens : il saute de joie !
+- **Le noir** du film : on ne te voit pas au-delà du cercle de lumière de la télé, sauf les pattes en l'air.
 
 Options : volumes, plein écran, mouvements réduits, **indices plus longs** (un quart de seconde de plus).
 

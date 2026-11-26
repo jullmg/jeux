@@ -1,5 +1,20 @@
 # Journal des versions
 
+## 1.1.0-rc1 (2026-11-26) : la salle à manger et le salon
+
+- **Sept nouvelles missions** (9 à 15) : le brunch du dimanche, le souper en famille, la fête de Charlotte, le souper
+  des invités (demandé par Julien), la soirée du hockey, le film en famille et le party des Fêtes, qui réunit les deux
+  pièces et finit le jeu.
+- Nouveautés, une par mission : se cacher sous la table (la cage comme coin), Maman qui part à la cuisine et revient
+  toujours annoncée, Charlotte complice, la visite à table, Papa qui surveille du divan (table basse et cachette
+  derrière le divan), le noir éclairé par la télé, puis tout à la fois avec la visite qui circule.
+- La salle à manger et le salon en 3D d'après les photos, en ordre : un seul modèle, une caméra et une lumière par
+  pièce ; deux nouveaux personnages (ma tante et mon oncle, visages inventés) ; on s'assoit à table et au divan.
+- Vingt et une nouvelles nourritures et les images de leurs plats ; six nouveaux sons ; l'écran des missions a un
+  onglet par pièce.
+- Les missions 1 à 8 jouent exactement comme avant (essai de non-régression) ; une partie qui avait fini la cuisine
+  ouvre la salle à manger.
+
 ## 1.0.0-rc4 (2026-11-25) : fluidité
 
 - Le jeu saccadait sur les grands écrans (45 images/s en 3440×1440, 31 en plein écran sur le MacBook). La 3D est

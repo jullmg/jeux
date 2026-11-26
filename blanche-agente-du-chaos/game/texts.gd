@@ -64,7 +64,7 @@ const LONG_HINTS := "Indices plus longs"
 const ON := "Oui"
 const OFF := "Non"
 const CONTROLS_TEXT := "Se déplacer : flèches ou WASD · manette : stick ou croix · souris ou doigt : toucher le plancher\nAttraper : maintenir Espace · manette : A · bouton à l'écran\nLâcher ce qu'on a dans la gueule : appuyer de nouveau\nPause : Échap · manette : Start"
-const CREDITS_TEXT := "Blanche Pronovost agente du Chaos\n\nUne idée de Julien. Avec Blanche, Maman, Papa et Charlotte.\n\nModèles, sons et musiques fabriqués par script (Blender et synthèse).\nCode et art réalisés avec Claude.\n\nMoteur : Godot Engine (licence MIT).\nPolice : Fredoka (SIL Open Font License)."
+const CREDITS_TEXT := "Blanche Pronovost agente du Chaos\n\nUne idée de Julien. Avec Blanche, Maman, Papa et Charlotte,\net la visite : ma tante et mon oncle.\n\nModèles, sons et musiques fabriqués par script (Blender et synthèse).\nCode et art réalisés avec Claude.\n\nMoteur : Godot Engine (licence MIT).\nPolice : Fredoka (SIL Open Font License)."
 const AU_COIN := "AU COIN !"
 ## Dans la salle à manger, le coin, c'est la cage : la bannière dit parfois ceci.
 const DANS_TA_CAGE := "DANS TA CAGE !"

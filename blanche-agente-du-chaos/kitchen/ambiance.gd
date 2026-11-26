@@ -103,7 +103,7 @@ func _ready() -> void:
 	# Le double salon : le jour par la fenêtre du salon (au sud), la suspension de la salle à manger, la lampe sur pied,
 	# le plafonnier du salon et un peu de lumière dans le corridor.
 	_rig("double_salon", [Vector3(0.65, 2.75, 6.2), Vector3(0.1, 0.0, 1.2)], [Vector3(0.15, 1.78, -1.8),
-		Vector3(1.23, 1.45, 0.0), Vector3(0.0, 2.6, 1.9), Vector3(-2.3, 2.3, -0.4), Vector3(0.0, 2.6, -2.4)])
+		Vector3(1.23, 1.45, 0.0), Vector3(0.0, 2.6, 1.9), Vector3(-2.3, 2.3, -0.4)])
 	set_room("cuisine")
 	set_moment("matin")
 
@@ -124,7 +124,8 @@ func _rig(model: String, window: Array, lamps: Array) -> void:
 		var lamp := OmniLight3D.new()
 		lamp.position = at
 		lamp.light_color = Color(1.0, 0.80, 0.54)
-		lamp.omni_range = 3.0 if at.y > 2.0 or model != "cuisine" else 1.25
+		# Des portées courtes : chaque lampe n'éclaire que son coin (moins de lumières à calculer par point).
+		lamp.omni_range = (3.0 if at.y > 2.0 else 1.25) if model == "cuisine" else (2.6 if at.y > 2.0 else 2.2)
 		add_child(lamp)
 		list.append(lamp)
 	_rigs[model] = [spot, list]
@@ -176,6 +177,8 @@ func set_moment(name_: String) -> void:
 	_fill.light_energy = m.fill[1]
 	for lamp in _lamps:
 		lamp.light_energy = m.lamps * (1.0 if lamp.omni_range < 2.0 else 0.7)
+		# Éteinte (le film), une lampe ne coûte plus rien à l'écran.
+		lamp.visible = m.lamps > 0.0
 	_capture_reflections()
 
 

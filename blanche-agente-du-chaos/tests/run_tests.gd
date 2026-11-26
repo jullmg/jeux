@@ -958,6 +958,14 @@ func test_portee_dans_le_noir() -> void:
 	sim.mom_left = 9999.0
 	run(sim, 1.0)
 	check(sim.tv_light > 0.99 and is_equal_approx(sim.sight_range(), 4.0) and not sim.dog_hidden(), "scène claire : vue")
+	# Pendant l'indice non plus : ce qu'on voyait en se décidant reste vrai.
+	var hint := lab_in("salon", {"stations": ["divan_maman"], "dark": {"near": 1.4, "far": 4.0}, "feint_chance": 0.0})
+	hint.tv_light = 0.0
+	hint._tv_target = 1.0
+	hint._tv_left = 999.0
+	hint._hint("real", 0.6)
+	run(hint, 0.5)
+	check(hint.mom_state == Sim.Mom.HINT and hint.tv_light == 0.0, "la lumière ne monte pas pendant l'indice")
 	# Les pattes en l'air, jamais cachée, même dans le noir.
 	var up := lab_in("salon", {"stations": ["divan_maman"], "dark": {"near": 0.2, "far": 0.3}})
 	at(up, "piano")
@@ -1089,6 +1097,19 @@ func test_niveau_mal_ecrit() -> void:
 	level.seated = [{"who": "ginette", "seat": "sud_est", "role": "complice"}]
 	var problems := Levels.validate(level, m)
 	check(problems.size() >= 4, "problèmes trouvés : %s" % ", ".join(problems))
+
+
+## Au party, assise au divan, Maman ne lance pas le tour de la table à l'autre bout de la maison.
+func test_pas_de_tour_loin_de_la_table() -> void:
+	var sim := lab_in("fetes", {"stations": ["divan_maman"], "round_chance": 1.0, "feint_chance": 0.0})
+	sim.unseen_time = 9.0
+	sim.mom_left = 0.01
+	run(sim, 0.05)
+	check(sim.mom_state == Sim.Mom.HINT and sim.hint_kind == "real", "un vrai indice, pas un tour : %s" % sim.hint_kind)
+	var near := lab_in("salle_a_manger", {"stations": ["buffet"], "round_chance": 1.0, "feint_chance": 0.0})
+	near.mom_left = 0.01
+	run(near, 0.05)
+	check(near.hint_kind == "round", "près de la table, le tour a lieu")
 
 
 ## Les chaises grincent quand on fonce dedans, comme le tabouret.

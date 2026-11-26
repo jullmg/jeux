@@ -2,10 +2,8 @@
 
 Jeu 3D Godot 4.7 (Forward+ sur Mac, 1920×1080) : la chienne Blanche vole de la nourriture pendant que Maman cuisine.
 Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et décisions : `docs/etat.md` ; revues :
-`docs/revues.md` ; refonte graphique : `PROMPT-GRAPHIQUES.md` ; salle à manger et salon (missions 9 à 15, en cours :
-moteur et données faits, 3D, personnages, nourriture et interface à venir) : `PROMPT-PIECES.md`, photos dans
-`reference/photos-8/`. Version 1.0.0-rc4 : Mac d'abord, iPad et Android
-ensuite.
+`docs/revues.md` ; refonte graphique : `PROMPT-GRAPHIQUES.md` ; salle à manger et salon (missions 9 à 15) :
+`PROMPT-PIECES.md`, photos dans `reference/photos-8/`. Version 1.1.0-rc1 : Mac d'abord, iPad et Android ensuite.
 
 ## Vérifier
 
@@ -61,6 +59,11 @@ ensuite.
 - La méfiance (`Sim.suspicion`, constantes `WARY_*`) doit **se voir monter** dans toutes les missions (testé).
 - La chicane (`activity == "chicane"`) : Maman ne surveille pas ; ce qui suit repasse toujours par un indice. Quelqu'un
   d'immobile n'est pas un obstacle (`Sim.people_circles`), sinon Blanche peut rester coincée.
+- Salle à manger et salon : le **retour de la cuisine** s'annonce toujours (indice « retour » d'au moins `hint_min`,
+  puis elle apparaît dans la porte) ; **dans le noir**, les pattes en l'air sont toujours vues, et la lumière de la télé
+  ne monte jamais pendant un regard ; **assis, on n'est pas un obstacle** ; la chicane avec Charlotte (`_bust`) remplace
+  un regard et ce qui suit repasse par un indice ; aucune **poche** de plancher hors d'atteinte, même avec Maman à un de
+  ses postes (`test_aucune_poche`) : le revérifier si un plan change.
 - Après tout changement de règle : `tools/calibrate.py --games 400 --write-stars`, puis `tools/test.sh`.
 
 ## Art et son

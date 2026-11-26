@@ -667,7 +667,7 @@ func _end_window() -> void:
 		_hint("feint", FEINT_TIME)
 		return
 	var camping := unseen_time > 4.5
-	if float(level.round_chance) > 0.0 and (camping or rng.randf() < float(level.round_chance)):
+	if float(level.round_chance) > 0.0 and _ring_near() and (camping or rng.randf() < float(level.round_chance)):
 		unseen_time = 0.0
 		_hint("round", _hint_time() + 0.35)
 		return
@@ -717,6 +717,14 @@ func _start_walk(to: String, what: String, speed := MOM_WALK) -> void:
 		goal = map.mom_door
 	mom_path = mom_nav.path(mom_pos, goal)
 	_emit("walk", {"station": station})
+
+
+## Le tour ne part que d'un poste près de lui (au party, assise au divan, elle ne traverse pas le salon pour le faire).
+func _ring_near() -> bool:
+	for p in map.ring:
+		if mom_pos.distance_to(p) < 1.2:
+			return true
+	return false
 
 
 func _start_round() -> void:
@@ -1255,7 +1263,8 @@ func _step_tv(dt: float) -> void:
 		_tv_left = _tv_rng.randf_range(TV_SCENE_TIME[0], TV_SCENE_TIME[1])
 		_tv_target = TV_SCENES[_tv_rng.randi_range(0, TV_SCENES.size() - 1)]
 	var want := _tv_target
-	if (watching() or mom_state == Mom.TURN) and want > tv_light:
+	# Dès l'indice : ce que le joueur voit au moment de se décider reste vrai jusqu'à la fin du regard.
+	if (watching() or mom_state == Mom.TURN or mom_state == Mom.HINT) and want > tv_light:
 		want = tv_light
 	tv_light = move_toward(tv_light, want, dt / TV_RAMP)
 

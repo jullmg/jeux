@@ -95,6 +95,15 @@ souper avec des invités**.
 - La mission 1 annonce « AU COIN ! » dans ses consignes sans le jouer d'avance.
 - L'application n'est pas notariée (compte développeur Apple requis).
 
+## Questions pour Julien (salle à manger et salon)
+
+1. Les sept nouvelles missions et leur difficulté te conviennent-elles ? Le souper des invités est-il comme tu
+   l'imaginais (ma tante et mon oncle à table, qui disent ce qu'ils voient de leur côté) ?
+2. Le party des Fêtes montre les deux pièces d'un coup : tout y est plus petit. Est-ce assez lisible sur ton écran ?
+3. Dans le noir du film, le cercle de lumière au plancher est-il clair ? Veux-tu le noir plus noir ?
+4. Ressemblances : la salle à manger et le salon te semblent-ils les tiens (le mur ardoise, l'étagère, la cage, le
+   divan moutarde, le mur de cadres) ? Qu'est-ce qui manque le plus ?
+
 ## Questions pour Julien
 
 1. La nouvelle allure (rc3) te plaît-elle ? Les visages de Maman, Papa et Charlotte sont-ils assez ressemblants ?
