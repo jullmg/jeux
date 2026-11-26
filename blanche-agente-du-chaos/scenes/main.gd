@@ -41,6 +41,8 @@ var _fullscreen_applied := false
 var _result: Dictionary = {}
 var _nav: Nav
 var _mom_nav: Nav
+## Les grilles de déplacement de chaque pièce, faites une fois : pièce → [Nav, Nav].
+var _grids: Dictionary = {}
 var _ambient_left := 0.0
 var _chew_left := 0.0
 var _step_left := 0.0
@@ -70,9 +72,7 @@ func _ready() -> void:
 	stage = Stage.new()
 	stage.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(stage)
-	_nav = Sim.dog_grid(stage.map)
-	_mom_nav = Sim.mom_grid(stage.map)
-	_follower = Follower.new(_nav)
+	_use_piece("cuisine")
 	var hud_layer := CanvasLayer.new()
 	hud_layer.layer = 10
 	add_child(hud_layer)
@@ -190,12 +190,24 @@ func show_brief(id: int) -> void:
 	menus.show_brief(id)
 
 
+## Les grilles de déplacement d'une pièce (préparées une fois) et celui qui suit les doigts.
+func _use_piece(piece: String) -> void:
+	if not _grids.has(piece):
+		var m := stage.map_for(piece)
+		_grids[piece] = [Sim.dog_grid(m), Sim.mom_grid(m)]
+	_nav = _grids[piece][0]
+	_mom_nav = _grids[piece][1]
+	_follower = Follower.new(_nav)
+
+
 func start_level(id: int) -> void:
 	get_tree().paused = false
 	level_id = id
 	var level := Levels.load_level(id)
+	var piece := Levels.piece_of(level)
+	_use_piece(piece)
 	var seed_ := seed_override if seed_override >= 0 else _rng.randi()
-	sim = Sim.new(stage.map, level, seed_, _nav, _mom_nav)
+	sim = Sim.new(stage.map_for(piece), level, seed_, _nav, _mom_nav)
 	_apply_hints()
 	bot = Bot.new(sim, "equilibre", 0.35, 0.95, 3) if demo else null
 	_follower.clear()
@@ -304,7 +316,7 @@ func tap(screen: Vector2) -> void:
 	var best := Vector2.INF
 	var ground := stage.floor_point(screen)
 	# Dans la cachette, c'est le plancher qu'on vise : seul un morceau touché de près l'emporte.
-	var hiding := ground != Vector2.INF and stage.map.hidden_by_island(sim.mom_pos, ground, sim.mom_at_island())
+	var hiding := ground != Vector2.INF and sim.hidden_at(ground)
 	var best_d := 32.0 if hiding else 62.0
 	for item in sim.food:
 		var d := stage.on_screen(stage.item_position(item)).distance_to(screen)

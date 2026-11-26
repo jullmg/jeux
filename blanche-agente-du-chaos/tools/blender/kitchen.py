@@ -1,4 +1,4 @@
-"""La cuisine, d'après les photos, aux dimensions de data/kitchen.json.
+"""La cuisine, d'après les photos, aux dimensions de data/pieces/cuisine.json.
 
 Blender --background --python tools/blender/kitchen.py
 """
@@ -15,7 +15,7 @@ import bpy  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
 C.reset()
-PLAN = json.loads((C.ROOT / "data" / "kitchen.json").read_text())
+PLAN = json.loads((C.ROOT / "data" / "pieces" / "cuisine.json").read_text())
 OB = PLAN["obstacles"]
 H = PLAN["counter_height"]
 rng = random.Random(5)

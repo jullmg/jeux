@@ -5,18 +5,23 @@ extends SceneTree
 const DT := 1.0 / 60.0
 const TMP := "user://test_sauvegarde.json"
 
-var map: KitchenMap
+const PIECES := ["cuisine", "salle_a_manger", "salon", "fetes"]
+
+var map: RoomMap
 var nav: Nav
 var mom_nav: Nav
+## Les plans et les grilles de chaque pièce : pièce → [RoomMap, Nav, Nav].
+var pieces := {}
 var failures := 0
 var checks := 0
 var current := ""
 
 
 func _init() -> void:
-	map = KitchenMap.new()
+	map = RoomMap.new()
 	nav = Sim.dog_grid(map)
 	mom_nav = Sim.mom_grid(map)
+	pieces["cuisine"] = [map, nav, mom_nav]
 	var filter := ""
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--filtre="):
@@ -59,8 +64,46 @@ func lab(overrides := {}) -> Sim:
 	return sim
 
 
+## Les plans et grilles d'une pièce, faits une fois.
+func grids(piece: String) -> Array:
+	if not pieces.has(piece):
+		var m := RoomMap.new(piece)
+		pieces[piece] = [m, Sim.dog_grid(m), Sim.mom_grid(m)]
+	return pieces[piece]
+
+
+## Une partie dans le niveau `id`, sur le plan de sa pièce.
+func game(id: int, seed_: int) -> Sim:
+	var level := Levels.load_level(id)
+	var g := grids(Levels.piece_of(level))
+	return Sim.new(g[0], level, seed_, g[1], g[2])
+
+
+## Un laboratoire dans une autre pièce : `overrides` doit donner ses postes.
+func lab_in(piece: String, overrides := {}) -> Sim:
+	var g := grids(piece)
+	var m: RoomMap = g[0]
+	var level := Levels.load_level(1)
+	level.piece = piece
+	level.spots = m.spots.keys()
+	level.noisy_spots = []
+	level.helpers = []
+	level.spawn = [9999.0, 9999.0]
+	level.treasure_at = 2.0
+	level.max_items = 20
+	level.duration = 9999
+	level.erase("tutorial")
+	for k: String in overrides:
+		level[k] = overrides[k]
+	var sim := Sim.new(m, level, 3, g[1], g[2])
+	sim.food.clear()
+	sim.mom_left = 9999.0
+	sim.drain_events()
+	return sim
+
+
 func put(sim: Sim, size: int, spot: String) -> Dictionary:
-	return sim._add_item(size, spot, map.spots[spot].food)
+	return sim._add_item(size, spot, sim.map.spots[spot].food)
 
 
 func run(sim: Sim, seconds: float, move := Vector2.ZERO, grab := false) -> void:
@@ -71,7 +114,7 @@ func run(sim: Sim, seconds: float, move := Vector2.ZERO, grab := false) -> void:
 
 
 func at(sim: Sim, spot: String) -> void:
-	sim.dog_pos = map.spots[spot].stand
+	sim.dog_pos = sim.map.spots[spot].stand
 
 
 func force_look(sim: Sim) -> void:
@@ -88,57 +131,97 @@ func types(sim: Sim) -> Array:
 func test_niveaux_valides() -> void:
 	for id in range(1, Levels.COUNT + 1):
 		var level := Levels.load_level(id)
-		var problems := Levels.validate(level, map)
+		var problems := Levels.validate(level, grids(Levels.piece_of(level))[0])
 		check(problems.is_empty(), "niveau %d : %s" % [id, ", ".join(problems)])
 		check(int(level.id) == id, "numéro du niveau %d" % id)
+	# L'indice raccourcit d'une mission à l'autre ; il remonte un peu au début d'une nouvelle pièce.
 	for id in range(2, Levels.COUNT + 1):
-		check(Levels.load_level(id).hint_min < Levels.load_level(id - 1).hint_min, "indice plus court au niveau %d" % id)
+		var level := Levels.load_level(id)
+		var before := Levels.load_level(id - 1)
+		if Levels.piece_of(level) == Levels.piece_of(before) or id == Levels.COUNT:
+			check(level.hint_min < before.hint_min, "indice plus court au niveau %d" % id)
+	var last := Levels.load_level(Levels.COUNT)
+	for id in range(1, Levels.COUNT):
+		check(float(last.hint_min) <= float(Levels.load_level(id).hint_min), "la dernière mission a l'indice le plus court")
 
 
 func test_endroits_libres() -> void:
-	check(map.is_free(map.corner, Sim.DOG_RADIUS), "le coin est libre")
-	for id: String in map.spots:
-		check(map.is_free(map.spots[id].stand, Sim.DOG_RADIUS - 0.01), "place libre : " + id)
-	for id: String in map.stations:
-		check(map.is_free(map.stations[id].pos, Sim.MOM_RADIUS - 0.02), "poste libre : " + id)
+	for piece: String in PIECES:
+		var m: RoomMap = grids(piece)[0]
+		check(m.is_free(m.corner, Sim.DOG_RADIUS), piece + " : le coin est libre")
+		for id: String in m.spots:
+			check(m.is_free(m.spots[id].stand, Sim.DOG_RADIUS - 0.01), "%s : place libre : %s" % [piece, id])
+			check(m.room.has_point(m.spots[id].food), "%s : nourriture dans la pièce : %s" % [piece, id])
+		for id: String in m.stations:
+			var st: Dictionary = m.stations[id]
+			# Assise, on est sur sa chaise ; sortie, on est hors de la pièce.
+			if not st.seated and not st.outside:
+				check(m.is_free(st.pos, Sim.MOM_RADIUS - 0.02), "%s : poste libre : %s" % [piece, id])
+			check(st.outside != m.room.has_point(st.pos), "%s : poste %s du bon côté de la porte" % [piece, id])
+		for p: Vector2 in m.ring:
+			check(m.is_free(p, Sim.MOM_RADIUS - 0.02), "%s : tour libre en %s" % [piece, p])
+		if m.mom_door != Vector2.INF:
+			check(m.is_free(m.mom_door, Sim.MOM_RADIUS - 0.02), piece + " : la porte de Maman est libre")
+		for name_: String in m.data.get("waypoints", {}):
+			check(m.is_free(RoomMap.vec(m.data.waypoints[name_]), Sim.HELPER_RADIUS), "%s : passage %s" % [piece, name_])
+		for id: String in m.seats:
+			check(m.seats[id].chair >= 0 or m.room.has_point(m.seats[id].pos), "%s : place %s" % [piece, id])
 
 
 func test_chemins_vers_chaque_endroit() -> void:
-	for id: String in map.spots:
-		var goal: Vector2 = map.spots[id].stand
-		var path := nav.path(map.corner, goal)
-		check(not path.is_empty() and path[path.size() - 1].distance_to(goal) < 0.15, "coin → " + id)
+	for piece: String in PIECES:
+		var m: RoomMap = grids(piece)[0]
+		var n: Nav = grids(piece)[1]
+		for id: String in m.spots:
+			var goal: Vector2 = m.spots[id].stand
+			var path := n.path(m.corner, goal)
+			check(not path.is_empty() and path[path.size() - 1].distance_to(goal) < 0.15, "%s : coin → %s" % [piece, id])
+			var back := n.path(goal, m.corner)
+			check(not back.is_empty() and back[back.size() - 1].distance_to(m.corner) < 0.15, "%s : %s → coin" % [piece, id])
 
 
 func test_maman_ne_coince_jamais() -> void:
-	# Quel que soit son poste, tout endroit qu'elle n'occupe pas reste accessible et on peut en revenir.
-	for station: String in map.stations:
-		var blocker := [[map.stations[station].pos, Sim.MOM_RADIUS]]
-		for id: String in map.spots:
-			var goal: Vector2 = map.spots[id].stand
-			if goal.distance_to(map.stations[station].pos) < Sim.MOM_RADIUS + Sim.DOG_RADIUS:
-				continue
-			var path := nav.path(map.corner, goal, blocker)
-			check(not path.is_empty() and path[path.size() - 1].distance_to(goal) < 0.2,
-				"Maman à %s : coin → %s" % [station, id])
+	# Quel que soit son poste, tout endroit qu'elle n'occupe pas reste accessible et on peut en revenir. Assise ou
+	# sortie, elle n'est pas un obstacle ; dans la porte, elle en est un.
+	for piece: String in PIECES:
+		var m: RoomMap = grids(piece)[0]
+		var n: Nav = grids(piece)[1]
+		var places: Dictionary = {}
+		for station: String in m.stations:
+			var st: Dictionary = m.stations[station]
+			if not st.seated and not st.outside:
+				places[station] = st.pos
+		if m.mom_door != Vector2.INF:
+			places["porte"] = m.mom_door
+		for p: Vector2 in m.ring:
+			places["tour %s" % p] = p
+		for where: String in places:
+			var blocker := [[places[where], Sim.MOM_RADIUS]]
+			for id: String in m.spots:
+				var goal: Vector2 = m.spots[id].stand
+				if goal.distance_to(places[where]) < Sim.MOM_RADIUS + Sim.DOG_RADIUS:
+					continue
+				var path := n.path(m.corner, goal, blocker)
+				check(not path.is_empty() and path[path.size() - 1].distance_to(goal) < 0.2,
+					"%s : Maman à %s : coin → %s" % [piece, where, id])
 
 
 func test_cachette() -> void:
 	var stove: Vector2 = map.stations.cuisiniere.pos
 	var south := Vector2(0.02, 0.8)
-	check(map.hidden_by_island(stove, south), "derrière l'îlot, vu de la cuisinière")
-	check(not map.hidden_by_island(stove, Vector2(1.1, 0.4)), "à côté de l'îlot : visible")
-	check(not map.hidden_by_island(stove, Vector2(0.0, 1.9)), "trop loin derrière : visible")
-	check(map.hidden_by_island(map.stations.evier.pos, Vector2(-0.65, 0.0)) \
-		or map.hidden_by_island(map.stations.evier.pos, Vector2(-0.62, 0.2)), "la cachette se déplace vers l'ouest")
-	check(not map.hidden_by_island(map.stations.telephone.pos, south), "le sud n'est plus caché depuis le téléphone")
+	check(map.hidden(stove, south), "derrière l'îlot, vu de la cuisinière")
+	check(not map.hidden(stove, Vector2(1.1, 0.4)), "à côté de l'îlot : visible")
+	check(not map.hidden(stove, Vector2(0.0, 1.9)), "trop loin derrière : visible")
+	check(map.hidden(map.stations.evier.pos, Vector2(-0.65, 0.0)) \
+		or map.hidden(map.stations.evier.pos, Vector2(-0.62, 0.2)), "la cachette se déplace vers l'ouest")
+	check(not map.hidden(map.stations.telephone.pos, south), "le sud n'est plus caché depuis le téléphone")
 	var from: Vector2 = map.stations.ilot.pos
 	var count := [0, 0]
 	for x in range(-20, 21):
 		for z in range(-20, 21):
 			var p := Vector2(x, z) * 0.08
-			count[0] += int(map.hidden_by_island(from, p, false))
-			count[1] += int(map.hidden_by_island(from, p, true))
+			count[0] += int(map.hidden(from, p, ""))
+			count[1] += int(map.hidden(from, p, "ilot"))
 	check(count[1] > 0 and count[1] < count[0], "à l'îlot, la cachette rapetisse : %s" % str(count))
 
 
@@ -295,7 +378,7 @@ func test_cachee_elle_le_reste_pendant_un_regard() -> void:
 			for z in range(-22, 23):
 				var p := Vector2(x, z) * 0.08
 				if spot == Vector2.INF and map.is_free(p, Sim.DOG_RADIUS) and p.distance_to(sim.mom_pos) > 0.6 \
-						and map.hidden_by_island(sim.mom_pos, p, station == "ilot"):
+						and map.hidden(sim.mom_pos, p, "ilot" if station == "ilot" else ""):
 					spot = p
 		if spot == Vector2.INF:
 			continue
@@ -490,7 +573,7 @@ func test_toute_surveillance_suit_un_indice() -> void:
 	for id in range(1, Levels.COUNT + 1):
 		var level := Levels.load_level(id)
 		for g in 6:
-			var sim := Sim.new(map, level, 40 + g, nav, mom_nav)
+			var sim := game(id, 40 + g)
 			var bot := Bot.new(sim, ["equilibre", "tetu", "campeur"][g % 3], 0.3, 0.9, g)
 			var previous := sim.mom_state
 			var hint_start := -1.0
@@ -517,7 +600,7 @@ func test_toute_surveillance_suit_un_indice() -> void:
 						check(hint_len >= float(level.hint_min) - DT * 1.5,
 							"niveau %d : indice de %.3f s sous %.2f" % [id, hint_len, level.hint_min])
 					if now == Sim.Mom.TURN:
-						check(kind == "real", "niveau %d : demi-tour après une feinte" % id)
+						check(kind == "real" or kind == "retour", "niveau %d : demi-tour après une feinte" % id)
 				previous = now
 	for type: String in ["hint", "look", "walk", "round", "surprise", "noise", "feint_end", "caught", "distract",
 			"snitch", "snitch_call", "papa_drop", "argue", "treasure", "meal_ready", "dropped", "corner_arrive"]:
@@ -547,7 +630,7 @@ func test_bruit_referme_la_fenetre() -> void:
 func test_tabouret() -> void:
 	for noisy: bool in [true, false]:
 		var sim := lab({"noise": noisy})
-		sim.dog_pos = map.stool_pos + Vector2(0.0, 0.6)
+		sim.dog_pos = map.stools[0].pos + Vector2(0.0, 0.6)
 		run(sim, 0.6, Vector2.UP)
 		check(types(sim).has("noise") == noisy, "tabouret bruyant : %s" % noisy)
 
@@ -581,7 +664,7 @@ func test_mefiance_visible() -> void:
 	crumb._take(put(crumb, Sim.Size.CRUMB, "nord_gauche"))
 	check(crumb.suspicion == 0.0, "une miette ne se remarque pas")
 	# Et pendant une vraie partie, même la première mission la fait monter nettement.
-	var map := KitchenMap.new()
+	var map := RoomMap.new()
 	var peaks := 0.0
 	for g in 10:
 		var sim := Sim.new(map, Levels.load_level(1), 100 + g)
@@ -640,7 +723,7 @@ func test_robot_sage_jamais_pris() -> void:
 		var reaction: float = minf(0.45, float(level.hint_min) - 0.02)
 		var caught := 0
 		for g in 8:
-			var sim := Sim.new(map, level, 700 + g, nav, mom_nav)
+			var sim := game(id, 700 + g)
 			var bot := Bot.new(sim, "sage", reaction, 1.0, g)
 			while not sim.over:
 				bot.step(DT)
@@ -678,6 +761,276 @@ func test_toujours_dans_la_piece() -> void:
 		if not map.is_free(sim.dog_pos, Sim.DOG_RADIUS - 0.03) and sim.dog_state == Sim.Dog.FREE:
 			bad += 1
 	check(bad == 0, "Blanche dans un meuble %d fois" % bad)
+
+
+# ------------------------------------------------------------------ salle à manger et salon
+
+## Sous la table : personne debout ne voit Blanche ; assis, on voit seulement la moitié de son côté.
+func test_sous_la_table() -> void:
+	var m: RoomMap = grids("salle_a_manger")[0]
+	var middle := Vector2(0.15, -1.8)
+	var north := Vector2(0.15, -2.05)
+	var south := Vector2(0.15, -1.55)
+	var standing: Vector2 = m.stations.buffet.pos
+	check(m.hidden(standing, middle) and m.hidden(standing, north) and m.hidden(standing, south), "debout : cachée")
+	check(m.hidden(m.stations.servir.pos, north), "debout, tout près de la table : cachée")
+	check(not m.hidden(standing, Vector2(1.2, -0.9)), "hors de la table : visible")
+	check(not m.hidden(standing, Vector2(0.15, -2.23)), "au bord de la table : visible")
+	var seated_north: Vector2 = m.seats.nord_ouest.pos
+	check(not m.hidden(seated_north, north, "", true) and m.hidden(seated_north, south, "", true), "assis au nord")
+	var seated_south: Vector2 = m.seats.sud_est.pos
+	check(m.hidden(seated_south, north, "", true) and not m.hidden(seated_south, south, "", true), "assis au sud")
+	# Dans une partie : sous la table, la gueule pleine, Maman debout la regarde et ne voit rien…
+	var sim := lab_in("salle_a_manger", {"stations": ["buffet"]})
+	sim.dog_pos = middle
+	sim.mouth = {"id": 99, "size": 2, "points": 150, "eat_left": 999.0, "spot": "", "pos": Vector2.ZERO}
+	force_look(sim)
+	run(sim, 0.5)
+	check(sim.dog_hidden() and sim.caught_count == 0, "sous la table, jamais prise par qui est debout")
+	# … mais assise du même côté, elle la voit.
+	var seated := lab_in("salle_a_manger", {"stations": ["assise"]})
+	seated.dog_pos = south
+	seated.mouth = sim.mouth.duplicate()
+	check(seated.mom_low() and not seated.dog_hidden(), "assise, Maman voit sous la table de son côté")
+	force_look(seated)
+	run(seated, 0.3)
+	check(seated.caught_count == 1, "prise de son côté")
+	# Les pattes sur la table, jamais cachée.
+	var up := lab_in("salle_a_manger", {"stations": ["buffet"]})
+	at(up, "table_nord")
+	put(up, Sim.Size.BIG, "table_nord")
+	run(up, 0.3, Vector2.ZERO, true)
+	check(up.paws_up() and not up.dog_hidden(), "les pattes sur la table, visible")
+
+
+## Derrière le divan : Papa assis ne voit pas ce qui est juste derrière lui.
+func test_derriere_le_divan() -> void:
+	var m: RoomMap = grids("salon")[0]
+	var papa: Vector2 = m.stations.divan_papa.pos
+	check(m.hidden(papa, Vector2(0.1, 0.3)), "juste derrière le divan : cachée")
+	check(not m.hidden(papa, Vector2(0.15, 1.9)), "devant le divan : visible")
+	check(not m.hidden(papa, Vector2(1.45, 1.8)), "à côté du divan : visible")
+	var sim := lab_in("salon", {"watcher": "papa", "stations": ["divan_papa"]})
+	check(sim.watcher == "papa" and sim.mom_low(), "Papa surveille, assis")
+	check(sim.people_circles().is_empty(), "assis, il n'est pas un obstacle")
+	sim.dog_pos = Vector2(0.1, 0.3)
+	sim.mouth = {"id": 99, "size": 2, "points": 150, "eat_left": 999.0, "spot": "", "pos": Vector2.ZERO}
+	force_look(sim)
+	run(sim, 0.5)
+	check(sim.caught_count == 0, "cachée derrière le divan pendant qu'il regarde")
+
+
+## Sur la table basse, on attrape le nez tendu : plus vite, et jamais cachée.
+func test_table_basse() -> void:
+	var sim := lab_in("salon", {"watcher": "papa", "stations": ["divan_papa"]})
+	at(sim, "table_basse_nord")
+	var item := put(sim, Sim.Size.SMALL, "table_basse_nord")
+	check(is_equal_approx(sim.grab_time(item), Sim.GRAB_TIMES[Sim.Size.SMALL] * Sim.LOW_GRAB), "plus vite")
+	run(sim, 0.3, Vector2.ZERO, true)
+	check(sim.dog_state == Sim.Dog.REACHING and sim.paws_up() and not sim.dog_hidden(), "le nez tendu, visible")
+	run(sim, Sim.GRAB_TIMES[Sim.Size.SMALL] * Sim.LOW_GRAB - 0.2, Vector2.ZERO, true)
+	check(not sim.mouth.is_empty(), "attrapé avant le temps d'un comptoir")
+
+
+## Papa surveille du divan ; un but est une très longue fenêtre, mais soudaine.
+func test_papa_surveille() -> void:
+	var sim := lab_in("salon", {"watcher": "papa", "stations": ["divan_papa"], "surprise_chance": 1.0,
+		"surprise": {"activity": "but"}, "feint_chance": 0.0})
+	sim.time = 20.0
+	sim.mom_state = Sim.Mom.TURN_BACK
+	sim._set_timer(0.01)
+	run(sim, 0.05)
+	check(sim.activity == "but" and sim.station == "divan_papa", "il fête le but, sans bouger")
+	check(sim.mom_left > 5.0, "une très longue fenêtre (%.1f s)" % sim.mom_left)
+
+
+## Maman part à la cuisine : on ne la voit plus, et son retour s'annonce toujours.
+func test_maman_sort_et_revient() -> void:
+	var sim := lab_in("salle_a_manger", {"stations": ["servir", "cuisine"], "feint_chance": 0.0, "round_chance": 0.0,
+		"surprise_chance": 0.0, "serve": true, "spawn": [9999.0, 9999.0], "max_items": 6})
+	sim._start_walk("cuisine", "cuisine")
+	var out := false
+	for i in 900:
+		sim.step(DT, Vector2.ZERO, false)
+		if sim.mom_out:
+			out = true
+			break
+	check(out and types(sim).has("out"), "elle sort par la porte")
+	check(sim.people_circles().is_empty() and not sim.watching(), "sortie, elle ne voit rien et ne gêne pas")
+	at(sim, "table_est")
+	put(sim, Sim.Size.SMALL, "table_est")
+	sim.mom_left = 0.01
+	run(sim, 0.05)
+	check(sim.mom_state == Sim.Mom.HINT and sim.hint_kind == "retour" and sim.warning(), "son retour s'annonce")
+	var start := sim.time
+	while sim.mom_state == Sim.Mom.HINT:
+		sim.step(DT, Vector2.ZERO, false)
+	check(sim.time - start >= float(sim.level.hint_min) + Sim.RETURN_EXTRA - DT, "au moins l'indice minimal")
+	check(sim.mom_state == Sim.Mom.TURN and not sim.mom_out and sim.mom_pos == sim.map.mom_door, "la voilà dans la porte")
+	check(types(sim).has("back_in"), "événement d'entrée")
+	while sim.mom_state != Sim.Mom.WALK:
+		sim.step(DT, Vector2.ZERO, false)
+	var served := false
+	for i in 900:
+		sim.step(DT, Vector2.ZERO, false)
+		served = served or types(sim).has("served")
+		if sim.mom_state == Sim.Mom.BUSY:
+			break
+	check(sim.station == "servir" and served, "elle entre et pose un plat")
+	# La visite qui l'appelle la fait revenir de la cuisine.
+	var called := lab_in("salle_a_manger", {"stations": ["servir", "cuisine"], "feint_chance": 0.0,
+		"seated": [{"who": "tante", "seat": "nord_est", "role": "temoin"}]})
+	called._start_walk("cuisine", "cuisine")
+	for i in 900:
+		called.step(DT, Vector2.ZERO, false)
+		if called.mom_out:
+			break
+	called.mom_left = 9999.0
+	var guest: Dictionary = called.seated[0]
+	guest.state = "regarde"
+	guest.t = 99.0
+	at(called, "table_nord")
+	put(called, Sim.Size.BIG, "table_nord")
+	run(called, 1.2, Vector2.ZERO, true)
+	check(called.mom_state == Sim.Mom.HINT and called.hint_kind == "retour", "appelée, elle revient (annoncée)")
+
+
+## Dans le noir, on ne voit pas loin, sauf aux scènes claires ; la lumière ne monte pas pendant un regard.
+func test_portee_dans_le_noir() -> void:
+	var sim := lab_in("salon", {"stations": ["divan_maman"], "dark": {"near": 1.4, "far": 4.0}})
+	sim.tv_light = 0.0
+	sim._tv_target = 0.0
+	sim._tv_left = 999.0
+	check(is_equal_approx(sim.sight_range(), 1.4), "portée dans une scène sombre")
+	sim.dog_pos = Vector2(-1.2, 3.1)
+	sim.mouth = {"id": 99, "size": 2, "points": 150, "eat_left": 999.0, "spot": "", "pos": Vector2.ZERO}
+	check(sim.dog_pos.distance_to(sim.mom_pos) > 1.4 and sim.dog_hidden(), "loin, dans le noir : cachée")
+	sim._tv_target = 1.0
+	force_look(sim)
+	run(sim, 1.0)
+	check(sim.tv_light == 0.0 and sim.caught_count == 0, "la lumière ne monte pas pendant qu'elle regarde")
+	sim.mom_state = Sim.Mom.BUSY
+	sim.mom_left = 9999.0
+	run(sim, 1.0)
+	check(sim.tv_light > 0.99 and is_equal_approx(sim.sight_range(), 4.0) and not sim.dog_hidden(), "scène claire : vue")
+	# Les pattes en l'air, jamais cachée, même dans le noir.
+	var up := lab_in("salon", {"stations": ["divan_maman"], "dark": {"near": 0.2, "far": 0.3}})
+	at(up, "piano")
+	put(up, Sim.Size.BIG, "piano")
+	run(up, 0.3, Vector2.ZERO, true)
+	check(up.paws_up() and not up.dog_hidden(), "dressée dans le noir : visible")
+
+
+## Charlotte glisse des morceaux sous la table, de son côté ; si Maman la voit faire, c'est la chicane.
+func test_charlotte_complice() -> void:
+	var sim := lab_in("salle_a_manger", {"stations": ["servir"],
+		"seated": [{"who": "charlotte", "seat": "sud_est", "role": "complice"}]})
+	var slipped: Dictionary = {}
+	for i in 1200:
+		sim.step(DT, Vector2.ZERO, false)
+		for e in sim.drain_events():
+			if e.type == "slip":
+				slipped = e.item
+		if not slipped.is_empty():
+			break
+	var table: Rect2 = sim.map.hides[0].rect
+	check(not slipped.is_empty() and table.has_point(slipped.pos) and slipped.pos.y > table.get_center().y,
+		"un morceau sous la table, du côté de Charlotte")
+	check(sim.map.hidden(sim.mom_pos, slipped.pos), "un morceau peu risqué : caché de qui est debout")
+	var charlotte: Dictionary = sim.seated[0]
+	charlotte.state = "slip"
+	charlotte.t = 1.0
+	sim.mom_state = Sim.Mom.TURN
+	sim._set_timer(0.02)
+	at(sim, "table_est")
+	put(sim, Sim.Size.BIG, "table_est")
+	sim.dog_state = Sim.Dog.REACHING
+	sim.reach_item = sim.food.back()
+	var events := []
+	for i in 10:
+		sim.step(DT, Vector2.ZERO, true)
+		events.append_array(types(sim))
+	check(events.has("busted") and sim.activity == "chicane" and sim.chicane_with == "charlotte", "la chicane")
+	check(sim.caught_count == 0 and not sim.watching(), "Maman ne regarde plus que Charlotte")
+	var next_look := false
+	var hinted := false
+	for i in 1200:
+		sim.step(DT, Vector2.ZERO, false)
+		for e in sim.drain_events():
+			if e.type == "hint" and e.kind != "feint":
+				hinted = true
+			if e.type == "look":
+				next_look = true
+		if next_look:
+			break
+	check(next_look and hinted, "après la chicane, un indice avant de regarder")
+
+
+## La visite assise ne voit que son côté de la table, et seulement quand elle ne jase pas.
+func test_visite_a_table() -> void:
+	var sim := lab_in("salle_a_manger", {"stations": ["buffet"],
+		"seated": [{"who": "tante", "seat": "nord_est", "role": "temoin"}]})
+	var guest: Dictionary = sim.seated[0]
+	guest.state = "jase"
+	guest.t = 99.0
+	at(sim, "table_nord")
+	put(sim, Sim.Size.TREASURE, "table_nord")
+	run(sim, 1.5, Vector2.ZERO, true)
+	check(not types(sim).has("snitch"), "elle jase : elle ne voit rien")
+	var far := lab_in("salle_a_manger", {"stations": ["buffet"],
+		"seated": [{"who": "tante", "seat": "nord_est", "role": "temoin"}]})
+	far.seated[0].state = "regarde"
+	far.seated[0].t = 99.0
+	at(far, "table_ouest")
+	put(far, Sim.Size.TREASURE, "table_ouest")
+	run(far, 1.5, Vector2.ZERO, true)
+	check(not types(far).has("snitch"), "l'autre bout de la table : elle ne voit pas")
+	var near := lab_in("salle_a_manger", {"stations": ["buffet"],
+		"seated": [{"who": "tante", "seat": "nord_est", "role": "temoin"}]})
+	near.seated[0].state = "regarde"
+	near.seated[0].t = 99.0
+	at(near, "table_nord")
+	put(near, Sim.Size.TREASURE, "table_nord")
+	run(near, 0.4, Vector2.ZERO, true)
+	var first := types(near)
+	check(first.has("snitch") and not first.has("snitch_call"), "« Hon ! » d'abord")
+	run(near, 0.7, Vector2.ZERO, true)
+	check(types(near).has("snitch_call") and near.mom_state == Sim.Mom.HINT and near.caught_count == 0,
+		"puis elle appelle : un vrai indice, le temps de redescendre")
+
+
+## La visite qui circule va d'un endroit à l'autre sans traverser les meubles, et voit ce qui se passe.
+func test_visite_qui_circule() -> void:
+	var sim := lab_in("fetes", {"stations": ["servir"], "walkers": [{"who": "oncle", "start": "entree",
+		"points": ["entree", "lampe", "milieu", "salon_ouest", "salon_est", "sdm_sud"]}]})
+	var bad := 0
+	var walked := 0.0
+	var last: Vector2 = sim.walkers[0].pos
+	for i in 6000:
+		sim.step(DT, Vector2.ZERO, false)
+		var w: Dictionary = sim.walkers[0]
+		walked += w.pos.distance_to(last)
+		last = w.pos
+		if not sim.map.is_free(w.pos, Sim.HELPER_RADIUS - 0.05):
+			bad += 1
+	check(walked > 5.0 and bad == 0, "elle circule (%.1f m) sans traverser les meubles (%d)" % [walked, bad])
+
+
+## Les chaises grincent quand on fonce dedans, comme le tabouret.
+func test_chaise_grince() -> void:
+	var sim := lab_in("salle_a_manger", {"stations": ["buffet"], "noise": true})
+	var chair: Vector2 = sim.map.stools[0].pos
+	sim.dog_pos = chair + Vector2(-0.6, 0.0)
+	run(sim, 0.6, Vector2.RIGHT)
+	var noisy := sim.drain_events().filter(func(e: Dictionary) -> bool: return e.type == "noise")
+	check(noisy.size() == 1 and noisy[0].what == "chaise" and noisy[0].index == 0, "la chaise grince")
+
+
+## Une partie qui avait fini la cuisine ouvre la suite.
+func test_deblocage_apres_la_cuisine() -> void:
+	write_tmp("{\"version\":1,\"unlocked\":8,\"stars\":{\"8\":1},\"best\":{\"8\":1200}}")
+	var s := SaveData.new(TMP)
+	check(s.unlocked == mini(Levels.COUNT, 9), "la mission suivante est ouverte (%d)" % s.unlocked)
 
 
 # ------------------------------------------------------------------ sauvegarde
@@ -790,5 +1143,7 @@ func test_tous_les_sons_existent() -> void:
 func test_textes_complets() -> void:
 	for activity: String in Sim.ACTIVITY_WINDOWS:
 		check(Texts.ACTIVITY.has(activity), "activité sans texte : " + activity)
-	for id: String in map.stations:
-		check(Sim.ACTIVITY_WINDOWS.has(map.stations[id].activity), "poste sans durée : " + id)
+	for piece: String in PIECES:
+		var m: RoomMap = grids(piece)[0]
+		for id: String in m.stations:
+			check(Sim.ACTIVITY_WINDOWS.has(m.stations[id].activity), "%s : poste sans durée : %s" % [piece, id])

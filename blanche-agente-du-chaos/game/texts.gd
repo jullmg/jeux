@@ -71,6 +71,9 @@ const ACTIVITY := {
 	"brasser": "brasse la sauce", "four": "surveille le four", "couper": "coupe des légumes", "laver": "lave la vaisselle",
 	"frigo": "fouille dans le frigo", "telephone": "jase au téléphone", "ilot": "pétrit sur l'îlot",
 	"surprise": "sauve son chaudron", "charlotte": "écoute Charlotte", "chicane": "se chicane avec Papa",
+	"servir": "sert à table", "manger": "mange", "buffet": "s'affaire au buffet", "disque": "choisit un disque",
+	"cuisine": "est à la cuisine", "hockey": "regarde le hockey", "but": "fête le but !", "film": "regarde le film",
+	"jaser": "jase avec la visite",
 }
 
 const MOM := {

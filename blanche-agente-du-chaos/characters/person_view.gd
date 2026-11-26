@@ -4,6 +4,9 @@ extends Node3D
 
 ## Les matières dont la couleur vient des sommets du modèle (tools/blender/heads.py).
 const PAINTED := ["peau_visage", "cheveux_ombre", "tissu_haut", "tissu_bas"]
+const STAND_IN := {"tante": "maman", "oncle": "papa"}
+## Les objets qu'on peut avoir en main.
+const PROPS := ["cuillere", "couteau", "assiette", "telephone", "panier"]
 
 ## "idle", "walk", "brasser", "couper", "laver", "frigo", "telephone", "four", "ilot", "surprise", "charlotte",
 ## "hint", "feint", "round", "look", "point", "laugh", "wave", "carry", "snitch", "cheer", "chicane", "argue"
@@ -36,7 +39,11 @@ func _init(who_: String) -> void:
 
 
 func _ready() -> void:
-	model = (load("res://art/models/%s.glb" % who) as PackedScene).instantiate()
+	var file := "res://art/models/%s.glb" % who
+	if not ResourceLoader.exists(file):
+		# La visite emprunte un corps de la famille tant qu'elle n'a pas le sien.
+		file = "res://art/models/%s.glb" % STAND_IN.get(who, "maman")
+	model = (load(file) as PackedScene).instantiate()
 	add_child(model)
 	rig = Rig.new(model)
 	_paint_by_vertex()
@@ -45,6 +52,10 @@ func _ready() -> void:
 	for mesh: MeshInstance3D in model.find_children("Bouche*", "MeshInstance3D", true, false):
 		_mouths[mesh.name.trim_prefix("Bouche")] = mesh
 	_set_mouth("Sourire")
+	# Les objets en main sont fabriqués d'avance : en pleine partie, une nouvelle matière ferait un à-coup.
+	for kind: String in PROPS:
+		_show_prop(kind)
+	_show_prop("")
 
 
 ## Les visages et les chevelures sont peints aux sommets (joues roses, barbe, cheveux foncés à la racine).

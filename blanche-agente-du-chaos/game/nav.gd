@@ -4,12 +4,12 @@ extends RefCounted
 
 const CELL := 0.08
 
-var map: KitchenMap
+var map: RoomMap
 var radius: float
 var grid := AStarGrid2D.new()
 
 
-func _init(map_: KitchenMap, radius_: float) -> void:
+func _init(map_: RoomMap, radius_: float) -> void:
 	map = map_
 	radius = radius_
 	var size := Vector2i(int(ceil(map.room.size.x / CELL)), int(ceil(map.room.size.y / CELL)))

@@ -435,7 +435,7 @@ func _draw_world(on: Control) -> void:
 	if sim.dog_state == Sim.Dog.REACHING:
 		var item := sim.reach_item
 		var at := stage.on_screen(stage.item_position(item) + Vector3(0, 0.07, 0))
-		var p := clampf(sim.reach_progress / Sim.GRAB_TIMES[item.size], 0.0, 1.0)
+		var p := clampf(sim.reach_progress / sim.grab_time(item), 0.0, 1.0)
 		var color := UiStyle.RED if _danger() else UiStyle.GOLD
 		on.draw_arc(at, 58.0, 0, TAU, 48, Color(0.1, 0.06, 0.04, 0.65), 18.0, true)
 		on.draw_arc(at, 58.0, -PI / 2.0, -PI / 2.0 + TAU * p, 48, color, 12.0, true)

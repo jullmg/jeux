@@ -1,8 +1,12 @@
 class_name Stage
 extends Node3D
-## La cuisine en 3D : lumière, caméra, personnages, nourriture et zone cachée. Montre l'état d'une Sim.
+## Les pièces en 3D : lumière, caméra, personnages, nourriture et zone cachée. Montre l'état d'une Sim.
+## La cuisine est toujours chargée (elle sert au titre) ; les autres pièces sont préparées au démarrage.
 
 const KITCHEN := "res://art/models/cuisine.glb"
+const MODELS := "res://art/models/%s.glb"
+## Les personnages du jeu (la visite a ses propres modèles).
+const PEOPLE := ["maman", "papa", "charlotte", "tante", "oncle"]
 const FOODS := "res://art/models/nourriture.glb"
 const MASK_CELL := 0.06
 ## Les morceaux sont grossis pour se lire de haut.
@@ -12,17 +16,24 @@ const RING_COLORS := [Color(1, 1, 1, 0.85), Color(0.2, 0.75, 1.0, 0.95), Color(1
 	Color(1.0, 0.82, 0.05, 1.0)]
 
 ## Pendant une chicane, les deux se tournent un peu vers nous pour qu'on voie leur visage.
-const TOWARD_CAMERA := Vector2(0.0, 0.75)
+const TOWARD_CAMERA := 0.75
 
-var map: KitchenMap
+## Le plan de la pièce montrée.
+var map: RoomMap
+## Les pièces déjà préparées : nom → {map, node}.
+var _rooms: Dictionary = {}
+var _room_node: Node3D
 var sim: Sim
 var camera: Camera3D
 var ambiance: Ambiance
 var effects: Effects
 var _dust_wait := 0.0
 var dog: DogView
+## La personne qui surveille (Maman, ou Papa).
 var mom: PersonView
 var people: Dictionary = {}
+## Tous les personnages déjà fabriqués, gardés pour éviter les à-coups : nom → PersonView.
+var _persons: Dictionary = {}
 var reduced_motion := false
 ## "titre" : gros plan sur le coin de Blanche. "jeu" : vue de la cuisine. "photo" : vue libre pour les planches d'essai.
 var view := "titre"
@@ -41,7 +52,7 @@ var _mask_texture: ImageTexture
 var _mask_rect: Rect2
 var _mask_node: MeshInstance3D
 var _mask_viewer := Vector2.INF
-var _mask_island := false
+var _mask_island := ""
 var _mask_wait := 0.0
 var _mask_center := Vector2.INF
 var _mask_bytes := PackedByteArray()
@@ -52,6 +63,8 @@ var _fridge_light: OmniLight3D
 var _time := 0.0
 var _shake := 0.0
 var _wobble := 0.0
+## Le petit meuble qui vacille (le tabouret, une chaise) : son indice dans le plan.
+var _wobble_index := -1
 var _held_id := -1
 var _laugh := 0.0
 var _surprised := 0.0
@@ -65,7 +78,6 @@ var _reach_spot := ""
 var _ring_mesh: ArrayMesh
 var _ring_materials: Array[StandardMaterial3D] = []
 var _ring_shadow: StandardMaterial3D
-var _kept: Array[Resource] = []
 ## Les positions des deux derniers pas des règles : entre deux, l'écran montre un point intermédiaire.
 var _before: Dictionary = {}
 var _after: Dictionary = {}
@@ -77,9 +89,11 @@ var _speeds: Dictionary = {}
 
 
 func _ready() -> void:
-	map = KitchenMap.new()
+	map = RoomMap.new("cuisine")
 	_kitchen = (load(KITCHEN) as PackedScene).instantiate()
 	add_child(_kitchen)
+	_rooms["cuisine"] = {"map": map, "node": _kitchen}
+	_room_node = _kitchen
 	_fridge_door = _kitchen.find_child("PorteFrigo", true, false)
 	_stool = _kitchen.find_child("Tabouret", true, false)
 	_christmas = _kitchen.find_child("Noel", true, false)
@@ -117,13 +131,75 @@ func _ready() -> void:
 	# Le shader de la silhouette se compile à l'écran titre, pas en pleine partie.
 	dog.set_see_through(true)
 	get_tree().create_timer(0.25).timeout.connect(dog.set_see_through.bind(false))
-	mom = PersonView.new("maman")
-	add_child(mom)
-	mom.add_child(_blob_shadow(0.32, 0.4))
-	# Les modèles qui vont et viennent restent chargés, pour éviter les à-coups.
-	for who: String in ["papa", "charlotte"]:
-		_kept.append(load("res://art/models/%s.glb" % who))
+	# Tous les personnages sont fabriqués d'avance et gardés : pas d'à-coup quand ils entrent en scène.
+	for who: String in PEOPLE:
+		_person(who)
+	mom = _person("maman")
+	for piece: String in ["salle_a_manger", "salon", "fetes"]:
+		if FileAccess.file_exists(RoomMap.FOLDER % piece):
+			_prepare_room(piece)
 	show_title()
+
+
+## Montre la personne qui surveille (Maman ou Papa) ; l'autre attend hors champ.
+func _use_watcher(who: String) -> void:
+	if mom != null and mom.who != who:
+		mom.visible = false
+	mom = _person(who)
+	mom.visible = true
+
+
+## Un personnage, fabriqué une seule fois.
+func _person(who: String) -> PersonView:
+	if not _persons.has(who):
+		var p := PersonView.new(who)
+		add_child(p)
+		p.add_child(_blob_shadow(0.32 if who == "maman" else 0.3, 0.4))
+		p.visible = false
+		_persons[who] = p
+	return _persons[who]
+
+
+## Le plan d'une pièce (et sa pièce en 3D, préparée une fois).
+func map_for(piece: String) -> RoomMap:
+	if not _rooms.has(piece):
+		_prepare_room(piece)
+	return _rooms[piece].map
+
+
+func _prepare_room(piece: String) -> void:
+	var m := RoomMap.new(piece)
+	var model := str(m.data.get("model", piece))
+	var node: Node3D = null
+	for other: Dictionary in _rooms.values():
+		if str(other.map.data.get("model", other.map.id)) == model:
+			node = other.node
+	if node == null:
+		if ResourceLoader.exists(MODELS % model):
+			node = (load(MODELS % model) as PackedScene).instantiate()
+		else:
+			node = Maquette.build(m)
+		node.visible = false
+		add_child(node)
+	_rooms[piece] = {"map": m, "node": node}
+
+
+## Montre une pièce : son modèle, ses objets cachés pour cette vue, sa zone cachée.
+func _show_room(m: RoomMap) -> void:
+	if not _rooms.has(m.id):
+		_prepare_room(m.id)
+	var node: Node3D = _rooms[m.id].node
+	if node != _room_node:
+		_room_node.visible = false
+		_room_node = node
+	node.visible = true
+	for child in node.get_children():
+		if child is Node3D:
+			child.visible = not m.data.get("cache", []).has(String(child.name))
+	if m != map:
+		map = m
+		_setup_mask()
+		_fit_camera()
 
 
 ## Le moment de la journée : la lumière, la vue par la fenêtre et les décorations.
@@ -131,7 +207,7 @@ func _set_moment(moment: String) -> void:
 	ambiance.set_moment(moment)
 	_outside.emission = ambiance.sky_tint()
 	_outside.emission_operator = BaseMaterial3D.EMISSION_OP_MULTIPLY
-	_christmas.visible = moment == "noel"
+	_christmas.visible = moment == "noel" and _room_node == _kitchen
 	dog.set_festive(moment == "noel")
 
 
@@ -234,23 +310,43 @@ func _build_effects() -> void:
 
 # ------------------------------------------------------------------ zone cachée
 
-func _build_mask() -> void:
-	_mask_rect = map.island.grow(1.15).intersection(map.room)
-	var w := int(_mask_rect.size.x / MASK_CELL)
-	var h := int(_mask_rect.size.y / MASK_CELL)
+## La zone cachée de la pièce montrée : les cases qui peuvent un jour être cachées, libres et près d'une cachette.
+func _setup_mask() -> void:
+	_mask_rect = map.hides_area(1.15)
+	var w := maxi(1, int(_mask_rect.size.x / MASK_CELL))
+	var h := maxi(1, int(_mask_rect.size.y / MASK_CELL))
 	_mask_image = Image.create(w, h, false, Image.FORMAT_R8)
 	_mask_texture = ImageTexture.create_from_image(_mask_image)
+	_mask_bytes = PackedByteArray()
 	_mask_bytes.resize(w * h)
-	# Les seules cases qui peuvent un jour être cachées : libres et assez près de l'îlot.
-	var inner := map.island.grow(-0.02)
+	_mask_index = PackedInt32Array()
+	_mask_points = PackedVector2Array()
 	for y in h:
 		for x in w:
 			var p := _mask_rect.position + Vector2(x + 0.5, y + 0.5) * MASK_CELL
-			if map.is_free(p, 0.07) and p.distance_to(p.clamp(inner.position, inner.end)) <= KitchenMap.SHADOW_MAX:
+			if map.is_free(p, 0.07) and _near_hide(p):
 				_mask_index.append(y * w + x)
 				_mask_points.append(p)
+	(_mask_node.mesh as PlaneMesh).size = _mask_rect.size
+	(_mask_node.material_override as ShaderMaterial).set_shader_parameter("mask", _mask_texture)
+	var c := _mask_rect.get_center()
+	_mask_node.position = Vector3(c.x, 0.006, c.y)
+	_mask_viewer = Vector2.INF
+
+
+func _near_hide(p: Vector2) -> bool:
+	for hd in map.hides:
+		var inner: Rect2 = hd.rect.grow(-0.02)
+		if hd.kind == "dessous":
+			if inner.has_point(p):
+				return true
+		elif p.distance_to(p.clamp(inner.position, inner.end)) <= float(hd.max):
+			return true
+	return false
+
+
+func _build_mask() -> void:
 	var plane := PlaneMesh.new()
-	plane.size = _mask_rect.size
 	var shader := Shader.new()
 	shader.code = """shader_type spatial;
 render_mode unshaded, blend_mix, depth_draw_never, cull_disabled, shadows_disabled;
@@ -283,29 +379,30 @@ void fragment() {
 """
 	var mat := ShaderMaterial.new()
 	mat.shader = shader
-	mat.set_shader_parameter("mask", _mask_texture)
 	_mask_node = MeshInstance3D.new()
 	_mask_node.mesh = plane
 	_mask_node.material_override = mat
-	var c := _mask_rect.get_center()
-	_mask_node.position = Vector3(c.x, 0.006, c.y)
 	_mask_node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_mask_node.visible = false
 	add_child(_mask_node)
+	_setup_mask()
 
 
 func _update_mask(delta: float) -> void:
 	_mask_wait -= delta
-	var at_island := sim.mom_at_island()
-	if _mask_wait > 0.0 or (sim.mom_pos.distance_to(_mask_viewer) < 0.03 and at_island == _mask_island):
+	var close := sim.mom_close()
+	var low := sim.mom_low()
+	var view_key := "%s|%s" % [close, low]
+	var eye := sim.viewpoint()
+	if _mask_wait > 0.0 or (eye.distance_to(_mask_viewer) < 0.03 and view_key == _mask_island):
 		return
 	_mask_wait = 0.08
-	_mask_viewer = sim.mom_pos
-	_mask_island = at_island
+	_mask_viewer = eye
+	_mask_island = view_key
 	var sum := Vector2.ZERO
 	var cells := 0
 	for i in _mask_index.size():
-		var on := map.hidden_by_island(sim.mom_pos, _mask_points[i], at_island)
+		var on := map.hidden(eye, _mask_points[i], close, low)
 		_mask_bytes[_mask_index[i]] = 255 if on else 0
 		if on:
 			sum += _mask_points[i]
@@ -348,7 +445,7 @@ func food_model(size: int) -> MeshInstance3D:
 func item_position(item: Dictionary) -> Vector3:
 	var y := 0.0
 	if item.spot != "":
-		y = _surface_height(item.spot)
+		y = map.surface_height(item.spot)
 	return Vector3(item.pos.x, y, item.pos.y)
 
 
@@ -421,10 +518,12 @@ func _sync_food(delta: float) -> void:
 # ------------------------------------------------------------------ vie
 
 func show_title() -> void:
+	_show_room(_rooms.cuisine.map)
 	_set_moment("matin")
 	sim = null
 	view = "titre"
 	_clear_level()
+	_use_watcher("maman")
 	dog.position = Vector3(map.corner.x - 0.06, 0, map.corner.y - 0.04)
 	_dog_yaw = atan2(-0.93, 0.36)
 	dog.rotation.y = _dog_yaw
@@ -440,6 +539,8 @@ func show_title() -> void:
 func start_level(sim_: Sim) -> void:
 	_clear_level()
 	sim = sim_
+	_show_room(sim.map)
+	_use_watcher(sim.watcher)
 	_set_moment(sim.level.get("moment", "midi"))
 	view = "jeu"
 	_last_time = -1.0
@@ -454,20 +555,24 @@ func start_level(sim_: Sim) -> void:
 	_dog_yaw = atan2(sim.dog_dir.x, sim.dog_dir.y)
 	_mom_yaw = atan2(sim.mom_dir.x, sim.mom_dir.y)
 	_cam_pos = Vector3.ZERO
-	for who: String in sim.level.helpers:
-		var p := PersonView.new(who)
-		add_child(p)
-		p.add_child(_blob_shadow(0.3, 0.35))
-		p.visible = false
-		people[who] = p
+	var cast: Array = sim.level.helpers.duplicate()
+	for s in sim.seated:
+		cast.append(s.who)
+	for w in sim.walkers:
+		cast.append(w.who)
+	for who: String in cast:
+		if who != sim.watcher:
+			people[who] = _person(who)
+			people[who].visible = false
 
 
 func _clear_level() -> void:
 	for node: Node in _items.values():
 		node.queue_free()
 	_items.clear()
-	for p: Node in people.values():
-		p.queue_free()
+	for p: PersonView in people.values():
+		p.visible = false
+		p.talking = 0.0
 	people.clear()
 	if dog:
 		dog.drop_held()
@@ -476,6 +581,7 @@ func _clear_level() -> void:
 		dog.sad = false
 		mom.talking = 0.0
 		mom.head_yaw = 0.0
+		mom.visible = true
 	_held_id = -1
 	_laugh = 0.0
 	_surprised = 0.0
@@ -510,8 +616,9 @@ func on_event(e: Dictionary) -> void:
 			if randf() < 0.6:
 				_laugh = 1.6
 		"noise":
-			if e.what == "tabouret":
+			if e.what in ["tabouret", "chaise"]:
 				_wobble = 1.0
+				_wobble_index = e.index
 			_shake = maxf(_shake, 0.25)
 
 
@@ -538,7 +645,8 @@ func _process(delta: float) -> void:
 		_sync_food(delta)
 		_update_mask(delta)
 		dog.set_see_through(_dog_covered())
-		_steam.emitting = sim.activity == "brasser" or sim.activity == "surprise" or sim.walk_activity == "surprise"
+		_steam.emitting = _room_node == _kitchen and (sim.activity == "brasser" or sim.activity == "surprise" \
+			or sim.walk_activity == "surprise")
 	_show_furniture(delta)
 	_move_camera(delta)
 
@@ -547,20 +655,20 @@ static func _turn(from: float, to: float, delta: float, speed: float) -> float:
 	return lerp_angle(from, to, 1.0 - exp(-delta * speed))
 
 
-func _surface_height(spot: String) -> float:
-	return 0.9 if map.spots[spot].surface == "buffet" else float(map.data.counter_height)
-
-
 ## Un meuble ou une personne passe-t-il entre la caméra et Blanche ?
 func _dog_covered() -> bool:
 	var eye := camera.global_position
 	for height: float in [0.14, 0.42]:
 		var point := Vector3(sim.dog_pos.x, height, sim.dog_pos.y)
-		var box := AABB(Vector3(map.island.position.x, 0.0, map.island.position.y),
-			Vector3(map.island.size.x, 0.93, map.island.size.y))
-		if box.intersects_segment(eye, point):
-			return true
-		var bodies: Array = [sim.mom_pos]
+		for hd in map.hides:
+			var r: Rect2 = hd.rect
+			var top: float = hd.height
+			# Sous une table, c'est le plateau qui la cache.
+			var bottom := top - 0.07 if hd.kind == "dessous" else 0.0
+			if AABB(Vector3(r.position.x, bottom, r.position.y), Vector3(r.size.x, top - bottom, r.size.y)) \
+					.intersects_segment(eye, point):
+				return true
+		var bodies: Array = [] if sim.mom_out else [sim.mom_pos]
 		for h in sim.helpers:
 			bodies.append(h.pos)
 		for c: Vector2 in bodies:
@@ -624,7 +732,7 @@ func _show_dog(delta: float) -> void:
 		var spot: Dictionary = map.spots[_reach_spot]
 		at = spot.stand
 		heading = spot.food - spot.stand
-		dog.surface_y = _surface_height(_reach_spot)
+		dog.surface_y = map.surface_height(_reach_spot)
 	_follow_floor(dog, at, delta)
 	dog.speed = _speeds.get("blanche", 0.0)
 	_dog_yaw = _turn(_dog_yaw, atan2(heading.x, heading.y), delta, 14.0)
@@ -644,7 +752,7 @@ func _show_dog(delta: float) -> void:
 			dog.pose = "sit"
 		Sim.Dog.REACHING:
 			dog.pose = "reach"
-			dog.reach_progress = clampf(sim.reach_progress / Sim.GRAB_TIMES[sim.reach_item.size], 0.0, 1.0)
+			dog.reach_progress = clampf(sim.reach_progress / sim.grab_time(sim.reach_item), 0.0, 1.0)
 		Sim.Dog.LOWERING:
 			dog.pose = "reach" if sim.lower_left > Sim.DESCEND_TIME * 0.5 else "stand"
 			dog.reach_progress = 0.3
@@ -661,11 +769,18 @@ func _show_dog(delta: float) -> void:
 
 
 func _show_mom(delta: float) -> void:
+	# Sortie à la cuisine, on ne la voit plus ; elle réapparaît d'un coup dans la porte.
+	var was := mom.visible
+	mom.visible = not sim.mom_out
+	if not mom.visible:
+		return
+	if not was:
+		mom.position = Vector3(sim.mom_pos.x, 0, sim.mom_pos.y)
 	_follow_floor(mom, _smooth("maman", sim.mom_pos), delta)
 	mom.speed = _speeds.get("maman", 0.0)
 	var dir := sim.mom_dir
 	if sim.mom_state == Sim.Mom.BUSY and sim.activity == "chicane":
-		dir += TOWARD_CAMERA
+		dir += toward_camera(sim.mom_pos)
 	var yaw := atan2(dir.x, dir.y)
 	_mom_yaw = _turn(_mom_yaw, yaw, delta, 16.0)
 	mom.rotation.y = _mom_yaw
@@ -716,7 +831,7 @@ func _show_people(delta: float) -> void:
 		var moving: bool = h.state != "stay"
 		var dir: Vector2 = h.dir if moving else sim.mom_pos - h.pos
 		if h.state == "argue":
-			dir = dir.normalized() + TOWARD_CAMERA
+			dir = dir.normalized() + toward_camera(h.pos)
 		if h.who == "charlotte" and h.snitch > 0.0:
 			dir = sim.dog_pos - h.pos
 			p.pose = "snitch"
@@ -726,9 +841,50 @@ func _show_people(delta: float) -> void:
 			p.pose = "walk" if moving else "wave"
 		var yaw := atan2(dir.x, dir.y)
 		p.rotation.y = yaw if not was_visible else _turn(p.rotation.y, yaw, delta, 10.0)
+	for s in sim.seated:
+		var p: PersonView = people.get(s.who)
+		if p == null:
+			continue
+		present[s.who] = true
+		p.visible = true
+		p.position = Vector3(s.pos.x, 0, s.pos.y)
+		var dir: Vector2 = s.dir
+		if s.state == "argue":
+			dir = (sim.mom_pos - s.pos).normalized() + toward_camera(s.pos)
+		p.rotation.y = _turn(p.rotation.y, atan2(dir.x, dir.y), delta, 10.0)
+		match s.state:
+			"slip":
+				p.pose = "slip"
+			"argue":
+				p.pose = "argue_seated"
+			_:
+				p.pose = "snitch_seated" if s.snitch > 0.0 else ("seated_chat" if s.state == "jase" else "seated")
+	for w in sim.walkers:
+		var p: PersonView = people.get(w.who)
+		if p == null:
+			continue
+		var was_visible := p.visible
+		present[w.who] = true
+		p.visible = true
+		if was_visible:
+			_follow_floor(p, _smooth(w.who, w.pos), delta)
+		else:
+			p.position = Vector3(w.pos.x, 0, w.pos.y)
+		p.speed = _speeds.get(w.who, 0.0)
+		var dir: Vector2 = w.dir
+		if w.snitch > 0.0:
+			dir = sim.dog_pos - w.pos
+		p.rotation.y = _turn(p.rotation.y, atan2(dir.x, dir.y), delta, 10.0)
+		p.pose = "snitch" if w.snitch > 0.0 else ("walk" if w.state == "walk" else "chat")
 	for who: String in people:
 		if not present.has(who):
 			people[who].visible = false
+
+
+## Vers la caméra, au sol, depuis `from` (pour se tourner un peu vers nous).
+func toward_camera(from: Vector2) -> Vector2:
+	var cam: Array = map.data.camera.pos
+	return (Vector2(cam[0], cam[2]) - from).normalized() * TOWARD_CAMERA
 
 
 func _show_furniture(delta: float) -> void:
@@ -737,8 +893,12 @@ func _show_furniture(delta: float) -> void:
 	_fridge_door.rotation.y = _turn(_fridge_door.rotation.y, deg_to_rad(-112.0) if open else 0.0, delta, 7.0)
 	_fridge_light.light_energy = lerpf(_fridge_light.light_energy, 0.9 if open else 0.0, 1.0 - exp(-delta * 7.0))
 	_wobble = maxf(0.0, _wobble - delta * 1.4)
-	if _stool:
+	if _stool and _room_node == _kitchen:
 		_stool.rotation.z = sin(_time * 24.0) * 0.14 * _wobble
+	elif _wobble_index >= 0 and _wobble_index < map.stools.size():
+		var chair := _room_node.find_child("Chaise_" + str(map.stools[_wobble_index].name), true, false) as Node3D
+		if chair:
+			chair.rotation.y = sin(_time * 24.0) * 0.05 * _wobble
 
 
 func _move_camera(delta: float) -> void:
@@ -751,8 +911,9 @@ func _move_camera(delta: float) -> void:
 		return
 	if view == "titre":
 		var drift := 0.0 if reduced_motion else sin(_time * 0.23) * 0.09
-		pos = Vector3(0.1 + drift, 1.22, 2.92)
-		target = Vector3(0.86, 0.5, 0.66)
+		var title: Dictionary = map.data.camera_title
+		pos = Vector3(title.pos[0] + drift, title.pos[1], title.pos[2])
+		target = Vector3(title.target[0], title.target[1], title.target[2])
 	elif not reduced_motion and dog:
 		var want := Vector3(dog.position.x * 0.09, 0, dog.position.z * 0.05)
 		_follow = _follow.lerp(want, 1.0 - exp(-delta * 2.5))

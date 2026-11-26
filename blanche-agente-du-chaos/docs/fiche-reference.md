@@ -1,7 +1,7 @@
 # Fiche de référence (étape 0)
 
 Établie à partir des photos de `reference/` (jamais versionnées). Les dimensions sont **estimées** : les corriger dans
-`data/kitchen.json`, puis relancer `tools/build_art.sh`.
+`data/pieces/cuisine.json`, puis relancer `tools/build_art.sh`.
 
 ## La cuisine
 

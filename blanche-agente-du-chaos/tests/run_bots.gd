@@ -22,12 +22,17 @@ func _init() -> void:
 				games = int(kv[1])
 			"--out":
 				out = kv[1]
-	var map := KitchenMap.new()
-	var nav := Sim.dog_grid(map)
-	var mom_nav := Sim.mom_grid(map)
+	var grids := {}
 	var results: Array = []
 	for id: int in levels:
 		var level := Levels.load_level(id)
+		var piece := Levels.piece_of(level)
+		if not grids.has(piece):
+			var m := RoomMap.new(piece)
+			grids[piece] = [m, Sim.dog_grid(m), Sim.mom_grid(m)]
+		var map: RoomMap = grids[piece][0]
+		var nav: Nav = grids[piece][1]
+		var mom_nav: Nav = grids[piece][2]
 		for profile: String in profiles:
 			results.append(run(map, nav, mom_nav, level, profile, games))
 			var r: Dictionary = results.back()
@@ -39,7 +44,7 @@ func _init() -> void:
 	quit()
 
 
-static func run(map: KitchenMap, nav: Nav, mom_nav: Nav, level: Dictionary, profile: String, games: int) -> Dictionary:
+static func run(map: RoomMap, nav: Nav, mom_nav: Nav, level: Dictionary, profile: String, games: int) -> Dictionary:
 	var parts := profile.split("_")
 	var scores: Array[int] = []
 	var passed := 0

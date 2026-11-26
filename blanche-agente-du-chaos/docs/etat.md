@@ -21,7 +21,7 @@ Point de reprise d'une session à l'autre. Julien a demandé de tout faire sans 
 | Chantier | État |
 |---|---|
 | 1. Fiche de référence | fait |
-| 2. Moteur multi-pièces | à faire |
+| 2. Moteur multi-pièces | fait : plans par pièce, cachettes en liste, Maman hors de la pièce, personnes assises, visite qui circule, le noir ; non-régression de la cuisine |
 | 3. Les missions en données | à faire |
 | 4. Les pièces en 3D | à faire |
 | 5. Personnages et animations | à faire |
@@ -41,6 +41,13 @@ souper avec des invités**.
   choisit sa caméra : vers le mur ardoise pour la salle à manger, vers la fenêtre pour le salon, et les deux pièces à
   la fois pour le party des Fêtes.
 - Maman part à la cuisine par la **porte de bois** de la salle à manger (elle donne sur le corridor).
+- **Assis, on n'est pas un obstacle** (Papa ou Maman au divan, la visite à table) : le chiot leur passe entre les
+  jambes, sinon la table basse serait inaccessible. Les chaises, elles, bloquent et grincent.
+- **Dans le noir**, la personne qui surveille ne voit pas au-delà de la lumière de la télé, **mais les pattes en l'air,
+  Blanche est toujours vue** (règle de la cuisine conservée). La lumière ne monte jamais pendant un regard : une scène
+  claire ne trahit pas une Blanche qui s'était fiée au noir.
+- Charlotte complice **sauve** Blanche quand Maman la voit glisser un morceau : la chicane commence au lieu du regard.
+- Pendant qu'elle est à la cuisine, la zone cachée se compte depuis **la porte** par où elle reviendra.
 
 ## Choix faits en l'absence de Julien (à réviser)
 

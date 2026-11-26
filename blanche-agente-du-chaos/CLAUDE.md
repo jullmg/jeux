@@ -23,11 +23,20 @@ ensuite.
 ## Organisation
 
 - `game/` : les règles, sans affichage. `sim.gd` (`Sim.step(dt, move, grab)` + liste d'événements, graine fixe),
-  `kitchen_map.gd` (collisions, ligne de vue de l'îlot), `nav.gd` (A*), `follower.gd`, `bot.gd` (robots),
-  `levels.gd`, `save_data.gd`, `texts.gd` (**tout le texte**).
-- `data/kitchen.json` : **plan unique** (meubles, endroits à nourriture, postes de Maman, caméra), lu par Godot et par
-  Blender. Mètres, x vers l'est, z vers la caméra.
-- `levels/niveau_N.json` : les huit missions. Étoiles recalculées par `tools/calibrate.py --write-stars`.
+  `room_map.gd` (`RoomMap` : collisions, cachettes et ligne de vue d'une pièce), `nav.gd` (A*), `follower.gd`,
+  `bot.gd` (robots), `levels.gd`, `save_data.gd`, `texts.gd` (**tout le texte**).
+- `data/pieces/<pièce>.json` : **le plan de chaque pièce** (meubles, cachettes, endroits à nourriture, postes, places
+  assises, caméra), lu par Godot et par Blender : `cuisine`, `salle_a_manger`, `salon`, `fetes` (les deux réunies).
+  Mètres, x vers l'est, z vers le sud. Les cachettes sont une liste : `"bloc"` (l'îlot, le divan : l'ombre derrière) ou
+  `"dessous"` (la table : personne debout ne voit dessous ; assis, on voit sa moitié). Un poste peut être `"assis"`,
+  `"dehors"` (Maman à la cuisine : son retour est un indice « retour », puis elle apparaît dans `mom_door`) ou regarder
+  `"devant"`. Sans modèle 3D, la pièce est montrée en gris (`kitchen/maquette.gd`).
+- `levels/niveau_N.json` : les missions. Chaque niveau dit sa pièce (`"piece"`, la cuisine par défaut), qui surveille
+  (`"watcher"`, Maman ou Papa), ses personnes assises (`"seated"` : `complice`, `temoin`, `decor`), sa visite qui
+  circule (`"walkers"`), le noir (`"dark"`). Étoiles recalculées par `tools/calibrate.py --write-stars`.
+- **Les missions 1 à 8 doivent jouer exactement comme avant** : `tests/regression.gd` rejoue 144 parties de robots et
+  les compare à `tests/regression_cuisine.json` (dans `tools/test.sh`). Une nouvelle règle ne touche pas au hasard de
+  la cuisine.
 - `kitchen/stage.gd` : la scène 3D qui montre une `Sim` ; `kitchen/ambiance.gd` : lumières, rendu et moments du jour
   (`"moment"` de chaque niveau) ; `kitchen/effects.gd` : les particules. `characters/` : `rig.gd` (poses par code, rotations dans les
   axes du modèle), `dog_view.gd`, `person_view.gd`. `ui/` : `hud.gd`, `menus.gd`, `ui_style.gd`, `icons.gd`,

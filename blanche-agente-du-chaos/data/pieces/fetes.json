@@ -1,0 +1,228 @@
+{
+  "_comment": "Plan de la salle à manger et du salon réunis (le party des Fêtes), source unique pour le jeu (Godot) et le modèle (Blender, double_salon.py). Repère du double salon : mètres, x vers l'est, z vers le sud (la rue), l'origine au milieu de la limite entre les deux pièces. Les rectangles sont [x0, z0, x1, z1].",
+  "model": "double_salon",
+  "room": {
+    "x0": -1.65,
+    "z0": -3.6,
+    "x1": 1.65,
+    "z1": 3.8
+  },
+  "surfaces": {
+    "table": 0.75,
+    "buffet": 0.76,
+    "low": 0.45,
+    "piano": 0.8
+  },
+  "obstacles": {
+    "buffet": [-0.78, -3.6, 0.82, -3.14],
+    "lampe_pied": [1.3, -0.6, 1.6, -0.3],
+    "divan": [-0.95, 0.55, 1.15, 1.5],
+    "table_basse": [-0.35, 2.15, 0.65, 2.7],
+    "piano": [-1.45, 3.4, -0.25, 3.8],
+    "fauteuil_marine": [-1.65, 2.2, -1.0, 2.9],
+    "berceuse": [1.05, 2.55, 1.65, 3.3],
+    "etagere_coin": [1.25, 3.4, 1.65, 3.8],
+    "radiateur": [0.15, 3.62, 1.15, 3.8],
+    "plante": [1.3, 1.7, 1.65, 2.05],
+    "lampe_salon": [1.35, -0.05, 1.6, 0.2],
+    "sapin": [1.05, -3.6, 1.65, -3.0]
+  },
+  "hides": [
+    {
+      "id": "table",
+      "kind": "dessous",
+      "rect": [-0.6, -2.25, 0.9, -1.35],
+      "height": 0.75
+    },
+    {
+      "id": "divan",
+      "kind": "bloc",
+      "obstacle": "divan",
+      "height": 0.85
+    }
+  ],
+  "chairs": {
+    "nord_ouest": {
+      "pos": [-0.3, -2.37],
+      "r": 0.19
+    },
+    "nord_est": {
+      "pos": [0.6, -2.37],
+      "r": 0.19
+    },
+    "sud_ouest": {
+      "pos": [-0.3, -1.23],
+      "r": 0.19
+    },
+    "sud_est": {
+      "pos": [0.6, -1.23],
+      "r": 0.19
+    }
+  },
+  "corner": {
+    "x": -1.22,
+    "z": -3.28,
+    "face": [0.25, 1.0],
+    "kind": "cage"
+  },
+  "camera": {
+    "pos": [5.6, 5.2, 0.1],
+    "target": [-0.5, 0.2, 0.1],
+    "fov": 44.0
+  },
+  "spots": {
+    "table_nord": {
+      "stand": [0.15, -2.55],
+      "food": [0.15, -2.07],
+      "far": 0.6,
+      "surface": "table"
+    },
+    "table_sud": {
+      "stand": [0.15, -1.05],
+      "food": [0.15, -1.53],
+      "far": 0.9,
+      "surface": "table"
+    },
+    "table_ouest": {
+      "stand": [-0.88, -1.8],
+      "food": [-0.44, -1.8],
+      "far": 0.5,
+      "surface": "table"
+    },
+    "table_est": {
+      "stand": [1.18, -1.8],
+      "food": [0.74, -1.8],
+      "far": 1.0,
+      "surface": "table"
+    },
+    "buffet_est": {
+      "stand": [0.5, -2.86],
+      "food": [0.5, -3.36],
+      "far": 0.8,
+      "surface": "buffet"
+    },
+    "buffet_ouest": {
+      "stand": [-0.42, -2.86],
+      "food": [-0.42, -3.36],
+      "far": 0.3,
+      "surface": "buffet"
+    },
+    "table_basse_nord": {
+      "stand": [0.15, 1.88],
+      "food": [0.15, 2.3],
+      "far": 1.0,
+      "surface": "low"
+    },
+    "table_basse_ouest": {
+      "stand": [-0.63, 2.42],
+      "food": [-0.2, 2.42],
+      "far": 0.9,
+      "surface": "low"
+    },
+    "table_basse_est": {
+      "stand": [0.92, 2.32],
+      "food": [0.5, 2.32],
+      "far": 0.5,
+      "surface": "low"
+    },
+    "table_basse_sud": {
+      "stand": [0.15, 2.98],
+      "food": [0.15, 2.55],
+      "far": 0.3,
+      "surface": "low"
+    },
+    "piano": {
+      "stand": [-0.85, 3.12],
+      "food": [-0.85, 3.55],
+      "far": 0.8,
+      "surface": "piano"
+    }
+  },
+  "stations": {
+    "buffet": {
+      "pos": [0.05, -2.88],
+      "face": [0, -1],
+      "activity": "buffet"
+    },
+    "disque": {
+      "pos": [0.1, -2.9],
+      "face": [0, -1],
+      "activity": "disque"
+    },
+    "servir": {
+      "pos": [1.22, -1.1],
+      "face": [-0.6, -0.8],
+      "activity": "servir",
+      "regard": "devant"
+    },
+    "assise": {
+      "pos": [-0.3, -1.23],
+      "face": [0, -1],
+      "activity": "manger",
+      "regard": "devant",
+      "assis": true
+    },
+    "cuisine": {
+      "pos": [-2.4, -2.45],
+      "face": [1, 0],
+      "activity": "cuisine",
+      "regard": "devant",
+      "dehors": true
+    },
+    "divan_maman": {
+      "pos": [0.75, 1.68],
+      "face": [0, 1],
+      "activity": "jaser",
+      "regard": "devant",
+      "assis": true
+    }
+  },
+  "seats": {
+    "nord_ouest": {
+      "pos": [-0.3, -2.37],
+      "face": [0, 1],
+      "chaise": "nord_ouest"
+    },
+    "nord_est": {
+      "pos": [0.6, -2.37],
+      "face": [0, 1],
+      "chaise": "nord_est"
+    },
+    "sud_ouest": {
+      "pos": [-0.3, -1.23],
+      "face": [0, -1],
+      "chaise": "sud_ouest"
+    },
+    "sud_est": {
+      "pos": [0.6, -1.23],
+      "face": [0, -1],
+      "chaise": "sud_est"
+    },
+    "divan_papa": {
+      "pos": [-0.45, 1.68],
+      "face": [0, 1]
+    },
+    "divan_maman": {
+      "pos": [0.75, 1.68],
+      "face": [0, 1]
+    },
+    "berceuse": {
+      "pos": [1.3, 2.9],
+      "face": [-1, 0]
+    }
+  },
+  "ring": [[-1.0, -2.7], [0.15, -2.75], [1.25, -2.6], [1.3, -1.8], [1.2, -0.85], [0.15, -0.78], [-0.95, -0.85], [-1.05, -1.8]],
+  "waypoints": {
+    "entree": [-1.2, 0.75],
+    "lampe": [1.12, -0.95],
+    "milieu": [0.1, 0.22],
+    "salon_ouest": [-1.2, 1.95],
+    "salon_est": [0.75, 1.92],
+    "sdm_sud": [0.15, -0.7]
+  },
+  "helper_door": [-1.38, -2.45],
+  "mom_door": [-1.38, -2.45],
+  "cache": [
+    "MurEst"
+  ]
+}

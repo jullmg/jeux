@@ -35,6 +35,8 @@ fi
 tools/check_scripts.sh
 echo "== règles du jeu"
 godot 400 -s res://tests/run_tests.gd -- --no-save
+echo "== non-régression de la cuisine (missions 1 à 8)"
+godot 300 -s res://tests/regression.gd -- --no-save
 echo "== intégration (vraies entrées)"
 godot 300 res://tests/integration.tscn -- --no-save
 echo "== parcours complet"

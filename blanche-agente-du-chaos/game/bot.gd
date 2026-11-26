@@ -33,7 +33,8 @@ func _init(sim_: Sim, style_ := "equilibre", reaction_ := 0.35, attentive_ := 0.
 	attentive = attentive_
 	rng.seed = seed_
 	follower = Follower.new(sim.nav)
-	var around := sim.map.island.grow(0.85)
+	# Les points où se cacher : autour des cachettes, ou toute la pièce dans le noir.
+	var around := sim.map.room if sim.level.has("dark") else sim.map.hides_area(0.85)
 	var x := around.position.x
 	while x <= around.end.x:
 		var y := around.position.y
@@ -63,7 +64,7 @@ func step(dt: float) -> void:
 			return
 		"campeur":
 			grab = false
-			var h := _hide_point(view.mom_pos, view.at_island)
+			var h := _hide_point(view)
 			if h != Vector2.INF:
 				move = follower.steer(dt, sim.dog_pos, h, sim.people_circles())
 			return
@@ -73,7 +74,7 @@ func step(dt: float) -> void:
 		return
 	var danger := _danger(view)
 	if sim.dog_state == Sim.Dog.REACHING:
-		var left: float = Sim.GRAB_TIMES[sim.reach_item.size] - sim.reach_progress
+		var left: float = sim.grab_time(sim.reach_item) - sim.reach_progress
 		var risk: bool = style == "gourmand" and view.state == Sim.Mom.HINT and left < 0.18
 		grab = not (danger or view.snitch) or risk
 		return
@@ -96,12 +97,12 @@ func step(dt: float) -> void:
 
 
 func _with_food(dt: float, view: Dictionary, danger: bool) -> void:
-	var hidden := sim.dog_hidden(view.mom_pos, view.at_island)
+	var hidden := sim.dog_hidden(view.mom_pos, view.close, view.low)
 	if danger:
 		if hidden:
 			grab = false
 			return
-		var h := _hide_point(view.mom_pos, view.at_island)
+		var h := _hide_point(view)
 		if h != Vector2.INF and sim.dog_pos.distance_to(h) < 0.55:
 			grab = false
 			move = follower.steer(dt, sim.dog_pos, h, sim.people_circles(), 0.03)
@@ -113,7 +114,7 @@ func _with_food(dt: float, view: Dictionary, danger: bool) -> void:
 	var patience := {"prudent": 0.6, "equilibre": 1.0, "gourmand": 2.0, "novice": 2.2}
 	var long_meal: bool = sim.mouth.eat_left > float(patience.get(style, 1.0))
 	if long_meal and not hidden:
-		var h := _hide_point(view.mom_pos, view.at_island)
+		var h := _hide_point(view)
 		if h != Vector2.INF and sim.dog_pos.distance_to(h) < 1.8:
 			move = follower.steer(dt, sim.dog_pos, h, sim.people_circles(), 0.05)
 
@@ -154,7 +155,7 @@ func _choose(view: Dictionary) -> Dictionary:
 		if goal.distance_to(sim.mom_pos) < Sim.MOM_RADIUS + Sim.DOG_RADIUS - 0.06:
 			continue
 		var travel := sim.dog_pos.distance_to(goal) * 1.25 / Sim.DOG_SPEED
-		var grab_time: float = Sim.GRAB_TIMES[item.size]
+		var grab_time: float = sim.grab_time(item)
 		match style:
 			"prudent", "miettes":
 				if grab_time + minf(travel, 1.0) > remaining + 0.2:
@@ -180,12 +181,13 @@ func _go_to_nearest(dt: float) -> void:
 		move = follower.steer(dt, sim.dog_pos, best, sim.people_circles())
 
 
-func _hide_point(viewer: Vector2, at_island: bool) -> Vector2:
+func _hide_point(view: Dictionary) -> Vector2:
+	var viewer: Vector2 = view.mom_pos
 	var best := Vector2.INF
 	var best_d := INF
 	for p in _hide_points:
 		var d := sim.dog_pos.distance_squared_to(p)
-		if d < best_d and p.distance_to(viewer) > 0.55 and sim.map.hidden_by_island(viewer, p, at_island):
+		if d < best_d and p.distance_to(viewer) > 0.55 and sim.hidden_at(p, viewer, view.close, view.low):
 			best_d = d
 			best = p
 	return best
@@ -196,8 +198,8 @@ func _observe() -> void:
 		if sim.mom_state == Sim.Mom.BUSY:
 			_busy_since = sim.time
 		_last_state = sim.mom_state
-	_seen.append({"t": sim.time, "state": sim.mom_state, "kind": sim.hint_kind, "mom_pos": sim.mom_pos,
-		"at_island": sim.mom_at_island(), "activity": sim.activity, "snitch": sim.snitching()})
+	_seen.append({"t": sim.time, "state": sim.mom_state, "kind": sim.hint_kind, "mom_pos": sim.viewpoint(),
+		"close": sim.mom_close(), "low": sim.mom_low(), "activity": sim.activity, "snitch": sim.snitching()})
 	while _seen.size() > 1 and _seen[1].t <= sim.time - reaction:
 		_seen.pop_front()
 

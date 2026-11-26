@@ -1,0 +1,112 @@
+{
+  "_comment": "Plan du salon, source unique pour le jeu (Godot) et le modèle (Blender, double_salon.py). Repère du double salon : mètres, x vers l'est, z vers le sud (la rue), l'origine au milieu de la limite entre les deux pièces. Les rectangles sont [x0, z0, x1, z1].",
+  "model": "double_salon",
+  "room": {
+    "x0": -1.65,
+    "z0": -0.1,
+    "x1": 1.65,
+    "z1": 3.8
+  },
+  "surfaces": {
+    "low": 0.45,
+    "piano": 0.8
+  },
+  "obstacles": {
+    "divan": [-0.95, 0.55, 1.15, 1.5],
+    "table_basse": [-0.35, 2.15, 0.65, 2.7],
+    "piano": [-1.45, 3.4, -0.25, 3.8],
+    "fauteuil_marine": [-1.65, 2.2, -1.0, 2.9],
+    "berceuse": [1.05, 2.55, 1.65, 3.3],
+    "etagere_coin": [1.25, 3.4, 1.65, 3.8],
+    "radiateur": [0.15, 3.62, 1.15, 3.8],
+    "plante": [1.3, 1.7, 1.65, 2.05],
+    "lampe_salon": [1.35, -0.05, 1.6, 0.2]
+  },
+  "hides": [
+    {
+      "id": "divan",
+      "kind": "bloc",
+      "obstacle": "divan",
+      "height": 0.85
+    }
+  ],
+  "corner": {
+    "x": 0.62,
+    "z": 3.3,
+    "face": [0, -1.0],
+    "kind": "coussin"
+  },
+  "cushion": [0.32, 3.05, 0.92, 3.58],
+  "camera": {
+    "pos": [-0.05, 3.55, -1.85],
+    "target": [-0.1, 0.4, 2.2],
+    "fov": 44.0
+  },
+  "spots": {
+    "table_basse_nord": {
+      "stand": [0.15, 1.88],
+      "food": [0.15, 2.3],
+      "far": 1.0,
+      "surface": "low"
+    },
+    "table_basse_ouest": {
+      "stand": [-0.63, 2.42],
+      "food": [-0.2, 2.42],
+      "far": 0.9,
+      "surface": "low"
+    },
+    "table_basse_est": {
+      "stand": [0.92, 2.32],
+      "food": [0.5, 2.32],
+      "far": 0.5,
+      "surface": "low"
+    },
+    "table_basse_sud": {
+      "stand": [0.15, 2.98],
+      "food": [0.15, 2.55],
+      "far": 0.3,
+      "surface": "low"
+    },
+    "piano": {
+      "stand": [-0.85, 3.12],
+      "food": [-0.85, 3.55],
+      "far": 0.8,
+      "surface": "piano"
+    }
+  },
+  "stations": {
+    "divan_papa": {
+      "pos": [-0.45, 1.68],
+      "face": [0, 1],
+      "activity": "hockey",
+      "regard": "devant",
+      "assis": true
+    },
+    "divan_maman": {
+      "pos": [0.75, 1.68],
+      "face": [0, 1],
+      "activity": "film",
+      "regard": "devant",
+      "assis": true
+    }
+  },
+  "seats": {
+    "divan_papa": {
+      "pos": [-0.45, 1.68],
+      "face": [0, 1]
+    },
+    "divan_maman": {
+      "pos": [0.75, 1.68],
+      "face": [0, 1]
+    },
+    "berceuse": {
+      "pos": [1.3, 2.9],
+      "face": [-1, 0]
+    }
+  },
+  "helper_door": [-1.38, 0.75],
+  "mom_door": [-1.38, 0.75],
+  "cache": [
+    "SalleAManger"
+  ]
+}

@@ -48,6 +48,10 @@ func load_file() -> void:
 				var id := int(key)
 				if id >= 1 and id <= Levels.COUNT:
 					pair[1][str(id)] = clampi(int(_number(pair[0][key], 0)), 0, pair[2])
+	# Une étoile ouvre la mission suivante, même dans une sauvegarde d'avant les nouvelles missions.
+	for key: String in stars:
+		if int(stars[key]) >= 1:
+			unlocked = maxi(unlocked, mini(Levels.COUNT, int(key) + 1))
 	var o: Variant = d.get("options")
 	if o is Dictionary:
 		for key: String in DEFAULT_OPTIONS:

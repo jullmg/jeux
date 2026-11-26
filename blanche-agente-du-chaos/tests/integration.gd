@@ -338,7 +338,7 @@ func test_deuxieme_doigt() -> void:
 
 func test_but_hors_d_atteinte() -> void:
 	var sim := await calm(4)
-	for aim: Vector3 in [Vector3(sim.map.stool_pos.x, 0.6, sim.map.stool_pos.y), Vector3(1.8, 0.9, -0.6),
+	for aim: Vector3 in [Vector3(sim.map.stools[0].pos.x, 0.6, sim.map.stools[0].pos.y), Vector3(1.8, 0.9, -0.6),
 			Vector3(0.0, 0.9, -0.1)]:
 		main.tap(main.stage.on_screen(aim))
 		check(await run_until(func() -> bool: return main._touch_goal == Vector2.INF, 480), "le but est abandonné : %s" % aim)
