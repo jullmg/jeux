@@ -1,0 +1,86 @@
+{
+  "id": 10,
+  "meal": "Le souper en famille",
+  "piece": "salle_a_manger",
+  "novelty": "Les allers-retours",
+  "moment": "soir",
+  "intro": [
+    "Maman fait des allers-retours à la cuisine, par la porte de bois.",
+    "Quand elle est partie, c'est le temps d'en profiter !",
+    "Son retour s'annonce toujours : des pas, « J'arrive ! » et une icône du côté de la porte.",
+    "Elle revient avec un plat… et elle regarde la pièce en entrant."
+  ],
+  "duration": 130,
+  "hint_min": 0.55,
+  "window_mult": 1.0,
+  "look": [
+    1.2,
+    1.9
+  ],
+  "stations": [
+    "servir",
+    "buffet",
+    "assise",
+    "cuisine"
+  ],
+  "move_chance": 0.55,
+  "feint_chance": 0.15,
+  "surprise_chance": 0.0,
+  "round_chance": 0.08,
+  "noise": true,
+  "noisy_spots": [
+    "buffet_est"
+  ],
+  "serve": true,
+  "helpers": [],
+  "spots": [
+    "table_nord",
+    "table_sud",
+    "table_ouest",
+    "table_est",
+    "buffet_est",
+    "buffet_ouest"
+  ],
+  "weights": [
+    0.35,
+    0.45,
+    0.2
+  ],
+  "spawn": [
+    1.9,
+    3.1
+  ],
+  "max_items": 5,
+  "treasure_at": 0.6,
+  "treasure_points": 500,
+  "foods": {
+    "crumb": [
+      "miette",
+      "Grain de blé d'Inde"
+    ],
+    "small": [
+      "pepperoni",
+      "Petit pain chaud"
+    ],
+    "big": [
+      "pointe_pizza",
+      "Portion de pâté chinois"
+    ],
+    "treasure": [
+      "poulet_roti",
+      "Le pâté chinois"
+    ]
+  },
+  "activity_text": {
+    "servir": "sert le pâté chinois",
+    "buffet": "met la table",
+    "manger": "soupe avec nous",
+    "cuisine": "est à la cuisine"
+  },
+  "stars": [
+    650,
+    1400,
+    2200
+  ],
+  "repeat_max": 6
+}

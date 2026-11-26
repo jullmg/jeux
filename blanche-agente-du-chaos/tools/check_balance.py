@@ -4,11 +4,17 @@
   tools/check_balance.py --games 60      # rapide
   tools/check_balance.py --games 1000    # complet (une vingtaine de minutes)
 """
-import argparse, pathlib, sys
+import argparse, json, pathlib, sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import calibrate
 
+# Les premières missions d'une nouvelle pièce (la salle à manger, le salon, les deux réunies) : la difficulté y
+# redescend un peu. Et les missions qui ont le droit de résister davantage.
+PIECES = {l: json.loads((calibrate.ROOT / "levels" / f"niveau_{l}.json").read_text()).get("piece", "cuisine")
+          for l in calibrate.LEVELS}
+ROOM_START = {l for l in calibrate.LEVELS if l > 1 and PIECES[l] != PIECES[l - 1]}
+HARDER = {7, 8, 11, 12, 14, 15}
 HONEST = ["prudent_300", "equilibre_300", "equilibre_500", "equilibre_700", "gourmand_300", "novice_700", "sage_300"]
 
 
@@ -25,12 +31,14 @@ def main():
         if not ok:
             problems.append(text)
 
-    for level in range(1, 9):
+    last = max(calibrate.LEVELS)
+    for level in calibrate.LEVELS:
         need(get(level, "sage_300")["caught"] == 0, f"équité : le robot sage est pris au niveau {level}")
         need(get(level, "equilibre_300")["pass_rate"] >= 95, f"niveau {level} : un bon joueur ne le réussit pas toujours")
         need(get(level, "equilibre_300")["three_rate"] >= 25, f"niveau {level} : trois étoiles trop rares")
-        # Les deux dernières missions ont le droit de résister davantage.
-        need(get(level, "novice_700")["pass_rate"] >= (88 if level <= 6 else 78), f"niveau {level} : trop dur pour un débutant")
+        # Les missions qui terminent une pièce ont le droit de résister davantage.
+        need(get(level, "novice_700")["pass_rate"] >= (78 if level in HARDER else 88),
+             f"niveau {level} : trop dur pour un débutant")
         for profile in ("spam_300", "campeur_300"):
             need(get(level, profile)["pass_rate"] <= 1, f"niveau {level} : {profile} réussit")
         need(get(level, "miettes_300")["pass_rate"] <= 5, f"niveau {level} : les miettes suffisent")
@@ -40,13 +48,23 @@ def main():
              f"niveau {level} : s'entêter vaut presque un jeu honnête")
         for profile in HONEST:
             need(get(level, profile)["stuck"] == 0, f"niveau {level} : {profile} reste coincé")
-    for level in range(2, 9):
+    # La difficulté monte d'une mission à l'autre, sauf au début d'une nouvelle pièce, où elle redescend un peu.
+    for level in calibrate.LEVELS:
+        if level == 1 or level in ROOM_START:
+            continue
         need(get(level, "equilibre_700")["caught"] >= get(level - 1, "equilibre_700")["caught"] - 0.4,
              f"la difficulté recule au niveau {level} (au coin)")
         need(get(level, "novice_700")["three_rate"] <= get(level - 1, "novice_700")["three_rate"] + 15,
              f"la difficulté recule au niveau {level} (trois étoiles)")
-    need(get(8, "equilibre_700")["caught"] >= get(1, "equilibre_700")["caught"] + 2, "le dernier niveau n'est pas plus dur")
+    need(get(8, "equilibre_700")["caught"] >= get(1, "equilibre_700")["caught"] + 2, "la cuisine n'est pas plus dure à la fin")
     need(get(8, "novice_700")["three_rate"] <= get(1, "novice_700")["three_rate"] - 40, "la courbe de difficulté est trop plate")
+    first_new = min(ROOM_START)
+    need(get(last, "novice_700")["three_rate"] <= get(first_new, "novice_700")["three_rate"] - 20,
+         "la dernière mission n'est pas plus dure que le début de la salle à manger (trois étoiles)")
+    need(get(last, "equilibre_700")["caught"] >= get(first_new, "equilibre_700")["caught"] + 1.5,
+         "la dernière mission n'est pas plus dure que le début de la salle à manger (au coin)")
+    need(get(last, "novice_700")["pass_rate"] <= get(first_new, "novice_700")["pass_rate"] - 5,
+         "la dernière mission n'est pas plus dure que le début de la salle à manger (réussite)")
 
     if problems:
         print("\nÉQUILIBRAGE : ÉCHEC")

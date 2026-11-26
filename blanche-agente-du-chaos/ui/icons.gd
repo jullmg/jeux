@@ -95,3 +95,24 @@ static func lock(on: CanvasItem, c: Vector2, r: float, color: Color) -> void:
 static func pause(on: CanvasItem, c: Vector2, r: float, color: Color) -> void:
 	for s: float in [-1.0, 1.0]:
 		on.draw_line(c + Vector2(s * r * 0.35, -r * 0.55), c + Vector2(s * r * 0.35, r * 0.55), color, r * 0.28, true)
+
+
+static func heart(on: CanvasItem, c: Vector2, r: float, color: Color) -> void:
+	var pts := PackedVector2Array()
+	for i in 32:
+		var a := TAU * i / 32.0
+		# La courbe du cœur, la pointe en bas.
+		var x := 16.0 * pow(sin(a), 3)
+		var y := -(13.0 * cos(a) - 5.0 * cos(2.0 * a) - 2.0 * cos(3.0 * a) - cos(4.0 * a))
+		pts.append(c + Vector2(x, y) * r / 17.0)
+	on.draw_colored_polygon(pts, color)
+	pts.append(pts[0])
+	on.draw_polyline(pts, Color.WHITE, maxf(2.0, r * 0.12), true)
+
+
+## Une porte entrouverte, avec la flèche de quelqu'un qui arrive.
+static func door(on: CanvasItem, c: Vector2, r: float, color: Color) -> void:
+	on.draw_rect(Rect2(c + Vector2(-r * 0.55, -r), Vector2(r * 1.1, r * 2.0)), Color.WHITE, true)
+	on.draw_colored_polygon(PackedVector2Array([c + Vector2(-r * 0.45, -r * 0.9), c + Vector2(r * 0.25, -r * 0.7),
+		c + Vector2(r * 0.25, r * 0.95), c + Vector2(-r * 0.45, r * 0.9)]), color)
+	on.draw_circle(c + Vector2(r * 0.1, r * 0.1), r * 0.09, Color.WHITE, true, -1.0, true)

@@ -156,6 +156,9 @@ func _choose(view: Dictionary) -> Dictionary:
 			continue
 		var travel := sim.dog_pos.distance_to(goal) * 1.25 / Sim.DOG_SPEED
 		var grab_time: float = sim.grab_time(item)
+		if item.has("from"):
+			# Un morceau glissé sous la table par Charlotte se prend sans se dresser.
+			grab_time = 0.0
 		match style:
 			"prudent", "miettes":
 				if grab_time + minf(travel, 1.0) > remaining + 0.2:

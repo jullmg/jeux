@@ -46,6 +46,8 @@ const WARY_NOISE := 0.18
 const WARY_CAUGHT := 0.3
 ## La part des fenêtres que la méfiance retranche, quand la jauge est pleine.
 const WARY_WINDOW := 0.3
+## La punition dure un peu plus dans la cage que sur un coussin.
+const CAGE_EXTRA := 0.6
 ## Au bout de combien de temps un trésor perdu revient sur un meuble.
 const TREASURE_RETURN := 12.0
 ## Durée d'une fenêtre selon ce que fait Maman (secondes, avant les ajustements).
@@ -54,7 +56,7 @@ const ACTIVITY_WINDOWS := {
 	"telephone": [6.0, 8.0], "ilot": [2.8, 4.0], "surprise": [7.0, 9.0], "charlotte": [6.0, 7.5],
 	"chicane": [ARGUE_TIME, ARGUE_TIME],
 	"servir": [2.6, 3.6], "manger": [3.6, 5.0], "buffet": [3.2, 4.4], "disque": [5.0, 6.5], "cuisine": [5.5, 7.5],
-	"hockey": [3.4, 4.8], "but": [7.0, 9.0], "film": [3.6, 5.0], "jaser": [4.0, 5.5],
+	"hockey": [3.4, 4.8], "but": [7.0, 9.0], "film": [3.6, 5.0], "jaser": [3.0, 4.2],
 }
 ## Le retour de la cuisine s'annonce un peu plus longtemps : il faut lire l'icône au bord de l'écran.
 const RETURN_EXTRA := 0.25
@@ -68,6 +70,9 @@ const GUEST_SIGHT := 0.85
 const SNITCH_SIGHT := 2.3
 const SNITCH_TIME := 0.9
 const WALKER_SPEED := 0.8
+const WALKER_SIGHT := 1.4
+## La visite jase longtemps entre deux déplacements.
+const WALKER_CHAT := [4.0, 7.5]
 ## Le noir : la lumière de la télé, d'une scène à l'autre, et le temps qu'elle met à changer.
 const TV_SCENES := [0.0, 0.15, 0.35, 0.7, 1.0]
 const TV_SCENE_TIME := [3.0, 7.0]
@@ -523,7 +528,10 @@ func _walk_to_corner(dt: float) -> void:
 		dog_pos = map.corner
 		dog_dir = map.corner_face
 		dog_state = Dog.IN_CORNER
-		corner_left = 2.0 + 0.5 * minf(caught_count - 1, 4)
+		corner_left = 2.0 + 0.5 * minf(caught_count - 1, float(level.get("repeat_max", 4)))
+		if map.corner_kind == "cage":
+			# Dans sa cage, on attend que Maman ait fermé puis rouvert la porte.
+			corner_left += CAGE_EXTRA
 		_emit("corner_arrive")
 		return
 	var step_ := _advance(dog_pos, dog_dir, corner_path, SULK_SPEED * dt)
@@ -1090,7 +1098,7 @@ func _setup_people() -> void:
 			"t": 0.0, "snitch": 0.0, "cool": 0.0, "dropped": 0}
 		match s.role:
 			"complice":
-				p.t = rng.randf_range(SLIP_WAIT[0], SLIP_WAIT[1])
+				p.t = _rand(level.get("slip_wait", SLIP_WAIT))
 			"temoin":
 				p.state = "jase"
 				p.t = rng.randf_range(GUEST_CHAT[0], GUEST_CHAT[1])
@@ -1128,12 +1136,13 @@ func _step_accomplice(s: Dictionary, dt: float) -> void:
 			s.t -= dt
 			if s.t <= 0.0:
 				s.state = "eat"
-				s.t = rng.randf_range(SLIP_WAIT[0], SLIP_WAIT[1])
+				s.t = _rand(level.get("slip_wait", SLIP_WAIT))
 				_slip_piece(s)
 		"argue":
 			if mom_state != Mom.BUSY or activity != "chicane":
 				s.state = "eat"
-				s.t = rng.randf_range(SLIP_WAIT[0] + 3.0, SLIP_WAIT[1] + 4.0)
+				var wait: Array = level.get("slip_wait", SLIP_WAIT)
+				s.t = rng.randf_range(wait[0] + 3.0, wait[1] + 4.0)
 
 
 ## Maman a vu Charlotte nourrir la chienne : elle ne regarde plus qu'elle, le temps de la chicane.
@@ -1182,6 +1191,7 @@ func _step_guest(s: Dictionary, dt: float) -> void:
 		else:
 			s.state = "jase"
 			s.t = rng.randf_range(GUEST_CHAT[0], GUEST_CHAT[1])
+			_emit("chat", {"who": s.who})
 	var sees: bool = s.state == "regarde" and s.cool <= 0.0 and dog_state == Dog.REACHING \
 		and map.spots[reach_item.spot].food.distance_to(s.pos) < GUEST_SIGHT
 	_snitch_step(s, sees, dt)
@@ -1233,8 +1243,10 @@ func _step_walkers(dt: float) -> void:
 			_nudge_dog(w.pos, HELPER_RADIUS)
 			if w.path.is_empty():
 				w.state = "pause"
-				w.t = rng.randf_range(2.5, 5.0)
-		var sees: bool = w.cool <= 0.0 and dog_state == Dog.REACHING and w.pos.distance_to(dog_pos) < SNITCH_SIGHT
+				w.t = rng.randf_range(WALKER_CHAT[0], WALKER_CHAT[1])
+		# En jasant, la visite ne voit rien ; en marchant, elle voit ce qui se passe autour d'elle.
+		var sees: bool = w.state == "walk" and w.cool <= 0.0 and dog_state == Dog.REACHING \
+			and w.pos.distance_to(dog_pos) < WALKER_SIGHT
 		_snitch_step(w, sees, dt)
 
 

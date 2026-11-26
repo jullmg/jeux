@@ -70,7 +70,7 @@ func _calm() -> bool:
 ## L'image d'un plat, pour les cartes et les résultats.
 func _dish(id: int, side: float) -> TextureRect:
 	var picture := TextureRect.new()
-	picture.texture = load("res://art/ui/plat_%d.png" % id)
+	picture.texture = Hud.dish_texture(id)
 	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	picture.custom_minimum_size = Vector2(side, side)

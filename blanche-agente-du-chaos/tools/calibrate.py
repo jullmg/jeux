@@ -10,15 +10,19 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 GODOT = os.environ.get("GODOT", "/Applications/Godot.app/Contents/MacOS/Godot")
 PROFILES = ["sage_300", "prudent_300", "equilibre_300", "equilibre_500", "equilibre_700", "gourmand_300", "novice_700",
             "tetu_300", "spam_300", "miettes_300", "campeur_300"]
-# Cibles des seuils, mesurées sur le robot débutant (lent à réagir et à se décider) :
-# part qui rate le niveau (1re étoile), puis part qui obtient trois étoiles.
-FAIL_TARGET = [3, 4, 5, 6, 7, 8, 9, 10]
-THREE_TARGET = [58, 50, 43, 36, 28, 21, 15, 9]
+LEVELS = range(1, len(list((ROOT / "levels").glob("niveau_*.json"))) + 1)
+# Cibles des seuils, mesurées sur le robot débutant (lent à réagir et à se décider) : part qui rate le niveau
+# (1re étoile), puis part qui obtient trois étoiles. La difficulté remonte un peu au début de chaque nouvelle pièce
+# (missions 9 et 13), puis monte.
+FAIL_TARGET = {1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8, 7: 9, 8: 10,
+               9: 5, 10: 6, 11: 7, 12: 9, 13: 6, 14: 8, 15: 11}
+THREE_TARGET = {1: 58, 2: 50, 3: 43, 4: 36, 5: 28, 6: 21, 7: 15, 8: 9,
+                9: 40, 10: 33, 11: 27, 12: 20, 13: 34, 14: 25, 15: 8}
 # Une personne est moins efficace qu'un robot (elle vise, hésite, regarde ailleurs) : la 1re étoile ne demande qu'une
 # part du score des débutants. À ajuster après les essais humains.
 HUMAN = 0.45
 # La première étoile du tutoriel reste facile, et la dernière mission reste gagnable.
-STAR1_MAX = {1: 700, 8: 950}
+STAR1_MAX = {1: 700, 8: 950, 15: 950}
 
 
 def run(level, profile, games, folder):
@@ -33,7 +37,7 @@ def run(level, profile, games, folder):
         return json.load(f)[0]
 
 
-def simulate(games, profiles=PROFILES, levels=range(1, 9)):
+def simulate(games, profiles=PROFILES, levels=LEVELS):
     with tempfile.TemporaryDirectory() as folder, concurrent.futures.ThreadPoolExecutor(max(2, os.cpu_count() - 2)) as pool:
         jobs = [pool.submit(run, l, p, games, folder) for l in levels for p in profiles]
         return {(r["level"], r["profile"]): r for r in (j.result() for j in jobs)}
@@ -50,13 +54,13 @@ def write_stars(games):
     """1 étoile : au-dessus de ce qu'on obtient sans jamais redescendre ; 3 étoiles : une courbe qui se resserre."""
     results = simulate(games, ["novice_700", "tetu_300"])
     round50 = lambda v: int(round(v / 50.0) * 50)
-    for level in range(1, 9):
+    for level in LEVELS:
         novice = sorted(results[(level, "novice_700")]["scores"])
         stubborn = sorted(results[(level, "tetu_300")]["scores"])
         quantile = lambda scores, percent: scores[min(len(scores) - 1, int(len(scores) * percent / 100))]
-        s1 = max(300, quantile(novice, FAIL_TARGET[level - 1]) * HUMAN, quantile(stubborn, 82))
+        s1 = max(300, quantile(novice, FAIL_TARGET[level]) * HUMAN, quantile(stubborn, 82))
         s1 = round50(min(s1, STAR1_MAX.get(level, s1)))
-        s3 = round50(max(quantile(novice, 100 - THREE_TARGET[level - 1]), s1 * 1.9))
+        s3 = round50(max(quantile(novice, 100 - THREE_TARGET[level]), s1 * 1.9))
         s2 = round50(s1 + (s3 - s1) * 0.5)
         path = ROOT / "levels" / f"niveau_{level}.json"
         data = json.loads(path.read_text())
@@ -69,8 +73,10 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--games", type=int, default=200)
     ap.add_argument("--write-stars", action="store_true")
+    ap.add_argument("--levels", default="", help="ex. 9,10,11 (tableau seulement)")
     args = ap.parse_args()
     if args.write_stars:
         write_stars(args.games)
     else:
-        table(simulate(args.games))
+        wanted = [int(x) for x in args.levels.split(",")] if args.levels else LEVELS
+        table(simulate(args.games, levels=wanted))

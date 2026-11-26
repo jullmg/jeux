@@ -1,0 +1,94 @@
+{
+  "id": 14,
+  "meal": "Le film en famille",
+  "piece": "salon",
+  "novelty": "Le noir",
+  "moment": "film",
+  "intro": [
+    "Lumières éteintes : c'est le film ! Maman surveille du divan.",
+    "Dans le noir, elle ne voit pas loin : le cercle de lumière montre jusqu'où.",
+    "Aux scènes claires, la télé éclaire toute la pièce.",
+    "Les pattes en l'air, on te voit toujours, même dans le noir !"
+  ],
+  "duration": 135,
+  "hint_min": 0.47,
+  "window_mult": 0.95,
+  "look": [
+    1.2,
+    1.9
+  ],
+  "stations": [
+    "divan_maman"
+  ],
+  "move_chance": 0.0,
+  "feint_chance": 0.25,
+  "surprise_chance": 0.0,
+  "round_chance": 0.0,
+  "noise": true,
+  "noisy_spots": [
+    "piano"
+  ],
+  "dark": {
+    "near": 1.5,
+    "far": 4.6
+  },
+  "helpers": [],
+  "seated": [
+    {
+      "who": "papa",
+      "seat": "divan_papa",
+      "role": "decor"
+    },
+    {
+      "who": "charlotte",
+      "seat": "berceuse",
+      "role": "decor"
+    }
+  ],
+  "spots": [
+    "table_basse_nord",
+    "table_basse_ouest",
+    "table_basse_est",
+    "table_basse_sud",
+    "piano"
+  ],
+  "weights": [
+    0.35,
+    0.45,
+    0.2
+  ],
+  "spawn": [
+    1.8,
+    3.0
+  ],
+  "max_items": 4,
+  "treasure_at": 0.6,
+  "treasure_points": 600,
+  "foods": {
+    "crumb": [
+      "miette",
+      "Grain de pop-corn"
+    ],
+    "small": [
+      "pepperoni",
+      "Réglisse rouge"
+    ],
+    "big": [
+      "pointe_pizza",
+      "Bol de pop-corn"
+    ],
+    "treasure": [
+      "poulet_roti",
+      "La boîte de pizza"
+    ]
+  },
+  "activity_text": {
+    "film": "regarde le film"
+  },
+  "stars": [
+    950,
+    1650,
+    2350
+  ],
+  "repeat_max": 6
+}

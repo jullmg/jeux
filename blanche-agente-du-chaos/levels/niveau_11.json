@@ -1,0 +1,99 @@
+{
+  "id": 11,
+  "meal": "La fête de Charlotte",
+  "piece": "salle_a_manger",
+  "novelty": "Charlotte complice",
+  "moment": "fete",
+  "intro": [
+    "C'est la fête de Charlotte ! Elle est assise à table… et elle t'aime beaucoup.",
+    "En cachette, elle glisse des morceaux sous la table, de son côté.",
+    "Si Maman la voit faire, ça va chicaner : profites-en !",
+    "La part de gâteau arrivera vers la fin."
+  ],
+  "duration": 130,
+  "hint_min": 0.5,
+  "window_mult": 0.97,
+  "look": [
+    1.2,
+    1.9
+  ],
+  "stations": [
+    "servir",
+    "buffet",
+    "assise",
+    "cuisine"
+  ],
+  "move_chance": 0.55,
+  "feint_chance": 0.2,
+  "surprise_chance": 0.0,
+  "round_chance": 0.1,
+  "noise": true,
+  "noisy_spots": [
+    "buffet_est",
+    "table_nord"
+  ],
+  "serve": true,
+  "helpers": [],
+  "seated": [
+    {
+      "who": "charlotte",
+      "seat": "sud_est",
+      "role": "complice"
+    },
+    {
+      "who": "papa",
+      "seat": "nord_ouest",
+      "role": "decor"
+    }
+  ],
+  "spots": [
+    "table_nord",
+    "table_sud",
+    "table_ouest",
+    "table_est",
+    "buffet_est",
+    "buffet_ouest"
+  ],
+  "weights": [
+    0.35,
+    0.45,
+    0.2
+  ],
+  "spawn": [
+    1.9,
+    3.1
+  ],
+  "max_items": 5,
+  "treasure_at": 0.62,
+  "treasure_points": 600,
+  "foods": {
+    "crumb": [
+      "miette",
+      "Miette de gâteau"
+    ],
+    "small": [
+      "pepperoni",
+      "Pointe de sandwich"
+    ],
+    "big": [
+      "pointe_pizza",
+      "Hot-dog"
+    ],
+    "treasure": [
+      "poulet_roti",
+      "La part de gâteau"
+    ]
+  },
+  "activity_text": {
+    "servir": "sert les hot-dogs",
+    "buffet": "allume les bougies",
+    "manger": "chante avec nous",
+    "cuisine": "va chercher le gâteau"
+  },
+  "stars": [
+    1250,
+    2700,
+    4200
+  ],
+  "repeat_max": 6
+}

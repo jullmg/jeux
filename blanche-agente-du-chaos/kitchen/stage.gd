@@ -171,9 +171,11 @@ func _prepare_room(piece: String) -> void:
 	var m := RoomMap.new(piece)
 	var model := str(m.data.get("model", piece))
 	var node: Node3D = null
-	for other: Dictionary in _rooms.values():
-		if str(other.map.data.get("model", other.map.id)) == model:
-			node = other.node
+	# Les pièces d'un même modèle le partagent ; une maquette grise, elle, est propre à son plan.
+	if ResourceLoader.exists(MODELS % model):
+		for other: Dictionary in _rooms.values():
+			if str(other.map.data.get("model", other.map.id)) == model:
+				node = other.node
 	if node == null:
 		if ResourceLoader.exists(MODELS % model):
 			node = (load(MODELS % model) as PackedScene).instantiate()

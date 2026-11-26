@@ -1,0 +1,83 @@
+{
+  "id": 9,
+  "meal": "Le brunch du dimanche",
+  "piece": "salle_a_manger",
+  "novelty": "Sous la table",
+  "moment": "brunch",
+  "intro": [
+    "Nouvelle pièce : la salle à manger. Ton coin, ici, c'est ta cage (la porte est ouverte).",
+    "Couchée sous la table, personne debout ne te voit… même la gueule pleine.",
+    "Mais assise à table, Maman voit dessous, de son côté.",
+    "Les pattes sur la table, tout le monde te voit. Et les chaises grincent si tu fonces dedans."
+  ],
+  "duration": 130,
+  "hint_min": 0.6,
+  "window_mult": 1.05,
+  "look": [
+    1.2,
+    1.8
+  ],
+  "stations": [
+    "servir",
+    "buffet",
+    "assise"
+  ],
+  "move_chance": 0.45,
+  "feint_chance": 0.1,
+  "surprise_chance": 0.0,
+  "round_chance": 0.06,
+  "noise": true,
+  "noisy_spots": [
+    "buffet_est"
+  ],
+  "helpers": [],
+  "spots": [
+    "table_nord",
+    "table_sud",
+    "table_ouest",
+    "table_est",
+    "buffet_est",
+    "buffet_ouest"
+  ],
+  "weights": [
+    0.35,
+    0.45,
+    0.2
+  ],
+  "spawn": [
+    1.8,
+    3.0
+  ],
+  "max_items": 5,
+  "treasure_at": 0.6,
+  "treasure_points": 500,
+  "foods": {
+    "crumb": [
+      "miette",
+      "Miette de rôtie"
+    ],
+    "small": [
+      "pepperoni",
+      "Tranche de bacon"
+    ],
+    "big": [
+      "pointe_pizza",
+      "Rôtie aux cretons"
+    ],
+    "treasure": [
+      "poulet_roti",
+      "L'assiette du brunch"
+    ]
+  },
+  "activity_text": {
+    "servir": "sert le café",
+    "buffet": "remplit les verres de jus",
+    "manger": "mange ses œufs"
+  },
+  "stars": [
+    450,
+    1300,
+    2100
+  ],
+  "repeat_max": 6
+}

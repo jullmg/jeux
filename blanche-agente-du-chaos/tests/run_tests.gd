@@ -180,6 +180,51 @@ func test_chemins_vers_chaque_endroit() -> void:
 			check(not back.is_empty() and back[back.size() - 1].distance_to(m.corner) < 0.15, "%s : %s → coin" % [piece, id])
 
 
+## Aucune poche : toute place libre du plancher se rejoint depuis le coin, même quand Maman est à un de ses postes,
+## dans la porte ou en train de faire son tour (sinon un but touché à l'écran ou un robot pousse sans fin).
+func test_aucune_poche() -> void:
+	for piece: String in PIECES:
+		var m: RoomMap = grids(piece)[0]
+		var n: Nav = grids(piece)[1]
+		var places: Dictionary = {"personne": Vector2.INF}
+		for station: String in m.stations:
+			var st: Dictionary = m.stations[station]
+			if not st.seated and not st.outside:
+				places[station] = st.pos
+		if m.mom_door != Vector2.INF:
+			places["porte"] = m.mom_door
+		for p: Vector2 in m.ring:
+			places["tour %s" % p] = p
+		for where: String in places:
+			var lost := _cells_out_of_reach(n, places[where])
+			check(lost.is_empty(), "%s, Maman à %s : %d places hors d'atteinte, ex. %s" % [piece, where, lost.size(),
+				str(lost.slice(0, 3))])
+
+
+## Les places libres qu'on ne rejoint pas depuis le coin quand quelqu'un se tient en `blocker`.
+func _cells_out_of_reach(n: Nav, blocker: Vector2) -> Array:
+	var reach := Sim.MOM_RADIUS + n.radius
+	var blocked := func(c: Vector2i) -> bool:
+		return n.grid.is_point_solid(c) or (blocker != Vector2.INF and n.center(c).distance_to(blocker) < reach)
+	var start := n.nearest_open(n.map.corner)
+	var seen := {start: true}
+	var todo: Array[Vector2i] = [start]
+	while not todo.is_empty():
+		var c: Vector2i = todo.pop_back()
+		for d: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+			var nb := c + d
+			if n.grid.region.has_point(nb) and not seen.has(nb) and not blocked.call(nb):
+				seen[nb] = true
+				todo.append(nb)
+	var lost := []
+	for x in n.grid.region.size.x:
+		for y in n.grid.region.size.y:
+			var c := Vector2i(x, y)
+			if not blocked.call(c) and not seen.has(c):
+				lost.append(n.center(c))
+	return lost
+
+
 func test_maman_ne_coince_jamais() -> void:
 	# Quel que soit son poste, tout endroit qu'elle n'occupe pas reste accessible et on peut en revenir. Assise ou
 	# sortie, elle n'est pas un obstacle ; dans la porte, elle en est un.

@@ -22,6 +22,26 @@ const MOMENTS := {
 		"window": [Color(1.0, 0.55, 0.30), 4.2], "fill": [Color(0.88, 0.80, 0.80), 0.09], "lamps": 0.62,
 		"sky": Color(1.0, 0.58, 0.44), "exposure": 1.08, "saturation": 1.06,
 	},
+	"brunch": {
+		"ambient": [Color(0.78, 0.75, 0.76), 0.56], "key": [Color(1.0, 0.95, 0.89), 0.68],
+		"window": [Color(1.0, 0.86, 0.62), 5.5], "fill": [Color(0.86, 0.90, 1.0), 0.14], "lamps": 0.30,
+		"sky": Color(1.0, 1.0, 1.0), "exposure": 1.10, "saturation": 1.10,
+	},
+	"fete": {
+		"ambient": [Color(0.80, 0.78, 0.76), 0.58], "key": [Color(1.0, 0.97, 0.93), 0.76],
+		"window": [Color(1.0, 0.94, 0.82), 4.0], "fill": [Color(0.88, 0.92, 1.0), 0.14], "lamps": 0.22,
+		"sky": Color(1.0, 1.0, 1.0), "exposure": 1.06, "saturation": 1.08,
+	},
+	"hockey": {
+		"ambient": [Color(0.72, 0.62, 0.55), 0.48], "key": [Color(1.0, 0.86, 0.70), 0.60],
+		"window": [Color(1.0, 0.55, 0.30), 4.2], "fill": [Color(0.88, 0.80, 0.80), 0.09], "lamps": 0.62,
+		"sky": Color(1.0, 0.58, 0.44), "exposure": 1.08, "saturation": 1.06,
+	},
+	"film": {
+		"ambient": [Color(0.72, 0.62, 0.55), 0.48], "key": [Color(1.0, 0.86, 0.70), 0.60],
+		"window": [Color(1.0, 0.55, 0.30), 4.2], "fill": [Color(0.88, 0.80, 0.80), 0.09], "lamps": 0.62,
+		"sky": Color(1.0, 0.58, 0.44), "exposure": 1.08, "saturation": 1.06,
+	},
 	"noel": {
 		"ambient": [Color(0.68, 0.55, 0.50), 0.44], "key": [Color(1.0, 0.82, 0.62), 0.56],
 		"window": [Color(0.45, 0.60, 1.0), 2.2], "fill": [Color(0.72, 0.72, 0.92), 0.07], "lamps": 0.85,

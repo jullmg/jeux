@@ -224,7 +224,7 @@ func start_level(id: int) -> void:
 	hud.start(sim, stage)
 	state = "jeu"
 	Sound.music("jeu")
-	_say_later(Texts.pick(Texts.MOM.intro, _rng))
+	_say_later(Texts.pick(_lines("intro"), _rng))
 	_handle_events()
 
 
@@ -372,7 +372,7 @@ func _commands(delta: float) -> Array:
 func _physics_process(delta: float) -> void:
 	# Elle fredonne tant qu'elle est occupée : le silence est un indice de plus. Déduit de l'état, rien à éteindre ailleurs.
 	Sound.hum(state == "jeu" and sim != null and not sim.over and sim.mom_state == Sim.Mom.BUSY \
-		and sim.activity != "telephone")
+		and sim.activity != "telephone" and not sim.mom_out)
 	if state != "jeu" or sim == null:
 		return
 	for i in speed:
@@ -424,6 +424,11 @@ func _event_sound(e: Dictionary) -> void:
 		"hint":
 			if e.kind == "feint":
 				Sound.play("feinte")
+			elif e.kind == "retour":
+				# Ses pas qui approchent dans le corridor.
+				Sound.play("indice")
+				for i in 3:
+					get_tree().create_timer(0.12 + i * 0.16, false).timeout.connect(Sound.play.bind("pas", -4.0, 0.8))
 			else:
 				Sound.play("indice")
 				Sound.play("tour" if e.kind == "round" else "alerte", -3.0)
@@ -452,8 +457,12 @@ func _event_sound(e: Dictionary) -> void:
 			Sound.play("maman_appel")
 		"snitch":
 			Sound.play("hon")
-		"helper_in":
+		"helper_in", "out", "back_in":
 			Sound.play("porte")
+		"served":
+			Sound.play("prise", -4.0, 0.8)
+		"busted":
+			Sound.play("maman_appel")
 		"papa_drop":
 			Sound.play("tombe", -4.0)
 		"freed":
@@ -467,26 +476,67 @@ func _event_sound(e: Dictionary) -> void:
 				Sound.play("frigo")
 
 
+## Les répliques de la personne qui surveille : Papa au hockey, Maman qui chuchote pendant le film, ou Maman.
+func _lines(key: String) -> Array:
+	var cage := sim != null and sim.map.corner_kind == "cage"
+	if cage and key in ["caught", "scold_after"]:
+		return Texts.MOM["caught_cage" if key == "caught" else "scold_cage"]
+	var own: Dictionary = Texts.MOM
+	if sim != null and sim.watcher == "papa":
+		own = Texts.PAPA_WATCH
+	elif sim != null and sim.level.get("moment", "") == "film":
+		own = Texts.MOM_FILM
+	return own[key] if own.has(key) else Texts.MOM[key]
+
+
+## Les répliques de quelqu'un d'autre que la personne qui surveille.
+func _other_lines(who: String, key: String) -> Array:
+	if Texts.GUESTS.has(who):
+		return Texts.GUESTS[who].get(key, [])
+	if who == "charlotte":
+		return Texts.CHARLOTTE.get(key, [])
+	return []
+
+
 func _event_words(e: Dictionary) -> void:
 	var say := func(who: PersonView, lines: Array, seconds := 1.8) -> void:
-		hud.bubble(who, Texts.pick(lines, _rng), seconds)
+		if who != null and not lines.is_empty():
+			hud.bubble(who, Texts.pick(lines, _rng), seconds)
 	match e.type:
 		"hint":
+			if e.kind == "retour":
+				return
 			var chance := 1.0 if e.kind == "round" else 0.7
 			if _rng.randf() < chance:
-				say.call(stage.mom, Texts.MOM[HINT_KEYS[e.kind]], 1.2)
+				say.call(stage.mom, _lines(HINT_KEYS[e.kind]), 1.2)
 		"caught":
-			say.call(stage.mom, Texts.MOM.caught, 2.0)
+			say.call(stage.mom, _lines("caught"), 2.0)
 		"corner_arrive":
-			say.call(stage.mom, Texts.MOM.scold_after, 2.0)
+			say.call(stage.mom, _lines("scold_after"), 2.0)
 		"surprise":
-			say.call(stage.mom, Texts.MOM.surprise)
+			say.call(stage.mom, _lines("surprise"))
 		"noise":
-			say.call(stage.mom, Texts.MOM.noise, 1.2)
+			say.call(stage.mom, _lines("noise"), 1.2)
 		"distract":
 			say.call(stage.mom, Texts.MOM.distract, 2.2)
+		"walk":
+			if sim.map.stations[e.station].outside:
+				say.call(stage.mom, Texts.MOM.out, 1.6)
+		"back_in":
+			say.call(stage.mom, Texts.MOM.retour, 1.4)
+		"served":
+			say.call(stage.mom, Texts.MOM.served, 1.6)
+		"busted":
+			say.call(stage.mom, Texts.MOM.busted, 1.6)
+		"slip_start":
+			if _rng.randf() < 0.4:
+				say.call(stage.people.get(e.who), _other_lines(e.who, "slip"), 1.2)
+		"chat":
+			if _rng.randf() < 0.5:
+				say.call(stage.people.get(e.who), _other_lines(e.who, "chat"), 1.8)
 		"argue":
-			_argument = Texts.CHICANE[_rng.randi_range(0, Texts.CHICANE.size() - 1)]
+			var pool: Array = Texts.CHICANE_CHARLOTTE if e.get("with", "papa") == "charlotte" else Texts.CHICANE
+			_argument = pool[_rng.randi_range(0, pool.size() - 1)]
 			_argument_line = -1
 		"helper_in":
 			if stage.people.has(e.who):
@@ -496,11 +546,11 @@ func _event_words(e: Dictionary) -> void:
 				tween.tween_interval(0.5)
 				tween.tween_callback(_greet.bind(who, lines))
 		"snitch":
-			if stage.people.has("charlotte"):
-				say.call(stage.people.charlotte, Texts.CHARLOTTE.snitch, 0.9)
+			var who: String = e.get("who", "charlotte")
+			say.call(stage.people.get(who), _other_lines(who, "snitch"), 0.9)
 		"snitch_call":
-			if stage.people.has("charlotte"):
-				say.call(stage.people.charlotte, Texts.CHARLOTTE.call, 1.6)
+			var who: String = e.get("who", "charlotte")
+			say.call(stage.people.get(who), _other_lines(who, "call"), 1.6)
 		"papa_drop":
 			if stage.people.has("papa"):
 				say.call(stage.people.papa, Texts.PAPA.drop, 1.4)
@@ -511,9 +561,9 @@ func _greet(who: PersonView, lines: Array) -> void:
 		hud.bubble(who, Texts.pick(lines, _rng), 2.0)
 
 
-## La chicane se dit une réplique à la fois, Maman puis Papa, au fil du temps qu'elle dure.
+## La chicane se dit une réplique à la fois, Maman puis l'autre (Papa ou Charlotte), au fil du temps qu'elle dure.
 func _argue() -> void:
-	if sim.mom_state != Sim.Mom.BUSY or sim.activity != "chicane" or not stage.people.has("papa"):
+	if sim.mom_state != Sim.Mom.BUSY or sim.activity != "chicane" or not stage.people.has(sim.chicane_with):
 		return
 	var step := Sim.ARGUE_TIME / _argument.size()
 	var line := mini(int((Sim.ARGUE_TIME - sim.mom_left) / step), _argument.size() - 1)
@@ -521,9 +571,10 @@ func _argue() -> void:
 		return
 	_argument_line = line
 	var moms := line % 2 == 0
-	var speaker: PersonView = stage.mom if moms else stage.people.papa
+	var other: PersonView = stage.people[sim.chicane_with]
+	var speaker: PersonView = stage.mom if moms else other
 	# Une seule bulle à la fois : on lit la chicane comme un ping-pong.
-	hud.hush(stage.people.papa if moms else stage.mom)
+	hud.hush(other if moms else stage.mom)
 	hud.bubble(speaker, _argument[line], step)
 	Sound.play("chicane_maman" if moms else "chicane_papa", -2.0)
 

@@ -22,7 +22,7 @@ Point de reprise d'une session à l'autre. Julien a demandé de tout faire sans 
 |---|---|
 | 1. Fiche de référence | fait |
 | 2. Moteur multi-pièces | fait : plans par pièce, cachettes en liste, Maman hors de la pièce, personnes assises, visite qui circule, le noir ; non-régression de la cuisine |
-| 3. Les missions en données | à faire |
+| 3. Les missions en données | fait : missions 9 à 15, répliques, tests des nouvelles règles, étoiles calibrées |
 | 4. Les pièces en 3D | à faire |
 | 5. Personnages et animations | à faire |
 | 6. La nourriture | à faire |
@@ -48,6 +48,16 @@ souper avec des invités**.
   claire ne trahit pas une Blanche qui s'était fiée au noir.
 - Charlotte complice **sauve** Blanche quand Maman la voit glisser un morceau : la chicane commence au lieu du regard.
 - Pendant qu'elle est à la cuisine, la zone cachée se compte depuis **la porte** par où elle reviendra.
+- **Le party des Fêtes (15)** a demandé des réglages pour que s'entêter (ne jamais redescendre) ne paie pas :
+  Maman se déplace moins (de longs trajets entre les deux pièces étaient des fenêtres gratuites), Charlotte glisse
+  moins de morceaux, le jambon vaut 800 points, et la 1re étoile est plafonnée à 950 comme à la dinde.
+- **La punition s'allonge davantage aux récidives** dans les nouvelles missions (`"repeat_max"` : jusqu'à 5 s au lieu
+  de 4, 9 s au party) : presque rien pour qui se fait prendre deux ou trois fois, beaucoup pour qui s'entête. Dans la
+  cage, elle dure 0,6 s de plus (Maman referme la porte). La cuisine n'a pas changé.
+- La visite qui circule ne voit qu'en marchant ; elle jase longtemps entre deux déplacements. La visite à table ne voit
+  que les morceaux proches d'elle (environ 85 cm), et seulement quand elle ne jase pas.
+- Les débuts de pièce (9, 13, 15) ont droit à une difficulté un peu plus basse que la mission d'avant ; la finale doit
+  être nettement plus dure que le début de la salle à manger (vérifié par `tools/check_balance.py`).
 
 ## Choix faits en l'absence de Julien (à réviser)
 

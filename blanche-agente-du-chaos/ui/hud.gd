@@ -44,6 +44,8 @@ var _top: Control
 var _font: Font
 var _styles: Dictionary = {}
 var _dishes: Array[Texture2D] = []
+## Le mot de la bannière du dernier « AU COIN ! » (« DANS TA CAGE ! » dans la salle à manger, parfois).
+var _banner_text := Texts.AU_COIN
 
 
 func _ready() -> void:
@@ -52,7 +54,7 @@ func _ready() -> void:
 	_font = load("res://art/fonts/fredoka.tres")
 	theme = UiStyle.theme()
 	for id in range(1, Levels.COUNT + 1):
-		_dishes.append(load("res://art/ui/plat_%d.png" % id))
+		_dishes.append(dish_texture(id))
 	_world = _layer(_draw_world)
 	_top = _layer(_draw_panels)
 	_grab = Button.new()
@@ -101,6 +103,12 @@ func _ready() -> void:
 	var banner := _layer(_draw_banner)
 	banner.name = "banniere"
 	clear()
+
+
+## L'image du plat d'une mission (celle de la première, si elle manque).
+static func dish_texture(id: int) -> Texture2D:
+	var path := "res://art/ui/plat_%d.png" % id
+	return load(path if ResourceLoader.exists(path) else "res://art/ui/plat_1.png")
 
 
 ## Place un contrôle à une distance fixe d'un coin de l'écran.
@@ -199,6 +207,8 @@ func on_event(e: Dictionary) -> void:
 			_has_eaten = true
 		"caught":
 			_banner = 1.35
+			var cage := sim.map.corner_kind == "cage" and randf() < 0.5
+			_banner_text = Texts.DANS_TA_CAGE if cage else Texts.AU_COIN
 		"wary":
 			_wary_jump = 0.4
 			# Le conseil, une fois affiché, reste le temps d'être lu.
@@ -231,6 +241,8 @@ func _process(delta: float) -> void:
 	if not _wary_tipped and sim.suspicion >= 0.4:
 		_wary_tipped = true
 		_wary_why = "tip"
+		if sim.map.corner_kind == "cage" or sim.watcher == "papa":
+			_wary_why = "tip_" + ("cage" if sim.map.corner_kind == "cage" else "papa")
 		_wary_left = 4.5
 	_toast.modulate.a = clampf(_toast_left * 3.0, 0.0, 1.0)
 	for who: PersonView in _bubbles.keys():
@@ -261,10 +273,10 @@ func _place_bubble(who: PersonView) -> void:
 	var at := stage.on_screen(who.head_position() + Vector3(0, 0.27, 0))
 	panel.reset_size()
 	var pos := at - Vector2(panel.size.x / 2.0, panel.size.y + 20.0)
-	var papa: PersonView = stage.people.get("papa")
-	if sim.activity == "chicane" and papa and (who == stage.mom or who == papa):
+	var partner: PersonView = stage.people.get(sim.chicane_with)
+	if sim.activity == "chicane" and partner and (who == stage.mom or who == partner):
 		# Chacun sa bulle de son côté : on voit tout de suite qui parle.
-		var other: PersonView = papa if who == stage.mom else stage.mom
+		var other: PersonView = partner if who == stage.mom else stage.mom
 		if stage.on_screen(who.head_position()).x < stage.on_screen(other.head_position()).x:
 			pos = at + Vector2(-panel.size.x - 40.0, -panel.size.y)
 		else:
@@ -375,14 +387,15 @@ func _draw_wary(on: Control, w: float) -> void:
 	var value := sim.suspicion
 	var state := 0 if value < 0.25 else (1 if value < 0.55 else 2)
 	var color: Color = [UiStyle.GREEN, Color("e07b1c"), UiStyle.RED][state]
-	_text(on, Vector2(box.position.x + 24, 60), Texts.SUSPICION, 26, UiStyle.INK_SOFT)
+	_text(on, Vector2(box.position.x + 24, 60), Texts.SUSPICION_OF.get(sim.watcher, Texts.SUSPICION), 26, UiStyle.INK_SOFT)
 	_text(on, Vector2(box.end.x - 184, 60), Texts.WARY_STATES[state], 26, color, HORIZONTAL_ALIGNMENT_RIGHT, 160.0)
 	# La barre gonfle un instant quand la jauge saute.
 	var swell := _wary_jump * 16.0 if not reduced_motion else 0.0
 	var bar := Rect2(box.position.x + 24, 76, box.size.x - 48, 24).grow(swell)
 	_bar(on, bar, value, color)
 	if _wary_left > 0.0:
-		var text: String = Texts.WARY_WHY[_wary_why]
+		var text: String = Texts.WARY_TIPS[_wary_why.trim_prefix("tip_")] if _wary_why.begins_with("tip_") \
+			else Texts.WARY_WHY[_wary_why]
 		var width := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 26).x + 36
 		var chip := Rect2(box.end.x - width, box.end.y + 10, width, 42)
 		on.draw_style_box(_style(Color(UiStyle.INK, 0.85), 21), chip)
@@ -456,6 +469,20 @@ func _draw_world(on: Control) -> void:
 			on.draw_style_box(_style(Color(0.1, 0.06, 0.04, 0.6), 18),
 				Rect2(at + Vector2(-width / 2.0, -20), Vector2(width, 38)))
 			_text(on, at + Vector2(-width / 2.0 + 15, 7), text, 24, Color.WHITE)
+			if sim.mom_out:
+				# À la cuisine : une porte rappelle par où elle reviendra.
+				on.draw_circle(at + Vector2(0, 58), 32.0, Color(0.1, 0.06, 0.04, 0.6), true, -1.0, true)
+				Icons.door(on, at + Vector2(0, 58), 21.0, Color("8a5a35"))
+		Sim.Mom.HINT when sim.hint_kind == "retour":
+			# Elle revient : ses pas, « J'arrive ! », et le temps qu'il reste avant qu'elle soit dans la porte.
+			var at := _door_sign()
+			Icons.warning(on, at, 54.0 * beat, UiStyle.RED)
+			var width := _font.get_string_size(Texts.COMING_BACK, HORIZONTAL_ALIGNMENT_LEFT, -1, 30).x + 34
+			var chip := Rect2(at + Vector2(-width / 2.0, -118), Vector2(width, 48))
+			on.draw_style_box(_style(Color(UiStyle.RED, 0.92), 24), chip)
+			_text(on, chip.position + Vector2(17, 35), Texts.COMING_BACK, 30, Color.WHITE)
+			var f := clampf(sim.mom_left / sim.mom_len, 0.0, 1.0)
+			_bar(on, Rect2(at + Vector2(-70, 56), Vector2(140, 14)), f, UiStyle.RED)
 		Sim.Mom.HINT:
 			if sim.hint_kind == "feint":
 				Icons.question(on, _beside_mom(34.0), 34.0)
@@ -472,15 +499,45 @@ func _draw_world(on: Control) -> void:
 			on.draw_circle(head, 40.0, UiStyle.RED, true, -1.0, true)
 			on.draw_arc(head, 40.0, 0, TAU, 40, Color.WHITE, 4.0, true)
 			Icons.eye(on, head, 29.0, true)
-	for h in sim.helpers:
-		if h.who == "charlotte" and h.snitch > 0.0:
-			var at := stage.on_screen(stage.people.charlotte.head_position() + Vector3(0, 0.35, 0))
-			Icons.warning(on, at, 34.0 * beat, Color("e07b1c"))
+	_draw_people_signs(on, beat)
+
+
+## Au-dessus des autres : qui va dénoncer (« ! » orange), la visite qui regarde (un œil) ou qui jase (une bulle),
+## Charlotte qui glisse un morceau (un cœur).
+func _draw_people_signs(on: Control, beat: float) -> void:
+	for list: Array in [sim.helpers, sim.seated, sim.walkers]:
+		for h: Dictionary in list:
+			var view: PersonView = stage.people.get(h.who)
+			if view == null or not view.visible:
+				continue
+			var at := stage.on_screen(view.head_position() + Vector3(0, 0.35, 0))
+			if h.snitch > 0.0:
+				Icons.warning(on, at, 34.0 * beat, Color("e07b1c"))
+			elif h.get("role", "") == "temoin":
+				var looking: bool = h.state == "regarde"
+				on.draw_circle(at, 24.0, Color(UiStyle.CREAM if looking else UiStyle.INK, 0.88), true, -1.0, true)
+				if looking:
+					Icons.eye(on, at, 17.0, true)
+				else:
+					for i in 3:
+						on.draw_circle(at + Vector2(-9 + i * 9, 0), 3.4, Color.WHITE, true, -1.0, true)
+			elif h.state == "slip":
+				Icons.heart(on, at, 20.0 * beat, UiStyle.PINK)
+
+
+## La porte par où Maman reviendra de la cuisine, à l'écran, gardée dans l'écran.
+func _door_sign() -> Vector2:
+	var door := sim.map.mom_door
+	var at := stage.on_screen(Vector3(door.x, 1.7, door.y))
+	return at.clamp(Vector2(90, SIGNS_TOP), size - Vector2(90, 200))
 
 
 ## Où poser un signe de Maman sans cacher son visage : à gauche de sa tête (sa bulle est à droite), à droite si la
 ## place manque. `half` est la demi-largeur du signe.
 func _beside_mom(half: float) -> Vector2:
+	if sim.mom_out:
+		# Elle est à la cuisine : ses signes sont à la porte par où elle reviendra.
+		return _door_sign()
 	var face := stage.mom.head_position() + Vector3(0, FACE_UP, 0)
 	var at := stage.on_screen(face)
 	var gap := stage.on_screen(face + stage.camera.global_basis.x * HEAD_HALF).x - at.x + half + 12.0
@@ -518,8 +575,8 @@ func _draw_banner(on: Control) -> void:
 		var r := 1.0 if i % 2 == 0 else 0.76
 		burst.append(Vector2(cos(a) * 390.0 * r, sin(a) * 160.0 * r))
 	on.draw_colored_polygon(burst, Color(UiStyle.GOLD, 0.94 * fade))
-	var text := Texts.AU_COIN
-	var font_size := 112
+	var text := _banner_text
+	var font_size := 112 if text == Texts.AU_COIN else 92
 	var width := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 	on.draw_string_outline(_font, Vector2(-width / 2.0, 38), text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 24,
 		Color(UiStyle.INK, fade))

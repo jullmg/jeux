@@ -1,0 +1,104 @@
+{
+  "id": 12,
+  "meal": "Le souper des invités",
+  "piece": "salle_a_manger",
+  "novelty": "La visite à table",
+  "moment": "soir",
+  "intro": [
+    "De la visite pour souper ! Ma tante et mon oncle sont assis à table.",
+    "Chacun voit son côté de la table… quand il ne jase pas.",
+    "Un œil au-dessus de sa tête : il regarde. Une bulle : il jase.",
+    "S'il te voit sur la table, il appelle Maman, même à la cuisine !"
+  ],
+  "duration": 135,
+  "hint_min": 0.47,
+  "window_mult": 0.95,
+  "look": [
+    1.2,
+    1.9
+  ],
+  "stations": [
+    "servir",
+    "buffet",
+    "assise",
+    "cuisine"
+  ],
+  "move_chance": 0.55,
+  "feint_chance": 0.2,
+  "surprise_chance": 0.0,
+  "round_chance": 0.1,
+  "noise": true,
+  "noisy_spots": [
+    "buffet_est",
+    "table_ouest"
+  ],
+  "serve": true,
+  "helpers": [],
+  "seated": [
+    {
+      "who": "tante",
+      "seat": "nord_ouest",
+      "role": "temoin"
+    },
+    {
+      "who": "oncle",
+      "seat": "nord_est",
+      "role": "temoin"
+    },
+    {
+      "who": "papa",
+      "seat": "sud_est",
+      "role": "decor"
+    }
+  ],
+  "spots": [
+    "table_nord",
+    "table_sud",
+    "table_ouest",
+    "table_est",
+    "buffet_est",
+    "buffet_ouest"
+  ],
+  "weights": [
+    0.35,
+    0.45,
+    0.2
+  ],
+  "spawn": [
+    1.8,
+    3.0
+  ],
+  "max_items": 5,
+  "treasure_at": 0.62,
+  "treasure_points": 600,
+  "foods": {
+    "crumb": [
+      "miette",
+      "Miette de pain à l'ail"
+    ],
+    "small": [
+      "pepperoni",
+      "Pain à l'ail"
+    ],
+    "big": [
+      "pointe_pizza",
+      "Carré de lasagne"
+    ],
+    "treasure": [
+      "poulet_roti",
+      "La lasagne"
+    ]
+  },
+  "activity_text": {
+    "servir": "sert la lasagne",
+    "buffet": "verse du vin à la visite",
+    "manger": "jase avec la visite",
+    "cuisine": "est à la cuisine"
+  },
+  "stars": [
+    450,
+    1000,
+    1600
+  ],
+  "repeat_max": 6
+}
