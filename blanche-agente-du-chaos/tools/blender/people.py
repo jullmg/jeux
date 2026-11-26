@@ -68,6 +68,10 @@ def _soft(parts, armature, color, voxel, smoothing, fold_heights, k, streaks=0.0
 
 
 def build(who, spec):
+    # `-- tante oncle` : ne refaire que ceux-là.
+    only = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    if only and who not in only:
+        return
     C.reset()
     C._materials.clear()
     C._painted.clear()
@@ -278,3 +282,34 @@ build("charlotte", dict(
     brow="#7a5234", eyes="#5e3b20", lips="#cf756c", top="#eee5d2", top2="#d9cfba", trim="#7ea58c", pants="#8d6f86",
     shoes="#d98ab0", neck_r=0.042, hip_r=0.14, chest_r=0.15, shoulders=0.92, arm_r=0.056, leg_r=0.074,
     extras=[fleece]))
+
+
+def cardigan(body, P, k, torso_w, M):
+    """Le cardigan rouge de ma tante, ouvert sur un chemisier crème, et ses boutons."""
+    blouse = M("chemisier", "#efe6d6", 0.9)
+    button = M("bouton", "#e8d9b8", 0.4, 0.3)
+    pts = [P(0, 0.98, 0.112), P(0, 1.1, 0.122), P(0, 1.22, 0.128), P(0, 1.32, 0.1)]
+    path, radii = C.curve(pts, [v * k for v in (0.026, 0.032, 0.04, 0.03)], 4)
+    body.tube(path, radii, blouse, seg=12, squash=(1.35, 0.35), weights=torso_w)
+    for y, z in ((1.24, 0.138), (1.15, 0.136), (1.06, 0.128)):
+        body.ball(P(0.046, y, z), 0.007 * k, button, weights=torso_w, seg=8, rings=6)
+
+
+def plaid(body, P, k, torso_w, M):
+    """Le chandail vert de mon oncle : un col de chemise à carreaux qui dépasse."""
+    collar = M("col_carreaux", "#b9483c", 0.85)
+    for s in (1, -1):
+        body.tube([P(0.01 * s, 1.36, 0.075), P(0.06 * s, 1.335, 0.09)], [0.02 * k, 0.012 * k], collar, seg=8,
+                  squash=(1.0, 0.45), weights={"chest": 1.0})
+
+
+build("tante", dict(
+    file="tante", height=1.62, skin="#eec0a6", hair="#b9afa2", hair2="#968a7c", hair_root="#7c7064", brow="#7a6a5c",
+    eyes="#5b6f4a", lips="#c26a72", top="#b23b47", top2="#962f3a", trim="#962f3a", pants="#3a3a42", shoes="#5a4034",
+    hip_r=0.165, chest_r=0.16, shoulders=0.98, extras=[cardigan]))
+
+build("oncle", dict(
+    file="oncle", height=1.78, skin="#e2ae90", hair="#9d978e", hair2="#7d776e", hair_root="#6a645c", brow="#6e665c",
+    eyes="#5b4a3a", lips="#b8786a", mouth_line="#7d463d", stubble="#b9b3aa", top="#4f6e54", top2="#435d47",
+    trim="#435d47", pants="#b5a483", shoes="#3e3328", neck_r=0.055, hip_r=0.16, chest_r=0.175, shoulders=1.08,
+    torso_x=1.02, arm_r=0.057, extras=[plaid]))

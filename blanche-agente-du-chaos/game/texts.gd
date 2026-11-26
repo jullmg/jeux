@@ -113,7 +113,8 @@ const MOM := {
 ## Papa qui surveille du divan, pendant la game.
 const PAPA_WATCH := {
 	"intro": ["Bon, la game commence !", "Toi, tu restes tranquille, hein ?", "Go Habs go !"],
-	"hint": ["Hein ?", "Où est la télécommande ?", "Bon, une pause pub…", "C'est quoi, ce bruit-là ?"],
+	"hint": ["Hein ?", "Bon, une pause pub…", "C'est quoi, ce bruit-là ?", "Hmm ?"],
+	"remote": ["Où est la télécommande ?", "Voyons, la manette…", "Elle est où, la zapette ?"],
 	"feint": ["Allez, allez !", "Lance !", "Ah ben voyons, l'arbitre !", "Mmm…"],
 	"round": ["Blanche ? T'es où ?"],
 	"caught": ["Blanche ! AU COIN !", "Eille, toi ! AU COIN !", "Pas les nachos ! AU COIN !", "Je t'ai vue ! AU COIN !"],

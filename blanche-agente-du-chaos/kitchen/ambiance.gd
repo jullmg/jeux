@@ -50,12 +50,18 @@ const MOMENTS := {
 }
 
 var moment := ""
+## Le modèle éclairé : "cuisine" ou "double_salon".
+var room := "cuisine"
 var _env: Environment
 var _key: DirectionalLight3D
 var _fill: DirectionalLight3D
 var _window: SpotLight3D
 var _lamps: Array[OmniLight3D] = []
 var _probe: ReflectionProbe
+## Les lumières propres à chaque pièce : modèle → [fenêtre, lampes].
+var _rigs: Dictionary = {}
+## La boîte de la sonde de reflets pour la pièce montrée.
+var _probe_box := [Vector3(0.0, 1.35, 0.35), Vector3(4.3, 3.0, 5.6)]
 
 
 func _ready() -> void:
@@ -89,27 +95,54 @@ func _ready() -> void:
 	rim.light_energy = 0.9
 	rim.light_cull_mask = RIM_LAYER
 
-	_window = SpotLight3D.new()
-	_window.position = Vector3(3.5, 2.75, -0.95)
-	_window.spot_range = 8.0
-	_window.spot_angle = 26.0
-	_window.spot_attenuation = 0.4
-	_window.shadow_enabled = true
-	_window.shadow_blur = 2.0
-	add_child(_window)
-	_window.look_at(Vector3(0.1, 0.0, 0.15))
+	# La cuisine : le soleil par la fenêtre de l'est, les réglettes sous les armoires, un halo près de la porte.
+	_rig("cuisine", [Vector3(3.5, 2.75, -0.95), Vector3(0.1, 0.0, 0.15)], [Vector3(-0.39, 1.36, -1.78),
+		Vector3(1.0, 1.24, -1.74), Vector3(1.78, 1.36, 0.45), Vector3(1.78, 1.36, -1.45), Vector3(1.2, 2.2, 1.35)])
+	# Le double salon : le jour par la fenêtre du salon (au sud), la suspension de la salle à manger, la lampe sur pied,
+	# le plafonnier du salon et un peu de lumière dans le corridor.
+	_rig("double_salon", [Vector3(0.65, 2.75, 6.2), Vector3(0.1, 0.0, 1.2)], [Vector3(0.15, 1.78, -1.8),
+		Vector3(1.23, 1.45, 0.0), Vector3(0.0, 2.6, 1.9), Vector3(-2.3, 2.3, -0.4), Vector3(0.0, 2.6, -2.4)])
+	set_room("cuisine")
+	set_moment("matin")
 
-	# Sous les armoires, puis un halo près de la porte.
-	for at: Vector3 in [Vector3(-0.39, 1.36, -1.78), Vector3(1.0, 1.24, -1.74), Vector3(1.78, 1.36, 0.45),
-			Vector3(1.78, 1.36, -1.45), Vector3(1.2, 2.2, 1.35)]:
+
+## Les lumières d'une pièce : la fenêtre [position, cible] et les lampes (une portée de plus de 2 m : un halo).
+func _rig(model: String, window: Array, lamps: Array) -> void:
+	var spot := SpotLight3D.new()
+	spot.position = window[0]
+	spot.spot_range = 9.0
+	spot.spot_angle = 26.0
+	spot.spot_attenuation = 0.4
+	spot.shadow_enabled = true
+	spot.shadow_blur = 2.0
+	add_child(spot)
+	spot.look_at(window[1])
+	var list: Array[OmniLight3D] = []
+	for at: Vector3 in lamps:
 		var lamp := OmniLight3D.new()
 		lamp.position = at
 		lamp.light_color = Color(1.0, 0.80, 0.54)
-		lamp.omni_range = 3.0 if at.y > 2.0 else 1.25
+		lamp.omni_range = 3.0 if at.y > 2.0 or model != "cuisine" else 1.25
 		add_child(lamp)
-		_lamps.append(lamp)
+		list.append(lamp)
+	_rigs[model] = [spot, list]
 
-	set_moment("matin")
+
+## Montre les lumières d'une pièce (et cache celles de l'autre). `probe` : [centre, taille] de la sonde de reflets.
+func set_room(model: String, probe: Array = []) -> void:
+	room = model
+	for name_: String in _rigs:
+		var on: bool = name_ == model
+		_rigs[name_][0].visible = on
+		for lamp: OmniLight3D in _rigs[name_][1]:
+			lamp.visible = on
+	_window = _rigs[model][0]
+	_lamps = _rigs[model][1]
+	_probe_box = probe if not probe.is_empty() else [Vector3(0.0, 1.35, 0.35), Vector3(4.3, 3.0, 5.6)]
+	var m := moment
+	moment = ""
+	if m != "":
+		set_moment(m)
 
 
 func _sun(degrees: Vector3, shadows: bool) -> DirectionalLight3D:
@@ -161,8 +194,8 @@ func sky_tint() -> Color:
 func _capture_reflections() -> void:
 	if _probe == null:
 		_probe = ReflectionProbe.new()
-		_probe.position = Vector3(0.0, 1.35, 0.35)
-		_probe.size = Vector3(4.3, 3.0, 5.6)
+		_probe.position = _probe_box[0]
+		_probe.size = _probe_box[1]
 		_probe.interior = true
 		_probe.box_projection = true
 		_probe.ambient_mode = ReflectionProbe.AMBIENT_DISABLED
@@ -170,4 +203,6 @@ func _capture_reflections() -> void:
 		_probe.intensity = 0.8
 		add_child(_probe)
 	else:
-		_probe.position.y = 1.35 if _probe.position.y > 1.3505 else 1.351
+		_probe.size = _probe_box[1]
+		var at: Vector3 = _probe_box[0]
+		_probe.position = at if _probe.position.distance_to(at) > 0.0004 else at + Vector3(0, 0.001, 0)

@@ -193,8 +193,9 @@ func _process(delta: float) -> void:
 		"stand":
 			rig.add("neck", Vector3(-look_up * 20, 0, 0))
 			rig.add("head", Vector3(-look_up * 14 + 3, sin(_time * 0.8) * 8, 0))
-		"walk", "sulk":
+		"walk", "sulk", "crawl":
 			var sulk := pose == "sulk"
+			var crawl := pose == "crawl"
 			_phase += delta * speed / STRIDE * TAU
 			var amp := clampf(speed / 1.2, 0.45, 1.0)
 			for s: String in ["L", "R"]:
@@ -211,7 +212,22 @@ func _process(delta: float) -> void:
 			quick["hips"] = Vector3(0, 0, sin(_phase) * 4 * amp)
 			quick["head"] = Vector3(sin(_phase * 2) * 4, 0, 0)
 			ears = 10.0 + sin(_phase * 2) * 16 * amp
-			if sulk:
+			if crawl:
+				# Sous la table : le ventre au ras du plancher, la tête basse, on avance en se faufilant.
+				for s: String in ["L", "R"]:
+					rig.add("shoulder" + s, Vector3(-40, 0, 0))
+					rig.add("elbow" + s, Vector3(-26, 0, 0))
+					rig.add("paw" + s, Vector3(56, 0, 0))
+					rig.add("thigh" + s, Vector3(-32, 0, 0))
+					rig.add("knee" + s, Vector3(64, 0, 0))
+					rig.add("hock" + s, Vector3(-60, 0, 0))
+				rig.add("neck", Vector3(18, 0, 0))
+				rig.add("head", Vector3(-4, 0, 0))
+				rig.add("tail1", Vector3(-8, 0, 0))
+				ears = 2.0
+				wag = 12.0
+				wag_speed = 9.0
+			elif sulk:
 				rig.add("neck", Vector3(32, 0, 0))
 				rig.add("head", Vector3(16, 0, 0))
 				rig.add("tail1", Vector3(-62, 0, 0))
@@ -248,6 +264,21 @@ func _process(delta: float) -> void:
 			wag = 30.0
 			wag_speed = 8.0 + p * 12.0
 			ears = 14.0
+		"sniff":
+			# La table basse : debout, le nez tendu vers le morceau, sans se dresser.
+			var p := reach_progress
+			for s: String in ["L", "R"]:
+				rig.add("shoulder" + s, Vector3(-14, 0, 0))
+				rig.add("paw" + s, Vector3(12, 0, 0))
+				rig.add("thigh" + s, Vector3(10, 0, 0))
+			rig.add("neck", Vector3(-6 - p * 10, 0, 0))
+			rig.add("head", Vector3(14 + p * 6, 0, 0))
+			rig.add("tail1", Vector3(10, 0, 0))
+			quick["head"] = Vector3(0, sin(_time * 17) * 3.0 * p, 0)
+			jaw = 6.0 + p * 20.0
+			wag = 30.0
+			wag_speed = 8.0 + p * 12.0
+			ears = 12.0
 		"crouch":
 			for s: String in ["L", "R"]:
 				rig.add("shoulder" + s, Vector3(-52, 0, 0))
@@ -337,7 +368,7 @@ func _curious(delta: float) -> void:
 
 
 func _stretch_body(delta: float) -> void:
-	_stretch = lerpf(_stretch, 1.0 if pose == "reach" else 0.0, 1.0 - exp(-delta * 20.0))
+	_stretch = lerpf(_stretch, 1.0 if pose == "reach" or pose == "sniff" else 0.0, 1.0 - exp(-delta * 20.0))
 	for bone: String in STRETCH:
 		var i: int = rig.bones[bone]
 		rig.skeleton.set_bone_pose_position(i, rig.skeleton.get_bone_rest(i).origin * (1.0 + STRETCH[bone] * _stretch))

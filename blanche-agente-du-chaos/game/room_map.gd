@@ -73,14 +73,17 @@ func _init(piece := "cuisine") -> void:
 		var s: Dictionary = data.stations[key]
 		stations[key] = {"pos": vec(s.pos), "face": vec(s.face).normalized(), "activity": s.activity,
 			"front": s.get("regard", "dos") == "devant", "seated": s.get("assis", false) == true,
-			"outside": s.get("dehors", false) == true, "close": s.get("pres", "")}
+			"outside": s.get("dehors", false) == true, "close": s.get("pres", ""),
+			"hips": vec(s.get("hanches", s.pos)), "seat_y": float(s.get("siege", 0.48))}
 	for key: String in data.get("seats", {}):
 		var s: Dictionary = data.seats[key]
 		var chair := -1
 		for i in stools.size():
 			if stools[i].name == s.get("chaise", ""):
 				chair = i
-		seats[key] = {"pos": vec(s.pos), "face": vec(s.face).normalized(), "chair": chair}
+		# `hips` : où l'on est assis, pour l'affichage (au divan, les pieds sont devant, les hanches dans le coussin).
+		seats[key] = {"pos": vec(s.pos), "face": vec(s.face).normalized(), "chair": chair,
+			"hips": vec(s.get("hanches", s.pos)), "seat_y": float(s.get("siege", 0.48))}
 	helper_door = vec(data.helper_door)
 	if data.has("mom_door"):
 		mom_door = vec(data.mom_door)

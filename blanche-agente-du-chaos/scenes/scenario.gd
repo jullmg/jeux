@@ -263,6 +263,89 @@ func _run() -> void:
 			await until(func() -> bool: return main.sim.mom_state == Sim.Mom.BUSY)
 			await wait(0.8)
 			await shot("3%d_niveau" % id)
+	if wants("assis"):
+		# Les postures des nouvelles pièces, de profil : assises (sans chaise : on juge le corps), debout, et Blanche.
+		var stage: Stage = main.stage
+		main.menus.close()
+		stage.show_title()
+		stage.view = "photo"
+		var at := Vector3(-0.2, 0, 1.2)
+		var papa: PersonView = stage._person("papa")
+		stage.mom.position = Vector3(3.5, 0, 6.0)
+		papa.visible = true
+		papa.position = at
+		papa.rotation.y = PI / 2.0
+		stage.photo = [at + Vector3(0.2, 1.1, 2.6), at + Vector3(0.0, 0.7, 0.0)]
+		for pose: String in ["seated", "hockey", "film", "manger", "remote", "jaser", "slip", "argue_seated", "snitch_seated"]:
+			papa.seat_y = 0.48
+			papa.pose = pose
+			await wait(0.8)
+			await shot("p_assis_" + pose)
+		for pose: String in ["servir", "buffet", "carry_plate", "chat", "cheer"]:
+			papa.seat_y = 0.0
+			papa.pose = pose
+			papa.speed = 1.0
+			await wait(0.8)
+			await shot("p_debout_" + pose)
+		papa.visible = false
+		var spot := Vector3(-0.35, 0, 1.45)
+		stage.dog.position = spot
+		stage.dog.rotation.y = PI / 2.0
+		stage.photo = [spot + Vector3(0.15, 0.75, 1.55), spot + Vector3(0.05, 0.42, 0.0)]
+		for pose: String in ["crawl", "sniff"]:
+			stage.dog.pose = pose
+			stage.dog.speed = 1.0
+			stage.dog.reach_progress = 0.7
+			await wait(0.9)
+			await shot("p_chien_" + pose)
+	if wants("pieces"):
+		# Les nouvelles pièces : deux moments de chaque mission, et des situations précises.
+		for id in range(9, Levels.COUNT + 1):
+			for k in 2:
+				play(id, "equilibre", 60 + id)
+				main.speed = 8
+				await until(func() -> bool: return main.sim.time > 22.0 + k * 31.0)
+				main.speed = 1
+				await wait(0.7)
+				await shot("5%d_piece_%d" % [id, k])
+		play(9, "equilibre", 3)
+		main.bot = null
+		main.sim.dog_pos = Vector2(0.15, -1.8)
+		await wait(0.2)
+		main.sim.dog_pos = Vector2(0.4, -1.8)
+		for i in 40:
+			main.sim.dog_pos += Vector2(-0.01, 0)
+			await get_tree().physics_frame
+		await shot("60_sous_la_table")
+		play(13, "equilibre", 4)
+		main.bot = null
+		var item: Dictionary = main.sim._add_item(Sim.Size.BIG, "table_basse_nord", main.sim.map.spots.table_basse_nord.food)
+		main.sim.dog_pos = main.sim.map.spots.table_basse_nord.stand
+		main.sim.dog_state = Sim.Dog.REACHING
+		main.sim.reach_item = item
+		main.sim.reach_progress = 0.6
+		main.sim.mom_state = Sim.Mom.LOOK
+		main.sim._set_timer(99.0)
+		await wait(0.8)
+		await shot("61_nez_tendu_papa_regarde")
+		play(11, "equilibre", 5)
+		main.bot = null
+		var charlotte: Dictionary = main.sim.seated[0]
+		charlotte.state = "slip"
+		charlotte.t = 99.0
+		await wait(0.8)
+		await shot("62_charlotte_glisse")
+		main.sim._bust(charlotte)
+		await wait(1.2)
+		await shot("63_chicane_charlotte")
+		play(10, "equilibre", 6)
+		main.bot = null
+		main.sim._start_walk("cuisine", "cuisine")
+		await until(func() -> bool: return main.sim.mom_out)
+		main.sim.mom_left = 0.01
+		await until(func() -> bool: return main.sim.mom_state == Sim.Mom.HINT)
+		await wait(0.2)
+		await shot("64_retour_annonce")
 	if wants("situations"):
 		play(5, "equilibre", 3)
 		# Maman est envoyée à chaque poste, sans attendre que le hasard l'y mène.

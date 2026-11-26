@@ -167,6 +167,11 @@ func toast(text: String, seconds := 2.2) -> void:
 	_toast_left = seconds
 
 
+## Quelqu'un parle déjà.
+func has_bubbles() -> bool:
+	return not _bubbles.is_empty()
+
+
 ## Fait taire quelqu'un : sa bulle disparaît.
 func hush(who: PersonView) -> void:
 	if _bubbles.has(who):
@@ -436,7 +441,10 @@ func _draw_world(on: Control) -> void:
 	if bool(sim.level.noise):
 		for id: String in sim.level.noisy_spots:
 			var food: Vector2 = sim.map.spots[id].food
-			var at := stage.on_screen(Vector3(food.x, 1.38, food.y))
+			var spot := Vector3(food.x, sim.map.surface_height(id) + 0.46, food.y)
+			if stage.camera.is_position_behind(spot):
+				continue
+			var at := stage.on_screen(spot)
 			Icons.bell(on, at + Vector2(0, sin(_time * 3.0 + food.x * 4.0) * 3.0), 17.0)
 	# un œil fermé marque la cachette
 	var hide := stage.hidden_center()

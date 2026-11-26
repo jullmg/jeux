@@ -1,6 +1,6 @@
 #!/bin/sh
 # Régénère tous les modèles 3D (art/models/) et leurs aperçus (art/previews/).
-# tools/build_art.sh [cuisine|blanche|famille|nourriture|icone]
+# tools/build_art.sh [cuisine|double_salon|blanche|famille|nourriture|icone]
 set -eu
 cd "$(dirname "$0")/.."
 BLENDER=${BLENDER:-/Applications/Blender.app/Contents/MacOS/Blender}
@@ -16,6 +16,7 @@ build() {
 	grep -E '^(EXPORT|APERCU)' "$log" || true
 }
 build cuisine kitchen
+build double_salon double_salon
 build blanche dog
 build famille people
 build nourriture food

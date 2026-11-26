@@ -38,6 +38,12 @@ ensuite.
 - **Les missions 1 à 8 doivent jouer exactement comme avant** : `tests/regression.gd` rejoue 144 parties de robots et
   les compare à `tests/regression_cuisine.json` (dans `tools/test.sh`). Une nouvelle règle ne touche pas au hasard de
   la cuisine.
+- Le double salon (salle à manger et salon) est **un seul modèle**, `art/models/double_salon.glb` (script
+  `tools/blender/double_salon.py`, aides partagées dans `tools/blender/decor.py`) : chaque plan dit ce que sa caméra
+  doit cacher (`"cache"`), l'objet `Noel` n'est montré qu'au moment « noel », un seul `Ecran*` de la télé à la fois.
+  `Ambiance.set_room()` change les lumières et la sonde de reflets (`"probe"` du plan). La visite : `tante.glb`,
+  `oncle.glb` (`people.py -- tante oncle`). `PersonView.seat_y` assoit quelqu'un (les jambes plient sous toute pose) ;
+  `"hanches"` et `"siege"` d'une place ou d'un poste disent où et à quelle hauteur.
 - `kitchen/stage.gd` : la scène 3D qui montre une `Sim` ; `kitchen/ambiance.gd` : lumières, rendu et moments du jour
   (`"moment"` de chaque niveau) ; `kitchen/effects.gd` : les particules. `characters/` : `rig.gd` (poses par code, rotations dans les
   axes du modèle), `dog_view.gd`, `person_view.gd`. `ui/` : `hud.gd`, `menus.gd`, `ui_style.gd`, `icons.gd`,

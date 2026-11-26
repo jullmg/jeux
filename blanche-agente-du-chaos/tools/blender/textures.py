@@ -68,13 +68,15 @@ def _grain(h, w, rng, along_x=True, rings=9.0, wobble=2.4):
     return np.clip(waves ** 3 * 0.75 + (fine - 0.45) * 0.9, 0.0, 1.0)
 
 
-def floor(rng):
-    """Un vieux plancher de bois franc verni : lattes étroites, teintes inégales, nœuds, joints, usure."""
+def floor(rng, name="plancher", tones=None, along_z=False):
+    """Un vieux plancher de bois franc verni : lattes étroites, teintes inégales, nœuds, joints, usure.
+
+    `along_z` : les lattes courent dans la longueur de la pièce (le double salon)."""
     size, meters, rows = 1024, 1.6, 24
     color = np.zeros((size, size, 3))
     height = np.zeros((size, size))
     rough = np.zeros((size, size))
-    tones = ["#a4622c", "#b57536", "#c08544", "#965528", "#ad6d31", "#c8904f", "#9d5e2c", "#b97d3e"]
+    tones = tones or ["#a4622c", "#b57536", "#c08544", "#965528", "#ad6d31", "#c8904f", "#9d5e2c", "#b97d3e"]
     wear = _fbm(size, size, 200, 340)
     ph = size / rows
     yy = np.arange(size)
@@ -115,7 +117,9 @@ def floor(rng):
     lines = np.clip((scratch - 0.52) * 6, 0, 1)
     rough += lines * 0.18
     color += (lines * 0.05)[..., None]
-    return _pack("plancher", color, height, rough, meters, 0.9)
+    if along_z:
+        color, height, rough = color.transpose(1, 0, 2), height.T, rough.T
+    return _pack(name, color, height, rough, meters, 0.9)
 
 
 def wood(name, light, dark, vertical=True, meters=0.8, rough=0.42, contrast=0.85):
@@ -343,3 +347,200 @@ def food(name, base, patches=(), speckles=(), rough=0.5, relief=1.2, meters=0.16
         color[dots < share] = C.srgb(tone)
     height = _fbm(size, size, 10, 10, 3) * 2.0 + cloud * 1.5
     return _pack(name, np.clip(color, 0, 1), height, np.clip(rough + (cloud - 0.5) * 0.2, 0.05, 1), meters, relief)
+
+
+# ---------------------------------------------------------------- le double salon
+
+def corduroy(name, color_, meters=0.18):
+    """Le velours côtelé du divan : des côtes en relief, plus claires sur le dessus, et un peu de lustre."""
+    size = 256
+    x = np.arange(size)[None, :] * np.ones((size, 1))
+    rib = 0.5 + 0.5 * np.cos(TAU * x / 8.0)
+    fuzz = C.value_noise(size, size, 2, 2)
+    worn = _fbm(size, size, 64, 64)
+    color = _hex(color_) * (0.78 + 0.26 * rib + 0.08 * (fuzz - 0.5) + 0.10 * (worn - 0.5))[..., None]
+    return _pack(name, color, rib * 2.4 + fuzz * 0.5, 0.78 - 0.22 * rib, meters, 0.9)
+
+
+def velvet(name, color_, meters=0.3):
+    """Un velours lisse (le fauteuil marine) : de grandes ondes de lustre."""
+    size = 256
+    sheen = _fbm(size, size, 90, 90, 3)
+    fuzz = C.value_noise(size, size, 2, 2)
+    color = _hex(color_) * (0.85 + 0.25 * sheen + 0.06 * (fuzz - 0.5))[..., None]
+    return _pack(name, color, fuzz * 0.6, 0.7 - 0.2 * sheen, meters, 0.6)
+
+
+def picture(name, kind, w=256, h=320):
+    """Une image inventée pour un cadre (rien n'est tiré des photos) : paysage, motifs, lune, chien, carte du ciel…"""
+    import random
+    rng = random.Random(name)
+    y = np.linspace(0, 1, h)[:, None] * np.ones((1, w))          # 0 en bas
+    x = np.linspace(0, 1, w)[None, :] * np.ones((h, 1))
+    img = np.ones((h, w, 3)) * _hex("#f3efe6")
+    if kind == "paysage":
+        img = _ramp(y, [(0.0, "#f6e6c8"), (0.6, "#f2c9a0"), (1.0, "#c7d9e8")])
+        for k, (base, amp, tone) in enumerate(((0.55, 0.12, "#8aa7b8"), (0.42, 0.10, "#5f8a6f"), (0.25, 0.08, "#3f6a4e"))):
+            ridge = base + amp * np.sin(x * TAU * (1.1 + k * 0.7) + k) * 0.6 + amp * 0.4 * np.sin(x * TAU * 3.3 + k * 2)
+            img[y < ridge] = C.srgb(tone)
+        sun = np.hypot(x - 0.7, (y - 0.74) * h / w) < 0.09
+        img[sun] = C.srgb("#f39a5b")
+    elif kind == "motifs":
+        img[:] = _hex("#f5f1e8")
+        for r in range(6):
+            for c in range(4):
+                cx, cy = (c + 0.5) / 4, (r + 0.5) / 6
+                shape = rng.randrange(3)
+                tone = ["#3d4a6b", "#c46b4a", "#7f9c8a", "#d9a441"][rng.randrange(4)]
+                if shape == 0:
+                    m = np.hypot(x - cx, (y - cy) * h / w) < 0.07
+                elif shape == 1:
+                    m = (np.abs(x - cx) < 0.07) & (np.abs(y - cy) < 0.05)
+                else:
+                    m = (np.abs(x - cx) + np.abs(y - cy) * h / w) < 0.08
+                img[m] = C.srgb(tone)
+    elif kind == "lune":
+        img = _ramp(y, [(0.0, "#141821"), (1.0, "#262c3d")])
+        stars = np.random.rand(h, w) > 0.996
+        img[stars] = C.srgb("#f4f0dc")
+        moon = np.hypot(x - 0.5, (y - 0.58) * h / w)
+        img[moon < 0.2] = (_hex("#e9e2c7") * (0.85 + 0.2 * _fbm(h, w, 16, 16, 3))[..., None])[moon < 0.2]
+        hill = y < 0.18 + 0.03 * np.sin(x * 9)
+        img[hill] = C.srgb("#0d1016")
+    elif kind == "lettres":
+        img[:] = _hex("#f4f1ea")
+        for r in range(4):
+            for c in range(3):
+                cx, cy = (c + 0.5) / 3, (r + 0.5) / 4
+                bar = (np.abs(x - cx) < 0.11) & (np.abs(y - cy) < 0.018)
+                post = (np.abs(x - cx + 0.06 * (1 if (r + c) % 2 else -1)) < 0.018) & (np.abs(y - cy) < 0.09)
+                img[bar | post] = C.srgb("#2a2a2e")
+    elif kind == "aquarelle":
+        img[:] = _hex("#f7f3ea")
+        for k in range(7):
+            cx, cy, r = rng.uniform(0.2, 0.8), rng.uniform(0.25, 0.8), rng.uniform(0.08, 0.2)
+            tone = _hex(["#e4774f", "#5e9ac4", "#f0c64b", "#7bb07a", "#c45d8e"][k % 5])
+            d = np.hypot(x - cx, (y - cy) * h / w * 0.6) + (_fbm(h, w, 20, 20, 3) - 0.5) * 0.08
+            a = np.clip((r - d) * 12, 0, 0.6)[..., None]
+            img = img * (1 - a) + tone * a
+    elif kind == "chien":
+        img[:] = _hex("#ece4d4")
+        head = np.hypot(x - 0.5, (y - 0.55) * 1.1) < 0.24
+        ears = (np.hypot(x - 0.28, (y - 0.5) * 0.7) < 0.1) | (np.hypot(x - 0.72, (y - 0.5) * 0.7) < 0.1)
+        img[head | ears] = C.srgb("#1f1c1d")
+        nose = np.hypot(x - 0.5, y - 0.45) < 0.035
+        img[nose] = C.srgb("#4a3a36")
+        chest = (np.abs(x - 0.5) < 0.06) & (y < 0.3) & (y > 0.2)
+        img[chest] = C.srgb("#f4efe6")
+    elif kind == "ciel":
+        img = np.ones((h, w, 3)) * _hex("#16213b")
+        disc = np.hypot(x - 0.5, (y - 0.58) * h / w)
+        img[disc < 0.36] = C.srgb("#1d2b4c")
+        stars = (np.random.rand(h, w) > 0.985) & (disc < 0.36)
+        img[stars] = C.srgb("#f3edd2")
+        ring = np.abs(disc - 0.36) < 0.004
+        img[ring] = C.srgb("#c9b984")
+        for _ in range(5):
+            ax, ay = rng.uniform(0.3, 0.7), rng.uniform(0.4, 0.75)
+            bx, by = ax + rng.uniform(-0.12, 0.12), ay + rng.uniform(-0.1, 0.1)
+            t_ = np.clip(((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / ((bx - ax) ** 2 + (by - ay) ** 2 + 1e-6), 0, 1)
+            line = np.hypot(x - ax - t_ * (bx - ax), y - ay - t_ * (by - ay)) < 0.003
+            img[line] = C.srgb("#c9b984")
+        img[(y < 0.16) & (y > 0.13) & (np.abs(x - 0.5) < 0.22)] = C.srgb("#c9b984")
+    elif kind == "vagues":
+        img[:] = _hex("#f5f2ea")
+        for k in range(9):
+            line = np.abs(y - (0.15 + k * 0.05) - 0.02 * np.sin(x * TAU * 2 + k)) < 0.005
+            img[line] = C.srgb("#3a3a3f")
+        sun = np.hypot(x - 0.62, (y - 0.78) * h / w) < 0.12
+        img[sun] = C.srgb("#f1c33c")
+    elif kind == "falaise":
+        img = _ramp(y, [(0.0, "#6d6f72"), (0.5, "#b9bbbe"), (1.0, "#dfe1e3")])
+        cliff = (x < 0.55 + 0.2 * y) & (y < 0.62 - 0.1 * np.sin(x * 7))
+        img[cliff] = (_hex("#3c3e42") * (0.8 + 0.4 * _fbm(h, w, 12, 12, 3))[..., None])[cliff]
+        sea = (y < 0.22) & ~cliff
+        img[sea] = C.srgb("#8b8f94")
+    return C.image(name, np.clip(img, 0, 1))
+
+
+def screen(name, kind):
+    """L'écran de la télé : une partie de hockey dessinée (vue d'en haut), ou une scène de film inventée."""
+    w, h = 384, 216
+    y = np.linspace(0, 1, h)[:, None] * np.ones((1, w))
+    x = np.linspace(0, 1, w)[None, :] * np.ones((h, 1))
+    if kind == "hockey":
+        img = np.ones((h, w, 3)) * _hex("#eef4f8")
+        img[(y < 0.12) | (y > 0.88)] = C.srgb("#2c2f3a")             # la foule
+        crowd = (np.random.rand(h, w) > 0.6) & ((y < 0.12) | (y > 0.88))
+        img[crowd] = C.srgb("#b3373a")
+        img[np.abs(x - 0.5) < 0.006] = C.srgb("#c8262b")             # la ligne rouge
+        img[np.abs(x - 0.33) < 0.006] = C.srgb("#2a56b8")
+        img[np.abs(x - 0.67) < 0.006] = C.srgb("#2a56b8")
+        circle = np.abs(np.hypot(x - 0.5, (y - 0.5) * h / w) - 0.09) < 0.004
+        img[circle] = C.srgb("#2a56b8")
+        for cx, cy, tone in ((0.42, 0.45, "#c8262b"), (0.58, 0.6, "#f4f4f4"), (0.55, 0.38, "#c8262b"),
+                             (0.38, 0.62, "#f4f4f4"), (0.47, 0.52, "#c8262b")):
+            dot = np.hypot(x - cx, (y - cy) * h / w) < 0.018
+            img[dot] = C.srgb("#202126")
+            img[np.hypot(x - cx, (y - cy) * h / w) < 0.013] = C.srgb(tone)
+        img[np.hypot(x - 0.5, (y - 0.47) * h / w) < 0.005] = C.srgb("#111111")   # la rondelle
+    else:
+        img = _ramp(y, [(0.0, "#3b5f3a"), (0.35, "#6f9a4e"), (0.4, "#f2c57a"), (1.0, "#7cb6e8")])
+        hill = y < 0.38 + 0.06 * np.sin(x * 5)
+        img[hill] = (_hex("#5d8c45") * (0.8 + 0.3 * y)[..., None])[hill]
+        castle = (np.abs(x - 0.72) < 0.06) & (y < 0.62) & ~((y > 0.56) & ((x * 40).astype(int) % 2 == 0))
+        img[castle & ~hill] = C.srgb("#e8d9c0")
+        sun = np.hypot(x - 0.25, (y - 0.75) * h / w) < 0.07
+        img[sun] = C.srgb("#fff2b8")
+    return C.image(name, np.clip(img, 0, 1))
+
+
+def street(rng):
+    """La vue par la fenêtre du salon : les plex d'en face, leurs balcons et un arbre de la rue."""
+    w, h = 512, 512
+    y = np.linspace(0, 1, h)[:, None] * np.ones((1, w))
+    x = np.linspace(0, 1, w)[None, :] * np.ones((h, 1))
+    img = _ramp(y, [(0.6, "#dfeaf3"), (1.0, "#9cc4e6")])
+    for k, (x0, x1, tone) in enumerate(((0.0, 0.36, "#9b4f3e"), (0.36, 0.7, "#b77a52"), (0.7, 1.0, "#8d5a48"))):
+        block = (x >= x0) & (x < x1) & (y < 0.82)
+        rows = ((y * 70).astype(int)) % 2
+        mortar = ((y * 70) % 1 < 0.14) | (((x * 40 + rows * 0.5) % 1) < 0.06)
+        wall_ = _hex(tone) * (0.88 + 0.24 * _fbm(h, w, 14, 24))[..., None]
+        wall_[mortar] = C.srgb("#c9b6a4")
+        img[block] = wall_[block]
+        img[(x >= x0) & (x < x1) & (y >= 0.8) & (y < 0.84)] = C.srgb("#d8d2c6")   # la corniche
+        for wx in (x0 + 0.05, x0 + (x1 - x0) / 2 + 0.02):
+            for wy in (0.22, 0.52):
+                pane = (x > wx) & (x < wx + 0.1) & (y > wy) & (y < wy + 0.17)
+                img[pane] = _ramp((y - wy) / 0.17, [(0.0, "#36506b"), (1.0, "#8fb3d2")])[pane]
+                img[pane & ((np.abs(x - wx - 0.05) < 0.004) | (np.abs(y - wy - 0.085) < 0.004))] = C.srgb("#efe9df")
+        img[(x >= x0) & (x < x1) & (np.abs(y - 0.47) < 0.008)] = C.srgb("#2a2a2e")      # le balcon de fer
+        bars = (x >= x0) & (x < x1) & (y > 0.47) & (y < 0.51) & (((x * 160) % 1) < 0.25)
+        img[bars] = C.srgb("#2a2a2e")
+    gy, gx = np.mgrid[0:h, 0:w]
+    ragged = (_fbm(h, w, 10, 10, 3) - 0.5) * 26
+    for cx, cy, r, tone in ((0.18, 0.55, 110, "#6d9a3e"), (0.08, 0.7, 80, "#86ad45"), (0.3, 0.68, 70, "#577f34")):
+        d = np.hypot(gx - cx * w, gy - cy * h) + ragged
+        leaves = _hex(tone) * (0.72 + 0.62 * _fbm(h, w, 8, 8, 3))[..., None]
+        img[d < r] = leaves[d < r]
+    trunk = (np.abs(x - 0.18) < 0.012) & (y < 0.45)
+    img[trunk] = C.srgb("#4a3626")
+    img[y < 0.12] = C.srgb("#6f6f74")                                  # la rue
+    img[(y < 0.13) & (y > 0.11)] = C.srgb("#d8d4cc")                   # le trottoir
+    return C.image("vue_rue", np.clip(img, 0, 1))
+
+
+def blanket(name, meters=0.6):
+    """La couverture de la cage : crème, avec des arcs-en-ciel pastel."""
+    size = 256
+    x = np.arange(size)[None, :] * np.ones((size, 1)) / size
+    y = np.arange(size)[:, None] * np.ones((1, size)) / size
+    img = np.ones((size, size, 3)) * _hex("#efe6d6")
+    for cx, cy in ((0.25, 0.25), (0.75, 0.75), (0.75, 0.2), (0.25, 0.72)):
+        d = np.hypot(x - cx, y - cy)
+        for k, tone in enumerate(("#e98b8b", "#f2c46b", "#9cc98a", "#8fb6e0")):
+            band = (np.abs(d - (0.12 - k * 0.022)) < 0.009) & (y < cy)
+            img[band] = C.srgb(tone)
+    fuzz = C.value_noise(size, size, 2, 2)
+    img *= (0.94 + 0.1 * (fuzz - 0.5))[..., None]
+    return _pack(name, img, fuzz * 0.7, np.full((size, size), 0.95), meters, 0.6)

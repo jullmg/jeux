@@ -23,8 +23,8 @@ Point de reprise d'une session à l'autre. Julien a demandé de tout faire sans 
 | 1. Fiche de référence | fait |
 | 2. Moteur multi-pièces | fait : plans par pièce, cachettes en liste, Maman hors de la pièce, personnes assises, visite qui circule, le noir ; non-régression de la cuisine |
 | 3. Les missions en données | fait : missions 9 à 15, répliques, tests des nouvelles règles, étoiles calibrées |
-| 4. Les pièces en 3D | à faire |
-| 5. Personnages et animations | à faire |
+| 4. Les pièces en 3D | fait : le double salon d'un seul modèle (`tools/blender/double_salon.py`), une caméra et un éclairage par pièce |
+| 5. Personnages et animations | fait : assis à table et au divan, servir, manger, le but, la télécommande, Charlotte qui glisse un morceau, la visite (deux nouveaux modèles), Blanche qui rampe et tend le nez |
 | 6. La nourriture | à faire |
 | 7. Lumière, son et interface | à faire |
 | 8. Finition et livraison | à faire |
@@ -48,6 +48,12 @@ souper avec des invités**.
   claire ne trahit pas une Blanche qui s'était fiée au noir.
 - Charlotte complice **sauve** Blanche quand Maman la voit glisser un morceau : la chicane commence au lieu du regard.
 - Pendant qu'elle est à la cuisine, la zone cachée se compte depuis **la porte** par où elle reviendra.
+- Les chantiers 4 (décor) et 5 (personnages) sont livrés dans un seul commit : la scène 3D (`stage.gd`) montre les deux
+  à la fois (une personne assise a besoin de son siège dans le décor).
+- Au party, la caméra montre **les deux pièces d'un coup**, de côté (depuis le mur est) : tout est plus petit que dans
+  la cuisine, mais Maman, Blanche, le coin et la nourriture restent dans le cadre.
+- Les chaises, le fauteuil berçant et le piano sont simplifiés ; le banc du piano est rangé ; les céramiques sont des
+  formes simples (tasses, bols, vases, piles d'assiettes) aux glaçures pastel.
 - **Le party des Fêtes (15)** a demandé des réglages pour que s'entêter (ne jamais redescendre) ne paie pas :
   Maman se déplace moins (de longs trajets entre les deux pièces étaient des fenêtres gratuites), Charlotte glisse
   moins de morceaux, le jambon vaut 800 points, et la 1re étoile est plafonnée à 950 comme à la dinde.

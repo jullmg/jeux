@@ -59,6 +59,37 @@ LOOKS = {
         blush=(0.050, -0.030, 0.46),
         hair=dict(long=0.300, wave=0.019, part=-0.014, forehead=0.070, narrow=0.955),
     ),
+    # La visite (inventée, aucun visage réel) : ma tante, un visage rond et doux, un carré court grisonnant.
+    "tante": dict(
+        size=0.96,
+        shapes=((0, 0.004, -0.002, 0.088, 0.110, 0.100),
+                (0, -0.040, 0.018, 0.066, 0.056, 0.069),
+                (0, -0.072, 0.050, 0.027, 0.022, 0.030)),
+        pairs=((0.034, -0.024, 0.055, 0.028, 0.025, 0.030),),
+        nose=dict(bridge=(0.0058, 0.0080), tip=0.0125, wing=0.0080),
+        ear=0.085,
+        eye=dict(x=0.035, y=0.006, size=1.0, lash=0.8, flick=True),
+        brow=dict(arc=((0.013, 0.0300), (0.025, 0.0340), (0.038, 0.0360), (0.050, 0.0345), (0.060, 0.0290)), thick=0.85),
+        mouth=dict(y=-0.050, width=1.02, lips=0.9, grin=True),
+        blush=(0.047, -0.026, 0.40),
+        hair=dict(long=0.135, wave=0.008, part=-0.020, forehead=0.072, narrow=0.95),
+    ),
+    # mon oncle : un visage long, une barbe grise, les cheveux courts gris.
+    "oncle": dict(
+        size=0.97,
+        shapes=((0, 0.004, -0.002, 0.086, 0.116, 0.100),
+                (0, -0.046, 0.016, 0.068, 0.060, 0.070),
+                (0, -0.082, 0.046, 0.032, 0.026, 0.034)),
+        pairs=((0.033, -0.016, 0.056, 0.024, 0.022, 0.027),
+               (0.036, -0.060, 0.018, 0.026, 0.026, 0.034)),
+        nose=dict(bridge=(0.0072, 0.0100), tip=0.0145, wing=0.0098),
+        ear=0.090,
+        eye=dict(x=0.034, y=0.008, size=0.9, lash=0.45, flick=False),
+        brow=dict(arc=((0.0115, 0.0280), (0.024, 0.0320), (0.039, 0.0330), (0.052, 0.0320), (0.063, 0.0280)), thick=1.5),
+        mouth=dict(y=-0.053, width=1.05, lips=0.6, grin=True),
+        blush=(0.046, -0.024, 0.22),
+        hair=dict(long=0.0, forehead=0.090),
+    ),
 }
 
 

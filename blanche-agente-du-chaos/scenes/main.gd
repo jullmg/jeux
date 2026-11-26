@@ -507,8 +507,13 @@ func _event_words(e: Dictionary) -> void:
 			if e.kind == "retour":
 				return
 			var chance := 1.0 if e.kind == "round" else 0.7
+			var key: String = HINT_KEYS[e.kind]
+			if sim.watcher == "papa" and e.kind == "real" and stage.hint_flavor == 1:
+				# Il cherche la télécommande : il le dit, toujours.
+				key = "remote"
+				chance = 1.0
 			if _rng.randf() < chance:
-				say.call(stage.mom, _lines(HINT_KEYS[e.kind]), 1.2)
+				say.call(stage.mom, _lines(key), 1.2)
 		"caught":
 			say.call(stage.mom, _lines("caught"), 2.0)
 		"corner_arrive":
@@ -532,8 +537,9 @@ func _event_words(e: Dictionary) -> void:
 			if _rng.randf() < 0.4:
 				say.call(stage.people.get(e.who), _other_lines(e.who, "slip"), 1.2)
 		"chat":
-			if _rng.randf() < 0.5:
-				say.call(stage.people.get(e.who), _other_lines(e.who, "chat"), 1.8)
+			# La visite jase : une bulle de temps en temps seulement, et jamais par-dessus une autre.
+			if _rng.randf() < 0.3 and not hud.has_bubbles():
+				say.call(stage.people.get(e.who), _other_lines(e.who, "chat"), 1.6)
 		"argue":
 			var pool: Array = Texts.CHICANE_CHARLOTTE if e.get("with", "papa") == "charlotte" else Texts.CHICANE
 			_argument = pool[_rng.randi_range(0, pool.size() - 1)]

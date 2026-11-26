@@ -58,9 +58,16 @@ var _mask_index := PackedInt32Array()
 var _mask_points := PackedVector2Array()
 var _steam: CPUParticles3D
 var _fridge_light: OmniLight3D
+## La lumière de la télé du salon, et si elle joue.
+var _tv_light: OmniLight3D
+var _tv_on := false
+## Les matières des vues par la fenêtre, teintées selon le moment.
+var _views: Dictionary = {}
 var _time := 0.0
 var _shake := 0.0
 var _wobble := 0.0
+## Comment Papa annonce qu'il va regarder : 0 « Hein ? », 1 il cherche la télécommande (tiré à chaque indice).
+var hint_flavor := 0
 ## La chaise qui vacille (trouvée une fois, au choc).
 var _wobble_node: Node3D
 var _held_id := -1
@@ -200,6 +207,11 @@ func _show_room(m: RoomMap) -> void:
 		map = m
 		_setup_mask()
 		_fit_camera()
+	var probe: Array = []
+	if m.data.has("probe"):
+		var pr: Dictionary = m.data.probe
+		probe = [Vector3(pr.pos[0], pr.pos[1], pr.pos[2]), Vector3(pr.size[0], pr.size[1], pr.size[2])]
+	ambiance.set_room(str(m.data.get("model", m.id)), probe)
 
 
 ## Le moment de la journée : la lumière, la vue par la fenêtre et les décorations.
@@ -208,6 +220,23 @@ func _set_moment(moment: String) -> void:
 	_outside.emission = ambiance.sky_tint()
 	_outside.emission_operator = BaseMaterial3D.EMISSION_OP_MULTIPLY
 	_christmas.visible = moment == "noel" and _room_node == _kitchen
+	if _room_node != _kitchen:
+		# Le double salon : Noël au party, l'écran de la télé selon la soirée, la rue teintée selon l'heure.
+		var shown := {"Noel": moment == "noel", "EcranHockey": moment == "hockey", "EcranFilm": moment == "film"}
+		shown.EcranNoir = not (shown.EcranHockey or shown.EcranFilm)
+		for part: String in shown:
+			var node := _room_node.get_node_or_null(part) as Node3D
+			if node:
+				node.visible = shown[part] and not map.data.get("cache", []).has(part)
+		_tv_on = shown.EcranHockey or shown.EcranFilm
+		var view := _room_node.get_node_or_null("VueSalon") as MeshInstance3D
+		if view:
+			if not _views.has(view):
+				var mat: BaseMaterial3D = view.mesh.surface_get_material(0).duplicate()
+				view.set_surface_override_material(0, mat)
+				_views[view] = mat
+			_views[view].emission = ambiance.sky_tint()
+			_views[view].emission_operator = BaseMaterial3D.EMISSION_OP_MULTIPLY
 	dog.set_festive(moment == "noel")
 
 
@@ -220,6 +249,12 @@ func _build_lights() -> void:
 	_fridge_light.light_energy = 0.0
 	_fridge_light.omni_range = 1.4
 	add_child(_fridge_light)
+	_tv_light = OmniLight3D.new()
+	_tv_light.position = Vector3(-0.85, 1.5, 3.45)
+	_tv_light.light_color = Color(0.78, 0.88, 1.0)
+	_tv_light.omni_range = 4.6
+	_tv_light.light_energy = 0.0
+	add_child(_tv_light)
 
 
 func _build_camera() -> void:
@@ -607,6 +642,8 @@ func on_event(e: Dictionary) -> void:
 		"meal_ready":
 			if e.stars > 0:
 				effects.hearts(dog.head_position() + Vector3(0, 0.15, 0))
+		"hint":
+			hint_flavor = randi() % 2
 		"caught":
 			_shake = 1.0
 			_surprised = 0.45
@@ -678,6 +715,14 @@ func _dog_covered() -> bool:
 	return false
 
 
+## Sous une table (où il faut ramper).
+func _under_table(p: Vector2) -> bool:
+	for hd in map.hides:
+		if hd.kind == "dessous" and (hd.rect as Rect2).grow(0.08).has_point(p):
+			return true
+	return false
+
+
 ## Le milieu de la zone cachée (Vector2.INF s'il n'y en a pas).
 func hidden_center() -> Vector2:
 	return _mask_center
@@ -728,11 +773,15 @@ func _show_dog(delta: float) -> void:
 		or (sim.dog_state == Sim.Dog.LOWERING and sim.lower_left > Sim.DESCEND_TIME * 0.5)
 	var at := _smooth("blanche", sim.dog_pos)
 	var heading := sim.dog_dir
+	# Sur une table basse, elle ne se dresse pas : elle tend le nez.
+	var low: bool = _reach_spot != "" and map.spots.has(_reach_spot) and map.spots[_reach_spot].surface == "low"
 	if up and _reach_spot != "":
 		var spot: Dictionary = map.spots[_reach_spot]
 		at = spot.stand
 		heading = spot.food - spot.stand
 		dog.surface_y = map.surface_height(_reach_spot)
+		if low:
+			at = spot.stand.lerp(spot.food, 0.18)
 	_follow_floor(dog, at, delta)
 	dog.speed = _speeds.get("blanche", 0.0)
 	_dog_yaw = _turn(_dog_yaw, atan2(heading.x, heading.y), delta, 14.0)
@@ -751,14 +800,14 @@ func _show_dog(delta: float) -> void:
 		Sim.Dog.IN_CORNER:
 			dog.pose = "sit"
 		Sim.Dog.REACHING:
-			dog.pose = "reach"
+			dog.pose = "sniff" if low else "reach"
 			dog.reach_progress = clampf(sim.reach_progress / sim.grab_time(sim.reach_item), 0.0, 1.0)
 		Sim.Dog.LOWERING:
-			dog.pose = "reach" if sim.lower_left > Sim.DESCEND_TIME * 0.5 else "stand"
+			dog.pose = ("sniff" if low else "reach") if sim.lower_left > Sim.DESCEND_TIME * 0.5 else "stand"
 			dog.reach_progress = 0.3
 		_:
 			if sim.dog_moving:
-				dog.pose = "walk"
+				dog.pose = "crawl" if _under_table(sim.dog_pos) else "walk"
 			elif not sim.mouth.is_empty():
 				dog.chewing = true
 				dog.pose = "crouch" if sim.dog_hidden() else "stand"
@@ -774,13 +823,20 @@ func _show_mom(delta: float) -> void:
 	mom.visible = not sim.mom_out
 	if not mom.visible:
 		return
+	# Assise à son poste (sauf pendant un but : Papa saute debout), on la montre sur son siège.
+	var st: Dictionary = map.stations[sim.station]
+	var seated := sim.mom_seated() and sim.activity != "but"
+	mom.seat_y = st.seat_y if seated else 0.0
+	var shown_at: Vector2 = st.hips if seated else _smooth("maman", sim.mom_pos)
 	if not was:
-		mom.position = Vector3(sim.mom_pos.x, 0, sim.mom_pos.y)
-	_follow_floor(mom, _smooth("maman", sim.mom_pos), delta)
+		mom.position = Vector3(shown_at.x, 0, shown_at.y)
+	_follow_floor(mom, shown_at, delta)
 	mom.speed = _speeds.get("maman", 0.0)
 	var dir := sim.mom_dir
 	if sim.mom_state == Sim.Mom.BUSY and sim.activity == "chicane":
 		dir += toward_camera(sim.mom_pos)
+	if seated:
+		dir = st.face
 	var yaw := atan2(dir.x, dir.y)
 	_mom_yaw = _turn(_mom_yaw, yaw, delta, 16.0)
 	mom.rotation.y = _mom_yaw
@@ -788,17 +844,27 @@ func _show_mom(delta: float) -> void:
 	var relative := rad_to_deg(wrapf(atan2(to_dog.x, to_dog.y) - _mom_yaw, -PI, PI))
 	mom.head_yaw = 0.0
 	_laugh -= delta
+	mom.twist = 0.0
 	match sim.mom_state:
 		Sim.Mom.BUSY:
 			mom.pose = sim.activity
+			if sim.activity == "chicane" and seated:
+				mom.pose = "argue_seated"
+			elif sim.activity == "but":
+				mom.pose = "cheer"
 		Sim.Mom.HINT:
-			mom.pose = {"real": "hint", "feint": "feint", "round": "round"}[sim.hint_kind]
+			mom.pose = {"real": "hint", "feint": "feint", "round": "round", "retour": "idle"}[sim.hint_kind]
+			if seated and sim.watcher == "papa" and sim.hint_kind == "real" and hint_flavor == 1:
+				mom.pose = "remote"
 		Sim.Mom.TURN:
 			mom.pose = "look"
 		Sim.Mom.LOOK:
-			mom.pose = "look"
+			mom.pose = "seated" if seated else "look"
 			if not sim.dog_hidden():
 				mom.head_yaw = clampf(relative, -28.0, 28.0)
+				if seated:
+					# Assis, il se retourne vers elle.
+					mom.twist = clampf(relative, -70.0, 70.0)
 		Sim.Mom.TURN_BACK:
 			mom.pose = "idle"
 		Sim.Mom.SCOLD:
@@ -808,7 +874,7 @@ func _show_mom(delta: float) -> void:
 			_mom_yaw = _turn(_mom_yaw, atan2(corner.x, corner.y), delta, 20.0)
 			mom.head_yaw = clampf(relative, -28.0, 28.0)
 		Sim.Mom.WALK, Sim.Mom.ROUND:
-			mom.pose = "walk"
+			mom.pose = "carry_plate" if sim._serving else "walk"
 	# Elle ne peut pas s'empêcher de rire une fois Blanche rendue au coin.
 	if _laugh > 0.0 and (sim.mom_state == Sim.Mom.BUSY or sim.mom_state == Sim.Mom.TURN_BACK):
 		mom.pose = "laugh"
@@ -847,18 +913,28 @@ func _show_people(delta: float) -> void:
 			continue
 		present[s.who] = true
 		p.visible = true
-		p.position = Vector3(s.pos.x, 0, s.pos.y)
-		var dir: Vector2 = s.dir
-		if s.state == "argue":
-			dir = (sim.mom_pos - s.pos).normalized() + toward_camera(s.pos)
-		p.rotation.y = _turn(p.rotation.y, atan2(dir.x, dir.y), delta, 10.0)
+		var seat: Dictionary = map.seats[s.seat]
+		p.seat_y = seat.seat_y
+		p.position = Vector3(seat.hips.x, 0, seat.hips.y)
+		p.rotation.y = _turn(p.rotation.y, atan2(seat.face.x, seat.face.y), delta, 10.0)
+		var toward: Vector2 = sim.dog_pos if s.snitch > 0.0 else sim.viewpoint()
+		var to: Vector2 = toward - seat.hips
+		var relative := rad_to_deg(wrapf(atan2(to.x, to.y) - p.rotation.y, -PI, PI))
+		p.head_yaw = clampf(relative, -40.0, 40.0)
+		p.twist = clampf(relative, -50.0, 50.0) if s.snitch > 0.0 or s.state in ["argue", "slip"] else 0.0
 		match s.state:
 			"slip":
 				p.pose = "slip"
 			"argue":
 				p.pose = "argue_seated"
+			"eat":
+				p.pose = "manger"
 			_:
 				p.pose = "snitch_seated" if s.snitch > 0.0 else ("seated_chat" if s.state == "jase" else "seated")
+		if s.role == "decor":
+			p.pose = "film" if sim.level.get("moment", "") == "film" else ("hockey" if map.id == "salon" else "manger")
+			if s.who == "papa" and sim.level.get("moment", "") == "noel":
+				p.pose = "jaser"
 	for w in sim.walkers:
 		var p: PersonView = people.get(w.who)
 		if p == null:
@@ -901,6 +977,13 @@ func _show_furniture(delta: float) -> void:
 	open = open or (sim != null and sim.station == "frigo" and sim.mom_state == Sim.Mom.HINT)
 	_fridge_door.rotation.y = _turn(_fridge_door.rotation.y, deg_to_rad(-112.0) if open else 0.0, delta, 7.0)
 	_fridge_light.light_energy = lerpf(_fridge_light.light_energy, 0.9 if open else 0.0, 1.0 - exp(-delta * 7.0))
+	# La télé éclaire la pièce : par éclats pendant le film (la même lumière que celle des règles), plus doucement au hockey.
+	var tv := 0.0
+	if _tv_on and _room_node != _kitchen:
+		tv = 0.35 + 0.12 * sin(_time * 7.0) * sin(_time * 2.3)
+		if sim != null and sim.level.has("dark"):
+			tv = lerpf(0.25, 2.6, sim.tv_light)
+	_tv_light.light_energy = lerpf(_tv_light.light_energy, tv, 1.0 - exp(-delta * 10.0))
 	_wobble = maxf(0.0, _wobble - delta * 1.4)
 	if _stool and _room_node == _kitchen:
 		_stool.rotation.z = sin(_time * 24.0) * 0.14 * _wobble

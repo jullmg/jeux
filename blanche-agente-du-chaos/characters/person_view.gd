@@ -6,11 +6,19 @@ extends Node3D
 const PAINTED := ["peau_visage", "cheveux_ombre", "tissu_haut", "tissu_bas"]
 const STAND_IN := {"tante": "maman", "oncle": "papa"}
 ## Les objets qu'on peut avoir en main.
-const PROPS := ["cuillere", "couteau", "assiette", "telephone", "panier"]
+const PROPS := ["cuillere", "couteau", "assiette", "telephone", "panier", "plat", "fourchette", "verre", "cafetiere"]
+## L'espace entre le dessus du siège et l'os des hanches.
+const SEAT_GAP := 0.07
 
 ## "idle", "walk", "brasser", "couper", "laver", "frigo", "telephone", "four", "ilot", "surprise", "charlotte",
-## "hint", "feint", "round", "look", "point", "laugh", "wave", "carry", "snitch", "cheer", "chicane", "argue"
+## "hint", "feint", "round", "look", "point", "laugh", "wave", "carry", "snitch", "cheer", "chicane", "argue",
+## et dans la salle à manger et le salon : "servir", "buffet", "disque", "carry_plate", "manger", "jaser", "hockey",
+## "film", "remote", "seated", "seated_chat", "snitch_seated", "slip", "argue_seated", "chat".
 var pose := "idle"
+## Assis : la hauteur du siège (0 : debout). Les jambes se plient, le reste suit la pose.
+var seat_y := 0.0
+## Tourné vers quelque chose en restant assis (degrés autour de la verticale, relatifs au corps).
+var twist := 0.0
 var speed := 0.0
 ## "Sourire", "Neutre", "Ouverte", "Fachee"
 var mouth := "Sourire"
@@ -23,6 +31,8 @@ var _scold_time := 0.0
 
 var rig: Rig
 var model: Node3D
+## La hauteur des hanches debout (pour s'asseoir à la bonne hauteur).
+var _hip_y := 0.9
 var _mouths: Dictionary = {}
 var _time := 0.0
 var _phase := 0.0
@@ -46,6 +56,7 @@ func _ready() -> void:
 	model = (load(file) as PackedScene).instantiate()
 	add_child(model)
 	rig = Rig.new(model)
+	_hip_y = rig.rest_position_of("hips").y
 	_paint_by_vertex()
 	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 		mesh.layers = 1 | Ambiance.RIM_LAYER
@@ -257,10 +268,108 @@ func _process(delta: float) -> void:
 			for s: String in ["L", "R"]:
 				_arm(s, 10, 140, 16)
 			sink = absf(sin(t * 7.0)) * 0.08
+		"servir":
+			# Elle verse le café, puis pose une assiette.
+			var pour := sin(t * 1.6)
+			_arm("R", 42 + pour * 8, 6, 40)
+			_arm("L", 30, 4, 54)
+			quick["forearmR"] = Vector3(0, 0, maxf(0.0, pour) * 28)
+			rig.add("spine", Vector3(16, 0, 0))
+			rig.add("head", Vector3(18, 0, 0))
+			prop = "cafetiere"
+		"buffet", "disque":
+			var slow := sin(t * (1.3 if pose == "disque" else 2.6))
+			_arm("R", 40 + slow * 10, 2, 46)
+			_arm("L", 34 - slow * 8, 4, 40)
+			rig.add("spine", Vector3(12, 0, 0))
+			rig.add("head", Vector3(16, sin(t * 0.8) * 10, 0))
+			if pose == "disque":
+				quick["handR"] = Vector3(0, sin(t * 4.0) * 12, 0)
+		"carry_plate":
+			_phase += delta * speed / 1.1 * TAU
+			var amp := clampf(speed, 0.5, 1.2)
+			for s: String in ["L", "R"]:
+				var f := _phase + (0.0 if s == "L" else PI)
+				quick["thigh" + s] = Vector3(sin(f) * 27 * amp, 0, 0)
+				quick["shin" + s] = Vector3(maxf(0.0, -cos(f)) * 44 * amp, 0, 0)
+				_arm(s, 40, -2, 66)
+			sink = absf(sin(_phase)) * 0.018
+			prop = "plat"
+		"manger":
+			# Assise, elle mange : la fourchette monte à la bouche de temps en temps.
+			var bite := clampf(sin(t * 1.4) * 2.0 - 1.0, 0.0, 1.0)
+			_arm("R", 40 + bite * 22, 6, 60 + bite * 62)
+			_arm("L", 34, 4, 70)
+			rig.add("spine", Vector3(10, 0, 0))
+			rig.add("head", Vector3(10 - bite * 6, 0, 0))
+			prop = "fourchette"
+		"jaser", "seated_chat":
+			var talk := sin(t * 3.1)
+			_arm("R", 30 + talk * 18, 14, 70 + talk * 20)
+			_arm("L", 26, 6, 68)
+			rig.add("head", Vector3(-2, sin(t * 0.9) * 18, sin(t * 2.0) * 5))
+			shown = "Ouverte" if fmod(t, 0.42) < 0.2 else "Sourire"
+			prop = "verre" if pose == "jaser" else ""
+		"hockey", "film":
+			# Au divan, les yeux sur la télé ; au hockey, il se penche et serre les poings.
+			var tense := 1.0 if pose == "hockey" else 0.0
+			_arm("R", 30 + tense * 8, 10, 40 + tense * 14)
+			_arm("L", 30 + tense * 8, 10, 40 + tense * 14)
+			rig.add("spine", Vector3(-6 + tense * 14, 0, 0))
+			rig.add("head", Vector3(4 + tense * 6, sin(t * 0.5) * 4, 0))
+			if pose == "film" and fmod(t, 6.0) < 0.6:
+				_arm("R", 50, 6, 120)
+		"remote":
+			# Il cherche la télécommande : penché de côté, il tâte les coussins.
+			_arm("R", -4, 34 + sin(t * 6.0) * 8, 16)
+			_arm("L", 24, 6, 40)
+			rig.add("spine", Vector3(10, 0, -16))
+			rig.add("head", Vector3(14, -20, 0))
+			shown = "Neutre"
+		"seated":
+			_arm("R", 30, 8, 44)
+			_arm("L", 30, 8, 44)
+			rig.add("head", Vector3(0, sin(t * 0.6) * 22, 0))
+		"snitch_seated":
+			_arm("R", 70, 6, 8)
+			_arm("L", 28, 6, 64)
+			rig.add("head", Vector3(0, head_yaw, 0))
+			shown = "Ouverte"
+		"slip":
+			# En cachette, la main descend sous la table ; l'œil guette Maman.
+			_arm("R", -6, 22, 10)
+			_arm("L", 30, 6, 66)
+			rig.add("spine", Vector3(4, 0, 8))
+			rig.add("head", Vector3(6, head_yaw, -6))
+			shown = "Sourire"
+		"argue_seated":
+			_arm("R", 30 + sin(t * 5.0) * 16, 14, 80)
+			_arm("L", 22, 8, 70)
+			rig.add("head", Vector3(12, sin(t * 6.0) * 10, 0))
+			shown = "Neutre"
+		"chat":
+			var nod := sin(t * 2.4)
+			_arm("R", 34, 4, 70)
+			_arm("L", 8 + nod * 10, 8, 30)
+			rig.add("head", Vector3(nod * 4, sin(t * 0.7) * 14, 0))
+			shown = "Ouverte" if fmod(t, 0.5) < 0.2 else "Sourire"
+			prop = "verre"
 		_:
 			for s: String in ["L", "R"]:
 				_arm(s, sin(t * 1.3) * 2, 3, 12)
 			rig.add("head", Vector3(0, head_yaw + sin(t * 0.7) * 7, 0))
+	if seat_y > 0.0:
+		# Assis : les cuisses à plat, les jambes qui pendent (et se balancent un peu chez Charlotte).
+		var swing := sin(t * 2.2) * 8.0 if who == "charlotte" else 0.0
+		for s: String in ["L", "R"]:
+			rig.target["thigh" + s] = Vector3(-86, 0, 0)
+			rig.target["shin" + s] = Vector3(80 + (swing if s == "L" else -swing), 0, 0)
+			rig.target["foot" + s] = Vector3(-4, 0, 0)
+			quick.erase("thigh" + s)
+			quick.erase("shin" + s)
+		rig.add("chest", Vector3(0, twist * 0.45, 0))
+		rig.add("spine", Vector3(0, twist * 0.35, 0))
+		sink = seat_y + SEAT_GAP - _hip_y
 	_scold_time = _scold_time + delta if pose == "point" else 0.0
 	if talking > 0.0:
 		talking -= delta
@@ -299,6 +408,18 @@ func _show_prop(kind: String) -> void:
 			_part(node, _cylinder(0.11, 0.015), Color("f2efe8"), Vector3(0.05, -0.04, 0.09), Vector3(60, 0, 0))
 		"telephone":
 			_part(node, _box(Vector3(0.018, 0.14, 0.07)), Color("26262c"), Vector3(0.01, -0.03, 0.02))
+		"plat":
+			bone = "chest"
+			# Un plat de service fumant, tenu à deux mains devant elle.
+			_part(node, _cylinder(0.17, 0.025), Color("f3efe6"), Vector3(0, -0.2, 0.36))
+			_part(node, _cylinder(0.13, 0.05), Color("c87a3a"), Vector3(0, -0.17, 0.36))
+		"fourchette":
+			_part(node, _box(Vector3(0.012, 0.012, 0.16)), Color("d5d8dc"), Vector3(0, -0.03, 0.08))
+		"verre":
+			_part(node, _cylinder(0.03, 0.11), Color("e9d5a8"), Vector3(0, -0.02, 0.05))
+		"cafetiere":
+			_part(node, _cylinder(0.05, 0.16), Color("2a2a2e"), Vector3(0, -0.06, 0.07))
+			_part(node, _cylinder(0.012, 0.05), Color("cda75f"), Vector3(0, -0.02, 0.13), Vector3(60, 0, 0))
 		"panier":
 			bone = "chest"
 			# Un panier d'osier tressé, plein de linge plié.

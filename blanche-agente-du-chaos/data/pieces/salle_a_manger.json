@@ -52,6 +52,10 @@
     "target": [0.1, 0.4, -2.05],
     "fov": 44.0
   },
+  "probe": {
+    "pos": [0.0, 1.4, -1.75],
+    "size": [3.5, 3.0, 3.9]
+  },
   "spots": {
     "table_nord": {
       "stand": [0.15, -2.55],
@@ -148,6 +152,7 @@
   "helper_door": [-1.38, -2.45],
   "mom_door": [-1.38, -2.45],
   "cache": [
-    "Salon"
+    "Salon",
+    "CoupeSud"
   ]
 }

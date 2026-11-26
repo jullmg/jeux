@@ -1189,6 +1189,20 @@ func test_modeles_complets() -> void:
 		model.free()
 
 
+## Le double salon a toutes les parties que les plans et la scène nomment.
+func test_double_salon_complet() -> void:
+	var model: Node = (load("res://art/models/double_salon.glb") as PackedScene).instantiate()
+	var names := ["Noel", "EcranHockey", "EcranFilm", "EcranNoir", "VueSalon", "SalleAManger", "Salon", "Lampe", "Plancher"]
+	for piece: String in ["salle_a_manger", "salon", "fetes"]:
+		var m: RoomMap = grids(piece)[0]
+		names.append_array(m.data.get("cache", []))
+		for s in m.stools:
+			names.append("Chaise_" + str(s.name))
+	for part: String in names:
+		check(model.get_node_or_null(part) != null, "double salon : " + part)
+	model.free()
+
+
 func test_taille_de_blanche() -> void:
 	# Le jeu place la gueule d'après la taille du modèle : le script Blender doit dire la même.
 	var script := FileAccess.get_file_as_string("res://tools/blender/dog.py")
