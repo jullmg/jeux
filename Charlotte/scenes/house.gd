@@ -110,6 +110,9 @@ var _party_busy := false
 var _fridge_art: Node2D
 var _crafts_art: Node2D
 var _pots_art: Node2D
+# Her decorated bedroom door over the corridor's door, and the paper "chacha" sign it replaces.
+var _door_art: Sprite2D
+var _chacha: Node2D
 var _fridge_busy := false
 var _mom_routine: FamilyRoutine
 var _dad_routine: FamilyRoutine
@@ -2968,6 +2971,7 @@ func _use_desk() -> void:
 		{"text": "Mes devoirs", "note": note, "color": Color("#B8E986")},
 		{"text": "Dessiner", "note": "Du papier et des crayons", "color": Color("#8FCBF2")},
 		{"text": "Dessiner mon chandail", "note": "Ton dessin sur ton linge", "color": Color("#F7B6D2")},
+		{"text": "Décorer ma porte", "note": "Ta porte de chambre", "color": Color("#FFD98A")},
 	])
 	card.chose.connect(func(which: int) -> void:
 		if which == 0:
@@ -2976,6 +2980,8 @@ func _use_desk() -> void:
 			_open_drawing_pad()
 		elif which == 2:
 			_draw_my_shirt()
+		elif which == 3:
+			_decorate_door()
 		else:
 			_control.enabled = true)
 
@@ -2997,6 +3003,57 @@ func _open_drawing_pad() -> void:
 		_show_fridge_drawings()
 		_control.enabled = true)
 	add_child(pad)
+
+
+# Her bedroom door (Julien: "décorer sa porte de chambre"): the craft studio with her door on the bench (`CraftArt` "porte"), the
+# chacha sign on it; what she makes goes on the corridor's door (`porte_chambre.png` in the slot), and she goes out to see it.
+func _decorate_door() -> void:
+	_control.enabled = false
+	var studio := CraftStudio.new()
+	studio.who = "moi"
+	studio.start_with = "porte"
+	studio.closed.connect(func(result: Dictionary) -> void:
+		_control.enabled = true
+		if result.is_empty():
+			return
+		DirAccess.make_dir_recursive_absolute(GameState.slot_dir())
+		(result.image as Image).save_png(door_path())
+		_show_door()
+		_charlotte.express("happy", 2.4)
+		_say(_charlotte, "Ma porte est prête !\nJe vais la voir dans le corridor.", 280.0, 2.4)
+		var go := create_tween()
+		go.tween_interval(2.4)
+		go.tween_callback(func() -> void:
+			_go_through(CHACHA_DOOR_X - 60.0, HALL, 1)
+			var look := create_tween()
+			look.tween_interval(1.2)
+			look.tween_callback(func() -> void:
+				_charlotte.express("grin", 2.4)
+				_say(_charlotte, "Wow ! C'est la plus belle porte\nde toute la maison !", 280.0, 3.0))))
+	add_child(studio)
+
+
+static func door_path() -> String:
+	return GameState.slot_dir() + "/porte_chambre.png"
+
+
+# Her decorated door, if she has made one (it has the chacha sign drawn on it, so the paper one is hidden).
+func _show_door() -> void:
+	if _door_art == null:
+		return
+	var has := FileAccess.file_exists(door_path())
+	_door_art.visible = has
+	if _chacha:
+		_chacha.visible = not has
+	if not has:
+		return
+	var img := Image.load_from_file(door_path())
+	if img == null:
+		_door_art.visible = false
+		return
+	img.generate_mipmaps()
+	_door_art.texture = ImageTexture.create_from_image(img)
+	_door_art.scale = Vector2(150.0 / img.get_width(), 430.0 / img.get_height())
 
 
 # Her own print (Julien: "dessiner son propre chandail"): what she draws goes on her top (`CharacterArt.save_motif`), and she
@@ -3179,7 +3236,13 @@ func _build_hallway() -> void:
 	_put(InteriorArt.radiator(160.0, 150.0), 2790.0, WALL_BASE, 1.0, "floor")
 	_put(InteriorArt.recycling_bin(), 2985.0, 608.0, 1.0, "floor")
 	_put(InteriorArt.panel_door(), CHACHA_DOOR_X, WALL_BASE)
+	_door_art = Sprite2D.new()
+	_door_art.centered = false
+	_door_art.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	_door_art.position = Vector2(CHACHA_DOOR_X, WALL_BASE - 430.0)
+	add_child(_door_art)
 	_chacha_sign(Vector2(CHACHA_DOOR_X + 75.0, 330.0))
+	_show_door()
 	_plant("corridor", "fiddle", 3283.0, 606.0, 0.55)
 	_plant("fougere", "fern", 2690.0, 606.0, 0.5)
 	_put(InteriorArt.kitchen(), KITCHEN_START, WALL_BASE)
@@ -3257,11 +3320,13 @@ func _build_bedroom() -> void:
 
 # Paper sign taped to the bedroom door, each letter in a different marker colour.
 func _chacha_sign(center: Vector2) -> void:
+	_chacha = Node2D.new()
+	add_child(_chacha)
 	var paper := Polygon2D.new()
 	paper.polygon = PackedVector2Array([Vector2(-58, -16), Vector2(58, -19), Vector2(60, 17), Vector2(-57, 19)])
 	paper.color = Color("#FBFAF6")
 	paper.position = center
-	add_child(paper)
+	_chacha.add_child(paper)
 	var colors := ["#7E57C2", "#F2A7C9", "#1FB5C4", "#E04F5F", "#FF8A3D", "#3E8E5A"]
 	var word := "chacha"
 	for i in word.length():
@@ -3273,7 +3338,7 @@ func _chacha_sign(center: Vector2) -> void:
 		letter.label_settings = settings
 		letter.position = center + Vector2(-50.0 + i * 17.0, -18.0 + (i % 2) * 2.0)
 		letter.rotation = deg_to_rad(-4.0 + (i * 37) % 9)
-		add_child(letter)
+		_chacha.add_child(letter)
 
 
 # The TV's picture over the InteriorArt.tv() frame at `top_left`: click to turn on and change channels.

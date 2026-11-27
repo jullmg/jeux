@@ -561,6 +561,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Bodies and clothes have a shape, not a tube: `TOP_BODY`, `DRESS_BODICE`, `COAT_BODY` give sloping shoulders, a waist and hips
   (the coat flares from the waist to its hem), and the bare limbs taper — a fuller shoulder and elbow narrowing to the wrist
   (`_upper_arm_svg`, `_forearm_svg`), thighs narrowing to the ankle (`_leg_body`, all legwear).
+- **Her bedroom door, decorated** (Julien, 2026-11-27): her desk's "Décorer ma porte" opens the `CraftStudio` straight on the
+  bench (`start_with = "porte"`, `who = "moi"`: titles, phrases "Entrez !", "Toc toc !"… and the end card speak to her) with her
+  corridor door on it (`CraftArt` base "porte": `DOOR_RECT` is the door's 150 × 430 at `DOOR_K`, `_door` draws the oak door,
+  `_chacha` the paper sign over the paint). It prints cut to the door's edges, `porte_chambre.png` in the slot
+  (`house.gd door_path`), laid over the corridor's door (`_show_door`, the paper sign hidden since the print carries it), and she
+  goes out to see it. The decorations got a "Fête" box (fanions, accroche-porte, arc-en-ciel, ampoules) for every craft.
 - **Her own drawing on her clothes** (Julien, 2026-11-27: "dessiner son propre chandail"): her desk's "Dessiner mon chandail", or
   "Dessiner mon motif" under the wardrobe's Motif row, opens the `DrawingPad` ("Sur mon chandail !"); `CharacterArt.save_motif`
   takes the paper out (only what she drew stays), cuts it to its edges and keeps it as `mon_motif.png` in the slot. Patterns

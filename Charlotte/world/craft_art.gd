@@ -18,7 +18,12 @@ const BASES := {
 	"pot": ["Un pot à crayons", "Une vieille boîte de conserve toute belle."],
 	"cadre": ["Un cadre", "Un cadre pour un de tes dessins."],
 	"collier": ["Un collier", "Des pâtes et des perles sur une ficelle."],
+	# Not on the garde's first card: her bedroom door, decorated from her desk (`house.gd _decorate_door`).
+	"porte": ["La porte de ma chambre", "Ton nom, des autocollants, de la peinture… sur ta porte !"],
 }
+## Her door on the bench: the corridor's door (150 × 430) at 0.96, so the picture goes back on it as it is.
+const DOOR_RECT := Rect2(208, 4, 144, 412)
+const DOOR_K := 144.0 / 150.0
 
 const PALETTE := ["#E04F5F", "#FF8A3D", "#FFD23F", "#9BD84B", "#3E8E5A", "#2FB7B0", "#4FA3E0", "#1D4F91", "#7E57C2", "#FF7BA3",
 	"#B5442E", "#8D6E63", "#F2C29A", "#FFFFFF", "#E8E8E8", "#2B2B2B", "#F7C7D2", "#BFE3F7", "#C9EDB3", "#FFE9A8"]
@@ -36,6 +41,7 @@ const DECO_GROUPS := [
 		["noeud", "Nœud"], ["spirale", "Ruban"]]],
 	["brillants", "Brillants", [["gemme", "Diamant"], ["gemme_ronde", "Gemme"], ["scintille", "Scintille"], ["paillettes", "Paillettes"],
 		["confettis", "Confettis"]]],
+	["fete", "Fête", [["fanions", "Fanions"], ["accroche", "Accroche-porte"], ["arc_en_ciel", "Arc-en-ciel"], ["ampoules", "Lumières"]]],
 	["nature", "Nature", [["plume", "Plume"], ["marguerite", "Marguerite"], ["tournesol", "Tournesol"], ["fleur_feutre", "Feutre"],
 		["coeur_feutre", "Cœur"], ["etoile_feutre", "Étoile"], ["coquillage", "Coquillage"], ["feuillage", "Feuillage"]]],
 ]
@@ -59,6 +65,8 @@ static func base_rect(base: String) -> Rect2:
 			return Rect2(150, 40, 260, 385)
 		"cadre":
 			return Rect2(60, 30, 440, 360)
+		"porte":
+			return DOOR_RECT
 	return Rect2(40, 20, 480, 380)
 
 
@@ -85,6 +93,8 @@ static func inside(base: String, p: Vector2, grow := 0.0) -> bool:
 			return absf(p.y - 395.0) <= 22.0 * sqrt(maxf(0.0, 1.0 - x * x)) + grow
 		"cadre":
 			return Rect2(60, 30, 440, 360).grow(grow).has_point(p) and not WINDOW.grow(-grow).has_point(p)
+		"porte":
+			return DOOR_RECT.grow(grow).has_point(p)
 	return true
 
 
@@ -138,6 +148,8 @@ static func draw_base(ci: CanvasItem, base: String, face: int, picture: Texture2
 			ci.draw_colored_polygon(body, Color("#B9BEC7"))
 			for k in 10:
 				ci.draw_rect(Rect2(170 + k * 22, 110, 11, 300), Color(1, 1, 1, 0.07 + 0.05 * (k % 3)))
+		"porte":
+			_door(ci)
 		"cadre":
 			var f := Rect2(60, 30, 440, 360)
 			ci.draw_rect(Rect2(f.position + Vector2(6, 8), f.size), Color(0.3, 0.2, 0.1, 0.2))
@@ -153,6 +165,8 @@ static func draw_base(ci: CanvasItem, base: String, face: int, picture: Texture2
 ## What goes over the paint and the pieces: the front rim of the tin, the glass of the frame.
 static func draw_over(ci: CanvasItem, base: String) -> void:
 	match base:
+		"porte":
+			_chacha(ci, DOOR_RECT.position + Vector2(75, 160) * DOOR_K)
 		"pot":
 			ci.draw_arc(Vector2(280, 110), 110.0, 0.0, PI, 32, Color("#8F949D"), 4.0, true)
 			ci.draw_arc(Vector2(280, 110), 110.0, 0.0, PI, 32, Color(1, 1, 1, 0.35), 1.5, true)
@@ -168,6 +182,61 @@ static func _default_picture(ci: CanvasItem, r: Rect2) -> void:
 	CuteArt.sun(ci, r.position + Vector2(r.size.x * 0.82, r.size.y * 0.2), 22.0)
 	CuteArt.house(ci, r.position + Vector2(r.size.x * 0.4, r.size.y * 0.6), 52.0)
 	CuteArt.flower(ci, r.position + Vector2(r.size.x * 0.12, r.size.y * 0.82), 20.0, Color("#FF7BA3"))
+
+
+# Her oak door as in the corridor (`InteriorArt.panel_door`): the frame, the panel, the raised panel, the grain, the knob.
+static func _door(ci: CanvasItem) -> void:
+	var o := DOOR_RECT.position
+	var k := DOOR_K
+	ci.draw_rect(Rect2(o + Vector2(6, 8), DOOR_RECT.size), Color(0.3, 0.2, 0.1, 0.2))
+	ci.draw_rect(DOOR_RECT, Color("#9A5E2C"))
+	ci.draw_rect(Rect2(o, Vector2(DOOR_RECT.size.x * 0.25, DOOR_RECT.size.y)), Color(1, 1, 1, 0.07))
+	ci.draw_rect(Rect2(o + Vector2(10, 10) * k, Vector2(130, 420) * k), Color("#A5663A"))
+	ci.draw_rect(Rect2(o + Vector2(10, 10) * k, Vector2(130, 420) * k), Color("#5E3517"), false, 2.4)
+	var panel := Rect2(o + Vector2(26, 30) * k, Vector2(98, 370) * k)
+	ci.draw_rect(panel, Color("#B07240"))
+	ci.draw_rect(panel, Color("#5E3517"), false, 2.4)
+	for pts: Array in [[Vector2(26, 30), Vector2(38, 42)], [Vector2(124, 30), Vector2(112, 42)], [Vector2(26, 400), Vector2(38, 388)], [Vector2(124, 400), Vector2(112, 388)]]:
+		ci.draw_line(o + pts[0] * k, o + pts[1] * k, Color("#5E3517"), 2.0, true)
+	ci.draw_line(o + Vector2(38, 42) * k, o + Vector2(112, 42) * k, Color("#5E3517"), 2.0, true)
+	ci.draw_line(o + Vector2(38, 388) * k, o + Vector2(112, 388) * k, Color("#5E3517"), 2.0, true)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 9
+	for i in 6:
+		var cx := 75.0 + rng.randf_range(-16, 16)
+		var cy := 120.0 + i * 50.0
+		var rad := Vector2(rng.randf_range(10, 30), rng.randf_range(16, 30)) * k
+		var ring := PackedVector2Array()
+		for j in 33:
+			ring.append(o + Vector2(cx, cy) * k + Vector2(cos(TAU * j / 32.0) * rad.x, sin(TAU * j / 32.0) * rad.y))
+		ci.draw_polyline(ring, Color(0.37, 0.21, 0.09, 0.4), 1.4, true)
+	for i in 9:
+		var x := 32.0 + i * 10.0 + rng.randf_range(-3, 3)
+		ci.draw_line(o + Vector2(x, 36) * k, o + Vector2(x + rng.randf_range(-3, 3), 394) * k, Color(0.37, 0.21, 0.09, 0.12), 1.0)
+	ci.draw_rect(DOOR_RECT, Color("#5E3517"), false, 3.0)
+	var knob := o + Vector2(128, 236) * k
+	ci.draw_circle(knob + Vector2(1.5, 2), 7.0, Color(0, 0, 0, 0.25))
+	ci.draw_circle(knob, 7.0, Color("#E8E4D8"))
+	ci.draw_arc(knob, 7.0, 0.0, TAU, 20, Color("#8A8478"), 2.0, true)
+	ci.draw_circle(knob + Vector2(-2, -2), 2.2, Color.WHITE)
+
+
+## The paper "chacha" sign taped to her door, each letter in another marker (as in `house.gd _chacha_sign`).
+static func _chacha(ci: CanvasItem, center: Vector2) -> void:
+	var k := DOOR_K
+	var paper := PackedVector2Array([Vector2(-58, -16), Vector2(58, -19), Vector2(60, 17), Vector2(-57, 19)])
+	var placed := PackedVector2Array()
+	for p: Vector2 in paper:
+		placed.append(center + p * k)
+	ci.draw_colored_polygon(placed, Color("#FBFAF6"))
+	var colors := ["#7E57C2", "#F2A7C9", "#1FB5C4", "#E04F5F", "#FF8A3D", "#3E8E5A"]
+	var word := "chacha"
+	var font := ThemeDB.fallback_font
+	for i in word.length():
+		var at := center + Vector2(-50.0 + i * 17.0 + 4.0, 6.0 + (i % 2) * 2.0) * k
+		ci.draw_set_transform(at, deg_to_rad(-4.0 + (i * 37) % 9))
+		ci.draw_string(font, Vector2.ZERO, word[i], HORIZONTAL_ALIGNMENT_LEFT, -1, int(24 * k), Color(colors[i]))
+	ci.draw_set_transform(Vector2.ZERO)
 
 
 static func _ellipse(ci: CanvasItem, c: Vector2, rad: Vector2, col: Color) -> void:
@@ -601,6 +670,55 @@ static func deco(ci: CanvasItem, id: String, c: Vector2, r: float, color: Color,
 			shell.append(shell[0])
 			ci.draw_polyline(shell, color.darkened(0.4), w * 1.3, true)
 			ci.draw_rect(Rect2(c + Vector2(-0.25, 0.8) * r, Vector2(0.5, 0.15) * r), color.darkened(0.3))
+		"fanions":
+			# A string of little flags across, each its own colour.
+			var flags := ["#E04F5F", "#FFD23F", "#4FA3E0", "#7CCB5A", "#FF7BA3", "#7E57C2"]
+			var line := PackedVector2Array()
+			for j in 21:
+				var t := j / 20.0
+				line.append(c + Vector2(lerpf(-1.0, 1.0, t), -0.35 + sin(t * PI) * 0.25) * r)
+			for j in 6:
+				var t0 := (j + 0.15) / 6.0
+				var t1 := (j + 0.85) / 6.0
+				var a := c + Vector2(lerpf(-1.0, 1.0, t0), -0.35 + sin(t0 * PI) * 0.25) * r
+				var b := c + Vector2(lerpf(-1.0, 1.0, t1), -0.35 + sin(t1 * PI) * 0.25) * r
+				var tip := (a + b) / 2.0 + Vector2(0, 0.42 * r)
+				var col := Color(flags[(j + seed_) % flags.size()]) if color.s < 0.15 else (color if j % 2 == 0 else color.lightened(0.45))
+				ci.draw_colored_polygon(PackedVector2Array([a, b, tip]), col)
+				ci.draw_polyline(PackedVector2Array([a, tip, b]), col.darkened(0.3), w, true)
+			ci.draw_polyline(line, Color("#6E4E3A"), w * 1.2, true)
+		"accroche":
+			# A door hanger: a card with a round hole at the top for the knob.
+			var card := Rect2(c + Vector2(-0.55, -0.9) * r, Vector2(1.1, 1.85) * r)
+			ci.draw_rect(Rect2(card.position + Vector2(2, 3), card.size), Color(0, 0, 0, 0.2))
+			ci.draw_rect(card, color if color.v > 0.25 else Color("#FFB3C7"))
+			ci.draw_rect(card, color.darkened(0.35), false, w * 1.2)
+			ci.draw_circle(c + Vector2(0, -0.55) * r, 0.2 * r, Color(0.3, 0.2, 0.1, 0.45))
+			ci.draw_line(c + Vector2(-0.12, -0.34) * r, c + Vector2(-0.12, -0.1) * r, color.darkened(0.35), w, true)
+			ci.draw_line(c + Vector2(0.12, -0.34) * r, c + Vector2(0.12, -0.1) * r, color.darkened(0.35), w, true)
+			StampArt._p(ci, c + Vector2(0, 0.45) * r, r * 0.3, [Vector2(0, 0.8), Vector2(-0.9, -0.1), Vector2(-0.5, -0.7), Vector2(0, -0.3), Vector2(0.5, -0.7), Vector2(0.9, -0.1)], Color.WHITE, w)
+		"arc_en_ciel":
+			var bands := ["#E8542F", "#F2C230", "#5BD16E", "#4FA3E0", "#9C6CC4"]
+			for j in bands.size():
+				ci.draw_arc(c + Vector2(0, 0.45) * r, r * (0.95 - j * 0.13), PI, TAU, 28, Color(bands[j]), r * 0.13, true)
+			for sx in [-0.78, 0.78]:
+				ci.draw_circle(c + Vector2(sx, 0.48) * r, r * 0.2, Color.WHITE)
+				ci.draw_circle(c + Vector2(sx + 0.16 * sign(sx), 0.42) * r, r * 0.16, Color.WHITE)
+		"ampoules":
+			# A little string of bulbs, glowing.
+			var bulbs := ["#FF5E8A", "#FFD23F", "#5BD1E0", "#7CCB5A", "#FF8A3D"]
+			var wire := PackedVector2Array()
+			for j in 21:
+				var t := j / 20.0
+				wire.append(c + Vector2(lerpf(-1.0, 1.0, t), -0.3 + sin(t * PI) * 0.3) * r)
+			ci.draw_polyline(wire, Color("#3E4A3A"), w * 1.2, true)
+			for j in 5:
+				var t := (j + 0.5) / 5.0
+				var at := c + Vector2(lerpf(-1.0, 1.0, t), -0.3 + sin(t * PI) * 0.3 + 0.18) * r
+				var col := Color(bulbs[(j + seed_) % bulbs.size()])
+				ci.draw_circle(at, r * 0.2, Color(col, 0.25))
+				ci.draw_circle(at, r * 0.11, col)
+				ci.draw_circle(at + Vector2(-0.03, -0.04) * r, r * 0.04, Color(1, 1, 1, 0.8))
 		"feuillage":
 			ci.draw_line(c + Vector2(0, 0.95) * r, c + Vector2(0, -0.8) * r, Color("#3E8E5A"), w * 1.6, true)
 			for k in 4:
@@ -651,6 +769,12 @@ static func deco_half(id: String, r: float) -> Vector2:
 			return Vector2(0.55, 0.55) * r
 		"noeud":
 			return Vector2(1.0, 0.85) * r
+		"fanions", "ampoules":
+			return Vector2(1.0, 0.6) * r
+		"accroche":
+			return Vector2(0.6, 0.95) * r
+		"arc_en_ciel":
+			return Vector2(1.0, 0.6) * r
 	return Vector2(1.0, 1.0) * r
 
 

@@ -35,9 +35,12 @@ const TEXT_S := [22, 32, 46]
 const PHRASES := {
 	"maman": ["Pour Maman", "Je t'aime, Maman !", "Merci, Maman", "Câlins !", "Bonne fête !"],
 	"papa": ["Pour Papa", "Je t'aime, Papa !", "Merci, Papa", "Câlins !", "Bonne fête !"],
+	"moi": ["Chambre de Chachoue", "Entrez !", "Toc toc !", "Défense d'entrer… sauf les amis !", "Chut ! Je dors"],
 }
 
 var who := "maman"
+## Straight to the bench with this thing to make (her door: `who` "moi"), without the first card.
+var start_with := ""
 ## The drawing that goes in the frame (null = a little picture of her own).
 var picture: Texture2D
 
@@ -110,7 +113,10 @@ func _ready() -> void:
 	_panel.size = Vector2(1240, 696)
 	_panel.add_theme_stylebox_override("panel", _box(CREAM, BLUE, 6, 26))
 	_root.add_child(_panel)
-	_choose()
+	if start_with != "":
+		_begin(start_with)
+	else:
+		_choose()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -225,7 +231,7 @@ func _begin(id: String) -> void:
 		var paint := Image.create(int(WORK.x), int(WORK.y), false, Image.FORMAT_RGBA8)
 		var ink := Image.create(int(WORK.x), int(WORK.y), false, Image.FORMAT_RGBA8)
 		_faces.append({"items": [], "paint": paint, "ink": ink, "paint_tex": ImageTexture.create_from_image(paint), "ink_tex": ImageTexture.create_from_image(ink)})
-	_tab = "peinture" if id in ["pot", "assiette"] else "papier"
+	_tab = "peinture" if id in ["pot", "assiette"] else ("decos" if id == "porte" else "papier")
 	_build_work()
 	if id == "cadre":
 		_toast("Ton cadre est prêt pour un de tes dessins !" if not DrawingPad.gallery_names().is_empty() else "Ton cadre attend un dessin : on met une petite image.")
@@ -235,7 +241,7 @@ func _begin(id: String) -> void:
 
 func _build_work() -> void:
 	_clear_panel()
-	_title = _label("%s pour %s" % [CraftArt.BASES[_base][0], "Maman" if who == "maman" else "Papa"], 30, BLUE)
+	_title = _label(str(CraftArt.BASES[_base][0]) if who == "moi" else "%s pour %s" % [CraftArt.BASES[_base][0], "Maman" if who == "maman" else "Papa"], 30, BLUE)
 	_title.position = Vector2(0, 14)
 	_title.size = Vector2(1240, 44)
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -506,7 +512,7 @@ func _deco_options() -> void:
 		var b := Button.new()
 		b.text = names[i]
 		b.position = Vector2(x, y)
-		b.size = Vector2(124 if i < 4 else 160, 40)
+		b.size = Vector2(124, 40)
 		b.add_theme_font_size_override("font_size", 17)
 		b.add_theme_color_override("font_color", BLUE)
 		b.add_theme_stylebox_override("normal", _box(YELLOW if i == _deco_group else Color.WHITE, BLUE, 3 if i == _deco_group else 2, 12))
@@ -1329,7 +1335,8 @@ func _print() -> void:
 		result.image = await _render(func(ci: CanvasItem) -> void: _paint_necklace(ci), Rect2(40, 20, 480, 330))
 		result.inside = null
 	else:
-		var rect := CraftArt.base_rect(_base).grow(14.0)
+		# The door goes back on the door as it is: cut to its very edges.
+		var rect := CraftArt.base_rect(_base) if _base == "porte" else CraftArt.base_rect(_base).grow(14.0)
 		result.image = await _render(func(ci: CanvasItem) -> void: paint_face(ci, 0, false), rect)
 		result.inside = null
 		if _base == "carte":
@@ -1364,7 +1371,7 @@ func _celebrate(result: Dictionary) -> void:
 	card.position = Vector2(310, 68)
 	card.add_theme_stylebox_override("panel", _box(Color("#FFFDF7"), BLUE, 6, 26))
 	_panel.add_child(card)
-	var t := _label("Ton bricolage est prêt !", 36, BLUE)
+	var t := _label("Ta porte est prête !" if who == "moi" else "Ton bricolage est prêt !", 36, BLUE)
 	t.position = Vector2(0, 22)
 	t.size = Vector2(620, 50)
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -1379,12 +1386,12 @@ func _celebrate(result: Dictionary) -> void:
 	pic.pivot_offset = pic.size / 2.0
 	pic.scale = Vector2.ZERO
 	card.add_child(pic)
-	var sub := _label("Ça va faire plaisir à %s !" % ("Maman" if who == "maman" else "Papa"), 26, Color(BLUE, 0.85))
+	var sub := _label("Tout le monde va la voir dans le corridor !" if who == "moi" else "Ça va faire plaisir à %s !" % ("Maman" if who == "maman" else "Papa"), 26, Color(BLUE, 0.85))
 	sub.position = Vector2(0, 438)
 	sub.size = Vector2(620, 40)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	card.add_child(sub)
-	var ok := _button("Pour %s ♥" % ("Maman" if who == "maman" else "Papa"), 26, func() -> void:
+	var ok := _button("Sur ma porte ♥" if who == "moi" else "Pour %s ♥" % ("Maman" if who == "maman" else "Papa"), 26, func() -> void:
 		Sfx.play("chime")
 		closed.emit(result)
 		queue_free(), Vector2(300, 62))
