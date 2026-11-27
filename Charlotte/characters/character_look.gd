@@ -47,6 +47,8 @@ const ADULT_HAIR: Array[String] = ["short", "bob", "bun", "curly", "long_straigh
 ## A cord with a stone on it, over a top (the stone's colour; "": none), and a small stud in the ear.
 @export var necklace := ""
 @export var earring := false
+## A friendship bracelet on the front wrist: its colours, "#a,#b,#c" ("": none). See `FriendBracelet`.
+@export var bracelet := ""
 ## A Halloween costume (`CostumeArt.ALL`): "" = her own clothes. It dresses the whole puppet when the art is built.
 @export var costume := ""
 # Exact hex colours that win over the derived palette (used to keep Charlotte pixel-identical).
@@ -69,8 +71,8 @@ static func charlotte() -> CharacterLook:
 		var look := _outfit.duplicate(true) as CharacterLook
 		# Her mouth is always the closed smile, also in outfits saved before that (the wardrobe doesn't change it).
 		look.mouth = "smile"
-		return look
-	return usual()
+		return FriendBracelet.dress_mine(look)
+	return FriendBracelet.dress_mine(usual())
 
 
 ## Back to her usual dress (a new game).
@@ -181,7 +183,7 @@ static func billie() -> CharacterLook:
 	look.legwear_color = Color.WHITE
 	look.shoes = "mary_jane"
 	look.shoe_color = Color("#2B2B2B")
-	return look
+	return FriendBracelet.dress(look, "billie")
 
 
 ## Alyzée, 7, new at Charlotte's school (no photo: Julien asked for black hair and her height, then very pale skin and long hair;
@@ -205,7 +207,7 @@ static func alyzee() -> CharacterLook:
 	look.legwear_color = Color("#5B3A70")
 	look.shoes = "sneaker"
 	look.shoe_color = Color("#D9342B")
-	return look
+	return FriendBracelet.dress(look, "alyzee")
 
 
 ## Emilia, seven, of Mexican heritage (her mamá comes from Puebla, her papa is from Montréal; no photo, invented): warm
@@ -228,7 +230,7 @@ static func emilia() -> CharacterLook:
 	look.legwear_color = Color("#F4F1EA")
 	look.shoes = "sneaker"
 	look.shoe_color = Color("#D9342B")
-	return look
+	return FriendBracelet.dress(look, "emilia")
 
 
 ## Jade, the educator: young, auburn hair in a ponytail, a teal hoodie, jeans, sneakers.
@@ -275,7 +277,7 @@ static func auguste() -> CharacterLook:
 	look.legwear_color = Color("#2B2B2B")
 	look.shoes = "sneaker"
 	look.shoe_color = Color("#2B2B2B")
-	return look
+	return FriendBracelet.dress(look, "auguste")
 
 
 ## Alphée: her hair down, a pale teal T-shirt with a pink heart, a stone on a cord.
@@ -288,7 +290,7 @@ static func alphee() -> CharacterLook:
 	look.pattern = "heart"
 	look.sleeve = "short"
 	look.necklace = "#3F3A63"
-	return look
+	return FriendBracelet.dress(look, "alphee")
 
 
 ## Constance: a ponytail, a beige sweater with little birds on skateboards, a stud in her ear.
@@ -301,7 +303,7 @@ static func constance() -> CharacterLook:
 	look.pattern = "birds"
 	look.sleeve = "long"
 	look.earring = true
-	return look
+	return FriendBracelet.dress(look, "constance")
 
 
 ## Her usual look: the yellow polka-dot dress.

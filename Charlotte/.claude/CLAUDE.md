@@ -567,6 +567,17 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   `_chacha` the paper sign over the paint). It prints cut to the door's edges, `porte_chambre.png` in the slot
   (`house.gd door_path`), laid over the corridor's door (`_show_door`, the paper sign hidden since the print carries it), and she
   goes out to see it. The decorations got a "Fête" box (fanions, accroche-porte, arc-en-ciel, ampoules) for every craft.
+- **Friendship bracelets** (Julien, 2026-11-27): her desk's "Un bracelet d'amitié" opens `ui/bracelet_studio.gd`
+  (`BraceletStudio`, art `world/bracelet_art.gd` `BraceletArt`): the threads pinned to her jeans with a safety pin; she picks 2 to
+  6 colours, a pattern (`PATTERNS`: chevrons, rayures, losanges, damier; `knot_index`), ties `ROWS` rows of knots by clicking
+  (or holding), adds letter beads (a word or a friend's name, capitals without accents) and a charm (`CHARMS`), then chooses who
+  it is for among the friends she has met, or herself. `world/friend_bracelet.gd` (`FriendBracelet`): it waits in her pocket
+  (`flags.bracelets_a_donner`) until she clicks that friend (`give`, first thing in `Twins`, `BillieAuguste`, `Alyzee`, `Emilia`
+  and the service de garde's talks; their "!" shows while one waits), who puts it on and keeps wearing it (`flags.bracelets`,
+  `FriendBracelet.dress` in each friend's `CharacterLook` constructor). The first friend to get one gives her one back
+  (`flags.bracelet_a_moi`, `dress_mine` in `CharacterLook.charlotte()`). Worn on the front wrist: `look.bracelet` (its colours)
+  makes `CharacterArt` draw a second forearm, `fore_front` (`_bracelet_svg`, high enough that the hand doesn't hide it), used by
+  `Character._make_arm(…, front)`. **A new friend = a line in `FriendBracelet.FRIENDS`, `dress` in their look, `give` in their click.**
 - **Her own drawing on her clothes** (Julien, 2026-11-27: "dessiner son propre chandail"): her desk's "Dessiner mon chandail", or
   "Dessiner mon motif" under the wardrobe's Motif row, opens the `DrawingPad` ("Sur mon chandail !"); `CharacterArt.save_motif`
   takes the paper out (only what she drew stays), cuts it to its edges and keeps it as `mon_motif.png` in the slot. Patterns

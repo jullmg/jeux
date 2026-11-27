@@ -165,6 +165,7 @@ func _build() -> Dictionary:
 		"torso": _tex(_torso_svg(sx, sy)),
 		"upper": _tex(_upper_arm_svg(upper)),
 		"fore": _tex(_forearm_svg(fore)),
+		"fore_front": _tex(_forearm_svg(fore, true)) if look.bracelet != "" else null,
 		"hand_relaxed": _tex(_hand_svg("relaxed", hs)),
 		"hand_open": _tex(_hand_svg("open", hs)),
 		"hand_flat": _tex(_hand_svg("flat", hs)),
@@ -1203,7 +1204,7 @@ func _upper_arm_svg(length: float) -> String:
 
 ## Elbow to wrist: slimmer than the upper arm, a round cap at the elbow, and for a long sleeve the cloth down to a cuff, with the
 ## little creases of a bent elbow. Canvas 30 wide; the elbow pivot is at (15, 8); the wrist at (15, 8 + length).
-func _forearm_svg(length: float) -> String:
+func _forearm_svg(length: float, bracelet := false) -> String:
 	var wy := 8.0 + length
 	# Fuller at the elbow, narrowing to the wrist.
 	var s := _f('<path d="M8.6 8 H21.4 L19.8 %s Q15 %s 10.2 %s Z" fill="{skin}" stroke="{skin_line}" stroke-width="2.2" stroke-linejoin="round"/>' % [wy - 1.0, wy + 2.0, wy - 1.0])
@@ -1219,7 +1220,24 @@ func _forearm_svg(length: float) -> String:
 			t += _f('<rect x="6.6" y="%s" width="16.8" height="8" rx="3" fill="{cloth_line}" opacity="0.55"/>' % (wy - 12.0))
 			t += _f('<path d="M8.5 14 q6.5 4.5 13 0 M9.5 19.5 q5.5 3.5 11 0 M10.5 25 q4.5 3 9 0" stroke="{cloth_line}" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.4"/>')
 		return t)
+	if bracelet:
+		s += _bracelet_svg(wy)
 	return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="%d" viewBox="0 0 30 %d">%s</svg>' % [ceili(wy + 10), ceili(wy + 10), s]
+
+
+# A friendship bracelet round the wrist (`look.bracelet`, its colours): a band of slanted knots, just above the hand.
+func _bracelet_svg(wy: float) -> String:
+	var colors := look.bracelet.split(",", false)
+	if colors.is_empty():
+		return ""
+	# High enough on the wrist that the hand doesn't cover it.
+	var y := wy - 12.0
+	var s := '<rect x="6.4" y="%.1f" width="17.2" height="8.6" rx="3.2" fill="#2F2A3A"/>' % (y - 0.6)
+	for k in 7:
+		var col: String = colors[k % colors.size()]
+		s += '<path d="M%.1f %.1f l2.8 0 l-1.4 7.4 l-2.8 0 z" fill="%s"/>' % [7.6 + k * 2.4, y + 0.1, col]
+	s += '<path d="M7.4 %.1f H22.6" stroke="#FFFFFF" stroke-width="1.1" opacity="0.55"/>' % (y + 1.2)
+	return s
 
 
 # One finger: two segments (`a1` then `a2` degrees, negative = curling forward) from its root at (x, y), width `w`.

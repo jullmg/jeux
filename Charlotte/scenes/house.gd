@@ -2972,6 +2972,7 @@ func _use_desk() -> void:
 		{"text": "Dessiner", "note": "Du papier et des crayons", "color": Color("#8FCBF2")},
 		{"text": "Dessiner mon chandail", "note": "Ton dessin sur ton linge", "color": Color("#F7B6D2")},
 		{"text": "Décorer ma porte", "note": "Ta porte de chambre", "color": Color("#FFD98A")},
+		{"text": "Un bracelet d'amitié", "note": "Pour une amie, ou pour toi", "color": Color("#C9B6F2")},
 	])
 	card.chose.connect(func(which: int) -> void:
 		if which == 0:
@@ -2982,6 +2983,8 @@ func _use_desk() -> void:
 			_draw_my_shirt()
 		elif which == 3:
 			_decorate_door()
+		elif which == 4:
+			_make_bracelet()
 		else:
 			_control.enabled = true)
 
@@ -3003,6 +3006,30 @@ func _open_drawing_pad() -> void:
 		_show_fridge_drawings()
 		_control.enabled = true)
 	add_child(pad)
+
+
+# A friendship bracelet (`BraceletStudio`): for a friend, it waits in her pocket until she sees them (`FriendBracelet`); for her,
+# she puts it on at once.
+func _make_bracelet() -> void:
+	_control.enabled = false
+	var studio := BraceletStudio.new()
+	studio.closed.connect(func(result: Dictionary) -> void:
+		_control.enabled = true
+		if result.is_empty():
+			return
+		var who := str(result["for"])
+		_charlotte.express("happy", 2.4)
+		if who == "moi":
+			FriendBracelet.keep(result.data)
+			_charlotte.look.bracelet = BraceletArt.wrist(result.data)
+			_charlotte.set_look(_charlotte.look)
+			_say(_charlotte, "Mon beau bracelet ! Je le garde\npour toujours.", 280.0, 2.8)
+			return
+		FriendBracelet.make(who, result.data)
+		var name := FriendBracelet.name_of(who)
+		_say(_charlotte, "Je le mets dans ma poche.\nJe vais le donner à %s !" % name, 280.0, 3.0)
+		Notebook.announce("step", "Donne ton bracelet d'amitié à %s !" % name, FriendBracelet.HEADING))
+	add_child(studio)
 
 
 # Her bedroom door (Julien: "décorer sa porte de chambre"): the craft studio with her door on the bench (`CraftArt` "porte"), the

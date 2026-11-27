@@ -209,7 +209,7 @@ func _build() -> void:
 	if tex.has("mask"):
 		_part(_head, tex.mask, _rig.head_pivot, Vector2.ZERO)
 	_part(_head, tex.hair_front, _rig.head_pivot, Vector2.ZERO)
-	_arm_front = _make_arm(tex, Vector2(-(_rig.arm_x as float), _rig.shoulder_y), Color.WHITE)
+	_arm_front = _make_arm(tex, Vector2(-(_rig.arm_x as float), _rig.shoulder_y), Color.WHITE, true)
 	_apply_pose()
 
 
@@ -310,9 +310,11 @@ func shoulder_position(i: int) -> Vector2:
 
 
 # An arm chain in the body: the upper arm at the shoulder, the forearm at its elbow, the hand at the wrist. Returns the upper arm.
-func _make_arm(tex: Dictionary, shoulder: Vector2, tint: Color) -> Sprite2D:
+func _make_arm(tex: Dictionary, shoulder: Vector2, tint: Color, front := false) -> Sprite2D:
 	var upper := _part(_body, tex.upper, _rig.arm_pivot, shoulder, tint)
-	var fore := _part(upper, tex.fore, _rig.arm_pivot, Vector2(0, _rig.upper_len))
+	# The front wrist wears the friendship bracelet, if any.
+	var fore_tex: Texture2D = tex.fore_front if front and tex.get("fore_front") != null else tex.fore
+	var fore := _part(upper, fore_tex, _rig.arm_pivot, Vector2(0, _rig.upper_len))
 	var hand := _part(fore, tex.hand_relaxed, _rig.hand_pivot, Vector2(0, _rig.fore_len))
 	_arms.append(upper)
 	_fores.append(fore)

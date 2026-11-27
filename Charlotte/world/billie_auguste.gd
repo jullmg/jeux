@@ -112,7 +112,7 @@ static func met() -> bool:
 func waiting() -> bool:
 	if _talking:
 		return false
-	return not met() or Snowman.can_start() or Quests.active(Snowman.QUEST) and Carry.has("bonhomme")
+	return not met() or FriendBracelet.has_pending(["billie", "auguste"]) or Snowman.can_start() or Quests.active(Snowman.QUEST) and Carry.has("bonhomme")
 
 
 func can_interact() -> bool:
@@ -151,6 +151,8 @@ func interact(who: Character) -> void:
 		kid.facing = 1 if who.position.x > kid.global_position.x else -1
 	if not met():
 		_meet()
+	elif FriendBracelet.give(_kids[_clicked], ["billie", "auguste"][_clicked], _say_as(_clicked), who):
+		pass
 	elif Snowman.can_start():
 		_ask_for_snowman()
 	elif Quests.active(Snowman.QUEST) and Carry.has("bonhomme"):
@@ -287,3 +289,8 @@ class _Ball:
 		draw_arc(p + Vector2(-26, 0), 20.0, -0.9, 0.9, 10, color.darkened(0.4), 1.8, true)
 		draw_arc(p + Vector2(26, 0), 20.0, PI - 0.9, PI + 0.9, 10, color.darkened(0.4), 1.8, true)
 		draw_circle(p + Vector2(-7, -8), 4.5, Color(1, 1, 1, 0.35))
+
+
+# A line from kid `i` (kept for a line said later, whoever is clicked by then).
+func _say_as(i: int) -> Callable:
+	return func(t: String) -> void: _say(i, t)
