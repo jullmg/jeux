@@ -22,7 +22,7 @@ func _ready() -> void:
 	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_NO_FOCUS, true)
 	DirAccess.make_dir_recursive_absolute(dir)
 	_run.call_deferred()
-	get_tree().create_timer(400.0, true, false, true).timeout.connect(func() -> void: main.quit_game(2))
+	get_tree().create_timer(1200.0, true, false, true).timeout.connect(func() -> void: main.quit_game(2))
 
 
 func wait(seconds: float) -> void:
@@ -113,7 +113,8 @@ func _performance() -> void:
 func _poses() -> void:
 	var stage: Stage = main.stage
 	main.menus.close()
-	stage.show_title()
+	main.go_title()
+	main.menus.close()
 	stage.view = "photo"
 	var spot := Vector3(-0.35, 0, 1.45)
 	stage.dog.position = spot
@@ -201,6 +202,9 @@ func _run() -> void:
 		main.menus.show_select("chambre")
 		await wait(0.4)
 		await shot("02_missions_chambre")
+		main.show_brief(15)
+		await wait(0.4)
+		await shot("03_consignes_pyjama")
 		main.save.reset_defaults()
 		main.save.record(1, 2900, 2)
 		main.save.record(2, 900, 1)
@@ -280,7 +284,8 @@ func _run() -> void:
 		# Les postures des nouvelles pièces, de profil : assises (sans chaise : on juge le corps), debout, et Blanche.
 		var stage: Stage = main.stage
 		main.menus.close()
-		stage.show_title()
+		main.go_title()
+		main.menus.close()
 		stage.view = "photo"
 		var at := Vector3(-0.2, 0, 1.2)
 		var papa: PersonView = stage._person("papa")

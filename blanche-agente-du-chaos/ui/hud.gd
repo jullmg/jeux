@@ -10,6 +10,8 @@ signal grab_pressed
 const FACE_UP := 0.13
 const HEAD_HALF := 0.17
 const SIGNS_TOP := 205.0
+## Les bulles restent sous les panneaux du haut et sous l'étiquette de la méfiance.
+const BUBBLE_TOP := 184.0
 
 var sim: Sim
 var stage: Stage
@@ -83,9 +85,17 @@ func _ready() -> void:
 	_toast = UiStyle.label("", 34, Color.WHITE)
 	_toast.add_theme_color_override("font_outline_color", UiStyle.INK)
 	_toast.add_theme_constant_override("outline_size", 12)
-	_toast.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	_toast.offset_top = 144
-	_toast.offset_bottom = 190
+	# L'annonce sur une étiquette foncée, centrée sous le titre : elle se lit par-dessus tout ce qui est dessous.
+	_toast.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_toast.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_toast.offset_top = 140
+	var chip := UiStyle.box(Color(UiStyle.INK, 0.82), 24, Color.TRANSPARENT, 0, 0)
+	chip.content_margin_left = 26
+	chip.content_margin_right = 26
+	chip.content_margin_top = 4
+	chip.content_margin_bottom = 6
+	_toast.add_theme_stylebox_override("normal", chip)
 	add_child(_toast)
 	var foot := VBoxContainer.new()
 	foot.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -263,6 +273,7 @@ func _process(delta: float) -> void:
 			_wary_why = "tip_" + ("cage" if sim.map.corner_kind == "cage" else "papa")
 		_wary_left = 4.5
 	_toast.modulate.a = clampf(_toast_left * 3.0, 0.0, 1.0)
+	_toast.visible = _toast.text != "" and _toast_left > 0.0
 	# La bulle de Maman reste près de sa tête ; les autres se tassent autour d'elle, de ce qu'elle fait et des annonces.
 	var placed := _signs_rects()
 	for who: PersonView in _bubbles.keys():
@@ -355,7 +366,7 @@ func _clear_of(panel: Control, placed: Array[Rect2]) -> Rect2:
 			if rect.grow(4.0).intersects(other):
 				hit = true
 				var up := other.position.y - rect.size.y - 8.0
-				rect.position.y = up if up >= 150.0 else other.end.y + 8.0
+				rect.position.y = up if up >= BUBBLE_TOP else other.end.y + 8.0
 		if not hit:
 			break
 	panel.position = rect.position
@@ -379,7 +390,7 @@ func _place_bubble(who: PersonView) -> void:
 		# À côté de sa tête, de l'autre côté de ses signes.
 		pos = at + Vector2(96.0, -panel.size.y / 2.0)
 	pos.x = clampf(pos.x, 12.0, size.x - panel.size.x - 12.0)
-	pos.y = clampf(pos.y, 150.0, size.y - panel.size.y - 12.0)
+	pos.y = clampf(pos.y, BUBBLE_TOP, size.y - panel.size.y - 12.0)
 	panel.position = pos
 
 
