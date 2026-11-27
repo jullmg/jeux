@@ -14,7 +14,7 @@ extends RefCounted
 
 const KEY := "carried"
 ## The quest each thing belongs to: left in her arms after it, a thing is put down when the next scene opens.
-const OWNERS := {"milk": "milk", "can": "plants", "toy": "menage", "book": "livre", "chips": "chips", "gift": "fete",
+const OWNERS := {"panier": "paques", "milk": "milk", "can": "plants", "toy": "menage", "book": "livre", "chips": "chips", "gift": "fete",
 	"bonhomme": "bonhomme", "pelle": "souffleuse", "deco": "sapin", "lettre": "noel", "biscuits": "noel"}
 const FULL_HANDS := "J'ai déjà les mains pleines !"
 ## Where her hands hold the watering can, in the can's own space (its handle).
@@ -160,6 +160,16 @@ static func _build(kind: String, id: String) -> Node2D:
 			bag.name = "snacks"
 			bag.set_meta("keep_upright", true)
 			return bag
+		"panier":
+			# Her Easter basket, the eggs she has found in it.
+			var basket := Sprite2D.new()
+			basket.texture = Easter.basket(Easter.found().size())
+			basket.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			basket.scale = Vector2.ONE * 0.95
+			basket.offset = Vector2(0, -22)
+			basket.name = "panier"
+			basket.set_meta("keep_upright", true)
+			return basket
 		"drawing":
 			# The drawing from the service de garde, held up in front of her, the right way round, on its white sheet.
 			var sheet := Sprite2D.new()

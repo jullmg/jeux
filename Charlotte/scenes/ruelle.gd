@@ -124,6 +124,8 @@ func _ready() -> void:
 		_build_little_neighbours()
 		if SnowFort.standing():
 			_build_snow_fort()
+	if lane == "middle" and Easter.step() == 2:
+		_build_easter()
 	var squirrels := _build_lane_squirrels()
 	_charlotte = _spawn_charlotte(start_x)
 	for squirrel in squirrels:
@@ -645,6 +647,111 @@ func _build_snow_fort() -> void:
 					_twins.cheer(text))
 		, fort.position.x + SnowFort.THROW_DX))
 	add_child(QuestMark.make(fort.position + Vector2(0, -130), func() -> bool: return SnowFort.step() == 1 and _control.enabled))
+
+
+# The Easter egg hunt (`Easter`): the eggs still hidden, and Maman and Papa by her gate.
+var _easter_parents: Array[Character] = []
+
+
+func _build_easter() -> void:
+	for i in Easter.SPOTS.size():
+		if i in Easter.found():
+			continue
+		var egg := Easter.Egg.new()
+		egg.index = i
+		egg.position = Easter.position(i)
+		egg.picked.connect(_egg_found)
+		add_child(egg)
+	var gate := _gate_x()
+	var spots := [[CharacterLook.mom(), gate - 130.0, 1], [CharacterLook.dad(), gate + 150.0, -1]]
+	for sp: Array in spots:
+		var look: CharacterLook = sp[0]
+		Season.dress_for_weather(look)
+		var who := Character.new()
+		who.look = look
+		who.fidgets = true
+		who.scale = Vector2.ONE * CHAR_SCALE * 1.18
+		who.position = Vector2(float(sp[1]), NEIGHBOUR_Y + 14.0)
+		who.facing = int(sp[2])
+		add_child(who)
+		_easter_parents.append(who)
+		var spot := DoorSpot.make(Rect2(who.position.x - 40.0, who.position.y - 150.0, 80.0, 150.0), func() -> void:
+			who.facing = 1 if _charlotte.position.x > who.position.x else -1
+			who.express("happy", 2.0)
+			Bubble.say(self, who.position + Vector2(0, -160), Easter.warmth(_charlotte.position.x), 2.6), who.position.x + (60.0 if int(sp[2]) > 0 else -60.0))
+		add_child(spot)
+	# Coming out, Maman says what to do.
+	var hello := create_tween()
+	hello.tween_interval(1.0)
+	hello.tween_callback(func() -> void:
+		if Easter.found().is_empty():
+			Bubble.say(self, _easter_parents[0].position + Vector2(0, -160), "Joyeuses Pâques, Chachoue ! Le lapin a caché\ndes cocos partout dans la ruelle. Cherche ben !", 4.0)
+		if not Carry.has("panier"):
+			Carry.take(_charlotte, "panier"))
+
+
+const EGG_WORDS := ["Un coco !", "Trouvé !", "Encore un coco !", "Hi hi, je t'ai vu !", "Dans mon panier !"]
+
+
+func _egg_found(i: int) -> void:
+	Easter.mark(i)
+	var gold: bool = Easter.SPOTS[i][2] == "croque"
+	_charlotte.pet(0.6, 0 if gold else 1)
+	Sfx.play("chime" if gold else "pop", _charlotte.position)
+	if Carry.has("panier"):
+		Carry.put_down(_charlotte)
+	Carry.take(_charlotte, "panier")
+	var n := Easter.found().size()
+	var words: String = "Un coco en or !" if gold else EGG_WORDS[n % EGG_WORDS.size()]
+	Bubble.say(self, _charlotte.position + Vector2(0, -190), "%s  (%d sur %d)" % [words, n, Easter.SPOTS.size()], 2.2)
+	if Easter.left() == 0:
+		_easter_done()
+
+
+# All found: a chocolate bunny from the Easter bunny, chocolates for her stash, and everyone goes in.
+func _easter_done() -> void:
+	_control.enabled = false
+	var steps := create_tween()
+	steps.tween_interval(2.4)
+	steps.tween_callback(func() -> void:
+		for who in _easter_parents:
+			who.facing = 1 if _charlotte.position.x > who.position.x else -1
+			who.express("grin", 3.0)
+		Bubble.say(self, _easter_parents[1].position + Vector2(0, -160), "Bravo, Chachoue ! Tu les as toutes trouvées !\nLe lapin de Pâques a laissé ça pour toi…", 3.4))
+	steps.tween_interval(3.4)
+	steps.tween_callback(func() -> void:
+		var bunny := Sprite2D.new()
+		bunny.texture = Easter.bunny()
+		bunny.position = _charlotte.position + Vector2(0, -230)
+		bunny.modulate.a = 0.0
+		bunny.z_index = 20
+		add_child(bunny)
+		var up := create_tween()
+		up.tween_property(bunny, "modulate:a", 1.0, 0.3)
+		up.parallel().tween_property(bunny, "position:y", bunny.position.y - 30.0, 1.8)
+		up.tween_interval(1.2)
+		up.tween_property(bunny, "modulate:a", 0.0, 0.4)
+		up.tween_callback(bunny.queue_free)
+		Sfx.play("chime", _charlotte.position)
+		_charlotte.express("grin", 3.0)
+		Stash.add("chocolate", 6)
+		Bubble.say(self, _charlotte.position + Vector2(0, -300), "Un lapin en chocolat ! Merci, le lapin de Pâques !", 3.0))
+	steps.tween_interval(3.4)
+	steps.tween_callback(func() -> void:
+		Bubble.say(self, _easter_parents[0].position + Vector2(0, -160), "On rentre ! Tes cocos vont dans ta cachette,\npas tous dans ta bedaine d'un coup, là !", 3.4)
+		Carry.put_down(_charlotte)
+		Quests.complete(Easter.QUEST))
+	steps.tween_interval(3.4)
+	steps.tween_callback(func() -> void:
+		var gate := _gate_x()
+		for who in _easter_parents:
+			var go := create_tween()
+			who.is_walking = true
+			who.facing = 1 if gate > who.position.x else -1
+			go.tween_property(who, "position:x", gate, absf(gate - who.position.x) / 120.0)
+			go.tween_property(who, "modulate:a", 0.0, 0.4)
+			go.tween_callback(who.queue_free)
+		_control.enabled = true)
 
 
 func _build_little_neighbours() -> void:

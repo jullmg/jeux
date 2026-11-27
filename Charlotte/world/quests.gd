@@ -222,6 +222,8 @@ static func hint(id: String) -> String:
 		return Birthday.hint()
 	if id == Valentine.QUEST and active(id):
 		return Valentine.hint()
+	if id == Easter.QUEST and active(id):
+		return Easter.hint()
 	return str(ALL.get(id, {}).get("hint", ""))
 
 

@@ -250,18 +250,36 @@ func _build_family() -> void:
 			or Christmas.can_start() or Christmas.step() == 1 and Carry.has("lettre") \
 			or NewYear.can_start() or NewYear.step() == 3 or Tooth.can_start() \
 			or Birthday.can_start() or Birthday.step() == 1 \
-			or Valentine.can_start() or Valentine.step() == 3 and "maman" in Valentine.parents_left())
+			or Valentine.can_start() or Valentine.step() == 3 and "maman" in Valentine.parents_left() \
+			or Easter.can_start() or Easter.step() == 1)
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
 		return Quests.available("hamster") or Quests.available("plants") or Quests.available("chips") \
 			or Quests.active("chips") and Carry.has("chips") or Snowman.needs("tuque") and not Carry.busy() \
 			or Snowstorm.step() == 1 or XmasTree.can_start() or XmasTree.step() == 4 or NewYear.step() == 3 \
-			or Valentine.step() == 3 and "papa" in Valentine.parents_left())
+			or Valentine.step() == 3 and "papa" in Valentine.parents_left() or Easter.can_start())
 	# The morning after the storm, Papa is out front shovelling.
 	if Snowstorm.dad_outside():
 		_dad.visible = false
 		_dad_routine.process_mode = Node.PROCESS_MODE_DISABLED
 		_dad_routine.spot.queue_free()
 		_dad_routine.mark.queue_free()
+	# Easter: they are out in the lane, where the eggs are hidden.
+	if Easter.parents_outside():
+		_parents_out()
+
+
+func _parents_out() -> void:
+	for pair: Array in [[_mom, _mom_routine], [_dad, _dad_routine]]:
+		var who: Character = pair[0]
+		var routine: FamilyRoutine = pair[1]
+		if not who.visible:
+			continue
+		who.visible = false
+		routine.process_mode = Node.PROCESS_MODE_DISABLED
+		if is_instance_valid(routine.spot):
+			routine.spot.queue_free()
+		if is_instance_valid(routine.mark):
+			routine.mark.queue_free()
 
 
 # A parent's routine with its click area and its "!" (over whoever has a quest for Charlotte, or is waiting for what she brings).
@@ -286,6 +304,9 @@ func _talk_to_mom() -> void:
 		return
 	if Valentine.step() == 3 and "maman" in Valentine.parents_left():
 		_valentine_to(_mom, _mom_routine, "maman")
+		return
+	if Easter.step() == 1 or Easter.can_start():
+		_easter_start(_mom)
 		return
 	if Quests.active("milk") and Carry.has("milk"):
 		Carry.put_down(_charlotte)
@@ -411,6 +432,9 @@ func _talk_to_dad() -> void:
 		return
 	if Valentine.step() == 3 and "papa" in Valentine.parents_left():
 		_valentine_to(_dad, _dad_routine, "papa")
+		return
+	if Easter.can_start():
+		_easter_start(_dad)
 		return
 	if Quests.active("chips") and Carry.has("chips"):
 		_hockey_night()
@@ -2655,6 +2679,8 @@ func _build_doors() -> void:
 		Sfx.play("door")
 		Transition.arrive = "ruelle_from_maison"
 		Transition.change_scene(self, "res://scenes/ruelle.tscn"), KITCHEN_START + 300.0))
+	# Easter: the eggs are out in the lane.
+	add_child(QuestMark.make(Vector2(KITCHEN_START + 360.0, 220.0), func() -> bool: return Easter.step() == 2 and _control.enabled))
 	# The fridge: a snack.
 	add_child(DoorSpot.make(Rect2(KITCHEN_START + 4.0, 240, 104, 356), _open_fridge, KITCHEN_START + 140.0))
 	# The drawing from the service de garde, waiting to go up on it.
@@ -3113,6 +3139,26 @@ func _chocolate_heart() -> ImageTexture:
 	s += '<path d="M14 40 L86 40" stroke="#F2C230" stroke-width="6"/><path d="M50 30 Q40 14 34 22 Q38 30 50 30 Q62 14 66 22 Q62 30 50 30 Z" fill="#F2C230" stroke="#B58A1E" stroke-width="1.5"/>'
 	s += '<circle cx="34" cy="30" r="4" fill="#FFFFFF" opacity="0.5"/>'
 	return InteriorArt.tex(100, 100, s)
+
+
+# Easter (`Easter`): Maman or Papa hands her the basket, and both go out to the lane; she follows by the kitchen's back door.
+func _easter_start(who: Character) -> void:
+	if Easter.can_start():
+		Quests.start(Easter.QUEST)
+		Easter.set_step(1)
+	who.express("grin", 2.4)
+	if not Carry.take(_charlotte, "panier"):
+		_say(who, "Joyeuses Pâques, Chachoue ! Pose ce que t'as\ndans les mains, pis viens chercher ton panier.", 400.0, 3.4)
+		return
+	_control.enabled = false
+	_say(who, "Joyeuses Pâques, Chachoue ! Le lapin de Pâques\nest passé dans la ruelle… Prends ton panier !\nOn t'attend dehors, par la porte de la cuisine.", 420.0, 4.6)
+	Notebook.announce("step", "Va chercher les cocos de Pâques dans la ruelle, par la porte de la cuisine !", Easter.HEADING)
+	var out := create_tween()
+	out.tween_interval(4.8)
+	out.tween_callback(func() -> void:
+		Easter.set_step(2)
+		_parents_out()
+		_control.enabled = true)
 
 
 # A friendship bracelet (`BraceletStudio`): for a friend, it waits in her pocket until she sees them (`FriendBracelet`); for her,
