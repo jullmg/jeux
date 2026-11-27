@@ -17,6 +17,16 @@ const CHACHA_DOOR_X := 3120.0
 const PIANO_X := 2300.0
 const POTTERY_X := 2520.0
 const BEDROOM_DOOR_X := 6440.0
+## Her pots (`PotteryStudio`) on a little shelf on the corridor wall, right of the TV, over the radiator.
+const POT_SHELF_X := 2782.0
+const POT_SHELF_Y := 404.0
+const POTTERY_LINES := {
+	"bol": "Un bol pour tes céréales !\nTu vas manger dedans demain matin.",
+	"tasse": "Une tasse ! Je te fais un chocolat chaud\ndedans tantôt, promis.",
+	"vase": "Un vase ! Papa va être obligé\nde m'acheter des fleurs, astheure.",
+	"pot": "Un pot à fleurs ! On va planter\nquelque chose de beau dedans.",
+	"assiette": "Une assiette ! On la met au mur\nou ben on mange dedans ?",
+}
 const MOM_LINES := ["Bonjour ma chouette !", "As-tu faim ? Il y a des fruits.", "N'oublie pas de nourrir le hamster !", "Je t'aime, Chachoue !"]
 const DAD_LINES := ["Salut Chachoue !", "On va au parc tantôt ?", "As-tu fait un beau dessin ?", "Tu veux jouer avec moi ?"]
 # What's lying on the bedroom floor (kind, x in the bedroom). Tidying: she picks each one up in her arms (Carry "toy"), says
@@ -99,6 +109,7 @@ var _party_busy := false
 # Charlotte's drawings stuck on the fridge door with magnets.
 var _fridge_art: Node2D
 var _crafts_art: Node2D
+var _pots_art: Node2D
 var _fridge_busy := false
 var _mom_routine: FamilyRoutine
 var _dad_routine: FamilyRoutine
@@ -1503,8 +1514,8 @@ func _ask_mom() -> void:
 	_control.enabled = false
 	var school := School.available_today()
 	var movie := Cinema.can_ask()
-	var choices: Array = [{"text": "On cuisine ensemble ?", "note": "pizza, muffins, biscuits…"}]
-	var kinds: Array = ["cook"]
+	var choices: Array = [{"text": "On cuisine ensemble ?", "note": "pizza, muffins, biscuits…"}, {"text": "On fait de la poterie ?", "note": "au tour, dans le corridor"}]
+	var kinds: Array = ["cook", "pottery"]
 	if movie:
 		choices.append({"text": "On fait une soirée cinéma ?", "note": "avec tes amis"})
 		kinds.append("movie")
@@ -1522,6 +1533,8 @@ func _ask_mom() -> void:
 		var what: String = kinds[i]
 		if what == "cook":
 			_cook_with_mom()
+		elif what == "pottery":
+			_open_pottery()
 		elif what == "movie":
 			_choose_movie_friends()
 		elif what == "school":
@@ -1634,6 +1647,99 @@ func _open_cooking(recipe: String) -> void:
 		_say(_mom, "%s\n%s  %s" % [str(CookieArt.recipe(str(result.recipe)).eat), "★".repeat(stars) + "☆".repeat(3 - stars), praise], 380.0, 4.2)
 		_treat(ImageTexture.create_from_image(shot), "On a tout fait nous-mêmes !", 0.4))
 	add_child(studio)
+
+
+# Pottery with Maman at her wheel (`PotteryStudio`): a click on the wheel, or Maman's card.
+func _pottery_with_mom() -> void:
+	_control.enabled = false
+	_mom_routine.pause(6.0, _charlotte.position.x)
+	_mom.express("happy", 2.0)
+	_say(_mom, "De la poterie ? Mets ton tablier, Chachoue !", 380.0, 2.2)
+	var later := create_tween()
+	later.tween_interval(1.8)
+	later.tween_callback(_open_pottery)
+
+
+func _open_pottery() -> void:
+	_control.enabled = false
+	var studio := PotteryStudio.new()
+	studio.closed.connect(func(result: Dictionary) -> void:
+		_control.enabled = true
+		if result.is_empty():
+			_say(_charlotte, "On en fera une autre fois, Maman !", 300.0)
+			return
+		PotteryStudio.keep(result.image, str(result.kind))
+		_show_pots()
+		_mom_routine.pause(5.0, _charlotte.position.x)
+		_mom.express("happy", 3.0)
+		_say(_mom, str(POTTERY_LINES.get(result.kind, "Wow ! C'est toi qui as fait ça ?")), 380.0, 3.8)
+		_hold_up(_pot_picture(result.image, 120.0), "Je la mets sur ma tablette !"))
+	add_child(studio)
+
+
+# A copy of a pot's picture no bigger than `most` px.
+func _pot_picture(img: Image, most: float) -> ImageTexture:
+	var shot: Image = img.duplicate()
+	var k := minf(1.0, most / maxf(shot.get_width(), shot.get_height()))
+	shot.resize(maxi(1, int(shot.get_width() * k)), maxi(1, int(shot.get_height() * k)), Image.INTERPOLATE_LANCZOS)
+	return ImageTexture.create_from_image(shot)
+
+
+# Something she made, held up over her head for a moment with a word (a `_treat` without the "yum").
+func _hold_up(picture: Texture2D, text: String) -> void:
+	_charlotte.express("happy", 3.0)
+	var shown := Node2D.new()
+	shown.position = _charlotte.position + Vector2(0, -280)
+	shown.modulate.a = 0.0
+	add_child(shown)
+	var icon := Sprite2D.new()
+	icon.texture = picture
+	shown.add_child(icon)
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 20)
+	label.add_theme_color_override("font_color", Color("#1D4F91"))
+	label.add_theme_color_override("font_outline_color", Color.WHITE)
+	label.add_theme_constant_override("outline_size", 6)
+	label.position = Vector2(-130, -picture.get_height() / 2.0 - 34.0)
+	label.size = Vector2(260, 30)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	shown.add_child(label)
+	var tween := create_tween()
+	tween.tween_callback(func(): Sfx.play("chime"))
+	tween.tween_property(shown, "modulate:a", 1.0, 0.25)
+	tween.parallel().tween_property(shown, "position:y", shown.position.y - 30.0, 1.6)
+	tween.tween_interval(1.8)
+	tween.tween_property(shown, "modulate:a", 0.0, 0.4)
+	tween.tween_callback(shown.queue_free)
+
+
+# Her pots on their shelf, the newest on the right (no shelf before the first one).
+func _show_pots() -> void:
+	if _pots_art == null:
+		return
+	for c in _pots_art.get_children():
+		c.queue_free()
+	var pots := PotteryStudio.kept()
+	if pots.is_empty():
+		return
+	var shelf := Sprite2D.new()
+	shelf.texture = InteriorArt.pottery_shelf()
+	shelf.centered = false
+	shelf.position = Vector2(POT_SHELF_X, POT_SHELF_Y - 8.0)
+	_pots_art.add_child(shelf)
+	for i in pots.size():
+		var img: Image = pots[i].duplicate()
+		img.generate_mipmaps()
+		var sprite := Sprite2D.new()
+		sprite.texture = ImageTexture.create_from_image(img)
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		sprite.centered = false
+		var k := minf(40.0 / img.get_width(), 66.0 / img.get_height())
+		sprite.scale = Vector2.ONE * k
+		var cx := POT_SHELF_X + 26.0 + i * 46.0
+		sprite.position = Vector2(cx - img.get_width() * k / 2.0, POT_SHELF_Y + 2.0 - img.get_height() * k)
+		_pots_art.add_child(sprite)
 
 
 # Papa, on demand: to the Parc du Pélican, with him (`ParkOuting`).
@@ -3029,6 +3135,13 @@ func _build_hallway() -> void:
 	_put(InteriorArt.piano(), PIANO_X, 606.0, 0.62, "floor")
 	_put(InteriorArt.piano_bench(), PIANO_X + 196.0, 636.0, 0.9, "floor")
 	_put(InteriorArt.pottery_station(), POTTERY_X, 606.0, 0.85, "floor")
+	# Her wheel too: a click and she makes pottery with Maman.
+	var wheel := DoorSpot.make(Rect2(POTTERY_X + 40.0, 470.0, 150.0, 136.0), _pottery_with_mom, POTTERY_X + 60.0)
+	wheel.condition = func() -> bool: return _control.enabled
+	add_child(wheel)
+	_pots_art = Node2D.new()
+	add_child(_pots_art)
+	_show_pots()
 	_put(InteriorArt.photo_row(), 2520.0, 260.0, 0.8, "wall")
 	_put(InteriorArt.tv(), 2560.0, 400.0, 0.8, "wall")
 	_build_tv(Vector2(2560.0, 400.0 - 140.0 * 0.8), 0.8)

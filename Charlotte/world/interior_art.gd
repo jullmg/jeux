@@ -2198,3 +2198,13 @@ static func pottery_station() -> ImageTexture:
 	s += '<path d="M212 112 Q212 100 220 98 Q230 100 228 112 Z" fill="url(#gl3)" stroke="#1E5C60" stroke-width="2"/>'
 	s += '<ellipse cx="190" cy="82" rx="9" ry="2.2" fill="#3A1E10" fill-opacity="0.7"/>'
 	return tex(230, 150, s)
+
+
+## Canvas 200x46: a little wooden wall shelf for her pots (its top at y 8), on two brackets.
+static func pottery_shelf() -> ImageTexture:
+	var s := '<rect x="4" y="10" width="192" height="6" fill="#000" fill-opacity="0.12"/>'
+	s += '<path d="M24 16 V42 L50 16 Z M150 16 L176 16 V42 Z" fill="#8A5A30" stroke="#5E3A1C" stroke-width="2"/>'
+	s += '<rect x="0" y="4" width="196" height="12" rx="2" fill="#C68A52" stroke="#7A4E24" stroke-width="2"/>'
+	s += '<rect x="2" y="5" width="192" height="3" fill="#E4AD72"/>'
+	s += '<path d="M30 11 H90 M110 12 H170" stroke="#9E6A38" stroke-width="1.2" opacity="0.6"/>'
+	return tex(200, 46, s)
