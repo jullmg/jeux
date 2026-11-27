@@ -436,6 +436,23 @@ func test_recommencer_pendant_la_punition() -> void:
 	check(main.sim.dog_pos.distance_to(main.sim.map.corner) < 0.05, "de retour au coin")
 
 
+## Changer de mission pendant que Blanche redescend d'une table ne plante pas (l'endroit n'existe plus).
+func test_changer_de_piece_en_redescendant() -> void:
+	var sim := await calm(12)
+	sim.dog_pos = sim.map.spots.table_nord.stand
+	var item := sim._add_item(Sim.Size.BIG, "table_nord", sim.map.spots.table_nord.food)
+	sim.dog_state = Sim.Dog.REACHING
+	sim.reach_item = item
+	await frames(3)
+	sim.dog_state = Sim.Dog.LOWERING
+	sim.lower_left = Sim.DESCEND_TIME
+	main.start_level(1)
+	main.sim.dog_state = Sim.Dog.LOWERING
+	main.sim.lower_left = Sim.DESCEND_TIME
+	await frames(4)
+	check(main.state == "jeu" and main.stage._reach_spot == "", "la cuisine a oublié la table")
+
+
 func test_resultats_et_suite() -> void:
 	main.save.reset_defaults()
 	var sim := await calm()

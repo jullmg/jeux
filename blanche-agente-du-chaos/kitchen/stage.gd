@@ -718,6 +718,7 @@ func _clear_level() -> void:
 		mom.head_yaw = 0.0
 		mom.visible = true
 	_held_id = -1
+	_reach_spot = ""
 	_laugh = 0.0
 	_surprised = 0.0
 	_shake = 0.0
@@ -876,7 +877,10 @@ func _show_dog(delta: float) -> void:
 	var at := _smooth("blanche", sim.dog_pos)
 	var heading := sim.dog_dir
 	# Sur une table basse, elle ne se dresse pas : elle tend le nez.
-	var low: bool = _reach_spot != "" and map.spots.has(_reach_spot) and map.spots[_reach_spot].surface == "low"
+	if not map.spots.has(_reach_spot):
+		# Un endroit de la mission d'avant (on a changé de mission pendant qu'elle redescendait).
+		_reach_spot = ""
+	var low: bool = _reach_spot != "" and map.spots[_reach_spot].surface == "low"
 	if up and _reach_spot != "":
 		var spot: Dictionary = map.spots[_reach_spot]
 		at = spot.stand
