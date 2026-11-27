@@ -350,6 +350,46 @@ func _run() -> void:
 		await until(func() -> bool: return main.sim.mom_state == Sim.Mom.HINT)
 		await wait(0.2)
 		await shot("64_retour_annonce")
+	if wants("souper"):
+		# La table de la salle à manger de près : les gens assis, Maman qui sert, Maman qui fait le tour de la table.
+		var stage: Stage = main.stage
+		var table := Vector3(0.15, 0.55, -1.8)
+		for id: int in [12, 10, 9, 11]:
+			play(id, "equilibre", 70 + id)
+			main.bot = null
+			main.sim.dog_pos = Vector2(-1.2, -0.4)
+			await wait(1.2)
+			stage.view = "photo"
+			stage.photo = [table + Vector3(1.45, 0.75, 1.6), table]
+			await wait(0.5)
+			await shot("70_table_%d_sud_est" % id)
+			stage.photo = [table + Vector3(-1.6, 0.7, 1.55), table]
+			await wait(0.3)
+			await shot("70_table_%d_sud_ouest" % id)
+			# De profil, depuis le mur est : les gens assis du côté sud, leur chaise et le bord de la table.
+			stage.photo = [Vector3(1.6, 0.85, -1.3), Vector3(0.3, 0.7, -1.3)]
+			await wait(0.3)
+			await shot("70_table_%d_profil" % id)
+			stage.view = "jeu"
+		play(12, "equilibre", 9)
+		main.bot = null
+		var stage_mom := main.stage.mom as PersonView
+		stage = main.stage
+		for to: String in ["servir", "buffet"]:
+			main.sim._start_walk(to, main.stage.map.stations[to].activity)
+			for k in 3:
+				await wait(0.55)
+				await shot("71_maman_vers_%s_%d" % [to, k])
+			await until(func() -> bool: return main.sim.mom_state == Sim.Mom.BUSY, 900)
+			await wait(0.6)
+			stage.view = "photo"
+			var at := stage_mom.position
+			# Vue de l'intérieur de la pièce, du côté de la table.
+			var from := Vector3(0.1, 1.55, -0.45) if to == "servir" else Vector3(0.9, 1.6, -1.7)
+			stage.photo = [from, at + Vector3(0.0, 0.95, 0.0)]
+			await wait(0.3)
+			await shot("72_maman_" + to)
+			stage.view = "jeu"
 	if wants("situations"):
 		play(5, "equilibre", 3)
 		# Maman est envoyée à chaque poste, sans attendre que le hasard l'y mène.

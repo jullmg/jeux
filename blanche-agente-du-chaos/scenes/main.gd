@@ -53,6 +53,8 @@ var _ticking_said := false
 ## La chicane en cours : ses répliques et la dernière qui a été dite.
 var _argument: Array = []
 var _argument_line := -1
+## Les conversations à table de la partie en cours.
+var _talk: TableTalk
 
 
 func _ready() -> void:
@@ -222,6 +224,7 @@ func start_level(id: int) -> void:
 	menus.close()
 	stage.start_level(sim)
 	hud.start(sim, stage)
+	_talk = TableTalk.new(sim, stage, hud, _rng)
 	state = "jeu"
 	Sound.music("jeu")
 	if level.get("moment", "") == "noel":
@@ -386,6 +389,7 @@ func _physics_process(delta: float) -> void:
 		_handle_events()
 	_sounds(delta * speed)
 	_argue()
+	_talk.step(delta * speed)
 	if sim.over:
 		if _result.is_empty():
 			_record()
@@ -545,9 +549,8 @@ func _event_words(e: Dictionary) -> void:
 			if _rng.randf() < 0.4:
 				say.call(stage.people.get(e.who), _other_lines(e.who, "slip"), 1.2)
 		"chat":
-			# La visite jase : une bulle de temps en temps seulement, et jamais par-dessus une autre.
-			if _rng.randf() < 0.3 and not hud.has_bubbles():
-				say.call(stage.people.get(e.who), _other_lines(e.who, "chat"), 1.6)
+			# La visite se met à jaser : une conversation avec elle part bientôt (scenes/table_talk.gd).
+			_talk.nudge(e.who)
 		"argue":
 			var pool: Array = Texts.CHICANE_CHARLOTTE if e.get("with", "papa") == "charlotte" else Texts.CHICANE
 			_argument = pool[_rng.randi_range(0, pool.size() - 1)]

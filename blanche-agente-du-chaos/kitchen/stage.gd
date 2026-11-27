@@ -68,6 +68,10 @@ var _room_key := ""
 ## Le temps qui reste au glissement vers le siège (ou depuis le siège) de la personne qui surveille.
 var _seat_blend := 0.0
 var _mom_was_seated := false
+## La conversation à table : qui parle, à qui, et encore combien de temps (les autres le regardent).
+var _talker: PersonView
+var _talk_to: PersonView
+var _talk_left := 0.0
 ## Dans le noir : jusqu'où voit la personne qui surveille (un cercle au plancher, de la taille des règles).
 var _sight: MeshInstance3D
 var _dark := false
@@ -246,6 +250,37 @@ func _set_moment(moment: String) -> void:
 			_views[view] = view.mesh.surface_get_material(0).duplicate()
 			view.set_surface_override_material(0, _views[view])
 		_tint(_views[view])
+
+
+## Les couverts des places occupées (les gens assis, et la place de Maman si elle s'assoit à table), pas les autres.
+func _set_places() -> void:
+	var taken := {}
+	for s in sim.seated:
+		taken[s.seat] = true
+	for id: String in sim.level.get("stations", []):
+		var st: Dictionary = map.stations[id]
+		if st.seated:
+			for seat: String in map.seats:
+				if (map.seats[seat].pos as Vector2).distance_to(st.pos) < 0.05:
+					taken[seat] = true
+	for seat: String in map.seats:
+		_set_part("Couvert_" + seat, taken.has(seat))
+
+
+## Quelqu'un parle à table : les autres se tournent vers lui, lui vers celui à qui il parle.
+func talk(speaker: PersonView, listener: PersonView, seconds: float) -> void:
+	_talker = speaker
+	_talk_to = listener
+	_talk_left = seconds
+
+
+## Où regarde une personne assise qui ne surveille pas : vers qui parle (ou, si c'est elle, vers qui l'écoute).
+func _talk_focus(p: PersonView) -> Node3D:
+	if _talk_left <= 0.0 or _talker == null or not _talker.visible:
+		return null
+	if p == _talker:
+		return _talk_to if _talk_to and _talk_to.visible else null
+	return _talker
 
 
 func _set_part(part: String, on: bool) -> void:
@@ -636,6 +671,9 @@ func start_level(sim_: Sim) -> void:
 	_use_watcher(sim.watcher)
 	_dark = sim.level.has("dark")
 	_set_moment(sim.level.get("moment", "midi"))
+	_set_places()
+	mom.dish = str(sim.level.get("plat", ""))
+	mom.hold_dish(_food_meshes.get(PersonView.DISHES.get(mom.dish, ""), null))
 	view = "jeu"
 	_last_time = -1.0
 	_before.clear()
@@ -668,6 +706,9 @@ func _clear_level() -> void:
 		p.visible = false
 		p.talking = 0.0
 	people.clear()
+	_talker = null
+	_talk_to = null
+	_talk_left = 0.0
 	if dog:
 		dog.drop_held()
 		dog.chewing = false
@@ -909,6 +950,10 @@ func _show_mom(delta: float) -> void:
 	mom.rotation.y = _mom_yaw
 	var relative := _aim(shown_at, sim.dog_pos, _mom_yaw)
 	mom.head_yaw = 0.0
+	_talk_left -= delta
+	var focus := _talk_focus(mom)
+	if seated and focus and sim.mom_state == Sim.Mom.BUSY:
+		mom.head_yaw = clampf(_aim(shown_at, Vector2(focus.position.x, focus.position.z), _mom_yaw), -40.0, 40.0)
 	_laugh -= delta
 	mom.twist = 0.0
 	match sim.mom_state:
@@ -984,6 +1029,9 @@ func _show_people(delta: float) -> void:
 		p.position = Vector3(seat.hips.x, 0, seat.hips.y)
 		p.rotation.y = _turn(p.rotation.y, atan2(seat.face.x, seat.face.y), delta, 10.0)
 		var relative := _aim(seat.hips, sim.dog_pos if s.snitch > 0.0 else sim.viewpoint(), p.rotation.y)
+		var focus := _talk_focus(p)
+		if focus and s.snitch <= 0.0 and s.state != "regarde" and s.state != "slip":
+			relative = _aim(seat.hips, Vector2(focus.position.x, focus.position.z), p.rotation.y)
 		p.head_yaw = clampf(relative, -40.0, 40.0)
 		p.twist = clampf(relative, -50.0, 50.0) if s.snitch > 0.0 or s.state in ["argue", "slip"] else 0.0
 		match s.state:

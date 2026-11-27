@@ -60,6 +60,19 @@ static func validate(level: Dictionary, map: RoomMap) -> PackedStringArray:
 			out.append("rôle inconnu : " + str(p.get("role")))
 		if not PEOPLE.has(p.get("who", "")):
 			out.append("personne inconnue : " + str(p.get("who")))
+	# Une place n'est prise qu'une fois, en comptant celle où Maman s'assoit à table.
+	var taken := {}
+	for id: String in level.stations:
+		if map.stations.has(id) and map.stations[id].seated:
+			for seat: String in map.seats:
+				if (map.seats[seat].pos as Vector2).distance_to(map.stations[id].pos) < 0.05:
+					taken[seat] = "maman"
+	for p: Dictionary in level.get("seated", []):
+		if taken.has(p.get("seat", "")):
+			out.append("place prise deux fois : " + str(p.get("seat")))
+		taken[p.get("seat", "")] = p.get("who", "")
+	if level.has("plat") and not (PersonView.DISHES.has(level.plat) or level.plat == "cafe"):
+		out.append("plat inconnu : " + str(level.plat))
 	for w: Dictionary in level.get("walkers", []):
 		if not PEOPLE.has(w.get("who", "")):
 			out.append("personne inconnue : " + str(w.get("who")))

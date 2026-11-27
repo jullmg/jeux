@@ -42,6 +42,20 @@ Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et 
   `Ambiance.set_room()` change les lumières et la sonde de reflets (`"probe"` du plan). La visite : `tante.glb`,
   `oncle.glb` (`people.py -- tante oncle`). `PersonView.seat_y` assoit quelqu'un (les jambes plient sous toute pose) ;
   `"hanches"` et `"siege"` d'une place ou d'un poste disent où et à quelle hauteur.
+- **À table** (salle à manger, party) : Maman fait le tour de la table (`Sim.mom_grid` bloque les cachettes « dessous »,
+  `Nav.around_tables` ; la chienne passe toujours dessous, la cuisine ne change pas). Les places ont leurs `"hanches"`
+  6 cm vers le dossier. Chaque chaise a son couvert dans le modèle (`Couvert_<chaise>`), montré seulement aux places
+  occupées (`Stage._set_places`). Le `"plat"` d'un niveau (`PersonView.DISHES` : lasagne, pâté chinois, hot-dogs,
+  tourtière, ou `"cafe"` au brunch) est le vrai modèle que Maman tient à deux mains, toujours à plat (`hold_dish`).
+  Assis à table, `"manger"` fait des bouchées, coupe, boit (vin, jus au brunch, lait pour Charlotte) et se tourne pour
+  jaser ; Papa lit `"journal"` au brunch. Une place n'est prise qu'une fois (`Levels.validate`).
+- **Les conversations à table** : `scenes/table_talk.gd` (`TableTalk`), rien que de l'affichage (le hasard des règles
+  n'est pas touché). Les répliques dans `Texts.TABLE_TALK` (`"sur"` : moment ou plat ; vide = à table, dans la salle à
+  manger seulement) et `Texts.TABLE_SOLO`. **La visite ne parle que lorsqu'elle jase pour vrai** (état `"jase"`, assez de
+  temps pour sa dernière réplique ; trois répliques au plus), Charlotte pas en glissant un morceau, Maman seulement
+  assise et occupée ; rien pendant un indice, un regard ou une chicane. Les autres regardent qui parle (`Stage.talk`).
+  Bulles de jasette plus petites (`Hud.bubble(…, small)`) ; aucune bulle ne cache celle de Maman, son étiquette
+  d'activité ni l'annonce (`Hud._clear_of`).
 - `kitchen/stage.gd` : la scène 3D qui montre une `Sim` ; `kitchen/ambiance.gd` : lumières, rendu et moments du jour
   (`"moment"` de chaque niveau) ; `kitchen/effects.gd` : les particules. `characters/` : `rig.gd` (poses par code, rotations dans les
   axes du modèle), `dog_view.gd`, `person_view.gd`. `ui/` : `hud.gd`, `menus.gd`, `ui_style.gd`, `icons.gd`,
@@ -79,7 +93,11 @@ Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et 
   `PersonView._paint_by_vertex` le dit au moteur Forward+ (le moteur mobile les prend telles quelles).
 - Maman ne doit pas avoir un visage large (demande de Julien) ; son visage reste visible quand elle regarde (signes à
   côté de sa tête, `Hud._beside_mom`, tête haute dans la pose « look »).
-- Les images des plats des menus (`art/ui/plat_N.png`) sont rendues par `food.py` (`PLATS`).
+- Les images des plats des menus (`art/ui/plat_N.png`) sont rendues par `food.py` (`PLATS`). Les plats en grès
+  (`baking_dish`) montrent leurs étages par la portion déjà servie (`layers_around_cut`) ; leurs dessus sont des
+  reliefs peints carreau par carreau à 2,5 mm (`relief`, `bumps`) : la lasagne gratinée (`cheese_top`), la purée à la
+  fourchette du pâté chinois (`mashed_top`).
+- Deux surfaces au même niveau clignotent : le plancher des pièces s'arrête où commence celui du corridor (testé).
 - Décor de la cuisine : rien près des endroits à nourriture ; l'objet `Noel` n'est montré qu'au moment « noel » ; le
   tapis reste sous la zone cachée (hauteur < 0,006).
 - Sur le moteur mobile (iPad, Android), le jeu démarre mais la lumière est trop forte : à régler avant d'y livrer.

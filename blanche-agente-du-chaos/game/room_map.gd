@@ -167,6 +167,17 @@ func is_free(pos: Vector2, radius: float) -> bool:
 	return true
 
 
+## Vrai si un cercle touche une table (une cachette « dessous ») : on ne la traverse pas debout.
+func under_table(pos: Vector2, radius: float) -> bool:
+	for h in hides:
+		if h.kind == "dessous":
+			var rect: Rect2 = h.rect
+			var near := Vector2(clampf(pos.x, rect.position.x, rect.end.x), clampf(pos.y, rect.position.y, rect.end.y))
+			if pos.distance_squared_to(near) < radius * radius:
+				return true
+	return false
+
+
 ## Paramètres [entrée, sortie] (0 à 1) du segment a→b dans le rectangle, ou un tableau vide.
 static func segment_rect(a: Vector2, b: Vector2, rect: Rect2) -> PackedFloat32Array:
 	var t0 := 0.0

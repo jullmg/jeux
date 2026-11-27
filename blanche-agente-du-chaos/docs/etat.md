@@ -69,6 +69,23 @@ souper avec des invités**.
 - Les débuts de pièce (9, 13, 15) ont droit à une difficulté un peu plus basse que la mission d'avant ; la finale doit
   être nettement plus dure que le début de la salle à manger (vérifié par `tools/check_balance.py`).
 
+### Corrections de la salle à manger (2026-11-26, demandes de Julien)
+
+- Maman passait à travers la table : elle en fait maintenant le tour (et ne pousse plus Blanche de dessous la table).
+  Étoiles des missions 9 à 15 recalibrées (ses trajets sont un peu plus longs).
+- Papa (et tout le monde) était assis trop près du bord : les hanches reculent de 6 cm vers le dossier.
+- Maman tenait une cafetière noire en servant la lasagne : elle tient maintenant le vrai plat du repas, à plat (la
+  cafetière de verre reste au brunch).
+- Le souper en famille et le brunch : Papa et Charlotte sont à table (Papa lit le journal au brunch) ; assis, chacun
+  mange pour vrai (bouchées, couper, boire, se tourner pour jaser).
+- Un couvert à chaque place occupée (assiette, ustensiles, serviette, verre d'eau).
+- Papa, Charlotte, Maman assise et la visite jasent à table : une quarantaine de conversations drôles et de répliques
+  seules, selon le repas (la visite ne parle que quand elle jase pour vrai, pour ne pas tromper la joueuse).
+- La lasagne (gratinée, ses étages) et le pâté chinois (purée à la fourchette, blé d'Inde, steak) refaits.
+- Le plancher qui clignotait sous la porte de bois : deux planchers se chevauchaient.
+- Les cloches au-dessus de certains endroits : ce sont les endroits bruyants (y prendre un morceau fait tinter la
+  vaisselle et Maman l'entend).
+
 ## Choix faits en l'absence de Julien (à réviser)
 
 - Le prototype gris à l'écran a été sauté : personne n'était là pour juger s'il est amusant. Les règles ont été

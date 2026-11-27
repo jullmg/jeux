@@ -1097,6 +1097,95 @@ func test_niveau_mal_ecrit() -> void:
 	level.seated = [{"who": "ginette", "seat": "sud_est", "role": "complice"}]
 	var problems := Levels.validate(level, m)
 	check(problems.size() >= 4, "problèmes trouvés : %s" % ", ".join(problems))
+	var twice := Levels.load_level(10)
+	twice.seated = [{"who": "papa", "seat": "sud_ouest", "role": "decor"}]
+	twice.plat = "sushi"
+	var found := Levels.validate(twice, grids("salle_a_manger")[0])
+	check(found.has("place prise deux fois : sud_ouest") and found.has("plat inconnu : sushi"), "places et plat : %s" % str(found))
+
+
+## Maman (et la visite qui circule) font le tour de la table : debout, on ne passe pas au travers. La chienne, elle,
+## passe encore dessous.
+func test_maman_contourne_la_table() -> void:
+	for piece: String in ["salle_a_manger", "fetes"]:
+		var g := grids(piece)
+		var m: RoomMap = g[0]
+		var table: Rect2 = m.hides[0].rect
+		var mom_grid: Nav = g[2]
+		for pair: Array in [["servir", "buffet"], ["buffet", "servir"], ["assise", "buffet"], ["servir", "assise"]]:
+			var path := mom_grid.path(m.stations[pair[0]].pos, m.stations[pair[1]].pos)
+			check(not path.is_empty(), "%s : chemin %s → %s" % [piece, pair[0], pair[1]])
+			var here: Vector2 = m.stations[pair[0]].pos
+			for p in path:
+				for k in 10:
+					check(not table.has_point(here.lerp(p, k / 10.0)), "%s : %s → %s traverse la table" % [piece, pair[0], pair[1]])
+				here = p
+		var dog_grid: Nav = g[1]
+		check(not dog_grid.grid.is_point_solid(dog_grid.cell(table.get_center())), piece + " : la chienne passe sous la table")
+	# Dans la cuisine, rien ne change.
+	var kitchen := Sim.mom_grid(map)
+	for x in mom_nav.grid.region.size.x:
+		for y in mom_nav.grid.region.size.y:
+			var c := Vector2i(x, y)
+			if kitchen.grid.is_point_solid(c) != mom_nav.grid.is_point_solid(c):
+				check(false, "la grille de Maman de la cuisine a changé")
+				return
+
+
+## Les conversations à table ne trompent jamais : la visite ne parle que lorsqu'elle jase, Charlotte pas pendant
+## qu'elle glisse un morceau ; les répliques sont courtes et leurs personnes connues.
+func test_conversations_a_table() -> void:
+	var sim := game(12, 5)
+	var talk := TableTalk.new(sim, null, null, RandomNumberGenerator.new())
+	var tante: Dictionary = sim.seated[0]
+	tante.state = "regarde"
+	tante.t = 9.0
+	check(not talk._free("tante"), "la visite qui regarde ne parle pas")
+	tante.state = "jase"
+	check(talk._free("tante") and talk._free("papa"), "la visite qui jase et Papa parlent")
+	tante.snitch = 0.3
+	check(not talk._free("tante"), "la visite qui voit Blanche ne jase plus")
+	tante.snitch = 0.0
+	tante.t = 0.5
+	var free := talk._free_people()
+	for i in Texts.TABLE_TALK.size():
+		var t: Dictionary = Texts.TABLE_TALK[i]
+		if TableTalk._speakers(t).has("tante"):
+			check(not talk._fits(t, free), "pas de conversation qui déborde de son temps de jaser : %d" % i)
+	# Quelqu'un d'absent : la conversation ne part pas, sans erreur.
+	check(not talk._fits({"sur": [], "lines": [["papa", "Allo"], ["charlotte", "Allo"]]}, {"papa": Vector2.ZERO}),
+		"personne absente")
+	var people := ["papa", "maman", "charlotte", "tante", "oncle"]
+	for t: Dictionary in Texts.TABLE_TALK:
+		var guests := 0
+		for line: Array in t.lines:
+			check(people.has(line[0]), "personne inconnue : " + str(line[0]))
+			check(str(line[1]).length() <= 56, "réplique trop longue : " + str(line[1]))
+			if line[0] in ["tante", "oncle"]:
+				guests += 1
+		check(guests == 0 or t.lines.size() <= 3 or "noel" in t.sur, "avec la visite assise, trois répliques au plus")
+	var kid := game(11, 5)
+	var kid_talk := TableTalk.new(kid, null, null, RandomNumberGenerator.new())
+	var charlotte: Dictionary = kid.seated[0]
+	charlotte.state = "slip"
+	check(not kid_talk._free("charlotte"), "Charlotte ne jase pas en glissant un morceau")
+	# Au film, rien que les conversations du film ; au party, celles du party.
+	for id: int in [14, 15]:
+		var away := game(id, 5)
+		var away_talk := TableTalk.new(away, null, null, RandomNumberGenerator.new())
+		var everyone := {"papa": Vector2.ZERO, "charlotte": Vector2.ZERO, "maman": Vector2.ZERO, "tante": Vector2.ZERO,
+			"oncle": Vector2.ZERO}
+		for t: Dictionary in Texts.TABLE_TALK:
+			if away_talk._fits(t, everyone):
+				check(t.sur.has(away.level.moment), "mission %d : conversation hors de propos : %s" % [id, t.lines[0][1]])
+	# Les règles n'en savent rien : la même graine donne la même partie.
+	var a := game(12, 9)
+	var b := game(12, 9)
+	var a_talk := TableTalk.new(a, null, null, RandomNumberGenerator.new())
+	a_talk._free_people()
+	run(a, 20.0)
+	run(b, 20.0)
+	check(a.score == b.score and a.mom_pos == b.mom_pos and a.time == b.time, "les conversations ne touchent pas au hasard")
 
 
 ## Au party, assise au divan, Maman ne lance pas le tour de la table à l'autre bout de la maison.
@@ -1189,6 +1278,9 @@ func test_modeles_de_nourriture() -> void:
 	for id in range(1, Levels.COUNT + 1):
 		for entry: Array in Levels.load_level(id).foods.values():
 			check(foods.find_child(entry[0], true, false) is MeshInstance3D, "niveau %d : modèle %s" % [id, entry[0]])
+	# les plats que Maman tient en servant
+	for dish: String in PersonView.DISHES:
+		check(foods.find_child(PersonView.DISHES[dish], true, false) is MeshInstance3D, "plat tenu : " + dish)
 	foods.free()
 
 
@@ -1222,8 +1314,16 @@ func test_double_salon_complet() -> void:
 		names.append(str(m.data.get("vue", "")))
 		for s in m.stools:
 			names.append("Chaise_" + str(s.name))
+			names.append("Couvert_" + str(s.name))
 	for part: String in names:
 		check(model.get_node_or_null(part) != null, "double salon : " + part)
+	# Le plancher des pièces et celui du corridor se touchent sans se chevaucher : deux surfaces l'une sur l'autre
+	# clignotaient sous le cadre de la porte.
+	var room_floor := (model.get_node("Plancher") as MeshInstance3D)
+	var hall := (model.get_node("Corridor") as MeshInstance3D)
+	var a := room_floor.transform * room_floor.mesh.get_aabb()
+	var b := hall.transform * hall.mesh.get_aabb()
+	check(a.position.x >= b.end.x - 0.001, "les planchers se chevauchent de %.3f m" % (b.end.x - a.position.x))
 	model.free()
 
 

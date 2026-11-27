@@ -4,6 +4,7 @@
   "piece": "salle_a_manger",
   "novelty": "La visite à table",
   "moment": "soir",
+  "plat": "lasagne",
   "intro": [
     "De la visite pour souper ! Ma tante et mon oncle sont assis à table.",
     "Chacun voit son côté de la table… quand il ne jase pas.",
@@ -97,9 +98,9 @@
     "cuisine": "est à la cuisine"
   },
   "stars": [
-    450,
-    1000,
-    1600
+    500,
+    1100,
+    1650
   ],
   "repeat_max": 6
 }

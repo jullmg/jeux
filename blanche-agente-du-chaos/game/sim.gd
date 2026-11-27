@@ -194,8 +194,9 @@ static func dog_grid(map_: RoomMap) -> Nav:
 	return Nav.new(map_, DOG_RADIUS - 0.01)
 
 
+## Maman fait le tour de la table (sans table, comme la cuisine, la grille est la même qu'avant).
 static func mom_grid(map_: RoomMap) -> Nav:
-	return Nav.new(map_, MOM_RADIUS - 0.02)
+	return Nav.new(map_, MOM_RADIUS - 0.02, true)
 
 
 # ------------------------------------------------------------------ lecture

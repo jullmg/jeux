@@ -4,6 +4,7 @@
   "piece": "salle_a_manger",
   "novelty": "Les allers-retours",
   "moment": "soir",
+  "plat": "pate_chinois",
   "intro": [
     "Maman fait des allers-retours à la cuisine, par la porte de bois.",
     "Quand elle est partie, c'est le temps d'en profiter !",
@@ -33,6 +34,20 @@
   ],
   "serve": true,
   "helpers": [],
+  "seated": [
+    {
+      "who": "papa",
+      "seat": "nord_ouest",
+      "role": "decor",
+      "pose": "manger"
+    },
+    {
+      "who": "charlotte",
+      "seat": "nord_est",
+      "role": "decor",
+      "pose": "manger"
+    }
+  ],
   "spots": [
     "table_nord",
     "table_sud",
@@ -78,9 +93,9 @@
     "cuisine": "est à la cuisine"
   },
   "stars": [
-    650,
-    1400,
-    2200
+    750,
+    1500,
+    2250
   ],
   "repeat_max": 6
 }

@@ -141,7 +141,9 @@ def wall_z(o, x, z0, z1, material, holes=()):
 
 
 floor_ob = C.Obj("Plancher")
-floor_ob.box(X0 - 0.2, -0.06, ZN - 0.2, X1 + 0.2, 0.0, ZS + 0.2, floor_m)
+# il s'arrête sous le mur ouest, là où commence celui du corridor : deux planchers superposés clignotaient dans
+# les portes
+floor_ob.box(X0 - WALL, -0.06, ZN - 0.2, X1 + 0.2, 0.0, ZS + 0.2, floor_m)
 floor_ob.build()
 
 # Le mur nord, ardoise, avec sa plinthe et sa corniche blanches.
@@ -407,6 +409,50 @@ for name, c in SAM["chairs"].items():
     pts, radii = C.curve(path, [0.05, 0.05, 0.05], 6)
     ch.tube(pts, radii, walnut, seg=10, squash=(1.0, 0.35))
     ch.build()
+
+# Le couvert de chaque place : assiette de grès, fourchette sur sa serviette, couteau, verre d'eau. Le jeu ne montre
+# que ceux des places occupées (Couvert_<chaise>). Les verres vont vers le milieu de la table, loin des endroits à
+# nourriture des bouts de la table.
+plate_m = M("assiette_gres", "#f4efe4", 0.3)
+plate_rim = M("assiette_bord", "#4f7f8c", 0.3)
+sauce_m = M("assiette_sauce", "#a4472c", 0.45)
+cutlery = M("ustensiles", "#d9dde2", 0.25, 0.85)
+napkin_m = mat("serviette_table", T.fabric("serviette_table", "#d8a33a", 0.3, 9))
+wine_glass = M("verre_vin", "#e8eef2", 0.04, alpha=0.22)
+water = M("eau_verre", "#cfe6f0", 0.05, alpha=0.35)
+tcx = (tx0 + tx1) / 2
+for name, c in SAM["chairs"].items():
+    px, pz = c["pos"]
+    toward = 1 if pz < (tz0 + tz1) / 2 else -1        # vers la table, en z
+    side = 1 if px < tcx else -1                       # vers le milieu de la table, en x
+    left = toward                                       # la gauche de qui est assis (face à la table)
+    cv = C.Obj("Couvert_" + name, origin=(px, TH, pz))
+    plz = (tz0 + 0.19) if toward == 1 else (tz1 - 0.19)
+    cv.cyl((px, TH, plz), 0.125, 0.012, plate_m, seg=36, top=0.13, bevel=0.003)
+    cv.torus((px, TH + 0.013, plz), 0.112, 0.006, plate_rim, seg=40, sides=6)
+    cv.cyl((px, TH + 0.012, plz), 0.085, 0.003, plate_m, seg=32)
+    # un reste de sauce et un bout de croûte : on a déjà commencé
+    cv.ball((px + 0.03 * side, TH + 0.016, plz + 0.02 * toward), (0.045, 0.004, 0.03), sauce_m, seg=14, rings=6)
+    cv.ball((px - 0.035 * side, TH + 0.018, plz - 0.025 * toward), (0.018, 0.008, 0.012), M("croute", "#d8a85c", 0.6),
+            seg=10, rings=6)
+    # la serviette pliée et la fourchette à gauche (les dents vers le milieu de la table), le couteau à droite
+    fx = px + 0.17 * left
+    cv.box(fx - 0.045, TH, plz - 0.07, fx + 0.045, TH + 0.008, plz + 0.07, napkin_m, bevel=0.003, seg=1)
+    za, zb = plz - 0.075 * toward, plz + 0.03 * toward
+    cv.box(fx - 0.005, TH + 0.008, min(za, zb), fx + 0.005, TH + 0.012, max(za, zb), cutlery, bevel=0.001, seg=1)
+    cv.box(fx - 0.011, TH + 0.008, min(zb, zb + 0.012 * toward), fx + 0.011, TH + 0.012, max(zb, zb + 0.012 * toward),
+           cutlery)
+    for k in range(4):
+        tine_x = fx - 0.0095 + k * 0.0063
+        z0_, z1_ = zb + 0.01 * toward, zb + 0.05 * toward
+        cv.box(tine_x - 0.0013, TH + 0.0085, min(z0_, z1_), tine_x + 0.0013, TH + 0.0115, max(z0_, z1_), cutlery)
+    kx = px - 0.16 * left
+    cv.box(kx - 0.007, TH, plz - 0.09, kx + 0.007, TH + 0.005, plz + 0.09, cutlery, bevel=0.001, seg=1)
+    # le verre d'eau (il va avec tous les repas, et Charlotte aussi y a droit)
+    gx, gz = px + 0.15 * side, plz + 0.16 * toward
+    cv.cyl((gx, TH, gz), 0.029, 0.1, wine_glass, seg=24, top=0.033)
+    cv.cyl((gx, TH + 0.004, gz), 0.026, 0.07, water, seg=20, top=0.029)
+    cv.build()
 
 # La lampe sur pied en laiton, au globe de verre fumé (entre la salle à manger et le salon).
 lx0, lz0, lx1, lz1 = rect(SAM["obstacles"]["lampe_pied"])

@@ -6,7 +6,13 @@ extends Node3D
 const PAINTED := ["peau_visage", "cheveux_ombre", "tissu_haut", "tissu_bas"]
 const STAND_IN := {"tante": "maman", "oncle": "papa"}
 ## Les objets qu'on peut avoir en main.
-const PROPS := ["cuillere", "couteau", "assiette", "telephone", "panier", "plat", "fourchette", "verre", "cafetiere"]
+const PROPS := ["cuillere", "couteau", "assiette", "telephone", "panier", "plat", "fourchette", "verre", "cafetiere",
+	"verre_vin", "verre_jus", "verre_lait", "journal", "plat_tenu"]
+## Le plat qu'on sert ou qu'on rapporte de la cuisine (le « plat » de la mission) → son modèle dans nourriture.glb.
+const DISHES := {"lasagne": "lasagne", "pate_chinois": "pate_chinois", "hot_dogs": "plateau_hot_dogs",
+	"tourtiere": "tourtiere"}
+## Le plat tenu à deux mains, à sa taille sur la table.
+const DISH_SCALE := 1.05
 ## L'espace entre le dessus du siège et l'os des hanches.
 const SEAT_GAP := 0.07
 
@@ -25,6 +31,8 @@ var mouth := "Sourire"
 var talking := 0.0
 ## Direction du regard, en degrés autour de la verticale (relative au corps).
 var head_yaw := 0.0
+## Le plat du repas ("lasagne", "pate_chinois", "hot_dogs", "tourtiere", ou "cafe" au brunch : elle verse le café).
+var dish := ""
 ## La façon de chicaner : 0 doigt pointé, 1 doigt qui secoue et poing sur la hanche, 2 les bras au ciel puis le doigt.
 var scold_style := 0
 var _scold_time := 0.0
@@ -38,6 +46,8 @@ var _time := 0.0
 var _phase := 0.0
 var _props: Dictionary = {}         # nom → objet déjà fabriqué
 var _prop_kind := ""
+## Le vrai plat du repas, tenu à deux mains (son modèle est donné par la scène, `hold_dish`).
+var _dish: MeshInstance3D
 ## Les matières des objets restent en mémoire : les recréer ferait recompiler leur shader en pleine partie.
 static var _materials: Dictionary = {}
 var who: String
@@ -269,14 +279,23 @@ func _process(delta: float) -> void:
 				_arm(s, 10, 140, 16)
 			sink = absf(sin(t * 7.0)) * 0.08
 		"servir":
-			# Elle verse le café, puis pose une assiette.
-			var pour := sin(t * 1.6)
-			_arm("R", 42 + pour * 8, 6, 40)
-			_arm("L", 30, 4, 54)
-			quick["forearmR"] = Vector3(0, 0, maxf(0.0, pour) * 28)
-			rig.add("spine", Vector3(16, 0, 0))
-			rig.add("head", Vector3(18, 0, 0))
-			prop = "cafetiere"
+			if _holds_dish():
+				# Le plat à deux mains au-dessus de la table : elle l'avance pour servir chacun.
+				var dip := maxf(0.0, sin(t * 1.3))
+				for s: String in ["L", "R"]:
+					_arm(s, 44 + dip * 14, -2, 62 - dip * 16)
+				rig.add("spine", Vector3(14 + dip * 9, 0, 0))
+				rig.add("head", Vector3(16 + dip * 6, 0, 0))
+				prop = "plat_tenu"
+			else:
+				# Elle verse le café, puis pose une assiette.
+				var pour := sin(t * 1.6)
+				_arm("R", 42 + pour * 8, 6, 40)
+				_arm("L", 30, 4, 54)
+				quick["forearmR"] = Vector3(0, 0, maxf(0.0, pour) * 28)
+				rig.add("spine", Vector3(16, 0, 0))
+				rig.add("head", Vector3(18, 0, 0))
+				prop = "cafetiere"
 		"buffet", "disque":
 			var slow := sin(t * (1.3 if pose == "disque" else 2.6))
 			_arm("R", 40 + slow * 10, 2, 46)
@@ -294,15 +313,21 @@ func _process(delta: float) -> void:
 				quick["shin" + s] = Vector3(maxf(0.0, -cos(f)) * 44 * amp, 0, 0)
 				_arm(s, 40, -2, 66)
 			sink = absf(sin(_phase)) * 0.018
-			prop = "plat"
+			prop = "plat_tenu" if _holds_dish() else "plat"
 		"manger":
-			# Assise, elle mange : la fourchette monte à la bouche de temps en temps.
-			var bite := clampf(sin(t * 1.4) * 2.0 - 1.0, 0.0, 1.0)
-			_arm("R", 40 + bite * 22, 6, 60 + bite * 62)
-			_arm("L", 34, 4, 70)
-			rig.add("spine", Vector3(10, 0, 0))
-			rig.add("head", Vector3(10 - bite * 6, 0, 0))
-			prop = "fourchette"
+			prop = _eat(t, quick)
+			if prop == "":
+				shown = "Ouverte" if fmod(t, 0.42) < 0.2 else "Sourire"
+			elif prop == "fourchette" and _bite(t) > 0.55:
+				shown = "Ouverte"
+		"journal":
+			# Il lit le journal, le baisse pour jaser, puis s'y replonge.
+			var down := 1.0 if talking > 0.0 or fmod(t, 9.0) > 7.2 else 0.0
+			for s: String in ["L", "R"]:
+				_arm(s, 46 - down * 16, 14, 78 - down * 30)
+			rig.add("head", Vector3(14 - down * 12, head_yaw * down, 0))
+			rig.add("spine", Vector3(6, 0, 0))
+			prop = "journal"
 		"jaser", "seated_chat":
 			var talk := sin(t * 3.1)
 			_arm("R", 30 + talk * 18, 14, 70 + talk * 20)
@@ -380,6 +405,65 @@ func _process(delta: float) -> void:
 	_show_prop(prop)
 	rig.apply(delta, 10.0, quick)
 	model.position.y = lerpf(model.position.y, sink, 1.0 - exp(-delta * 18.0))
+	if _prop_kind == "plat_tenu":
+		# Le plat reste à plat, quoi que fasse le dos : rien ne doit glisser.
+		_dish.global_basis = Basis(Vector3.UP, global_rotation.y).scaled(Vector3.ONE * DISH_SCALE)
+
+
+## Le vrai plat du repas à tenir (la scène le donne au début de la mission ; rien : on n'en tient pas).
+func hold_dish(mesh: Mesh) -> void:
+	_dish.mesh = mesh
+
+
+func _holds_dish() -> bool:
+	return _dish != null and _dish.mesh != null
+
+
+## La bouchée : 0 la fourchette dans l'assiette, 1 à la bouche.
+static func _bite(t: float) -> float:
+	return clampf(sin(t * 2.2) * 1.8 - 0.5, 0.0, 1.0)
+
+
+## Un repas à table, vu de partout : des bouchées, couper sa viande, une gorgée de vin, se tourner pour jaser
+## (vers `head_yaw`). Le cycle dure 15 s, décalé d'une personne à l'autre. Rend l'objet en main ("" : les mains vides).
+func _eat(t: float, quick: Dictionary) -> String:
+	var c := fmod(t, 15.0)
+	if talking > 0.0:
+		c = 12.0
+	if c < 6.0:
+		var bite := _bite(t)
+		_arm("R", 40 + bite * 32, 8, 62 + bite * 70)
+		_arm("L", 34, 4, 70)
+		rig.add("spine", Vector3(10 + bite * 3, 0, 0))
+		rig.add("head", Vector3(12 - bite * 10, 0, 0))
+		if bite < 0.2 and fmod(t, 0.5) < 0.25:
+			quick["head"] = Vector3(2, 0, 0)
+		return "fourchette"
+	if c < 8.5:
+		_arm("R", 40, 4, 66)
+		_arm("L", 40, 2, 66)
+		quick["forearmR"] = Vector3(sin(t * 12.0) * 9, 0, 0)
+		rig.add("spine", Vector3(15, 0, 0))
+		rig.add("head", Vector3(20, 0, 0))
+		return "couteau"
+	if c < 10.5:
+		var sip := clampf(sin((c - 8.5) / 2.0 * PI) * 1.6, 0.0, 1.0)
+		_arm("R", 32 + sip * 40, 12, 56 + sip * 74)
+		_arm("L", 30, 4, 66)
+		rig.add("head", Vector3(4 - sip * 16, 0, 0))
+		if who == "charlotte":
+			return "verre_lait"
+		return "verre_jus" if dish == "cafe" else "verre_vin"
+	# se tourner vers les autres et jaser, la main qui parle
+	var turn := sin(clampf((c - 10.5) / 4.5, 0.0, 1.0) * PI)
+	if talking > 0.0:
+		turn = 1.0
+	var toward := head_yaw if absf(head_yaw) > 4.0 else 26.0 * (1.0 if fmod(floor(t / 15.0), 2.0) == 0.0 else -1.0)
+	rig.add("chest", Vector3(0, toward * 0.45 * turn, 0))
+	rig.add("head", Vector3(-2, toward * 0.6 * turn, sin(t * 2.0) * 4))
+	_arm("R", 26 + sin(t * 3.1) * 16 * turn, 14, 70 + sin(t * 3.1) * 18 * turn)
+	_arm("L", 30, 6, 68)
+	return ""
 
 
 # ------------------------------------------------------------------ objets en main
@@ -418,22 +502,46 @@ func _show_prop(kind: String) -> void:
 		"verre":
 			_part(node, _cylinder(0.03, 0.11), Color("e9d5a8"), Vector3(0, -0.02, 0.05))
 		"cafetiere":
-			_part(node, _cylinder(0.05, 0.16), Color("2a2a2e"), Vector3(0, -0.06, 0.07))
-			_part(node, _cylinder(0.012, 0.05), Color("cda75f"), Vector3(0, -0.02, 0.13), Vector3(60, 0, 0))
-		"panier":
+			# La cafetière de verre : le café, le col, le couvercle et la poignée noirs.
+			_part(node, _cylinder(0.062, 0.13, 0.05), Color(0.86, 0.92, 0.95, 0.3), Vector3(0, -0.1, 0.1))
+			_part(node, _cylinder(0.057, 0.08, 0.047), Color("3b1f12"), Vector3(0, -0.125, 0.1))
+			_part(node, _cylinder(0.045, 0.035), Color("1d1d21"), Vector3(0, -0.02, 0.1))
+			_part(node, _cylinder(0.05, 0.012), Color("1d1d21"), Vector3(0, -0.0, 0.1))
+			_part(node, _box(Vector3(0.02, 0.1, 0.025)), Color("1d1d21"), Vector3(0, -0.07, 0.03))
+			_part(node, _box(Vector3(0.016, 0.016, 0.045)), Color(0.86, 0.92, 0.95, 0.35), Vector3(0, -0.035, 0.165),
+				Vector3(-25, 0, 0))
+		"verre_vin":
+			_part(node, _cylinder(0.026, 0.004), Color(0.88, 0.93, 0.95, 0.35), Vector3(0, -0.075, 0.05))
+			_part(node, _cylinder(0.004, 0.07), Color(0.88, 0.93, 0.95, 0.35), Vector3(0, -0.04, 0.05))
+			_part(node, _cylinder(0.034, 0.075, 0.028), Color(0.88, 0.93, 0.95, 0.3), Vector3(0, 0.03, 0.05))
+			_part(node, _cylinder(0.03, 0.03, 0.026), Color("5e0f1c"), Vector3(0, 0.012, 0.05))
+		"verre_jus", "verre_lait":
+			# un verre droit de jus d'orange (au brunch) ou de lait (Charlotte)
+			_part(node, _cylinder(0.033, 0.1, 0.029), Color(0.88, 0.93, 0.95, 0.3), Vector3(0, -0.02, 0.05))
+			_part(node, _cylinder(0.03, 0.075, 0.027), Color("f4a227") if kind == "verre_jus" else Color("f6f4ee"),
+				Vector3(0, -0.032, 0.05))
+		"plat_tenu":
 			bone = "chest"
-			# Un panier d'osier tressé, plein de linge plié.
-			_part(node, _box(Vector3(0.42, 0.19, 0.25)), Color("a9803f"), Vector3(0, -0.095, 0.4))
-			for i in 4:
-				_part(node, _box(Vector3(0.445, 0.016, 0.275)), Color("c59a55"), Vector3(0, -0.17 + i * 0.047, 0.4))
-			for i in 7:
-				_part(node, _box(Vector3(0.014, 0.19, 0.28)), Color("8f6a32"), Vector3(-0.18 + i * 0.06, -0.095, 0.4))
-			_part(node, _box(Vector3(0.47, 0.028, 0.3)), Color("d6ac66"), Vector3(0, 0.005, 0.4))
-			# des serviettes roulées qui dépassent du panier
-			for roll: Array in [["7fa8cf", -0.1, 0.02, 0.37, 0.05, 6.0], ["e8e3d8", 0.09, 0.025, 0.43, 0.052, -10.0],
-					["d67b6a", 0.03, 0.06, 0.37, 0.043, 20.0], ["f2c95c", -0.07, 0.055, 0.45, 0.036, -24.0]]:
-				_part(node, _cylinder(roll[4], 0.19), Color(roll[0]), Vector3(roll[1], roll[2], roll[3]),
-					Vector3(0, roll[5], 90))
+			_dish = MeshInstance3D.new()
+			_dish.position = Vector3(0, -0.24, 0.34)
+			_dish.scale = Vector3.ONE * DISH_SCALE
+			node.add_child(_dish)
+		"journal":
+			bone = "chest"
+			# Le journal ouvert à deux mains devant lui : papier crème, gros titre, colonnes et une photo.
+			var paper := Node3D.new()
+			paper.position = Vector3(0, -0.02, 0.36)
+			paper.rotation_degrees = Vector3(-14, 0, 0)
+			node.add_child(paper)
+			for side: float in [-1.0, 1.0]:
+				_part(paper, _box(Vector3(0.27, 0.36, 0.004)), Color("ece6d6"), Vector3(side * 0.135, 0, 0),
+					Vector3(0, side * 9.0, 0))
+				_part(paper, _box(Vector3(0.21, 0.035, 0.002)), Color("26262b"), Vector3(side * 0.135, 0.13, 0.004),
+					Vector3(0, side * 9.0, 0))
+				for k in 6:
+					_part(paper, _box(Vector3(0.2, 0.008, 0.002)), Color("8d8a84"),
+						Vector3(side * 0.135, 0.08 - k * 0.028, 0.004), Vector3(0, side * 9.0, 0))
+			_part(paper, _box(Vector3(0.09, 0.07, 0.002)), Color("6f8fae"), Vector3(0.18, -0.1, 0.02), Vector3(0, 9, 0))
 	var attach := BoneAttachment3D.new()
 	attach.bone_name = bone
 	rig.skeleton.add_child(attach)
@@ -450,9 +558,15 @@ func _part(parent: Node3D, mesh: Mesh, color: Color, at: Vector3, degrees := Vec
 	if not _materials.has(color):
 		var mat := StandardMaterial3D.new()
 		mat.albedo_color = color
-		mat.roughness = 0.5
+		mat.roughness = 0.5 if color.a >= 1.0 else 0.08
+		if color.a < 1.0:
+			# le verre : transparent et luisant
+			mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			mat.metallic_specular = 0.9
 		_materials[color] = mat
 	m.material_override = _materials[color]
+	m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if color.a >= 1.0 else \
+		GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.position = at
 	m.rotation_degrees = degrees
 	parent.add_child(m)
@@ -464,19 +578,19 @@ static func _box(size: Vector3) -> BoxMesh:
 	return m
 
 
-static func _sphere(radius: float) -> SphereMesh:
+static func _sphere(radius: float, flat := 1.0) -> SphereMesh:
 	var m := SphereMesh.new()
 	m.radius = radius
-	m.height = radius * 2.0
+	m.height = radius * 2.0 * flat
 	m.radial_segments = 16
 	m.rings = 8
 	return m
 
 
-static func _cylinder(radius: float, height: float) -> CylinderMesh:
+static func _cylinder(radius: float, height: float, bottom := -1.0) -> CylinderMesh:
 	var m := CylinderMesh.new()
 	m.top_radius = radius
-	m.bottom_radius = radius
+	m.bottom_radius = radius if bottom < 0.0 else bottom
 	m.height = height
 	m.radial_segments = 20
 	return m

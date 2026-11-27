@@ -179,14 +179,16 @@ func hush(who: PersonView) -> void:
 		_bubbles.erase(who)
 
 
-## Une bulle de paroles au-dessus d'un personnage ; elle le suit.
-func bubble(who: PersonView, text: String, seconds := 2.0) -> void:
+## Une bulle de paroles au-dessus d'un personnage ; elle le suit. `small` : une jasette à table, plus discrète que
+## ce qui compte pour jouer.
+func bubble(who: PersonView, text: String, seconds := 2.0, small := false) -> void:
 	if _bubbles.has(who):
 		_bubbles[who].panel.queue_free()
 	var panel := PanelContainer.new()
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color.WHITE, 26, UiStyle.INK, 3, 14))
-	panel.add_child(UiStyle.label(text, 32))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(1, 1, 1, 0.96) if small else Color.WHITE, 22 if small else 26,
+		UiStyle.INK, 2 if small else 3, 10 if small else 14))
+	panel.add_child(UiStyle.label(text, 26 if small else 32))
 	add_child(panel)
 	move_child(panel, _top.get_index())
 	_bubbles[who] = {"panel": panel, "left": maxf(seconds, text.length() / 13.0)}
@@ -250,13 +252,20 @@ func _process(delta: float) -> void:
 			_wary_why = "tip_" + ("cage" if sim.map.corner_kind == "cage" else "papa")
 		_wary_left = 4.5
 	_toast.modulate.a = clampf(_toast_left * 3.0, 0.0, 1.0)
+	# La bulle de Maman reste près de sa tête ; les autres se tassent autour d'elle, de ce qu'elle fait et des annonces.
+	var placed := _signs_rects()
 	for who: PersonView in _bubbles.keys():
 		_bubbles[who].left -= delta
 		if _bubbles[who].left <= 0.0 or not who.visible:
 			_bubbles[who].panel.queue_free()
 			_bubbles.erase(who)
-		else:
+		elif who == stage.mom:
 			_place_bubble(who)
+			placed.append(Rect2(_bubbles[who].panel.position, _bubbles[who].panel.size))
+	for who: PersonView in _bubbles.keys():
+		if who != stage.mom:
+			_place_bubble(who)
+			placed.append(_clear_of(_bubbles[who].panel, placed))
 	for i in range(_floaters.size() - 1, -1, -1):
 		var f := _floaters[i]
 		f.age += delta
@@ -271,6 +280,39 @@ func _process(delta: float) -> void:
 	_top.queue_redraw()
 	_grab.get_node("face").queue_redraw()
 	get_node("banniere").queue_redraw()
+
+
+## Ce que les bulles ne doivent pas cacher : l'étiquette de ce que fait Maman et l'annonce du moment.
+func _signs_rects() -> Array[Rect2]:
+	var out: Array[Rect2] = []
+	if sim.mom_state == Sim.Mom.BUSY and sim.activity != "chicane":
+		var width := _font.get_string_size(_activity_text(), HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x + 30
+		var at := _beside_mom(width / 2.0)
+		out.append(Rect2(at + Vector2(-width / 2.0, -20), Vector2(width, 128.0 if sim.mom_out else 38.0)))
+	if _toast_left > 0.0 and _toast.text != "":
+		var w := _font.get_string_size(_toast.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 34).x + 20
+		out.append(Rect2(Vector2((size.x - w) / 2.0, _toast.offset_top), Vector2(w, 46)))
+	return out
+
+
+func _activity_text() -> String:
+	return sim.level.get("activity_text", {}).get(sim.activity, Texts.ACTIVITY.get(sim.activity, ""))
+
+
+## Pousse une bulle qui en chevauche une autre : au-dessus si la place y est, sinon en dessous.
+func _clear_of(panel: Control, placed: Array[Rect2]) -> Rect2:
+	var rect := Rect2(panel.position, panel.size)
+	for _i in 4:
+		var hit := false
+		for other in placed:
+			if rect.grow(4.0).intersects(other):
+				hit = true
+				var up := other.position.y - rect.size.y - 8.0
+				rect.position.y = up if up >= 150.0 else other.end.y + 8.0
+		if not hit:
+			break
+	panel.position = rect.position
+	return rect
 
 
 func _place_bubble(who: PersonView) -> void:
@@ -471,7 +513,7 @@ func _draw_world(on: Control) -> void:
 	var beat := 1.0 + (0.0 if reduced_motion else sin(_time * 18.0) * 0.1)
 	match sim.mom_state:
 		Sim.Mom.BUSY when sim.activity != "chicane":
-			var text: String = sim.level.get("activity_text", {}).get(sim.activity, Texts.ACTIVITY.get(sim.activity, ""))
+			var text := _activity_text()
 			var width := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x + 30
 			var at := _beside_mom(width / 2.0)
 			on.draw_style_box(_style(Color(0.1, 0.06, 0.04, 0.6), 18),

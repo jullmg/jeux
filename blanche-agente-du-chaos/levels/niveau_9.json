@@ -4,6 +4,7 @@
   "piece": "salle_a_manger",
   "novelty": "Sous la table",
   "moment": "brunch",
+  "plat": "cafe",
   "intro": [
     "Nouvelle pièce : la salle à manger. Ton coin, ici, c'est ta cage (la porte est ouverte).",
     "Couchée sous la table, personne debout ne te voit… même la gueule pleine.",
@@ -31,6 +32,20 @@
     "buffet_est"
   ],
   "helpers": [],
+  "seated": [
+    {
+      "who": "papa",
+      "seat": "nord_ouest",
+      "role": "decor",
+      "pose": "journal"
+    },
+    {
+      "who": "charlotte",
+      "seat": "nord_est",
+      "role": "decor",
+      "pose": "manger"
+    }
+  ],
   "spots": [
     "table_nord",
     "table_sud",
@@ -75,7 +90,7 @@
     "manger": "mange ses œufs"
   },
   "stars": [
-    450,
+    500,
     1300,
     2100
   ],

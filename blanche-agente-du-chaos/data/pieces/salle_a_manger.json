@@ -116,7 +116,8 @@
       "face": [0, -1],
       "activity": "manger",
       "regard": "devant",
-      "assis": true
+      "assis": true,
+      "hanches": [-0.3, -1.17]
     },
     "cuisine": {
       "pos": [-2.4, -2.45],
@@ -130,21 +131,25 @@
     "nord_ouest": {
       "pos": [-0.3, -2.37],
       "face": [0, 1],
+      "hanches": [-0.3, -2.43],
       "chaise": "nord_ouest"
     },
     "nord_est": {
       "pos": [0.6, -2.37],
       "face": [0, 1],
+      "hanches": [0.6, -2.43],
       "chaise": "nord_est"
     },
     "sud_ouest": {
       "pos": [-0.3, -1.23],
       "face": [0, -1],
+      "hanches": [-0.3, -1.17],
       "chaise": "sud_ouest"
     },
     "sud_est": {
       "pos": [0.6, -1.23],
       "face": [0, -1],
+      "hanches": [0.6, -1.17],
       "chaise": "sud_est"
     }
   },

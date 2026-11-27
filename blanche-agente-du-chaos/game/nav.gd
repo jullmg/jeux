@@ -7,11 +7,14 @@ const CELL := 0.08
 var map: RoomMap
 var radius: float
 var grid := AStarGrid2D.new()
+## Les tables (cachettes « dessous ») bloquent aussi : la chienne passe dessous, pas les gens debout.
+var around_tables := false
 
 
-func _init(map_: RoomMap, radius_: float) -> void:
+func _init(map_: RoomMap, radius_: float, around_tables_ := false) -> void:
 	map = map_
 	radius = radius_
+	around_tables = around_tables_
 	var size := Vector2i(int(ceil(map.room.size.x / CELL)), int(ceil(map.room.size.y / CELL)))
 	grid.region = Rect2i(Vector2i.ZERO, size)
 	grid.cell_size = Vector2(CELL, CELL)
@@ -20,7 +23,7 @@ func _init(map_: RoomMap, radius_: float) -> void:
 	for x in size.x:
 		for y in size.y:
 			var c := Vector2i(x, y)
-			if not map.is_free(center(c), radius):
+			if not map.is_free(center(c), radius) or (around_tables and map.under_table(center(c), radius)):
 				grid.set_point_solid(c, true)
 
 
