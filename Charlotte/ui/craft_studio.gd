@@ -35,6 +35,7 @@ const TEXT_S := [22, 32, 46]
 const PHRASES := {
 	"maman": ["Pour Maman", "Je t'aime, Maman !", "Merci, Maman", "Câlins !", "Bonne fête !"],
 	"papa": ["Pour Papa", "Je t'aime, Papa !", "Merci, Papa", "Câlins !", "Bonne fête !"],
+	"amis": ["Bonne Saint-Valentin !", "Tu es mon amie", "Je t'aime gros comme ça !", "Amis pour toujours", "XOXO"],
 	"moi": ["Chambre de Chachoue", "Entrez !", "Toc toc !", "Défense d'entrer… sauf les amis !", "Chut ! Je dors"],
 }
 
@@ -231,7 +232,7 @@ func _begin(id: String) -> void:
 		var paint := Image.create(int(WORK.x), int(WORK.y), false, Image.FORMAT_RGBA8)
 		var ink := Image.create(int(WORK.x), int(WORK.y), false, Image.FORMAT_RGBA8)
 		_faces.append({"items": [], "paint": paint, "ink": ink, "paint_tex": ImageTexture.create_from_image(paint), "ink_tex": ImageTexture.create_from_image(ink)})
-	_tab = "peinture" if id in ["pot", "assiette"] else ("decos" if id == "porte" else "papier")
+	_tab = "peinture" if id in ["pot", "assiette"] else ("decos" if id in ["porte", "valentin"] else "papier")
 	_build_work()
 	if id == "cadre":
 		_toast("Ton cadre est prêt pour un de tes dessins !" if not DrawingPad.gallery_names().is_empty() else "Ton cadre attend un dessin : on met une petite image.")
@@ -241,7 +242,7 @@ func _begin(id: String) -> void:
 
 func _build_work() -> void:
 	_clear_panel()
-	_title = _label(str(CraftArt.BASES[_base][0]) if who == "moi" else "%s pour %s" % [CraftArt.BASES[_base][0], "Maman" if who == "maman" else "Papa"], 30, BLUE)
+	_title = _label(("Un valentin pour mes amis" if who == "amis" else str(CraftArt.BASES[_base][0])) if who in ["moi", "amis"] else "%s pour %s" % [CraftArt.BASES[_base][0], "Maman" if who == "maman" else "Papa"], 30, BLUE)
 	_title.position = Vector2(0, 14)
 	_title.size = Vector2(1240, 44)
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -1371,7 +1372,7 @@ func _celebrate(result: Dictionary) -> void:
 	card.position = Vector2(310, 68)
 	card.add_theme_stylebox_override("panel", _box(Color("#FFFDF7"), BLUE, 6, 26))
 	_panel.add_child(card)
-	var t := _label("Ta porte est prête !" if who == "moi" else "Ton bricolage est prêt !", 36, BLUE)
+	var t := _label({"moi": "Ta porte est prête !", "amis": "Ton valentin est prêt !"}.get(who, "Ton bricolage est prêt !"), 36, BLUE)
 	t.position = Vector2(0, 22)
 	t.size = Vector2(620, 50)
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -1386,12 +1387,12 @@ func _celebrate(result: Dictionary) -> void:
 	pic.pivot_offset = pic.size / 2.0
 	pic.scale = Vector2.ZERO
 	card.add_child(pic)
-	var sub := _label("Tout le monde va la voir dans le corridor !" if who == "moi" else "Ça va faire plaisir à %s !" % ("Maman" if who == "maman" else "Papa"), 26, Color(BLUE, 0.85))
+	var sub := _label("Tout le monde va la voir dans le corridor !" if who == "moi" else "On en fait un pour chacun de tes amis !" if who == "amis" else "Ça va faire plaisir à %s !" % ("Maman" if who == "maman" else "Papa"), 26, Color(BLUE, 0.85))
 	sub.position = Vector2(0, 438)
 	sub.size = Vector2(620, 40)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	card.add_child(sub)
-	var ok := _button("Sur ma porte ♥" if who == "moi" else "Pour %s ♥" % ("Maman" if who == "maman" else "Papa"), 26, func() -> void:
+	var ok := _button("Sur ma porte ♥" if who == "moi" else "Dans mon sac ♥" if who == "amis" else "Pour %s ♥" % ("Maman" if who == "maman" else "Papa"), 26, func() -> void:
 		Sfx.play("chime")
 		closed.emit(result)
 		queue_free(), Vector2(300, 62))

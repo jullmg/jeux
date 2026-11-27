@@ -56,7 +56,7 @@ static func met() -> bool:
 
 ## She has something to say and isn't saying it yet (the "!" over her).
 func waiting() -> bool:
-	return (not met() or FriendBracelet.has_pending(["alyzee"])) and not _talking
+	return (not met() or FriendBracelet.has_pending(["alyzee"]) or Valentine.step() == 2 and "alyzee" in Valentine.friends_left()) and not _talking
 
 
 func head() -> Vector2:
@@ -93,6 +93,8 @@ func interact(who: Character) -> void:
 	_charlotte = who
 	kid.facing = 1 if who.position.x > global_position.x else -1
 	if met() and FriendBracelet.give(kid, "alyzee", func(t: String) -> void: _say(0, t), who):
+		return
+	if met() and Valentine.give(kid, "alyzee", func(t: String) -> void: _say(0, t)):
 		return
 	if met():
 		_say(0, LINES[_line % LINES.size()])

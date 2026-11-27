@@ -1069,11 +1069,22 @@ func _build_window_cats() -> void:
 
 
 ## The morning after Halloween, the first time she steps outside: it snowed during the night, and she says so.
+const SPRING_WORDS := ["Toute la neige a fondu ! C'est le printemps !", "Ça sent le printemps ! Les arbres ont des bourgeons !",
+	"Le printemps est arrivé ! Fini les bottes d'hiver !"]
 const WINTER_WORDS := ["Oh !! Il a neigé pendant la nuit !", "De la neige ! L'hiver est arrivé !",
 	"Wow, tout est blanc ! Bonjour l'hiver !"]
 
 
 func _winter_hello() -> void:
+	if GameState.flags.get("spring_greeting", false):
+		GameState.flags.erase("spring_greeting")
+		var spring := create_tween()
+		spring.tween_interval(0.9)
+		spring.tween_callback(func() -> void:
+			_charlotte.express("happy", 2.6)
+			Sfx.play("chime", _charlotte.position)
+			Bubble.say(self, _charlotte.position + Vector2(0, -210.0), SPRING_WORDS[randi() % SPRING_WORDS.size()], 3.4))
+		return
 	if not GameState.flags.get("winter_greeting", false):
 		return
 	GameState.flags.erase("winter_greeting")

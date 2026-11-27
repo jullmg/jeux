@@ -7,7 +7,7 @@ extends RefCounted
 
 ## Quests that come `after` "halloween" open the morning after it, in winter; the Halloween evening doesn't wait for them
 ## (`after_halloween`).
-const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole", "emilia", "fete", "bonhomme", "glissade", "souffleuse", "sapin", "noel", "jourdelan", "fort", "dent", "anniversaire", "luge"]
+const ORDER := ["amies", "cachette", "livre", "milk", "hamster", "menage", "plants", "cat", "cat2", "cat3", "halloween", "chips", "cinema", "ecole", "emilia", "fete", "bonhomme", "glissade", "souffleuse", "sapin", "noel", "jourdelan", "fort", "dent", "anniversaire", "luge", "valentin", "paques"]
 const ALL := {
 	"milk": {
 		"title": "Maman a besoin de lait : va au dépanneur",
@@ -165,6 +165,19 @@ const ALL := {
 		"find": "Le 1er février approche… c'est un jour ben spécial !",
 		"age": 7, "after": "dent", "reward": 3.0,
 	},
+	"valentin": {
+		"title": "La Saint-Valentin",
+		"hint": "Fabrique un valentin pour chacun de tes amis, pis pour Maman et Papa.",
+		"find": "Maman a ressorti les cœurs rouges… c'est bientôt le 14 février !",
+		"age": 7, "after": "luge", "reward": 2.0,
+	},
+	"paques": {
+		"exclusive": true,
+		"title": "La chasse aux cocos de Pâques",
+		"hint": "Maman pis Papa ont caché des cocos de Pâques dans la ruelle du milieu. Trouve-les tous !",
+		"find": "Le printemps est là… pis Pâques s'en vient !",
+		"age": 7, "after": "valentin", "reward": 3.0,
+	},
 	"luge": {
 		"exclusive": true,
 		"title": "La luge avec Papa",
@@ -207,6 +220,8 @@ static func hint(id: String) -> String:
 		return Tooth.hint()
 	if id == Birthday.QUEST and active(id):
 		return Birthday.hint()
+	if id == Valentine.QUEST and active(id):
+		return Valentine.hint()
 	return str(ALL.get(id, {}).get("hint", ""))
 
 

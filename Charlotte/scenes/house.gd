@@ -249,11 +249,13 @@ func _build_family() -> void:
 			or Snowman.needs("boutons") and not Carry.busy() \
 			or Christmas.can_start() or Christmas.step() == 1 and Carry.has("lettre") \
 			or NewYear.can_start() or NewYear.step() == 3 or Tooth.can_start() \
-			or Birthday.can_start() or Birthday.step() == 1)
+			or Birthday.can_start() or Birthday.step() == 1 \
+			or Valentine.can_start() or Valentine.step() == 3 and "maman" in Valentine.parents_left())
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
 		return Quests.available("hamster") or Quests.available("plants") or Quests.available("chips") \
 			or Quests.active("chips") and Carry.has("chips") or Snowman.needs("tuque") and not Carry.busy() \
-			or Snowstorm.step() == 1 or XmasTree.can_start() or XmasTree.step() == 4 or NewYear.step() == 3)
+			or Snowstorm.step() == 1 or XmasTree.can_start() or XmasTree.step() == 4 or NewYear.step() == 3 \
+			or Valentine.step() == 3 and "papa" in Valentine.parents_left())
 	# The morning after the storm, Papa is out front shovelling.
 	if Snowstorm.dad_outside():
 		_dad.visible = false
@@ -281,6 +283,9 @@ func _routine(who: Character, tasks: Array, on_click: Callable, mark_at: Vector2
 func _talk_to_mom() -> void:
 	_mom_routine.pause(4.0, _charlotte.position.x)
 	if _hand_craft("maman"):
+		return
+	if Valentine.step() == 3 and "maman" in Valentine.parents_left():
+		_valentine_to(_mom, _mom_routine, "maman")
 		return
 	if Quests.active("milk") and Carry.has("milk"):
 		Carry.put_down(_charlotte)
@@ -311,6 +316,17 @@ func _talk_to_mom() -> void:
 		var card := create_tween()
 		card.tween_interval(3.8)
 		card.tween_callback(_invite_friends)
+	elif Valentine.step() == 1:
+		_say(_mom, "Ton valentin, ma chouette ! À ton bureau,\ndans ta chambre.", 400.0, 3.0)
+	elif Valentine.step() == 2:
+		_say(_mom, "Va donner tes valentins à tes amis !\nY vont être contents.", 400.0, 3.0)
+	elif Valentine.step() == 4:
+		_say(_mom, "Quelle belle journée !\nAu lit, astheure, ma grande.", 400.0, 3.0)
+	elif Valentine.can_start() and Quests.start(Valentine.QUEST):
+		Valentine.set_step(1)
+		_mom.express("happy", 2.4)
+		_say(_mom, "Demain, c'est la Saint-Valentin, Chachoue !\nFais un beau valentin à ton bureau : on en fera\nun pour chacun de tes amis, pis pour nous deux !", 420.0, 4.6)
+		Notebook.announce("step", "Fabrique ton valentin à ton bureau, dans ta chambre !", Valentine.HEADING)
 	elif Tooth.step() == 1:
 		_say(_mom, "Croque dans une belle pomme, ma chouette !\nY en a dans le frigo.", 400.0, 3.0)
 	elif Tooth.step() == 2:
@@ -392,6 +408,9 @@ func _talk_to_mom() -> void:
 func _talk_to_dad() -> void:
 	_dad_routine.pause(4.0, _charlotte.position.x)
 	if _hand_craft("papa"):
+		return
+	if Valentine.step() == 3 and "papa" in Valentine.parents_left():
+		_valentine_to(_dad, _dad_routine, "papa")
 		return
 	if Quests.active("chips") and Carry.has("chips"):
 		_hockey_night()
@@ -2652,7 +2671,10 @@ func _build_doors() -> void:
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 1110.0, 420, 300, 186), _use_desk, BEDROOM.x + 1200.0))
 	# A "!" over the desk as long as this week's homework isn't finished.
 	add_child(QuestMark.make(Vector2(BEDROOM.x + 1372.0, 398.0), func() -> bool:
-		return not Homework.all_done()))
+		return not Homework.all_done() or Valentine.step() == 1))
+	# Valentine's night: off to bed, spring is coming.
+	add_child(QuestMark.make(Vector2(BEDROOM.x + 590.0, 360.0), func() -> bool:
+		return Valentine.step() == 4 and _control.enabled))
 	# The dresser's drawers (under the terrarium): her wardrobe.
 	add_child(DoorSpot.make(Rect2(BEDROOM.x + 40.0, 444, 276, 162), _open_wardrobe, BEDROOM.x + 180.0))
 
@@ -2778,6 +2800,7 @@ func _go_to_sleep() -> void:
 	var christmas_eve := Christmas.step() == 4
 	var new_year := NewYear.step() == 2
 	var tooth_night := Tooth.step() == 2
+	var valentine_night := Valentine.step() == 4
 	var good_night := "Bonne nuit, Chachoue…"
 	if christmas_eve:
 		good_night = "Bonne nuit… le père Noël s'en vient !"
@@ -2785,6 +2808,8 @@ func _go_to_sleep() -> void:
 		good_night = "Bonne nuit… pis bonne année !"
 	elif tooth_night:
 		good_night = "Bonne nuit… pis bonne visite, la fée des dents !"
+	elif valentine_night:
+		good_night = "Bonne nuit… pis bonne Saint-Valentin !"
 	var words := _night_label(good_night, 40)
 	words.position.y = -170.0
 	night.add_child(words)
@@ -2851,6 +2876,18 @@ func _go_to_sleep() -> void:
 			Tooth.set_step(3)
 			words.text = "Le lendemain matin… regarde sous ton oreiller !"
 			Notebook.announce("step", "Regarde sous ton oreiller !", Tooth.HEADING)
+		if valentine_night:
+			# Weeks go by in the night: the quest is done and it is spring (Julien).
+			Quests.complete(Valentine.QUEST)
+			Season.current = "spring"
+			GameState.flags["spring_greeting"] = true
+			words.text = "Quelques semaines plus tard… c'est le printemps !"
+			if _salon_window:
+				_salon_window.texture = InteriorArt.window(170.0, 300.0)
+			if _bedroom_window:
+				_bedroom_window.texture = InteriorArt.window(180.0, 300.0)
+			for snow in _window_snows:
+				snow.visible = false
 		if new_year:
 			NewYear.set_step(3)
 			words.text = "Le jour de l'an !"
@@ -2964,6 +3001,9 @@ func _use_desk() -> void:
 	if Christmas.step() == 1 and not Carry.has("lettre"):
 		_write_to_santa()
 		return
+	if Valentine.step() == 1:
+		_make_valentine()
+		return
 	_control.enabled = false
 	var left := Homework.exercises().size() - Homework.done_count()
 	var note := "Tout est fait !" if left == 0 else "Il te reste %d question%s" % [left, "s" if left > 1 else ""]
@@ -3006,6 +3046,73 @@ func _open_drawing_pad() -> void:
 		_show_fridge_drawings()
 		_control.enabled = true)
 	add_child(pad)
+
+
+# Saint-Valentin, step 1: her valentine in the craft studio, a paper heart on a doily (`CraftArt` "valentin"); one for each friend
+# and for Maman and Papa.
+func _make_valentine() -> void:
+	_control.enabled = false
+	var studio := CraftStudio.new()
+	studio.who = "amis"
+	studio.start_with = "valentin"
+	studio.closed.connect(func(result: Dictionary) -> void:
+		_control.enabled = true
+		if result.is_empty():
+			return
+		DirAccess.make_dir_recursive_absolute(GameState.slot_dir())
+		(result.image as Image).save_png(Valentine.card_path())
+		Valentine.set_step(2)
+		_charlotte.express("happy", 2.4)
+		var n := Valentine.friends().size()
+		_say(_charlotte, "%d valentins pour mes amis,\npis deux pour Maman pis Papa !" % n, 280.0, 3.0)
+		Notebook.announce("step", "Donne un valentin à chacun de tes amis !", Valentine.HEADING)
+		if Valentine.friends_left().is_empty():
+			Valentine.set_step(3))
+	add_child(studio)
+
+
+# Step 3: her valentine for Maman or Papa; a hug; once both have theirs, a heart of chocolates for her, and off to bed.
+func _valentine_to(who: Character, routine: FamilyRoutine, id: String) -> void:
+	_control.enabled = false
+	var last := Valentine.parents_left() == [id]
+	# The last one, both stay for the chocolates.
+	for r in ([_mom_routine, _dad_routine] if last else [routine]):
+		r.pause(17.0 if last else 10.0, _charlotte.position.x)
+	Valentine.mark(id)
+	var card := Image.load_from_file(Valentine.card_path()) if FileAccess.file_exists(Valentine.card_path()) else null
+	if card:
+		_hold_up(_pot_picture(card, 130.0), "Bonne Saint-Valentin !")
+	_say(_charlotte, "Bonne Saint-Valentin, %s !\nC'est moi qui l'ai fait." % ("Maman" if id == "maman" else "Papa"), 280.0, 2.6)
+	var steps := create_tween()
+	steps.tween_interval(2.8)
+	steps.tween_callback(func() -> void:
+		who.express("happy", 3.0)
+		var words := "Oh, qu'il est beau ! Je l'aime gros\ncomme la terre, Chachoue." if id == "maman" else "Un valentin pour moi ? Je vais\nle mettre dans mon portefeuille."
+		_hug_with(who, routine, words, 390.0))
+	if not last:
+		steps.tween_callback(func() -> void: _control.enabled = true)
+		return
+	steps.tween_interval(6.2)
+	steps.tween_callback(func() -> void:
+		_control.enabled = false
+		_dad.express("grin", 3.0)
+		_say(_dad, "Pis nous autres, on a une surprise pour toi…\nUn cœur plein de chocolats !", 400.0, 3.4))
+	steps.tween_interval(3.6)
+	steps.tween_callback(func() -> void:
+		Stash.add("chocolate", 3)
+		_treat(_chocolate_heart(), "Trois chocolats dans ma cachette !", 0.0)
+		Valentine.set_step(4)
+		Notebook.announce("step", "Quelle belle Saint-Valentin ! Va te coucher dans ton lit.", Valentine.HEADING)
+		_control.enabled = true)
+
+
+# A heart-shaped box of chocolates with a gold ribbon.
+func _chocolate_heart() -> ImageTexture:
+	var s := '<path d="M50 88 C10 60 4 30 26 18 C40 10 50 22 50 28 C50 22 60 10 74 18 C96 30 90 60 50 88 Z" fill="#C2185B" stroke="#7A0E36" stroke-width="3"/>'
+	s += '<path d="M50 80 C18 56 14 34 30 26 C40 22 48 30 50 36 C52 30 60 22 70 26 C86 34 82 56 50 80 Z" fill="#E0306A"/>'
+	s += '<path d="M14 40 L86 40" stroke="#F2C230" stroke-width="6"/><path d="M50 30 Q40 14 34 22 Q38 30 50 30 Q62 14 66 22 Q62 30 50 30 Z" fill="#F2C230" stroke="#B58A1E" stroke-width="1.5"/>'
+	s += '<circle cx="34" cy="30" r="4" fill="#FFFFFF" opacity="0.5"/>'
+	return InteriorArt.tex(100, 100, s)
 
 
 # A friendship bracelet (`BraceletStudio`): for a friend, it waits in her pocket until she sees them (`FriendBracelet`); for her,

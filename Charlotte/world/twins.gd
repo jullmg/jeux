@@ -134,6 +134,8 @@ func waiting() -> bool:
 		return false
 	if met() and FriendBracelet.has_pending(["alphee", "constance"]):
 		return true
+	if met() and Valentine.step() == 2 and ("alphee" in Valentine.friends_left() or "constance" in Valentine.friends_left()):
+		return true
 	if not met() or Quests.available("cachette") or Quests.available("livre") or Quests.available(Cinema.QUEST) or SnowFort.can_start():
 		return true
 	# She is bringing the book back.
@@ -176,6 +178,8 @@ func interact(who: Character) -> void:
 		sister.facing = 1 if who.position.x > sister.global_position.x else -1
 	# A friendship bracelet in her pocket for the one she clicked.
 	if met() and FriendBracelet.give(_sisters[_clicked], ["alphee", "constance"][_clicked], _say_as(_clicked), who):
+		return
+	if met() and Valentine.give(_sisters[_clicked], ["alphee", "constance"][_clicked], _say_as(_clicked)):
 		return
 	if met() and Quests.available("cachette"):
 		_play_hide_and_seek()

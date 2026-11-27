@@ -92,7 +92,7 @@ static func shared() -> bool:
 
 ## She has something to say and isn't saying it yet (the "!" over her).
 func waiting() -> bool:
-	return (not met() or FriendBracelet.has_pending(["emilia"])) and not _talking
+	return (not met() or FriendBracelet.has_pending(["emilia"]) or Valentine.step() == 2 and "emilia" in Valentine.friends_left()) and not _talking
 
 
 ## The Spanish word of the lesson (scenes/classe.gd adds it at the end of the questions): school's question format.
@@ -148,6 +148,8 @@ func release() -> void:
 func interact(who: Character) -> void:
 	_charlotte = who
 	if met() and FriendBracelet.give(kid, "emilia", func(t: String) -> void: _say(0, t), who):
+		return
+	if met() and Valentine.give(kid, "emilia", func(t: String) -> void: _say(0, t)):
 		return
 	if met():
 		kid.facing = 1 if who.position.x > global_position.x else -1

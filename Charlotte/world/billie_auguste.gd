@@ -112,7 +112,7 @@ static func met() -> bool:
 func waiting() -> bool:
 	if _talking:
 		return false
-	return not met() or FriendBracelet.has_pending(["billie", "auguste"]) or Snowman.can_start() or Quests.active(Snowman.QUEST) and Carry.has("bonhomme")
+	return not met() or FriendBracelet.has_pending(["billie", "auguste"]) or Valentine.step() == 2 and ("billie" in Valentine.friends_left() or "auguste" in Valentine.friends_left()) or Snowman.can_start() or Quests.active(Snowman.QUEST) and Carry.has("bonhomme")
 
 
 func can_interact() -> bool:
@@ -152,6 +152,8 @@ func interact(who: Character) -> void:
 	if not met():
 		_meet()
 	elif FriendBracelet.give(_kids[_clicked], ["billie", "auguste"][_clicked], _say_as(_clicked), who):
+		pass
+	elif Valentine.give(_kids[_clicked], ["billie", "auguste"][_clicked], _say_as(_clicked)):
 		pass
 	elif Snowman.can_start():
 		_ask_for_snowman()

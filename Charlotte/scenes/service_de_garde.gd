@@ -290,6 +290,8 @@ func _talk_to_emilia() -> void:
 	_emilia.facing = -1 if _charlotte.position.x < _emilia.position.x else 1
 	if FriendBracelet.give(_emilia, "emilia", func(t: String) -> void: _say(_emilia, t, 175.0, 2.6), _charlotte):
 		return
+	if Valentine.give(_emilia, "emilia", func(t: String) -> void: _say(_emilia, t, 175.0, 2.6)):
+		return
 	if not Emilia.day() or Emilia.shared():
 		_say(_emilia, Emilia.LINES[randi() % Emilia.LINES.size()], 175.0, 2.6)
 		return
@@ -389,6 +391,8 @@ func _ask_craft() -> void:
 func _talk_to_alyzee() -> void:
 	_alyzee.facing = -1 if _charlotte.position.x < _alyzee.position.x else 1
 	if FriendBracelet.give(_alyzee, "alyzee", _alyzee_says, _charlotte):
+		return
+	if Valentine.give(_alyzee, "alyzee", _alyzee_says):
 		return
 	_did = true
 	_alyzee_says(ALYZEE_CHAT[_chat % ALYZEE_CHAT.size()])

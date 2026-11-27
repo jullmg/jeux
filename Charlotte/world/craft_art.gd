@@ -20,6 +20,8 @@ const BASES := {
 	"collier": ["Un collier", "Des pâtes et des perles sur une ficelle."],
 	# Not on the garde's first card: her bedroom door, decorated from her desk (`house.gd _decorate_door`).
 	"porte": ["La porte de ma chambre", "Ton nom, des autocollants, de la peinture… sur ta porte !"],
+	# Her valentine (quest "valentin"), made at her desk and copied for each friend.
+	"valentin": ["Un valentin", "Un cœur de papier sur un napperon de dentelle."],
 }
 ## Her door on the bench: the corridor's door (150 × 430) at 0.96, so the picture goes back on it as it is.
 const DOOR_RECT := Rect2(208, 4, 144, 412)
@@ -67,6 +69,8 @@ static func base_rect(base: String) -> Rect2:
 			return Rect2(60, 30, 440, 360)
 		"porte":
 			return DOOR_RECT
+		"valentin":
+			return Rect2(70, 12, 420, 396)
 	return Rect2(40, 20, 480, 380)
 
 
@@ -95,6 +99,8 @@ static func inside(base: String, p: Vector2, grow := 0.0) -> bool:
 			return Rect2(60, 30, 440, 360).grow(grow).has_point(p) and not WINDOW.grow(-grow).has_point(p)
 		"porte":
 			return DOOR_RECT.grow(grow).has_point(p)
+		"valentin":
+			return Geometry2D.is_point_in_polygon(HEART_C + (p - HEART_C) / (1.0 + grow / 170.0), heart_points())
 	return true
 
 
@@ -150,6 +156,8 @@ static func draw_base(ci: CanvasItem, base: String, face: int, picture: Texture2
 				ci.draw_rect(Rect2(170 + k * 22, 110, 11, 300), Color(1, 1, 1, 0.07 + 0.05 * (k % 3)))
 		"porte":
 			_door(ci)
+		"valentin":
+			_valentine(ci)
 		"cadre":
 			var f := Rect2(60, 30, 440, 360)
 			ci.draw_rect(Rect2(f.position + Vector2(6, 8), f.size), Color(0.3, 0.2, 0.1, 0.2))
@@ -219,6 +227,52 @@ static func _door(ci: CanvasItem) -> void:
 	ci.draw_circle(knob, 7.0, Color("#E8E4D8"))
 	ci.draw_arc(knob, 7.0, 0.0, TAU, 20, Color("#8A8478"), 2.0, true)
 	ci.draw_circle(knob + Vector2(-2, -2), 2.2, Color.WHITE)
+
+
+## The valentine's paper heart: its middle and its outline.
+const HEART_C := Vector2(280, 206)
+
+
+static func heart_points() -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	for k in 72:
+		var a := TAU * k / 72.0
+		pts.append(HEART_C + Vector2(16.0 * pow(sin(a), 3.0), -(13.0 * cos(a) - 5.0 * cos(2.0 * a) - 2.0 * cos(3.0 * a) - cos(4.0 * a)) - 2.0) * 10.6)
+	return pts
+
+
+# A white lace doily under a pink paper heart.
+static func _valentine(ci: CanvasItem) -> void:
+	var c := HEART_C + Vector2(0, 8)
+	var lace := PackedVector2Array()
+	for k in 96:
+		var a := TAU * k / 96.0
+		lace.append(c + Vector2.from_angle(a) * (196.0 + 7.0 * cos(a * 32.0)))
+	var shade := PackedVector2Array()
+	for p: Vector2 in lace:
+		shade.append(p + Vector2(5, 7))
+	ci.draw_colored_polygon(shade, Color(0.3, 0.2, 0.1, 0.15))
+	ci.draw_colored_polygon(lace, Color("#FFFDF9"))
+	for ring in [[176.0, 32, 5.0], [150.0, 24, 4.0]]:
+		for k in int(ring[1]):
+			var a := TAU * k / float(ring[1])
+			ci.draw_circle(c + Vector2.from_angle(a) * float(ring[0]), float(ring[2]), Color("#EFE3E3"))
+	ci.draw_arc(c, 186.0, 0.0, TAU, 96, Color("#E8DADA"), 1.4, true)
+	var heart := heart_points()
+	var hs := PackedVector2Array()
+	for p: Vector2 in heart:
+		hs.append(p + Vector2(4, 6))
+	ci.draw_colored_polygon(hs, Color(0.5, 0.1, 0.2, 0.18))
+	ci.draw_colored_polygon(heart, Color("#FFC2D4"))
+	# The grain of the construction paper.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 14
+	for k in 160:
+		var p := HEART_C + Vector2(rng.randf_range(-160, 160), rng.randf_range(-140, 170))
+		if Geometry2D.is_point_in_polygon(p, heart):
+			ci.draw_circle(p, rng.randf_range(0.6, 1.4), Color(1, 1, 1, 0.35))
+	heart.append(heart[0])
+	ci.draw_polyline(heart, Color("#D9668C"), 3.0, true)
 
 
 ## The paper "chacha" sign taped to her door, each letter in another marker (as in `house.gd _chacha_sign`).
