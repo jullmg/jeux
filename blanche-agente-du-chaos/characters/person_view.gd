@@ -4,7 +4,7 @@ extends Node3D
 
 ## Les matières dont la couleur vient des sommets du modèle (tools/blender/heads.py).
 const PAINTED := ["peau_visage", "cheveux_ombre", "tissu_haut", "tissu_bas"]
-const STAND_IN := {"tante": "maman", "oncle": "papa"}
+const STAND_IN := {"tante": "maman", "oncle": "papa", "alyzee": "charlotte"}
 ## Les objets qu'on peut avoir en main.
 const PROPS := ["cuillere", "couteau", "assiette", "telephone", "panier", "plat", "fourchette", "verre", "cafetiere",
 	"verre_vin", "verre_jus", "verre_lait", "journal", "plat_tenu"]
@@ -15,6 +15,8 @@ const DISHES := {"lasagne": "lasagne", "pate_chinois": "pate_chinois", "hot_dogs
 const DISH_SCALE := 1.05
 ## L'espace entre le dessus du siège et l'os des hanches.
 const SEAT_GAP := 0.07
+## Plus bas que ça, on est assis par terre (un coussin, un sac de couchage) : les jambes vont devant, pas en bas.
+const FLOOR_SEAT := 0.25
 
 ## "idle", "walk", "brasser", "couper", "laver", "frigo", "telephone", "four", "ilot", "surprise", "charlotte",
 ## "hint", "feint", "round", "look", "point", "laugh", "wave", "carry", "snitch", "cheer", "chicane", "argue",
@@ -42,6 +44,9 @@ var model: Node3D
 ## La hauteur des hanches debout (pour s'asseoir à la bonne hauteur).
 var _hip_y := 0.9
 var _mouths: Dictionary = {}
+## Les paupières fermées (un objet du modèle) et le temps avant le prochain clignement.
+var _lids: MeshInstance3D
+var _blink := 2.0
 var _time := 0.0
 var _phase := 0.0
 var _props: Dictionary = {}         # nom → objet déjà fabriqué
@@ -51,15 +56,20 @@ var _dish: MeshInstance3D
 ## Les matières des objets restent en mémoire : les recréer ferait recompiler leur shader en pleine partie.
 static var _materials: Dictionary = {}
 var who: String
+## Le fichier du modèle, s'il n'est pas celui de `who` (une tenue de mission : Charlotte en pyjama).
+var outfit := ""
 
 
-func _init(who_: String) -> void:
+func _init(who_: String, outfit_ := "") -> void:
 	who = who_
+	outfit = outfit_
 	_time = absf(float(who_.hash() % 100)) * 0.1
 
 
 func _ready() -> void:
-	var file := "res://art/models/%s.glb" % who
+	var file := "res://art/models/%s.glb" % (outfit if outfit != "" else who)
+	if not ResourceLoader.exists(file):
+		file = "res://art/models/%s.glb" % who
 	if not ResourceLoader.exists(file):
 		# La visite emprunte un corps de la famille tant qu'elle n'a pas le sien.
 		file = "res://art/models/%s.glb" % STAND_IN.get(who, "maman")
@@ -72,6 +82,10 @@ func _ready() -> void:
 		mesh.layers = 1 | Ambiance.RIM_LAYER
 	for mesh: MeshInstance3D in model.find_children("Bouche*", "MeshInstance3D", true, false):
 		_mouths[mesh.name.trim_prefix("Bouche")] = mesh
+	_lids = model.find_child("Paupieres", true, false) as MeshInstance3D
+	if _lids:
+		_lids.visible = false
+	_blink = 1.0 + absf(float(who.hash() % 37)) * 0.1
 	_set_mouth("Sourire")
 	# Les objets en main sont fabriqués d'avance : en pleine partie, une nouvelle matière ferait un à-coup.
 	for kind: String in PROPS:
@@ -135,6 +149,8 @@ func _process(delta: float) -> void:
 	var shown := mouth
 	var prop := ""
 	var sink := 0.0
+	## Un saut (la joie, la danse) : au-dessus du sol où les pieds se posent.
+	var hop := 0.0
 	rig.add("chest", Vector3(sin(t * 1.9) * 1.0, 0, 0))
 	match pose:
 		"walk", "carry":
@@ -146,12 +162,14 @@ func _process(delta: float) -> void:
 				quick["shin" + s] = Vector3(maxf(0.0, -cos(f)) * 44 * amp, 0, 0)
 				if pose == "walk":
 					quick["arm" + s] = Vector3(-sin(f) * 20 * amp, 0, 0)
+					# le coude plie un peu plus quand le bras passe devant
+					quick["forearm" + s] = Vector3(-maxf(0.0, sin(f)) * 14 * amp, 0, 0)
 					_arm(s, 0, 2, 16)
+			_stride(amp)
 			if pose == "carry":
 				for s: String in ["L", "R"]:
 					_arm(s, 34, -4, 62)
 				prop = "panier"
-			sink = absf(sin(_phase)) * 0.018
 		"brasser", "surprise":
 			var rate := 4.0 if pose == "brasser" else 9.0
 			_arm("R", 38, -2, 52)
@@ -198,13 +216,28 @@ func _process(delta: float) -> void:
 				rig.add("thigh" + s, Vector3(-30, 0, 0))
 				rig.add("shin" + s, Vector3(44, 0, 0))
 				rig.add("foot" + s, Vector3(-14, 0, 0))
-			sink = -0.09
 		"ilot":
 			var push := sin(t * 5.0)
 			for s: String in ["L", "R"]:
 				_arm(s, 34 + push * 8, -5, 36 - push * 12)
 			rig.add("spine", Vector3(14 + push * 4, 0, 0))
 			rig.add("head", Vector3(24, 0, 0))
+		"hamster":
+			# Penchée sur la cage du hamster : une main lui donne une graine, l'autre tient le couvercle.
+			_arm("R", 58 + sin(t * 2.4) * 6, 4, 26)
+			_arm("L", 70, 14, 12)
+			rig.add("spine", Vector3(18, 0, 0))
+			rig.add("head", Vector3(22, sin(t * 0.9) * 8, 0))
+			shown = "Ouverte" if fmod(t, 3.0) < 0.5 else "Sourire"
+		"danse":
+			# Une chorégraphie inventée : les bras qui montent tour à tour, les hanches qui balancent, des petits sauts.
+			var beat := t * 4.2
+			_arm("R", 20 + maxf(0.0, sin(beat)) * 90, 30 + sin(beat) * 50, 30)
+			_arm("L", 20 + maxf(0.0, -sin(beat)) * 90, 30 - sin(beat) * 50, 30)
+			rig.add("hips", Vector3(0, sin(beat * 0.5) * 14, sin(beat) * 6))
+			rig.add("head", Vector3(-6, sin(beat * 0.5) * 12, sin(beat) * 8))
+			hop = absf(sin(beat)) * 0.05
+			shown = "Ouverte" if fmod(t, 0.5) < 0.25 else "Sourire"
 		"charlotte":
 			_arm("R", 10, 6, 30)
 			_arm("L", 10, 6, 30)
@@ -277,7 +310,7 @@ func _process(delta: float) -> void:
 		"cheer":
 			for s: String in ["L", "R"]:
 				_arm(s, 10, 140, 16)
-			sink = absf(sin(t * 7.0)) * 0.08
+			hop = absf(sin(t * 7.0)) * 0.08
 		"servir":
 			if _holds_dish():
 				# Le plat à deux mains au-dessus de la table : elle l'avance pour servir chacun.
@@ -312,7 +345,7 @@ func _process(delta: float) -> void:
 				quick["thigh" + s] = Vector3(sin(f) * 27 * amp, 0, 0)
 				quick["shin" + s] = Vector3(maxf(0.0, -cos(f)) * 44 * amp, 0, 0)
 				_arm(s, 40, -2, 66)
-			sink = absf(sin(_phase)) * 0.018
+			_stride(amp)
 			prop = "plat_tenu" if _holds_dish() else "plat"
 		"manger":
 			prop = _eat(t, quick)
@@ -380,10 +413,43 @@ func _process(delta: float) -> void:
 			shown = "Ouverte" if fmod(t, 0.5) < 0.2 else "Sourire"
 			prop = "verre"
 		_:
+			# Debout au repos : le poids passe d'une jambe à l'autre, le genou libre plie un peu ; on parle avec les mains.
+			var shift := sin(t * 0.55)
+			rig.add("hips", Vector3(0, shift * 3.0, shift * 2.5))
+			rig.add("spine", Vector3(0, 0, -shift * 1.8))
 			for s: String in ["L", "R"]:
+				var side := 1.0 if s == "L" else -1.0
+				var free := maxf(0.0, shift * side)
+				rig.add("thigh" + s, Vector3(-free * 6.0, 0, 0))
+				rig.add("shin" + s, Vector3(free * 12.0, 0, 0))
 				_arm(s, sin(t * 1.3) * 2, 3, 12)
+			if talking > 0.0:
+				_arm("R", 26 + sin(t * 3.4) * 14, 12, 58 + sin(t * 2.6) * 18)
 			rig.add("head", Vector3(0, head_yaw + sin(t * 0.7) * 7, 0))
-	if seat_y > 0.0:
+	if seat_y > 0.0 and seat_y < FLOOR_SEAT:
+		# Assis par terre (le nid de sacs de couchage) : les genoux relevés, les pieds devant, un peu écartés ; au repos,
+		# les mains se posent sur les genoux.
+		if pose in ["film", "seated", "seated_chat"]:
+			var chatty := talking > 0.0 or pose == "seated_chat"
+			for s: String in ["L", "R"]:
+				if chatty and s == "R":
+					# la main qui parle
+					rig.target["arm" + s] = Vector3(-38 - sin(t * 3.1) * 14, 0, -4)
+					rig.target["forearm" + s] = Vector3(-74 - sin(t * 2.4) * 16, 0, 0)
+				else:
+					rig.target["arm" + s] = Vector3(-46, 0, -4 * (1.0 if s == "L" else -1.0))
+					rig.target["forearm" + s] = Vector3(-46, 0, 0)
+		for s: String in ["L", "R"]:
+			var side := 1.0 if s == "L" else -1.0
+			rig.target["thigh" + s] = Vector3(-62, 0, 12 * side)
+			rig.target["shin" + s] = Vector3(72, 0, -6 * side)
+			rig.target["foot" + s] = Vector3(-18, 0, 0)
+			quick.erase("thigh" + s)
+			quick.erase("shin" + s)
+		rig.add("chest", Vector3(0, twist * 0.45, 0))
+		rig.add("spine", Vector3(6, twist * 0.35, 0))
+		sink = seat_y + SEAT_GAP - _hip_y
+	elif seat_y > 0.0:
 		# Assis : les cuisses à plat, les jambes qui pendent (et se balancent un peu chez Charlotte).
 		var swing := sin(t * 2.2) * 8.0 if who == "charlotte" else 0.0
 		for s: String in ["L", "R"]:
@@ -403,11 +469,35 @@ func _process(delta: float) -> void:
 			shown = "Ouverte" if fmod(t, 0.24) < 0.12 else closed
 	_set_mouth(shown)
 	_show_prop(prop)
+	# Un clignement de temps en temps (et deux de suite, parfois).
+	_blink -= delta
+	if _blink < -0.13:
+		_blink = randf_range(2.2, 5.5) if randf() > 0.2 else 0.25
+	if _lids:
+		_lids.visible = _blink < 0.0
 	rig.apply(delta, 10.0, quick)
-	model.position.y = lerpf(model.position.y, sink, 1.0 - exp(-delta * 18.0))
+	if seat_y <= 0.0:
+		# Debout, les pieds restent sur le plancher : quand les jambes s'écartent ou que les genoux plient, le corps
+		# descend d'autant (sans ça, le pied avant flottait en marchant).
+		var low := INF
+		for f: String in ["footL", "footR"]:
+			low = minf(low, rig.position_of(f).y - rig.rest_position_of(f).y)
+		sink = -low + hop
+		model.position.y = lerpf(model.position.y, sink, 1.0 - exp(-delta * 30.0))
+	else:
+		model.position.y = lerpf(model.position.y, sink, 1.0 - exp(-delta * 18.0))
 	if _prop_kind == "plat_tenu":
 		# Le plat reste à plat, quoi que fasse le dos : rien ne doit glisser.
 		_dish.global_basis = Basis(Vector3.UP, global_rotation.y).scaled(Vector3.ONE * DISH_SCALE)
+
+
+## La démarche : les hanches qui balancent, le torse qui tourne à l'inverse, un peu penché vers l'avant.
+func _stride(amp: float) -> void:
+	var f := _phase
+	rig.add("hips", Vector3(0, sin(f) * 7.0 * amp, sin(f) * 2.5 * amp))
+	rig.add("chest", Vector3(0, -sin(f) * 6.0 * amp, 0))
+	rig.add("spine", Vector3(3.0 * amp, 0, 0))
+	rig.add("head", Vector3(-2.0 * amp, -sin(f) * 1.5 * amp, 0))
 
 
 ## Le vrai plat du repas à tenir (la scène le donne au début de la mission ; rien : on n'en tient pas).

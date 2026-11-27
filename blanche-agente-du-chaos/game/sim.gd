@@ -3,7 +3,7 @@ extends RefCounted
 ## Toutes les règles d'un niveau, sans affichage : Blanche, la personne qui surveille, la nourriture, les aides et le
 ## pointage. On appelle step() avec les commandes ; l'affichage lit l'état et la liste d'événements.
 ##
-## La personne qui surveille est Maman, ou Papa (`watcher`) ; ses variables gardent le préfixe `mom_`.
+## La personne qui surveille est Maman, Papa ou Charlotte (`watcher`) ; ses variables gardent le préfixe `mom_`.
 
 enum Dog { FREE, REACHING, LOWERING, TO_CORNER, IN_CORNER }
 ## WALK : elle change de place sans surveiller. ROUND : le tour de l'îlot, les yeux ouverts, toujours annoncé.
@@ -57,6 +57,7 @@ const ACTIVITY_WINDOWS := {
 	"chicane": [ARGUE_TIME, ARGUE_TIME],
 	"servir": [2.6, 3.6], "manger": [3.6, 5.0], "buffet": [3.2, 4.4], "disque": [5.0, 6.5], "cuisine": [5.5, 7.5],
 	"hockey": [3.4, 4.8], "but": [7.0, 9.0], "film": [3.6, 5.0], "jaser": [3.0, 4.2],
+	"hamster": [4.2, 5.6], "danse": [3.0, 4.2],
 }
 ## Le retour de la cuisine s'annonce un peu plus longtemps : il faut lire l'icône au bord de l'écran.
 const RETURN_EXTRA := 0.25

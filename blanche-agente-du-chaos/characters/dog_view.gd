@@ -19,6 +19,8 @@ const PAW_ABOVE := 0.035
 const STRETCH := {"spine": 0.35, "chest": 0.35, "neck": 0.5}
 ## Où le morceau se tient dans la gueule, dans le repère du modèle au repos.
 const MOUTH := Vector3(0, 0.352, 0.352) * SIZE
+## La durée d'un bâillement.
+const YAWN_TIME := 1.5
 
 ## "stand", "walk", "sit", "reach", "sulk", "crouch", "happy", "surprised"
 var pose := "sit"
@@ -46,6 +48,11 @@ var _stretch := 0.0
 var _curious_wait := 2.0
 var _curious_left := 0.0
 var _curious_side := 1.0
+## Assise, elle bâille de temps en temps ; debout, elle renifle l'air.
+var _yawn_wait := 9.0
+var _yawn_left := 0.0
+var _sniff_wait := 4.0
+var _sniff_left := 0.0
 var _held: Node3D
 var _hat: Node3D
 ## Surfaces du poil : [maillage, surface, matière normale, matière avec silhouette].
@@ -329,6 +336,20 @@ func _process(delta: float) -> void:
 		# Elle halète un peu, la langue sortie.
 		if sin(_time * 0.45) > 0.55:
 			jaw = 7.0 + absf(sin(_time * 12.0)) * 5.0
+		_idle_habits(delta)
+		if _yawn_left > 0.0:
+			# Un grand bâillement : la gueule grande ouverte, les yeux plissés, la tête qui monte.
+			var y := sin(clampf(1.0 - _yawn_left / YAWN_TIME, 0.0, 1.0) * PI)
+			jaw = 38.0 * y
+			lids = LID_CLOSED * 0.7 * y
+			ears -= 10.0 * y
+			rig.add("head", Vector3(-16 * y, 0, 0))
+			rig.add("neck", Vector3(-8 * y, 0, 0))
+		elif _sniff_left > 0.0:
+			# Elle lève le nez et renifle : de petits coups rapides.
+			rig.add("head", Vector3(-12, sin(_time * 3.0) * 10, 0))
+			quick["head"] = quick.get("head", Vector3.ZERO) + Vector3(absf(sin(_time * 22.0)) * -2.5, 0, 0)
+			jaw = 2.0
 	if pose != "happy":
 		position.y = 0.0
 	if carrying and pose != "reach":
@@ -353,6 +374,22 @@ func _process(delta: float) -> void:
 	rig.apply(delta, 13.0, quick)
 	_stretch_body(delta)
 	_plant_feet(delta, bounce)
+
+
+## Ses petites habitudes au repos : bâiller quand elle est assise, renifler l'air quand elle est debout.
+func _idle_habits(delta: float) -> void:
+	_yawn_left -= delta
+	_sniff_left -= delta
+	if pose == "sit":
+		_yawn_wait -= delta
+		if _yawn_wait <= 0.0:
+			_yawn_wait = randf_range(9.0, 16.0)
+			_yawn_left = YAWN_TIME
+	elif pose == "stand":
+		_sniff_wait -= delta
+		if _sniff_wait <= 0.0:
+			_sniff_wait = randf_range(4.0, 8.0)
+			_sniff_left = 1.2
 
 
 ## Par moments, elle penche la tête d'un côté, l'air de se demander ce qui se passe.

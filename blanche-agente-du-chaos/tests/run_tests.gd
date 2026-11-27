@@ -5,7 +5,7 @@ extends SceneTree
 const DT := 1.0 / 60.0
 const TMP := "user://test_sauvegarde.json"
 
-const PIECES := ["cuisine", "salle_a_manger", "salon", "fetes"]
+const PIECES := ["cuisine", "salle_a_manger", "salon", "fetes", "chambre"]
 
 var map: RoomMap
 var nav: Nav
@@ -1090,7 +1090,7 @@ func test_la_visite_ne_coupe_pas_la_chicane() -> void:
 ## Un niveau mal écrit est refusé avant d'être joué.
 func test_niveau_mal_ecrit() -> void:
 	var m: RoomMap = grids("fetes")[0]
-	var level := Levels.load_level(15)
+	var level := Levels.load_level(16)
 	level.walkers = [{"who": "tante", "start": "entree", "points": ["entree"]}]
 	level.surprise = {"activity": "but "}
 	level.dark = {"near": 2.0}
@@ -1155,13 +1155,13 @@ func test_conversations_a_table() -> void:
 	# Quelqu'un d'absent : la conversation ne part pas, sans erreur.
 	check(not talk._fits({"sur": [], "lines": [["papa", "Allo"], ["charlotte", "Allo"]]}, {"papa": Vector2.ZERO}),
 		"personne absente")
-	var people := ["papa", "maman", "charlotte", "tante", "oncle"]
+	var people := ["papa", "maman", "charlotte", "tante", "oncle", "alyzee"]
 	for t: Dictionary in Texts.TABLE_TALK:
 		var guests := 0
 		for line: Array in t.lines:
 			check(people.has(line[0]), "personne inconnue : " + str(line[0]))
 			check(str(line[1]).length() <= 56, "réplique trop longue : " + str(line[1]))
-			if line[0] in ["tante", "oncle"]:
+			if line[0] in ["tante", "oncle", "alyzee"]:
 				guests += 1
 		check(guests == 0 or t.lines.size() <= 3 or "noel" in t.sur, "avec la visite assise, trois répliques au plus")
 	var kid := game(11, 5)
@@ -1170,7 +1170,7 @@ func test_conversations_a_table() -> void:
 	charlotte.state = "slip"
 	check(not kid_talk._free("charlotte"), "Charlotte ne jase pas en glissant un morceau")
 	# Au film, rien que les conversations du film ; au party, celles du party.
-	for id: int in [14, 15]:
+	for id: int in [14, 16]:
 		var away := game(id, 5)
 		var away_talk := TableTalk.new(away, null, null, RandomNumberGenerator.new())
 		var everyone := {"papa": Vector2.ZERO, "charlotte": Vector2.ZERO, "maman": Vector2.ZERO, "tante": Vector2.ZERO,
@@ -1224,6 +1224,16 @@ func write_tmp(text: String) -> void:
 	var f := FileAccess.open(TMP, FileAccess.WRITE)
 	f.store_string(text)
 	f.close()
+
+
+## Une sauvegarde d'avant la soirée pyjama : le record du party (alors la mission 15) le suit à la 16, et tout est
+## ouvert jusqu'à la nouvelle finale.
+func test_sauvegarde_avant_la_soiree_pyjama() -> void:
+	write_tmp("{\"version\":1,\"unlocked\":15,\"stars\":{\"14\":2,\"15\":3},\"best\":{\"15\":4200}}")
+	var s := SaveData.new(TMP)
+	check(s.stars_of(16) == 3 and s.best_of(16) == 4200, "le party garde son record")
+	check(s.stars_of(15) == 0 and s.best_of(15) == 0, "la soirée pyjama est neuve")
+	check(s.unlocked == 16, "tout est ouvert (%d)" % s.unlocked)
 
 
 func test_sauvegarde_aller_retour() -> void:

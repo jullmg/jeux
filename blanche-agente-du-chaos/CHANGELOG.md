@@ -1,5 +1,24 @@
 # Journal des versions
 
+## 1.2.0-rc1 (2026-11-27) : la soirée pyjama, la salle à manger corrigée et tout le jeu repassé
+
+- **Nouvelle mission 15, la soirée pyjama**, dans la chambre de Charlotte faite d'après les photos : c'est Charlotte
+  qui garde les collations, comme Maman ailleurs ; son amie Alyzée (coton ouaté à oursons) voit son bout du plateau
+  quand elle ne jase pas ; Blanche vise le pop-corn, les oursons en jujube, les bubly et le gros sac de bonbons. Le
+  party des Fêtes reste la finale, maintenant la mission 16 (une sauvegarde d'avant garde son record).
+- **La salle à manger corrigée** : Maman fait le tour de la table au lieu de la traverser ; personne n'est plus assis
+  dans le bord de la table ; Maman sert le vrai plat (plus de cafetière noire pour la lasagne) ; un couvert à chaque
+  place ; Papa et Charlotte au brunch et au souper en famille ; on mange pour vrai à table.
+- **Des conversations drôles** à table, au film, au party et à la soirée pyjama (Papa parle souvent) ; la visite ne
+  parle que quand elle jase pour vrai.
+- **La lasagne, le pâté chinois, le jambon à l'érable, la soupe et le brunch refaits** ; le plateau de hot-dogs et la
+  tourtière que Maman sert.
+- **Les mouvements** : les pieds restent au sol en marchant, la démarche balance, on change d'appui au repos, on
+  parle avec les mains, tout le monde cligne des yeux ; Blanche bâille et renifle l'air.
+- Le plancher ne clignote plus sous la porte de bois ; le salon a son tapis ; les bulles ont une queue tournée vers qui
+  parle et ne se cachent plus ; les onglets des missions se lisent ; un mot de la fin à chaque repas.
+- Corrigé : changer de mission pendant que Blanche redescend d'une table faisait planter.
+
 ## 1.1.0-rc1 (2026-11-26) : la salle à manger et le salon
 
 - **Sept nouvelles missions** (9 à 15) : le brunch du dimanche, le souper en famille, la fête de Charlotte, le souper

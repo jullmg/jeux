@@ -183,7 +183,7 @@ func test_missions_verrouillees() -> void:
 	var grid: Array = main.menus.find_children("*", "GridContainer", true, false)
 	check(grid.size() == 1 and grid[0].get_child_count() == 8, "les huit missions de la cuisine")
 	var tabs: Array = main.menus.find_children("onglet_*", "Button", true, false)
-	check(tabs.size() == 4, "un onglet par pièce : %d" % tabs.size())
+	check(tabs.size() == Texts.ROOMS.size(), "un onglet par pièce : %d" % tabs.size())
 	check(tabs.filter(func(b: Button) -> bool: return not b.disabled).size() == 1, "seule la cuisine est ouverte")
 	var open := 0
 	for b: Button in grid[0].get_children():

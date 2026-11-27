@@ -277,6 +277,44 @@ def rug(name, base, stripe, border, meters=1.0):
     return _pack(name, color, weave * 1.2 + fuzz, np.full((size, size), 0.95), meters, 0.8)
 
 
+def oriental_rug(name, w=512, h=384):
+    """Le tapis du salon (d'après l'esprit de la photo, rien n'en est copié) : un tapis d'Orient délavé, rose poudré et
+    beige, sa bordure à motifs, un médaillon au centre, le velours usé par endroits."""
+    import random
+    rng = random.Random(name)
+    y = np.linspace(0, 1, h)[:, None] * np.ones((1, w))
+    x = np.linspace(0, 1, w)[None, :] * np.ones((h, 1))
+    img = np.ones((h, w, 3)) * _hex("#e8cfc2")
+    edge = np.minimum(np.minimum(x, 1 - x) * w / h, np.minimum(y, 1 - y))
+    # les bordures : une bande foncée, une frise de losanges, un filet
+    img[(edge > 0.035) & (edge < 0.05)] = C.srgb("#9c5a68")
+    frieze = (edge > 0.06) & (edge < 0.13)
+    img[frieze] = C.srgb("#d9a7a6")
+    diamonds = frieze & ((np.abs(((x * 26) % 1) - 0.5) + np.abs(((y * 20) % 1) - 0.5)) < 0.32)
+    img[diamonds] = C.srgb("#8c5a6e")
+    img[(edge > 0.14) & (edge < 0.152)] = C.srgb("#9c5a68")
+    # le champ et son médaillon
+    u, v = (x - 0.5) * w / h, y - 0.5
+    d = np.abs(u) / 0.42 + np.abs(v) / 0.3
+    for r, tone in ((1.0, "#c98a92"), (0.86, "#efdccf"), (0.72, "#b5707e"), (0.5, "#f1e2d6"), (0.32, "#9c5a68"),
+                    (0.16, "#e7c08f")):
+        img[(d < r) & (edge > 0.16)] = C.srgb(tone)
+    for k in range(40):
+        cx, cy = rng.uniform(0.2, 0.8), rng.uniform(0.22, 0.78)
+        if abs(cx - 0.5) * w / h / 0.42 + abs(cy - 0.5) / 0.3 < 1.05:
+            continue
+        flower = np.hypot((x - cx) * w / h, y - cy) < 0.018
+        img[flower & (edge > 0.16)] = C.srgb(["#b5707e", "#8c9a78", "#e7c08f"][k % 3])
+    # délavé, usé, le velours
+    worn = _fbm(h, w, 18, 24, 4)
+    img = img * (0.86 + 0.2 * worn)[..., None] + (1 - worn)[..., None] * 0.05
+    pile = C.value_noise(h, w, 2, 2)
+    img *= (0.94 + 0.08 * pile)[..., None]
+    # la frange aux deux bouts
+    img[edge < 0.03] = C.srgb("#f1e8da")
+    return C.image(name, np.clip(img, 0, 1))
+
+
 def view(rng):
     """La vue par la fenêtre : le ciel et ses nuages, les arbres de la ruelle, la maison de brique d'en face."""
     w, h = 512, 448
@@ -423,6 +461,39 @@ def picture(name, kind, w=256, h=320):
             d = np.hypot(x - cx, (y - cy) * h / w * 0.6) + (_fbm(h, w, 20, 20, 3) - 0.5) * 0.08
             a = np.clip((r - d) * 12, 0, 0.6)[..., None]
             img = img * (1 - a) + tone * a
+    elif kind == "fraises":
+        # l'affiche de la chambre (inventée) : un damier rose en perspective, deux fraises « boule disco » à facettes
+        u = (x - 0.5) / np.maximum(0.25, 1.15 - y) + 0.5
+        v = 1.0 / np.maximum(0.25, 1.15 - y)
+        check = ((np.floor(u * 6) + np.floor(v * 4)) % 2 == 0)
+        img[:] = _hex("#f7d6e3")
+        img[check] = C.srgb("#e48bb0")
+        img[y > 0.78] = (_ramp(y, [(0.78, "#d9a1c4"), (1.0, "#9a5a99")]))[y > 0.78]
+        for cx, cy, r in ((0.38, 0.5, 0.2), (0.68, 0.36, 0.17)):
+            d = np.hypot((x - cx) * 1.0, (y - cy) * h / w * 0.85)
+            body = d < r * (1.0 - 0.35 * np.clip((cy - y) / r, 0, 1))
+            facet = ((np.floor((x - cx) * 60) + np.floor((y - cy) * 48)) % 2 == 0)
+            shade = np.clip(1.15 - d / r * 0.7 + (x - cx) * -0.8, 0.4, 1.3)
+            red = np.where(facet, 0.82, 1.0)[..., None] * _hex("#c8243f") * shade[..., None]
+            img[body] = red[body]
+            glint = body & (np.random.rand(h, w) > 0.985)
+            img[glint] = C.srgb("#fff2f6")
+            leaves = (np.hypot(x - cx, (y - cy - r * 0.95) * h / w) < r * 0.32) & (y > cy + r * 0.7)
+            img[leaves] = C.srgb("#3f8a3a")
+    elif kind == "fleurs":
+        # le tableau au-dessus de la commode (inventé) : un damier jaune et blanc, un bouquet rose et blanc
+        check = ((np.floor(x * 6) + np.floor(y * 7)) % 2 == 0)
+        img[:] = _hex("#fbf3d8")
+        img[check] = C.srgb("#f2cf45")
+        for k in range(9):
+            cx, cy, r = rng.uniform(0.25, 0.75), rng.uniform(0.38, 0.72), rng.uniform(0.06, 0.1)
+            tone = _hex(["#f19ab8", "#ffffff", "#e5658f", "#fbd2e0"][k % 4])
+            a = np.arctan2(y - cy, x - cx)
+            petal = np.hypot(x - cx, (y - cy) * h / w) < r * (0.75 + 0.25 * np.cos(a * 5))
+            img[petal] = tone
+            img[np.hypot(x - cx, (y - cy) * h / w) < r * 0.25] = C.srgb("#f6c33a")
+        stem = (np.abs(x - 0.5 - (0.38 - y) * 0.3) < 0.012) & (y < 0.4) & (y > 0.08)
+        img[stem] = C.srgb("#4f9440")
     elif kind == "chien":
         img[:] = _hex("#ece4d4")
         head = np.hypot(x - 0.5, (y - 0.55) * 1.1) < 0.24

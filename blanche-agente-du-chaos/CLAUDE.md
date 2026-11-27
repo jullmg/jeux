@@ -3,7 +3,9 @@
 Jeu 3D Godot 4.7 (Forward+ sur Mac, 1920×1080) : la chienne Blanche vole de la nourriture pendant que Maman cuisine.
 Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et décisions : `docs/etat.md` ; revues :
 `docs/revues.md` ; refonte graphique : `PROMPT-GRAPHIQUES.md` ; salle à manger et salon (missions 9 à 15) :
-`PROMPT-PIECES.md`, photos dans `reference/photos-8/`. Version 1.1.0-rc1 : Mac d'abord, iPad et Android ensuite.
+`PROMPT-PIECES.md`, photos dans `reference/photos-8/` ; la chambre de Charlotte d'après les photos du jeu Charlotte
+(`../Charlotte/reference/maison_charlotte/interieur/`) et `reference/20261126_200025.jpg`. Version 1.1.0-rc1 : Mac
+d'abord, iPad et Android ensuite.
 
 ## Vérifier
 
@@ -29,7 +31,7 @@ Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et 
   Mètres, x vers l'est, z vers le sud. Les cachettes sont une liste : `"bloc"` (l'îlot, le divan : l'ombre derrière) ou
   `"dessous"` (la table : personne debout ne voit dessous ; assis, on voit sa moitié). Un poste peut être `"assis"`,
   `"dehors"` (Maman à la cuisine : son retour est un indice « retour », puis elle apparaît dans `mom_door`) ou regarder
-  `"devant"`. Sans modèle 3D, la pièce est montrée en gris (`kitchen/maquette.gd`).
+  `"devant"`. Sans modèle 3D, la pièce est montrée en gris (`kitchen/maquette.gd`). `chambre` : la soirée pyjama.
 - `levels/niveau_N.json` : les missions. Chaque niveau dit sa pièce (`"piece"`, la cuisine par défaut), qui surveille
   (`"watcher"`, Maman ou Papa), ses personnes assises (`"seated"` : `complice`, `temoin`, `decor`), sa visite qui
   circule (`"walkers"`), le noir (`"dark"`). Étoiles recalculées par `tools/calibrate.py --write-stars`.
@@ -56,6 +58,13 @@ Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et 
   assise et occupée ; rien pendant un indice, un regard ou une chicane. Les autres regardent qui parle (`Stage.talk`).
   Bulles de jasette plus petites (`Hud.bubble(…, small)`) ; aucune bulle ne cache celle de Maman, son étiquette
   d'activité ni l'annonce (`Hud._clear_of`).
+- **La chambre de Charlotte, la soirée pyjama (mission 15)** : `data/pieces/chambre.json`, modèle `chambre.glb`
+  (`tools/blender/chambre.py`, d'après les photos de Julien sans en rien copier). **Charlotte surveille** (`"watcher":
+  "charlotte"`, en pyjama : `"tenues"` du niveau → `charlotte_pyjama.glb`, `Stage.OUTFITS`), avec les mêmes règles que
+  Maman (indices, regards, coin, allers-retours à la cuisine) et ses propres répliques (`Texts.CHARLOTTE_WATCH`).
+  Alyzée (`alyzee.glb`, coton ouaté à oursons) est une visite « témoin » assise dans le nid. Assis par terre
+  (`siege` < `PersonView.FLOOR_SEAT`), les jambes vont devant. Le dessous du lit est une cachette « dessous ». Le party
+  des Fêtes reste la finale (16) ; les sauvegardes d'avant y font suivre son record (`SaveData` version 2).
 - `kitchen/stage.gd` : la scène 3D qui montre une `Sim` ; `kitchen/ambiance.gd` : lumières, rendu et moments du jour
   (`"moment"` de chaque niveau) ; `kitchen/effects.gd` : les particules. `characters/` : `rig.gd` (poses par code, rotations dans les
   axes du modèle), `dog_view.gd`, `person_view.gd`. `ui/` : `hud.gd`, `menus.gd`, `ui_style.gd`, `icons.gd`,

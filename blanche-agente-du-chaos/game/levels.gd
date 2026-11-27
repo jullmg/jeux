@@ -3,14 +3,14 @@ extends RefCounted
 ## Les niveaux : un fichier de données par niveau dans res://levels/. Chaque niveau dit sa pièce (`"piece"`, la cuisine
 ## par défaut) et qui surveille (`"watcher"`, Maman par défaut).
 
-const COUNT := 15
+const COUNT := 16
 const REQUIRED := [
 	"id", "meal", "novelty", "intro", "duration", "hint_min", "window_mult", "look", "stations", "move_chance",
 	"feint_chance", "surprise_chance", "round_chance", "noise", "noisy_spots", "helpers", "spots", "foods", "weights",
 	"spawn", "max_items", "treasure_at", "treasure_points", "stars",
 ]
-const WATCHERS := ["maman", "papa"]
-const PEOPLE := ["maman", "papa", "charlotte", "tante", "oncle"]
+const WATCHERS := ["maman", "papa", "charlotte"]
+const PEOPLE := ["maman", "papa", "charlotte", "tante", "oncle", "alyzee"]
 const ROLES := ["complice", "temoin", "decor"]
 
 

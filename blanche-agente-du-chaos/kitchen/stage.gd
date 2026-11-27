@@ -69,6 +69,8 @@ var _room_key := ""
 var _seat_blend := 0.0
 var _mom_was_seated := false
 ## La conversation à table : qui parle, à qui, et encore combien de temps (les autres le regardent).
+## Les tenues propres à une mission (`"tenues"` d'un niveau), fabriquées d'avance comme les autres : qui → fichier.
+const OUTFITS := {"charlotte": "charlotte_pyjama"}
 var _talker: PersonView
 var _talk_to: PersonView
 var _talk_left := 0.0
@@ -143,30 +145,34 @@ func _ready() -> void:
 	# Tous les personnages sont fabriqués d'avance et gardés : pas d'à-coup quand ils entrent en scène.
 	for who: String in Levels.PEOPLE:
 		_person(who)
+	for who: String in OUTFITS:
+		_person(who, OUTFITS[who])
 	mom = _person("maman")
-	for piece: String in ["salle_a_manger", "salon", "fetes"]:
+	for piece: String in ["salle_a_manger", "salon", "fetes", "chambre"]:
 		if FileAccess.file_exists(RoomMap.FOLDER % piece):
 			_prepare_room(piece)
 	show_title()
 
 
-## Montre la personne qui surveille (Maman ou Papa) ; l'autre attend hors champ.
-func _use_watcher(who: String) -> void:
-	if mom != null and mom.who != who:
+## Montre la personne qui surveille (Maman, Papa ou Charlotte, dans la tenue de la mission) ; l'autre attend hors champ.
+func _use_watcher(who: String, model := "") -> void:
+	var next := _person(who, model)
+	if mom != null and mom != next:
 		mom.visible = false
-	mom = _person(who)
+	mom = next
 	mom.visible = true
 
 
-## Un personnage, fabriqué une seule fois.
-func _person(who: String) -> PersonView:
-	if not _persons.has(who):
-		var p := PersonView.new(who)
+## Un personnage, fabriqué une seule fois (une fois par tenue : `model` est son fichier, Charlotte en pyjama).
+func _person(who: String, model := "") -> PersonView:
+	var key := model if model != "" else who
+	if not _persons.has(key):
+		var p := PersonView.new(who, model)
 		add_child(p)
 		p.add_child(_blob_shadow(0.32 if who == "maman" else 0.3, 0.4))
 		p.visible = false
-		_persons[who] = p
-	return _persons[who]
+		_persons[key] = p
+	return _persons[key]
 
 
 ## Le plan d'une pièce (et sa pièce en 3D, préparée une fois).
@@ -668,7 +674,8 @@ func start_level(sim_: Sim) -> void:
 	_clear_level()
 	sim = sim_
 	_show_room(sim.map)
-	_use_watcher(sim.watcher)
+	var outfits: Dictionary = sim.level.get("tenues", {})
+	_use_watcher(sim.watcher, str(outfits.get(sim.watcher, "")))
 	_dark = sim.level.has("dark")
 	_set_moment(sim.level.get("moment", "midi"))
 	_set_places()
@@ -694,7 +701,7 @@ func start_level(sim_: Sim) -> void:
 		cast.append(w.who)
 	for who: String in cast:
 		if who != sim.watcher:
-			people[who] = _person(who)
+			people[who] = _person(who, str(outfits.get(who, "")))
 			people[who].visible = false
 
 

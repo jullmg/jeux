@@ -66,7 +66,7 @@ func _performance() -> void:
 	else:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
 	await wait(2.0)
-	var ids: Array = [1, 8, 9, 12, 13, 14, 15]
+	var ids: Array = [1, 8, 9, 12, 13, 14, 15, 16]
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--perf="):
 			ids = Array(a.get_slice("=", 1).split(",")).map(func(s: String) -> int: return int(s))
@@ -195,6 +195,15 @@ func _run() -> void:
 		main.menus.show_select()
 		await wait(0.4)
 		await shot("02_missions")
+		# Toutes les pièces ouvertes : les cinq onglets doivent tenir, et la chambre montrer sa mission.
+		for id in range(1, Levels.COUNT):
+			main.save.record(id, 2000, 2)
+		main.menus.show_select("chambre")
+		await wait(0.4)
+		await shot("02_missions_chambre")
+		main.save.reset_defaults()
+		main.save.record(1, 2900, 2)
+		main.save.record(2, 900, 1)
 		main.show_brief(2)
 		await wait(0.4)
 		await shot("03_consignes")
@@ -390,6 +399,30 @@ func _run() -> void:
 			await wait(0.3)
 			await shot("72_maman_" + to)
 			stage.view = "jeu"
+	if wants("pyjama"):
+		# La soirée pyjama : la vue de jeu, les filles de près, Charlotte à chacun de ses postes.
+		var stage: Stage = main.stage
+		play(15, "equilibre", 8)
+		main.bot = null
+		await wait(1.5)
+		await shot("80_pyjama")
+		stage.view = "photo"
+		stage.photo = [Vector3(0.2, 1.0, 1.4), Vector3(0.2, 0.45, -0.3)]
+		await wait(0.5)
+		await shot("81_pyjama_filles")
+		stage.view = "jeu"
+		for to: String in ["hamster", "danse"]:
+			main.sim._start_walk(to, main.stage.map.stations[to].activity)
+			await until(func() -> bool: return main.sim.mom_state == Sim.Mom.BUSY, 900)
+			await wait(0.8)
+			await shot("82_pyjama_" + to)
+		main.sim._start_walk("nid", "film")
+		await until(func() -> bool: return main.sim.mom_state == Sim.Mom.BUSY, 900)
+		main.speed = 6
+		await until(func() -> bool: return main.sim.time > 40.0)
+		main.speed = 1
+		await wait(0.6)
+		await shot("83_pyjama_jeu")
 	if wants("situations"):
 		play(5, "equilibre", 3)
 		# Maman est envoyée à chaque poste, sans attendre que le hasard l'y mène.

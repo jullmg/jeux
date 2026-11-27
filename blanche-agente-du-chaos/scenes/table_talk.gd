@@ -144,14 +144,15 @@ func _free_people() -> Dictionary:
 	for w in sim.walkers:
 		if _free(w.who):
 			out[w.who] = w.pos
-	if _free("maman"):
-		out["maman"] = sim.mom_pos
+	if _free(sim.watcher):
+		out[sim.watcher] = sim.mom_pos
 	return out
 
 
 func _free(who: String) -> bool:
-	if who == "maman":
-		return sim.watcher == "maman" and not sim.mom_out and sim.mom_seated() and sim.mom_state == Sim.Mom.BUSY \
+	if who == sim.watcher:
+		# Qui surveille ne jase qu'assis et occupé (Maman à table ou au film, Charlotte à la soirée pyjama).
+		return not sim.mom_out and sim.mom_seated() and sim.mom_state == Sim.Mom.BUSY \
 			and sim.activity in ["manger", "jaser", "film"]
 	for s in sim.seated:
 		if s.who == who:
@@ -214,8 +215,8 @@ func _chat_left(who: String) -> float:
 
 
 func _view(who: String) -> PersonView:
-	if who == "maman":
-		return stage.mom if sim.watcher == "maman" else null
+	if who == sim.watcher:
+		return stage.mom
 	return stage.people.get(who)
 
 

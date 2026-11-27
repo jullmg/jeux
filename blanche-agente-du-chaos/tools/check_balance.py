@@ -14,7 +14,7 @@ import calibrate
 PIECES = {l: json.loads((calibrate.ROOT / "levels" / f"niveau_{l}.json").read_text()).get("piece", "cuisine")
           for l in calibrate.LEVELS}
 ROOM_START = {l for l in calibrate.LEVELS if l > 1 and PIECES[l] != PIECES[l - 1]}
-HARDER = {7, 8, 11, 12, 14, 15}
+HARDER = {7, 8, 11, 12, 14, 16}
 HONEST = ["prudent_300", "equilibre_300", "equilibre_500", "equilibre_700", "gourmand_300", "novice_700", "sage_300"]
 
 

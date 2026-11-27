@@ -1,0 +1,133 @@
+{
+  "_comment": "Plan de la chambre de Charlotte (la soirée pyjama), source unique pour le jeu (Godot) et le modèle (Blender, chambre.py), d'après les photos de Julien (reference/, jamais copiées). Mètres, x vers l'est, z vers le sud (la porte du corridor est à l'est). Les rectangles sont [x0, z0, x1, z1].",
+  "model": "chambre",
+  "room": {
+    "x0": -1.55,
+    "z0": -1.75,
+    "x1": 1.55,
+    "z1": 1.75
+  },
+  "surfaces": {
+    "lit": 0.52,
+    "commode": 0.82,
+    "bureau": 0.72,
+    "low": 0.34
+  },
+  "obstacles": {
+    "commode": [-1.55, 0.62, -1.08, 1.75],
+    "bureau": [1.05, 0.45, 1.55, 1.6],
+    "fauteuil": [0.95, -1.75, 1.55, -1.1],
+    "plateau": [-0.35, 0.35, 0.45, 0.75]
+  },
+  "hides": [
+    {
+      "id": "lit",
+      "kind": "dessous",
+      "rect": [-1.52, -1.72, -0.52, 0.28],
+      "height": 0.3
+    }
+  ],
+  "chairs": {
+    "chaise_bureau": {
+      "pos": [0.88, 1.3],
+      "r": 0.19
+    }
+  },
+  "corner": {
+    "x": 0.45,
+    "z": -1.42,
+    "face": [0, 1.0],
+    "kind": "coussin"
+  },
+  "cushion": [0.15, -1.72, 0.75, -1.15],
+  "camera": {
+    "pos": [0.05, 3.45, 3.25],
+    "target": [-0.05, 0.25, -0.25],
+    "fov": 46.0
+  },
+  "probe": {
+    "pos": [0.0, 1.3, 0.0],
+    "size": [3.2, 2.8, 3.6]
+  },
+  "spots": {
+    "lit": {
+      "stand": [-0.28, -0.85],
+      "food": [-0.74, -0.85],
+      "far": 0.8,
+      "surface": "lit"
+    },
+    "commode": {
+      "stand": [-0.82, 0.98],
+      "food": [-1.24, 0.92],
+      "far": 0.5,
+      "surface": "commode"
+    },
+    "bureau": {
+      "stand": [0.8, 0.52],
+      "food": [1.2, 0.62],
+      "far": 0.7,
+      "surface": "bureau"
+    },
+    "plateau_ouest": {
+      "stand": [-0.75, 0.55],
+      "food": [-0.24, 0.55],
+      "far": 0.6,
+      "surface": "low"
+    },
+    "plateau_sud": {
+      "stand": [0.1, 1.17],
+      "food": [0.1, 0.68],
+      "far": 0.3,
+      "surface": "low"
+    },
+    "plateau_est": {
+      "stand": [0.78, 0.02],
+      "food": [0.34, 0.44],
+      "far": 0.9,
+      "surface": "low"
+    }
+  },
+  "stations": {
+    "nid": {
+      "pos": [-0.1, -0.3],
+      "face": [0, 1],
+      "activity": "film",
+      "regard": "devant",
+      "assis": true,
+      "hanches": [-0.1, -0.36],
+      "siege": 0.1
+    },
+    "hamster": {
+      "pos": [-0.84, 1.53],
+      "face": [-1, 0],
+      "activity": "hamster"
+    },
+    "danse": {
+      "pos": [0.2, -0.88],
+      "face": [0, 1],
+      "activity": "danse",
+      "regard": "devant"
+    },
+    "cuisine": {
+      "pos": [2.4, -0.55],
+      "face": [-1, 0],
+      "activity": "cuisine",
+      "regard": "devant",
+      "dehors": true
+    }
+  },
+  "seats": {
+    "nid_est": {
+      "pos": [0.48, -0.3],
+      "face": [0, 1],
+      "hanches": [0.48, -0.36],
+      "siege": 0.1
+    }
+  },
+  "ring": [[-0.3, -1.25], [0.85, -0.75], [0.85, 0.2], [0.15, 1.0], [-0.7, 0.5], [-0.35, -0.55]],
+  "helper_door": [1.3, -0.55],
+  "mom_door": [1.3, -0.55],
+  "cache": [
+    "CoupeSud"
+  ]
+}

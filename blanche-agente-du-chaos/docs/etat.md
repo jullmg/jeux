@@ -86,6 +86,35 @@ souper avec des invités**.
 - Les cloches au-dessus de certains endroits : ce sont les endroits bruyants (y prendre un morceau fait tinter la
   vaisselle et Maman l'entend).
 
+### La soirée pyjama (2026-11-26, demandée par Julien)
+
+- **Mission 15, dans la chambre de Charlotte**, faite d'après tes photos (le lit de métal blanc et sa douillette rose,
+  le rideau de lumières, le cœur néon, l'affiche aux fraises, le tableau fleuri, les étagères, le fauteuil en fourrure,
+  le bureau et sa chaise rouge à trous, la commode et la cage de verre du hamster) ; aucune image n'en est copiée et la
+  pancarte de la porte n'a pas de mots.
+- Compris ainsi (à corriger au besoin) : **c'est Charlotte qui surveille**, « comme le reste de Maman » : indices,
+  regards, au coin, et des allers-retours à la cuisine pour remplir le bol. Elle regarde le film dans le nid, nourrit
+  le hamster, invente une chorégraphie. **Alyzée** (cheveux noirs, coton ouaté à petits oursons, teint pâle, inventée)
+  voit son bout du plateau quand elle ne jase pas. Charlotte est en pyjama rose à pois.
+- Blanche vise le pop-corn, les oursons en jujube, les canettes de bubly (sans logo) et, en trésor, le gros sac de bonbons.
+- **Ordre des missions** : le party des Fêtes reste la grande finale ; la soirée pyjama passe avant lui (15), le party
+  devient la 16. Une sauvegarde d'avant garde le record du party.
+- Les filles jasent entre elles pendant le film (conversations propres à la soirée pyjama).
+
+### Passe d'amélioration générale (nuit du 2026-11-26, demandée par Julien : tout améliorer sans changer le jeu)
+
+- **Les pieds au sol** : en marchant, le pied avant flottait (jusqu'à une dizaine de centimètres) ; le corps descend
+  maintenant d'autant que les jambes s'écartent ou que les genoux plient (comme Blanche).
+- **Une démarche plus vivante** : les hanches balancent, le torse tourne à l'inverse, les coudes plient ; au repos, on
+  change d'appui d'une jambe à l'autre et on parle avec les mains ; tout le monde **cligne des yeux** (paupières
+  ajoutées aux modèles).
+- **Blanche** bâille de temps en temps quand elle est assise et renifle l'air quand elle est debout.
+- **Les bulles** ont une queue tournée vers qui parle ; les onglets des missions se lisent (encre sur crème).
+- **Le salon** a son tapis d'Orient rose et beige délavé ; **le jambon à l'érable** est garni à la québécoise
+  (rondelles d'ananas, cerises, tranches en éventail).
+- Charlotte et Alyzée appellent d'une voix plus aiguë que Maman.
+- Changer de mission pendant que Blanche redescend d'une table plantait (corrigé, testé).
+
 ## Choix faits en l'absence de Julien (à réviser)
 
 - Le prototype gris à l'écran a été sauté : personne n'était là pour juger s'il est amusant. Les règles ont été

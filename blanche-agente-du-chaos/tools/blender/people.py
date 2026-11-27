@@ -11,7 +11,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import common as C  # noqa: E402
 import heads  # noqa: E402
 import bpy  # noqa: E402
-from mathutils import Vector, noise  # noqa: E402
+from mathutils import Matrix, Vector, noise  # noqa: E402
 from mathutils.kdtree import KDTree  # noqa: E402
 
 
@@ -284,6 +284,62 @@ build("charlotte", dict(
     extras=[fleece]))
 
 
+def _on_torso(y, a, hip_r, chest_r, lift=0.006):
+    """Un point sur le devant du torse (y : hauteur, a : angle depuis l'avant), d'après les rayons du haut."""
+    heights = (0.94, 1.03, 1.12, 1.22, 1.30, 1.36)
+    radii = (hip_r * 1.05, hip_r * 0.97, chest_r * 0.95, chest_r, chest_r * 0.97, 0.11)
+    for i in range(len(heights) - 1):
+        if heights[i] <= y <= heights[i + 1]:
+            t = (y - heights[i]) / (heights[i + 1] - heights[i])
+            r = radii[i] + (radii[i + 1] - radii[i]) * t + lift
+            break
+    else:
+        r = radii[-1] + lift
+    return math.sin(a) * r * 0.99, math.cos(a) * r * 0.70 + 0.008
+
+
+def pyjama(body, P, k, torso_w, M):
+    """Le pyjama rose de Charlotte : des pois blancs en quinconce, posés à plat sur le tissu, et sa patte à boutons."""
+    dot = M("pois", "#fff6f8", 0.8)
+    button = M("bouton_pyjama", "#ffffff", 0.4)
+    for row, y in enumerate((1.0, 1.06, 1.12, 1.18, 1.24, 1.3)):
+        for col in range(-3, 4):
+            a = (col + (0.5 if row % 2 else 0.0)) * 0.36
+            if abs(a) > 1.15:
+                continue
+            x, z = _on_torso(y, a, 0.14, 0.15)
+            body.ball(P(x, y, z), (0.0072 * k, 0.0072 * k, 0.0016 * k), dot, seg=10, rings=4, weights=torso_w,
+                      matrix=Matrix.Rotation(a, 3, "Y"))
+    for y in (1.27, 1.19, 1.11, 1.03):
+        x, z = _on_torso(y, 0.0, 0.14, 0.15, 0.009)
+        body.ball(P(x, y, z), 0.0062 * k, button, weights=torso_w, seg=8, rings=6)
+
+
+def bear_hoodie(body, P, k, torso_w, M):
+    """Le coton ouaté d'Alyzée, plein de petits oursons : leur tête ronde, leurs oreilles et leur museau ; la poche
+    kangourou, les cordons et le capuchon dans le dos."""
+    brown = M("ourson", "#8a5a3a", 0.85)
+    snout = M("museau_ourson", "#e8c9a6", 0.85)
+    pocket = M("poche_ouate", "#a993cc", 0.95)
+    cord = M("cordon", "#f4f0ea", 0.8)
+    for x, y in ((-0.075, 1.27), (0.0, 1.235), (0.07, 1.28), (-0.045, 1.155), (0.05, 1.17), (-0.085, 1.07), (0.085, 1.075)):
+        z = 0.128 if y > 1.12 else 0.122
+        body.ball(P(x, y, z), (0.017 * k, 0.016 * k, 0.004 * k), brown, seg=12, rings=6, weights=torso_w)
+        for s in (-1, 1):
+            body.ball(P(x + 0.012 * s, y + 0.013, z - 0.001), (0.0065 * k, 0.0065 * k, 0.003 * k), brown, seg=8,
+                      rings=5, weights=torso_w)
+        body.ball(P(x, y - 0.004, z + 0.003), (0.0075 * k, 0.006 * k, 0.002 * k), snout, seg=8, rings=5, weights=torso_w)
+    # la poche kangourou : un rabat bombé collé au ventre
+    x, z = _on_torso(1.04, 0.0, 0.138, 0.148, 0.004)
+    body.ball(P(0, 1.045, z), (0.075 * k, 0.042 * k, 0.008 * k), pocket, seg=20, rings=8, weights=torso_w)
+    for s in (1, -1):
+        body.tube([P(0.025 * s, 1.345, 0.09), P(0.03 * s, 1.27, 0.128), P(0.028 * s, 1.21, 0.131)], [0.004 * k] * 3, cord,
+                  seg=6, weights=torso_w)
+        body.ball(P(0.028 * s, 1.205, 0.131), 0.006 * k, cord, seg=8, rings=5, weights=torso_w)
+    body.tube([P(-0.085, 1.34, -0.06), P(0, 1.3, -0.13), P(0.085, 1.34, -0.06)], [0.045 * k, 0.07 * k, 0.045 * k],
+              M("capuchon", "#b9a6d8", 0.95), seg=14, weights={"chest": 1.0})
+
+
 def cardigan(body, P, k, torso_w, M):
     """Le cardigan rouge de ma tante, ouvert sur un chemisier crème, et ses boutons."""
     blouse = M("chemisier", "#efe6d6", 0.9)
@@ -302,6 +358,18 @@ def plaid(body, P, k, torso_w, M):
         body.tube([P(0.01 * s, 1.36, 0.075), P(0.06 * s, 1.335, 0.09)], [0.02 * k, 0.012 * k], collar, seg=8,
                   squash=(1.0, 0.45), weights={"chest": 1.0})
 
+
+build("charlotte_pyjama", dict(
+    file="charlotte_pyjama", look="charlotte", height=1.28, child=True, skin="#efbea2", hair="#b88e5e", hair2="#8c6440",
+    hair_root="#5c3e28", brow="#7a5234", eyes="#5e3b20", lips="#cf756c", top="#f2a9c4", top2="#e391b0", trim="#fbe1ea",
+    pants="#f2a9c4", shoes="#f8e6ec", neck_r=0.042, hip_r=0.14, chest_r=0.15, shoulders=0.92, arm_r=0.056, leg_r=0.074,
+    extras=[pyjama]))
+
+build("alyzee", dict(
+    file="alyzee", height=1.28, child=True, skin="#f8e2d8", hair="#1d1b20", hair2="#2c2932", hair_root="#0f0e12",
+    brow="#262028", eyes="#3a2a22", lips="#d48c90", top="#b9a6d8", top2="#a993cc", trim="#a993cc", pants="#4f4170",
+    shoes="#f4f0ea", neck_r=0.041, hip_r=0.138, chest_r=0.148, shoulders=0.9, arm_r=0.057, leg_r=0.072,
+    extras=[bear_hoodie]))
 
 build("tante", dict(
     file="tante", height=1.62, skin="#eec0a6", hair="#b9afa2", hair2="#968a7c", hair_root="#7c7064", brow="#7a6a5c",

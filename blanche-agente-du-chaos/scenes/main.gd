@@ -452,7 +452,8 @@ func _event_sound(e: Dictionary) -> void:
 		"dropped":
 			Sound.play("lache")
 		"caught":
-			Sound.play("au_coin", 2.0)
+			# Charlotte crie plus aigu que Maman.
+			Sound.play("au_coin", 2.0, 1.22 if sim.watcher == "charlotte" else 1.0)
 		"noise":
 			Sound.play({"tabouret": "tombe", "chaise": "chaise"}.get(e.what, "fracas"))
 		"surprise":
@@ -464,7 +465,9 @@ func _event_sound(e: Dictionary) -> void:
 		"treasure":
 			Sound.play("tresor")
 		"distract", "snitch_call":
-			Sound.play("maman_appel")
+			# Une enfant (Charlotte, Alyzée) appelle d'une voix plus aiguë.
+			var kid: bool = e.get("who", "") in ["charlotte", "alyzee"] or (e.type == "distract" and sim.watcher == "charlotte")
+			Sound.play("maman_appel", 0.0, 1.25 if kid else 1.0)
 		"snitch":
 			Sound.play("hon")
 		"helper_in", "out", "back_in":
@@ -496,6 +499,8 @@ func _lines(key: String) -> Array:
 	var own: Dictionary = Texts.MOM
 	if sim != null and sim.watcher == "papa":
 		own = Texts.PAPA_WATCH
+	elif sim != null and sim.watcher == "charlotte":
+		own = Texts.CHARLOTTE_WATCH
 	elif sim != null and sim.level.get("moment", "") == "film":
 		own = Texts.MOM_FILM
 	return own[key] if own.has(key) else Texts.MOM[key]
@@ -535,14 +540,14 @@ func _event_words(e: Dictionary) -> void:
 		"noise":
 			say.call(stage.mom, _lines("noise"), 1.2)
 		"distract":
-			say.call(stage.mom, Texts.MOM.distract, 2.2)
+			say.call(stage.mom, _lines("distract"), 2.2)
 		"walk":
 			if sim.map.stations[e.station].outside:
-				say.call(stage.mom, Texts.MOM.out, 1.6)
+				say.call(stage.mom, _lines("out"), 1.6)
 		"back_in":
-			say.call(stage.mom, Texts.MOM.retour, 1.4)
+			say.call(stage.mom, _lines("retour"), 1.4)
 		"served":
-			say.call(stage.mom, Texts.MOM.served, 1.6)
+			say.call(stage.mom, _lines("served"), 1.6)
 		"busted":
 			say.call(stage.mom, Texts.MOM.busted, 1.6)
 		"slip_start":
@@ -571,6 +576,13 @@ func _event_words(e: Dictionary) -> void:
 		"papa_drop":
 			if stage.people.has("papa"):
 				say.call(stage.people.papa, Texts.PAPA.drop, 1.4)
+		"meal_ready":
+			_say_done()
+
+
+## Le mot de la fin, quand le repas est prêt (Maman, Papa au hockey, Charlotte à la soirée pyjama…).
+func _say_done() -> void:
+	hud.bubble(stage.mom, Texts.pick(_lines("done"), _rng), 2.4)
 
 
 func _greet(who: PersonView, lines: Array) -> void:

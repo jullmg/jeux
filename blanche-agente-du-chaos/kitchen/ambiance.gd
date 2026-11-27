@@ -46,6 +46,12 @@ const MOMENTS := {
 		"window": [Color(0.40, 0.50, 0.90), 0.9], "fill": [Color(0.70, 0.74, 0.95), 0.05], "lamps": 0.0,
 		"sky": Color(0.10, 0.14, 0.30), "exposure": 1.18, "saturation": 1.0,
 	},
+	# La soirée pyjama : la nuit dehors, le rideau de lumières, le cœur néon et la tablette éclairent la chambre.
+	"pyjama": {
+		"ambient": [Color(0.66, 0.58, 0.62), 0.30], "key": [Color(1.0, 0.86, 0.74), 0.22],
+		"window": [Color(0.45, 0.55, 1.0), 1.1], "fill": [Color(0.78, 0.74, 0.92), 0.06], "lamps": 1.1,
+		"sky": Color(0.12, 0.16, 0.36), "exposure": 1.06, "saturation": 1.04,
+	},
 	"noel": {
 		"ambient": [Color(0.68, 0.55, 0.50), 0.44], "key": [Color(1.0, 0.82, 0.62), 0.56],
 		"window": [Color(0.45, 0.60, 1.0), 2.2], "fill": [Color(0.72, 0.72, 0.92), 0.07], "lamps": 0.85,
@@ -108,11 +114,17 @@ func _ready() -> void:
 	# Des portées courtes : chaque lampe n'éclaire que son coin (moins de lumières à calculer par point).
 	_rig("double_salon", [Vector3(0.65, 2.75, 6.2), Vector3(0.1, 0.0, 1.2), 9.0], [[Vector3(0.15, 1.78, -1.8), 2.2],
 		[Vector3(1.23, 1.45, 0.0), 2.2], [Vector3(0.0, 2.6, 1.9), 2.6], [Vector3(-2.3, 2.3, -0.4), 2.6]])
+	# La chambre de Charlotte : la lune par la fenêtre du nord, le rideau de lumières devant elle, le cœur néon rose
+	# au-dessus du lit, la tablette posée sur le plateau (sa lueur bleutée sur les visages).
+	_rig("chambre", [Vector3(0.2, 2.4, -4.2), Vector3(0.0, 0.0, 0.2), 7.0], [
+		[Vector3(-0.1, 1.35, -1.45), 2.4, Color(1.0, 0.86, 0.62)], [Vector3(0.55, 1.9, -1.45), 2.2, Color(1.0, 0.86, 0.62)],
+		[Vector3(-1.3, 1.5, -1.18), 1.2, Color(1.0, 0.42, 0.6), 0.7],
+		[Vector3(0.1, 0.62, 0.42), 1.5, Color(0.72, 0.82, 1.0), 1.2]])
 	set_room("cuisine")
 	set_moment("matin")
 
 
-## Les lumières d'une pièce : la fenêtre [position, cible, portée] et les lampes [position, portée].
+## Les lumières d'une pièce : la fenêtre [position, cible, portée] et les lampes [position, portée, couleur, force].
 func _rig(model: String, window: Array, lamps: Array) -> void:
 	var spot := SpotLight3D.new()
 	spot.position = window[0]
@@ -127,8 +139,9 @@ func _rig(model: String, window: Array, lamps: Array) -> void:
 	for spec: Array in lamps:
 		var lamp := OmniLight3D.new()
 		lamp.position = spec[0]
-		lamp.light_color = Color(1.0, 0.80, 0.54)
+		lamp.light_color = spec[2] if spec.size() > 2 else Color(1.0, 0.80, 0.54)
 		lamp.omni_range = spec[1]
+		lamp.set_meta("force", spec[3] if spec.size() > 3 else 1.0)
 		add_child(lamp)
 		list.append(lamp)
 	_rigs[model] = {"window": spot, "lamps": list}
@@ -177,7 +190,7 @@ func set_moment(name_: String) -> void:
 	_fill.light_color = m.fill[0]
 	_fill.light_energy = m.fill[1]
 	for lamp in _lamps:
-		lamp.light_energy = m.lamps * (1.0 if lamp.omni_range < 2.0 else 0.7)
+		lamp.light_energy = m.lamps * (1.0 if lamp.omni_range < 2.0 else 0.7) * float(lamp.get_meta("force", 1.0))
 		# Éteinte (le film), une lampe ne coûte plus rien à l'écran.
 		lamp.visible = m.lamps > 0.0
 	_capture_reflections()

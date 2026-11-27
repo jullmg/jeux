@@ -1,89 +1,56 @@
 {
   "id": 15,
-  "meal": "Le party des Fêtes",
-  "piece": "fetes",
-  "novelty": "Le party",
-  "moment": "noel",
-  "plat": "tourtiere",
+  "meal": "La soirée pyjama",
+  "piece": "chambre",
+  "novelty": "Charlotte surveille",
+  "moment": "pyjama",
+  "watcher": "charlotte",
+  "tenues": {
+    "charlotte": "charlotte_pyjama"
+  },
   "intro": [
-    "Le party des Fêtes ! Toute la maison est pleine, de la salle à manger au salon.",
-    "La visite circule partout, Charlotte glisse des morceaux, Maman va et vient.",
-    "Ton coin, c'est ta cage. Le jambon à l'érable arrivera vers la fin…",
-    "Bonne chance, agente Blanche."
+    "Soirée pyjama dans la chambre de Charlotte ! Alyzée dort ici ce soir.",
+    "Cette fois, c'est Charlotte qui garde les collations… et elle te connaît par cœur.",
+    "Alyzée voit son bout du plateau quand elle ne jase pas. Sous le lit, personne debout ne te voit.",
+    "Charlotte va remplir le bol à la cuisine : son retour s'annonce toujours."
   ],
-  "duration": 170,
-  "hint_min": 0.4,
-  "window_mult": 0.75,
+  "duration": 135,
+  "hint_min": 0.47,
+  "window_mult": 0.95,
   "look": [
-    1.5,
-    2.4
+    1.2,
+    1.9
   ],
   "stations": [
-    "servir",
-    "buffet",
-    "assise",
-    "cuisine",
-    "divan_maman"
+    "nid",
+    "hamster",
+    "danse",
+    "cuisine"
   ],
-  "move_chance": 0.3,
-  "feint_chance": 0.25,
+  "move_chance": 0.5,
+  "feint_chance": 0.22,
   "surprise_chance": 0.0,
-  "round_chance": 0.2,
+  "round_chance": 0.08,
   "noise": true,
   "noisy_spots": [
-    "buffet_est",
-    "piano",
-    "table_ouest"
+    "bureau"
   ],
   "serve": true,
   "helpers": [],
   "seated": [
     {
-      "who": "charlotte",
-      "seat": "sud_est",
-      "role": "complice"
-    },
-    {
-      "who": "papa",
-      "seat": "divan_papa",
-      "role": "decor",
-      "pose": "jaser"
-    }
-  ],
-  "walkers": [
-    {
-      "who": "tante",
-      "start": "salon_est",
-      "points": [
-        "salon_est",
-        "milieu",
-        "lampe",
-        "sdm_sud"
-      ]
-    },
-    {
-      "who": "oncle",
-      "start": "entree",
-      "points": [
-        "entree",
-        "salon_ouest",
-        "milieu",
-        "sdm_sud"
-      ]
+      "who": "alyzee",
+      "seat": "nid_est",
+      "role": "temoin"
     }
   ],
   "spots": [
-    "table_nord",
-    "table_sud",
-    "table_ouest",
-    "table_est",
-    "buffet_est",
-    "buffet_ouest",
-    "table_basse_nord",
-    "table_basse_ouest",
-    "table_basse_est",
-    "table_basse_sud",
-    "piano"
+    "lit",
+    "commode",
+    "bureau",
+    "plateau_ouest",
+    "plateau_sud",
+    "plateau_est"
   ],
   "weights": [
     0.35,
@@ -91,45 +58,40 @@
     0.2
   ],
   "spawn": [
-    1.5,
-    2.5
+    1.8,
+    3.0
   ],
   "max_items": 5,
-  "treasure_at": 0.7,
-  "treasure_points": 800,
+  "treasure_at": 0.62,
+  "treasure_points": 600,
   "foods": {
     "crumb": [
-      "miette_tourtiere",
-      "Miette de tourtière"
+      "grain_popcorn",
+      "Grain de pop-corn"
     ],
     "small": [
-      "tranche_buche",
-      "Tranche de bûche"
+      "oursons",
+      "Oursons en jujube"
     ],
     "big": [
-      "pointe_tourtiere",
-      "Pointe de tourtière"
+      "bubly",
+      "Canette de bubly"
     ],
     "treasure": [
-      "jambon_erable",
-      "LE JAMBON À L'ÉRABLE"
+      "sac_bonbons",
+      "Le gros sac de bonbons"
     ]
   },
   "activity_text": {
-    "servir": "sert la tourtière",
-    "buffet": "garnit le buffet",
-    "manger": "jase à table",
-    "cuisine": "est à la cuisine",
-    "jaser": "jase avec la visite"
+    "film": "regarde le film",
+    "hamster": "nourrit le hamster",
+    "danse": "invente une chorégraphie",
+    "cuisine": "remplit le bol à la cuisine"
   },
   "stars": [
-    950,
-    1900,
-    2900
+    750,
+    1600,
+    2400
   ],
-  "slip_wait": [
-    14.0,
-    20.0
-  ],
-  "repeat_max": 14
+  "repeat_max": 6
 }

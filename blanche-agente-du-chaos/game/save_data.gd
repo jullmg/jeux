@@ -3,7 +3,8 @@ extends RefCounted
 ## La progression et les options, dans un fichier JSON de user://.
 ## Un fichier absent, abîmé ou d'une autre version ne fait jamais planter : on repart de valeurs sûres.
 
-const VERSION := 1
+## 2 : la soirée pyjama est devenue la mission 15 ; le party des Fêtes, la finale, est passé de 15 à 16.
+const VERSION := 2
 const DEFAULT_OPTIONS := {
 	"music": 0.7, "sfx": 0.9, "fullscreen": false, "reduced_motion": false, "long_hints": false,
 }
@@ -40,6 +41,12 @@ func load_file() -> void:
 		DirAccess.copy_absolute(path, path + ".abime")
 		return
 	var d: Dictionary = json.data
+	if int(_number(d.get("version"), 1)) < 2:
+		# Les records du party des Fêtes suivent le party, de 15 à 16 ; la soirée pyjama (15) est neuve.
+		for key: String in ["stars", "best"]:
+			if d.get(key) is Dictionary and (d[key] as Dictionary).has("15"):
+				d[key]["16"] = d[key]["15"]
+				d[key].erase("15")
 	unlocked = clampi(int(_number(d.get("unlocked"), 1)), 1, Levels.COUNT)
 	finished_seen = d.get("finished_seen") == true
 	for pair: Array in [[d.get("stars"), stars, 3], [d.get("best"), best, 1000000]]:

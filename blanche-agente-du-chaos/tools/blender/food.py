@@ -469,22 +469,23 @@ def _(o):
 @food("bol_soupe")
 def _(o):
     bowl = m("bol_bleu", "#2f6f9e", 0.18)
+    # le bol est plein : le bouillon et ce qui flotte sont posés juste au-dessus de son dessus, sous le rebord
     o.cyl((0, 0, 0), 0.085, 0.085, bowl, seg=48, top=0.165)
     o.torus((0, 0.086, 0), 0.158, 0.011, plate, seg=56, sides=10)
-    o.cyl((0, 0.074, 0), 0.15, 0.008, tasty("bouillon", "#e59a2c", [("#f4bd55", 0.55, 0.8)], [("#3f7a24", 0.01)], 0.08), seg=48)
+    o.cyl((0, 0.084, 0), 0.153, 0.005, tasty("bouillon", "#e59a2c", [("#f4bd55", 0.55, 0.8)], [("#3f7a24", 0.01)], 0.08), seg=48)
     for i in range(9):
         a = i * 2.4
         r = 0.11 * math.sqrt((i + 0.4) / 9)
         x, z = math.cos(a) * r, math.sin(a) * r
         if i % 3 == 0:
-            o.cyl((x, 0.082, z), 0.022, 0.008, carrot, seg=18, bevel=0.002)
+            o.cyl((x, 0.087, z), 0.022, 0.006, carrot, seg=18, bevel=0.002)
         elif i % 3 == 1:
-            o.torus((x, 0.086, z), 0.018, 0.0065, pasta, sides=8, seg=14, arc=(a, a + 4.2))
+            o.torus((x, 0.091, z), 0.018, 0.0055, pasta, sides=8, seg=14, arc=(a, a + 4.2))
         else:
-            o.box(x - 0.014, 0.08, z - 0.012, x + 0.014, 0.092, z + 0.012, golden, bevel=0.005, seg=2)
+            o.box(x - 0.014, 0.086, z - 0.012, x + 0.014, 0.096, z + 0.012, golden, bevel=0.005, seg=2)
     for i in range(7):
         a = i * 1.9
-        o.ball((math.cos(a) * 0.06, 0.086, math.sin(a) * 0.05), (0.011, 0.002, 0.006), herb, seg=8, rings=5)
+        o.ball((math.cos(a) * 0.06, 0.0905, math.sin(a) * 0.05), (0.011, 0.002, 0.006), herb, seg=8, rings=5)
     o.tube([(0.06, 0.085, 0.02), (0.17, 0.13, 0.05), (0.24, 0.13, 0.07)], [0.012, 0.01, 0.016], platter, seg=10,
            squash=(1.4, 0.7))
 
@@ -547,6 +548,8 @@ glaze = tasty("jambon_glace", "#a9471d", [("#7e3010", 0.52, 0.9), ("#d9783a", 0.
 ham_in = tasty("jambon_coeur", "#ef9a92", [("#f6c2b8", 0.57, 0.9)], (), 0.35)
 clove = m("clou_girofle", "#3a2416", 0.6)
 maple = m("erable_sirop", "#b8631a", 0.04)
+pineapple = m("ananas", "#f5cf4a", 0.3)
+cherry = m("cerise", "#c8102e", 0.08)
 
 
 def bacon_strip(o, z, length=0.16, y=0.012):
@@ -577,9 +580,13 @@ def _(o):
     for x, z in ((-0.05, -0.05), (0.045, -0.065)):
         wavy(o, 0.012, 0.045, 0.006, egg_w, x, z, 0.12)
         o.ball((x + 0.004, 0.022, z), (0.019, 0.011, 0.019), yolk, seg=16, rings=10)
+    # deux tranches de bacon ondulées, rouges striées de gras
     for k in range(2):
-        tilt = Matrix.Translation((0.08, 0.02, 0.03 + k * 0.035)) @ Matrix.Rotation(0.5, 4, "Y")
-        o.box(-0.05, -0.006, -0.012, 0.05, 0.006, 0.012, bacon_m, bevel=0.003, seg=1, matrix=tilt)
+        for i in range(9):
+            t = -0.05 + i * 0.0125
+            rot = Matrix.Translation((0.075, 0.016 + 0.005 * math.sin(i * 1.5 + k), 0.03 + k * 0.035)) @ Matrix.Rotation(0.5, 4, "Y")
+            o.box(t - 0.0072, -0.004, -0.012, t + 0.0072, 0.004, 0.012, bacon_m if (i + k) % 3 else bacon_fat, bevel=0.002,
+                  seg=1, matrix=rot)
     o.box(-0.13, 0.012, 0.02, -0.04, 0.026, 0.11, crust, bevel=0.01, seg=1)
     o.box(-0.122, 0.02, 0.028, -0.048, 0.03, 0.102, crumb_c, bevel=0.005, seg=1)
     for i in range(14):
@@ -975,6 +982,94 @@ def _(o):
         lumpy(o, (math.cos(a) * r, 0.13 + rng.uniform(-0.01, 0.025), math.sin(a) * r), (0.017, 0.015, 0.017), popcorn, 3, 0.6)
 
 
+# La soirée pyjama : des oursons en jujube, une canette de bubly, le gros sac de bonbons.
+gummy = [m(f"jujube_{n}", c, 0.12, alpha=0.82) for n, c in (("rouge", "#e8303f"), ("vert", "#62c23a"),
+                                                            ("jaune", "#f6c21c"), ("orange", "#f47a1f"))]
+can_m = m("canette_rose", "#f05f86", 0.25, metal=0.6)
+can_top = m("canette_alu", "#d7dbe0", 0.2, metal=0.9)
+can_band = m("canette_bande", "#fbe7ee", 0.3)
+can_dot = m("canette_bulle", "#ffffff", 0.2)
+fruit = m("pamplemousse", "#f59a5c", 0.4)
+bucket_red = m("seau_rouge", "#d63a3a", 0.3)
+bucket_white = m("seau_blanc", "#f6f2ea", 0.3)
+
+
+def gummy_bear(o, x, z, turn, mat, y=0.0):
+    """Un ourson en jujube couché sur le dos : ventre, tête, oreilles, pattes ; translucide et luisant."""
+    rot = Matrix.Rotation(turn, 3, "Y")
+
+    def at(px, py, pz):
+        return tuple(Vector((x, y, z)) + rot @ Vector((px, py, pz)))
+    o.ball(at(0, 0.011, 0.0), (0.012, 0.009, 0.015), mat, seg=12, rings=8)
+    o.ball(at(0, 0.012, -0.019), (0.011, 0.009, 0.010), mat, seg=12, rings=8)
+    for s in (-1, 1):
+        o.ball(at(0.008 * s, 0.013, -0.027), 0.0045, mat, seg=8, rings=6)
+        o.ball(at(0.012 * s, 0.009, -0.004), (0.005, 0.005, 0.006), mat, seg=8, rings=6)
+        o.ball(at(0.009 * s, 0.009, 0.014), (0.0055, 0.005, 0.007), mat, seg=8, rings=6)
+
+
+@food("oursons")
+def _(o):
+    for i, (x, z, turn) in enumerate(((-0.018, 0.006, 0.4), (0.018, -0.004, -0.5), (0.0, 0.026, 1.6))):
+        gummy_bear(o, x, z, turn, gummy[i % len(gummy)])
+
+
+@food("bubly")
+def _(o):
+    """Une canette de bubly au pamplemousse rose : le corps coloré, sa bande pâle, des bulles et un sourire, le
+    dessus d'alu et sa languette."""
+    r, h = 0.034, 0.12
+    o.cyl((0, 0, 0), r * 0.86, 0.008, can_top, seg=28, top=r)
+    o.cyl((0, 0.008, 0), r, h - 0.02, can_m, seg=28)
+    o.cyl((0, 0.05, 0), r + 0.0006, 0.03, can_band, seg=28)
+    o.cyl((0, h - 0.012, 0), r, 0.012, can_top, seg=28, top=r * 0.82)
+    o.torus((0, h, 0), r * 0.8, 0.0025, can_top, seg=28, sides=6)
+    o.box(-0.006, h, -0.012, 0.006, h + 0.002, 0.008, can_top, bevel=0.001, seg=1)
+    # le fruit et le sourire sur la bande, des bulles plus haut
+    o.ball((0, 0.065, r + 0.002), (0.011, 0.011, 0.003), fruit, seg=12, rings=6)
+    path, radii = C.curve([(-0.012, 0.056, r * 0.93 + 0.0035), (0.0, 0.052, r + 0.0035), (0.012, 0.056, r * 0.93 + 0.0035)],
+                          [0.0016] * 3, 4)
+    o.tube(path, radii, can_m, seg=6)
+    for i in range(9):
+        a = rng.uniform(-1.2, 1.2)
+        y = rng.uniform(0.084, 0.1)
+        o.ball((math.sin(a) * (r + 0.0015), y, math.cos(a) * (r + 0.0015)), 0.0028, can_dot, seg=6, rings=4)
+
+
+@food("sac_bonbons")
+def _(o):
+    """Le gros sac de bonbons de la soirée pyjama : un sachet de cellophane bombé, noué d'un ruban rose, plein d'oursons
+    en jujube et de bonbons emballés, deux suçons qui dépassent."""
+    cello = m("cellophane", "#f4f8fb", 0.04, alpha=0.32)
+    ribbon = m("ruban_rose", "#ef6fa1", 0.35)
+    wraps = [m(f"papillote_{i}", c, 0.3) for i, c in enumerate(("#5bc0eb", "#f6d14b", "#9b5de5", "#f15bb5"))]
+    # le contenu d'abord (on le voit à travers le sachet)
+    for i in range(34):
+        y = rng.uniform(0.035, 0.14)
+        room = 0.105 * math.sqrt(max(0.0, 1 - ((y - 0.09) / 0.095) ** 2)) - 0.03
+        a, r = rng.uniform(0, math.tau), room * math.sqrt(rng.uniform(0, 1))
+        x, z = math.cos(a) * r, math.sin(a) * r
+        if i % 3 == 0:
+            w = wraps[i % len(wraps)]
+            rot = Matrix.Rotation(rng.uniform(0, 3), 3, "Y")
+            o.tube([tuple(Vector((x, y, z)) + rot @ Vector((-0.022, 0, 0))), tuple(Vector((x, y, z)) + rot @ Vector((0.022, 0, 0)))],
+                   [0.004, 0.011, 0.004], w, seg=10)
+        else:
+            gummy_bear(o, x, z, rng.uniform(0, 6), gummy[i % len(gummy)], y - 0.01)
+    # le sachet, son col froncé et le ruban
+    o.ball((0, 0.09, 0), (0.105, 0.095, 0.1), cello, seg=28, rings=18)
+    o.cyl((0, 0.175, 0), 0.03, 0.06, cello, seg=18, top=0.05)
+    o.torus((0, 0.185, 0), 0.032, 0.007, ribbon, seg=20, sides=8)
+    for s_ in (-1, 1):
+        o.ball((0.03 * s_, 0.2, 0.0), (0.03, 0.016, 0.009), ribbon, seg=12, rings=8, matrix=Matrix.Rotation(0.5 * s_, 3, "Z"))
+        o.tube([(0.03 * s_, 0.185, 0.03), (0.05 * s_, 0.17, 0.05)], [0.006, 0.005], ribbon, seg=6, squash=(1.0, 0.35))
+    # deux suçons qui dépassent du col
+    for k, (dx, tone) in enumerate(((-0.02, "#ff7eb6"), (0.024, "#7bd389"))):
+        o.tube([(dx * 0.5, 0.16, 0.0), (dx, 0.26, 0.01)], 0.004, m("baton", "#f8f4ec", 0.5), seg=6)
+        o.cyl((dx, 0.27, 0.01), 0.028, 0.012, m(f"sucon_{k}", tone, 0.15), axis=(0, 0, 1), seg=24, bevel=0.003)
+        o.torus((dx, 0.27, 0.0235), 0.016, 0.0025, m("spirale_blanche", "#ffffff", 0.2), axis=(0, 0, 1), seg=20, sides=5)
+
+
 @food("nachos")
 def _(o):
     dish(o, 0.18)
@@ -1076,27 +1171,41 @@ def _(o):
 
 @food("jambon_erable")
 def _(o):
+    """Le jambon glacé à l'érable des Fêtes : quadrillé et piqué de clous de girofle, garni à la québécoise de rondelles
+    d'ananas et de cerises, des tranches roses en éventail devant, du houx sur le plat."""
     disc(o, 0.0, 0.21, 0.014, platter)
     o.ball((0, 0.09, 0), (0.15, 0.1, 0.115), glaze, seg=32, rings=20)
-    # le quadrillage d'entailles, un clou de girofle à chaque croisement, posés sur la surface
+
+    def on_ham(x, z, lift=0.0):
+        inside = max(0.0, 1 - (x / 0.15) ** 2 - (z / 0.115) ** 2)
+        return 0.09 + 0.1 * math.sqrt(inside) + lift, inside
+    # le quadrillage d'entailles, un clou de girofle à chaque croisement
     for i in range(-3, 4):
         for j in range(-3, 4):
             x, z = (i + j) * 0.026, (i - j) * 0.02
-            inside = 1 - (x / 0.15) ** 2 - (z / 0.115) ** 2
+            y, inside = on_ham(x, z)
             if inside < 0.25:
                 continue
-            y = 0.09 + 0.1 * math.sqrt(inside)
             o.ball((x, y - 0.001, z), 0.0065, clove, seg=6, rings=4)
-    for k in range(5):
-        a = k * 1.3
-        o.ball((math.cos(a) * 0.05, 0.185, math.sin(a) * 0.04), (0.03, 0.004, 0.02), maple, seg=10, rings=5,
-               matrix=Matrix.Rotation(a, 3, "Y"))
-    for i in range(10):
-        a = i * math.tau / 10
-        o.ball((math.cos(a) * 0.17, 0.018, math.sin(a) * 0.17), (0.022, 0.006, 0.014), maple, seg=10, rings=5,
-               matrix=Matrix.Rotation(a, 3, "Y"))
-    o.box(0.12, 0.014, -0.05, 0.2, 0.03, 0.04, ham_in, bevel=0.008, seg=1,
-          matrix=Matrix.Translation((0.16, 0.02, 0)) @ Matrix.Rotation(0.3, 4, "Y") @ Matrix.Translation((-0.16, -0.02, 0)))
+    # les rondelles d'ananas et leur cerise, couchées sur le dos du jambon
+    for x, z in ((-0.06, -0.035), (0.055, -0.03), (0.0, 0.04), (-0.07, 0.05), (0.075, 0.055)):
+        y, inside = on_ham(x, z, 0.004)
+        tilt_x, tilt_z = -x / 0.15 * 0.9, z / 0.115 * 0.9
+        rot = Matrix.Rotation(tilt_z, 3, "X") @ Matrix.Rotation(tilt_x, 3, "Z")
+        o.torus((x, y, z), 0.021, 0.0062, pineapple, axis=tuple(rot @ Vector((0, 1, 0))), seg=24, sides=8, squash=0.55)
+        o.ball((x, y + 0.004, z), 0.0075, cherry, seg=12, rings=8)
+    # le glaçage qui a coulé au pied du jambon : des perles luisantes sur le plat
+    for k in range(24):
+        a = k * math.tau / 24 + rng.uniform(-0.08, 0.08)
+        o.ball((math.cos(a) * 0.128, 0.016, math.sin(a) * 0.097), (0.026, 0.005, 0.017), maple, seg=10, rings=5,
+               matrix=Matrix.Rotation(-a, 3, "Y"))
+    # trois tranches ovales en éventail devant, chacune sur son bord de gras
+    for k in range(3):
+        a = 0.2 + k * 0.45
+        cx, cz = 0.13 + math.cos(a) * 0.05, 0.06 + math.sin(a) * 0.05
+        rot = Matrix.Rotation(-a, 3, "Y") @ Matrix.Rotation(0.12, 3, "Z")
+        o.ball((cx, 0.022 + k * 0.007, cz), (0.052, 0.0045, 0.04), ham_in, seg=20, rings=6, matrix=rot)
+        o.ball((cx + 0.004, 0.0205 + k * 0.007, cz), (0.057, 0.004, 0.045), fat, seg=20, rings=6, matrix=rot)
     for k in (-1, 1):
         o.ball((-0.17, 0.03, k * 0.06), (0.03, 0.006, 0.016), holly, seg=10, rings=6,
                matrix=Matrix.Rotation(k * 0.6, 3, "Y"))
@@ -1115,7 +1224,7 @@ C.export("nourriture")
 # les images des plats, pour les cartes de mission (fond transparent)
 PLATS = {1: "pile_crepes", 2: "sandwich", 3: "bol_soupe", 4: "plaque_biscuits", 5: "pizza", 6: "grosse_boulette",
          7: "plateau_fromages", 8: "dinde", 9: "assiette_brunch", 10: "pate_chinois", 11: "part_gateau", 12: "lasagne",
-         13: "nachos", 14: "bol_popcorn", 15: "jambon_erable"}
+         13: "nachos", 14: "bol_popcorn", 15: "sac_bonbons", 16: "jambon_erable"}
 by_name = {o.name: o for o in objects}
 for level, name in PLATS.items():
     for o in objects:

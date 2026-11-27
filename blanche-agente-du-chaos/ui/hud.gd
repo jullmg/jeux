@@ -153,6 +153,7 @@ func clear() -> void:
 		_toast.text = ""
 	for b: Dictionary in _bubbles.values():
 		b.panel.queue_free()
+		b.tail.queue_free()
 	_bubbles.clear()
 	for f in _floaters:
 		f.label.queue_free()
@@ -176,6 +177,7 @@ func has_bubbles() -> bool:
 func hush(who: PersonView) -> void:
 	if _bubbles.has(who):
 		_bubbles[who].panel.queue_free()
+		_bubbles[who].tail.queue_free()
 		_bubbles.erase(who)
 
 
@@ -184,6 +186,7 @@ func hush(who: PersonView) -> void:
 func bubble(who: PersonView, text: String, seconds := 2.0, small := false) -> void:
 	if _bubbles.has(who):
 		_bubbles[who].panel.queue_free()
+		_bubbles[who].tail.queue_free()
 	var panel := PanelContainer.new()
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(1, 1, 1, 0.96) if small else Color.WHITE, 22 if small else 26,
@@ -191,7 +194,15 @@ func bubble(who: PersonView, text: String, seconds := 2.0, small := false) -> vo
 	panel.add_child(UiStyle.label(text, 26 if small else 32))
 	add_child(panel)
 	move_child(panel, _top.get_index())
-	_bubbles[who] = {"panel": panel, "left": maxf(seconds, text.length() / 13.0)}
+	# La queue de la bulle, tournée vers la tête de qui parle (par-dessus le bord de la bulle).
+	var tail := Control.new()
+	tail.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tail.set_meta("pts", PackedVector2Array())
+	tail.set_meta("line", 2.0 if small else 3.0)
+	tail.draw.connect(_draw_tail.bind(tail))
+	add_child(tail)
+	move_child(tail, panel.get_index() + 1)
+	_bubbles[who] = {"panel": panel, "tail": tail, "left": maxf(seconds, text.length() / 13.0)}
 	who.say(minf(seconds, 1.4))
 	_place_bubble(who)
 
@@ -258,6 +269,7 @@ func _process(delta: float) -> void:
 		_bubbles[who].left -= delta
 		if _bubbles[who].left <= 0.0 or not who.visible:
 			_bubbles[who].panel.queue_free()
+			_bubbles[who].tail.queue_free()
 			_bubbles.erase(who)
 		elif who == stage.mom:
 			_place_bubble(who)
@@ -266,6 +278,8 @@ func _process(delta: float) -> void:
 		if who != stage.mom:
 			_place_bubble(who)
 			placed.append(_clear_of(_bubbles[who].panel, placed))
+	for who: PersonView in _bubbles.keys():
+		_aim_tail(who)
 	for i in range(_floaters.size() - 1, -1, -1):
 		var f := _floaters[i]
 		f.age += delta
@@ -297,6 +311,39 @@ func _signs_rects() -> Array[Rect2]:
 
 func _activity_text() -> String:
 	return sim.level.get("activity_text", {}).get(sim.activity, Texts.ACTIVITY.get(sim.activity, ""))
+
+
+## La queue d'une bulle : du bord le plus proche de la tête de qui parle, vers elle (au plus 26 px).
+func _aim_tail(who: PersonView) -> void:
+	var panel: PanelContainer = _bubbles[who].panel
+	var tail: Control = _bubbles[who].tail
+	var rect := Rect2(panel.position, panel.size)
+	var head := stage.on_screen(who.head_position() + Vector3(0, 0.12, 0))
+	var pts := PackedVector2Array()
+	if not rect.grow(6.0).has_point(head) and not stage.camera.is_position_behind(who.head_position()):
+		var base := Vector2(clampf(head.x, rect.position.x + 22.0, rect.end.x - 22.0),
+			clampf(head.y, rect.position.y + 16.0, rect.end.y - 16.0))
+		# sur le bord le plus proche
+		var gaps := [absf(base.x - rect.position.x), absf(rect.end.x - base.x), absf(base.y - rect.position.y),
+			absf(rect.end.y - base.y)]
+		var side: int = gaps.find(gaps.min())
+		var inward: Vector2 = [Vector2.RIGHT, Vector2.LEFT, Vector2.DOWN, Vector2.UP][side]
+		base = ([Vector2(rect.position.x, base.y), Vector2(rect.end.x, base.y), Vector2(base.x, rect.position.y),
+			Vector2(base.x, rect.end.y)] as Array[Vector2])[side]
+		var dir := (head - base).normalized()
+		var tip := base + dir * minf(26.0, base.distance_to(head) - 4.0)
+		var across := Vector2(-inward.y, inward.x) * 10.0
+		pts = PackedVector2Array([base + across + inward * 3.0, tip, base - across + inward * 3.0])
+	tail.set_meta("pts", pts)
+	tail.queue_redraw()
+
+
+func _draw_tail(tail: Control) -> void:
+	var pts: PackedVector2Array = tail.get_meta("pts")
+	if pts.size() != 3:
+		return
+	tail.draw_colored_polygon(pts, Color.WHITE)
+	tail.draw_polyline(PackedVector2Array([pts[0], pts[1], pts[2]]), UiStyle.INK, tail.get_meta("line"), true)
 
 
 ## Pousse une bulle qui en chevauche une autre : au-dessus si la place y est, sinon en dessous.

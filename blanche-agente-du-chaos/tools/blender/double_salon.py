@@ -473,6 +473,15 @@ light_bulb.build()
 
 # ---------------------------------------------------------------- le salon
 
+# le tapis d'Orient délavé du salon, sous la table basse : à plat sous la zone cachée (moins de 6 mm)
+rug_img = T.oriental_rug("tapis_salon")
+rug_mat = M("tapis_salon", "#ffffff", 0.96)
+rug_node = rug_mat.node_tree.nodes.new("ShaderNodeTexImage")
+rug_node.image = rug_img
+rug_mat.node_tree.links.new(rug_node.outputs["Color"], rug_mat.node_tree.nodes["Principled BSDF"].inputs["Base Color"])
+rx0, rz0, rx1, rz1 = -0.72, 1.64, 1.02, 3.0
+rug_ob = D.picture("Tapis", [(rx0, 0.004, rz1), (rx1, 0.004, rz1), (rx1, 0.004, rz0), (rx0, 0.004, rz0)], rug_mat)
+
 salon = C.Obj("Salon")
 OB = SALON["obstacles"]
 # le divan de velours côtelé moutarde, dos à la salle à manger

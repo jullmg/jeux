@@ -59,6 +59,22 @@ LOOKS = {
         blush=(0.050, -0.030, 0.46),
         hair=dict(long=0.300, wave=0.019, part=-0.014, forehead=0.070, narrow=0.955),
     ),
+    # Alyzée, l'amie de Charlotte (inventée, d'après ce qu'en dit Julien : cheveux noirs, longs et raides, teint très
+    # pâle) : une tête ronde d'enfant, des yeux en amande un peu plus étroits, une raie au milieu.
+    "alyzee": dict(
+        size=0.97,
+        shapes=((0, 0.004, -0.002, 0.089, 0.108, 0.099),
+                (0, -0.036, 0.020, 0.064, 0.052, 0.066),
+                (0, -0.064, 0.048, 0.022, 0.019, 0.027)),
+        pairs=((0.035, -0.026, 0.054, 0.028, 0.026, 0.031),),
+        nose=dict(bridge=(0.0036, 0.0050), tip=0.0088, wing=0.0052),
+        ear=0.088,
+        eye=dict(x=0.037, y=0.000, size=1.22, lash=0.85, flick=True),
+        brow=dict(arc=((0.0160, 0.0285), (0.027, 0.0315), (0.039, 0.0326), (0.051, 0.0312), (0.060, 0.0268)), thick=0.78),
+        mouth=dict(y=-0.046, width=0.84, lips=0.75, grin=True),
+        blush=(0.050, -0.030, 0.40),
+        hair=dict(long=0.34, wave=0.004, part=0.0, forehead=0.068, narrow=0.93),
+    ),
     # La visite (inventée, aucun visage réel) : ma tante, un visage rond et doux, un carré court grisonnant.
     "tante": dict(
         size=0.96,
@@ -95,7 +111,7 @@ LOOKS = {
 
 def build(who, armature, spec, hc, hr, rng):
     """`hc` : centre de la tête ; `hr` : échelle de la tête selon la taille du personnage."""
-    look = LOOKS[who]
+    look = LOOKS[spec.get("look", who)]
     hr *= look["size"]
 
     def H(x, y, z):
@@ -229,6 +245,33 @@ def _features(armature, spec, look, hr, H, surface):
                            [r * thick * hr for r in (0.0022, 0.0028, 0.0025, 0.0018, 0.0005)], 4)
         parts.tube(path, rr, brow, seg=8, weights=w, cap_rings=2)
     C.skin(parts.build(), armature)
+    _lids(armature, spec, look, hr, H, surface)
+
+
+def _lids(armature, spec, look, hr, H, surface):
+    """Les paupières fermées, un objet à part que le jeu montre le temps d'un clignement : la peau qui couvre l'œil, et
+    la ligne des cils, courbée vers le bas."""
+    lids = C.Obj("Paupieres")
+    skin = C.material("peau", spec["skin"], 0.62)
+    lash = C.material("cils", spec.get("lash", "#2a1a13"), 0.8)
+    w = {"head": 1.0}
+    eye = look["eye"]
+    EX, EY, E, L = eye["x"], eye["y"], eye["size"], eye["lash"]
+    for s in (1, -1):
+        center = surface(EX * s, EY, -0.0042)
+        lids.ball(Vector((center.x, center.y, center.z)), (0.0218 * E * hr, 0.0150 * E * hr, 0.0128 * hr), skin,
+                  weights=w, seg=24, rings=14)
+        pts = []
+        for i in range(9):
+            t = -1.0 + 2.0 * i / 8
+            x = EX * s + t * 0.0205 * E * s
+            y = EY - 0.0030 * E * math.sqrt(max(0.0, 1.0 - t * t)) - 0.0008
+            pts.append(Vector((H(x, y, 0).x, H(x, y, 0).y, center.z + (0.0128 * math.sqrt(max(0.0, 1.0 - t * t * 0.7))
+                                                                         + 0.0006) * hr)))
+        path, rr = C.curve(pts, [r * L * hr for r in (0.0008, 0.0014, 0.0018, 0.002, 0.002, 0.002, 0.0018, 0.0014,
+                                                       0.0008)], 3)
+        lids.tube(path, rr, lash, seg=8, weights=w, cap_rings=2)
+    C.skin(lids.build(), armature)
 
 
 def _cap(hair, mat, H, rx, ry, rz, back, limit_at):

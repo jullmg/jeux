@@ -221,10 +221,12 @@ func show_select(room := "") -> void:
 		tab.focus_mode = Control.FOCUS_ALL if open else Control.FOCUS_NONE
 		var face := Color("d9cbbb") if not open else (Color(UiStyle.PINK) if name_ == room else Color("fffaf0"))
 		_candy_states(tab, face, 0.2, Color("c9a87e"))
+		# Le texte se lit sur chaque fond : blanc sur l'onglet choisi, encre sur les autres, gris sur ceux à débloquer.
+		var ink := Color.WHITE if name_ == room else UiStyle.INK
+		for key: String in ["font_color", "font_hover_color", "font_focus_color", "font_pressed_color"]:
+			tab.add_theme_color_override(key, ink)
+		tab.add_theme_color_override("font_disabled_color", Color("a8988a"))
 		if name_ == room:
-			tab.add_theme_color_override("font_color", Color.WHITE)
-			tab.add_theme_color_override("font_hover_color", Color.WHITE)
-			tab.add_theme_color_override("font_focus_color", Color.WHITE)
 			chosen = tab
 		tabs.add_child(tab)
 	var grid := GridContainer.new()

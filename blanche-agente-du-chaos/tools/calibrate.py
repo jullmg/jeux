@@ -13,16 +13,17 @@ PROFILES = ["sage_300", "prudent_300", "equilibre_300", "equilibre_500", "equili
 LEVELS = range(1, len(list((ROOT / "levels").glob("niveau_*.json"))) + 1)
 # Cibles des seuils, mesurées sur le robot débutant (lent à réagir et à se décider) : part qui rate le niveau
 # (1re étoile), puis part qui obtient trois étoiles. La difficulté redescend un peu au début de chaque nouvelle pièce
-# (missions 9, 13, et 15 où les deux pièces sont réunies), puis monte ; la finale reste la plus dure à réussir.
+# (missions 9, 13, 15 la chambre de Charlotte, et 16 où les deux pièces sont réunies), puis monte ; la finale reste la
+# plus dure à réussir.
 FAIL_TARGET = {1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8, 7: 9, 8: 10,
-               9: 5, 10: 6, 11: 7, 12: 9, 13: 6, 14: 8, 15: 11}
+               9: 5, 10: 6, 11: 7, 12: 9, 13: 6, 14: 8, 15: 7, 16: 11}
 THREE_TARGET = {1: 58, 2: 50, 3: 43, 4: 36, 5: 28, 6: 21, 7: 15, 8: 9,
-                9: 40, 10: 33, 11: 27, 12: 20, 13: 34, 14: 25, 15: 8}
+                9: 40, 10: 33, 11: 27, 12: 20, 13: 34, 14: 25, 15: 30, 16: 8}
 # Une personne est moins efficace qu'un robot (elle vise, hésite, regarde ailleurs) : la 1re étoile ne demande qu'une
 # part du score des débutants. À ajuster après les essais humains.
 HUMAN = 0.45
 # La première étoile du tutoriel reste facile, et la dernière mission reste gagnable.
-STAR1_MAX = {1: 700, 8: 950, 15: 950}
+STAR1_MAX = {1: 700, 8: 950, 16: 950}
 
 
 def run(level, profile, games, folder):
