@@ -578,10 +578,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   (`flags.bracelet_a_moi`, `dress_mine` in `CharacterLook.charlotte()`). Worn on the front wrist: `look.bracelet` (its colours)
   makes `CharacterArt` draw a second forearm, `fore_front` (`_bracelet_svg`, high enough that the hand doesn't hide it), used by
   `Character._make_arm(…, front)`. **A new friend = a line in `FriendBracelet.FRIENDS`, `dress` in their look, `give` in their click.**
+  Each row tied clicks ("knot"); before "Pour qui ?" she ties the two ends (`_tie_ends`: the strip lifts off her knee and curls
+  into the bracelet, sparkles); the notebook's friends page says who wears hers (`Notebook.FRIENDS` have an `id`).
 - **Her own drawing on her clothes** (Julien, 2026-11-27: "dessiner son propre chandail"): her desk's "Dessiner mon chandail", or
   "Dessiner mon motif" under the wardrobe's Motif row, opens the `DrawingPad` ("Sur mon chandail !"); `CharacterArt.save_motif`
   takes the paper out (only what she drew stays), cuts it to its edges and keeps it as `mon_motif.png` in the slot. Patterns
-  `"mine"` (one big print on the front; higher on a hoodie, over its pocket) and `"mine_all"` (small ones all over), on tops,
+  `"mine"` (one big print on the front; higher on a hoodie, over its pocket) and `"mine_all"` (small ones all over), `"mine_small"` (a little crest over the heart), on tops,
   pyjamas and dresses (`CharacterArt._mine_svg`: the PNG embedded in the garment's SVG, base64, clipped to its outline; ThorVG
   draws it). The wardrobe lists them once she has a print (`Wardrobe._patterns`); a new game forgets it (`forget_outfit`).
 - A wide everyday wardrobe, worn by Charlotte and by the neighbours alike (`CharacterLook.random` picks from the same lists, with
@@ -943,7 +945,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     on a paper heart over a lace doily (`CraftArt` base "valentin", `HEART_C`, `heart_points`; `who` "amis"), kept as
     `valentin.png` in the slot; 2. a valentine for each friend she has met (`Valentine.friends()`, the same list as the
     bracelets): `Valentine.give` first thing in each friend's click (twins and Billie/Auguste in the lane, Alyzée and Emilia at
-    school or the garde), a line from them and a candy for her stash (`THANKS`), `flags.valentin_donnes`; 3. at home, Maman then
+    school or the garde), a line from them and a candy for her stash (`THANKS`), the card floating up over them (`Valentine._show_card`), `flags.valentin_donnes`; 3. at home, Maman then
     Papa (`house.gd _valentine_to`: the card held up, a hug, then a heart of chocolates, three to the stash); 4. bed ("Bonne nuit…
     pis bonne Saint-Valentin !"), and the morning is "Quelques semaines plus tard… c'est le printemps !": the quest is done,
     `Season.current` turns to "spring", and her first step outside she says so (`StreetScene._winter_hello`, `SPRING_WORDS`,
@@ -968,7 +970,7 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     then) half hidden along the fences behind grass, a flower pot, a rubber boot, bricks, a bucket, dandelions, and a golden one
     on the croque-livre's roof; found ones in `flags.paques_trouves`; Maman and Papa by her gate call "Tu chauffes !" / "Tu
     gèles !" (`Easter.warmth`, toward Holt or Dandurand); 3. all found: a chocolate bunny (`Easter.bunny`), six chocolates to
-    her stash, the quest done, and they all go in by her gate. **A new hiding place = a line in `SPOTS` (+ a case in
+    her stash, the quest done, and they all go in by her gate. The twins and Billie and Auguste are hunting too (a line each while it is on). **A new hiding place = a line in `SPOTS` (+ a case in
     `Easter._cover` for a new cover).**
 - The twins' house, `duplex_jumelles` (generator entry, 5716 6e Avenue, `reference/maison_jumelles/`, replaces `plex_08` in `main.gd`'s layout, the second house before the Holt lane): warm brown brick with dark mortar, black-framed windows under brick arches, a glass door (door style `glass`), white concrete balcony, black open-tread stair curving to the right, low black fence; Halloween decorations kept.
 - Charlotte's own house, `duplex_charlotte`, follows `reference/maison_charlotte/` as closely as can be (no Halloween decorations): red-brown brick with dark headers and grey mortar; double-hung windows (`window_style` "hung", `_hung_window`: black frame, one meeting rail, the same glass as the other houses (Julien), thick stone sill); varnished wood doors (`wood_glass`, `_wood_door`: stone lintel with a fleur-de-lis, dark transom, smoky pane; wide with sidelights downstairs, single upstairs), little lanterns (`_wall_lantern`) and small BLUE number plates under them (`_small_plaque`, `number_up`), a black mailbox; a thick white balcony slab (`slab_h`) with thin widely spaced iron railings and a scroll over each door (`iron_rail`, `_iron_balcony`), twin iron posts with scrolls (`iron_posts`, `_iron_post`), thin awning posts (`awning_posts`); a straight stair, pale treads on a black beam (`stair_beam`); the porch's steps at the LEFT (`steps_side`, `_side_steps`); a low fence of thin bars wide apart (`fence_style` "wide"); iron hearts (`_iron_heart`) along that fence, low on the porch railing and on the two curved rails of the steps; thin grey posts under the porch; leafy plants on the soil behind the fence in summer and autumn (`_greenery`); in winter a string of big old-style bulbs along the hand rail of her porch, the 5672, not the 5674's balcony, and up the two posts holding up that balcony (`_vintage_lights`, `_vintage_post`). Its door is at SVG x 348: the game reads it from `doors.json` (`StreetScene._door_x`). The tree in front of it stands toward its Holt end, past the window to the right of the door, so as not to hide the house (Julien; `StreetScene.tree_shift`, `tree_size`, `_tree_x`), big, its crown over the upper floor.
@@ -1204,6 +1206,11 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
   The newest four stand on a shelf on the corridor wall right of the TV (`POT_SHELF_X`, `_show_pots`, `poteries/` in the slot,
   `PotteryStudio.keep` / `kept` / `forget_all`), and Maman has a word for each kind (`POTTERY_LINES`). **A new shape = `KINDS` +
   `KIND_INFO`; a new glaze = a line in `GLAZES`; a new stamp = `STAMPS` + a case in `PotteryArt.stamp`.**
+  The second pass (2026-11-27): the wheel hums (`Sfx` "whirr") and wet slip flies off her hands as she throws; a dotted guide shows
+  the kind's shape to aim for (`_paint_guide`); in the finishing and glazing steps **the pot turns on the wheel** (`pot.turn`,
+  read by every drawing: marks and strokes are kept in the pot's own angles, `PotteryArt.to_pot` turns a click back, `_shown`
+  turns them for display; the handle and the spout go round behind it); the arrows, "Faire tourner le tour" or dragging beside
+  the pot turn it, and **the brush held still on a turning pot bands a line all the way round**, as potters do.
 - The wardrobe (`ui/wardrobe.gd`) also has: eight more hairstyles (`high_ponytail`, `side_ponytail`, `half_up`, `long_curly`, `pixie`, `afro_puffs`, `side_braid`, `bob_bangs`, in `CharacterArt._hair_back` / `_hair_front`), a pyjama outfit (`_pyjama`: collar with piping, buttons, pocket; choosing it sets long trousers in the same colour and long sleeves) and three kinds of big fluffy slippers (`shoes`: `slipper`, `bunny_slipper`, `bear_slipper`).
 - **People who talk face each other** (Julien, 2026-11-22): `Interior._say` calls `_face_talk` (whoever speaks turns to Charlotte or the nearest person, everyone standing within `TALK_RANGE` turns to the speaker; seated, walking and riding people are left alone), and `Character.GAZE` slides the eyes, brows and mouth toward the side she faces (the puppets are drawn front-on). A scene that stages people at a table or in a row sets `facing` toward the centre, never all toward the camera.
 - **Real brands and their logos are allowed** (Julien's decision, 2026-11-01; it replaces the old "original artwork, never real

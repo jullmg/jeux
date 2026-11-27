@@ -13,12 +13,12 @@ const PAGE := Vector2(760, 600)
 const TABS := [["Missions", Color("#3D8BD9")], ["Mes devoirs", Color("#7CCB5A")], ["Mes amis", Color("#E85FA0")]]
 ## Her friends, once she has met them (the story flag). A new friend = one more line here.
 const FRIENDS := [
-	{"name": "Alphée Turcotte", "note": "La jumelle aux cheveux détachés. On se voit dans la ruelle.", "flag": "met_twins"},
-	{"name": "Constance Turcotte", "note": "La jumelle à la queue de cheval. On se voit dans la ruelle.", "flag": "met_twins"},
-	{"name": "Billie", "note": "Elle a sept ans. La grande sœur d'Auguste, dans la ruelle.", "flag": "met_billie_auguste"},
-	{"name": "Auguste", "note": "Il a cinq ans et les cheveux roux. Le petit frère de Billie.", "flag": "met_billie_auguste"},
-	{"name": "Alyzée", "note": "Elle a sept ans et les cheveux noirs. Elle est nouvelle à l'école, on joue ensemble à la récré.", "flag": "met_alyzee"},
-	{"name": "Emilia", "note": "Elle a sept ans, des tresses noires pis une abuela au Mexique. Elle dessine des mariposas à la craie.", "flag": "met_emilia"},
+	{"id": "alphee", "name": "Alphée Turcotte", "note": "La jumelle aux cheveux détachés. On se voit dans la ruelle.", "flag": "met_twins"},
+	{"id": "constance", "name": "Constance Turcotte", "note": "La jumelle à la queue de cheval. On se voit dans la ruelle.", "flag": "met_twins"},
+	{"id": "billie", "name": "Billie", "note": "Elle a sept ans. La grande sœur d'Auguste, dans la ruelle.", "flag": "met_billie_auguste"},
+	{"id": "auguste", "name": "Auguste", "note": "Il a cinq ans et les cheveux roux. Le petit frère de Billie.", "flag": "met_billie_auguste"},
+	{"id": "alyzee", "name": "Alyzée", "note": "Elle a sept ans et les cheveux noirs. Elle est nouvelle à l'école, on joue ensemble à la récré.", "flag": "met_alyzee"},
+	{"id": "emilia", "name": "Emilia", "note": "Elle a sept ans, des tresses noires pis une abuela au Mexique. Elle dessine des mariposas à la craie.", "flag": "met_emilia"},
 ]
 
 var _button: Button
@@ -257,7 +257,10 @@ func _friends() -> void:
 	var fresh: Array = GameState.flags.get("friends_new", [])
 	for friend in met:
 		var is_new: bool = friend.flag in fresh
-		_list.add_child(_row("friend", friend.name + ("   ♥ Nouveau !" if is_new else ""), friend.note,
+		var note: String = friend.note
+		if not FriendBracelet.given(str(friend.get("id", ""))).is_empty():
+			note += "  🧵 %s porte ton bracelet d'amitié !" % ("Il" if friend.get("id", "") == "auguste" else "Elle")
+		_list.add_child(_row("friend", friend.name + ("   ♥ Nouveau !" if is_new else ""), note,
 			Color("#D6336C") if is_new else INK))
 	# Seen now: the heart on the button goes.
 	if not fresh.is_empty():

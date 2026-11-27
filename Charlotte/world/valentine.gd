@@ -84,6 +84,7 @@ static func give(friend: Character, id: String, say: Callable) -> bool:
 	mark(id)
 	friend.express("happy", 3.0)
 	Sfx.play("chime")
+	_show_card(friend)
 	say.call(str(THANKS.get(id, ["Merci, Chachoue !"])[0]))
 	Stash.add("wrapped")
 	if friends_left().is_empty():
@@ -92,6 +93,28 @@ static func give(friend: Character, id: String, say: Callable) -> bool:
 	else:
 		Notebook.announce("step", "Valentin donné à %s ! (%d sur %d)" % [FriendBracelet.name_of(id), given().size(), friends().size()], HEADING)
 	return true
+
+
+## The valentine floats up over the friend who gets it, so it is seen changing hands.
+static func _show_card(friend: Character) -> void:
+	var tex := card()
+	var parent := friend.get_parent()
+	if tex == null or parent == null:
+		return
+	var sprite := Sprite2D.new()
+	sprite.texture = tex
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	var k := 64.0 / maxf(tex.get_width(), tex.get_height())
+	sprite.scale = Vector2.ONE * k * 0.4
+	sprite.z_index = 20
+	sprite.position = parent.to_local(friend.global_position) + Vector2(0, -150)
+	parent.add_child(sprite)
+	var tw := sprite.create_tween()
+	tw.tween_property(sprite, "scale", Vector2.ONE * k, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(sprite, "position:y", sprite.position.y - 40.0, 1.8)
+	tw.parallel().tween_property(sprite, "rotation", 0.15, 1.8)
+	tw.tween_property(sprite, "modulate:a", 0.0, 0.5)
+	tw.tween_callback(sprite.queue_free)
 
 
 static func clear() -> void:

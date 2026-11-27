@@ -37,6 +37,9 @@ var _tie_timer := 0.0
 var _word_edit: LineEdit
 var _counter: Label
 var _time := 0.0
+## Tying the two ends: 0 the strip, 1 a bracelet.
+var _close := 0.0
+var _sparkles: Array = []
 
 
 func _init() -> void:
@@ -249,7 +252,7 @@ func _tie() -> void:
 	_pop = 0.4
 	var tw := create_tween()
 	tw.tween_property(self, "_pop", 1.0, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	Sfx.play("pop", Vector2.INF, -10.0, 1.2 + 0.4 * randf())
+	Sfx.play("knot", Vector2.INF, -6.0, 0.9 + 0.3 * randf())
 	if _rows == BraceletArt.ROWS:
 		Sfx.play("chime")
 	_update_counter()
@@ -306,6 +309,13 @@ func _letters(t: String) -> String:
 
 
 func _qui_side() -> void:
+	if _close < 1.0:
+		_heading("Noue les deux bouts")
+		_text("Ton bracelet est presque prêt : noue les deux bouts ensemble pour le fermer !")
+		var tie := _button("Nouer les bouts !", 24, _tie_ends, Vector2(320, 62))
+		tie.add_theme_stylebox_override("normal", _box(YELLOW, BLUE, 3, 18))
+		_side.add_child(tie)
+		return
 	_heading("Pour qui ?")
 	_text("À qui veux-tu le donner ? Tu le lui donneras la prochaine fois que tu la vois. Ou garde-le pour toi !")
 	var grid := GridContainer.new()
@@ -321,6 +331,19 @@ func _qui_side() -> void:
 	var me := _button("Pour moi !", 21, _finish.bind("moi"), Vector2(290, 60))
 	me.add_theme_stylebox_override("normal", _box(YELLOW, BLUE, 3, 16))
 	grid.add_child(me)
+
+
+func _tie_ends() -> void:
+	Sfx.play("swoosh")
+	var tw := create_tween()
+	tw.tween_property(self, "_close", 1.0, 1.1).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_callback(func() -> void:
+		Sfx.play("knot")
+		get_tree().create_timer(0.18).timeout.connect(func() -> void: Sfx.play("knot", Vector2.INF, 0.0, 1.2))
+		get_tree().create_timer(0.4).timeout.connect(func() -> void: Sfx.play("chime"))
+		for k in 16:
+			_sparkles.append([Vector2(STAGE_SIZE.x / 2.0, 250) + Vector2.from_angle(randf() * TAU) * randf_range(120, 210), randf() * TAU])
+		_set_step("qui"))
 
 
 func _finish(who: String) -> void:
@@ -363,14 +386,32 @@ func paint_stage(ci: Control) -> void:
 		if _step == "motif":
 			_paint_sample(ci)
 	elif _step == "qui":
-		BraceletArt.draw_loop(ci, Vector2(STAGE_SIZE.x / 2.0, 250), _data, 1.5)
+		var c := Vector2(STAGE_SIZE.x / 2.0, 250)
+		if _close < 1.0:
+			# The strip lifts off her knee and curls round into a bracelet.
+			var k := clampf(_close, 0.0, 1.0)
+			ci.draw_set_transform(TOP.lerp(c + Vector2(0, -160), k), k * PI * 0.5, Vector2.ONE * (1.0 - 0.6 * k))
+			BraceletArt.draw_strip(ci, Vector2.ZERO, _data, BraceletArt.ROWS, 1.0, 60.0 * (1.0 - k))
+			ci.draw_set_transform(Vector2.ZERO)
+			if k > 0.05:
+				ci.draw_set_transform(c, 0.0, Vector2.ONE * k)
+				BraceletArt.draw_loop(ci, Vector2.ZERO, _data, 1.5)
+				ci.draw_set_transform(Vector2.ZERO)
+		else:
+			BraceletArt.draw_loop(ci, c, _data, 1.5)
+			for sp: Array in _sparkles:
+				var tw := 0.5 + 0.5 * sin(_time * 4.0 + float(sp[1]))
+				var p: Vector2 = sp[0]
+				for a in 4:
+					ci.draw_line(p, p + Vector2.from_angle(a * PI / 2.0) * 9.0 * tw, Color(1, 1, 0.75, tw), 2.0, true)
 	else:
 		var hang := 420.0 - _rows * BraceletArt.PITCH
 		BraceletArt.draw_strip(ci, top, _data, _rows, 1.0, maxf(40.0, hang), _pop)
 		if _step == "breloques" and _rows > 0:
 			BraceletArt.draw_beads(ci, top, str(_data.word), 1.0, 10)
 			BraceletArt.draw_charm(ci, top + Vector2(0, _rows * BraceletArt.PITCH + 34.0), str(_data.charm), 30.0)
-	_paint_pin(ci, top + Vector2(0, -26))
+	if _step != "qui" or _close == 0.0:
+		_paint_pin(ci, top + Vector2(0, -26))
 	if _step == "noeuds" and _rows < BraceletArt.ROWS:
 		# Where the next row goes.
 		var y := top.y + _rows * BraceletArt.PITCH

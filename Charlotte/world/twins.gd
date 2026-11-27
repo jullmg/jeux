@@ -181,6 +181,10 @@ func interact(who: Character) -> void:
 		return
 	if met() and Valentine.give(_sisters[_clicked], ["alphee", "constance"][_clicked], _say_as(_clicked)):
 		return
+	if met() and Easter.step() == 2:
+		# They are hunting too.
+		_say(_clicked, ["On en a trouvé trois, nous autres !\nPis y en a un en or quelque part, paraît…", "Psst… regarde proche des pots de fleurs\npis des bottes de pluie !"][_clicked])
+		return
 	if met() and Quests.available("cachette"):
 		_play_hide_and_seek()
 		return

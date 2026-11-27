@@ -228,6 +228,19 @@ func _clothes_page(page: VBoxContainer) -> void:
 		_choices(page, "Motif", _patterns(_look.outfit), _look.pattern, func(v): _look.pattern = v)
 		# Her own print: she draws it on the drawing pad.
 		var mine := _row(page, "Mon dessin à moi")
+		if CharacterArt.has_motif():
+			# What she drew, on a little swatch of the cloth's colour.
+			var swatch := PanelContainer.new()
+			swatch.add_theme_stylebox_override("panel", _box(_look.outfit_color, Color(BLUE, 0.4), 2, 10))
+			var pic := TextureRect.new()
+			var img := Image.load_from_file(CharacterArt.motif_path())
+			if img:
+				pic.texture = ImageTexture.create_from_image(img)
+			pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			pic.custom_minimum_size = Vector2(70, 46)
+			swatch.add_child(pic)
+			mine.add_child(swatch)
 		var draw := Button.new()
 		draw.text = "✏  Dessiner mon motif" if not CharacterArt.has_motif() else "✏  Dessiner un nouveau motif"
 		draw.custom_minimum_size = Vector2(0, 46)
@@ -243,7 +256,7 @@ func _clothes_page(page: VBoxContainer) -> void:
 func _patterns(outfit: String) -> Array:
 	var base: Array = (DRESS_PATTERNS if outfit == "dress" else TOP_PATTERNS).duplicate()
 	if CharacterArt.has_motif():
-		base.append_array([["mine", "Mon dessin"], ["mine_all", "Mon dessin partout"]])
+		base.append_array([["mine", "Mon dessin"], ["mine_all", "Mon dessin partout"], ["mine_small", "Petit sur le cœur"]])
 	return base
 
 

@@ -155,6 +155,8 @@ func interact(who: Character) -> void:
 		pass
 	elif Valentine.give(_kids[_clicked], ["billie", "auguste"][_clicked], _say_as(_clicked)):
 		pass
+	elif Easter.step() == 2:
+		_say(_clicked, ["Auguste a déjà mangé son coco en chocolat…\npis il est juste dix heures !", "Moi, j'ai trouvé un coco dans une botte !\nEuh… c'était ma botte."][_clicked])
 	elif Snowman.can_start():
 		_ask_for_snowman()
 	elif Quests.active(Snowman.QUEST) and Carry.has("bonhomme"):

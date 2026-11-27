@@ -33,7 +33,7 @@ const TIPS := {
 	"monter": "Tire la terre vers le haut ou vers le bas. Pousse vers l'extérieur pour élargir, vers le centre pour resserrer.",
 	"sec": "Ta terre sèche, ma chouette ! Prends l'éponge pour la mouiller.",
 	"finir": "Pendant qu'elle sèche, tu peux ajouter une anse, onduler le bord ou graver des dessins.",
-	"emailler": "L'émail est tout pâle avant la cuisson… attends de voir les vraies couleurs !",
+	"emailler": "L'émail pâlit avant la cuisson. Fais tourner le tour en tenant ton pinceau : une ligne tout le tour !",
 	"cuire": "Le four monte à 1 240 degrés ! On met ta poterie dedans pis on attend.",
 	"chaud": "Ça chauffe… pas touche, c'est ben trop chaud !",
 	"fini": "Wow ! C'est toi qui as fait ça ? Elle est magnifique, ma chouette !",
@@ -78,6 +78,14 @@ var _firing := false
 var _busy := false
 ## 0 the pot in the kiln, 1 out of it, big on the table.
 var _reveal := 0.0
+# Glazing on a turning wheel (banding): how far it has turned, whether it turns by itself, the arrows held.
+var _turn := 0.0
+var _banding := false
+var _turn_dir := 0.0
+var _drag_turn := false
+var _hum := 0.0
+# Wet slip flying off her hands while she throws.
+var _slip: Array = []
 
 
 func _init() -> void:
@@ -106,8 +114,29 @@ func _process(delta: float) -> void:
 	match _step:
 		"centrer", "monter":
 			_spin += delta * 7.0
+			# The wheel hums.
+			_hum -= delta
+			if _hum <= 0.0:
+				_hum = 0.82
+				Sfx.play("whirr", Vector2.INF, -14.0)
 		"finir":
 			_spin += delta * 1.2
+			_pot.turn = _spin * 0.6
+		"emailler":
+			if _banding:
+				_turn += delta * 2.2
+			_turn += _turn_dir * delta * 2.4
+			_pot.turn = _turn
+			# The brush held still on a turning pot draws a ring all the way round.
+			if _pressing and _tool == "pinceau" and not _stroke.is_empty() and (_banding or _turn_dir != 0.0) and _mouse.x >= 0.0:
+				var hit := PotteryArt.surface_at(BASE, _pot, _mouse)
+				if not hit.is_empty() and hit.side == _stroke[2]:
+					_add_to_stroke(PotteryArt.to_pot(_pot, hit))
+	for sp: Array in _slip:
+		sp[1] += Vector2(0, 700.0) * delta
+		sp[0] += sp[1] * delta
+		sp[2] -= delta
+	_slip = _slip.filter(func(sp: Array) -> bool: return sp[2] > 0.0)
 	if _step == "centrer" and _pressing and _wobble > 0.0:
 		_wobble = maxf(0.0, _wobble - delta * 0.42)
 		if _wobble == 0.0:
@@ -318,8 +347,11 @@ func _go_next() -> void:
 			_set_step("finir")
 		"finir":
 			_undo.clear()
+			_pot.turn = 0.0
+			_turn = 0.0
 			_set_step("emailler")
 		"emailler":
+			_pot.turn = 0.0
 			_door = 1.0
 			_heat = 0.0
 			_set_step("cuire")
@@ -441,6 +473,18 @@ func _glaze_side() -> void:
 		"coulures":
 			_text("Clique sur ta poterie : l'émail coule du bord en gouttes.")
 	_side.add_child(opts)
+	# The wheel turns: to paint all the way round, or to band it (hold the brush still while it turns).
+	var turn := HBoxContainer.new()
+	turn.add_theme_constant_override("separation", 8)
+	_side.add_child(turn)
+	for dir: float in [-1.0, 1.0]:
+		var b := _button("⟲" if dir < 0.0 else "⟳", 24, func() -> void: pass, Vector2(64, 42))
+		b.button_down.connect(func() -> void: _turn_dir = dir)
+		b.button_up.connect(func() -> void: _turn_dir = 0.0)
+		turn.add_child(b)
+	turn.add_child(_toggle("Arrêter le tour" if _banding else "Faire tourner le tour", _banding, func() -> void:
+		_banding = not _banding
+		_build_side(), Vector2(250, 42)))
 
 
 func _heading(text: String) -> void:
@@ -520,6 +564,10 @@ func _throw_input(event: InputEvent) -> void:
 		return
 	var rel: Vector2 = event.relative
 	var eff := 0.2 + 0.8 * clampf(_wet, 0.0, 1.0)
+	if randf() < 0.35 * clampf(_wet, 0.2, 1.0):
+		var side := -1.0 if randf() < 0.5 else 1.0
+		var from := PotteryArt.point(BASE, _pot, side * PI / 2.0, _grab_t)
+		_slip.append([from, Vector2(side * randf_range(60, 200), randf_range(-220, -60)), 0.8])
 	var r: Array = _pot.r
 	if absf(rel.y) > absf(rel.x):
 		var old_h := float(_pot.h)
@@ -629,6 +677,17 @@ func _has_glaze() -> bool:
 
 
 func _glaze_input(event: InputEvent) -> void:
+	# Beside the pot: she turns the wheel with her hand.
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed and PotteryArt.surface_at(BASE, _pot, event.position).is_empty():
+			_drag_turn = true
+			return
+		if not event.pressed and _drag_turn:
+			_drag_turn = false
+			return
+	if event is InputEventMouseMotion and _drag_turn:
+		_turn += event.relative.x * 0.012
+		return
 	if _tool == "pinceau":
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
@@ -638,7 +697,7 @@ func _glaze_input(event: InputEvent) -> void:
 				_snap()
 				_stroke = [_glaze, _brush, hit.side, []]
 				_pot.strokes.append(_stroke)
-				_add_to_stroke(hit)
+				_add_to_stroke(PotteryArt.to_pot(_pot, hit))
 				_pressing = true
 			else:
 				_pressing = false
@@ -647,13 +706,14 @@ func _glaze_input(event: InputEvent) -> void:
 		elif event is InputEventMouseMotion and _pressing and not _stroke.is_empty():
 			var hit := PotteryArt.surface_at(BASE, _pot, event.position)
 			if not hit.is_empty() and hit.side == _stroke[2]:
-				_add_to_stroke(hit)
+				_add_to_stroke(PotteryArt.to_pot(_pot, hit))
 		return
 	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 		return
 	var at := PotteryArt.surface_at(BASE, _pot, event.position)
 	if at.is_empty():
 		return
+	at = PotteryArt.to_pot(_pot, at)
 	_snap()
 	match _tool:
 		"tremper":
@@ -764,6 +824,10 @@ func paint_stage(ci: Control) -> void:
 	if _step == "centrer":
 		at.x += _wobble * 16.0 * sin(_spin * 1.3)
 	PotteryArt.draw_pot(ci, at, _pot, stage, _spin * 0.35)
+	if _step == "monter" and _pot.open:
+		_paint_guide(ci)
+	for sp: Array in _slip:
+		ci.draw_circle(sp[0], 3.0, Color(PotteryArt.CLAY_WET, clampf(sp[2] * 1.5, 0.0, 1.0)))
 	if _pressing and _step in ["centrer", "monter"]:
 		var t := 0.5 if _step == "centrer" else _grab_t
 		var wobble_x := at.x - BASE.x
@@ -775,6 +839,24 @@ func paint_stage(ci: Control) -> void:
 		_paint_gauges(ci)
 	if _step == "emailler" and _mouse.x >= 0.0 and _tool == "tampon":
 		PotteryArt.stamp(ci, _stamp, _mouse, _stamp_size, Color(PotteryArt.glaze(_glaze, "fired"), 0.45))
+
+
+# The shape she chose, in faint dashes, to aim for.
+func _paint_guide(ci: Control) -> void:
+	var goal := PotteryArt.shaped(_pot, _kind)
+	for side: float in [-1.0, 1.0]:
+		var line := PackedVector2Array()
+		for k in 31:
+			line.append(PotteryArt.point(BASE, goal, side * PI / 2.0, k / 30.0))
+		for k in range(0, line.size() - 1, 2):
+			ci.draw_line(line[k], line[k + 1], Color(0.2, 0.3, 0.6, 0.35), 4.0, true)
+			ci.draw_line(line[k], line[k + 1], Color(1, 1, 1, 0.85), 2.0, true)
+	var words := "le modèle : %s" % str(PotteryArt.KIND_INFO[_kind][0]).to_lower()
+	var font := ThemeDB.fallback_font
+	var w := font.get_string_size(words, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
+	var top := PotteryArt.point(BASE, goal, PI, 1.0) + Vector2(-w / 2.0, -16.0)
+	ci.draw_rect(Rect2(top + Vector2(-6, -15), Vector2(w + 12, 21)), Color(1, 1, 1, 0.7))
+	ci.draw_string(font, top, words, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("#1D4F91"))
 
 
 # How wet the clay is, and how far from centred.
@@ -837,6 +919,7 @@ func _finish() -> void:
 	if _busy:
 		return
 	_busy = true
+	_pot.turn = 0.0
 	var img := await render(_pot)
 	Sfx.play("chime")
 	closed.emit({"image": img, "kind": _kind})

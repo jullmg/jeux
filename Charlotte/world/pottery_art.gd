@@ -411,8 +411,10 @@ static func _carving(ci: CanvasItem, base: Vector2, pot: Dictionary, stage: Stri
 		"pois":
 			for row in 3:
 				var t := 0.35 + row * 0.15
-				for k in 15:
-					var a := -1.4 + 2.8 * k / 14.0 + (0.1 if row % 2 else 0.0)
+				for k in 30:
+					var a := _shown(pot, -PI + TAU * k / 30.0 + (0.1 if row % 2 else 0.0))
+					if cos(a) < 0.15:
+						continue
 					var c := point(base, pot, a, t, s)
 					_ellipse(ci, c, Vector2(3.2 * s * cos(a) + 0.6, 2.6 * s), dark)
 					_ellipse(ci, c + Vector2(0, 1.2 * s), Vector2(2.2 * s * cos(a) + 0.4, 1.2 * s), light)
@@ -423,7 +425,7 @@ static func _around(ci: CanvasItem, base: Vector2, pot: Dictionary, t_of: Callab
 	var below := PackedVector2Array()
 	for j in 61:
 		var a := -1.5 + 3.0 * j / 60.0
-		var p := point(base, pot, a, float(t_of.call(a)), s)
+		var p := point(base, pot, a, float(t_of.call(a - _turn(pot))), s)
 		line.append(p)
 		below.append(p + Vector2(0, 1.6 * s))
 	ci.draw_polyline(below, light, 1.6 * s, true)
@@ -434,15 +436,48 @@ static func _speckles(ci: CanvasItem, base: Vector2, pot: Dictionary, stage: Str
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
 	for k in 260:
-		var a := rng.randf_range(-1.5, 1.5)
+		var a := _shown(pot, rng.randf_range(-PI, PI))
 		var t := rng.randf_range(0.0, 1.0)
 		var size := rng.randf_range(0.6, 1.7)
 		var glazed: bool = pot.out == "mouchete" and t >= 1.0 - float(pot.dip)
 		for b: Array in pot.bands:
 			if t >= float(b[0]) and t <= float(b[1]):
 				glazed = b[2] == "mouchete"
-		if glazed:
+		if glazed and cos(a) > 0.05:
 			ci.draw_circle(point(base, pot, a, t, s), size * s, Color(0.42, 0.26, 0.16, 0.75 if stage == "fired" else 0.3))
+
+
+## How far the pot has turned on the wheel (`pot.turn`): what she painted turns with it.
+static func _turn(pot: Dictionary) -> float:
+	return float(pot.get("turn", 0.0))
+
+
+## Where something painted at angle `a` of the pot (pot's own angle) shows now, wrapped to -PI..PI.
+static func _shown(pot: Dictionary, a: float) -> float:
+	return wrapf(a + _turn(pot), -PI, PI)
+
+
+## The inside of the opening turns too: (u, v) as an angle round the middle.
+static func _turned_in(pot: Dictionary, u: float, v: float) -> Vector2:
+	var t := _turn(pot)
+	if t == 0.0:
+		return Vector2(u, v)
+	var r := Vector2(u, v).length()
+	var th := atan2(u, v) + t
+	return Vector2(sin(th) * r, cos(th) * r)
+
+
+## From what she clicked (screen angle / screen inside point) to the pot's own place, so it turns with it.
+static func to_pot(pot: Dictionary, hit: Dictionary) -> Dictionary:
+	var h := hit.duplicate()
+	if hit.side == "o":
+		h.a = wrapf(float(hit.a) - _turn(pot), -PI, PI)
+	else:
+		var r := Vector2(float(hit.u), float(hit.v)).length()
+		var th := atan2(float(hit.u), float(hit.v)) - _turn(pot)
+		h.u = sin(th) * r
+		h.v = cos(th) * r
+	return h
 
 
 # A painted outside point is only seen on the front half.
@@ -460,13 +495,15 @@ static func _mark_pos(base: Vector2, pot: Dictionary, side: String, x: float, y:
 
 static func _mark(ci: CanvasItem, base: Vector2, pot: Dictionary, m: Array, stage: String, s: float) -> void:
 	var side: String = m[1]
-	if side == "o" and (not _seen(side, float(m[2]))):
+	var x := _shown(pot, float(m[2])) if side == "o" else _turned_in(pot, float(m[2]), float(m[3])).x
+	var y := float(m[3]) if side == "o" else _turned_in(pot, float(m[2]), float(m[3])).y
+	if side == "o" and (not _seen(side, x)):
 		return
-	var c := _mark_pos(base, pot, side, float(m[2]), float(m[3]), s)
-	var sq := Vector2(cos(float(m[2])), 1.0) if side == "o" else Vector2(1.0, 0.55)
+	var c := _mark_pos(base, pot, side, x, y, s)
+	var sq := Vector2(cos(x), 1.0) if side == "o" else Vector2(1.0, 0.55)
 	var col := glaze(str(m[4]), stage)
 	if side == "o":
-		col = col * _light(float(m[2]))
+		col = col * _light(x)
 		col.a = 1.0
 	stamp(ci, str(m[0]), c, float(m[5]) * s, col, sq)
 	if stage == "fired":
@@ -480,13 +517,20 @@ static func _stroke(ci: CanvasItem, base: Vector2, pot: Dictionary, st: Array, s
 	var line := PackedVector2Array()
 	var k := 0
 	while k + 1 < raw.size():
-		var x: float = raw[k]
+		var x: float = _shown(pot, float(raw[k])) if side == "o" else _turned_in(pot, float(raw[k]), float(raw[k + 1])).x
+		var y: float = float(raw[k + 1]) if side == "o" else _turned_in(pot, float(raw[k]), float(raw[k + 1])).y
 		if side == "o" and not _seen(side, x):
 			if line.size() > 1:
 				ci.draw_polyline(line, col, float(st[1]) * s, true)
 			line = PackedVector2Array()
 		else:
-			line.append(_mark_pos(base, pot, side, x, float(raw[k + 1]), s))
+			# A stroke that went round the back jumps: start again on this side.
+			var p := _mark_pos(base, pot, side, x, y, s)
+			if line.size() > 0 and line[line.size() - 1].distance_to(p) > 60.0 * s:
+				if line.size() > 1:
+					ci.draw_polyline(line, col, float(st[1]) * s, true)
+				line = PackedVector2Array()
+			line.append(p)
 		k += 2
 	if line.size() > 1:
 		ci.draw_polyline(line, col, float(st[1]) * s, true)
@@ -517,8 +561,12 @@ static func _drips(ci: CanvasItem, base: Vector2, pot: Dictionary, stage: String
 			var i := j * 2
 			idx.append_array([i, i + 2, i + 1, i + 2, i + 3, i + 1])
 	RenderingServer.canvas_item_add_triangle_array(ci.get_canvas_item(), idx, pts, colors)
-	for k in 11:
-		var a := -1.35 + 2.7 * k / 10.0 + rng.randf_range(-0.08, 0.08)
+	for k in 22:
+		var a := _shown(pot, -PI + TAU * k / 22.0 + rng.randf_range(-0.08, 0.08))
+		if cos(a) < 0.2:
+			rng.randf_range(0.1, 0.32)
+			rng.randf_range(5.0, 9.0)
+			continue
 		var length := rng.randf_range(0.1, 0.32) * clampf(120.0 / float(pot.h), 0.4, 1.4)
 		var w := rng.randf_range(5.0, 9.0) * s * cos(a)
 		var line := PackedVector2Array()
@@ -540,30 +588,37 @@ static func _handle(ci: CanvasItem, base: Vector2, pot: Dictionary, stage: Strin
 	var reach := 46.0 if pot.handle == "anse" else 22.0
 	var thick := 13.0 if pot.handle == "anse" else 9.0
 	for side: int in sides:
-		var a0 := point(base, pot, side * PI / 2.0, t0, s) + Vector2(-side * 3.0 * s, 0)
-		var a1 := point(base, pot, side * PI / 2.0, t1, s) + Vector2(-side * 3.0 * s, 0)
-		var out := Vector2(side * reach * s, 0)
+		# It turns with the pot: behind it when it is round the back, narrower when it faces us.
+		var phi := _shown(pot, side * PI / 2.0)
+		if (cos(phi) < 0.0) != back:
+			continue
+		var dir := sin(phi)
+		var a0 := point(base, pot, phi, t0, s) + Vector2(-dir * 3.0 * s, 0)
+		var a1 := point(base, pot, phi, t1, s) + Vector2(-dir * 3.0 * s, 0)
+		var out := Vector2(dir * reach * s, cos(phi) * 6.0 * s)
 		var pts := PackedVector2Array()
 		for k in 21:
 			var f := k / 20.0
 			var u := 1.0 - f
 			pts.append(a0 * u * u * u + (a0 + out + Vector2(0, -8.0 * s)) * 3.0 * u * u * f + (a1 + out * 1.05 + Vector2(0, 6.0 * s)) * 3.0 * u * f * f + a1 * f * f * f)
 		var t_mid := (t0 + t1) / 2.0
-		var c := surface_color(pot, t_mid, stage) * (0.75 if side > 0 else 1.0)
+		var c := surface_color(pot, t_mid, stage) * (_light(phi) if not back else 0.6)
 		c.a = 1.0
-		if back:
-			ci.draw_polyline(pts, Color(LINE, 0.6), thick * s + 3.0 * s, true)
-			continue
 		ci.draw_polyline(pts, Color(LINE, 0.6), thick * s + 3.0 * s, true)
 		ci.draw_polyline(pts, c, thick * s, true)
+		if back:
+			continue
 		var hi := PackedVector2Array()
 		for k in range(2, 14):
-			hi.append(pts[k] + Vector2(-side * 2.0 * s, -2.5 * s))
+			hi.append(pts[k] + Vector2(-signf(dir) * 2.0 * s, -2.5 * s))
 		ci.draw_polyline(hi, Color(1, 1, 1, 0.45 if stage == "fired" else 0.18), 2.4 * s, true)
 
 
 static func _spout(ci: CanvasItem, base: Vector2, pot: Dictionary, stage: String, s: float) -> void:
-	var tip := point(base, pot, -PI / 2.0, 1.0, s)
+	var phi := _shown(pot, -PI / 2.0)
+	if cos(phi) < -0.3:
+		return
+	var tip := point(base, pot, phi, 1.0, s)
 	var c := surface_color(pot, 1.0, stage) * _light(-1.2)
 	c.a = 1.0
 	var pts := PackedVector2Array([tip + Vector2(10.0 * s, -2.0 * s), tip + Vector2(-16.0 * s, -10.0 * s), tip + Vector2(-12.0 * s, -4.0 * s), tip + Vector2(6.0 * s, 9.0 * s)])

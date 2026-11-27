@@ -47,7 +47,7 @@ var _clip_id := 0
 ## Her own drawing printed on her clothes (Julien: "dessiner son propre chandail"): pattern "mine" is one big print on the
 ## front, "mine_all" small ones all over. The drawing is `mon_motif.png` in the game's slot (`save_motif`), embedded in the
 ## garment's SVG as a PNG (ThorVG draws it, clipped to the garment).
-const MINE := ["mine", "mine_all"]
+const MINE := ["mine", "mine_all", "mine_small"]
 static var _mine := {}
 static var _mine_version := 0
 
@@ -870,6 +870,8 @@ func _dress() -> String:
 	s += _pattern([[80, 40], [48, 46]], [], 3.5)
 	if look.pattern == "mine_all":
 		s += _mine_svg(DRESS_BODICE, Rect2(22, 12, 88, 52), true)
+	elif look.pattern == "mine_small":
+		s += _mine_svg(DRESS_BODICE, Rect2(70, 24, 20, 18), false)
 	s += '<path d="M42 13 Q46 30 65 25 Q84 30 88 13 Q65 23 42 13 Z" fill="#FFFFFF" stroke="#CFC8BA" stroke-width="1.5" stroke-linejoin="round"/>'
 	s += _f('<rect x="24" y="58" width="82" height="10" rx="3" fill="{accent}" stroke="{accent_line}" stroke-width="2"/>')
 	s += _f('<path d="M38 63 L24 54 Q20 63 24 72 Z" fill="{accent_light}" stroke="{accent_line}" stroke-width="2" stroke-linejoin="round"/>')
@@ -942,6 +944,9 @@ func _top() -> String:
 			s += _mine_svg(TOP_BODY, Rect2(40, 26, 50, 44) if look.outfit == "hoodie" else Rect2(37, 30, 56, 50), false)
 		"mine_all":
 			s += _mine_svg(TOP_BODY, Rect2(20, 6, 92, 104), true)
+		"mine_small":
+			# A little crest over the heart.
+			s += _mine_svg(TOP_BODY, Rect2(70, 28, 22, 20), false)
 		"stripes":
 			for y in [40, 58, 76]:
 				s += _f('<rect x="24" y="%d" width="82" height="8" fill="{accent}" opacity="0.9"/>' % y)
