@@ -4,7 +4,7 @@ Jeu 3D Godot 4.7 (Forward+ sur Mac, 1920×1080) : la chienne Blanche vole de la 
 Texte en français du Québec. Cahier des charges : `PROMPT.md` ; avancement et décisions : `docs/etat.md` ; revues :
 `docs/revues.md` ; refonte graphique : `PROMPT-GRAPHIQUES.md` ; salle à manger et salon (missions 9 à 15) :
 `PROMPT-PIECES.md`, photos dans `reference/photos-8/` ; la chambre de Charlotte d'après les photos du jeu Charlotte
-(`../Charlotte/reference/maison_charlotte/interieur/`) et `reference/20261126_200025.jpg`. Version 1.1.0-rc1 : Mac
+(`../Charlotte/reference/maison_charlotte/interieur/`) et `reference/20261126_200025.jpg`. Version 1.2.0-rc1 : Mac
 d'abord, iPad et Android ensuite.
 
 ## Vérifier

@@ -314,10 +314,10 @@ func _process(delta: float) -> void:
 		"servir":
 			if _holds_dish():
 				# Le plat à deux mains au-dessus de la table : elle l'avance pour servir chacun.
+				# Les bras tiennent le plat comme en le portant ; c'est le dos qui se penche pour servir.
 				var dip := maxf(0.0, sin(t * 1.3))
-				for s: String in ["L", "R"]:
-					_arm(s, 44 + dip * 14, -2, 62 - dip * 16)
-				rig.add("spine", Vector3(14 + dip * 9, 0, 0))
+				_hold_dish_arms()
+				rig.add("spine", Vector3(10 + dip * 12, 0, 0))
 				rig.add("head", Vector3(16 + dip * 6, 0, 0))
 				prop = "plat_tenu"
 			else:
@@ -345,6 +345,8 @@ func _process(delta: float) -> void:
 				quick["thigh" + s] = Vector3(sin(f) * 27 * amp, 0, 0)
 				quick["shin" + s] = Vector3(maxf(0.0, -cos(f)) * 44 * amp, 0, 0)
 				_arm(s, 40, -2, 66)
+			if _holds_dish():
+				_hold_dish_arms()
 			_stride(amp)
 			prop = "plat_tenu" if _holds_dish() else "plat"
 		"manger":
@@ -505,6 +507,13 @@ func hold_dish(mesh: Mesh) -> void:
 	_dish.mesh = mesh
 
 
+## Les deux mains sous les côtés du plat, à hauteur de la taille.
+func _hold_dish_arms() -> void:
+	for s: String in ["L", "R"]:
+		rig.target["arm" + s] = Vector3(-28, 0, 0)
+		rig.target["forearm" + s] = Vector3(-56, 0, 0)
+
+
 func _holds_dish() -> bool:
 	return _dish != null and _dish.mesh != null
 
@@ -613,7 +622,7 @@ func _show_prop(kind: String) -> void:
 		"plat_tenu":
 			bone = "chest"
 			_dish = MeshInstance3D.new()
-			_dish.position = Vector3(0, -0.24, 0.34)
+			_dish.position = Vector3(0, -0.15, 0.36)
 			_dish.scale = Vector3.ONE * DISH_SCALE
 			node.add_child(_dish)
 		"journal":

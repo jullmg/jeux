@@ -1039,9 +1039,13 @@ func _show_people(delta: float) -> void:
 		p.seat_y = seat.seat_y
 		p.position = Vector3(seat.hips.x, 0, seat.hips.y)
 		p.rotation.y = _turn(p.rotation.y, atan2(seat.face.x, seat.face.y), delta, 10.0)
-		var relative := _aim(seat.hips, sim.dog_pos if s.snitch > 0.0 else sim.viewpoint(), p.rotation.y)
+		# Qui la voit (ou guette son côté de la table) la suit des yeux ; la famille la regarde passer quand elle est
+		# tout près ; sinon on regarde Maman.
+		var near: bool = s.role == "decor" and sim.dog_pos.distance_to(seat.hips) < 1.3
+		var watch: bool = s.snitch > 0.0 or s.state == "regarde" or near
+		var relative := _aim(seat.hips, sim.dog_pos if watch else sim.viewpoint(), p.rotation.y)
 		var focus := _talk_focus(p)
-		if focus and s.snitch <= 0.0 and s.state != "regarde" and s.state != "slip":
+		if focus and s.snitch <= 0.0 and s.state != "regarde" and s.state != "slip" and not near:
 			relative = _aim(seat.hips, Vector2(focus.position.x, focus.position.z), p.rotation.y)
 		p.head_yaw = clampf(relative, -40.0, 40.0)
 		p.twist = clampf(relative, -50.0, 50.0) if s.snitch > 0.0 or s.state in ["argue", "slip"] else 0.0

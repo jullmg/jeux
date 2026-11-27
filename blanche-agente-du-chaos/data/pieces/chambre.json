@@ -1,5 +1,5 @@
 {
-  "_comment": "Plan de la chambre de Charlotte (la soirée pyjama), source unique pour le jeu (Godot) et le modèle (Blender, chambre.py), d'après les photos de Julien (reference/, jamais copiées). Mètres, x vers l'est, z vers le sud (la porte du corridor est à l'est). Les rectangles sont [x0, z0, x1, z1].",
+  "_comment": "Plan de la chambre de Charlotte (la soirée pyjama), source unique pour le jeu (Godot) et le modèle (Blender, chambre.py), inspiré de la vraie chambre (rien n'en est copié). Mètres, x vers l'est, z vers le sud (la porte du corridor est à l'est). Les rectangles sont [x0, z0, x1, z1].",
   "model": "chambre",
   "room": {
     "x0": -1.55,

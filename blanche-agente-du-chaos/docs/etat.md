@@ -14,7 +14,7 @@ Point de reprise d'une session à l'autre. Julien a demandé de tout faire sans 
 | 4. Production | fait : les huit missions |
 | 5. Finition | fait : équilibrage, performance, accessibilité, icône |
 | 6. Assurance qualité | fait : revues corrigées, batterie complète réussie (`docs/revues.md`) |
-| 7. Livraison | version macOS 1.0.0-rc4 exportée et testée ; puis 1.1.0-rc1 avec les missions 9 à 15 ; **acceptation de Julien à venir** |
+| 7. Livraison | version macOS 1.0.0-rc4 exportée et testée ; puis 1.1.0-rc1 avec les missions 9 à 15, puis 1.2.0-rc1 (soirée pyjama, corrections, passe d'amélioration) ; **acceptation de Julien à venir** |
 
 ## Salle à manger et salon (`PROMPT-PIECES.md`, commencé le 2026-11-25)
 
@@ -147,6 +147,16 @@ souper avec des invités**.
 - Au party des Fêtes, la vue des deux pièces d'un coup rend tout plus petit (voir les questions).
 - Les chaises, le fauteuil berçant et le piano sont simplifiés ; `kitchen.py` n'utilise pas encore les aides de
   `decor.py` (il faudrait régénérer la cuisine, qui ne devait pas bouger).
+
+## Questions pour Julien (soirée pyjama et passe d'amélioration, 2026-11-27)
+
+1. La soirée pyjama est-elle comme tu l'imaginais ? J'ai compris « c'est Charlotte qui surveille, comme Maman » ;
+   « en faisant du reste de maman » voulait-il dire autre chose (Maman qui passe vérifier, par exemple) ?
+2. Alyzée te ressemble-t-elle à ce que tu avais en tête (cheveux noirs, coton ouaté lilas à oursons, pantalon mauve) ?
+   Et Charlotte en pyjama rose à pois ?
+3. Les canettes de bubly sont sans logo (des couleurs et un sourire) : veux-tu le vrai logo ?
+4. La chambre : manque-t-il quelque chose d'important (la cage du hamster est sur la commode, à gauche) ?
+5. Les conversations à table : le ton te plaît-il ? Papa parle-t-il assez souvent ?
 
 ## Questions pour Julien (salle à manger et salon)
 
