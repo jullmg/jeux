@@ -43,6 +43,8 @@ var _preview: Character
 var _mirror: Control
 var _tabs: TabContainer
 var _root: Control
+# Her drawing pad, open over the wardrobe while she draws her own print.
+var _pad: DrawingPad
 
 
 ## While the Halloween quest is on, the drawers hold nothing but costumes: the costume tab is the only one, and
@@ -93,6 +95,8 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _pad:
+		return
 	if event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
 		_close(null)
@@ -200,7 +204,7 @@ func _costume_page(page: VBoxContainer) -> void:
 func _clothes_page(page: VBoxContainer) -> void:
 	_choices(page, "Quoi porter", OUTFITS, _look.outfit, func(v):
 		_look.outfit = v
-		var allowed := DRESS_PATTERNS if v == "dress" else TOP_PATTERNS
+		var allowed := _patterns(v)
 		if v in ["coat", "overalls", "raincoat"] or not allowed.any(func(o): return o[0] == _look.pattern):
 			_look.pattern = "none"
 		if v == "overalls":
@@ -220,13 +224,47 @@ func _clothes_page(page: VBoxContainer) -> void:
 		_look.outfit_color = c
 		if _look.outfit == "overalls" or _look.outfit == "pyjama":
 			_look.legwear_color = c)
-	if _look.outfit == "dress":
-		_choices(page, "Motif", DRESS_PATTERNS, _look.pattern, func(v): _look.pattern = v)
-	elif _look.outfit in ["tshirt", "sweater", "hoodie", "cardigan"]:
-		_choices(page, "Motif", TOP_PATTERNS, _look.pattern, func(v): _look.pattern = v)
+	if _look.outfit in ["dress", "tshirt", "sweater", "hoodie", "cardigan", "pyjama"]:
+		_choices(page, "Motif", _patterns(_look.outfit), _look.pattern, func(v): _look.pattern = v)
+		# Her own print: she draws it on the drawing pad.
+		var mine := _row(page, "Mon dessin à moi")
+		var draw := Button.new()
+		draw.text = "✏  Dessiner mon motif" if not CharacterArt.has_motif() else "✏  Dessiner un nouveau motif"
+		draw.custom_minimum_size = Vector2(0, 46)
+		draw.add_theme_stylebox_override("normal", _box(Color("#FFE9F2"), Color("#E86BB0"), 3, 14))
+		draw.pressed.connect(_draw_motif)
+		mine.add_child(draw)
 	var detail := "Chandail en dessous" if _look.outfit == "overalls" else "Couleur des détails"
 	_swatches(page, detail, COLORS, _look.accent_color, func(c): _look.accent_color = c)
 	_choices(page, "Manches", SLEEVES, _look.sleeve, func(v): _look.sleeve = v)
+
+
+# The prints an outfit can take, with hers once she has drawn one.
+func _patterns(outfit: String) -> Array:
+	var base: Array = (DRESS_PATTERNS if outfit == "dress" else TOP_PATTERNS).duplicate()
+	if CharacterArt.has_motif():
+		base.append_array([["mine", "Mon dessin"], ["mine_all", "Mon dessin partout"]])
+	return base
+
+
+# The drawing pad over the wardrobe: what she draws becomes the print on her clothes.
+func _draw_motif() -> void:
+	Sfx.play("page")
+	_pad = DrawingPad.new()
+	_pad.layer = 61
+	_pad.done_text = "Sur mon chandail !"
+	_pad.fridge_ok = false
+	_root.visible = false
+	_pad.closed.connect(func(drawing: Image) -> void:
+		_pad = null
+		_root.visible = true
+		if drawing and CharacterArt.save_motif(drawing):
+			if _look.pattern not in CharacterArt.MINE:
+				_look.pattern = "mine"
+			if _look.outfit not in ["dress", "tshirt", "sweater", "hoodie", "cardigan", "pyjama"]:
+				_look.outfit = "tshirt"
+		_refresh())
+	add_child(_pad)
 
 
 func _legs_page(page: VBoxContainer) -> void:

@@ -44,6 +44,95 @@ static func build(character_look: CharacterLook) -> Dictionary:
 
 var _clip_id := 0
 
+## Her own drawing printed on her clothes (Julien: "dessiner son propre chandail"): pattern "mine" is one big print on the
+## front, "mine_all" small ones all over. The drawing is `mon_motif.png` in the game's slot (`save_motif`), embedded in the
+## garment's SVG as a PNG (ThorVG draws it, clipped to the garment).
+const MINE := ["mine", "mine_all"]
+static var _mine := {}
+static var _mine_version := 0
+
+
+static func motif_path() -> String:
+	return GameState.slot_dir() + "/mon_motif.png"
+
+
+static func has_motif() -> bool:
+	return FileAccess.file_exists(motif_path())
+
+
+## Keeps a drawing from the pad as her print: the paper goes, only what she drew stays, cut to its edges.
+static func save_motif(drawing: Image) -> bool:
+	var img: Image = drawing.duplicate()
+	img.convert(Image.FORMAT_RGBA8)
+	var paper := DrawingPad.PAPER_COLOR
+	for y in img.get_height():
+		for x in img.get_width():
+			var c := img.get_pixel(x, y)
+			var d := absf(c.r - paper.r) + absf(c.g - paper.g) + absf(c.b - paper.b)
+			if d < 0.06:
+				img.set_pixel(x, y, Color(0, 0, 0, 0))
+			elif d < 0.16:
+				c.a *= (d - 0.06) / 0.1
+				img.set_pixel(x, y, c)
+	var used := img.get_used_rect()
+	if used.size.x < 2 or used.size.y < 2:
+		return false
+	img = img.get_region(used.grow(3).intersection(Rect2i(Vector2i.ZERO, img.get_size())))
+	var k := minf(1.0, 240.0 / maxf(img.get_width(), img.get_height()))
+	if k < 1.0:
+		img.resize(maxi(1, int(img.get_width() * k)), maxi(1, int(img.get_height() * k)), Image.INTERPOLATE_LANCZOS)
+	DirAccess.make_dir_recursive_absolute(GameState.slot_dir())
+	img.save_png(motif_path())
+	_mine_version += 1
+	return true
+
+
+static func forget_motif() -> void:
+	if has_motif():
+		DirAccess.remove_absolute(motif_path())
+	_mine_version += 1
+
+
+static func _motif() -> Dictionary:
+	if not has_motif():
+		return {}
+	var key := "%s|%d|%d" % [motif_path(), FileAccess.get_modified_time(motif_path()), _mine_version]
+	if _mine.get("key", "") != key:
+		var img := Image.load_from_file(motif_path())
+		if img == null:
+			return {}
+		_mine = {"key": key, "b64": Marshalls.raw_to_base64(FileAccess.get_file_as_bytes(motif_path())), "w": img.get_width(), "h": img.get_height()}
+	return _mine
+
+
+# Her drawing on a garment whose outline is `clip`: one print fitted in `area`, or (`tiled`) little ones all over it.
+func _mine_svg(clip: String, area: Rect2, tiled: bool) -> String:
+	var m := _motif()
+	if m.is_empty():
+		return ""
+	_clip_id += 1
+	var id := "mine%d" % _clip_id
+	var href := "data:image/png;base64," + str(m.b64)
+	var w := float(m.w)
+	var h := float(m.h)
+	var s := '<clipPath id="%s"><path d="%s"/></clipPath><g clip-path="url(#%s)">' % [id, clip, id]
+	if not tiled:
+		var k := minf(area.size.x / w, area.size.y / h)
+		var c := area.get_center()
+		s += '<image x="%.1f" y="%.1f" width="%.1f" height="%.1f" preserveAspectRatio="none" href="%s"/>' % [c.x - w * k / 2.0, c.y - h * k / 2.0, w * k, h * k, href]
+	else:
+		var k := minf(20.0 / w, 20.0 / h)
+		var row := 0
+		var y := area.position.y
+		while y < area.end.y:
+			var x := area.position.x + (13.0 if row % 2 else 0.0)
+			while x < area.end.x:
+				s += '<image x="%.1f" y="%.1f" width="%.1f" height="%.1f" preserveAspectRatio="none" href="%s"/>' % [x, y, w * k, h * k, href]
+				x += 26.0
+			y += 24.0
+			row += 1
+	return s + '</g>'
+
 
 func _build() -> Dictionary:
 	var r: Dictionary = RIGS[look.age]
@@ -763,6 +852,10 @@ func _dress() -> String:
 	s += _f('<g stroke="{cloth_line}" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.4">%s</g>' % _gathers())
 	s += _f('<path d="M3 139 Q10 146 22 141 Q32 148 44 142 Q54 148 65 142 Q76 148 86 142 Q98 148 108 141 Q120 146 127 139" stroke="{accent}" stroke-width="2.6" fill="none" stroke-linecap="round" opacity="0.85"/>')
 	s += _pattern([[36, 96], [62, 88], [94, 96], [50, 122], [78, 116], [106, 126], [22, 128]], [[70, 132], [96, 110], [40, 110]])
+	if look.pattern == "mine":
+		s += _mine_svg(DRESS_SKIRT, Rect2(32, 80, 66, 52), false)
+	elif look.pattern == "mine_all":
+		s += _mine_svg(DRESS_SKIRT, Rect2(0, 62, 130, 84), true)
 	if look.pattern == "stripes":
 		s += '<clipPath id="skirt"><path d="M26 62 H104 Q118 100 128 140 L2 140 Q12 100 26 62 Z"/></clipPath><g clip-path="url(#skirt)">'
 		for y in [80, 100, 120]:
@@ -774,6 +867,8 @@ func _dress() -> String:
 	# Two darts and a seam under the bust give the bodice its shape.
 	s += _f('<path d="M50 40 Q54 50 52 60 M80 40 Q76 50 78 60" stroke="{cloth_line}" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.35"/>')
 	s += _pattern([[80, 40], [48, 46]], [], 3.5)
+	if look.pattern == "mine_all":
+		s += _mine_svg(DRESS_BODICE, Rect2(22, 12, 88, 52), true)
 	s += '<path d="M42 13 Q46 30 65 25 Q84 30 88 13 Q65 23 42 13 Z" fill="#FFFFFF" stroke="#CFC8BA" stroke-width="1.5" stroke-linejoin="round"/>'
 	s += _f('<rect x="24" y="58" width="82" height="10" rx="3" fill="{accent}" stroke="{accent_line}" stroke-width="2"/>')
 	s += _f('<path d="M38 63 L24 54 Q20 63 24 72 Z" fill="{accent_light}" stroke="{accent_line}" stroke-width="2" stroke-linejoin="round"/>')
@@ -841,6 +936,11 @@ func _top() -> String:
 	s += _sheen(TOP_BODY)
 	s += _f('<path d="M24 34 Q24 24 32 20 Q28 50 30 102 H26 Z" fill="{cloth_shade}"/>')
 	match look.pattern:
+		"mine":
+			# Over a hoodie's pocket it sits higher.
+			s += _mine_svg(TOP_BODY, Rect2(40, 26, 50, 44) if look.outfit == "hoodie" else Rect2(37, 30, 56, 50), false)
+		"mine_all":
+			s += _mine_svg(TOP_BODY, Rect2(20, 6, 92, 104), true)
 		"stripes":
 			for y in [40, 58, 76]:
 				s += _f('<rect x="24" y="%d" width="82" height="8" fill="{accent}" opacity="0.9"/>' % y)

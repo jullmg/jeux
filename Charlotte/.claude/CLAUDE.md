@@ -561,6 +561,12 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
 - Bodies and clothes have a shape, not a tube: `TOP_BODY`, `DRESS_BODICE`, `COAT_BODY` give sloping shoulders, a waist and hips
   (the coat flares from the waist to its hem), and the bare limbs taper — a fuller shoulder and elbow narrowing to the wrist
   (`_upper_arm_svg`, `_forearm_svg`), thighs narrowing to the ankle (`_leg_body`, all legwear).
+- **Her own drawing on her clothes** (Julien, 2026-11-27: "dessiner son propre chandail"): her desk's "Dessiner mon chandail", or
+  "Dessiner mon motif" under the wardrobe's Motif row, opens the `DrawingPad` ("Sur mon chandail !"); `CharacterArt.save_motif`
+  takes the paper out (only what she drew stays), cuts it to its edges and keeps it as `mon_motif.png` in the slot. Patterns
+  `"mine"` (one big print on the front; higher on a hoodie, over its pocket) and `"mine_all"` (small ones all over), on tops,
+  pyjamas and dresses (`CharacterArt._mine_svg`: the PNG embedded in the garment's SVG, base64, clipped to its outline; ThorVG
+  draws it). The wardrobe lists them once she has a print (`Wardrobe._patterns`); a new game forgets it (`forget_outfit`).
 - A wide everyday wardrobe, worn by Charlotte and by the neighbours alike (`CharacterLook.random` picks from the same lists, with
   the same number of random draws so the street keeps its people): outfits dress, T-shirt, sweater, hoodie, **cardigan** (open, over
   the top), coat, **raincoat** (hood, big buttons, a shine) and overalls; patterns dots, flowers, hearts, stars, stripes, zigzag,

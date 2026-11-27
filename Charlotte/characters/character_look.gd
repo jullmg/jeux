@@ -77,6 +77,7 @@ static func charlotte() -> CharacterLook:
 static func forget_outfit() -> void:
 	_outfit = null
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(outfit_path()))
+	CharacterArt.forget_motif()
 
 
 ## Forgets the outfit in memory (another game was loaded): read again from that game's folder.

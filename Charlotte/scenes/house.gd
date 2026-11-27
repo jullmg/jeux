@@ -2967,12 +2967,15 @@ func _use_desk() -> void:
 	var card := ChoiceCard.ask(self, "Qu'est-ce que tu veux faire ?", [
 		{"text": "Mes devoirs", "note": note, "color": Color("#B8E986")},
 		{"text": "Dessiner", "note": "Du papier et des crayons", "color": Color("#8FCBF2")},
+		{"text": "Dessiner mon chandail", "note": "Ton dessin sur ton linge", "color": Color("#F7B6D2")},
 	])
 	card.chose.connect(func(which: int) -> void:
 		if which == 0:
 			_open_homework()
 		elif which == 1:
 			_open_drawing_pad()
+		elif which == 2:
+			_draw_my_shirt()
 		else:
 			_control.enabled = true)
 
@@ -2993,6 +2996,33 @@ func _open_drawing_pad() -> void:
 		# The drawer may have put one on the fridge without finishing this one.
 		_show_fridge_drawings()
 		_control.enabled = true)
+	add_child(pad)
+
+
+# Her own print (Julien: "dessiner son propre chandail"): what she draws goes on her top (`CharacterArt.save_motif`), and she
+# puts it on at once. The wardrobe's "Motif" row keeps it ("Mon dessin", "Mon dessin partout") and can draw a new one.
+func _draw_my_shirt() -> void:
+	_control.enabled = false
+	var pad := DrawingPad.new()
+	pad.done_text = "Sur mon chandail !"
+	pad.fridge_ok = false
+	pad.closed.connect(func(drawing: Image) -> void:
+		_show_fridge_drawings()
+		_control.enabled = true
+		if drawing == null:
+			return
+		if not CharacterArt.save_motif(drawing):
+			_say(_charlotte, "Il faut dessiner quelque chose\navant de l'imprimer !", 280.0)
+			return
+		var look := CharacterLook.charlotte()
+		if look.pattern not in CharacterArt.MINE:
+			look.pattern = "mine"
+		if look.outfit not in ["dress", "tshirt", "sweater", "hoodie", "cardigan", "pyjama"]:
+			look.outfit = "tshirt"
+		CharacterLook.dress_charlotte(look)
+		_charlotte.set_look(CharacterLook.charlotte())
+		_twirl()
+		_say(_charlotte, "Mon chandail à moi ! C'est moi\nqui l'ai dessiné !", 280.0, 3.0))
 	add_child(pad)
 
 
