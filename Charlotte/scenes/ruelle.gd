@@ -654,6 +654,7 @@ var _easter_parents: Array[Character] = []
 
 
 func _build_easter() -> void:
+	Easter.load_mine()
 	for i in Easter.SPOTS.size():
 		if i in Easter.found():
 			continue

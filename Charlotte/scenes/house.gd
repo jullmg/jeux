@@ -110,6 +110,9 @@ var _party_busy := false
 var _fridge_art: Node2D
 var _crafts_art: Node2D
 var _pots_art: Node2D
+# Her Easter eggs in a bowl on the dining table.
+const EGG_BOWL_X := 1880.0
+var _eggs_art: Node2D
 # Her decorated bedroom door over the corridor's door, and the paper "chacha" sign it replaces.
 var _door_art: Sprite2D
 var _chacha: Node2D
@@ -251,7 +254,8 @@ func _build_family() -> void:
 			or NewYear.can_start() or NewYear.step() == 3 or Tooth.can_start() \
 			or Birthday.can_start() or Birthday.step() == 1 \
 			or Valentine.can_start() or Valentine.step() == 3 and "maman" in Valentine.parents_left() \
-			or Easter.can_start() or Easter.step() == 1)
+			or Easter.can_start() or Easter.step() == 1 \
+			or Season.current == "spring" and (Quests.available("cocos") or Quests.active("cocos")))
 	_dad_routine = _routine(_dad, DAD_TASKS, _talk_to_dad, Vector2(0, -360), func() -> bool:
 		return Quests.available("hamster") or Quests.available("plants") or Quests.available("chips") \
 			or Quests.active("chips") and Carry.has("chips") or Snowman.needs("tuque") and not Carry.busy() \
@@ -307,6 +311,9 @@ func _talk_to_mom() -> void:
 		return
 	if Easter.step() == 1 or Easter.can_start():
 		_easter_start(_mom)
+		return
+	if Season.current == "spring" and (Quests.available("cocos") or Quests.active("cocos")):
+		_decorate_eggs()
 		return
 	if Quests.active("milk") and Carry.has("milk"):
 		Carry.put_down(_charlotte)
@@ -1568,6 +1575,9 @@ func _ask_mom() -> void:
 	if school:
 		choices.append({"text": "Je vais à l'école ?"})
 		kinds.append("school")
+	if Season.current == "spring" and Quests.done("cocos"):
+		choices.append({"text": "On décore des cocos ?", "note": "teinture, cire, brillants"})
+		kinds.append("eggs")
 	choices.append({"text": "Juste un câlin !"})
 	kinds.append("hug")
 	var card := ChoiceCard.ask(self, "Qu'est-ce que tu dis à Maman ?", choices)
@@ -1581,6 +1591,8 @@ func _ask_mom() -> void:
 			_cook_with_mom()
 		elif what == "pottery":
 			_open_pottery()
+		elif what == "eggs":
+			_decorate_eggs()
 		elif what == "movie":
 			_choose_movie_friends()
 		elif what == "school":
@@ -2827,6 +2839,8 @@ func _go_to_sleep() -> void:
 	var new_year := NewYear.step() == 2
 	var tooth_night := Tooth.step() == 2
 	var valentine_night := Valentine.step() == 4
+	var easter_eve: bool = Season.current == "spring" and Quests.done("cocos") and Quests.status(Easter.QUEST) == "" \
+		and not GameState.flags.get(Easter.MORNING, false)
 	var good_night := "Bonne nuit, Chachoue…"
 	if christmas_eve:
 		good_night = "Bonne nuit… le père Noël s'en vient !"
@@ -2836,6 +2850,8 @@ func _go_to_sleep() -> void:
 		good_night = "Bonne nuit… pis bonne visite, la fée des dents !"
 	elif valentine_night:
 		good_night = "Bonne nuit… pis bonne Saint-Valentin !"
+	elif easter_eve:
+		good_night = "Bonne nuit… le lapin de Pâques s'en vient !"
 	var words := _night_label(good_night, 40)
 	words.position.y = -170.0
 	night.add_child(words)
@@ -2914,6 +2930,10 @@ func _go_to_sleep() -> void:
 				_bedroom_window.texture = InteriorArt.window(180.0, 300.0)
 			for snow in _window_snows:
 				snow.visible = false
+		if easter_eve:
+			GameState.flags[Easter.MORNING] = true
+			words.text = "Le matin de Pâques !"
+			Notebook.announce("step", "C'est Pâques ! Va voir Maman dans la cuisine.", Easter.HEADING)
 		if new_year:
 			NewYear.set_step(3)
 			words.text = "Le jour de l'an !"
@@ -3161,6 +3181,72 @@ func _easter_start(who: Character) -> void:
 		_control.enabled = true)
 
 
+# Easter eggs with Maman (`EggStudio`, quest "cocos"): she starts it in spring; what they make goes in a bowl on the dining
+# table, and the Easter bunny hides those very eggs in the lane (`Easter.mine`).
+func _decorate_eggs() -> void:
+	_control.enabled = false
+	_mom_routine.pause(8.0, _charlotte.position.x)
+	if Quests.available("cocos"):
+		Quests.start("cocos")
+		_mom.express("grin", 2.4)
+		_say(_mom, "Pâques s'en vient, Chachoue ! J'ai fait cuire\ndes œufs : on les décore ensemble ?", 400.0, 3.2)
+	else:
+		_mom.express("happy", 2.0)
+		_say(_mom, "Des cocos ? Viens, j'ai sorti\nles teintures pis la cire !", 400.0, 2.6)
+	var later := create_tween()
+	later.tween_interval(2.6)
+	later.tween_callback(func() -> void:
+		var studio := EggStudio.new()
+		studio.closed.connect(func(result: Dictionary) -> void:
+			_control.enabled = true
+			var eggs: Array = result.get("eggs", [])
+			if eggs.is_empty():
+				_say(_charlotte, "On en fera tantôt, Maman !", 300.0)
+				return
+			for img: Image in eggs:
+				EggStudio.keep(img)
+			_show_eggs()
+			_mom_routine.pause(6.0, _charlotte.position.x)
+			_mom.express("happy", 3.0)
+			_hold_up(_pot_picture(eggs[eggs.size() - 1], 110.0), "Mon coco de Pâques !")
+			if Quests.active("cocos"):
+				Quests.complete("cocos")
+				_say(_mom, "Ils sont magnifiques ! On les laisse sécher sur la table…\nPis à soir, le lapin de Pâques va peut-être passer.", 420.0, 4.4)
+			else:
+				_say(_mom, "Encore des beaux cocos pour le panier !", 380.0, 3.0))
+		add_child(studio))
+
+
+# Her eggs in a little wicker bowl on the dining table, in spring.
+func _show_eggs() -> void:
+	if _eggs_art == null:
+		return
+	for c in _eggs_art.get_children():
+		c.queue_free()
+	if Season.current != "spring":
+		return
+	var eggs := EggStudio.kept()
+	if eggs.is_empty():
+		return
+	var bowl := Sprite2D.new()
+	bowl.texture = InteriorArt.egg_bowl()
+	bowl.centered = false
+	bowl.position = Vector2(EGG_BOWL_X - 60.0, 484.0 - 38.0)
+	var shown := eggs.slice(maxi(0, eggs.size() - 5))
+	for i in shown.size():
+		var img: Image = shown[i].duplicate()
+		img.generate_mipmaps()
+		var egg := Sprite2D.new()
+		egg.texture = ImageTexture.create_from_image(img)
+		egg.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		var k := 34.0 / img.get_height()
+		egg.scale = Vector2.ONE * k
+		egg.position = Vector2(EGG_BOWL_X - 40.0 + i * 20.0, 484.0 - 34.0 - (i % 2) * 6.0)
+		egg.rotation = deg_to_rad([-12.0, 8.0, -4.0, 14.0, -8.0][i])
+		_eggs_art.add_child(egg)
+	_eggs_art.add_child(bowl)
+
+
 # A friendship bracelet (`BraceletStudio`): for a friend, it waits in her pocket until she sees them (`FriendBracelet`); for her,
 # she puts it on at once.
 func _make_bracelet() -> void:
@@ -3390,6 +3476,9 @@ func _build_salon() -> void:
 	_crafts_art = Node2D.new()
 	add_child(_crafts_art)
 	_show_crafts()
+	_eggs_art = Node2D.new()
+	add_child(_eggs_art)
+	_show_eggs()
 	if XmasTree.in_salon():
 		_build_xmas_tree()
 

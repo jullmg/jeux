@@ -948,7 +948,20 @@ sitcom "Les Ratons", cooking, space, music, game show; `TvShows.draw(id, canvas,
     pis bonne Saint-Valentin !"), and the morning is "Quelques semaines plus tard… c'est le printemps !": the quest is done,
     `Season.current` turns to "spring", and her first step outside she says so (`StreetScene._winter_hello`, `SPRING_WORDS`,
     `flags.spring_greeting`).
-  - paques, the Easter egg hunt (after "valentin", spring; `world/easter.gd`, `Easter`, step in `flags.paques_step`; Julien: "les
+  - cocos, decorating Easter eggs with Maman (after "valentin", spring; Julien, 2026-11-27): Maman ("!") opens `ui/egg_studio.gd`
+    (`EggStudio`) at once; also on her card afterwards ("On décore des cocos ?", in spring). **The egg is 3D and turns**
+    (`shaders/egg.gdshader`: the whole shell is one 512 × 256 map `_surf`, longitude × latitude; `_uv_at` finds where a click
+    lands, `_radii` keeps a dab round on the curve; the arrows, "Faire tourner" or dragging beside the egg turn it), and it is
+    decorated the real way: dye baths (`DYES`, all / half / the tip, the shell MULTIPLIED by the dye so colours mix: yellow then
+    blue makes green; a wavering line where it stops; it comes out wet and dripping, `_apply_dye` on the raw bytes), a white wax
+    crayon that resists the dye (`_wax`, which shines in the shader), rubber bands that make stripes (Maman takes them off after
+    the bath), a brush, Easter stickers (`StampArt` baked in a SubViewport and laid undistorted on the map), glitter that
+    twinkles (`_glit`); "Oups !"; "Encore un coco !". Her eggs (fronts, `render_front`) are kept in `cocos/` (`EggStudio.keep`,
+    `kept`), sit in a wicker bowl on the dining table in spring (`house.gd _show_eggs`, `InteriorArt.egg_bowl`), and done, that
+    night is Easter eve ("Bonne nuit… le lapin de Pâques s'en vient !", `flags.paques_matin`): the hunt starts the next
+    morning, and **the eggs hidden in the lane are hers** (`Easter.mine`, newest first; the golden one stays the bunny's).
+    New sounds for it in `Sfx`: "bloop", "drip" (also "knot", "whirr").
+  - paques, the Easter egg hunt (after "cocos", the morning after it, spring; `world/easter.gd`, `Easter`, step in `flags.paques_step`; Julien: "les
     parents cachent des cocos de Pâques dans la ruelle"): 1. Maman (or Papa) hands her a basket (`Carry` "panier", `Easter.basket`
     fills with what she finds) and both go out (hidden from the flat while `Easter.parents_outside()`, `house.gd _parents_out`);
     2. the middle lane (`ruelle.gd _build_easter`): `Easter.SPOTS` eggs (`Easter.Egg`, an interactable that twinkles now and

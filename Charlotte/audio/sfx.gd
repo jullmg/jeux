@@ -174,7 +174,27 @@ func _synth(sound: String) -> PackedFloat32Array:
 			return _shovel()
 		"snowblower":
 			return _snowblower()
+		"bloop":
+			return _chirp(0.2, 210.0, 560.0, 0.4)
+		"drip":
+			return _chirp(0.07, 1700.0, 760.0, 0.2)
+		"knot":
+			return _chirp(0.045, 640.0, 430.0, 0.22)
+		"whirr":
+			return _whirr()
 	return PackedFloat32Array()
+
+
+# The potter's wheel turning: a soft low hum that rises and falls, with the rasp of wet clay.
+func _whirr() -> PackedFloat32Array:
+	var out := _buffer(0.9)
+	var phase := 0.0
+	for i in out.size():
+		var t := float(i) / RATE
+		phase += TAU * (82.0 + 6.0 * sin(TAU * 3.0 * t)) / RATE
+		var env := minf(1.0, t / 0.15) * minf(1.0, (0.9 - t) / 0.2)
+		out[i] = (sin(phase) * 0.6 + sin(phase * 2.0) * 0.25 + _rng.randf_range(-1.0, 1.0) * 0.08) * env * 0.16
+	return out
 
 
 # A shovel pushed into the snow and thrown: a short scrape of the blade on the step, then the soft whump of the snow.

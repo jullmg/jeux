@@ -2208,3 +2208,13 @@ static func pottery_shelf() -> ImageTexture:
 	s += '<rect x="2" y="5" width="192" height="3" fill="#E4AD72"/>'
 	s += '<path d="M30 11 H90 M110 12 H170" stroke="#9E6A38" stroke-width="1.2" opacity="0.6"/>'
 	return tex(200, 46, s)
+
+
+## Canvas 120x40: the front of a little wicker bowl with paper grass, for her Easter eggs on the dining table.
+static func egg_bowl() -> ImageTexture:
+	var s := '<path d="M4 4 L14 0 L20 6 L28 -2 L36 6 L46 0 L54 6 L64 -2 L72 6 L82 0 L90 6 L98 -2 L106 6 L116 2 L116 10 H4 Z" fill="#7CCB5A"/>'
+	s += '<path d="M2 8 H118 Q114 36 96 38 H24 Q6 36 2 8 Z" fill="#C8904E" stroke="#7A5226" stroke-width="2"/>'
+	for y in [16, 24, 32]:
+		s += '<path d="M6 %d Q60 %d 114 %d" stroke="#9A6A34" stroke-width="1.6" fill="none"/>' % [y, y + 4, y]
+	s += '<path d="M2 8 H118" stroke="#E8B878" stroke-width="3"/>'
+	return tex(120, 40, s)

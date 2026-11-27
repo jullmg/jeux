@@ -45,8 +45,36 @@ static func set_step(n: int) -> void:
 	GameState.flags[STEP] = n
 
 
+## Easter morning: the night after she decorated eggs with Maman (`house.gd _go_to_sleep` sets `MORNING`).
+const MORNING := "paques_matin"
+
+
 static func can_start() -> bool:
-	return Season.current == "spring" and Quests.available(QUEST)
+	return Season.current == "spring" and Quests.available(QUEST) and GameState.flags.get(MORNING, false)
+
+
+## The eggs she decorated with Maman (`EggStudio`): the Easter bunny hides those first.
+static var _mine: Array[Texture2D] = []
+
+
+static func load_mine() -> void:
+	_mine.clear()
+	for img: Image in EggStudio.kept():
+		var copy: Image = img.duplicate()
+		copy.generate_mipmaps()
+		_mine.append(ImageTexture.create_from_image(copy))
+
+
+## Her own egg for spot `i`, or null (the golden one is always the bunny's).
+static func mine(i: int) -> Texture2D:
+	if SPOTS[i][2] == "croque":
+		return null
+	var rank := 0
+	for k in i:
+		if SPOTS[k][2] != "croque":
+			rank += 1
+	var all := _mine.size()
+	return _mine[all - 1 - rank] if rank < all else null
 
 
 ## Maman and Papa are out in the lane, hiding eggs and waiting for her.
@@ -102,6 +130,7 @@ static func warmth(from_x: float) -> String:
 static func clear() -> void:
 	GameState.flags.erase(STEP)
 	GameState.flags.erase(FOUND)
+	GameState.flags.erase(MORNING)
 
 
 static func hint() -> String:
@@ -280,7 +309,14 @@ class Egg:
 		var egg_at := Vector2({"pot": -6.0, "botte": -19.0}.get(s[2], 0.0), -12.0)
 		if s[2] == "seau":
 			egg_at = Vector2(16.0, -10.0)
-		Easter.draw_egg(self, egg_at, int(s[3]), str(s[4]), 1.0)
+		var hers := Easter.mine(index)
+		if hers:
+			# One of hers, the size of an egg in the lane.
+			var h := 27.0
+			var w := h * hers.get_width() / float(hers.get_height())
+			draw_texture_rect(hers, Rect2(egg_at - Vector2(w, h) / 2.0, Vector2(w, h)), false)
+		else:
+			Easter.draw_egg(self, egg_at, int(s[3]), str(s[4]), 1.0)
 		Easter._cover(self, str(s[2]), Vector2.ZERO, 40 + index)
 		# A little twinkle now and then, to help.
 		var tw := sin(_t * 1.3 + _phase)
